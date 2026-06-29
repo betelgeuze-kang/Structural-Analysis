@@ -59,7 +59,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-29T15:13:45.775072+00:00",
+  "generated_at": "2026-06-29T15:20:13.620487+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -101,7 +101,7 @@
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:f80ec114cb6a27e6ebd27f6a195ccecf86546c2edf48b3349908fcb62afc86ea",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:6ad27f4e1ccd194f266c7fbd03b22ecedcb71e2971b6fef2f4e61fa6e2d19688",
     "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json": "sha256:a09a6f069955dc132241f1cf62a09410fa22e829cdce922ea88ca69bc0cd5b6c",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:b2b6549d99013e021a2c937ea99e3e0802db30187cf01b1ef83fe24b8445b084",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:b1efa81f155d5ce9972a57b80998847ac6b7fa165eebd3574738eee61a60724d",
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json": "sha256:60766fe101aaac8fe37a5228f7f31dfd193b1320a9844f5d9996a8afb710c364",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
@@ -112,8 +112,8 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:099ad0cebcf7fffccc7be492962dd5a5cc13a035a6eafefad835bb2e515e6a48",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8deae576a48edf1b4ac4b02e2aaa9daa0547cb2fde958a90a2a557f4d430fc3e",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:bd92e23a6b4aceffec00e6baed3008c7e696a0415fd45b5a5f77448e0fcde952",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:4c634a86e2e6f20a51716479b9063d47b7b68cb993b3ca53c9e0c2d0e85dfd85",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:c316f6d7f882a728a1eb647ecbd75eaa3a247cf371f770a1ddca7744ba6685bc",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:85348ffa93f1ae4ad81a4412c22625a0f4eeb18559dea66759c7b13e0ee16460",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
@@ -128,7 +128,7 @@
     "implementation/phase1/release_evidence/productization/worst_case_report.json": "sha256:bef6af55560c5094526cfc686123a549cfb267edf1559f642e9deccd4dbdb2b4",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:dc2689e2c94ae6c08b97de3272a63d3320a6902f6cf1f0b970edf63cd53182a2",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:962a84c4468570e7106b97ab50b440f698b0b56300732ec5126d1933a4b9c42e",
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:81fd5c2bfb26d3809f1bc74ff13a518df61ab94a44fbb6dbdea4c5d408d4ce33",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
@@ -945,8 +945,8 @@
       "ok": false,
       "status": "blocked",
       "summary": {
-        "feature_ahead_count": 125,
-        "main_ahead_count": 4,
+        "feature_ahead_count": 129,
+        "main_ahead_count": 3,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -969,11 +969,13 @@
       {
         "blocker_count": 0,
         "contract_pass": true,
+        "first_blocked_target": "",
         "locked": false,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json",
         "present": true,
         "reason_code": "PASS",
+        "root_cause_tags": [],
         "status": "PASS",
         "summary_line": "Element/material breadth: PASS | shell=yes(elems=5,cases=31) | wall=yes(rows=2,cases=14) | panel_cyclic=yes(sections=2,pinch=0.18,crush=1.00) | assembled_depth=yes(beam_iter=2,tangent=0.05,panel=2,torsion=1) | coupling=yes(beam=1,panel=2,support=21,search=9,proxy=5) | contact=full_structural_contact | support=15(contact=6,foundation=4,device=5) | materials=2(rc_composite,steel_elastic_plastic) | links=6(bearing_bilinear,compression_only_penalty,coulomb_friction,kelvin_voigt_pounding,normal_gap_unilateral,uplift_seat_unilateral) | capabilities=12(contact_bearing_friction_impact,contact_gap_uplift_unilateral,dissipative_device_response,foundation_soil_link_nonlinear,interface_transfer_finite,rc_bond_slip,rc_cracking,rc_creep_shrinkage,shell_surface_transfer,slab_wall_interaction,soil_boundary_nonlinear,wall_compression_damage) | groups=4(rc=5,shell_interface=2,foundation_soil=2,device_contact=3)",
         "surface_id": "element_material_breadth_gate_report"
@@ -981,35 +983,43 @@
       {
         "blocker_count": 0,
         "contract_pass": true,
+        "first_blocked_target": "",
         "locked": false,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
         "present": true,
         "reason_code": "PASS",
+        "root_cause_tags": [],
         "status": "PASS",
         "summary_line": "General FE contact matrix: PASS | ready=10/10 | direct=6/6 | foundation=yes | interface=yes | ssi=yes | soil_tunnel=yes | support=contact:6,foundation:4,device:5 | support_search=9 | node_surface_proxy=5 | support_depth=21 | coupling_depth=31 | support_families=2/2 | proxy_families=2/2",
         "surface_id": "general_fe_contact_benchmark_gate_report"
       },
       {
-        "blocker_count": 3,
+        "blocker_count": 12,
         "contract_pass": false,
+        "first_blocked_target": "DRD2",
         "locked": true,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
         "present": true,
         "reason_code": "ERR_BROAD_GPCR_CLAIM_LOCKED",
+        "root_cause_tags": [
+          "operator_values_required"
+        ],
         "status": "locked",
-        "summary_line": "GPCR hard-decoy evidence surface: LOCKED | DRD2/HTR2A/OPRM1 numeric criteria missing",
+        "summary_line": "GPCR hard-decoy suite: LOCKED | first_blocked_target=DRD2 | root_cause=operator_values_required",
         "surface_id": "gpcr_hard_decoy_evidence_surface"
       },
       {
         "blocker_count": 2,
         "contract_pass": false,
+        "first_blocked_target": "",
         "locked": true,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
         "present": true,
         "reason_code": "ERR_H_BOND_BACKMAP_EVIDENCE_LOCKED",
+        "root_cause_tags": [],
         "status": "locked",
         "summary_line": "H-Bond BackMap evidence surface: LOCKED | authoritative receipts required",
         "surface_id": "h_bond_backmap_evidence_surface"
@@ -1017,11 +1027,13 @@
       {
         "blocker_count": 0,
         "contract_pass": true,
+        "first_blocked_target": "",
         "locked": false,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json",
         "present": true,
         "reason_code": "PASS",
+        "root_cause_tags": [],
         "status": "PASS",
         "summary_line": "Material constitutive gate: PASS | concrete_damage=yes(matrix=48/48,max=1.000) | cyclic_degradation=yes(matrix=46/46,residual_max=1.914%,lib=rev2/pinch0.22/crush1.00/series=3/3@2400/wall=1/rc=2) | bond_interface=yes(matrix=48/48,bond_max=0.980) | creep_shrinkage=yes(matrix=7/7,mean=1.000/0.617) | soil_boundary_nonlinear=yes(matrix=11/11,profile=dense_sand) | device_dissipation=yes(matrix=10/10,types=3) | foundation_impedance_nonlinear=yes(matrix=19/19,links=6) | contact_link_hysteresis=yes(matrix=15/15,cats=6) | panel_zone_joint_response=yes(matrix=12/12,rows=12) | wind_dynamic_response=yes(matrix=16/16,topo=4) | track_support_viscoelasticity=yes(matrix=11/11,class=B) | vehicle_track_transient_coupling=yes(matrix=19/19,iters=1.01) | tunnel_soil_wave_attenuation=yes(matrix=13/13,dist=24) | serviceability_velocity_response=yes(matrix=8/8,pass_ratio=1.000) | construction_stage_redistribution=yes(matrix=6/6,diff=1) | joint_constraint_transfer=yes(matrix=5/5,rows=135) | aeroelastic_serviceability=yes(matrix=7/7,pass_ratio=1.000) | heterogeneous_soil_adaptation=yes(matrix=5/5,recall=1.000) | segment_joint_softening=yes(matrix=5/5,yield=53.000) | longitudinal_wave_strain_transfer=yes(matrix=5/5,strain=0.000000) | raw_pressure_field_mapping=yes(matrix=5/5,mapped=7278) | phase_assimilation_correction=yes(matrix=5/5,ratio=0.964) | multiscale_streaming_refinement=yes(matrix=5/5,chunk=16) | integrated_vibration_transfer=yes(matrix=5/5,checks=4) | resilience_ood_recovery=yes(matrix=5/5,steps=3) | boundary_absorption_nonlinear=yes(matrix=6/6,supports=2) | attention_load_localization=yes(matrix=6/6,peak=0.350) | residual_energy_stabilization=yes(matrix=7/7,solver=FIRE) | matrix=400/400 | groups=concrete_damage=48/48,cyclic_degradation=46/46,bond_interface=48/48,creep_shrinkage=7/7,soil_boundary_nonlinear=11/11,device_dissipation=10/10,foundation_impedance_nonlinear=19/19,contact_link_hysteresis=15/15,panel_zone_joint_response=12/12,wind_dynamic_response=16/16,track_support_viscoelasticity=11/11,vehicle_track_transient_coupling=19/19,tunnel_soil_wave_attenuation=13/13,serviceability_velocity_response=8/8,construction_stage_redistribution=6/6,joint_constraint_transfer=5/5,aeroelastic_serviceability=7/7,heterogeneous_soil_adaptation=5/5,segment_joint_softening=5/5,longitudinal_wave_strain_transfer=5/5,raw_pressure_field_mapping=5/5,phase_assimilation_correction=5/5,multiscale_streaming_refinement=5/5,integrated_vibration_transfer=5/5,resilience_ood_recovery=5/5,boundary_absorption_nonlinear=6/6,attention_load_localization=6/6,residual_energy_stabilization=7/7,phase_latency_projection=5/5,cache_window_adaptation=5/5,whitebox_feedback_stitching=5/5,recovery_residual_relock=5/5,rail_support_contact_modulation=5/5,tunnel_lining_interface_recovery=5/5,panel_feedback_residual_transfer=5/5,wind_pressure_coupled_transfer=5/5 | coverage=cd[t=2,h=2,s=2,sf=19],cyc[t=2,h=2,store=1,sf=18],bond[t=2,h=2,s=2,sf=18] | core=cd[states=5,res=0.20],cyc[states=4,tags=6],bond[states=3,slip=1.14,res=0.25]",
         "surface_id": "material_constitutive_gate_report"
@@ -1029,11 +1041,13 @@
       {
         "blocker_count": 0,
         "contract_pass": true,
+        "first_blocked_target": "",
         "locked": false,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/solver_breadth_report.json",
         "present": true,
         "reason_code": "PASS",
+        "root_cause_tags": [],
         "status": "PASS",
         "summary_line": "Solver breadth: PASS | shell=yes(elems=5,cases=31) | wall=yes(rows=2,cases=14,material=rc_composite) | interface=yes(ssi_nonlinear_boundary) | contact=full_structural_contact | general_fe_contact=yes(10/10) | contact_coupling=yes(depth=31,support=21,search=9,proxy=5) | contact_families=yes(support=2/2,proxy=2/2) | surface_interaction=yes(7/7) | interaction_family=yes(420/420) | interaction_sources=10/10 | groups=modal-transfer=4/4,phase-assimilation-coupling=4/4,streaming-partition-coupling=4/4,integrated-vibration-coupling=4/4,resilience-recovery-coupling=4/4,kinematic-coupling=3/3,constraint-bridge=3/3,wave-radiation=2/2,boundary-absorption-coupling=4/4,attention-guided-transfer=4/4,residual-stabilization-coupling=4/4,solver-feedback-coupling=4/4,multiphysics-coupling=4/4,explicit-shear-transfer=4/4,phase-latency-coupling=4/4,cache-window-coupling=4/4,whitebox-feedback-coupling=4/4,recovery-residual-coupling=4/4,support-contact-modulation-coupling=4/4,lining-recovery-coupling=4/4,panel-feedback-coupling=4/4,pressure-mapping-coupling=4/4,shell-shell=53/53,shell-wall=81/81,footing-soil=62/62,track-slab=8/8,vehicle-track=8/8,tunnel-lining-soil=8/8,joint-panel=8/8,ssi=13/13,soil-tunnel=84/84,direct-contact=11/11",
         "surface_id": "solver_breadth_report"
@@ -1041,11 +1055,13 @@
       {
         "blocker_count": 0,
         "contract_pass": true,
+        "first_blocked_target": "",
         "locked": false,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json",
         "present": true,
         "reason_code": "PASS",
+        "root_cause_tags": [],
         "status": "PASS",
         "summary_line": "Solver truthfulness: PASS | reports=4/4 | explicit=4/4 | production_seeded=4/4 | surrogate_free=4/4 | cpu_fallback=0/4 | solver_hip_variants=20/20 | hazards=20 | topologies=17 | load_paths=15",
         "surface_id": "solver_truthfulness_gate_report"
@@ -1053,11 +1069,13 @@
       {
         "blocker_count": 0,
         "contract_pass": true,
+        "first_blocked_target": "",
         "locked": false,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json",
         "present": true,
         "reason_code": "PASS",
+        "root_cause_tags": [],
         "status": "PASS",
         "summary_line": "Steel/composite constitutive gate: PASS | steel=12/12 | composite=8/8 | steel_cases=4 | composite_cases=4 | source=constitutive_library_benchmarks",
         "surface_id": "steel_composite_constitutive_gate_report"
@@ -1065,11 +1083,13 @@
       {
         "blocker_count": 0,
         "contract_pass": true,
+        "first_blocked_target": "",
         "locked": false,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
         "present": true,
         "reason_code": "PASS",
+        "root_cause_tags": [],
         "status": "PASS",
         "summary_line": "Structural contact readiness: PASS | bounded_contact=yes | impl=6/6 | validated=6/6 | ready=6/6 | support=contact:6,foundation:4,device:5 | support_search=9 | node_surface_proxy=5 | support_depth=21 | support_families=2 | proxy_families=2 | partial_only=none | missing=none",
         "surface_id": "structural_contact_gate_report"
@@ -1077,11 +1097,13 @@
       {
         "blocker_count": 0,
         "contract_pass": true,
+        "first_blocked_target": "",
         "locked": false,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json",
         "present": true,
         "reason_code": "PASS",
+        "root_cause_tags": [],
         "status": "PASS",
         "summary_line": "Surface interaction benchmark: PASS | ready=7/7 | family_matrix=420/420 | source_families=10/10 | shell_surface=yes | interface_transfer=yes | interface_gap=yes | foundation=yes | track_slab=yes | vehicle_track=yes | tunnel_lining_soil=yes | joint_panel=yes | ssi=yes | soil_tunnel=yes | direct_contact=6/6 | general_fe_coupling=yes | groups=modal-transfer=4/4,phase-assimilation-coupling=4/4,streaming-partition-coupling=4/4,integrated-vibration-coupling=4/4,resilience-recovery-coupling=4/4,kinematic-coupling=3/3,constraint-bridge=3/3,wave-radiation=2/2,boundary-absorption-coupling=4/4,attention-guided-transfer=4/4,residual-stabilization-coupling=4/4,solver-feedback-coupling=4/4,multiphysics-coupling=4/4,explicit-shear-transfer=4/4,phase-latency-coupling=4/4,cache-window-coupling=4/4,whitebox-feedback-coupling=4/4,recovery-residual-coupling=4/4,support-contact-modulation-coupling=4/4,lining-recovery-coupling=4/4,panel-feedback-coupling=4/4,pressure-mapping-coupling=4/4,shell-shell=53/53,shell-wall=81/81,footing-soil=62/62,track-slab=8/8,vehicle-track=8/8,tunnel-lining-soil=8/8,joint-panel=8/8,ssi=13/13,soil-tunnel=84/84,direct-contact=11/11",
         "surface_id": "surface_interaction_benchmark_gate_report"
@@ -1112,8 +1134,12 @@
         "bottleneck": "broad_gpcr_family_claim_locked",
         "broad_family_claim_safe": false,
         "contract_pass_count": 0,
+        "first_blocked_target": "DRD2",
         "locked_count": 1,
         "present": true,
+        "root_cause_tags": [
+          "operator_values_required"
+        ],
         "status": "locked",
         "surface_count": 1,
         "surface_family": "gpcr",
@@ -1124,8 +1150,10 @@
       "h_bond": {
         "bottleneck": "h_bond_evidence_surface_locked",
         "contract_pass_count": 0,
+        "first_blocked_target": "",
         "locked_count": 1,
         "present": true,
+        "root_cause_tags": [],
         "status": "locked",
         "surface_count": 1,
         "surface_family": "h_bond",
@@ -1192,6 +1220,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "24474943ada1fd1139644403c02d064f524500e8",
+  "source_commit_sha": "d3adf488c82dc4dda9fc33c9c3ed07ff07e4883e",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
