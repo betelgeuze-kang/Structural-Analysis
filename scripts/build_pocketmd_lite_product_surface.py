@@ -37,6 +37,9 @@ HANDOFF_SCHEMA_VERSION = "pocketmd-lite-delivery-handoff.v1"
 OPERATOR_INTAKE_PACKET_SCHEMA_VERSION = "pocketmd-lite-operator-intake-packet.v1"
 SURFACE_SCHEMA_VERSION = "pocketmd-lite-science-product-surface.v1"
 
+POCKETMD_LITE_ROUTE = "/product/pocketmd-lite"
+POCKETMD_LITE_HANDOFF_ROUTE = "/product/pocketmd-lite/handoff"
+
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
@@ -261,6 +264,14 @@ def build_readonly_api(*, repo_root: Path = ROOT) -> dict[str, Any]:
         ),
         "status": "ready_for_seed_artifacts",
         "contract_pass": True,
+        "read_model_ready": True,
+        "route": POCKETMD_LITE_ROUTE,
+        "read_model": {
+            "route": POCKETMD_LITE_ROUTE,
+            "alternate_routes": [POCKETMD_LITE_HANDOFF_ROUTE, "/product/capabilities"],
+            "artifact": str(DEFAULT_READONLY_API_OUT),
+            "mutation_allowed": False,
+        },
         "mutation_allowed": False,
         "endpoints": [
             {
@@ -282,6 +293,11 @@ def build_readonly_api(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "endpoint_id": "get_pocketmd_lite_operator_intake_packet",
                 "method": "GET",
                 "artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
+            },
+            {
+                "endpoint_id": "get_pocketmd_lite_delivery_handoff",
+                "method": "GET",
+                "artifact": str(DEFAULT_HANDOFF_OUT),
             },
             {
                 "endpoint_id": "list_operator_required_fields",
@@ -315,6 +331,14 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "contract_pass": True,
         "owner": "science_product_owner",
         "product_capability_id": "pocketmd_lite_top_k_refinement",
+        "read_model_ready": True,
+        "route": POCKETMD_LITE_HANDOFF_ROUTE,
+        "read_model": {
+            "route": POCKETMD_LITE_HANDOFF_ROUTE,
+            "alternate_routes": [POCKETMD_LITE_ROUTE, "/product/capabilities"],
+            "artifact": str(DEFAULT_HANDOFF_OUT),
+            "mutation_allowed": False,
+        },
         "evidence_artifacts": {
             "contract": str(DEFAULT_CONTRACT_OUT),
             "topk_survival_report": str(DEFAULT_SURVIVAL_REPORT_OUT),
@@ -322,6 +346,27 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_OUT),
             "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
             "science_product_surface": str(DEFAULT_SURFACE_OUT),
+        },
+        "phase4_exit_gate_reference": {
+            "source_artifact": str(DEFAULT_SURVIVAL_REPORT_OUT),
+            "json_pointer": "/phase4_exit_gate",
+            "required_status": "ready",
+            "required_criteria": [
+                "top_k_refinement_rows_present",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved",
+                "broad_all_atom_fep_claims_locked",
+            ],
+        },
+        "operator_intake_reference": {
+            "source_artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
+            "markdown_artifact": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
+            "required_slot_id": "top_k_refinement_rows",
+            "case_key": "cases",
         },
         "operator_next_actions": [
             "fill_pocketmd_lite_operator_intake_packet",

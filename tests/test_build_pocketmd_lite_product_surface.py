@@ -102,14 +102,60 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
 
     assert api["schema_version"] == "pocketmd-lite-readonly-api.v1"
     assert api["contract_pass"] is True
+    assert api["read_model_ready"] is True
+    assert api["route"] == "/product/pocketmd-lite"
+    assert api["read_model"] == {
+        "route": "/product/pocketmd-lite",
+        "alternate_routes": ["/product/pocketmd-lite/handoff", "/product/capabilities"],
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_readonly_api.json"
+        ),
+        "mutation_allowed": False,
+    }
     assert api["mutation_allowed"] is False
     assert {row["method"] for row in api["endpoints"]} == {"GET"}
+    assert "get_pocketmd_lite_delivery_handoff" in {
+        row["endpoint_id"] for row in api["endpoints"]
+    }
     assert "write_operator_evidence" in api["forbidden_operations"]
 
     assert handoff["schema_version"] == "pocketmd-lite-delivery-handoff.v1"
     assert handoff["contract_pass"] is True
+    assert handoff["read_model_ready"] is True
+    assert handoff["route"] == "/product/pocketmd-lite/handoff"
+    assert handoff["read_model"] == {
+        "route": "/product/pocketmd-lite/handoff",
+        "alternate_routes": ["/product/pocketmd-lite", "/product/capabilities"],
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_delivery_handoff.json"
+        ),
+        "mutation_allowed": False,
+    }
     assert handoff["evidence_artifacts"]["operator_intake_packet"].endswith(
         "pocketmd_lite_operator_intake_packet.json"
+    )
+    assert handoff["phase4_exit_gate_reference"] == {
+        "source_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_survival_report.json"
+        ),
+        "json_pointer": "/phase4_exit_gate",
+        "required_status": "ready",
+        "required_criteria": [
+            "top_k_refinement_rows_present",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved",
+            "broad_all_atom_fep_claims_locked",
+        ],
+    }
+    assert handoff["operator_intake_reference"]["required_slot_id"] == (
+        "top_k_refinement_rows"
     )
     assert "topk_survival_report.real_refinement_case_count > 0" in handoff[
         "acceptance_criteria"

@@ -9,7 +9,7 @@
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "top_k_refinement_operator_intake",
-  "generated_at": "2026-06-29T18:30:49.592384+00:00",
+  "generated_at": "2026-06-29T19:21:22.453562+00:00",
   "goal_roadmap_linkage": {
     "bottleneck": "pocketmd_lite_science_product_surface_locked",
     "next_goal_actions": [
@@ -23,7 +23,7 @@
     "roadmap_item": "PocketMD Lite science product surface"
   },
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:bd077cb410cddb0ba9ca8f39be70094746d30033a0ab0ef6dc09cca5a013d823",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:b96199ea1669063d130796ef8db5f3eacfca5e7a23167909b917c15fbba2b7ab",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "linked_artifacts": {
@@ -186,7 +186,7 @@
   ],
   "schema_version": "pocketmd-lite-science-product-surface.v1",
   "science_surface_family": "pocketmd_lite",
-  "source_commit_sha": "aba7de270e2e2d4c6b442e78983407303e6630b8",
+  "source_commit_sha": "a98435ea8f163803fe8cd77c8819b8b85a30692b",
   "status": "locked",
   "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
   "surface_id": "pocketmd_lite_science_product_surface",

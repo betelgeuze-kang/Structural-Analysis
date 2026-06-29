@@ -165,9 +165,28 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     } == {"top_k_refinement_rows": "operator_input_required"}
     assert (
         "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_readonly_api.json"
+        in pocketmd["evidence_artifacts"]
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_delivery_handoff.json"
+        in pocketmd["evidence_artifacts"]
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_operator_intake_packet.json"
         in pocketmd["evidence_artifacts"]
     )
+    assert pocketmd["summary"]["readonly_api_status"] == "ready_for_seed_artifacts"
+    assert pocketmd["summary"]["readonly_api_route"] == "/product/pocketmd-lite"
+    assert pocketmd["summary"]["readonly_api_endpoint_count"] == 6
+    assert pocketmd["summary"]["handoff_status"] == (
+        "handoff_ready_operator_evidence_required"
+    )
+    assert pocketmd["summary"]["handoff_route"] == "/product/pocketmd-lite/handoff"
+    assert pocketmd["summary"]["handoff_acceptance_criteria_count"] == 6
+    assert pocketmd["summary"]["handoff_phase4_exit_gate_required_status"] == "ready"
     assert "fill_pocketmd_lite_operator_intake_packet" in pocketmd["next_actions"]
     assert "run_pocketmd_lite_topk_survival_materializer" in pocketmd["next_actions"]
 

@@ -35,6 +35,8 @@ DEFAULT_GPCR_OPERATOR_INTAKE_PACKET = (
 DEFAULT_GPCR_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_POCKETMD_TOPK_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
+DEFAULT_POCKETMD_READONLY_API = PRODUCTIZATION / "pocketmd_lite_readonly_api.json"
+DEFAULT_POCKETMD_DELIVERY_HANDOFF = PRODUCTIZATION / "pocketmd_lite_delivery_handoff.json"
 DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET = (
     PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.json"
 )
@@ -95,6 +97,8 @@ def _input_paths() -> list[Path]:
         Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
         DEFAULT_POCKETMD_SURFACE,
         DEFAULT_POCKETMD_TOPK_REPORT,
+        DEFAULT_POCKETMD_READONLY_API,
+        DEFAULT_POCKETMD_DELIVERY_HANDOFF,
         DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
         DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_PRODUCT_CAPABILITIES,
@@ -452,6 +456,8 @@ def _pocketmd_row(
     decision: dict[str, Any],
     pocketmd_surface: dict[str, Any],
     pocketmd_topk_report: dict[str, Any],
+    pocketmd_readonly_api: dict[str, Any],
+    pocketmd_delivery_handoff: dict[str, Any],
     pocketmd_operator_intake: dict[str, Any],
     product_capabilities: dict[str, Any],
 ) -> dict[str, Any]:
@@ -492,11 +498,15 @@ def _pocketmd_row(
             PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json",
             DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
             DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
-            PRODUCTIZATION / "pocketmd_lite_readonly_api.json",
-            PRODUCTIZATION / "pocketmd_lite_delivery_handoff.json",
+            DEFAULT_POCKETMD_READONLY_API,
+            DEFAULT_POCKETMD_DELIVERY_HANDOFF,
             DEFAULT_POCKETMD_SURFACE,
         ],
-        linked_routes=["/product/capabilities"],
+        linked_routes=[
+            "/product/pocketmd-lite",
+            "/product/pocketmd-lite/handoff",
+            "/product/capabilities",
+        ],
         next_actions=_dedupe(
             [str(row) for row in _as_list(linkage.get("next_goal_actions"))]
             + [str(row) for row in _as_list(pocketmd_operator_intake.get("next_actions"))]
@@ -506,6 +516,30 @@ def _pocketmd_row(
         summary={
             "product_surface_ready": ready,
             "surface_status": str(pocketmd_surface.get("status") or ""),
+            "readonly_api_status": str(pocketmd_readonly_api.get("status") or ""),
+            "readonly_api_route": str(
+                pocketmd_readonly_api.get("route")
+                or _as_dict(pocketmd_readonly_api.get("read_model")).get("route")
+                or ""
+            ),
+            "readonly_api_endpoint_count": len(
+                _as_list(pocketmd_readonly_api.get("endpoints"))
+            ),
+            "handoff_status": str(pocketmd_delivery_handoff.get("status") or ""),
+            "handoff_route": str(
+                pocketmd_delivery_handoff.get("route")
+                or _as_dict(pocketmd_delivery_handoff.get("read_model")).get("route")
+                or ""
+            ),
+            "handoff_acceptance_criteria_count": len(
+                _as_list(pocketmd_delivery_handoff.get("acceptance_criteria"))
+            ),
+            "handoff_phase4_exit_gate_required_status": str(
+                _as_dict(
+                    pocketmd_delivery_handoff.get("phase4_exit_gate_reference")
+                ).get("required_status")
+                or ""
+            ),
             "operator_intake_packet_status": str(pocketmd_operator_intake.get("status") or ""),
             "operator_intake_required_slot_count": _as_int(
                 pocketmd_operator_intake.get("required_slot_count")
@@ -553,6 +587,8 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
     gpcr_surface = _load_json(repo_root, DEFAULT_GPCR_SURFACE)
     pocketmd_surface = _load_json(repo_root, DEFAULT_POCKETMD_SURFACE)
     pocketmd_topk_report = _load_json(repo_root, DEFAULT_POCKETMD_TOPK_REPORT)
+    pocketmd_readonly_api = _load_json(repo_root, DEFAULT_POCKETMD_READONLY_API)
+    pocketmd_delivery_handoff = _load_json(repo_root, DEFAULT_POCKETMD_DELIVERY_HANDOFF)
     pocketmd_operator_intake = _load_json(repo_root, DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET)
     product_capabilities = _load_json(repo_root, DEFAULT_PRODUCT_CAPABILITIES)
 
@@ -608,6 +644,8 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             decision=decision,
             pocketmd_surface=pocketmd_surface,
             pocketmd_topk_report=pocketmd_topk_report,
+            pocketmd_readonly_api=pocketmd_readonly_api,
+            pocketmd_delivery_handoff=pocketmd_delivery_handoff,
             pocketmd_operator_intake=pocketmd_operator_intake,
             product_capabilities=product_capabilities,
         ),

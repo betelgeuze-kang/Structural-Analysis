@@ -32,6 +32,8 @@ DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD = (
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_POCKETMD_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 DEFAULT_POCKETMD_TOPK_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
+DEFAULT_POCKETMD_READONLY_API = PRODUCTIZATION / "pocketmd_lite_readonly_api.json"
+DEFAULT_POCKETMD_DELIVERY_HANDOFF = PRODUCTIZATION / "pocketmd_lite_delivery_handoff.json"
 DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET = (
     PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.json"
 )
@@ -262,6 +264,8 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
     surface = _load_json(repo_root, DEFAULT_POCKETMD_SURFACE)
     contract = _load_json(repo_root, DEFAULT_POCKETMD_CONTRACT)
     topk_report = _load_json(repo_root, DEFAULT_POCKETMD_TOPK_REPORT)
+    readonly_api = _load_json(repo_root, DEFAULT_POCKETMD_READONLY_API)
+    delivery_handoff = _load_json(repo_root, DEFAULT_POCKETMD_DELIVERY_HANDOFF)
     operator_intake = _load_json(repo_root, DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET)
     phase4_exit_gate = _as_dict(
         surface.get("phase4_exit_gate") or topk_report.get("phase4_exit_gate")
@@ -310,6 +314,8 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
         evidence_artifacts=[
             DEFAULT_POCKETMD_CONTRACT,
             DEFAULT_POCKETMD_TOPK_REPORT,
+            DEFAULT_POCKETMD_READONLY_API,
+            DEFAULT_POCKETMD_DELIVERY_HANDOFF,
             DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
             DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
             DEFAULT_POCKETMD_SURFACE,
@@ -323,6 +329,28 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
             "real_refinement_case_count": _surface_summary(surface).get("real_refinement_case_count", 0),
             "top_k_candidate_count": _surface_summary(surface).get("top_k_candidate_count", 0),
             "topk_report_status": str(topk_report.get("status") or ""),
+            "readonly_api_status": str(readonly_api.get("status") or ""),
+            "readonly_api_route": str(
+                readonly_api.get("route")
+                or _as_dict(readonly_api.get("read_model")).get("route")
+                or ""
+            ),
+            "readonly_api_endpoint_count": len(_as_list(readonly_api.get("endpoints"))),
+            "handoff_status": str(delivery_handoff.get("status") or ""),
+            "handoff_route": str(
+                delivery_handoff.get("route")
+                or _as_dict(delivery_handoff.get("read_model")).get("route")
+                or ""
+            ),
+            "handoff_acceptance_criteria_count": len(
+                _as_list(delivery_handoff.get("acceptance_criteria"))
+            ),
+            "handoff_phase4_exit_gate_required_status": str(
+                _as_dict(delivery_handoff.get("phase4_exit_gate_reference")).get(
+                    "required_status"
+                )
+                or ""
+            ),
             "operator_intake_packet_status": str(operator_intake.get("status") or ""),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
@@ -491,6 +519,8 @@ def _input_paths() -> list[Path]:
         DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD,
         DEFAULT_POCKETMD_CONTRACT,
         DEFAULT_POCKETMD_TOPK_REPORT,
+        DEFAULT_POCKETMD_READONLY_API,
+        DEFAULT_POCKETMD_DELIVERY_HANDOFF,
         DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
         DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_POCKETMD_SURFACE,

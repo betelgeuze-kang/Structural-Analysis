@@ -207,11 +207,35 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_4["state"] == "blocked"
     assert phase_4["bottleneck"] == "pocketmd_lite_science_product_surface_locked"
     assert phase_4["first_blocked_target"] == "top_k_refinement_operator_intake"
+    assert phase_4["linked_routes"] == [
+        "/product/pocketmd-lite",
+        "/product/pocketmd-lite/handoff",
+        "/product/capabilities",
+    ]
     assert (
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_operator_intake_packet.json"
         in phase_4["evidence_artifacts"]
     )
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_readonly_api.json"
+        in phase_4["evidence_artifacts"]
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_delivery_handoff.json"
+        in phase_4["evidence_artifacts"]
+    )
+    assert phase_4["summary"]["readonly_api_status"] == "ready_for_seed_artifacts"
+    assert phase_4["summary"]["readonly_api_route"] == "/product/pocketmd-lite"
+    assert phase_4["summary"]["readonly_api_endpoint_count"] == 6
+    assert phase_4["summary"]["handoff_status"] == (
+        "handoff_ready_operator_evidence_required"
+    )
+    assert phase_4["summary"]["handoff_route"] == "/product/pocketmd-lite/handoff"
+    assert phase_4["summary"]["handoff_acceptance_criteria_count"] == 6
+    assert phase_4["summary"]["handoff_phase4_exit_gate_required_status"] == "ready"
     assert phase_4["summary"]["operator_intake_packet_status"] == (
         "ready_for_operator_input"
     )
