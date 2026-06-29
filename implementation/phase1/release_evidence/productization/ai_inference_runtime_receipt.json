@@ -1,6 +1,21 @@
 {
   "schema_version": "ai-inference-runtime-receipt.v1",
-  "generated_at": "2026-06-23T14:58:45.432710+00:00",
+  "generated_at": "2026-06-29T12:50:53.272568+00:00",
+  "source_commit_sha": "d75a6cec8ac97128fa415ab63ed3cc5710a8146c",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "input_checksums": {
+    "implementation/phase1/build_ai_engine_productization_contracts.py": "sha256:7c757be26d0b45e66dfa65c9595e03413ff307d9cdbae73a6954a88cefe43ab8",
+    "scripts/build_ai_engine_productization_contracts.py": "sha256:9bc61510ffda7c006813745cb7f7764d7cb5314619c498271129201058dbc2a0",
+    "implementation/phase1/release_evidence/productization/ml_multi_objective_status.json": "sha256:8ea62bf5a3e28fbc5d73054545d5b1ea148b0bdaa4b22ec965e6e09d083733a7",
+    "implementation/phase1/release/ml_surrogate/checkpoint.pt": "sha256:c53d3207cc2dbbbe41f9fd8ac941a164e4f25bc7efcdf9a743be2c435dcec86f",
+    "implementation/phase1/release/ml_surrogate/dataset_card.json": "sha256:742d952f20a1b69d7b98109c01493c2ce1c62c77c06de1b6d9ba872067aa6220",
+    "implementation/phase1/release/ml_surrogate/model_card.json": "sha256:6c0f7728d9babbf4c08686d220722024e5476f805f3928a6d72805a60c57fea1",
+    "implementation/phase1/release/ml_surrogate/validation_receipt.json": "sha256:90015af7267f6d23ee60e123e2d1d2fbc8a69f681a0e427504c69b92a4986c3b",
+    "implementation/phase1/release/ml_surrogate/ood_gate.json": "sha256:261699e3bf06892c48c8b63f7c928b62b94635f01e7dc0a35a8fcc2580eb0a3d",
+    "implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json": "sha256:d4ede93b309bce63e2e2f8dd146a3eaee1fa83db3ba5d46d4a551221ea370362"
+  },
+  "reused_evidence": true,
+  "reuse_policy": "ai_engine_productization_contracts_aggregate_ml_checkpoint_receipts",
   "status": "ready",
   "inference_executed": true,
   "backend": "numpy_ridge_shadow_surrogate",
