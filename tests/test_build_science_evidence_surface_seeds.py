@@ -39,12 +39,18 @@ def test_science_evidence_surface_seeds_are_locked_not_passing() -> None:
     assert gpcr["surface_id"] == "gpcr_hard_decoy_evidence_surface"
     assert gpcr["contract_pass"] is False
     assert gpcr["reason_code"] == "ERR_BROAD_GPCR_CLAIM_LOCKED"
+    assert gpcr["first_blocked_target"] == "DRD2"
+    assert gpcr["root_cause_tags"] == ["operator_values_required"]
     assert gpcr["exit_criteria"] == {
         "ranking_pr_auc_ci_low_min": 0.45,
         "top20_hit_rate_min": 0.20,
         "decoys_above_positive_count_max": 0,
         "positive_out_anchored_by_top_decoys_allowed": False,
     }
+    assert gpcr["materializer"]["schema_version"] == "gpcr-hard-decoy-suite-report.v1"
+    assert "materialize_gpcr_hard_decoy_suite_report.py" in gpcr["materializer"][
+        "materialization_command"
+    ]
 
 
 def test_science_evidence_surface_seed_cli_writes_pm_visible_surfaces(
@@ -73,6 +79,9 @@ def test_science_evidence_surface_seed_cli_writes_pm_visible_surfaces(
     assert h_bond_payload["source_commit_sha"]
     assert gpcr_payload["input_checksums"][
         "scripts/build_science_evidence_surface_seeds.py"
+    ].startswith("sha256:")
+    assert gpcr_payload["input_checksums"][
+        "scripts/materialize_gpcr_hard_decoy_suite_report.py"
     ].startswith("sha256:")
 
     rows = pm_report._evidence_surface_rows(surface_dir)

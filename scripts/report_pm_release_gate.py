@@ -301,6 +301,17 @@ def _evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str, Any]]:
                 "locked": _contains_locked_signal(payload),
                 "missing": not payload or _contains_missing_signal(payload),
                 "summary_line": str(payload.get("summary_line") or summary.get("summary_line") or ""),
+                "first_blocked_target": str(
+                    payload.get("first_blocked_target")
+                    or summary.get("first_blocked_target")
+                    or ""
+                ),
+                "root_cause_tags": [
+                    str(row)
+                    for row in _as_list(
+                        payload.get("root_cause_tags") or summary.get("root_cause_tags")
+                    )
+                ],
             }
         )
     return rows
@@ -404,6 +415,17 @@ def _science_surface_status(
         "contract_pass_count": contract_pass_count,
         "locked_count": locked_count,
         "surface_ids": [str(row["surface_id"]) for row in surfaces],
+        "first_blocked_target": next(
+            (str(row["first_blocked_target"]) for row in surfaces if row["first_blocked_target"]),
+            "",
+        ),
+        "root_cause_tags": list(
+            dict.fromkeys(
+                str(tag)
+                for row in surfaces
+                for tag in _as_list(row.get("root_cause_tags"))
+            )
+        ),
         "bottleneck": bottleneck,
     }
 

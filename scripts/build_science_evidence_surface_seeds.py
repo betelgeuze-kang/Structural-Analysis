@@ -15,6 +15,9 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+from materialize_gpcr_hard_decoy_suite_report import (  # noqa: E402
+    SCHEMA_VERSION as GPCR_HARD_DECOY_MATERIALIZER_SCHEMA_VERSION,
+)
 
 
 SCHEMA_VERSION = "science-evidence-surface-seed.v1"
@@ -33,11 +36,15 @@ def _base_surface(
     summary_line: str,
     blockers: list[str],
     repo_root: Path,
+    extra_input_paths: list[Path] | None = None,
 ) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
-            input_paths=[Path("scripts/build_science_evidence_surface_seeds.py")],
+            input_paths=[
+                Path("scripts/build_science_evidence_surface_seeds.py"),
+                *(extra_input_paths or []),
+            ],
             reused_evidence=False,
             reuse_policy="locked_science_evidence_surface_seed_from_goal_contract",
             repo_root=repo_root,
@@ -104,16 +111,41 @@ def build_gpcr_hard_decoy_surface(*, repo_root: Path = ROOT) -> dict[str, Any]:
             ),
             blockers=blockers,
             repo_root=repo_root,
+            extra_input_paths=[Path("scripts/materialize_gpcr_hard_decoy_suite_report.py")],
         ),
         "science_surface_family": "gpcr",
         "surface_scope": "broad_gpcr_hard_decoy",
         "target_families": ["DRD2", "HTR2A", "OPRM1"],
+        "first_blocked_target": "DRD2",
+        "root_cause_tags": ["operator_values_required"],
         "exit_criteria": {
             "ranking_pr_auc_ci_low_min": 0.45,
             "top20_hit_rate_min": 0.20,
             "decoys_above_positive_count_max": 0,
             "positive_out_anchored_by_top_decoys_allowed": False,
         },
+        "materializer": {
+            "schema_version": GPCR_HARD_DECOY_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_operator_intake",
+            "materialization_command": (
+                "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py "
+                "--intake implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_operator_template.json "
+                "--out-report implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_suite_report.json "
+                "--out-surface implementation/phase1/release_evidence/surface/"
+                "gpcr_hard_decoy_evidence_surface.json --fail-blocked"
+            ),
+            "claim_boundary": (
+                "The materializer evaluates operator-attached DRD2/HTR2A/OPRM1 hard-decoy "
+                "metrics against numeric exit criteria. It does not generate metrics or "
+                "unlock broad GPCR claims without all target rows passing."
+            ),
+        },
+        "suite_report": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_suite_report.json"
+        ),
         "next_actions": [
             "fill_drd2_htr2a_oprm1_operator_template_values",
             "run_gpcr_hard_decoy_materializer",

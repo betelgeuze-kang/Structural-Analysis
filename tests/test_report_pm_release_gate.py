@@ -657,6 +657,8 @@ def _release_decision_inputs(tmp_path: Path) -> dict[str, Path]:
             "reason_code": "ERR_BROAD_GPCR_CLAIM_LOCKED",
             "summary_line": "GPCR hard decoy surface: LOCKED",
             "blockers": ["broad_gpcr_family_claim_locked"],
+            "first_blocked_target": "DRD2",
+            "root_cause_tags": ["operator_values_required"],
         },
     )
     return {
@@ -945,6 +947,8 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         "contract_pass_count": 0,
         "locked_count": 0,
         "surface_ids": [],
+        "first_blocked_target": "",
+        "root_cause_tags": [],
         "bottleneck": "h_bond_evidence_surface_missing",
     }
     assert science_surface_status["gpcr"] == {
@@ -955,6 +959,8 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         "contract_pass_count": 0,
         "locked_count": 1,
         "surface_ids": ["gpcr_hard_decoy_surface"],
+        "first_blocked_target": "DRD2",
+        "root_cause_tags": ["operator_values_required"],
         "bottleneck": "broad_gpcr_family_claim_locked",
         "broad_family_claim_safe": False,
     }
@@ -962,6 +968,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     surface_paths = {row["surface_id"]: row for row in decision["evidence_surfaces"]}
     assert surface_paths["structural_contact_surface"]["contract_pass"] is True
     assert surface_paths["gpcr_hard_decoy_surface"]["locked"] is True
+    assert surface_paths["gpcr_hard_decoy_surface"]["first_blocked_target"] == "DRD2"
+    assert surface_paths["gpcr_hard_decoy_surface"]["root_cause_tags"] == [
+        "operator_values_required"
+    ]
     assert payload["implementation_orchestration"]["cursor_opencode_worker_preflight_pass"] is True
     assert (
         payload["implementation_orchestration"]["summary"]["opencode_configured_model"]

@@ -1,0 +1,32 @@
+{
+  "claim_boundary": "Operator intake template only. Fill DRD2, HTR2A, and OPRM1 with authoritative hard-decoy metrics before using the suite report as scientific evidence.",
+  "required_targets": [
+    "DRD2",
+    "HTR2A",
+    "OPRM1"
+  ],
+  "schema_version": "gpcr-hard-decoy-operator-intake.v1",
+  "targets": [
+    {
+      "decoys_above_positive_count": null,
+      "positive_out_anchored_by_top_decoys": null,
+      "ranking_pr_auc_ci_low": null,
+      "target_id": "DRD2",
+      "top20_hit_rate": null
+    },
+    {
+      "decoys_above_positive_count": null,
+      "positive_out_anchored_by_top_decoys": null,
+      "ranking_pr_auc_ci_low": null,
+      "target_id": "HTR2A",
+      "top20_hit_rate": null
+    },
+    {
+      "decoys_above_positive_count": null,
+      "positive_out_anchored_by_top_decoys": null,
+      "ranking_pr_auc_ci_low": null,
+      "target_id": "OPRM1",
+      "top20_hit_rate": null
+    }
+  ]
+}
