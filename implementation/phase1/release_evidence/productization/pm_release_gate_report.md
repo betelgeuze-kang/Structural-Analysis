@@ -20,7 +20,7 @@
 - `operator_action_count`: `16`
 - `approval_token_count`: `7`
 - `stale_artifact_count`: `0`
-- `evidence_surface_count`: `11`
+- `evidence_surface_count`: `12`
 - `missing_evidence_surface_count`: `0`
 - `locked_evidence_surface_count`: `3`
 - `h_bond_evidence_surface_present`: `True`

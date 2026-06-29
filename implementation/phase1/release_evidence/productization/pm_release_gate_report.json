@@ -59,7 +59,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-29T16:03:48.563394+00:00",
+  "generated_at": "2026-06-29T16:10:30.120973+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -112,8 +112,8 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:099ad0cebcf7fffccc7be492962dd5a5cc13a035a6eafefad835bb2e515e6a48",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d0df69cc0ee7f74016956591a1aae058ff55c7aca6a09a30dc8199cadd0b6090",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:bb76d6c87725b2cf16eaa4aeafa04f91f090ed0b54e64cbd3aaeebebec240800",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:1d0d457d79f1940fd57fc227b4ab59545d3dcc4ee840c3576b39def483edd3de",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:c1c50b08bc7f0e1b6ab526fa894b621f3b86f8b5c97e66ff26ed12a4c2e35584",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:85348ffa93f1ae4ad81a4412c22625a0f4eeb18559dea66759c7b13e0ee16460",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
@@ -132,6 +132,7 @@
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:81fd5c2bfb26d3809f1bc74ff13a518df61ab94a44fbb6dbdea4c5d408d4ce33",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:bc8a0bb6533d5e22ef9a2b2f61cc53e8ad247cf8caf30c560fde438f8fffb2ae",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:ae128a5fb6cb57ce29fa10073107a55b2f40a5ff67d339805d107acc0cacd209",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
@@ -946,7 +947,7 @@
       "ok": false,
       "status": "blocked",
       "summary": {
-        "feature_ahead_count": 147,
+        "feature_ahead_count": 150,
         "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
@@ -964,7 +965,7 @@
     "blocked_release_count": 8,
     "broad_gpcr_family_claim_safe": false,
     "claim_boundary": "Evidence surface counts reflect local JSON files under evidence_surface_dir. Broad GPCR family claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked. PocketMD Lite is a bounded top-k science product surface; broad all-atom MD and FEP claims remain locked unless separately evidenced.",
-    "evidence_surface_count": 11,
+    "evidence_surface_count": 12,
     "evidence_surface_dir": "implementation/phase1/release_evidence/surface",
     "evidence_surfaces": [
       {
@@ -1054,6 +1055,20 @@
         "status": "locked",
         "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
         "surface_id": "pocketmd_lite_science_product_surface"
+      },
+      {
+        "blocker_count": 0,
+        "contract_pass": true,
+        "first_blocked_target": "",
+        "locked": false,
+        "missing": false,
+        "path": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+        "present": true,
+        "reason_code": "PASS",
+        "root_cause_tags": [],
+        "status": "ready",
+        "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
+        "surface_id": "product_capabilities_surface"
       },
       {
         "blocker_count": 0,
@@ -1319,6 +1334,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "c0b779c2e248b549d61b6c14c3e7ab939e8052e3",
+  "source_commit_sha": "13b5db4ac94d4ada387c6979dc859df49ad55881",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
