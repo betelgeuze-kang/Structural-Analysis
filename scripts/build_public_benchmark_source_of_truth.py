@@ -39,6 +39,9 @@ from materialize_public_benchmark_posebusters_validity_packet import (  # noqa: 
 from materialize_public_benchmark_rmsd_scorecard import (  # noqa: E402
     SCHEMA_VERSION as RMSD_MATERIALIZER_SCHEMA_VERSION,
 )
+from materialize_public_benchmark_enrichment_scorecard import (  # noqa: E402
+    SCHEMA_VERSION as ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -46,10 +49,12 @@ DEFAULT_SOURCE_OF_TRUTH_OUT = PRODUCTIZATION / "public_benchmark_source_of_truth
 DEFAULT_SUBSET_MANIFEST_OUT = PRODUCTIZATION / "public_benchmark_subset_manifest.json"
 DEFAULT_POSE_VALIDITY_PACKET_OUT = PRODUCTIZATION / "public_benchmark_pose_validity_packet.json"
 DEFAULT_RMSD_SCORECARD_OUT = PRODUCTIZATION / "public_benchmark_symmetry_rmsd_scorecard.json"
+DEFAULT_ENRICHMENT_SCORECARD_OUT = PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
 SCHEMA_VERSION = "public-benchmark-source-of-truth.v1"
 SUBSET_SCHEMA_VERSION = "public-benchmark-subset-manifest.v1"
 POSE_PACKET_SCHEMA_VERSION = "public-benchmark-pose-validity-packet.v1"
 RMSD_SCORECARD_SCHEMA_VERSION = "public-benchmark-symmetry-rmsd-scorecard.v1"
+ENRICHMENT_SCORECARD_SCHEMA_VERSION = "public-benchmark-enrichment-scorecard.v1"
 
 
 def _source_input_paths() -> list[Path]:
@@ -57,6 +62,7 @@ def _source_input_paths() -> list[Path]:
         Path("scripts/build_public_benchmark_source_of_truth.py"),
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
+        Path("scripts/materialize_public_benchmark_enrichment_scorecard.py"),
         Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
         Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
@@ -387,11 +393,81 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
     }
 
 
+def build_enrichment_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
+    blockers = [
+        "dud_e_lit_pcba_enrichment_targets_missing",
+        "dud_e_lit_pcba_scored_molecules_missing",
+        "dud_e_lit_pcba_active_decoy_labels_missing",
+    ]
+    return {
+        "schema_version": ENRICHMENT_SCORECARD_SCHEMA_VERSION,
+        **release_evidence_metadata(
+            input_paths=_source_input_paths(),
+            reused_evidence=False,
+            reuse_policy="public_benchmark_enrichment_scorecard_seed_from_repo_contract",
+            repo_root=repo_root,
+        ),
+        "status": "operator_evidence_required",
+        "contract_pass": False,
+        "public_benchmark_enrichment_ready": False,
+        "real_enrichment_target_count": 0,
+        "target_rows": [],
+        "summary": {
+            "benchmark_family_count": 0,
+            "benchmark_families": [],
+            "target_count": 0,
+            "ready_target_count": 0,
+            "molecule_count": 0,
+            "active_count": 0,
+            "decoy_count": 0,
+            "enrichment_factor_1pct_median": None,
+            "enrichment_factor_5pct_median": None,
+            "roc_auc_median": None,
+            "blocker_count": len(blockers),
+        },
+        "materializer": {
+            "schema_version": ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_operator_intake",
+            "intake_target_key": "targets",
+            "required_target_fields": [
+                "benchmark_family",
+                "target_id",
+                "score_direction",
+                "scored_molecules",
+                "source_license_or_accession",
+                "source_checksum",
+                "provenance_ref",
+            ],
+            "required_molecule_fields": ["molecule_id", "is_active", "score"],
+            "materialization_command": (
+                "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py "
+                "--intake <operator-dud-e-lit-pcba-enrichment-intake.json> "
+                "--out-scorecard implementation/phase1/release_evidence/productization/"
+                "public_benchmark_enrichment_scorecard.json "
+                "--out-report implementation/phase1/release_evidence/productization/"
+                "public_benchmark_enrichment_materialization_report.json --fail-blocked"
+            ),
+            "claim_boundary": (
+                "The materializer consumes operator-attached DUD-E/LIT-PCBA scored "
+                "molecule rows and computes EF@1%, EF@5%, and ROC-AUC. It does not "
+                "fetch public benchmark files, infer ligand chemistry, or close Tier beta."
+            ),
+        },
+        "blockers": blockers,
+        "claim_boundary": (
+            "This seed defines the DUD-E/LIT-PCBA enrichment scorecard shape and "
+            "materializer command. With zero operator-attached target rows it is "
+            "intentionally blocked and cannot support an enrichment claim."
+        ),
+    }
+
+
 def build_source_of_truth(
     *,
     subset_manifest: dict[str, Any],
     pose_validity_packet: dict[str, Any],
     rmsd_scorecard: dict[str, Any],
+    enrichment_scorecard: dict[str, Any],
     repo_root: Path = ROOT,
 ) -> dict[str, Any]:
     return {
@@ -419,8 +495,8 @@ def build_source_of_truth(
             },
             {
                 "family_id": "dud_e_lit_pcba",
-                "role": "future_enrichment",
-                "materialization_status": "planned_later",
+                "role": "enrichment_scorecard",
+                "materialization_status": "operator_intake_required",
             },
             {
                 "family_id": "vina_gnina",
@@ -453,6 +529,16 @@ def build_source_of_truth(
             "dry_run_case_count": rmsd_scorecard["dry_run_case_count"],
             "real_benchmark_case_count": rmsd_scorecard["real_benchmark_case_count"],
             "dry_run_pose_success": bool(rmsd_scorecard["rows"][0]["score"]["pose_success"]),
+        },
+        "enrichment_scorecard_summary": {
+            "status": enrichment_scorecard["status"],
+            "public_benchmark_enrichment_ready": enrichment_scorecard[
+                "public_benchmark_enrichment_ready"
+            ],
+            "real_enrichment_target_count": enrichment_scorecard[
+                "real_enrichment_target_count"
+            ],
+            "blockers": enrichment_scorecard["blockers"],
         },
         "subset_manifest_validation": validate_subset_manifest(subset_manifest),
         "subset_materializer": {
@@ -513,9 +599,22 @@ def build_source_of_truth(
                 "benchmark ligands. It does not infer chemistry or close Tier beta."
             ),
         },
+        "enrichment_scorecard_materializer": {
+            "schema_version": ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_operator_intake",
+            "materialization_command": enrichment_scorecard["materializer"][
+                "materialization_command"
+            ],
+            "claim_boundary": (
+                "The enrichment materializer consumes DUD-E/LIT-PCBA scored molecule "
+                "rows and reports EF@1%, EF@5%, and ROC-AUC per target. It does not "
+                "download benchmark data, validate chemistry, or close Tier beta alone."
+            ),
+        },
         "blockers": [
             "casf_pdbbind_source_material_not_attached",
             "public_benchmark_real_pose_predictions_missing",
+            "dud_e_lit_pcba_enrichment_rows_missing",
             "public_benchmark_external_receipts_missing",
         ],
         "next_actions": [
@@ -527,12 +626,14 @@ def build_source_of_truth(
             "run_symmetry_aware_rmsd_on_real_subset",
             "run_public_benchmark_rmsd_scorecard_materializer",
             "materialize_posebusters_style_validity_packet_for_real_ligands",
+            "attach_dud_e_lit_pcba_enrichment_intake",
+            "run_public_benchmark_enrichment_materializer",
         ],
         "claim_boundary": (
             "This is the Phase 2 public benchmark harness seed. It closes source-of-truth "
             "shape, subset contract, RMSD scorer dry-run, and pose-validity packet shape. "
             "It does not close Tier beta, public benchmark results, Vina/GNINA comparison, "
-            "or DUD-E/LIT-PCBA enrichment."
+            "or DUD-E/LIT-PCBA enrichment results."
         ),
     }
 
@@ -541,10 +642,12 @@ def build_public_benchmark_artifacts(*, repo_root: Path = ROOT) -> dict[str, dic
     subset_manifest = build_subset_manifest(repo_root=repo_root)
     pose_validity_packet = build_pose_validity_packet(repo_root=repo_root)
     rmsd_scorecard = build_rmsd_scorecard(repo_root=repo_root)
+    enrichment_scorecard = build_enrichment_scorecard(repo_root=repo_root)
     source_of_truth = build_source_of_truth(
         subset_manifest=subset_manifest,
         pose_validity_packet=pose_validity_packet,
         rmsd_scorecard=rmsd_scorecard,
+        enrichment_scorecard=enrichment_scorecard,
         repo_root=repo_root,
     )
     return {
@@ -552,6 +655,7 @@ def build_public_benchmark_artifacts(*, repo_root: Path = ROOT) -> dict[str, dic
         "subset_manifest": subset_manifest,
         "pose_validity_packet": pose_validity_packet,
         "rmsd_scorecard": rmsd_scorecard,
+        "enrichment_scorecard": enrichment_scorecard,
     }
 
 
@@ -562,6 +666,7 @@ def write_public_benchmark_artifacts(
     subset_manifest_out: Path = DEFAULT_SUBSET_MANIFEST_OUT,
     pose_validity_packet_out: Path = DEFAULT_POSE_VALIDITY_PACKET_OUT,
     rmsd_scorecard_out: Path = DEFAULT_RMSD_SCORECARD_OUT,
+    enrichment_scorecard_out: Path = DEFAULT_ENRICHMENT_SCORECARD_OUT,
 ) -> dict[str, dict[str, Any]]:
     artifacts = build_public_benchmark_artifacts(repo_root=repo_root)
     outputs = {
@@ -569,6 +674,7 @@ def write_public_benchmark_artifacts(
         "subset_manifest": subset_manifest_out,
         "pose_validity_packet": pose_validity_packet_out,
         "rmsd_scorecard": rmsd_scorecard_out,
+        "enrichment_scorecard": enrichment_scorecard_out,
     }
     for key, out_path in outputs.items():
         resolved = out_path if out_path.is_absolute() else repo_root / out_path
@@ -583,6 +689,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--subset-manifest-out", type=Path, default=DEFAULT_SUBSET_MANIFEST_OUT)
     parser.add_argument("--pose-validity-packet-out", type=Path, default=DEFAULT_POSE_VALIDITY_PACKET_OUT)
     parser.add_argument("--rmsd-scorecard-out", type=Path, default=DEFAULT_RMSD_SCORECARD_OUT)
+    parser.add_argument("--enrichment-scorecard-out", type=Path, default=DEFAULT_ENRICHMENT_SCORECARD_OUT)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
@@ -591,6 +698,7 @@ def main(argv: list[str] | None = None) -> int:
         subset_manifest_out=args.subset_manifest_out,
         pose_validity_packet_out=args.pose_validity_packet_out,
         rmsd_scorecard_out=args.rmsd_scorecard_out,
+        enrichment_scorecard_out=args.enrichment_scorecard_out,
     )
     summary = artifacts["source_of_truth"]
     if args.json:

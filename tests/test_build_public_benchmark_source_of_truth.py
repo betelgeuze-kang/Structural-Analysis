@@ -26,6 +26,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     subset = artifacts["subset_manifest"]
     pose_packet = artifacts["pose_validity_packet"]
     rmsd = artifacts["rmsd_scorecard"]
+    enrichment = artifacts["enrichment_scorecard"]
 
     assert source["schema_version"] == "public-benchmark-source-of-truth.v1"
     assert source["contract_pass"] is True
@@ -45,6 +46,16 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "dry_run_case_count": 1,
         "real_benchmark_case_count": 0,
         "dry_run_pose_success": True,
+    }
+    assert source["enrichment_scorecard_summary"] == {
+        "status": "operator_evidence_required",
+        "public_benchmark_enrichment_ready": False,
+        "real_enrichment_target_count": 0,
+        "blockers": [
+            "dud_e_lit_pcba_enrichment_targets_missing",
+            "dud_e_lit_pcba_scored_molecules_missing",
+            "dud_e_lit_pcba_active_decoy_labels_missing",
+        ],
     }
     assert source["pose_validity_packet_summary"] == {
         "status": "ready_for_dry_run",
@@ -133,6 +144,19 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "benchmark ligands. It does not infer chemistry or close Tier beta."
         ),
     }
+    assert source["enrichment_scorecard_materializer"] == {
+        "schema_version": "public-benchmark-enrichment-materialization.v1",
+        "status": "ready_for_operator_intake",
+        "materialization_command": enrichment["materializer"]["materialization_command"],
+        "claim_boundary": (
+            "The enrichment materializer consumes DUD-E/LIT-PCBA scored molecule "
+            "rows and reports EF@1%, EF@5%, and ROC-AUC per target. It does not "
+            "download benchmark data, validate chemistry, or close Tier beta alone."
+        ),
+    }
+    assert {
+        row["family_id"]: row["materialization_status"] for row in source["source_families"]
+    }["dud_e_lit_pcba"] == "operator_intake_required"
     assert source["next_actions"] == [
         "attach_checked_casf_pdbbind_subset_source_files",
         "run_public_benchmark_subset_materializer",
@@ -142,9 +166,11 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "run_symmetry_aware_rmsd_on_real_subset",
         "run_public_benchmark_rmsd_scorecard_materializer",
         "materialize_posebusters_style_validity_packet_for_real_ligands",
+        "attach_dud_e_lit_pcba_enrichment_intake",
+        "run_public_benchmark_enrichment_materializer",
     ]
     assert "Vina/GNINA comparison" in source["claim_boundary"]
-    assert "DUD-E/LIT-PCBA enrichment" in source["claim_boundary"]
+    assert "DUD-E/LIT-PCBA enrichment results" in source["claim_boundary"]
 
     assert subset["schema_version"] == "public-benchmark-subset-manifest.v1"
     assert subset["source_families"] == ["CASF/PDBBind"]
@@ -237,12 +263,29 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert score["pose_success"] is True
     assert score["best_rmsd_angstrom"] < 1.0e-12
 
+    assert enrichment["schema_version"] == "public-benchmark-enrichment-scorecard.v1"
+    assert enrichment["status"] == "operator_evidence_required"
+    assert enrichment["contract_pass"] is False
+    assert enrichment["public_benchmark_enrichment_ready"] is False
+    assert enrichment["real_enrichment_target_count"] == 0
+    assert enrichment["target_rows"] == []
+    assert enrichment["materializer"]["schema_version"] == (
+        "public-benchmark-enrichment-materialization.v1"
+    )
+    assert "materialize_public_benchmark_enrichment_scorecard.py" in enrichment[
+        "materializer"
+    ]["materialization_command"]
+    assert "scripts/materialize_public_benchmark_enrichment_scorecard.py" in enrichment[
+        "input_checksums"
+    ]
+
 
 def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     source_out = tmp_path / "public_benchmark_source_of_truth.json"
     subset_out = tmp_path / "public_benchmark_subset_manifest.json"
     pose_out = tmp_path / "public_benchmark_pose_validity_packet.json"
     rmsd_out = tmp_path / "public_benchmark_symmetry_rmsd_scorecard.json"
+    enrichment_out = tmp_path / "public_benchmark_enrichment_scorecard.json"
 
     artifacts = module.write_public_benchmark_artifacts(
         repo_root=REPO_ROOT,
@@ -250,13 +293,18 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
         subset_manifest_out=subset_out,
         pose_validity_packet_out=pose_out,
         rmsd_scorecard_out=rmsd_out,
+        enrichment_scorecard_out=enrichment_out,
     )
 
     assert source_out.exists()
     assert subset_out.exists()
     assert pose_out.exists()
     assert rmsd_out.exists()
+    assert enrichment_out.exists()
     assert json.loads(source_out.read_text(encoding="utf-8")) == artifacts["source_of_truth"]
     assert json.loads(subset_out.read_text(encoding="utf-8")) == artifacts["subset_manifest"]
     assert json.loads(pose_out.read_text(encoding="utf-8")) == artifacts["pose_validity_packet"]
     assert json.loads(rmsd_out.read_text(encoding="utf-8")) == artifacts["rmsd_scorecard"]
+    assert json.loads(enrichment_out.read_text(encoding="utf-8")) == artifacts[
+        "enrichment_scorecard"
+    ]
