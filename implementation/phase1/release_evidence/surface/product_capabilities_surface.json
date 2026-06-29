@@ -102,6 +102,10 @@
           ],
           "minimum_evidence": {
             "case_count": 12,
+            "ligand_atom_order_contract_fields": [
+              "atom_count",
+              "atom_ids"
+            ],
             "local_source_file_fields": [
               "protein_structure_path",
               "reference_ligand_path",
@@ -111,7 +115,10 @@
               "source_license_or_accession",
               "source_checksum"
             ],
-            "source_family": "CASF/PDBBind"
+            "source_family": "CASF/PDBBind",
+            "symmetry_permutation_contract_fields": [
+              "permutations"
+            ]
           },
           "owner_actions": [
             "attach at least 12 local CASF/PDBBind case descriptors",
@@ -133,6 +140,10 @@
             ],
             "minimum_evidence": {
               "case_count": 12,
+              "ligand_atom_order_contract_fields": [
+                "atom_count",
+                "atom_ids"
+              ],
               "local_source_file_fields": [
                 "protein_structure_path",
                 "reference_ligand_path",
@@ -142,7 +153,10 @@
                 "source_license_or_accession",
                 "source_checksum"
               ],
-              "source_family": "CASF/PDBBind"
+              "source_family": "CASF/PDBBind",
+              "symmetry_permutation_contract_fields": [
+                "permutations"
+              ]
             },
             "slot_id": "casf_pdbbind_subset_intake",
             "unblocks_tier_beta_criteria": [
@@ -242,6 +256,10 @@
             ],
             "minimum_evidence": {
               "case_count": 12,
+              "ligand_atom_order_contract_fields": [
+                "atom_count",
+                "atom_ids"
+              ],
               "local_source_file_fields": [
                 "protein_structure_path",
                 "reference_ligand_path",
@@ -251,7 +269,10 @@
                 "source_license_or_accession",
                 "source_checksum"
               ],
-              "source_family": "CASF/PDBBind"
+              "source_family": "CASF/PDBBind",
+              "symmetry_permutation_contract_fields": [
+                "permutations"
+              ]
             },
             "slot_id": "casf_pdbbind_subset_intake",
             "slot_priority": 1,
@@ -957,7 +978,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-06-29T21:21:23.798320+00:00",
+  "generated_at": "2026-06-29T22:06:24.326615+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:6b7cd2c11db33687827b0cbef22e48c051f7edf552c45e433648ac11f1a2513e",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:beb648a879262dbf52294fb7a9df05ffe59f20aa9c5d32d2a4ae0d06511dc496",
@@ -970,9 +991,9 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:0cf91f85f705b7ee3c3a6bc12c9cf31ec71a75c53b836eee6d9e0d599886825d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:9ccdea722130644ee172e09f0de9377d782554e13ba43c3b587ac996af6754af",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:b04a28a51e38bbcba7889146d7f2c52350e65edc16e2b1595e84b502e3b00dec",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:2a966c069f3f64b4b5d5eb67e704c3650d14a7ed9484570bd8dba1c8ab4037ec",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:414bf457fbede57058e8b9b5e0399aa6b26eb345bd0a4d12e8e5c18f293c0cf4",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md": "sha256:40a6b7980527fd62daa075b2672b83fb839804c8f6c5e757c62ede460d55bff5",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:13325f03f0539312faa2225d47f4699a4118a2ef288c3e03986a5bb08496f482",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:105e7ed767abd55a7943dc62042ef458897e1ad35d46722171ff201298c0e7c7",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
@@ -1005,7 +1026,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "c5329b7c2214312cf9048addfbb1f3cf8cae9a43",
+  "source_commit_sha": "ed09b7430d02decc627f0aaad92ecb343883a088",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",

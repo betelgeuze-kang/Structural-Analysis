@@ -368,5 +368,6 @@ def test_product_capabilities_surface_cli_writes_pm_visible_ready_surface(
             "summary_line": payload["summary_line"],
             "first_blocked_target": "",
             "root_cause_tags": [],
+            "blocked_criteria": [],
         }
     ]

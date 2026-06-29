@@ -64,6 +64,10 @@
     ],
     "minimum_evidence": {
       "case_count": 12,
+      "ligand_atom_order_contract_fields": [
+        "atom_count",
+        "atom_ids"
+      ],
       "local_source_file_fields": [
         "protein_structure_path",
         "reference_ligand_path",
@@ -73,7 +77,10 @@
         "source_license_or_accession",
         "source_checksum"
       ],
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind",
+      "symmetry_permutation_contract_fields": [
+        "permutations"
+      ]
     },
     "owner_actions": [
       "attach at least 12 local CASF/PDBBind case descriptors",
@@ -89,9 +96,9 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-06-29T21:12:48.105141+00:00",
+  "generated_at": "2026-06-29T22:06:17.433329+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:508f59cb23b6e6f7cd07c2515d6ee57d102a4327521e1a13f286dc1df2497382",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:df62affcb6ba2305f0fc2afeaf03a4fe4731e182920536bb073074e2a0c765e8",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:a65b3c41d1189e78285c4e4e5168f52b6c4e2c8b2ef509bcfb6eb0005d047b6d",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
@@ -101,7 +108,7 @@
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c21641e971fd7675a2a3d24cb6a11a1c2a7bee7f3322cfbd5b931803f4884ba",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:b4577e4d510aa1cc6e7c3f8cb9b5620ee8edc05f01f5c787f6af7216ff99145e"
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:cea08f66df10b48fbdbe951f1e2c4f3a2da7294f7dd5c8e5de859b83f9251bc4"
   },
   "next_actions": [
     "fill_public_benchmark_operator_intake_packet",
@@ -155,6 +162,10 @@
       ],
       "minimum_evidence": {
         "case_count": 12,
+        "ligand_atom_order_contract_fields": [
+          "atom_count",
+          "atom_ids"
+        ],
         "local_source_file_fields": [
           "protein_structure_path",
           "reference_ligand_path",
@@ -164,7 +175,10 @@
           "source_license_or_accession",
           "source_checksum"
         ],
-        "source_family": "CASF/PDBBind"
+        "source_family": "CASF/PDBBind",
+        "symmetry_permutation_contract_fields": [
+          "permutations"
+        ]
       },
       "owner_actions": [
         "attach at least 12 local CASF/PDBBind case descriptors",
@@ -380,6 +394,10 @@
       ],
       "minimum_evidence": {
         "case_count": 12,
+        "ligand_atom_order_contract_fields": [
+          "atom_count",
+          "atom_ids"
+        ],
         "local_source_file_fields": [
           "protein_structure_path",
           "reference_ligand_path",
@@ -389,7 +407,10 @@
           "source_license_or_accession",
           "source_checksum"
         ],
-        "source_family": "CASF/PDBBind"
+        "source_family": "CASF/PDBBind",
+        "symmetry_permutation_contract_fields": [
+          "permutations"
+        ]
       },
       "slot_id": "casf_pdbbind_subset_intake",
       "status": "operator_input_required",
@@ -491,6 +512,10 @@
     "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
     "minimum_evidence": {
       "case_count": 12,
+      "ligand_atom_order_contract_fields": [
+        "atom_count",
+        "atom_ids"
+      ],
       "local_source_file_fields": [
         "protein_structure_path",
         "reference_ligand_path",
@@ -500,7 +525,10 @@
         "source_license_or_accession",
         "source_checksum"
       ],
-      "source_family": "CASF/PDBBind"
+      "source_family": "CASF/PDBBind",
+      "symmetry_permutation_contract_fields": [
+        "permutations"
+      ]
     },
     "required_slot_count": 4,
     "route": "/product/public-benchmark/operator-intake",
@@ -531,6 +559,10 @@
       ],
       "minimum_evidence": {
         "case_count": 12,
+        "ligand_atom_order_contract_fields": [
+          "atom_count",
+          "atom_ids"
+        ],
         "local_source_file_fields": [
           "protein_structure_path",
           "reference_ligand_path",
@@ -540,7 +572,10 @@
           "source_license_or_accession",
           "source_checksum"
         ],
-        "source_family": "CASF/PDBBind"
+        "source_family": "CASF/PDBBind",
+        "symmetry_permutation_contract_fields": [
+          "permutations"
+        ]
       },
       "slot_id": "casf_pdbbind_subset_intake",
       "slot_priority": 1,
@@ -554,6 +589,10 @@
         ],
         "minimum_evidence": {
           "case_count": 12,
+          "ligand_atom_order_contract_fields": [
+            "atom_count",
+            "atom_ids"
+          ],
           "local_source_file_fields": [
             "protein_structure_path",
             "reference_ligand_path",
@@ -563,7 +602,10 @@
             "source_license_or_accession",
             "source_checksum"
           ],
-          "source_family": "CASF/PDBBind"
+          "source_family": "CASF/PDBBind",
+          "symmetry_permutation_contract_fields": [
+            "permutations"
+          ]
         },
         "slot_id": "casf_pdbbind_subset_intake",
         "status": "operator_input_required",
@@ -779,7 +821,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "2bd80cb97ed2b203a8fcaf1a1129b70e01df9705",
+  "source_commit_sha": "ed09b7430d02decc627f0aaad92ecb343883a088",
   "source_families": [
     {
       "family_id": "casf_pdbbind",
