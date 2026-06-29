@@ -141,7 +141,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "github_sync::github_sync_preflight_not_synced"
     ]
     assert github_handoff["owner"] == "release_owner"
-    assert github_handoff["evidence_state"] == "approval_required"
+    assert github_handoff["evidence_state"] == "blocked"
     assert github_handoff["handoff_state"] == "external_owner_input_ready"
     assert briefing["human_ux_blockers"] == [
         "ux::human_new_user_observation_missing_or_failed",

@@ -28,10 +28,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T23:04:22.277863+00:00",
+  "generated_at": "2026-06-29T23:14:48.076980+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:7496cf37d94cbf8ad14e483e2ac54a114c3194375871b081b31ed5c571947234",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ea1419a86fe0be5a7d0bb4027fa871454ad07835985641fefa008c9e7b764325",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:23640dd7e5a93a2ba3b0009aff92ff9565d135134eb579d6f32ef35f105eb30d",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:08fe0aeda592078d7aba4f377a7a5ae66a0a760d5e08eece27225627ff327979",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -208,7 +208,7 @@
       "evidence_snapshot": {
         "ci_streak_source_evidence_age_hours": 0.0,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-06-29T23:04:17.583142+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-06-29T23:14:45.011876+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
         "nightly_github_actions_pass_streak_count": 0,
@@ -315,7 +315,7 @@
       "evidence_snapshot": {
         "ci_streak_source_evidence_age_hours": 0.0,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-06-29T23:04:17.583142+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-06-29T23:14:45.011876+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
         "nightly_github_actions_pass_streak_count": 0,
@@ -662,8 +662,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 275,
-        "main_ahead_count": 3,
+        "feature_ahead_count": 277,
+        "main_ahead_count": 5,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -674,9 +674,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 275,
+        "feature_ahead_count": 277,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 5,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -739,8 +739,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 275,
-        "main_ahead_count": 3,
+        "feature_ahead_count": 277,
+        "main_ahead_count": 5,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -751,9 +751,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 275,
+        "feature_ahead_count": 277,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 5,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -816,8 +816,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 275,
-        "main_ahead_count": 3,
+        "feature_ahead_count": 277,
+        "main_ahead_count": 5,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -828,9 +828,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 275,
+        "feature_ahead_count": 277,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 5,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -893,8 +893,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 275,
-        "main_ahead_count": 3,
+        "feature_ahead_count": 277,
+        "main_ahead_count": 5,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -905,9 +905,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 275,
+        "feature_ahead_count": 277,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 5,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -1198,7 +1198,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "4ba38e46a5e743a8d676933819162d7be3d21b64",
+  "source_commit_sha": "4c2e20580a36701738b1ef88328238e1bb33dc1f",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 13,
