@@ -146,6 +146,14 @@
         "first_blocked_target": "DRD2",
         "operator_intake_packet_status": "ready_for_operator_input",
         "operator_intake_required_slot_count": 3,
+        "phase3_exit_gate_status": "blocked",
+        "phase3_failed_criteria": [
+          "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate_min",
+          "decoys_above_positive_count_max",
+          "no_positive_out_anchored_by_top_decoys"
+        ],
+        "phase3_failed_criterion_count": 4,
         "product_report_ready": true,
         "product_report_route": "/product/gpcr-hard-decoy-suite-report",
         "reason_code": "ERR_BROAD_GPCR_CLAIM_LOCKED",
@@ -195,11 +203,11 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-06-29T18:08:37.168592+00:00",
+  "generated_at": "2026-06-29T18:19:11.707798+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:3de2d357a9a6e7e69929ceefb238e629c50f3c6bd38ebb92dd48f6631e6945ad",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:b976038d1e2ed14629b1a3d41ad08755fe59ae15243084fdc7798a95986cac2d",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:adcfe96ee079586804973cd96eca558a42449cd063bac6cfd46a395c5600c2a9",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:810b2763e7a6f5dd7ce1f0d799d16ee44280425e44d11a8d371c1dc470393d1a",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:90a17645943e5c7b379fd67cc6e5c90e4febafafad430cff90ab27dbad59dbc6",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json": "sha256:f9768ba7b15f029e3e917c55755f3c79432cd31b9c651b315ee8ce29ae4f193a",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md": "sha256:4e8a44624068cda8110c2986014663a2bddb61333cc5e81d90e77d8477d0401e",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:eb3d75d18b4e1b80451f1b3356e28c62f116c98905bc5c2aa387a67cbe65051f",
@@ -211,7 +219,7 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:f729fadd98ab4d69eb2174f8d26653170b1f40263b7a34a6470dae5d6bec6424",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:962a84c4468570e7106b97ab50b440f698b0b56300732ec5126d1933a4b9c42e",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:bc17d66d0ce6cc29849ea242d05ea1bef4d4ff8e3a19655d6db3587becd41a79",
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:81fd5c2bfb26d3809f1bc74ff13a518df61ab94a44fbb6dbdea4c5d408d4ce33",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:78ea46380b157593636f8056eec6b72328cc9007520f2695a2833db4d252d3e0",
@@ -220,7 +228,7 @@
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
-    "scripts/build_product_capabilities_surface.py": "sha256:fcea4ba2deeb8f90ffd1c3d2a8f9c30e570ac5d89c7cd2c61d7eac84bb74be72"
+    "scripts/build_product_capabilities_surface.py": "sha256:89340b5027e6af0ee8e8a881938468e29550f9aef0e23c4ec9e0142f8b82dc46"
   },
   "locked": false,
   "next_actions": [
@@ -240,7 +248,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "ef9e53ccb8e51e7207902ce84db55c4c30b1cc36",
+  "source_commit_sha": "e6fcebc95b7a6decf24b967fdcfc564ba4214c60",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
