@@ -30,7 +30,7 @@
 - `public_benchmark_ready`: `False`
 - `public_benchmark_source_of_truth_ready`: `False`
 - `public_benchmark_source_of_truth_status`: `seed_ready_materialization_blocked`
-- `public_benchmark_source_of_truth_blockers`: `casf_pdbbind_source_material_not_attached, public_benchmark_real_pose_predictions_missing, public_benchmark_external_receipts_missing`
+- `public_benchmark_source_of_truth_blockers`: `casf_pdbbind_source_material_not_attached, public_benchmark_real_pose_predictions_missing, dud_e_lit_pcba_enrichment_rows_missing, public_benchmark_external_receipts_missing`
 - `broad_gpcr_family_claim_safe`: `False`
 - `science_evidence_surface_bottlenecks`: `h_bond_evidence_surface_locked, broad_gpcr_family_claim_locked, pocketmd_lite_science_product_surface_locked`
 - `next_locally_closable_gaps`: `G1`
