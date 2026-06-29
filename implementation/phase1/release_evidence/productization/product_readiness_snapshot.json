@@ -91,7 +91,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 35,
+      "blocker_count": 36,
       "blockers": [
         "ci_streak::nightly::github_actions_query_failed",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -117,6 +117,7 @@
         "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
         "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
         "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
         "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
@@ -137,7 +138,7 @@
       ]
     }
   },
-  "blocker_count": 63,
+  "blocker_count": 64,
   "blockers": [
     "ci_streak::nightly::github_actions_query_failed",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -191,6 +192,7 @@
     "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+    "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
     "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
     "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
     "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
@@ -2378,8 +2380,31 @@
         "h_bond_evidence_surface_present": true,
         "locked_evidence_surface_count": 2,
         "missing_evidence_surface_count": 0,
-        "operator_action_count": 12,
-        "operator_actions": [],
+        "operator_action_count": 14,
+        "operator_actions": [
+          {
+            "action_id": "resolve_h_bond_evidence_surface",
+            "artifact": "h_bond_backmap_evidence_surface",
+            "bottleneck": "h_bond_evidence_surface_locked",
+            "first_blocked_target": "",
+            "reason": "h_bond evidence surface is locked; bottleneck=h_bond_evidence_surface_locked",
+            "root_cause_tags": [],
+            "status": "science_evidence_required",
+            "surface_family": "h_bond"
+          },
+          {
+            "action_id": "resolve_gpcr_evidence_surface",
+            "artifact": "gpcr_hard_decoy_evidence_surface",
+            "bottleneck": "broad_gpcr_family_claim_locked",
+            "first_blocked_target": "DRD2",
+            "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=operator_values_required",
+            "root_cause_tags": [
+              "operator_values_required"
+            ],
+            "status": "science_evidence_required",
+            "surface_family": "gpcr"
+          }
+        ],
         "public_benchmark_ready": false,
         "public_benchmark_source_of_truth_blockers": [
           "casf_pdbbind_source_material_not_attached",
@@ -2507,7 +2532,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-29T15:20:13.967156+00:00",
+  "generated_at": "2026-06-29T15:25:43.221389+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:0d8e16db27226dcde2972d13461bcca03d8964ec4c97befb00533bf958c16ffb",
@@ -2531,8 +2556,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:099ad0cebcf7fffccc7be492962dd5a5cc13a035a6eafefad835bb2e515e6a48",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:e58901801eb5b686db197475444206364f2c5877e9922c383d056bd9b0a65362",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:638aa8f628d76d3edfdfc08357046b7388ef7b304de129a5e9a00a08b71ca162",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:900300abdf9c22971c41acb61262e7ed22300f416fa183f8d6f79b81dec05d91",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9664e053f96273c9fe1aa0f820bcf01a69994de6b9d0f65d21653cc1bd135382",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5204e6b8a02f55edf406eed6b75fc14a561cfb1c7161af28180a6117cf20084a",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d46f30ea580fcceca095247c43d39d635bbb8526760ccb8e1b12eb850cdc1d00",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:79bde373448c48c69641172650d70641943e60f81de9391ac0c047a7677675c3",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:9244b37b3f1bd429cfc6a4a564e0d473fe0d48091903da93cca9a0f064b377c3",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2698,8 +2723,31 @@
     "h_bond_evidence_surface_present": true,
     "locked_evidence_surface_count": 2,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 12,
-    "operator_actions": [],
+    "operator_action_count": 14,
+    "operator_actions": [
+      {
+        "action_id": "resolve_h_bond_evidence_surface",
+        "artifact": "h_bond_backmap_evidence_surface",
+        "bottleneck": "h_bond_evidence_surface_locked",
+        "first_blocked_target": "",
+        "reason": "h_bond evidence surface is locked; bottleneck=h_bond_evidence_surface_locked",
+        "root_cause_tags": [],
+        "status": "science_evidence_required",
+        "surface_family": "h_bond"
+      },
+      {
+        "action_id": "resolve_gpcr_evidence_surface",
+        "artifact": "gpcr_hard_decoy_evidence_surface",
+        "bottleneck": "broad_gpcr_family_claim_locked",
+        "first_blocked_target": "DRD2",
+        "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=operator_values_required",
+        "root_cause_tags": [
+          "operator_values_required"
+        ],
+        "status": "science_evidence_required",
+        "surface_family": "gpcr"
+      }
+    ],
     "public_benchmark_ready": false,
     "public_benchmark_source_of_truth_blockers": [
       "casf_pdbbind_source_material_not_attached",
@@ -2839,7 +2887,7 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 20,
+      "blocker_count": 21,
       "blockers": [
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight_not_synced",
@@ -2850,6 +2898,7 @@
         "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
         "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
         "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
         "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
@@ -2868,7 +2917,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "d3adf488c82dc4dda9fc33c9c3ed07ff07e4883e",
+  "source_commit_sha": "0c0eabb1099031877da975d4ec10ddb5aea9f0f0",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2966,12 +3015,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-29T15:20:13.620487+00:00",
+        "generated_at": "2026-06-29T15:25:42.892412+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "d3adf488c82dc4dda9fc33c9c3ed07ff07e4883e",
+        "source_commit_sha": "0c0eabb1099031877da975d4ec10ddb5aea9f0f0",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -4288,6 +4337,7 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
           "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_public_benchmark_source_of_truth.py",
           "scripts/build_science_evidence_surface_seeds.py",
           "scripts/materialize_gpcr_hard_decoy_suite_report.py",
@@ -4296,6 +4346,7 @@
           "scripts/materialize_public_benchmark_rmsd_scorecard.py",
           "scripts/materialize_public_benchmark_subset_manifest.py",
           "scripts/report_pm_release_gate.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
           "tests/test_build_science_evidence_surface_seeds.py",
           "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
@@ -4317,7 +4368,10 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
+          "scripts/build_pm_release_blocker_action_register.py",
+          "scripts/report_pm_release_gate.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-06-29T15:19:55.600597+00:00",
         "input_checksum_present": true,
@@ -4325,8 +4379,8 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "92689e289f0314cc7a7103a5b032c062abb61244",
-        "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
@@ -8061,6 +8115,7 @@
         "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
       ],
       "non_receipt_dirty_paths": [],
@@ -8096,6 +8151,7 @@
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
       ]
     }

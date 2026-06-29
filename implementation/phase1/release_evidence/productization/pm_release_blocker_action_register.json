@@ -27,11 +27,11 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T15:20:13.668040+00:00",
+  "generated_at": "2026-06-29T15:25:42.939210+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9664e053f96273c9fe1aa0f820bcf01a69994de6b9d0f65d21653cc1bd135382",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d46f30ea580fcceca095247c43d39d635bbb8526760ccb8e1b12eb850cdc1d00",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:2e49451bf32f86b091a82f8ed7f337805a1c5f9a891dae0331ed77af9158b31d",
-    "scripts/build_pm_release_blocker_action_register.py": "sha256:c48b2389548a5f69291e4360f832e41bb5857c512084fe43e9afbc761d8193e7"
+    "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
     "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
@@ -50,6 +50,30 @@
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
+  "release_decision_operator_actions": [
+    {
+      "action_id": "resolve_h_bond_evidence_surface",
+      "artifact": "h_bond_backmap_evidence_surface",
+      "bottleneck": "h_bond_evidence_surface_locked",
+      "first_blocked_target": "",
+      "reason": "h_bond evidence surface is locked; bottleneck=h_bond_evidence_surface_locked",
+      "root_cause_tags": [],
+      "status": "science_evidence_required",
+      "surface_family": "h_bond"
+    },
+    {
+      "action_id": "resolve_gpcr_evidence_surface",
+      "artifact": "gpcr_hard_decoy_evidence_surface",
+      "bottleneck": "broad_gpcr_family_claim_locked",
+      "first_blocked_target": "DRD2",
+      "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=operator_values_required",
+      "root_cause_tags": [
+        "operator_values_required"
+      ],
+      "status": "science_evidence_required",
+      "surface_family": "gpcr"
+    }
+  ],
   "reuse_policy": "pm_release_blocker_action_register_aggregates_pm_report_and_freshness_actions",
   "reused_evidence": true,
   "rows": [
@@ -526,8 +550,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 129,
-        "main_ahead_count": 3,
+        "feature_ahead_count": 132,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -538,9 +562,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 129,
+        "feature_ahead_count": 132,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -603,8 +627,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 129,
-        "main_ahead_count": 3,
+        "feature_ahead_count": 132,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -615,9 +639,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 129,
+        "feature_ahead_count": 132,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -680,8 +704,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 129,
-        "main_ahead_count": 3,
+        "feature_ahead_count": 132,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -692,9 +716,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 129,
+        "feature_ahead_count": 132,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -985,7 +1009,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "d3adf488c82dc4dda9fc33c9c3ed07ff07e4883e",
+  "source_commit_sha": "0c0eabb1099031877da975d4ec10ddb5aea9f0f0",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 12,
@@ -1005,6 +1029,7 @@
     "release_area_blocker_count": 8,
     "release_area_gate_ready": false,
     "release_area_green_count": 12,
-    "release_area_total_count": 16
+    "release_area_total_count": 16,
+    "release_decision_operator_action_count": 2
   }
 }

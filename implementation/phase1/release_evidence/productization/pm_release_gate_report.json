@@ -59,7 +59,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-29T15:20:13.620487+00:00",
+  "generated_at": "2026-06-29T15:25:42.892412+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -112,8 +112,8 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:099ad0cebcf7fffccc7be492962dd5a5cc13a035a6eafefad835bb2e515e6a48",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:4c634a86e2e6f20a51716479b9063d47b7b68cb993b3ca53c9e0c2d0e85dfd85",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:c316f6d7f882a728a1eb647ecbd75eaa3a247cf371f770a1ddca7744ba6685bc",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:900300abdf9c22971c41acb61262e7ed22300f416fa183f8d6f79b81dec05d91",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:e3445009cea3334b2efefb61c0416fc3dc921ae182c0f279838b7862a056baaa",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:85348ffa93f1ae4ad81a4412c22625a0f4eeb18559dea66759c7b13e0ee16460",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
@@ -945,8 +945,8 @@
       "ok": false,
       "status": "blocked",
       "summary": {
-        "feature_ahead_count": 129,
-        "main_ahead_count": 3,
+        "feature_ahead_count": 132,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -1114,8 +1114,31 @@
     "h_bond_evidence_surface_present": true,
     "locked_evidence_surface_count": 2,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 12,
-    "operator_actions": [],
+    "operator_action_count": 14,
+    "operator_actions": [
+      {
+        "action_id": "resolve_h_bond_evidence_surface",
+        "artifact": "h_bond_backmap_evidence_surface",
+        "bottleneck": "h_bond_evidence_surface_locked",
+        "first_blocked_target": "",
+        "reason": "h_bond evidence surface is locked; bottleneck=h_bond_evidence_surface_locked",
+        "root_cause_tags": [],
+        "status": "science_evidence_required",
+        "surface_family": "h_bond"
+      },
+      {
+        "action_id": "resolve_gpcr_evidence_surface",
+        "artifact": "gpcr_hard_decoy_evidence_surface",
+        "bottleneck": "broad_gpcr_family_claim_locked",
+        "first_blocked_target": "DRD2",
+        "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=operator_values_required",
+        "root_cause_tags": [
+          "operator_values_required"
+        ],
+        "status": "science_evidence_required",
+        "surface_family": "gpcr"
+      }
+    ],
     "public_benchmark_ready": false,
     "public_benchmark_source_of_truth_blockers": [
       "casf_pdbbind_source_material_not_attached",
@@ -1220,6 +1243,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "d3adf488c82dc4dda9fc33c9c3ed07ff07e4883e",
+  "source_commit_sha": "0c0eabb1099031877da975d4ec10ddb5aea9f0f0",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
