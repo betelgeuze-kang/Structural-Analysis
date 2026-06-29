@@ -1,7 +1,7 @@
 # Paid Pilot Scope Guard Report
 
-- `summary_line`: `Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9`
-- `contract_pass`: `True`
+- `summary_line`: `Paid pilot scope guard: BLOCKED | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9`
+- `contract_pass`: `False`
 
 | Scope Check | Pass |
 |---|---|
@@ -46,7 +46,7 @@
 | Evidence Artifact | Present | Required Pass | Contract Pass |
 |---|---|---|---|
 | `pm_release_gate_report` | `True` | `False` | `True` |
-| `support_bundle_manifest` | `True` | `True` | `True` |
+| `support_bundle_manifest` | `True` | `True` | `False` |
 | `pm_owner_evidence_request_packet` | `True` | `True` | `True` |
 | `pm_release_gate_reviewer_handoff` | `True` | `True` | `True` |
 | `pm_release_reproduction_command_audit` | `True` | `True` | `True` |

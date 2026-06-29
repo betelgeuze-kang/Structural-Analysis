@@ -8,7 +8,7 @@
       "required_pass": false
     },
     {
-      "contract_pass": true,
+      "contract_pass": false,
       "label": "support_bundle_manifest",
       "path": "implementation/phase1/support_bundle_manifest.json",
       "present": true,
@@ -64,14 +64,16 @@
       "required_pass": false
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "required_evidence_artifact_not_green:support_bundle_manifest"
+  ],
   "checks": {
     "all_required_scope_terms_present": true,
     "commercial_v1_separate_validation_exclusions_present": true,
     "commercial_v1_supported_scope_present": true,
     "evidence_package_artifacts_present": true,
     "no_prohibited_scope_claims_present": true,
-    "required_evidence_package_artifacts_green": true,
+    "required_evidence_package_artifacts_green": false,
     "scope_source_present": true,
     "support_bundle_required_sections_present": true
   },
@@ -248,7 +250,7 @@
       "pass": true
     }
   ],
-  "contract_pass": true,
+  "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "forbidden_claim_rows": [
     {
@@ -308,22 +310,22 @@
       ]
     }
   ],
-  "generated_at": "2026-06-29T23:45:15.996879+00:00",
+  "generated_at": "2026-06-29T23:55:09.564258+00:00",
   "input_checksums": {
-    "README.md": "sha256:516cdae79ebe74272b7200ce37e4db351bdd76abbfdb71fcb6311c454e1e3e0f",
-    "docs/commercialization-gap-current-state.md": "sha256:95ca6037982bfaf87e4b5a41796a2aff643d030ec85f4bbde2ff45ca0101dd17",
+    "README.md": "sha256:ade4ac2572a04124ebb2cd22d66d19c7e6ea519351e89213258b9013c242ae88",
+    "docs/commercialization-gap-current-state.md": "sha256:d02d067461838ef1597c76cbbffdcbffa6795423862685a965057b896edff24f",
     "docs/pm-release-gate-milestones.md": "sha256:fdb22304c1e4c8047a2bebdf107007ac654869d06d603ace91a32fb128773092",
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:e5e5fe6e6fb02cdf2f369e745ba232a87f066a726e0969286a41e6e9ac6ccc83",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:e4b554d70eb56f31f6c2ef936ac19900174215cb659c6aa9b3b009ccf59d44de",
-    "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json": "sha256:9404f67928de660c1c1c2e14cbd47f1a20bbed767fc4b32d8d5e0cd267a0e59c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d4749ac13a391382923ff182a51db04761f4f3130b81c57eba05283d247e7a5b",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f2430d8050768d8a3469d26f3e319f7575f9c0b1a04e09255e3e47494f6b65e6",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json": "sha256:df344009f27d3f9c43fe9d5b271e0022d494a5d6441d1efd29a18f0026b7dba0",
-    "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:c3f59f1d2ff76e129f5e03dc5af697b4909f164eba2ec4521c6def6f1f7dfe0f",
-    "implementation/phase1/support_bundle_manifest.json": "sha256:f527fd3813bf8d20847064ed2cb2fd7c6e0fab24a306c3bd40116fc650912f04"
+    "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json": "sha256:0184f099f6d5ac7b0fa6cebaca1a04d2275bbfd9d3c0f83375ea6bb6bc8bb536",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:2a833c5fb2428345237ed78d99a53485936286e4d67060af045ac787fb4236c2",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d8fcb58fd1c4aa7dbe7ddcdf955ac1a3d60b3815702c96c5eefed9f4cba93b78",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json": "sha256:041eb2ed779cb96e49dc64c698a07efcfb5c035d3732d6839beb0ba4d2e9751f",
+    "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:97575b6bd064f08728a82915c9d30bde2fe09c9cd7ee85343cc509e39cc290bd",
+    "implementation/phase1/support_bundle_manifest.json": "sha256:a19b693145f06cb38d345138c76a74511150c4a7fb4fda9f1a6234e1ec5fb480"
   },
-  "reason_code": "PASS",
+  "reason_code": "ERR_PAID_PILOT_SCOPE_GUARD_BLOCKED",
   "reuse_policy": "scope_guard_rebuilt_from_scope_source_and_release_evidence_artifacts",
   "reused_evidence": true,
   "schema_version": "paid-pilot-scope-guard-report.v1",
@@ -373,7 +375,7 @@
       "pass": true
     }
   ],
-  "source_commit_sha": "5dca21418de7a3e168e2061ce7e8d991fa534c5d",
+  "source_commit_sha": "076fc401aaa276d59765aff8ab9abee57938de89",
   "summary": {
     "claim_boundary_docs": [
       "README.md",
@@ -394,7 +396,7 @@
     "support_bundle_required_section_count": 3,
     "support_bundle_required_section_present_count": 3
   },
-  "summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
+  "summary_line": "Paid pilot scope guard: BLOCKED | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
   "support_bundle_section_rows": [
     {
       "label": "pm_owner_evidence_request_packet",
