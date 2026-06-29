@@ -147,6 +147,12 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "vina_gnina_comparison_intake": "operator_input_required",
     }
     assert phase_2["summary"]["pose_validity_packet_summary"]["real_benchmark_case_count"] == 0
+    assert phase_2["summary"]["symmetry_rmsd_scorecard_summary"] == {
+        "status": "ready",
+        "dry_run_case_count": 1,
+        "real_benchmark_case_count": 0,
+        "dry_run_pose_success": True,
+    }
     assert phase_2["summary"]["vina_gnina_comparison_adapter_summary"][
         "real_comparison_case_count"
     ] == 0

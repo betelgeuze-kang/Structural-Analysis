@@ -246,6 +246,10 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
             "pose_validity_packet_summary": _as_dict(
                 payload.get("pose_validity_packet_summary")
             ),
+            "symmetry_rmsd_scorecard_summary": _as_dict(
+                payload.get("symmetry_rmsd_scorecard_summary")
+                or payload.get("symmetry_rmsd_summary")
+            ),
             "enrichment_scorecard_summary": _as_dict(payload.get("enrichment_scorecard_summary")),
             "vina_gnina_comparison_adapter_summary": _as_dict(
                 payload.get("vina_gnina_comparison_adapter_summary")

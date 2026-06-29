@@ -333,6 +333,10 @@ def _public_benchmark_row(
             "pose_validity_packet_summary": _as_dict(
                 public_benchmark.get("pose_validity_packet_summary")
             ),
+            "symmetry_rmsd_scorecard_summary": _as_dict(
+                public_benchmark.get("symmetry_rmsd_scorecard_summary")
+                or public_benchmark.get("symmetry_rmsd_summary")
+            ),
             "enrichment_scorecard_summary": _as_dict(public_benchmark.get("enrichment_scorecard_summary")),
             "vina_gnina_comparison_adapter_summary": _as_dict(
                 public_benchmark.get("vina_gnina_comparison_adapter_summary")

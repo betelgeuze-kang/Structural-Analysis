@@ -671,6 +671,12 @@ def build_source_of_truth(
     ]
     tier_beta_gate["failed_criterion_count"] = len(failed_gate_criteria)
     tier_beta_gate["failed_criteria"] = failed_gate_criteria
+    symmetry_rmsd_scorecard_summary = {
+        "status": rmsd_scorecard["status"],
+        "dry_run_case_count": rmsd_scorecard["dry_run_case_count"],
+        "real_benchmark_case_count": rmsd_scorecard["real_benchmark_case_count"],
+        "dry_run_pose_success": bool(rmsd_scorecard["rows"][0]["score"]["pose_success"]),
+    }
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -726,12 +732,8 @@ def build_source_of_truth(
                 "real_benchmark_case_count"
             ],
         },
-        "symmetry_rmsd_summary": {
-            "status": rmsd_scorecard["status"],
-            "dry_run_case_count": rmsd_scorecard["dry_run_case_count"],
-            "real_benchmark_case_count": rmsd_scorecard["real_benchmark_case_count"],
-            "dry_run_pose_success": bool(rmsd_scorecard["rows"][0]["score"]["pose_success"]),
-        },
+        "symmetry_rmsd_scorecard_summary": symmetry_rmsd_scorecard_summary,
+        "symmetry_rmsd_summary": symmetry_rmsd_scorecard_summary,
         "enrichment_scorecard_summary": {
             "status": enrichment_scorecard["status"],
             "public_benchmark_enrichment_ready": enrichment_scorecard[

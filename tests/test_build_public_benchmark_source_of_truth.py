@@ -73,6 +73,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "real_benchmark_case_count": 0,
         "dry_run_pose_success": True,
     }
+    assert source["symmetry_rmsd_scorecard_summary"] == source["symmetry_rmsd_summary"]
     assert source["enrichment_scorecard_summary"] == {
         "status": "operator_evidence_required",
         "public_benchmark_enrichment_ready": False,

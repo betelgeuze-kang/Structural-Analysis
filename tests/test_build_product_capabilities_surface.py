@@ -94,6 +94,12 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "dud_e_lit_pcba_enrichment_intake": "operator_input_required",
         "vina_gnina_comparison_intake": "operator_input_required",
     }
+    assert public_benchmark["summary"]["symmetry_rmsd_scorecard_summary"] == {
+        "status": "ready",
+        "dry_run_case_count": 1,
+        "real_benchmark_case_count": 0,
+        "dry_run_pose_success": True,
+    }
     assert (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_operator_intake_packet.json"
