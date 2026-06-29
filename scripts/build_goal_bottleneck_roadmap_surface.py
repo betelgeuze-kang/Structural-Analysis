@@ -24,6 +24,9 @@ DEFAULT_PM_REPORT = PRODUCTIZATION / "pm_release_gate_report.json"
 DEFAULT_ACTION_REGISTER = PRODUCTIZATION / "pm_release_blocker_action_register.json"
 DEFAULT_FRESHNESS_REPORT = PRODUCTIZATION / "release_evidence_freshness_report.json"
 DEFAULT_PUBLIC_BENCHMARK = PRODUCTIZATION / "public_benchmark_source_of_truth.json"
+DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE = (
+    PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
+)
 DEFAULT_GPCR_PRODUCT_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
 DEFAULT_GPCR_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
@@ -74,6 +77,7 @@ def _input_paths() -> list[Path]:
         DEFAULT_ACTION_REGISTER,
         DEFAULT_FRESHNESS_REPORT,
         DEFAULT_PUBLIC_BENCHMARK,
+        DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
         DEFAULT_GPCR_PRODUCT_REPORT,
         DEFAULT_GPCR_SURFACE,
         DEFAULT_POCKETMD_SURFACE,
@@ -230,6 +234,7 @@ def _public_benchmark_row(
     *,
     decision: dict[str, Any],
     public_benchmark: dict[str, Any],
+    public_benchmark_operator_intake: dict[str, Any],
     action_register: dict[str, Any],
     product_capabilities: dict[str, Any],
 ) -> dict[str, Any]:
@@ -244,17 +249,24 @@ def _public_benchmark_row(
         state="ready" if ready else "blocked",
         bottleneck="" if ready else "public_benchmark_source_of_truth_not_ready",
         first_blocker=str(action.get("first_blocker") or _first_str(blockers)),
-        evidence_artifacts=[DEFAULT_PUBLIC_BENCHMARK],
+        evidence_artifacts=[DEFAULT_PUBLIC_BENCHMARK, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE],
         next_actions=_dedupe(
             [str(row) for row in _as_list(action.get("next_actions"))]
             + [str(row) for row in _as_list(capability.get("next_actions"))]
             + [str(row) for row in _as_list(public_benchmark.get("next_actions"))]
+            + [str(row) for row in _as_list(public_benchmark_operator_intake.get("next_actions"))]
         ),
         summary={
             "status": str(public_benchmark.get("status") or ""),
             "tier_beta_ready": _as_bool(public_benchmark.get("tier_beta_ready")),
             "public_benchmark_ready": ready,
             "blockers": blockers,
+            "operator_intake_packet_status": str(
+                public_benchmark_operator_intake.get("status") or ""
+            ),
+            "operator_intake_required_slot_count": _as_int(
+                public_benchmark_operator_intake.get("required_slot_count")
+            ),
             "subset_manifest_summary": _as_dict(public_benchmark.get("subset_manifest_summary")),
             "enrichment_scorecard_summary": _as_dict(public_benchmark.get("enrichment_scorecard_summary")),
         },
@@ -379,6 +391,9 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
     action_register = _load_json(repo_root, DEFAULT_ACTION_REGISTER)
     freshness = _load_json(repo_root, DEFAULT_FRESHNESS_REPORT)
     public_benchmark = _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK)
+    public_benchmark_operator_intake = _load_json(
+        repo_root, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE
+    )
     gpcr_product_report = _load_json(repo_root, DEFAULT_GPCR_PRODUCT_REPORT)
     gpcr_surface = _load_json(repo_root, DEFAULT_GPCR_SURFACE)
     pocketmd_surface = _load_json(repo_root, DEFAULT_POCKETMD_SURFACE)
@@ -417,6 +432,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         _public_benchmark_row(
             decision=decision,
             public_benchmark=public_benchmark,
+            public_benchmark_operator_intake=public_benchmark_operator_intake,
             action_register=action_register,
             product_capabilities=product_capabilities,
         ),

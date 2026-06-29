@@ -157,7 +157,25 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert {
         row["family_id"]: row["materialization_status"] for row in source["source_families"]
     }["dud_e_lit_pcba"] == "operator_intake_required"
+    assert source["operator_intake_packet"]["schema_version"] == (
+        "public-benchmark-operator-intake-packet.v1"
+    )
+    assert source["operator_intake_packet"]["status"] == "ready_for_operator_input"
+    assert source["operator_intake_packet"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_operator_intake_packet.json"
+    )
+    assert source["operator_intake_packet"]["required_slot_count"] == 3
+    assert source["operator_intake_packet"]["input_slot_ids"] == [
+        "casf_pdbbind_subset_intake",
+        "pose_coordinate_intake",
+        "dud_e_lit_pcba_enrichment_intake",
+    ]
+    assert source["operator_intake_packet"]["acceptance_criteria"][-1] == (
+        "public_benchmark_source_of_truth.public_benchmark_ready == true"
+    )
     assert source["next_actions"] == [
+        "fill_public_benchmark_operator_intake_packet",
         "attach_checked_casf_pdbbind_subset_source_files",
         "run_public_benchmark_subset_materializer",
         "fill_ligand_atom_order_and_symmetry_permutation_contracts",
@@ -286,6 +304,8 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     pose_out = tmp_path / "public_benchmark_pose_validity_packet.json"
     rmsd_out = tmp_path / "public_benchmark_symmetry_rmsd_scorecard.json"
     enrichment_out = tmp_path / "public_benchmark_enrichment_scorecard.json"
+    operator_out = tmp_path / "public_benchmark_operator_intake_packet.json"
+    operator_md_out = tmp_path / "public_benchmark_operator_intake_packet.md"
 
     artifacts = module.write_public_benchmark_artifacts(
         repo_root=REPO_ROOT,
@@ -294,6 +314,8 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
         pose_validity_packet_out=pose_out,
         rmsd_scorecard_out=rmsd_out,
         enrichment_scorecard_out=enrichment_out,
+        operator_intake_packet_out=operator_out,
+        operator_intake_packet_md_out=operator_md_out,
     )
 
     assert source_out.exists()
@@ -301,6 +323,8 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     assert pose_out.exists()
     assert rmsd_out.exists()
     assert enrichment_out.exists()
+    assert operator_out.exists()
+    assert operator_md_out.exists()
     assert json.loads(source_out.read_text(encoding="utf-8")) == artifacts["source_of_truth"]
     assert json.loads(subset_out.read_text(encoding="utf-8")) == artifacts["subset_manifest"]
     assert json.loads(pose_out.read_text(encoding="utf-8")) == artifacts["pose_validity_packet"]
@@ -308,3 +332,9 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     assert json.loads(enrichment_out.read_text(encoding="utf-8")) == artifacts[
         "enrichment_scorecard"
     ]
+    assert json.loads(operator_out.read_text(encoding="utf-8")) == artifacts[
+        "operator_intake_packet"
+    ]
+    assert "# Public Benchmark Operator Intake Packet" in operator_md_out.read_text(
+        encoding="utf-8"
+    )

@@ -42,6 +42,11 @@ from materialize_public_benchmark_rmsd_scorecard import (  # noqa: E402
 from materialize_public_benchmark_enrichment_scorecard import (  # noqa: E402
     SCHEMA_VERSION as ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
 )
+from build_public_benchmark_operator_intake_packet import (  # noqa: E402
+    DEFAULT_OUT as DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
+    SCHEMA_VERSION as OPERATOR_INTAKE_PACKET_SCHEMA_VERSION,
+    build_public_benchmark_operator_intake_packet,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -50,6 +55,7 @@ DEFAULT_SUBSET_MANIFEST_OUT = PRODUCTIZATION / "public_benchmark_subset_manifest
 DEFAULT_POSE_VALIDITY_PACKET_OUT = PRODUCTIZATION / "public_benchmark_pose_validity_packet.json"
 DEFAULT_RMSD_SCORECARD_OUT = PRODUCTIZATION / "public_benchmark_symmetry_rmsd_scorecard.json"
 DEFAULT_ENRICHMENT_SCORECARD_OUT = PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
+DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT = DEFAULT_OPERATOR_INTAKE_PACKET_OUT.with_suffix(".md")
 SCHEMA_VERSION = "public-benchmark-source-of-truth.v1"
 SUBSET_SCHEMA_VERSION = "public-benchmark-subset-manifest.v1"
 POSE_PACKET_SCHEMA_VERSION = "public-benchmark-pose-validity-packet.v1"
@@ -65,6 +71,7 @@ def _source_input_paths() -> list[Path]:
         Path("scripts/materialize_public_benchmark_enrichment_scorecard.py"),
         Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
+        Path("scripts/build_public_benchmark_operator_intake_packet.py"),
         Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
         Path("scripts/validate_public_benchmark_pose_validity.py"),
         Path("scripts/validate_public_benchmark_subset_manifest.py"),
@@ -468,6 +475,7 @@ def build_source_of_truth(
     pose_validity_packet: dict[str, Any],
     rmsd_scorecard: dict[str, Any],
     enrichment_scorecard: dict[str, Any],
+    operator_intake_packet: dict[str, Any],
     repo_root: Path = ROOT,
 ) -> dict[str, Any]:
     return {
@@ -539,6 +547,24 @@ def build_source_of_truth(
                 "real_enrichment_target_count"
             ],
             "blockers": enrichment_scorecard["blockers"],
+        },
+        "operator_intake_packet": {
+            "schema_version": operator_intake_packet["schema_version"],
+            "status": operator_intake_packet["status"],
+            "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
+            "markdown_artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT),
+            "required_slot_count": operator_intake_packet["required_slot_count"],
+            "input_slot_ids": [row["slot_id"] for row in operator_intake_packet["input_slots"]],
+            "acceptance_criteria": operator_intake_packet["acceptance_criteria"],
+            "materialization_sequence": [
+                {
+                    "step_id": row["step_id"],
+                    "schema_version": row["schema_version"],
+                    "produces": row["produces"],
+                }
+                for row in operator_intake_packet["materialization_sequence"]
+            ],
+            "claim_boundary": operator_intake_packet["claim_boundary"],
         },
         "subset_manifest_validation": validate_subset_manifest(subset_manifest),
         "subset_materializer": {
@@ -618,6 +644,7 @@ def build_source_of_truth(
             "public_benchmark_external_receipts_missing",
         ],
         "next_actions": [
+            "fill_public_benchmark_operator_intake_packet",
             "attach_checked_casf_pdbbind_subset_source_files",
             "run_public_benchmark_subset_materializer",
             "fill_ligand_atom_order_and_symmetry_permutation_contracts",
@@ -643,11 +670,13 @@ def build_public_benchmark_artifacts(*, repo_root: Path = ROOT) -> dict[str, dic
     pose_validity_packet = build_pose_validity_packet(repo_root=repo_root)
     rmsd_scorecard = build_rmsd_scorecard(repo_root=repo_root)
     enrichment_scorecard = build_enrichment_scorecard(repo_root=repo_root)
+    operator_intake_packet = build_public_benchmark_operator_intake_packet(repo_root=repo_root)
     source_of_truth = build_source_of_truth(
         subset_manifest=subset_manifest,
         pose_validity_packet=pose_validity_packet,
         rmsd_scorecard=rmsd_scorecard,
         enrichment_scorecard=enrichment_scorecard,
+        operator_intake_packet=operator_intake_packet,
         repo_root=repo_root,
     )
     return {
@@ -656,6 +685,7 @@ def build_public_benchmark_artifacts(*, repo_root: Path = ROOT) -> dict[str, dic
         "pose_validity_packet": pose_validity_packet,
         "rmsd_scorecard": rmsd_scorecard,
         "enrichment_scorecard": enrichment_scorecard,
+        "operator_intake_packet": operator_intake_packet,
     }
 
 
@@ -667,6 +697,8 @@ def write_public_benchmark_artifacts(
     pose_validity_packet_out: Path = DEFAULT_POSE_VALIDITY_PACKET_OUT,
     rmsd_scorecard_out: Path = DEFAULT_RMSD_SCORECARD_OUT,
     enrichment_scorecard_out: Path = DEFAULT_ENRICHMENT_SCORECARD_OUT,
+    operator_intake_packet_out: Path = DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
+    operator_intake_packet_md_out: Path = DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT,
 ) -> dict[str, dict[str, Any]]:
     artifacts = build_public_benchmark_artifacts(repo_root=repo_root)
     outputs = {
@@ -675,11 +707,35 @@ def write_public_benchmark_artifacts(
         "pose_validity_packet": pose_validity_packet_out,
         "rmsd_scorecard": rmsd_scorecard_out,
         "enrichment_scorecard": enrichment_scorecard_out,
+        "operator_intake_packet": operator_intake_packet_out,
     }
     for key, out_path in outputs.items():
         resolved = out_path if out_path.is_absolute() else repo_root / out_path
         resolved.parent.mkdir(parents=True, exist_ok=True)
         resolved.write_text(_json_text(artifacts[key]), encoding="utf-8")
+    resolved_md = (
+        operator_intake_packet_md_out
+        if operator_intake_packet_md_out.is_absolute()
+        else repo_root / operator_intake_packet_md_out
+    )
+    resolved_md.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "# Public Benchmark Operator Intake Packet",
+        "",
+        f"- `contract_pass`: `{artifacts['operator_intake_packet']['contract_pass']}`",
+        f"- `status`: `{artifacts['operator_intake_packet']['status']}`",
+        f"- `public_benchmark_ready`: `{artifacts['operator_intake_packet']['public_benchmark_ready']}`",
+        f"- `claim_boundary`: {artifacts['operator_intake_packet']['claim_boundary']}",
+        "",
+        "| Slot | Status | Intake Artifact |",
+        "|---|---|---|",
+    ]
+    for slot in artifacts["operator_intake_packet"]["input_slots"]:
+        lines.append(
+            f"| `{slot['slot_id']}` | `{slot['status']}` | `{slot['intake_artifact']}` |"
+        )
+    lines.append("")
+    resolved_md.write_text("\n".join(lines), encoding="utf-8")
     return artifacts
 
 
@@ -690,6 +746,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pose-validity-packet-out", type=Path, default=DEFAULT_POSE_VALIDITY_PACKET_OUT)
     parser.add_argument("--rmsd-scorecard-out", type=Path, default=DEFAULT_RMSD_SCORECARD_OUT)
     parser.add_argument("--enrichment-scorecard-out", type=Path, default=DEFAULT_ENRICHMENT_SCORECARD_OUT)
+    parser.add_argument("--operator-intake-packet-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_PACKET_OUT)
+    parser.add_argument("--operator-intake-packet-md-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
@@ -699,6 +757,8 @@ def main(argv: list[str] | None = None) -> int:
         pose_validity_packet_out=args.pose_validity_packet_out,
         rmsd_scorecard_out=args.rmsd_scorecard_out,
         enrichment_scorecard_out=args.enrichment_scorecard_out,
+        operator_intake_packet_out=args.operator_intake_packet_out,
+        operator_intake_packet_md_out=args.operator_intake_packet_md_out,
     )
     summary = artifacts["source_of_truth"]
     if args.json:
