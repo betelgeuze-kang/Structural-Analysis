@@ -44,6 +44,10 @@ DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD = (
     PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.md"
 )
 DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
+DEFAULT_UX_OBSERVATION_REPORT = PRODUCTIZATION / "ux_new_user_observation_report.json"
+DEFAULT_UX_OBSERVATION_INTAKE_PACKET = (
+    PRODUCTIZATION / "ux_new_user_observation_intake_packet.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json"
 
 SCHEMA_VERSION = "goal-bottleneck-roadmap-surface.v1"
@@ -102,6 +106,8 @@ def _input_paths() -> list[Path]:
         DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
         DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_PRODUCT_CAPABILITIES,
+        DEFAULT_UX_OBSERVATION_REPORT,
+        DEFAULT_UX_OBSERVATION_INTAKE_PACKET,
     ]
 
 
@@ -990,6 +996,95 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
     return queue
 
 
+def _human_ux_release_gate_briefing(
+    *,
+    human_ux_blockers: list[str],
+    ux_observation_report: dict[str, Any],
+    ux_observation_intake_packet: dict[str, Any],
+) -> dict[str, Any]:
+    report_summary = _as_dict(ux_observation_report.get("summary"))
+    intake_summary = _as_dict(ux_observation_intake_packet.get("summary"))
+    report_blockers = [
+        str(row) for row in _as_list(ux_observation_report.get("blockers"))
+    ]
+    current_intake_blockers = [
+        str(row)
+        for row in _as_list(ux_observation_intake_packet.get("current_blockers"))
+    ]
+    validation_commands = _dedupe(
+        [str(row) for row in _as_list(ux_observation_report.get("validation_commands"))]
+        + [
+            str(row)
+            for row in _as_list(
+                ux_observation_intake_packet.get("validation_commands")
+            )
+        ]
+    )
+    owner_action = str(
+        intake_summary.get("owner_action")
+        or report_summary.get("owner_action")
+        or ""
+    )
+    return {
+        "status": "blocked" if human_ux_blockers else "ready",
+        "release_area_blockers": human_ux_blockers,
+        "release_area_blocker_count": len(human_ux_blockers),
+        "human_observation_contract_pass": _as_bool(
+            ux_observation_report.get("contract_pass")
+        ),
+        "human_observation_reason_code": str(
+            ux_observation_report.get("reason_code") or ""
+        ),
+        "human_observation_blocker_count": len(report_blockers),
+        "human_observation_blockers": report_blockers,
+        "owner_intake_contract_pass": _as_bool(
+            ux_observation_intake_packet.get("contract_pass")
+        ),
+        "owner_intake_reason_code": str(
+            ux_observation_intake_packet.get("reason_code") or ""
+        ),
+        "owner_intake_current_blocker_count": len(current_intake_blockers),
+        "owner_intake_current_blockers": current_intake_blockers,
+        "missing_field_count": len(_as_list(report_summary.get("missing_fields"))),
+        "missing_fields": [
+            str(row) for row in _as_list(report_summary.get("missing_fields"))
+        ],
+        "workflow_step_pass_count": _as_int(
+            report_summary.get("workflow_step_pass_count")
+        ),
+        "required_workflow_step_count": _as_int(
+            report_summary.get("required_workflow_step_count")
+        ),
+        "missing_workflow_steps": [
+            str(row) for row in _as_list(report_summary.get("missing_workflow_steps"))
+        ],
+        "max_completion_minutes": _as_int(report_summary.get("max_completion_minutes")),
+        "owner_action": owner_action,
+        "plain_status": (
+            "Human new-user observation evidence is still required for the UX "
+            "release-area gate. Automated rehearsal or templates do not close it."
+            if human_ux_blockers
+            else "Human UX release-area blockers are not present."
+        ),
+        "evidence_artifacts": {
+            "observation_report": str(DEFAULT_UX_OBSERVATION_REPORT),
+            "owner_intake_packet": str(DEFAULT_UX_OBSERVATION_INTAKE_PACKET),
+            "observation_source": str(
+                ux_observation_report.get("observation_path")
+                or ux_observation_intake_packet.get("observation_path")
+                or ""
+            ),
+            "template": str(ux_observation_intake_packet.get("template_path") or ""),
+        },
+        "validation_commands": validation_commands,
+        "claim_boundary": str(
+            ux_observation_report.get("claim_boundary")
+            or ux_observation_intake_packet.get("claim_boundary")
+            or ""
+        ),
+    }
+
+
 def _non_expert_release_briefing(
     *,
     release_decision_kpis: dict[str, Any],
@@ -997,6 +1092,8 @@ def _non_expert_release_briefing(
     roadmap_rows: list[dict[str, Any]],
     operator_evidence_handoff_queue: list[dict[str, Any]],
     primary_bottleneck_row: dict[str, Any],
+    ux_observation_report: dict[str, Any],
+    ux_observation_intake_packet: dict[str, Any],
 ) -> dict[str, Any]:
     release_area_blockers = [
         str(row) for row in _as_list(pm_report.get("release_area_blockers")) if str(row)
@@ -1004,6 +1101,11 @@ def _non_expert_release_briefing(
     human_ux_blockers = [
         blocker for blocker in release_area_blockers if blocker.startswith("ux::")
     ]
+    human_ux_release_gate = _human_ux_release_gate_briefing(
+        human_ux_blockers=human_ux_blockers,
+        ux_observation_report=ux_observation_report,
+        ux_observation_intake_packet=ux_observation_intake_packet,
+    )
     blocked_science_or_beta_rows = [
         row
         for row in roadmap_rows
@@ -1033,6 +1135,7 @@ def _non_expert_release_briefing(
             if human_ux_blockers
             else ""
         ),
+        "human_ux_release_gate": human_ux_release_gate,
         "primary_roadmap_bottleneck": str(primary_bottleneck_row.get("bottleneck") or ""),
         "primary_roadmap_phase_id": str(primary_bottleneck_row.get("phase_id") or ""),
         "blocked_science_or_beta_phase_count": len(blocked_science_or_beta_rows),
@@ -1079,6 +1182,10 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
     pocketmd_delivery_handoff = _load_json(repo_root, DEFAULT_POCKETMD_DELIVERY_HANDOFF)
     pocketmd_operator_intake = _load_json(repo_root, DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET)
     product_capabilities = _load_json(repo_root, DEFAULT_PRODUCT_CAPABILITIES)
+    ux_observation_report = _load_json(repo_root, DEFAULT_UX_OBSERVATION_REPORT)
+    ux_observation_intake_packet = _load_json(
+        repo_root, DEFAULT_UX_OBSERVATION_INTAKE_PACKET
+    )
 
     decision = _as_dict(pm_report.get("release_decision"))
     release_decision_kpis = {
@@ -1189,6 +1296,8 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         roadmap_rows=roadmap_rows,
         operator_evidence_handoff_queue=operator_evidence_handoff_queue,
         primary_bottleneck_row=primary_bottleneck_row,
+        ux_observation_report=ux_observation_report,
+        ux_observation_intake_packet=ux_observation_intake_packet,
     )
 
     return {

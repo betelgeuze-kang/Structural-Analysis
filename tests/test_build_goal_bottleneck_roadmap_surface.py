@@ -104,6 +104,57 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "attach a passing human new-user observation record before claiming "
         "the UX release-area gate"
     )
+    human_ux = briefing["human_ux_release_gate"]
+    assert human_ux["status"] == "blocked"
+    assert human_ux["release_area_blockers"] == briefing["human_ux_blockers"]
+    assert human_ux["human_observation_contract_pass"] is False
+    assert human_ux["human_observation_reason_code"] == (
+        "ERR_UX_NEW_USER_OBSERVATION_REQUIRED"
+    )
+    assert human_ux["human_observation_blocker_count"] == 11
+    assert human_ux["owner_intake_contract_pass"] is False
+    assert human_ux["owner_intake_reason_code"] == (
+        "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED"
+    )
+    assert human_ux["owner_intake_current_blocker_count"] == 11
+    assert human_ux["missing_field_count"] == 13
+    assert human_ux["workflow_step_pass_count"] == 0
+    assert human_ux["required_workflow_step_count"] == 5
+    assert human_ux["missing_workflow_steps"] == [
+        "import",
+        "model_health",
+        "analysis_setup",
+        "run_monitor",
+        "compare_report",
+    ]
+    assert human_ux["max_completion_minutes"] == 30
+    assert "Automated rehearsal or templates do not close it" in human_ux[
+        "plain_status"
+    ]
+    assert human_ux["evidence_artifacts"] == {
+        "observation_report": (
+            "implementation/phase1/release_evidence/productization/"
+            "ux_new_user_observation_report.json"
+        ),
+        "owner_intake_packet": (
+            "implementation/phase1/release_evidence/productization/"
+            "ux_new_user_observation_intake_packet.json"
+        ),
+        "observation_source": (
+            "implementation/phase1/release_evidence/productization/"
+            "ux_new_user_observation.json"
+        ),
+        "template": "docs/templates/ux_new_user_observation.template.json",
+    }
+    assert any(
+        "build_ux_new_user_observation_report.py" in command
+        for command in human_ux["validation_commands"]
+    )
+    assert human_ux["claim_boundary"] == (
+        "This report validates a human new-user observation record. Automated "
+        "browser rehearsal evidence does not satisfy the PM UX release-area "
+        "gate by itself."
+    )
     assert briefing["primary_roadmap_bottleneck"] == (
         "public_benchmark_source_of_truth_not_ready"
     )
