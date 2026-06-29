@@ -1,9 +1,11 @@
 {
-  "blockers": [],
+  "blockers": [
+    "remote_mutation_approval_required"
+  ],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
-    "feature_synced_to_head": true,
+    "feature_synced_to_head": false,
     "main_fast_forward_possible": true,
     "main_synced_to_head": true,
     "remote_fetch_ok": true,
@@ -16,35 +18,44 @@
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
   },
-  "contract_pass": true,
-  "generated_at": "2026-06-29T23:22:26.798196+00:00",
-  "pending_remote_updates": [],
+  "contract_pass": false,
+  "generated_at": "2026-06-29T23:34:47.281395+00:00",
+  "pending_remote_updates": [
+    {
+      "action": "push current HEAD to feature",
+      "command": "git push origin main:codex/create-architecture-definition-document-for-hybrid-ai",
+      "rollback": "restore feature to previous remote SHA c4149c5ac6722d0823fb9bdffa40c6f7dc8686de with an approved restore action",
+      "target": "origin/codex/create-architecture-definition-document-for-hybrid-ai"
+    }
+  ],
   "preflight_pass": true,
   "r4_disclosure": {
-    "action": "no remote mutation required",
-    "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
-    "risk": "No remote mutation remains.",
-    "rollback": "no rollback needed",
-    "target": [],
+    "action": "push current HEAD to feature",
+    "impact": "GitHub pending refs become externally visible at the local development state.",
+    "risk": "External reviewers of the feature branch immediately see the current commits.",
+    "rollback": "restore feature to previous remote SHA c4149c5ac6722d0823fb9bdffa40c6f7dc8686de with an approved restore action",
+    "target": [
+      "origin/codex/create-architecture-definition-document-for-hybrid-ai"
+    ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
-  "reason_code": "PASS",
+  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
   "remote_fetch_attempted": true,
   "remote_fetch_ok": true,
   "remote_mutation_approved": false,
-  "remote_sync_needed": false,
+  "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "main",
-    "feature_ahead_count": 0,
+    "feature_ahead_count": 2,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "c4149c5ac6722d0823fb9bdffa40c6f7dc8686de",
+    "local_head_sha": "fe2ddbefa30d49345f9dc3b835a16528663ee73e",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
     "remote_feature_sha": "c4149c5ac6722d0823fb9bdffa40c6f7dc8686de",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "c4149c5ac6722d0823fb9bdffa40c6f7dc8686de",
+    "remote_main_sha": "fe2ddbefa30d49345f9dc3b835a16528663ee73e",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -60,5 +71,5 @@
     },
     "worktree_status_short": ""
   },
-  "status": "synced"
+  "status": "approval_required"
 }
