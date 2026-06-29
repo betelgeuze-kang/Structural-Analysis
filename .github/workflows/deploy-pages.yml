@@ -3,10 +3,10 @@ name: Deploy Workbench (GitHub Pages)
 # Builds the workbench (with the read-only evidence bundle and the structure
 # viewer) and deploys to GitHub Pages under the repository subpath.
 #
-# Runner policy: GitHub Pages deployment generally requires GitHub-hosted
-# runners. This is gated by the same decision as Frontend Web CI — set
-# STRUCTURAL_FRONTEND_RUNNER_LABELS=["ubuntu-latest"] (and enable Pages) before
-# this can publish. Until then it can be run manually for build verification.
+# Runner policy: default to the repository self-hosted runner label set. If
+# Pages deployment must use a different runner class, set
+# STRUCTURAL_FRONTEND_RUNNER_LABELS explicitly and keep the PM runner-policy
+# evidence in sync before publishing.
 
 on:
   workflow_dispatch: {}
@@ -27,7 +27,7 @@ env:
 
 jobs:
   build:
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,7 +59,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

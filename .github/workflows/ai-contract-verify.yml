@@ -1,8 +1,8 @@
 name: AI Contract Verify
 
 # Lightweight AI-orchestration verification, separated from the heavy solver CI.
-# Public repositories default to GitHub-hosted Ubuntu; a repository/org variable
-# can still override the label set for a dedicated runner.
+# Defaults to the repository self-hosted runner label set; a repository/org
+# variable can still override the label set for a dedicated AI runner.
 
 on:
   pull_request:
@@ -44,7 +44,7 @@ env:
 
 jobs:
   ai-contract:
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_AI_RUNNER_LABELS || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_AI_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

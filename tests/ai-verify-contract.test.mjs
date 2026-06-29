@@ -34,12 +34,14 @@ test('preflight invokes AI verify through bash instead of executable-bit depende
   assert.doesNotMatch(source, /\.\/scripts\/ai-verify\.sh/)
 })
 
-test('dedicated workflow uses hosted-compatible runner and retains its JSON receipt', () => {
+test('dedicated workflow uses policy-controlled self-hosted runner and retains its JSON receipt', () => {
   const workflow = read('.github/workflows/ai-contract-verify.yml')
   assert.match(workflow, /name: AI Contract Verify/)
   assert.match(workflow, /npm run ai:verify:contract/)
   assert.match(workflow, /--json-out/)
   assert.match(workflow, /actions\/upload-artifact@v4/)
   assert.match(workflow, /STRUCTURAL_AI_RUNNER_LABELS/)
-  assert.match(workflow, /ubuntu-latest/)
+  assert.match(workflow, /STRUCTURAL_ACTIONS_RUNNER_LABELS/)
+  assert.match(workflow, /self-hosted/)
+  assert.doesNotMatch(workflow, /ubuntu-latest/)
 })
