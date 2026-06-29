@@ -15,9 +15,22 @@
     "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
     "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
   },
-  "generated_at": "2026-06-29T15:41:16.383365+00:00",
+  "generated_at": "2026-06-29T15:53:33.807594+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:542edf56c2f0be90fad3226adc2d328c0ede8ac01493d6dbeb048dfe4be6d707"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:d7e7b0811beeec45536828f921961997a673fd8f64a1a5bf106df8be0e1751a9",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:89b57eff81e97beb0018ecce3ce5e433d50b909c3bef6267688259a6d62b7b2b"
+  },
+  "materializer": {
+    "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+    "input_contract": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+    "outputs": {
+      "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+      "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+    },
+    "required_intake_key": "cases",
+    "schema_version": "pocketmd-lite-topk-survival-materialization.v1",
+    "script": "scripts/materialize_pocketmd_lite_topk_survival_report.py",
+    "status": "ready_for_operator_intake"
   },
   "operator_next_actions": [
     "attach_top_k_candidate_refinement_rows",
@@ -30,6 +43,6 @@
   "reuse_policy": "pocketmd_lite_delivery_handoff_generated_from_goal_contract",
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-delivery-handoff.v1",
-  "source_commit_sha": "bc1c088666829ac112be83fb19cf2e1fbb082006",
+  "source_commit_sha": "0461fa0234fa22385124793e27509f1a2b7dcf1c",
   "status": "handoff_ready_operator_evidence_required"
 }
