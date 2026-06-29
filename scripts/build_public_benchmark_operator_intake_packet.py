@@ -376,6 +376,7 @@ def build_public_benchmark_operator_intake_packet(
                 "local_source_file_fields": [str(row) for row in LOCAL_SOURCE_FILE_FIELDS],
                 "ligand_atom_order_contract_fields": ["atom_count", "atom_ids"],
                 "symmetry_permutation_contract_fields": ["permutations"],
+                "materialized_manifest_fields": ["source_file_checksums"],
                 "receipt_fields": ["source_license_or_accession", "source_checksum"],
             },
             materialization_steps=["materialize_subset_manifest"],

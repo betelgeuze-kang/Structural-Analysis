@@ -86,9 +86,12 @@ def test_materializer_blocks_missing_local_pose_prediction(tmp_path: Path) -> No
     assert manifest["public_benchmark_ready"] is False
     assert manifest["materialization_report"]["source_file_missing_count"] == 1
     assert manifest["blockers"] == [
+        "case_row_0:source_file_checksums_incomplete",
         "case_row_0:predicted_ligand_path_or_docking_run_id_local_file_missing"
     ]
-    assert manifest["case_rows"][0]["materialization_blockers"] == manifest["blockers"]
+    assert manifest["case_rows"][0]["materialization_blockers"] == [
+        "case_row_0:predicted_ligand_path_or_docking_run_id_local_file_missing"
+    ]
 
 
 def test_materializer_blocks_missing_ligand_atom_ids(tmp_path: Path) -> None:
@@ -107,6 +110,22 @@ def test_materializer_blocks_missing_ligand_atom_ids(tmp_path: Path) -> None:
     assert manifest["blockers"] == ["case_row_0:atom_ids_missing"]
     assert manifest["materialization_report"]["validation_blocker_count"] == 1
     assert manifest["materialization_report"]["materialization_blocker_count"] == 0
+
+
+def test_materializer_blocks_invalid_declared_source_checksum(tmp_path: Path) -> None:
+    case = _case_descriptor(tmp_path, "case_a")
+    case["source_checksum"] = "sha256:not-a-real-digest"
+
+    manifest = module.materialize_subset_manifest(
+        {"target_subset_case_count": 1, "cases": [case]},
+        repo_root=tmp_path,
+    )
+
+    assert manifest["public_benchmark_ready"] is False
+    assert manifest["blockers"] == ["case_row_0:source_checksum_invalid"]
+    assert manifest["materialization_report"]["validation_blocker_count"] == 1
+    assert manifest["materialization_report"]["materialization_blocker_count"] == 0
+    assert len(manifest["case_rows"][0]["source_file_checksums"]) == 3
 
 
 def test_materializer_cli_writes_manifest_and_report(tmp_path: Path) -> None:

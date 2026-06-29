@@ -17,6 +17,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from validate_public_benchmark_subset_manifest import (  # noqa: E402
+    LOCAL_SOURCE_FILE_FIELDS,
     REQUIRED_CASE_FIELDS,
     validate_subset_manifest,
 )
@@ -25,11 +26,6 @@ from validate_public_benchmark_subset_manifest import (  # noqa: E402
 SCHEMA_VERSION = "public-benchmark-subset-materialization.v1"
 MANIFEST_SCHEMA_VERSION = "public-benchmark-subset-manifest.v1"
 DEFAULT_TARGET_SUBSET_CASE_COUNT = 12
-LOCAL_SOURCE_FILE_FIELDS = (
-    "protein_structure_path",
-    "reference_ligand_path",
-    "predicted_ligand_path_or_docking_run_id",
-)
 
 
 def _json_text(payload: dict[str, Any]) -> str:

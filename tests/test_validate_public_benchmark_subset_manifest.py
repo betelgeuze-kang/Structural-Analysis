@@ -20,6 +20,7 @@ spec.loader.exec_module(module)
 
 
 def _complete_row(case_id: str) -> dict[str, object]:
+    source_checksum = "sha256:" + "a" * 64
     return {
         "case_id": case_id,
         "source_family": "CASF/PDBBind",
@@ -35,7 +36,12 @@ def _complete_row(case_id: str) -> dict[str, object]:
             "permutations": [[0, 1, 2], [0, 2, 1]],
         },
         "source_license_or_accession": "operator-attached-accession",
-        "source_checksum": "sha256:abc123",
+        "source_checksum": source_checksum,
+        "source_file_checksums": {
+            f"benchmarks/{case_id}/protein.pdb": "sha256:" + "b" * 64,
+            f"benchmarks/{case_id}/ligand_ref.sdf": "sha256:" + "c" * 64,
+            f"benchmarks/{case_id}/pose_pred.sdf": "sha256:" + "d" * 64,
+        },
     }
 
 
@@ -101,6 +107,36 @@ def test_validate_manifest_rejects_duplicate_ligand_atom_ids() -> None:
 
     assert result["public_benchmark_ready"] is False
     assert result["blockers"] == ["case_row_0:atom_ids_not_unique"]
+
+
+def test_validate_manifest_rejects_invalid_source_checksum() -> None:
+    row = _complete_row("case_a")
+    row["source_checksum"] = "sha256:not-a-real-digest"
+
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "case_rows": [row],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert result["blockers"] == ["case_row_0:source_checksum_invalid"]
+
+
+def test_validate_manifest_requires_source_file_checksums() -> None:
+    row = _complete_row("case_a")
+    row["source_file_checksums"] = {}
+
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "case_rows": [row],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert result["blockers"] == ["case_row_0:source_file_checksums_missing"]
 
 
 def test_validate_manifest_cli_writes_result(tmp_path: Path) -> None:

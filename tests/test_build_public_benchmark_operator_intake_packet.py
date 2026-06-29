@@ -159,6 +159,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
         "symmetry_permutation_contract_fields"
     ] == ["permutations"]
+    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
+        "materialized_manifest_fields"
+    ] == ["source_file_checksums"]
     assert gate_plan["pose_coordinate_intake"]["unblocks_tier_beta_criteria"] == [
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",

@@ -79,6 +79,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             ],
             "ligand_atom_order_contract_fields": ["atom_count", "atom_ids"],
             "symmetry_permutation_contract_fields": ["permutations"],
+            "materialized_manifest_fields": ["source_file_checksums"],
             "receipt_fields": ["source_license_or_accession", "source_checksum"],
         },
         "materialization_command": (

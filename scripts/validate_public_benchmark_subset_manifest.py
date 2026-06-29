@@ -6,10 +6,16 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 
 SCHEMA_VERSION = "public-benchmark-subset-manifest-validation.v1"
+LOCAL_SOURCE_FILE_FIELDS = (
+    "protein_structure_path",
+    "reference_ligand_path",
+    "predicted_ligand_path_or_docking_run_id",
+)
 REQUIRED_CASE_FIELDS = (
     "case_id",
     "source_family",
@@ -32,12 +38,34 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _is_sha256_ref(value: Any) -> bool:
+    return bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(value or "").strip()))
+
+
 def _validate_case_row(row: dict[str, Any], *, index: int) -> list[str]:
     blockers: list[str] = []
     for field in REQUIRED_CASE_FIELDS:
         value = row.get(field)
         if value in (None, "", [], {}):
             blockers.append(f"case_row_{index}:{field}_missing")
+    source_checksum = str(row.get("source_checksum") or "").strip()
+    if source_checksum and not _is_sha256_ref(source_checksum):
+        blockers.append(f"case_row_{index}:source_checksum_invalid")
+    source_file_checksums = row.get("source_file_checksums")
+    if not isinstance(source_file_checksums, dict) or not source_file_checksums:
+        blockers.append(f"case_row_{index}:source_file_checksums_missing")
+    else:
+        if len(source_file_checksums) < len(LOCAL_SOURCE_FILE_FIELDS):
+            blockers.append(f"case_row_{index}:source_file_checksums_incomplete")
+        for checksum_index, (path_key, checksum) in enumerate(source_file_checksums.items()):
+            if not str(path_key).strip():
+                blockers.append(
+                    f"case_row_{index}:source_file_checksum_{checksum_index}_path_missing"
+                )
+            if not _is_sha256_ref(checksum):
+                blockers.append(
+                    f"case_row_{index}:source_file_checksum_{checksum_index}_invalid"
+                )
     if row.get("source_family") not in {"CASF/PDBBind"}:
         blockers.append(f"case_row_{index}:unsupported_source_family")
     atom_order = row.get("ligand_atom_order_contract")
