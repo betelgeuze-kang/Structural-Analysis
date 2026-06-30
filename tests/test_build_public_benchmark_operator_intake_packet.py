@@ -125,6 +125,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "materialize_public_benchmark_subset_manifest.py"
         in subset["materialization_command"]
     )
+    assert subset["validation_command"] == subset["manifest_contract"][
+        "validation_command"
+    ]
 
     pose = slots["pose_coordinate_intake"]
     assert pose["depends_on"] == [
@@ -135,6 +138,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "materialize_public_benchmark_pose_validity_input.py"
         in pose["materialization_command"]
     )
+    assert "validate_public_benchmark_pose_validity.py" in pose["validation_command"]
 
     enrichment = slots["dud_e_lit_pcba_enrichment_intake"]
     assert enrichment["required_fields"] == [
@@ -148,6 +152,11 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     ]
     assert packet["supported_enrichment_families"] == ["DUD-E", "LIT-PCBA"]
     assert packet["required_molecule_fields"] == ["molecule_id", "is_active", "score"]
+    assert (
+        "materialize_public_benchmark_enrichment_scorecard.py"
+        in enrichment["validation_command"]
+    )
+    assert enrichment["validation_command"] == enrichment["materialization_command"]
 
     comparison = slots["vina_gnina_comparison_intake"]
     assert comparison["depends_on"] == [
@@ -168,6 +177,11 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         in comparison["materialization_command"]
     )
+    assert (
+        "materialize_public_benchmark_vina_gnina_comparison_adapter.py"
+        in comparison["validation_command"]
+    )
+    assert comparison["validation_command"] == comparison["materialization_command"]
     assert packet["supported_comparison_engines"] == ["vina", "gnina"]
     assert "symmetry_aware_rmsd_angstrom" in packet["required_engine_run_fields"]
     assert packet["gate_unblock_plan_count"] == 4
@@ -213,6 +227,19 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert gate_plan["vina_gnina_comparison_intake"]["minimum_evidence"][
         "required_engines"
     ] == ["vina", "gnina"]
+
+    gap_register = {
+        row["slot_id"]: row for row in packet["operator_evidence_gap_register"]
+    }
+    assert gap_register["dud_e_lit_pcba_enrichment_intake"][
+        "validation_command"
+    ] == enrichment["validation_command"]
+    assert gap_register["vina_gnina_comparison_intake"][
+        "validation_command"
+    ] == comparison["validation_command"]
+    assert gap_register["vina_gnina_comparison_intake"]["depends_on"] == comparison[
+        "depends_on"
+    ]
 
 
 def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ordered() -> (

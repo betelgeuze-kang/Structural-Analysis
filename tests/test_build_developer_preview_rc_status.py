@@ -671,10 +671,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "working_tree_clean=true and local_dirty_inputs=[]" in parity_handoff[
         "comparison_requirements"
     ]
-    assert any(
-        blocker.startswith("required_path_has_uncommitted_changes:")
-        for blocker in parity_handoff["clean_clone_blockers_tracked_elsewhere"]
-    )
+    assert "stable_artifact_checksum_mismatch" in parity_handoff[
+        "clean_clone_blockers_tracked_elsewhere"
+    ]
     assert "does not prove parity" in parity_handoff["claim_boundary"]
     clean_handoff = payload["known_limitations"]["clean_checkout_reproduction_handoff"]
     assert clean_handoff["clean_checkout_status_receipt"].endswith(
@@ -715,12 +714,13 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert clean_handoff["local_clean_checkout"]["executed"] is True
     assert clean_handoff["git_clean_clone"]["status"] == "blocked"
     assert clean_handoff["git_clean_clone"]["contract_pass"] is False
-    assert clean_handoff["git_clean_clone"]["executed"] is False
+    assert clean_handoff["git_clean_clone"]["executed"] is True
     git_clean_clone = clean_handoff["git_clean_clone"]
     assert git_clean_clone["required_input_count"] >= git_clean_clone["blocker_count"]
     assert sum(git_clean_clone["blocker_counts"].values()) == git_clean_clone["blocker_count"]
-    assert git_clean_clone["blocker_counts"]["required_path_has_uncommitted_changes"] > 0
-    assert git_clean_clone["blocker_counts"]["required_path_not_tracked"] > 0
+    assert git_clean_clone["blocker_counts"] == {
+        "stable_artifact_checksum_mismatch": 1
+    }
     cleanup = clean_handoff["release_control_cleanup"]
     assert cleanup["status"] == "blocked"
     assert cleanup["contract_pass"] is False
@@ -735,13 +735,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         for command in cleanup["next_verification_commands"]
     )
     assert "does not commit" in cleanup["claim_boundary"]
-    assert git_clean_clone["blocker_count"] == 14
-    assert git_clean_clone["blocker_counts"]["required_path_not_tracked"] == 1
-    assert (
-        "required_path_not_tracked:"
-        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
-        in git_clean_clone["blockers"]
-    )
+    assert git_clean_clone["blocker_count"] == 1
+    assert git_clean_clone["blocker_counts"]["stable_artifact_checksum_mismatch"] == 1
+    assert "stable_artifact_checksum_mismatch" in git_clean_clone["blockers"]
     assert any(
         "run_phase3_benchmark_factory_git_clean_clone_reproduction.py" in command
         for command in clean_handoff["required_commands"]

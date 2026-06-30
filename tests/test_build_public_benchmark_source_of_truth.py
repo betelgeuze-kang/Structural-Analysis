@@ -384,9 +384,25 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert evidence_gap_register["dud_e_lit_pcba_enrichment_intake"][
         "minimum_evidence"
     ]["supported_families"] == ["DUD-E", "LIT-PCBA"]
+    assert (
+        "materialize_public_benchmark_enrichment_scorecard.py"
+        in evidence_gap_register["dud_e_lit_pcba_enrichment_intake"][
+            "validation_command"
+        ]
+    )
     assert evidence_gap_register["vina_gnina_comparison_intake"][
         "materialization_steps"
     ] == ["materialize_vina_gnina_comparison_adapter"]
+    assert (
+        "materialize_public_benchmark_vina_gnina_comparison_adapter.py"
+        in evidence_gap_register["vina_gnina_comparison_intake"][
+            "validation_command"
+        ]
+    )
+    assert evidence_gap_register["vina_gnina_comparison_intake"]["depends_on"] == [
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+    ]
     assert (
         gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"]["case_count"] == 12
     )

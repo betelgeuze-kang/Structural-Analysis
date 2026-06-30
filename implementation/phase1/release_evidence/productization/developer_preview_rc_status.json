@@ -600,16 +600,16 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T00:11:51.006349+00:00",
+  "generated_at": "2026-06-30T00:17:58.029579+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:9e0c2207a9eeafa68f9b4dbb4876532fbaa57566509d40bd6b54b74a41c25d26",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:031d4af6d237ef1abf085264e3081756e4126719325e352200cae262bc7b535b",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:57c9c896dc72c55d500c5b7d4beadb04ddb81b6ec54ad9a4712ec6d562425176",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:5766e5cccd3d52cd5ff497cdfa82b255b2a754586a702ae001b3717f87cc1105",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:76915d86f3c0663c9930bb5a4130c044ee08332f6d294832e7aa9252f470bb60",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:be8d8cfa05885d432b63ecd23c7959e913c1bad1664d453ad2b11e0cbb8503d4",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:a810fc034a8bf6a6a1295b94cb2eac08e67678d47dcb11dde274c07375534541",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:006e42f030fe61e4f9878b2417413c68dbebe4a9388d899e90669b7d60a44813",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:75e42cbb9caa2e9541284f8308755ea7109dfd029097251170730ce52d0adbc1",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:776a1f3e08c92208689d997926c1675aa8ff9393a12ab56074287b89ec52df83",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:6a5e6ddce8ff4e178e7981a04bef9081fa56d4e4eb24d0aa32779d6cd27e6649",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": "sha256:fb612e88bc196e0c323190da8a0d29f409286ff1c8748257e47ef5eceee0cf65",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:d09f06b578c345217d22aad3cd67353232a8593e7274718c268c75c55b4c0abb",
@@ -952,30 +952,16 @@
       "clean_checkout_status_contract_pass": false,
       "clean_checkout_status_receipt": "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json",
       "git_clean_clone": {
-        "blocker_count": 14,
+        "blocker_count": 1,
         "blocker_counts": {
-          "required_path_has_uncommitted_changes": 13,
-          "required_path_not_tracked": 1
+          "stable_artifact_checksum_mismatch": 1
         },
         "blockers": [
-          "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+          "stable_artifact_checksum_mismatch"
         ],
         "claim_boundary": "This receipt is the authoritative Phase 3 seed git-clean-clone reproduction gate. When blocked, it proves the exact tracked/dirty-input reason a real clone cannot yet replay the seed benchmark artifacts from Git HEAD. When passing, it proves only a local git clone replay of generated analytic-small and element-patch seed artifacts. It is not Linux/Windows parity and does not prove Developer Preview Release Candidate closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, and is not full Phase 3 closure.",
         "contract_pass": false,
-        "executed": false,
+        "executed": true,
         "required_input_count": 63,
         "status": "blocked"
       },
@@ -1770,14 +1756,7 @@
       ],
       "claim_boundary": "This receipt defines and checks the Linux/Windows platform replay evidence required for the Developer Preview RC parity gate. It does not prove parity until independent passing Linux and Windows receipts are attached, and it does not replace the separate git clean-clone reproduction gate.",
       "clean_clone_blockers_tracked_elsewhere": [
-        "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json"
+        "stable_artifact_checksum_mismatch"
       ],
       "comparison_requirements": [
         "same source_commit_sha or explicit commit mapping",
@@ -2665,6 +2644,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "898430df078e2eae38b455d2a6ead7ad79da959b",
+  "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
   "status": "blocked"
 }

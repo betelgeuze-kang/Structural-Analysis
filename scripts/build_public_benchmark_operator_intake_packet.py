@@ -354,6 +354,13 @@ def _operator_evidence_gap_register(
                 "materialization_steps": [
                     str(row) for row in _as_list(slot.get("materialization_steps"))
                 ],
+                "depends_on": [
+                    str(path) for path in _as_list(slot.get("depends_on")) if str(path)
+                ],
+                "materialization_command": str(
+                    slot.get("materialization_command") or ""
+                ),
+                "validation_command": str(slot.get("validation_command") or ""),
             }
         )
     return rows
@@ -528,6 +535,7 @@ def build_public_benchmark_operator_intake_packet(
                 "include scored_molecules rows with molecule_id, is_active, and score",
                 "run the enrichment materializer with --fail-blocked",
             ],
+            validation_command=enrichment_materialization,
             materialization_command=enrichment_materialization,
             unblocks_tier_beta_criteria=[
                 "dud_e_lit_pcba_enrichment_ready",
@@ -560,6 +568,7 @@ def build_public_benchmark_operator_intake_packet(
                 "preserve docking run receipts, source accession or license references, and checksums",
                 "run the Vina/GNINA comparison materializer with --fail-blocked",
             ],
+            validation_command=vina_gnina_materialization,
             materialization_command=vina_gnina_materialization,
             unblocks_tier_beta_criteria=[
                 "vina_gnina_comparison_ready",
@@ -745,12 +754,13 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `source_of_truth_blocker_count`: `{len(payload['source_of_truth_blockers'])}`",
         f"- `claim_boundary`: {payload['claim_boundary']}",
         "",
-        "| Slot | Status | Intake Artifact |",
-        "|---|---|---|",
+        "| Slot | Status | Intake Artifact | Validation Command |",
+        "|---|---|---|---|",
     ]
     for slot in payload["input_slots"]:
         lines.append(
-            f"| `{slot['slot_id']}` | `{slot['status']}` | `{slot['intake_artifact']}` |"
+            f"| `{slot['slot_id']}` | `{slot['status']}` | "
+            f"`{slot['intake_artifact']}` | `{slot['validation_command']}` |"
         )
     lines.extend(
         ["", "## Gate Unblock Plan", "", "| Slot | Criteria | Minimum Evidence |"]
