@@ -66,7 +66,6 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
 from build_public_benchmark_operator_intake_packet import (  # noqa: E402
     DEFAULT_OPERATOR_TEMPLATE_DIR,
     DEFAULT_OUT as DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
-    SCHEMA_VERSION as OPERATOR_INTAKE_PACKET_SCHEMA_VERSION,
     build_public_benchmark_operator_intake_packet,
     write_public_benchmark_operator_template_payloads,
 )
@@ -1500,9 +1499,6 @@ def build_source_of_truth(
     operator_handoff_summary = {
         "route": PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE,
         "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
-        "operator_template_artifacts": dict(
-            operator_intake_packet.get("operator_template_artifacts") or {}
-        ),
         "first_blocker": blockers[0] if blockers else "",
         "first_blocked_target": first_blocked_target,
         "manifest_contract_id": first_manifest_contract_id,
