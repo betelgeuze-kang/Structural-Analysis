@@ -2779,12 +2779,12 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-30T03:35:35.271927+00:00",
+  "generated_at": "2026-06-30T03:37:48.380313+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
-    "README.md": "sha256:7483261c8121ce25f76c5668ebb5f1ea89327c5a0228b23baffca5a2cf20c8a5",
-    "docs/commercialization-gap-current-state.md": "sha256:26cc57e8aedce7933aee34c26a406a3024b9ccc46f86673f83ba2948f25f57fd",
+    "README.md": "sha256:aaa9a07ea855f52baca86c8cc8dd707a7396b9fb12b35a07674c9f59ef522473",
+    "docs/commercialization-gap-current-state.md": "sha256:d7433166fb9f1cd121263dcde47ed29b683ac7249bce0b2e297513b75580c22c",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:5bf4e1daf4d150f5f71683f115761eb8ab038a51553d380ecd5676f25002d384",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:b4f497bb36fa1398c1603815b78a4dbe17d0aad3533280db30d3c0c5597d1b4a",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:f856fab9cfa26bc44124641c9bd601ffdcf14de66cd51d40615063769768de1c",
@@ -3416,7 +3416,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "c1c18470e357c19bb5d47bb386153ccb1dc51d2c",
+  "source_commit_sha": "c9a74f83a398ebbdfe413fefc2ea7cb40ae51afc",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3506,6 +3506,8 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
           "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
@@ -3526,6 +3528,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/support_bundle_manifest.json"
@@ -3542,6 +3545,8 @@
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -3575,6 +3580,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -3594,6 +3600,8 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -3627,6 +3635,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -3646,6 +3655,8 @@
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -3679,6 +3690,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -3698,6 +3710,8 @@
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -3731,6 +3745,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -3750,6 +3765,8 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
           "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
@@ -3770,6 +3787,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/support_bundle_manifest.json"
@@ -3786,6 +3804,8 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
           "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
@@ -3806,6 +3826,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/support_bundle_manifest.json"
@@ -3822,6 +3843,8 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
           "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json",
@@ -3853,6 +3876,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -3870,6 +3894,8 @@
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -3903,6 +3929,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -3922,6 +3949,8 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -3955,6 +3984,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -3974,6 +4004,8 @@
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -4007,6 +4039,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -4026,6 +4059,8 @@
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -4059,6 +4094,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -4078,6 +4114,8 @@
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
           "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
@@ -4098,6 +4136,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/support_bundle_manifest.json"
@@ -4114,6 +4153,8 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
           "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
@@ -4134,6 +4175,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/support_bundle_manifest.json"
@@ -4150,6 +4192,8 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -4183,6 +4227,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -4202,6 +4247,8 @@
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
@@ -4235,6 +4282,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -4254,6 +4302,8 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
           "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
@@ -4274,6 +4324,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/support_bundle_manifest.json"
@@ -4290,6 +4341,8 @@
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
           "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json",
@@ -4321,6 +4374,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
@@ -4338,6 +4392,8 @@
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
           "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
           "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json",
@@ -4369,6 +4425,7 @@
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
