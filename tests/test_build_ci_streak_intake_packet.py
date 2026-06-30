@@ -221,6 +221,110 @@ def test_ci_streak_intake_packet_blocks_closed_manifest_without_source_evidence(
     assert payload["summary"]["lane_pass_count"] == 0
 
 
+def test_ci_streak_intake_packet_preserves_observed_partial_github_streak(tmp_path: Path) -> None:
+    now = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    manifest = _write_json(
+        tmp_path / "ci_consecutive_pass_manifest.json",
+        {
+            "contract_pass": False,
+            "threshold": 30,
+            "lanes": {
+                "pr": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 12,
+                    "local_consecutive_pass_count": 2,
+                    "github_actions_consecutive_pass_count": 12,
+                    "missing_consecutive_pass_count": 18,
+                    "streak_source": "github_actions",
+                    "github_actions_workflow_registered": True,
+                    "github_actions_queried_run_count": 500,
+                    "github_actions_filtered_run_count": 70,
+                    "pull_request_run_source_present": True,
+                    "github_actions_ignored_event_names": ["push"],
+                    "owner_action": "Collect 18 additional consecutive successful PR CI run(s).",
+                    "claim_boundary": "PR release streak credit requires tracked PR CI evidence.",
+                    "blockers": ["pr_ci_30_consecutive_pass_evidence_missing"],
+                },
+                "nightly": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "local_consecutive_pass_count": 230,
+                    "github_actions_consecutive_pass_count": 0,
+                    "missing_consecutive_pass_count": 30,
+                    "streak_source": "missing_tracked_ci_evidence",
+                    "github_actions_workflow_registered": True,
+                    "github_actions_queried_run_count": 11,
+                    "github_actions_filtered_run_count": 11,
+                    "owner_action": "Collect 30 additional consecutive successful nightly CI run(s).",
+                    "claim_boundary": "Nightly release streak credit requires tracked nightly CI evidence.",
+                    "blockers": ["nightly_ci_30_consecutive_pass_evidence_missing"],
+                },
+            },
+        },
+    )
+    github_actions = _write_json(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "generated_at": now.isoformat(),
+            "threshold": 30,
+            "workflow_discovery": {"query_error": ""},
+            "lanes": {
+                "pr": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 12,
+                    "run_count": 70,
+                    "queried_run_count": 500,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_workflow_trigger_events": ["pull_request", "push"],
+                    "local_required_trigger_present": True,
+                    "local_pull_request_trigger_present": True,
+                    "query_error": "",
+                    "pull_request_run_source_present": True,
+                },
+                "nightly": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "run_count": 11,
+                    "queried_run_count": 11,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_workflow_trigger_events": ["schedule", "workflow_dispatch"],
+                    "local_required_trigger_present": True,
+                    "local_schedule_trigger_present": True,
+                    "local_workflow_dispatch_trigger_present": True,
+                    "query_error": "",
+                },
+            },
+        },
+    )
+
+    payload = build_ci_streak_intake_packet.build_packet(
+        manifest_path=manifest,
+        github_actions_evidence_path=github_actions,
+        now=now,
+    )
+    rows = {row["lane"]: row for row in payload["lane_rows"]}
+    markdown = build_ci_streak_intake_packet._markdown(payload)
+
+    assert payload["contract_pass"] is False
+    assert rows["pr"]["threshold_pass"] is False
+    assert rows["pr"]["consecutive_pass_count"] == 12
+    assert rows["pr"]["github_actions_consecutive_pass_count"] == 12
+    assert rows["pr"]["source_observation_usable"] is True
+    assert rows["pr"]["missing_consecutive_pass_count"] == 18
+    assert payload["summary"]["pr_missing_consecutive_pass_count"] == 18
+    assert "| `pr` | `12/30` | `18` |" in markdown
+    assert "Observed Streak" in markdown
+
+
 def test_ci_streak_intake_packet_passes_closed_manifest_with_valid_source_evidence(tmp_path: Path) -> None:
     now = datetime(2026, 6, 16, tzinfo=timezone.utc)
     manifest = _write_json(
