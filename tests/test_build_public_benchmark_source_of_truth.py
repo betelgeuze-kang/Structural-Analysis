@@ -593,6 +593,7 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     vina_gnina_out = tmp_path / "public_benchmark_vina_gnina_comparison_adapter.json"
     operator_out = tmp_path / "public_benchmark_operator_intake_packet.json"
     operator_md_out = tmp_path / "public_benchmark_operator_intake_packet.md"
+    operator_template_dir = tmp_path / "templates"
 
     artifacts = module.write_public_benchmark_artifacts(
         repo_root=REPO_ROOT,
@@ -604,6 +605,7 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
         vina_gnina_comparison_adapter_out=vina_gnina_out,
         operator_intake_packet_out=operator_out,
         operator_intake_packet_md_out=operator_md_out,
+        operator_template_dir=operator_template_dir,
     )
 
     assert source_out.exists()
@@ -614,6 +616,7 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     assert vina_gnina_out.exists()
     assert operator_out.exists()
     assert operator_md_out.exists()
+    assert (operator_template_dir / "public_benchmark_casf_pdbbind_operator_template.json").exists()
     assert (
         json.loads(source_out.read_text(encoding="utf-8"))
         == artifacts["source_of_truth"]
@@ -644,3 +647,11 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     assert "# Public Benchmark Operator Intake Packet" in operator_md_out.read_text(
         encoding="utf-8"
     )
+    operator_template = json.loads(
+        (
+            operator_template_dir
+            / "public_benchmark_casf_pdbbind_operator_template.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert operator_template["schema_version"] == "public-benchmark-operator-template.v1"
+    assert operator_template["operator_values_filled"] is False

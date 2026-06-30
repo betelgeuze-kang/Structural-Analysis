@@ -227,6 +227,9 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert surface["first_operator_evidence_handoff"]["first_blocker"] == (
         "casf_pdbbind_source_material_not_attached"
     )
+    assert surface["first_operator_evidence_handoff"]["template_artifact"].endswith(
+        "public_benchmark_casf_pdbbind_operator_template.json"
+    )
     assert [
         row["phase_id"] for row in surface["operator_evidence_handoff_queue"]
     ] == [
@@ -432,6 +435,9 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "materialize_posebusters_validity_packet",
         "materialize_symmetry_rmsd_scorecard",
     ]
+    assert gate_plan["pose_coordinate_intake"]["template_artifact"].endswith(
+        "public_benchmark_pose_coordinate_operator_template.json"
+    )
     gap_register = {
         row["slot_id"]: row
         for row in phase_2["summary"]["operator_evidence_gap_register"]
@@ -444,6 +450,9 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert gap_register["casf_pdbbind_subset_intake"]["first_next_action"] == (
         "attach at least 12 local CASF/PDBBind case descriptors"
     )
+    assert phase_2["summary"]["operator_template_artifacts"][
+        "casf_pdbbind_subset_intake"
+    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
     assert phase_2["summary"]["pose_validity_packet_summary"]["real_benchmark_case_count"] == 0
     assert phase_2["summary"]["symmetry_rmsd_scorecard_summary"] == {
         "status": "ready",
@@ -594,6 +603,11 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "pocketmd_lite_delivery_handoff.json"
         in phase_4["evidence_artifacts"]
     )
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_operator_template.json"
+        in phase_4["evidence_artifacts"]
+    )
     assert phase_4["summary"]["readonly_api_status"] == "ready_for_seed_artifacts"
     assert phase_4["summary"]["readonly_api_route"] == "/product/pocketmd-lite"
     assert phase_4["summary"]["readonly_api_endpoint_count"] == 7
@@ -608,6 +622,9 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     )
     assert phase_4["summary"]["operator_intake_route"] == (
         "/product/pocketmd-lite/operator-intake"
+    )
+    assert phase_4["summary"]["operator_template_artifact"].endswith(
+        "pocketmd_lite_operator_template.json"
     )
     assert phase_4["summary"]["operator_intake_required_slot_count"] == 1
     assert phase_4["summary"]["gate_unblock_plan_count"] == 1
@@ -661,6 +678,9 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     gate_plan = phase_4["summary"]["gate_unblock_plan"][0]
     assert gate_plan["slot_id"] == "top_k_refinement_rows"
     assert gate_plan["status"] == "operator_input_required"
+    assert gate_plan["template_artifact"].endswith(
+        "pocketmd_lite_operator_template.json"
+    )
     assert gate_plan["unblocks_phase4_criteria"] == [
         "top_k_refinement_rows_present",
         "local_min_survival_materialized",

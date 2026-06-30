@@ -33,6 +33,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     survival = artifacts["topk_survival_report"]
     api = artifacts["readonly_api"]
     handoff = artifacts["delivery_handoff"]
+    operator_template = artifacts["operator_template"]
     operator = artifacts["operator_intake_packet"]
     surface = artifacts["surface"]
 
@@ -127,6 +128,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         row["endpoint_id"] for row in api["endpoints"]
     }
     assert "write_operator_evidence" in api["forbidden_operations"]
+    assert "get_pocketmd_lite_operator_template" in {
+        row["endpoint_id"] for row in api["endpoints"]
+    }
 
     assert handoff["schema_version"] == "pocketmd-lite-delivery-handoff.v1"
     assert handoff["contract_pass"] is True
@@ -172,6 +176,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert handoff["operator_intake_reference"]["route"] == (
         "/product/pocketmd-lite/operator-intake"
     )
+    assert handoff["operator_intake_reference"]["template_artifact"].endswith(
+        "pocketmd_lite_operator_template.json"
+    )
     assert "topk_survival_report.real_refinement_case_count > 0" in handoff[
         "acceptance_criteria"
     ]
@@ -204,6 +211,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["broad_fep_claim_safe"] is False
     assert operator["required_slot_count"] == 1
     assert operator["input_slots"][0]["slot_id"] == "top_k_refinement_rows"
+    assert operator["input_slots"][0]["template_artifact"].endswith(
+        "pocketmd_lite_operator_template.json"
+    )
     assert operator["gate_unblock_plan_count"] == 1
     assert operator["minimum_refinement_case_count"] == 1
     assert operator["minimum_top_k_candidate_count"] == 1
@@ -233,6 +243,12 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     )
     assert operator["next_actions"][0] == "fill_pocketmd_lite_operator_intake_packet"
     assert operator["acceptance_criteria"][-1].startswith("broad_all_atom_md_claim")
+    assert operator_template["schema_version"] == "pocketmd-lite-operator-template.v1"
+    assert operator_template["status"] == "operator_template_seed"
+    assert operator_template["operator_values_filled"] is False
+    assert operator_template["template"]["cases"][0]["case_id"] == (
+        "pocketmd_lite_case_001"
+    )
 
     assert surface["schema_version"] == "pocketmd-lite-science-product-surface.v1"
     assert surface["surface_id"] == "pocketmd_lite_science_product_surface"
@@ -361,6 +377,7 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     handoff_out = tmp_path / "pocketmd_lite_delivery_handoff.json"
     operator_out = tmp_path / "pocketmd_lite_operator_intake_packet.json"
     operator_md_out = tmp_path / "pocketmd_lite_operator_intake_packet.md"
+    operator_template_out = tmp_path / "pocketmd_lite_operator_template.json"
     surface_out = tmp_path / "surface" / "pocketmd_lite_science_product_surface.json"
 
     assert (
@@ -380,6 +397,8 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
                 str(operator_out),
                 "--operator-intake-md-out",
                 str(operator_md_out),
+                "--operator-template-out",
+                str(operator_template_out),
                 "--surface-out",
                 str(surface_out),
             ]
@@ -387,7 +406,15 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
         == 0
     )
 
-    for path in (contract_out, survival_out, api_out, handoff_out, operator_out, surface_out):
+    for path in (
+        contract_out,
+        survival_out,
+        api_out,
+        handoff_out,
+        operator_out,
+        operator_template_out,
+        surface_out,
+    ):
         assert path.exists()
         payload = json.loads(path.read_text(encoding="utf-8"))
         assert payload["source_commit_sha"]
