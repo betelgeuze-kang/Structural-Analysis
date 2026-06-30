@@ -113,6 +113,58 @@ READY_FIELDS = {
     "source_of_truth": "public_benchmark_ready",
 }
 
+ARTIFACT_ROLE_BY_FILENAME = {
+    filename: role for role, filename in ARTIFACT_FILENAMES.items()
+}
+
+PHASE2_REQUIRED_COMPONENTS = (
+    {
+        "component_id": "casf_pdbbind_pose_success_harness",
+        "requirement": "CASF/PDBBind pose-success harness",
+        "artifact_role": "pose_success_harness",
+        "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+        "ready_field": READY_FIELDS["pose_success_harness"],
+        "count_field": "real_benchmark_case_count",
+        "required_minimum_count": 1,
+    },
+    {
+        "component_id": "symmetry_aware_ligand_rmsd",
+        "requirement": "Symmetry-aware ligand RMSD scorecard",
+        "artifact_role": "rmsd_scorecard",
+        "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+        "ready_field": READY_FIELDS["rmsd_scorecard"],
+        "count_field": "real_benchmark_case_count",
+        "required_minimum_count": 1,
+    },
+    {
+        "component_id": "posebusters_style_pose_validity",
+        "requirement": "PoseBusters-style pose validity packet",
+        "artifact_role": "pose_validity_packet",
+        "criterion_id": "posebusters_style_pose_validity_ready",
+        "ready_field": READY_FIELDS["pose_validity_packet"],
+        "count_field": "real_benchmark_case_count",
+        "required_minimum_count": 1,
+    },
+    {
+        "component_id": "vina_gnina_comparison_adapter",
+        "requirement": "Vina/GNINA comparison adapter",
+        "artifact_role": "vina_gnina_comparison_adapter",
+        "criterion_id": "vina_gnina_comparison_ready",
+        "ready_field": READY_FIELDS["vina_gnina_comparison_adapter"],
+        "count_field": "real_comparison_case_count",
+        "required_minimum_count": 1,
+    },
+    {
+        "component_id": "dud_e_or_lit_pcba_enrichment",
+        "requirement": "DUD-E or LIT-PCBA enrichment scorecard",
+        "artifact_role": "enrichment_scorecard",
+        "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+        "ready_field": READY_FIELDS["enrichment_scorecard"],
+        "count_field": "real_enrichment_target_count",
+        "required_minimum_count": 1,
+    },
+)
+
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
@@ -124,6 +176,13 @@ def _as_dict(value: Any) -> dict[str, Any]:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _as_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -158,6 +217,151 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(_json_text(payload), encoding="utf-8")
 
 
+def _ready_from_payload(
+    *,
+    payload: dict[str, Any],
+    ready_field: str,
+    exists: bool,
+    blockers: list[str],
+) -> bool:
+    if not exists or blockers:
+        return False
+    if ready_field in payload:
+        return bool(payload.get(ready_field))
+    if payload.get("contract_pass") is False:
+        return False
+    return str(payload.get("status") or "") == "ready"
+
+
+def _artifact_counts(payload: dict[str, Any]) -> dict[str, int]:
+    report = _as_dict(payload.get("materialization_report"))
+    return {
+        "target_subset_case_count": _as_int(
+            payload.get("target_subset_case_count")
+            or report.get("target_subset_case_count")
+        ),
+        "materialized_case_count": _as_int(
+            payload.get("materialized_case_count")
+            or report.get("materialized_case_count")
+        ),
+        "real_benchmark_case_count": _as_int(
+            payload.get("real_benchmark_case_count")
+            or report.get("real_benchmark_case_count")
+        ),
+        "real_enrichment_target_count": _as_int(
+            payload.get("real_enrichment_target_count")
+            or report.get("real_enrichment_target_count")
+        ),
+        "real_comparison_case_count": _as_int(
+            payload.get("real_comparison_case_count")
+            or report.get("real_comparison_case_count")
+        ),
+    }
+
+
+def _phase2_component_rows(
+    artifact_summaries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    summary_by_role = {
+        str(summary.get("artifact_role")): summary for summary in artifact_summaries
+    }
+    rows: list[dict[str, Any]] = []
+    for required in PHASE2_REQUIRED_COMPONENTS:
+        role = str(required["artifact_role"])
+        summary = summary_by_role.get(role, {})
+        count_field = str(required["count_field"])
+        current_count = _as_int(summary.get(count_field))
+        required_minimum_count = _as_int(required["required_minimum_count"], default=1)
+        blockers = [str(blocker) for blocker in _as_list(summary.get("blockers"))]
+        if not summary:
+            blockers.append(f"phase2_component_artifact_missing:{role}")
+        elif not bool(summary.get("exists", True)):
+            blockers.append(f"phase2_component_artifact_missing:{role}")
+        if current_count < required_minimum_count:
+            blockers.append(
+                f"{count_field}_below_required:"
+                f"{current_count}<{required_minimum_count}"
+            )
+        contract_pass = summary.get("contract_pass") is True
+        ready = bool(
+            summary
+            and summary.get("exists", True)
+            and summary.get("ready")
+            and contract_pass
+            and current_count >= required_minimum_count
+            and not blockers
+        )
+        rows.append(
+            {
+                "component_id": str(required["component_id"]),
+                "requirement": str(required["requirement"]),
+                "artifact_role": role,
+                "artifact": str(summary.get("artifact") or ""),
+                "schema_version": str(summary.get("schema_version") or ""),
+                "status": str(summary.get("status") or "artifact_missing"),
+                "contract_pass": contract_pass,
+                "ready_field": str(required["ready_field"]),
+                "ready": ready,
+                "count_field": count_field,
+                "current_count": current_count,
+                "required_minimum_count": required_minimum_count,
+                "blocker_count": len(blockers),
+                "blockers": blockers,
+            }
+        )
+    return rows
+
+
+def _build_phase2_exit_gate(
+    component_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    component_by_id = {
+        str(row["component_id"]): row for row in component_rows
+    }
+    criteria: list[dict[str, Any]] = []
+    for required in PHASE2_REQUIRED_COMPONENTS:
+        component_id = str(required["component_id"])
+        component = component_by_id.get(component_id, {})
+        blockers = [str(blocker) for blocker in _as_list(component.get("blockers"))]
+        criteria.append(
+            {
+                "criterion_id": str(required["criterion_id"]),
+                "component_id": component_id,
+                "artifact_role": str(required["artifact_role"]),
+                "pass": bool(component.get("ready")),
+                "current": {
+                    str(required["count_field"]): _as_int(
+                        component.get("current_count")
+                    ),
+                    "ready": bool(component.get("ready")),
+                    "contract_pass": bool(component.get("contract_pass")),
+                },
+                "required": {
+                    str(required["count_field"]): _as_int(
+                        required["required_minimum_count"],
+                        default=1,
+                    ),
+                    "ready": True,
+                    "contract_pass": True,
+                },
+                "blockers": blockers,
+            }
+        )
+    failed_criteria = [
+        str(row["criterion_id"]) for row in criteria if not bool(row["pass"])
+    ]
+    return {
+        "claim": "public_benchmark_harness_phase2_exit_gate",
+        "status": "ready" if not failed_criteria else "blocked",
+        "criteria": criteria,
+        "failed_criteria": failed_criteria,
+        "failed_criterion_count": len(failed_criteria),
+        "component_count": len(component_rows),
+        "ready_component_count": sum(1 for row in component_rows if row["ready"]),
+        "required_component_count": len(PHASE2_REQUIRED_COMPONENTS),
+    }
+
+
 def materialize_public_benchmark_artifact_bundle(
     artifact_paths: list[Path],
     *,
@@ -171,16 +375,40 @@ def materialize_public_benchmark_artifact_bundle(
         exists = resolved.exists()
         if not exists:
             blockers.append(f"artifact_missing:{path.as_posix()}")
+        role = ARTIFACT_ROLE_BY_FILENAME.get(path.name)
+        if role is None:
+            artifact_blockers = [
+                str(blocker) for blocker in _as_list(payload.get("blockers"))
+            ]
+            rows.append(
+                {
+                    "artifact_role": "",
+                    "artifact": path.as_posix(),
+                    "exists": exists,
+                    "schema_version": str(payload.get("schema_version") or ""),
+                    "status": str(payload.get("status") or ""),
+                    "contract_pass": payload.get("contract_pass"),
+                    **_artifact_counts(payload),
+                    "ready_field": "",
+                    "ready": False,
+                    "blocker_count": len(artifact_blockers),
+                    "blockers": artifact_blockers,
+                }
+            )
+            continue
         rows.append(
-            {
-                "artifact": path.as_posix(),
-                "exists": exists,
-                "schema_version": str(payload.get("schema_version") or ""),
-                "status": str(payload.get("status") or ""),
-                "contract_pass": payload.get("contract_pass"),
-                "blocker_count": int(payload.get("blocker_count") or 0),
-            }
+            _artifact_summary(
+                role=role,
+                artifact_path=resolved,
+                payload=payload,
+                repo_root=repo_root,
+                exists=exists,
+            )
         )
+
+    phase2_components = _phase2_component_rows(rows)
+    phase2_exit_gate = _build_phase2_exit_gate(phase2_components)
+    phase2_ready = phase2_exit_gate["status"] == "ready"
 
     return {
         "schema_version": ARTIFACT_BUNDLE_SCHEMA_VERSION,
@@ -198,11 +426,20 @@ def materialize_public_benchmark_artifact_bundle(
         "artifact_count": len(rows),
         "missing_artifact_count": len(blockers),
         "artifact_rows": rows,
+        "required_components": list(PHASE2_REQUIRED_COMPONENTS),
+        "components": phase2_components,
+        "phase2_ready": phase2_ready,
+        "phase2_exit_gate": phase2_exit_gate,
         "blockers": blockers,
         "materialization_report": {
             "schema_version": FULL_MATERIALIZER_SCHEMA_VERSION,
             "artifact_count": len(rows),
             "missing_artifact_count": len(blockers),
+            "phase2_component_count": len(phase2_components),
+            "phase2_ready_component_count": sum(
+                1 for row in phase2_components if row["ready"]
+            ),
+            "phase2_ready": phase2_ready,
         },
         "claim_boundary": (
             "This bundle indexes local public-benchmark harness artifacts only. "
@@ -218,17 +455,25 @@ def _artifact_summary(
     artifact_path: Path,
     payload: dict[str, Any],
     repo_root: Path,
+    exists: bool = True,
 ) -> dict[str, Any]:
     ready_field = READY_FIELDS[role]
     blockers = [str(blocker) for blocker in _as_list(payload.get("blockers"))]
     return {
         "artifact_role": role,
         "artifact": _display_path(artifact_path, repo_root=repo_root),
+        "exists": exists,
         "schema_version": str(payload.get("schema_version") or ""),
         "status": str(payload.get("status") or ""),
         "contract_pass": payload.get("contract_pass"),
+        **_artifact_counts(payload),
         "ready_field": ready_field,
-        "ready": bool(payload.get(ready_field)),
+        "ready": _ready_from_payload(
+            payload=payload,
+            ready_field=ready_field,
+            exists=exists,
+            blockers=blockers,
+        ),
         "blocker_count": len(blockers),
         "blockers": blockers,
     }
@@ -373,7 +618,14 @@ def materialize_public_benchmark_harness_bundle(
     if source_refresh_error:
         blockers.append(f"source_of_truth:{source_refresh_error}")
 
-    bundle_ready = bool(source_of_truth.get("public_benchmark_ready")) and not blockers
+    phase2_components = _phase2_component_rows(artifact_summaries)
+    phase2_exit_gate = _build_phase2_exit_gate(phase2_components)
+    phase2_ready = phase2_exit_gate["status"] == "ready"
+    source_tier_beta_ready = bool(source_of_truth.get("tier_beta_ready"))
+    tier_beta_ready = bool(source_tier_beta_ready and phase2_ready)
+    bundle_ready = bool(source_of_truth.get("public_benchmark_ready")) and bool(
+        phase2_ready and not blockers
+    )
     report_input_paths = [
         Path("scripts/materialize_public_benchmark_harness_bundle.py")
     ]
@@ -391,7 +643,12 @@ def materialize_public_benchmark_harness_bundle(
         "status": "ready" if bundle_ready else "operator_evidence_required",
         "contract_pass": bundle_ready,
         "public_benchmark_ready": bool(source_of_truth.get("public_benchmark_ready")),
-        "tier_beta_ready": bool(source_of_truth.get("tier_beta_ready")),
+        "tier_beta_ready": tier_beta_ready,
+        "source_of_truth_tier_beta_ready": source_tier_beta_ready,
+        "required_components": list(PHASE2_REQUIRED_COMPONENTS),
+        "components": phase2_components,
+        "phase2_ready": phase2_ready,
+        "phase2_exit_gate": phase2_exit_gate,
         "target_subset_case_count": int(
             subset_manifest.get("target_subset_case_count") or 0
         ),
@@ -418,6 +675,12 @@ def materialize_public_benchmark_harness_bundle(
         "ready_artifact_count": sum(1 for row in artifact_summaries if row["ready"]),
         "blocked_artifact_count": sum(
             1 for row in artifact_summaries if not row["ready"]
+        ),
+        "phase2_ready_component_count": sum(
+            1 for row in phase2_components if row["ready"]
+        ),
+        "phase2_blocked_component_count": sum(
+            1 for row in phase2_components if not row["ready"]
         ),
         "blocker_count": len(blockers),
         "blockers": blockers,

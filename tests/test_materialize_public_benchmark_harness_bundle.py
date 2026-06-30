@@ -174,6 +174,12 @@ def test_public_benchmark_harness_bundle_materializes_tier_beta_ready_artifacts(
     assert report["real_enrichment_target_count"] == 1
     assert report["real_vina_gnina_comparison_case_count"] == 1
     assert report["tier_beta_gate"]["failed_criteria"] == []
+    assert report["phase2_ready"] is True
+    assert report["phase2_ready_component_count"] == report["phase2_exit_gate"][
+        "required_component_count"
+    ]
+    assert report["phase2_blocked_component_count"] == 0
+    assert report["phase2_exit_gate"]["failed_criteria"] == []
     assert report["ready_artifact_count"] == len(report["artifact_summaries"])
     for artifact in report["artifact_outputs"].values():
         assert (tmp_path / artifact).exists()
@@ -192,6 +198,9 @@ def test_public_benchmark_harness_bundle_blocks_empty_bundle(tmp_path: Path) -> 
     assert report["tier_beta_ready"] is False
     assert report["blocked_artifact_count"] > 0
     assert report["blocker_count"] > 0
+    assert report["phase2_ready"] is False
+    assert report["phase2_exit_gate"]["failed_criterion_count"] > 0
+    assert report["phase2_blocked_component_count"] > 0
     assert any("subset_manifest:" in blocker for blocker in report["blockers"])
 
 
