@@ -2107,7 +2107,7 @@
   "first_blocked_capability_id": "public_benchmark_harness",
   "first_blocked_capability_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
   "first_blocked_target": "",
-  "generated_at": "2026-06-30T23:28:58.603953+00:00",
+  "generated_at": "2026-06-30T23:31:25.957464+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:1b0953af454f73583229b6d8c711ff4274fab42ee88d4fdfc1310266b3ca38eb",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:838d4cdde0ce19f045dcbf379236ac8e99307f398a9275e81f66da42f20792ce",
@@ -2155,7 +2155,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "5cc16eeb18bd3757839ccc850705bb40a90438d4",
+  "source_commit_sha": "50ff7d33008936e0f06b26dee4c40cf9052eb590",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",

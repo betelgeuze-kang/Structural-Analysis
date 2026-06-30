@@ -11,10 +11,10 @@
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T23:20:55.071031+00:00",
+  "generated_at": "2026-06-30T23:31:31.328673+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:55f6fa2e87d882fe21792de14a7ed338aba295bec49001c9391352030dbfdb1e",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:133fcbd21be1311a9d1c26fc6b289a81234f3fe12d9dbc2f05785dec88a3c15c",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:0afdb2539c4c67971db0f4892a2f4451022e90f199d9ff203efaae7dfb4454f6",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:397f32753283417af1f666d8536264b0a8a2bcfa1190f4becf069f68a0adef1d",
     "scripts/build_pm_release_gate_completion_audit.py": "sha256:39246c0a8e4784455e85036062d2aa268cbe4c01393b924790e076d86a9b81cc"
   },
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -172,7 +172,7 @@
       "summary_snapshot": {
         "artifact_count": 18,
         "blocker_count": 0,
-        "current_source_commit_sha": "99a2946b54da6d2bed72cc289fa8b03743fd43ec",
+        "current_source_commit_sha": "50ff7d33008936e0f06b26dee4c40cf9052eb590",
         "max_age_days": 30.0,
         "pass_count": 18
       },
@@ -718,7 +718,7 @@
       "status": "pass",
       "summary_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "99a2946b54da6d2bed72cc289fa8b03743fd43ec",
+        "current_head_sha": "50ff7d33008936e0f06b26dee4c40cf9052eb590",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -726,7 +726,7 @@
         "pending_remote_update_actions": [],
         "pending_remote_update_count": 0,
         "pending_remote_update_targets": [],
-        "preflight_local_head_sha": "99a2946b54da6d2bed72cc289fa8b03743fd43ec",
+        "preflight_local_head_sha": "50ff7d33008936e0f06b26dee4c40cf9052eb590",
         "preflight_source_state_kind": "exact",
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
@@ -2537,7 +2537,7 @@
     "reason": "Completion audit snapshots exclude volatile timestamps and hashes. Support bundle manifests hash this audit as an output artifact, so the audit avoids embedding support-bundle archive hashes that would create circular freshness claims.",
     "stable_summary_snapshot": true
   },
-  "source_commit_sha": "99a2946b54da6d2bed72cc289fa8b03743fd43ec",
+  "source_commit_sha": "50ff7d33008936e0f06b26dee4c40cf9052eb590",
   "summary": {
     "blocked_external_owner_input_ready_count": 3,
     "blocked_handoff_incomplete_count": 0,
