@@ -74,7 +74,12 @@ def _remote_branch_name(remote_ref: str, *, remote: str = DEFAULT_FETCH_REMOTE) 
 
 
 def _status_path(line: str) -> str:
-    text = line[3:].strip() if len(line) > 3 else ""
+    if len(line) >= 3 and line[2] == " ":
+        text = line[3:].strip()
+    elif len(line) >= 2 and line[1] == " ":
+        text = line[2:].strip()
+    else:
+        text = line[3:].strip() if len(line) > 3 else ""
     if " -> " in text:
         text = text.rsplit(" -> ", 1)[-1].strip()
     return text.strip('"')

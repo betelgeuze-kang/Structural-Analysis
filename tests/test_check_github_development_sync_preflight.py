@@ -229,6 +229,8 @@ def test_sync_preflight_ignores_productization_evidence_dirty_for_sync_gate() ->
             remote_feature_sha="abc1234",
             feature_ahead_count=0,
             worktree_status_short=(
+                "M implementation/phase1/release_evidence/productization/"
+                "developer_preview_rc_status.json\n"
                 " M implementation/phase1/release_evidence/productization/"
                 "pm_release_gate_report.json\n"
                 " M implementation/phase1/release_evidence/productization/"
@@ -243,6 +245,7 @@ def test_sync_preflight_ignores_productization_evidence_dirty_for_sync_gate() ->
     assert payload["checks"]["worktree_clean"] is True
     assert payload["checks"]["worktree_only_ignored_evidence_dirty"] is True
     assert payload["state"]["effective_worktree_status_short"] == ""
+    assert "developer_preview_rc_status.json" in payload["state"]["ignored_worktree_status_short"]
     assert "pm_release_gate_report.json" in payload["state"]["ignored_worktree_status_short"]
 
 
