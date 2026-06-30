@@ -4,14 +4,13 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 6,
+  "blocker_count": 5,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
-    "human_ux::observation_file_missing",
-    "stale_or_inconsistent:worktree_dirty"
+    "human_ux::observation_file_missing"
   ],
   "categories": {
     "benchmark": {
@@ -69,10 +68,9 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 2,
+      "blocker_count": 1,
       "blockers": [
-        "human_ux::observation_file_missing",
-        "stale_or_inconsistent:worktree_dirty"
+        "human_ux::observation_file_missing"
       ]
     }
   },
@@ -196,7 +194,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T14:24:14.246954+00:00",
+  "generated_at": "2026-06-30T14:32:12.114021+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -215,22 +213,22 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:a17d0fd826996edb19b8e6eaeb85b851c9b0fb4ce8809a50bdac94bd7131fcc4",
+      "input_checksum": "sha256:acf99ab636699dd0b60c1c7105d17214f40e393b863b7e962808fefac908390b",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "29adc7177cd0744a96e16a65902bca82582cc333",
-      "status": "stale_or_inconsistent"
+      "source_commit_sha": "12affe4358e6a34bc809528c9a8a1685c73ab80e",
+      "status": "blocked"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:ffd25ec49df8503675c4aedc7ad5c22c309d486f60b9a00f7db384f8e5798d6d",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:a17d0fd826996edb19b8e6eaeb85b851c9b0fb4ce8809a50bdac94bd7131fcc4"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:acf99ab636699dd0b60c1c7105d17214f40e393b863b7e962808fefac908390b"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
-  "product_snapshot_status": "stale_or_inconsistent",
+  "product_snapshot_status": "blocked",
   "reason_code": "ERR_DEVELOPER_PREVIEW_BLOCKED",
   "reuse_policy": "derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence",
   "reused_evidence": false,
@@ -1849,12 +1847,11 @@
       },
       "release freshness/sync": {
         "blocked": true,
-        "blocker_count": 4,
+        "blocker_count": 3,
         "blockers": [
           "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
           "pm_release::github_sync::github_sync_preflight_not_synced",
-          "pm_release::github_sync::github_sync_remote_sync_pending",
-          "stale_or_inconsistent:worktree_dirty"
+          "pm_release::github_sync::github_sync_remote_sync_pending"
         ]
       }
     }
@@ -2051,6 +2048,6 @@
       }
     }
   },
-  "source_commit_sha": "29adc7177cd0744a96e16a65902bca82582cc333",
+  "source_commit_sha": "12affe4358e6a34bc809528c9a8a1685c73ab80e",
   "status": "blocked"
 }

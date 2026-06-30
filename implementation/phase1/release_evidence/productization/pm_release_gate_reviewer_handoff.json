@@ -18,7 +18,7 @@
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-30T14:21:06.942825+00:00",
+  "generated_at": "2026-06-30T14:29:57.030804+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -350,7 +350,7 @@
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
-      "release_area_status": "blocked_handoff_incomplete",
+      "release_area_status": "blocked_external_owner_input_ready",
       "reproduction_commands": [
         "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -389,7 +389,7 @@
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
-      "release_area_status": "blocked_handoff_incomplete",
+      "release_area_status": "blocked_external_owner_input_ready",
       "reproduction_commands": [
         "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -428,7 +428,7 @@
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
-      "release_area_status": "blocked_handoff_incomplete",
+      "release_area_status": "blocked_external_owner_input_ready",
       "reproduction_commands": [
         "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",

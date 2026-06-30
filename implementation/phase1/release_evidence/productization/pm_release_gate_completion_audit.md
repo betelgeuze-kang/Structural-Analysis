@@ -5,7 +5,7 @@
 - `contract_pass`: `False`
 - `explicit_requirement_count`: `52`
 - `blocked_requirement_count`: `6`
-- `blocked_release_area_next_action_missing_count`: `1`
+- `blocked_release_area_next_action_missing_count`: `0`
 
 | Requirement | Group | Status | Blockers | Next Action |
 |---|---|---|---|---|
@@ -24,7 +24,7 @@
 | `release_area.ux` new user completes sample project within 30 minutes | `release_area` | `blocked_external_owner_input_ready` | `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing` | 2 blockers: Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
 | `release_area.support` known issues, failure bundle, and rollback evidence | `release_area` | `pass` | none | none |
 | `release_area.security` secrets/license/SBOM/repro build pass | `release_area` | `blocked_external_owner_input_ready` | `security::license_status_not_configured` | security::license_status_not_configured: Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass. |
-| `release_area.github_sync` read-only GitHub sync preflight is clean or explicitly approved | `release_area` | `blocked_handoff_incomplete` | `github_sync::github_sync_preflight::remote_mutation_approval_required`, `github_sync::github_sync_remote_sync_pending`, `github_sync::github_sync_preflight_not_synced` | none |
+| `release_area.github_sync` read-only GitHub sync preflight is clean or explicitly approved | `release_area` | `blocked_external_owner_input_ready` | `github_sync::github_sync_preflight::remote_mutation_approval_required`, `github_sync::github_sync_remote_sync_pending`, `github_sync::github_sync_preflight_not_synced` | 3 blockers: Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
 | `m1_residual_report_fixed` ndtha_residual_gate_report.json fixed in release evidence | `milestone` | `pass` | none | none |
 | `m1_recommended_residual_hard_fail` recommended residual hard-fails in strict mode | `milestone` | `pass` | none | none |
 | `m1_strict_recommended_residual_pass` strict recommended residual pass | `milestone` | `pass` | none | none |

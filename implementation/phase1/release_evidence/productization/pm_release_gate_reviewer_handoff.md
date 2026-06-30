@@ -242,7 +242,7 @@ Verdict change conditions:
 ### `github_sync::github_sync_preflight::remote_mutation_approval_required`
 
 - Owner: `release_owner`
-- Release area status: `blocked_handoff_incomplete`
+- Release area status: `blocked_external_owner_input_ready`
 - Closure state: `external_owner_input_ready`
 - Evidence state: `approval_required`
 - External input required: `True`
@@ -278,7 +278,7 @@ Verdict change conditions:
 ### `github_sync::github_sync_remote_sync_pending`
 
 - Owner: `release_owner`
-- Release area status: `blocked_handoff_incomplete`
+- Release area status: `blocked_external_owner_input_ready`
 - Closure state: `external_owner_input_ready`
 - Evidence state: `approval_required`
 - External input required: `True`
@@ -314,7 +314,7 @@ Verdict change conditions:
 ### `github_sync::github_sync_preflight_not_synced`
 
 - Owner: `release_owner`
-- Release area status: `blocked_handoff_incomplete`
+- Release area status: `blocked_external_owner_input_ready`
 - Closure state: `external_owner_input_ready`
 - Evidence state: `approval_required`
 - External input required: `True`

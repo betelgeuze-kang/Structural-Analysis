@@ -513,10 +513,10 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T14:29:00.925608+00:00",
+  "generated_at": "2026-06-30T14:32:12.174407+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:bbc8066dc3091242a84c6c435f488da95b4e7cb0719e74df2886ac32b4f95e6e",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f3ecb8704c08819375c08e3ba94f717c8be17174c73585d7c9fb55ac1a71b1d3",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:8ac122ead4fa45ea7f9047b215f95ab6c65f9daa6916fedd96dec69f6bd73cec",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:b181b54239eebfcf62710cc3ba97bbaa512f17ef9adbc2101cce9bfd5c558ddc",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:ffd25ec49df8503675c4aedc7ad5c22c309d486f60b9a00f7db384f8e5798d6d",
@@ -1074,14 +1074,13 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 6,
+    "developer_preview_blocker_count": 5,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "human_ux::observation_file_missing",
-      "stale_or_inconsistent:worktree_dirty"
+      "human_ux::observation_file_missing"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -2432,6 +2431,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "46e65d3429977d3405c266e8c85cd534d5ba4206",
+  "source_commit_sha": "12affe4358e6a34bc809528c9a8a1685c73ab80e",
   "status": "blocked"
 }
