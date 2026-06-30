@@ -38,7 +38,16 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
     assert payload["visible_entity_accounting_case_count"] == 10
     assert payload["silent_import_loss_gate_pass_count"] == 10
     assert payload["quantity_credit_ready_count"] == 0
-    assert payload["silent_import_loss_zero"] is False
+    assert payload["silent_import_loss_zero"] is True
+    assert payload["technical_silent_import_loss_zero"] is True
+    assert payload["technical_direct_blockers"] == []
+    assert payload["product_release_credit_ready"] is False
+    assert payload["product_release_credit_blockers"] == [
+        "per_file_license_review_pending",
+        "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+        "phase3_ifc_import_case_quantity_credit_missing",
+        "product_legal_license_review_pending",
+    ]
     assert payload["evidence_requirements"]["clean_dirty_import_case_count"] == {
         "current": 10,
         "required": 10,
@@ -49,6 +58,8 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
     assert payload["evidence_requirements"]["product_license_review_ready"] is False
     assert payload["evidence_requirements"]["import_health_execution_ready"] is True
     assert payload["evidence_requirements"]["silent_data_loss_negative_gate_executed"] is True
+    assert payload["evidence_requirements"]["technical_silent_import_loss_zero"] is True
+    assert payload["evidence_requirements"]["product_release_credit_ready"] is False
     assert payload["readiness_inputs"]["import_health_receipt"].endswith(
         "phase3_ifc_import_health_execution_receipt.json"
     )
@@ -102,6 +113,7 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
     assert "expected contracts" not in payload["claim_boundary"]
     assert "does not download or bundle IFC files" in payload["claim_boundary"]
     assert "reported separately as spillover evidence" in payload["claim_boundary"]
+    assert "technical_silent_import_loss_zero field is scoped" in payload["claim_boundary"]
 
 
 def test_phase6_silent_import_loss_status_check_detects_missing_output(tmp_path: Path) -> None:

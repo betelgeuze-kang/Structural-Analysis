@@ -174,6 +174,14 @@ def _direct_and_spillover_blockers(blockers: list[str]) -> tuple[list[str], list
     return sorted(dict.fromkeys(direct)), sorted(dict.fromkeys(spillover))
 
 
+def _group_blockers(blockers: list[str], group_ids: set[str]) -> list[str]:
+    selected: list[str] = []
+    for blocker in blockers:
+        if any(_blocker_matches_group(blocker, BLOCKER_GROUPS[group_id]) for group_id in group_ids):
+            selected.append(blocker)
+    return sorted(dict.fromkeys(selected))
+
+
 def _selected_count(payload: dict[str, Any]) -> int:
     return int(payload.get("selected_file_count", 0) or 0)
 
@@ -256,6 +264,26 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         )
     all_blockers = sorted(dict.fromkeys(blockers))
     direct_blockers, spillover_blockers = _direct_and_spillover_blockers(all_blockers)
+    product_credit_blockers = _group_blockers(
+        direct_blockers,
+        {"license_legal", "quantity_credit"},
+    )
+    technical_direct_blockers = [
+        blocker for blocker in direct_blockers if blocker not in set(product_credit_blockers)
+    ]
+    technical_silent_import_loss_zero = bool(
+        not technical_direct_blockers
+        and case_count_ready
+        and source_acquired
+        and checksums_ready
+        and import_health_ready
+        and silent_negative_gate_executed
+    )
+    product_release_credit_ready = bool(
+        not product_credit_blockers
+        and license_ready
+        and quantity_credit_ready_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
+    )
     contract_pass = bool(
         not direct_blockers
         and case_count_ready
@@ -303,6 +331,10 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "developer_preview_release_candidate_claim": contract_pass,
+        "technical_silent_import_loss_zero": technical_silent_import_loss_zero,
+        "technical_direct_blockers": technical_direct_blockers,
+        "product_release_credit_ready": product_release_credit_ready,
+        "product_release_credit_blockers": product_credit_blockers,
         "required_ifc_import_case_count": REQUIRED_IFC_IMPORT_CASE_COUNT,
         "clean_selected_file_count": clean_selected_file_count,
         "dirty_selected_file_count": dirty_selected_file_count,
@@ -314,8 +346,12 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         "visible_entity_accounting_case_count": visible_entity_accounting_case_count,
         "silent_import_loss_gate_pass_count": silent_import_loss_gate_pass_count,
         "quantity_credit_ready_count": quantity_credit_ready_count,
-        "silent_import_loss_zero": contract_pass,
-        "evidence_requirements": evidence_requirements,
+        "silent_import_loss_zero": technical_silent_import_loss_zero,
+        "evidence_requirements": {
+            **evidence_requirements,
+            "technical_silent_import_loss_zero": technical_silent_import_loss_zero,
+            "product_release_credit_ready": product_release_credit_ready,
+        },
         "readiness_inputs": {
             "import_health_receipt": PHASE3_IFC_IMPORT_HEALTH.as_posix(),
             "clean_acquisition_receipt": PHASE3_IFC_CLEAN_ACQUISITION.as_posix(),
@@ -341,7 +377,11 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
             "or prove zero silent import loss until acquired/checksummed sources, license "
             "review, import-health execution, and silent-data-loss negative gates all pass. "
             "Query/GUI corpus readiness is reported separately as spillover evidence and "
-            "does not by itself block the direct silent-import-loss final gate."
+            "does not by itself block the direct silent-import-loss final gate. The "
+            "technical_silent_import_loss_zero field is scoped to acquired/checksummed "
+            "sources plus executed import-health and negative silent-loss gates; product "
+            "license review and quantity credit remain separate release/product-credit "
+            "requirements."
         ),
     }
 

@@ -32,7 +32,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert payload["deliverable_count"] == 10
     assert payload["final_gate_count"] == 9
     assert payload["deliverable_pass_count"] == 10
-    assert payload["final_gate_pass_count"] == 4
+    assert payload["final_gate_pass_count"] == 5
 
     deliverables = {row["item"]: row for row in payload["deliverables"]}
     assert deliverables["installable_python_package"]["contract_pass"] is True
@@ -98,7 +98,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "Policy-only acquisition rows" in " ".join(
         final_gates["large_models_crash_oom_free"]["notes"]
     )
-    assert final_gates["silent_import_loss_zero"]["contract_pass"] is False
+    assert final_gates["silent_import_loss_zero"]["contract_pass"] is True
     assert final_gates["silent_import_loss_zero"]["evidence"] == (
         "implementation/phase1/release_evidence/productization/"
         "phase3_ifc_import_health_execution_receipt.json; "
@@ -112,21 +112,22 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "phase6_silent_import_loss_status.json"
     )
     silent_blockers = final_gates["silent_import_loss_zero"]["blockers"]
+    assert silent_blockers == []
     assert "import_health_execution_missing" not in silent_blockers
     assert "dirty_import_execution_missing" not in silent_blockers
     assert "source_file_not_acquired" not in silent_blockers
     assert "source_sha256_missing" not in silent_blockers
     assert "ifc_import_health_execution_count_below_required:0/10" not in silent_blockers
     assert "silent_data_loss_negative_gate_not_executed" not in silent_blockers
-    assert "product_legal_license_review_pending" in silent_blockers
-    assert "per_file_license_review_pending" in silent_blockers
-    assert "phase3_ifc_import_case_quantity_credit_missing" in silent_blockers
-    assert "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review" in silent_blockers
+    assert "product_legal_license_review_pending" not in silent_blockers
+    assert "per_file_license_review_pending" not in silent_blockers
+    assert "phase3_ifc_import_case_quantity_credit_missing" not in silent_blockers
+    assert "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review" not in silent_blockers
     assert "gui_task_runner_not_implemented" not in silent_blockers
     assert "query_expected_answers_missing" not in silent_blockers
     assert "query_task_file_checksums_missing" not in silent_blockers
     assert "dataset_repository_url_missing" not in silent_blockers
-    assert "expected contracts alone do not prove" in " ".join(
+    assert "Product/legal license review" in " ".join(
         final_gates["silent_import_loss_zero"]["notes"]
     )
     assert final_gates["residual_and_convergence_history_present"]["contract_pass"] is True
@@ -462,6 +463,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     )
     assert ifc_handoff["silent_import_loss_status"] == "blocked"
     assert ifc_handoff["silent_import_loss_contract_pass"] is False
+    assert ifc_handoff["technical_silent_import_loss_zero"] is True
+    assert ifc_handoff["product_release_credit_ready"] is False
     assert ifc_handoff["import_health_receipt"].endswith(
         "phase3_ifc_import_health_execution_receipt.json"
     )
@@ -494,6 +497,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert ifc_handoff["evidence_requirements"]["import_health_execution_ready"] is True
     assert ifc_handoff["evidence_requirements"]["silent_data_loss_negative_gate_executed"] is True
     assert ifc_handoff["evidence_requirements"]["product_license_review_ready"] is False
+    assert ifc_handoff["evidence_requirements"]["technical_silent_import_loss_zero"] is True
+    assert ifc_handoff["evidence_requirements"]["product_release_credit_ready"] is False
     assert "source_file_not_acquired" not in ifc_handoff["import_health_blockers"]
     assert "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review" in ifc_handoff[
         "import_health_blockers"
@@ -508,6 +513,13 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     ]
     assert ifc_handoff["silent_import_loss_direct_blockers"] == ifc_handoff[
         "silent_import_loss_blockers"
+    ]
+    assert ifc_handoff["silent_import_loss_technical_direct_blockers"] == []
+    assert ifc_handoff["silent_import_loss_product_release_credit_blockers"] == [
+        "per_file_license_review_pending",
+        "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+        "phase3_ifc_import_case_quantity_credit_missing",
+        "product_legal_license_review_pending",
     ]
     assert "gui_task_runner_not_implemented" not in ifc_handoff[
         "silent_import_loss_direct_blockers"

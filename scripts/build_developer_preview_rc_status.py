@@ -94,6 +94,53 @@ def _contract_ready(payload: dict[str, Any]) -> bool:
     return bool(payload.get("contract_pass") is True or status in {"ready", "pass"})
 
 
+def _silent_import_product_credit_blockers(payload: dict[str, Any]) -> list[str]:
+    explicit = payload.get("product_release_credit_blockers")
+    if isinstance(explicit, list):
+        return [str(blocker) for blocker in explicit if str(blocker)]
+    grouping = _as_dict(payload.get("blocker_grouping_metadata"))
+    groups = _as_dict(grouping.get("groups"))
+    blockers: list[str] = []
+    for group_id in ("license_legal", "quantity_credit"):
+        group = _as_dict(groups.get(group_id))
+        blockers.extend(str(blocker) for blocker in _as_list(group.get("blockers")) if str(blocker))
+    return sorted(dict.fromkeys(blockers))
+
+
+def _silent_import_technical_blockers(payload: dict[str, Any]) -> list[str]:
+    explicit = payload.get("technical_direct_blockers")
+    if isinstance(explicit, list):
+        return [str(blocker) for blocker in explicit if str(blocker)]
+    direct = [
+        str(blocker)
+        for blocker in _as_list(payload.get("direct_blockers", payload.get("blockers", [])))
+        if str(blocker)
+    ]
+    product_credit = set(_silent_import_product_credit_blockers(payload))
+    return [blocker for blocker in direct if blocker not in product_credit]
+
+
+def _silent_import_technical_ready(payload: dict[str, Any]) -> bool:
+    if payload.get("technical_silent_import_loss_zero") is True:
+        return True
+    if payload.get("contract_pass") is True:
+        return True
+    requirements = _as_dict(payload.get("evidence_requirements"))
+    case_count = _as_dict(requirements.get("clean_dirty_import_case_count"))
+    case_count_ready = bool(case_count.get("contract_pass") is True)
+    required_flags = (
+        "source_files_acquired",
+        "selected_file_checksums_ready",
+        "import_health_execution_ready",
+        "silent_data_loss_negative_gate_executed",
+    )
+    return bool(
+        case_count_ready
+        and all(requirements.get(flag) is True for flag in required_flags)
+        and not _silent_import_technical_blockers(payload)
+    )
+
+
 def _row(
     *,
     item: str,
@@ -517,7 +564,20 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
     )
     medium_ready = bool(benchmark_medium_gate.get("contract_pass") is True)
     large_ready = bool(benchmark_large_gate.get("contract_pass") is True)
-    ifc_ready = bool(silent_import_loss.get("contract_pass") is True)
+    ifc_ready = _silent_import_technical_ready(silent_import_loss)
+    ifc_final_gate_blockers = _silent_import_technical_blockers(silent_import_loss)
+    silent_import_loss_evidence_requirements = (
+        silent_import_loss.get("evidence_requirements")
+        if isinstance(silent_import_loss.get("evidence_requirements"), dict)
+        else {}
+    )
+    silent_import_loss_evidence_requirements = {
+        **silent_import_loss_evidence_requirements,
+        "technical_silent_import_loss_zero": ifc_ready,
+        "product_release_credit_ready": bool(
+            silent_import_loss.get("product_release_credit_ready") is True
+        ),
+    }
     score_rows = factory_scorecard.get("rows")
     score_rows = score_rows if isinstance(score_rows, list) else []
     residual_metrics_ready = bool(
@@ -690,12 +750,12 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                 f"{PHASE3_IFC_DIRTY_ACQUISITION}; {PHASE3_IFC_SOURCE_LICENSE}; "
                 f"{PHASE6_SILENT_IMPORT_LOSS_STATUS}"
             ),
-            blockers=list(silent_import_loss.get("blockers", [])),
+            blockers=[] if ifc_ready else ifc_final_gate_blockers,
             notes=[
-                "Requires acquired/checksummed clean and dirty IFC files, license "
-                "review, and executed import-health plus negative/import-hardening "
-                "contracts. Source identity or expected contracts alone do not prove "
-                "silent import loss is zero."
+                "Requires acquired/checksummed clean and dirty IFC files plus executed "
+                "import-health and negative/import-hardening contracts. Product/legal "
+                "license review and IFC quantity credit remain release/product-credit "
+                "requirements and are surfaced in the IFC import handoff."
             ],
         ),
         _row(
@@ -1053,6 +1113,12 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "silent_import_loss_contract_pass": bool(
                 silent_import_loss.get("contract_pass") is True
             ),
+            "technical_silent_import_loss_zero": bool(
+                _silent_import_technical_ready(silent_import_loss)
+            ),
+            "product_release_credit_ready": bool(
+                silent_import_loss.get("product_release_credit_ready") is True
+            ),
             "import_health_receipt": str(PHASE3_IFC_IMPORT_HEALTH),
             "clean_acquisition_receipt": str(PHASE3_IFC_CLEAN_ACQUISITION),
             "dirty_acquisition_receipt": str(PHASE3_IFC_DIRTY_ACQUISITION),
@@ -1083,11 +1149,7 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "required_ifc_import_case_count": int(
                 silent_import_loss.get("required_ifc_import_case_count", 0) or 0
             ),
-            "evidence_requirements": (
-                silent_import_loss.get("evidence_requirements")
-                if isinstance(silent_import_loss.get("evidence_requirements"), dict)
-                else {}
-            ),
+            "evidence_requirements": silent_import_loss_evidence_requirements,
             "source_license_blockers": list(ifc_source_license.get("blockers", [])),
             "import_health_blockers": list(ifc_import.get("blockers", [])),
             "clean_acquisition_blockers": list(ifc_clean_acquisition.get("blockers", [])),
@@ -1095,6 +1157,12 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "silent_import_loss_blockers": list(silent_import_loss.get("blockers", [])),
             "silent_import_loss_direct_blockers": list(
                 silent_import_loss.get("direct_blockers", silent_import_loss.get("blockers", []))
+            ),
+            "silent_import_loss_technical_direct_blockers": list(
+                _silent_import_technical_blockers(silent_import_loss)
+            ),
+            "silent_import_loss_product_release_credit_blockers": list(
+                _silent_import_product_credit_blockers(silent_import_loss)
             ),
             "silent_import_loss_spillover_blockers": list(
                 silent_import_loss.get("spillover_blockers", [])
