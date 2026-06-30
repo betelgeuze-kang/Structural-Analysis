@@ -70,13 +70,13 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert classification["goal_operator_action_board"]["freshness_label"] == ""
 
     kpis = surface["release_decision_kpis"]
-    assert kpis["operator_action_count"] >= 16
+    assert kpis["operator_action_count"] >= 13
     assert {key: value for key, value in kpis.items() if key != "operator_action_count"} == {
         "approval_token_count": 4,
-        "blocked_release_count": 8,
+        "blocked_release_count": 5,
         "broad_gpcr_family_claim_safe": False,
         "evidence_surface_count": 12,
-        "first_blocker": "M5::pm_blocker_closure_board_count_mismatch",
+        "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "locked_evidence_surface_count": 3,
         "missing_evidence_surface_count": 0,
         "pocketmd_lite_product_surface_ready": False,
@@ -94,12 +94,12 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert briefing["audience"] == "non_expert_pm_operator"
     assert briefing["release_allowed"] is False
     assert briefing["primary_release_blocker"] == (
-        "M5::pm_blocker_closure_board_count_mismatch"
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
-    assert briefing["release_area_blocker_count"] == 7
-    assert briefing["release_area_owner_handoff_count"] == 7
+    assert briefing["release_area_blocker_count"] == 5
+    assert briefing["release_area_owner_handoff_count"] == 5
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
@@ -110,8 +110,6 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "report::commercial_packaging_milestone_not_green",
-        "support::pm_blocker_closure_board_count_mismatch",
     }
     ci_handoff = release_area_handoffs[
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
@@ -341,7 +339,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     }
     assert rows["phase_1_goal_release_cockpit"]["state"] == "ready"
     assert rows["phase_1_goal_release_cockpit"]["first_blocker"] == (
-        "M5::pm_blocker_closure_board_count_mismatch"
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
     phase_1_summary = rows["phase_1_goal_release_cockpit"]["summary"]
     science_rows = {

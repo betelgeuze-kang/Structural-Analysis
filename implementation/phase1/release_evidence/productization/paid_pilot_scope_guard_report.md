@@ -45,7 +45,7 @@
 
 | Evidence Artifact | Present | Required Pass | Contract Pass |
 |---|---|---|---|
-| `pm_release_gate_report` | `True` | `False` | `False` |
+| `pm_release_gate_report` | `True` | `False` | `True` |
 | `support_bundle_manifest` | `True` | `True` | `True` |
 | `pm_owner_evidence_request_packet` | `True` | `True` | `True` |
 | `pm_release_gate_reviewer_handoff` | `True` | `True` | `True` |

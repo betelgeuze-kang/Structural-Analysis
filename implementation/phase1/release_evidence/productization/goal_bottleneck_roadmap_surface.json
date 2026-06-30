@@ -161,12 +161,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T01:58:23.610447+00:00",
+  "generated_at": "2026-06-30T02:10:45.558288+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:d5f27e19224137df501234c6ddc5bcf894d3a97442329db6d361baca7168f8d5",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:dbe8a09a77f11d85a148751721fc71d0c8ac0e087ca3038f575c8f5f9a63855d",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:6d0a58577702540e7231c69828d7d07d6c1de7764621c5188a257d432cbb27bd",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:26b9c92c49c7a790aa37008c011f96170c7335bbdcc4c61d732df713e441a92f",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:f77d9cf7bb9c85bb3bde5665ebee04672c95d04c626d0f745b5b02297dbbdb75",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5dc8af0970c8694623e91e25e888a74d1466033770ce1dc76b0085419eaaf574",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:9a1d84d98ea81064ea717384b0dee1305a66b40a0420e9ce439fb8d1c70f63ab",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:8a2996d09d851bbd3187205b68ec03c5c164a80ec4606f167f6f23f5a777a581",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:ef50c77b0801fe9fcfd65e36994db0ae0130b3a32edc7ef336297402a16f070e",
@@ -174,7 +174,7 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:c45c11a16a447cb9bcc7be0d91f1d81b35f2c6478ee219c35b74f4e94526d456",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:4459ec6444d57d718d6ceb183c13fb7681c1631218af23d18b2f8da3a40cb4fc",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:62a5c4f1277a81dbaee1afe08c9762c206c1f4343f603d248fb34f81ee80a84d",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:4cdf9323476bdbc2d77aa4aaac84990f3cd665bc3d37e9c26c668d292e10ef8b",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6c5d7f4825ca7caaa808616f4511c372d366366d94dc416749dd1c1c2b9c3ab9",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:487cfcaa7356a50b7de27247e36307066096b78760f7811f5cd692e199a3e312",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
@@ -444,14 +444,14 @@
     "next_owner_handoff_count": 3,
     "next_owner_handoff_slot_count": 8,
     "plain_status": "Release is blocked. The product can remain in restricted alpha/beta preparation, but it must not be presented as fully release-ready.",
-    "primary_release_blocker": "M5::pm_blocker_closure_board_count_mismatch",
+    "primary_release_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "primary_roadmap_bottleneck": "public_benchmark_source_of_truth_not_ready",
     "primary_roadmap_phase_id": "phase_2_public_benchmark_harness",
     "refresh_required_operator_action_count": 0,
     "refresh_required_operator_actions": [],
     "release_allowed": false,
-    "release_area_blocker_count": 7,
-    "release_area_owner_handoff_count": 7,
+    "release_area_blocker_count": 5,
+    "release_area_owner_handoff_count": 5,
     "release_area_owner_handoffs": [
       {
         "acceptance_criteria": [
@@ -505,27 +505,6 @@
       },
       {
         "acceptance_criteria": [
-          "`report::commercial_packaging_milestone_not_green` absent from `full_release_blockers`",
-          "`full_release_gate_ready == true` after PM report regeneration"
-        ],
-        "acceptance_criteria_count": 2,
-        "blocker_id": "report::commercial_packaging_milestone_not_green",
-        "evidence_artifact_keys": [
-          "pm_release_gate_report",
-          "release_registry",
-          "reproducibility_lock",
-          "workflow_productization"
-        ],
-        "evidence_state": "open_release_evidence_blocker",
-        "external_input_required": false,
-        "handoff_state": "local_remediation_ready",
-        "namespace": "report",
-        "owner": "release_owner",
-        "owner_action": "Resolve `commercial_packaging_milestone_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.",
-        "title": "Report"
-      },
-      {
-        "acceptance_criteria": [
           "`ux_new_user_observation_report.json.contract_pass == true`",
           "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
           "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`"
@@ -573,31 +552,6 @@
         "owner": "ux_research_owner",
         "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
         "title": "UX"
-      },
-      {
-        "acceptance_criteria": [
-          "`support::pm_blocker_closure_board_count_mismatch` absent from `full_release_blockers`",
-          "`full_release_gate_ready == true` after PM report regeneration"
-        ],
-        "acceptance_criteria_count": 2,
-        "blocker_id": "support::pm_blocker_closure_board_count_mismatch",
-        "evidence_artifact_keys": [
-          "limitation_manual",
-          "pm_release_blocker_action_register",
-          "pm_release_blocker_closure_board",
-          "pm_release_gate_report",
-          "pm_release_reproduction_command_audit",
-          "runtime_packaging",
-          "support_bundle",
-          "template_evidence_safety"
-        ],
-        "evidence_state": "open_release_evidence_blocker",
-        "external_input_required": false,
-        "handoff_state": "local_remediation_ready",
-        "namespace": "support",
-        "owner": "release_owner",
-        "owner_action": "Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
-        "title": "Support"
       },
       {
         "acceptance_criteria": [
@@ -1363,13 +1317,13 @@
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
     "approval_token_count": 4,
-    "blocked_release_count": 8,
+    "blocked_release_count": 5,
     "broad_gpcr_family_claim_safe": false,
     "evidence_surface_count": 12,
-    "first_blocker": "M5::pm_blocker_closure_board_count_mismatch",
+    "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 16,
+    "operator_action_count": 13,
     "pocketmd_lite_product_surface_ready": false,
     "public_benchmark_ready": false,
     "release_allowed": false,
@@ -1571,14 +1525,14 @@
     {
       "blocked_criteria": [],
       "blocked_criteria_count": 0,
-      "bottleneck": "M5::pm_blocker_closure_board_count_mismatch",
+      "bottleneck": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
       ],
       "first_blocked_target": "",
-      "first_blocker": "M5::pm_blocker_closure_board_count_mismatch",
+      "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "linked_routes": [
         "/goal",
         "/goal/bottleneck",
@@ -1597,7 +1551,7 @@
         "action_register_contract_pass": false,
         "approval_token_count": 4,
         "blocked_capability_count": 4,
-        "blocked_release_count": 8,
+        "blocked_release_count": 5,
         "first_locked_science_evidence_surface": {
           "bottleneck": "h_bond_evidence_surface_locked",
           "capability_blocker_count": 2,
@@ -1622,7 +1576,7 @@
             "h_bond_backmap_evidence_surface"
           ]
         },
-        "operator_action_count": 16,
+        "operator_action_count": 13,
         "product_capability_count": 5,
         "release_allowed": false,
         "science_evidence_surface_bottlenecks": [
@@ -3331,7 +3285,7 @@
       ]
     }
   },
-  "source_commit_sha": "b887e1753f31fe42fc22eb50a53ffe840e38b5f3",
+  "source_commit_sha": "1c939c899382aca133c2c9bc640a6e0ef94560c0",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
