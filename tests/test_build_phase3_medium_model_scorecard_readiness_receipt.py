@@ -34,18 +34,23 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["pass_or_approved_review_count"] == 0
     assert payload["local_candidate_artifact_count"] == 2
     assert payload["local_topology_contract_pass"] is True
-    assert payload["required_evidence_pass_count"] == 1
+    assert payload["required_evidence_pass_count"] == 3
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
     assert "reference_outputs_missing" in payload["blockers"]
     assert "normalization_not_implemented" in payload["blockers"]
-    assert "opensees_medium_runner_command_missing" in payload["blockers"]
+    assert "opensees_medium_runner_command_missing" not in payload["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in payload["blockers"]
     assert "medium_model_pass_or_review_missing" in payload["blockers"]
+    assert payload["runner_command_ready"] is True
+    assert "run_phase3_medium_model_scorecard_receipt.py" in payload["runner_command_template"]
+    assert payload["resource_envelope"]["default_timeout_seconds"] == 3600
     assert payload["local_parser_boundary"]["topology_contract_pass"] is True
     assert "parser input evidence" in payload["local_parser_boundary"]["claim_boundary"]
     assert payload["scorecard_receipt_template"]["schema_version"] == "phase3-medium-model-scorecard-receipt.v1"
+    assert payload["scorecard_receipt_template"]["crashed"] is False
+    assert payload["scorecard_receipt_template"]["oom"] is False
     assert payload["scorecard_receipt_template"]["contract_pass"] is False
-    assert "parser-only" in payload["claim_boundary"]
+    assert "operator scorecard runner command" in payload["claim_boundary"]
 
 
 def test_medium_model_scorecard_readiness_check_detects_missing_output(tmp_path: Path) -> None:

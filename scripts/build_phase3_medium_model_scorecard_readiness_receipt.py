@@ -28,8 +28,31 @@ MEDIUM_MODEL_INPUTS = [
     Path("implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"),
     Path("scripts/build_phase3_opensees_source_license_receipt.py"),
     Path("scripts/build_phase3_medium_model_scorecard_readiness_receipt.py"),
+    Path("scripts/run_phase3_medium_model_scorecard_receipt.py"),
     Path("src/structural_analysis/benchmark/acquisition.py"),
 ]
+RUNNER_SCRIPT = Path("scripts/run_phase3_medium_model_scorecard_receipt.py")
+RUNNER_COMMAND_TEMPLATE = (
+    "python3 scripts/run_phase3_medium_model_scorecard_receipt.py "
+    "--model OPERATOR_ATTACHED_MODEL.json "
+    "--source-id OPERATOR_ATTACHED_SOURCE_ID "
+    "--case-id OPERATOR_ATTACHED_CASE_ID "
+    "--source-sha256 OPERATOR_ATTACHED_SHA256 "
+    "--scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json "
+    "--out implementation/phase1/release_evidence/productization/"
+    "medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json "
+    "--result-out implementation/phase1/release_evidence/productization/"
+    "medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json "
+    "--report-out implementation/phase1/release_evidence/productization/"
+    "medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json "
+    "--analysis-type model_health --fail-blocked"
+)
+RESOURCE_ENVELOPE = {
+    "default_timeout_seconds": 3600,
+    "default_memory_limit_gb": 32.0,
+    "artifact_retention_policy": "operator_attached_scorecard_receipt_result_and_validation_report",
+    "execution_scope": "operator_workstation_or_scheduled_self_hosted_runner",
+}
 REQUIRED_EVIDENCE = (
     {
         "id": "authoritative_source",
@@ -65,13 +88,6 @@ REQUIRED_EVIDENCE = (
         "status": "missing",
         "contract_pass": False,
         "blocker": "normalization_not_implemented",
-    },
-    {
-        "id": "runner_command",
-        "required": "Repeatable medium-model scorecard runner command with selected model inputs and outputs.",
-        "status": "missing",
-        "contract_pass": False,
-        "blocker": "opensees_medium_runner_command_missing",
     },
     {
         "id": "scorecard_execution",
@@ -138,7 +154,36 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         for row in _safe_list(canonical_report.get("rows"))
         if isinstance(row, dict) and row.get("case_id") in {"SCBF16B", "SCBF16B_shell_beam_mix"}
     ]
+    runner_script = repo_root / RUNNER_SCRIPT
+    runner_command_ready = runner_script.exists()
     evidence_rows = [dict(row) for row in REQUIRED_EVIDENCE]
+    evidence_rows.extend(
+        [
+            {
+                "id": "runner_command",
+                "required": (
+                    "Repeatable medium-model scorecard runner command with selected "
+                    "model inputs and output paths."
+                ),
+                "status": "ready" if runner_command_ready else "missing",
+                "contract_pass": runner_command_ready,
+                "blocker": "" if runner_command_ready else "opensees_medium_runner_command_missing",
+                "runner_command_template": RUNNER_COMMAND_TEMPLATE,
+                "runner_script": RUNNER_SCRIPT.as_posix(),
+            },
+            {
+                "id": "resource_envelope",
+                "required": (
+                    "Declared workstation/nightly CPU, memory, timeout, and artifact "
+                    "retention limits for medium scorecard runs."
+                ),
+                "status": "ready",
+                "contract_pass": True,
+                "blocker": "",
+                "resource_envelope": RESOURCE_ENVELOPE,
+            },
+        ]
+    )
     blockers = sorted({str(row["blocker"]) for row in evidence_rows if str(row.get("blocker", ""))})
     evidence_pass_count = sum(1 for row in evidence_rows if row["contract_pass"] is True)
     return {
@@ -163,6 +208,9 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "required_evidence_count": len(evidence_rows),
         "required_evidence_pass_count": evidence_pass_count,
         "required_evidence": evidence_rows,
+        "runner_command_ready": runner_command_ready,
+        "runner_command_template": RUNNER_COMMAND_TEMPLATE,
+        "resource_envelope": RESOURCE_ENVELOPE,
         "local_parser_boundary": {
             "topology_receipt_path": "implementation/phase1/opensees_topology_report.json",
             "topology_contract_pass": bool(topology_report.get("contract_pass")),
@@ -185,7 +233,11 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
             "source_sha256": "OPERATOR_ATTACHED_SHA256",
             "reference_output_sha256": "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256",
             "normalization_receipt": "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT",
-            "runner_command": "OPERATOR_RECORDED_COMMAND",
+            "runner_command": RUNNER_COMMAND_TEMPLATE,
+            "runtime_seconds": "OPERATOR_RECORDED_RUNTIME",
+            "peak_memory_gb": "OPERATOR_RECORDED_PEAK_MEMORY",
+            "crashed": False,
+            "oom": False,
             "metrics": {
                 "residual_formula": "F_internal_minus_F_external",
                 "convergence_history_retained": True,
@@ -207,9 +259,10 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         ),
         "claim_boundary": (
             "This receipt records the evidence contract for OpenSees medium scorecards. "
-            "It preserves local topology/parser evidence as parser-only and does not "
-            "prove source authority, license approval, reference outputs, normalization, "
-            "scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness."
+            "It preserves local topology/parser evidence as parser-only and implements the "
+            "operator scorecard runner command, but it does not prove source authority, "
+            "license approval, reference outputs, normalization, scorecard execution, "
+            "PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness."
         ),
     }
 
