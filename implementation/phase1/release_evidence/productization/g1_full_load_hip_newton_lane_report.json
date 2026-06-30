@@ -1431,7 +1431,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T01:45:43.198784+00:00",
+  "generated_at": "2026-06-30T01:52:06.570076+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -1471,6 +1471,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "f9173f7b5928c0dfe6a295eb7c0d08b965e895bd",
+  "source_commit_sha": "59740a00ef53e9cc0c25dc3fb03153efd87e11c8",
   "status": "blocked"
 }

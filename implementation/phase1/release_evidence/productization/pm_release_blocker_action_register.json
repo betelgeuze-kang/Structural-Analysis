@@ -26,10 +26,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T01:48:49.338198+00:00",
+  "generated_at": "2026-06-30T01:52:33.486060+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c6019084813ba1bcb4565a3d3df9484f208f6d6f425cf16cab07353993ca38f5",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:b31c6dfd006386bc249f06def8a2f05d0ce4bc2e080967ccb9b11ab2417aa84e",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:593ab91f6eb59611fe6a1df74d1d54f20528138ee8e033b34d8ac51526db612d",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:e5d5e7df1dd4963e43354dae7e4d4224e1b8a1172725348a7a80081f3112f788",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -221,9 +221,9 @@
         "pm_blocker_closure_board_open_blocker_count": 9,
         "pm_blocker_register_external_owner_input_ready_count": 9,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 7,
+        "pm_blocker_register_handoff_ready_count": 13,
+        "pm_blocker_register_open_blocker_count": 13,
+        "pm_blocker_register_release_area_blocker_count": 8,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
         "pm_release_reproduction_command_audit_command_count": 320,
         "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=320 | violations=0",
@@ -761,9 +761,9 @@
         "pm_blocker_closure_board_open_blocker_count": 9,
         "pm_blocker_register_external_owner_input_ready_count": 9,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 7,
+        "pm_blocker_register_handoff_ready_count": 13,
+        "pm_blocker_register_open_blocker_count": 13,
+        "pm_blocker_register_release_area_blocker_count": 8,
         "pm_failure_bundle_coverage_index": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "pm_failure_bundle_coverage_index_sha256": "76a525df665cd24ac179cc8481c90c38d6f4a39993ac97dfd990230e612d52d9",
         "pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
@@ -1159,7 +1159,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "f9173f7b5928c0dfe6a295eb7c0d08b965e895bd",
+  "source_commit_sha": "59740a00ef53e9cc0c25dc3fb03153efd87e11c8",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,

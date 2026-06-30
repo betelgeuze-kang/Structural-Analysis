@@ -385,7 +385,7 @@
       "summary_line": "Korean source collect: PASS | sources=22 | collected=10 | metadata_only=12 | rejected=0 | bytes=6628988 | seed_complete=22 | exact_topology=7 | native_writeback=7 | curated_local_ifc=5/7 | p0_focus=18"
     }
   ],
-  "generated_at": "2026-06-30T01:47:19.448019+00:00",
+  "generated_at": "2026-06-30T01:52:07.262370+00:00",
   "input_checksums": {
     "implementation/phase1/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
     "implementation/phase1/hf_benchmark_report.atwood_open.json": "sha256:5cf552c1aa8c5ca61b5677bf2dad3fc13c5876a962034a882e5834c2e5229320",
@@ -398,9 +398,9 @@
     "implementation/phase1/open_data/korea/korean_public_structure_collection_report.json": "sha256:5f440ab967a05a6303c30acb4b1f68bb86c9229219989ebef0aec0d1ddc1f711",
     "implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_benchmark_gate_report.json": "sha256:23ff66874024c15d800a9f2b359bb11435d9520899a719100821487be0bb0962",
     "implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json": "sha256:2e6bdaab47358db2788928716d5a880403a02270cb6f3a6ccd674938e0a18661",
-    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:9f727a0814671101c1a3ca9eda17d163c954e903fd515a7f3d7a7cd71fc49ee5",
-    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:aa472c7fffcdd0470cbfbc54933d3eb84f88e6d7e784c146a6ed9265350b7c6a",
-    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:3473116e62073b1523878271e98ee6e567c86876407e9d91693aab42ccedd1fa"
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:4b4fcd80a7f22aeb1df086ba0bc9e41127ed3c12e262ea51aa198995795013b2",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:5d277e6bbd1e3a052eccb7d7f8b1427c180d0a6654951b27cc9378de27405520",
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:3c83f90d90e1d331bd5e163c6247bc3b73344c837c53535676325f49d81c5847"
   },
   "next_action": "run P1 quality/fallback/benchmark breadth execution",
   "p0_release_blocker": false,
@@ -410,7 +410,7 @@
   "reuse_policy": "status_rebuilt_from_existing_p1_readiness_commercial_benchmark_and_sidecar_receipts",
   "reused_evidence": true,
   "schema_version": "p1-benchmark-breadth-status.v1",
-  "source_commit_sha": "f9173f7b5928c0dfe6a295eb7c0d08b965e895bd",
+  "source_commit_sha": "59740a00ef53e9cc0c25dc3fb03153efd87e11c8",
   "status": "ready",
   "summary": {
     "benchmark_report_count": 10,
