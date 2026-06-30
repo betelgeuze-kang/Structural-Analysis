@@ -76,6 +76,7 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert "opensees_medium_scorecard_execution_missing" in payload["blockers"]
     assert "opensees_medium_runner_command_missing" in payload["blockers"]
     assert "medium_model_pass_or_review_missing" in payload["blockers"]
+    assert "large_model_runner_not_implemented" not in payload["blockers"]
     assert "large_model_execution_receipt_missing" in payload["blockers"]
     assert "large_model_scorecard_or_review_missing" in payload["blockers"]
     assert "query_task_manifest_missing" in payload["blockers"]
@@ -141,6 +142,7 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     )
     assert large_model["existing_receipts"][0]["contract_pass"] is False
     assert large_model["existing_receipts"][0]["current_large_model_execution_receipt_count"] == 0
+    assert large_model["existing_receipts"][0]["runner_command_ready"] is True
     assert "Large-model runner readiness contract only" in large_model["existing_receipts"][0]["claim_boundary"]
     clean_ifc = rows_by_source["buildingsmart_clean_ifc_samples"]
     assert clean_ifc["source_url_or_doi"].startswith(

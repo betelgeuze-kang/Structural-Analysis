@@ -159,14 +159,14 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                 "license_review_pending",
                 "checksum_missing",
                 "reference_outputs_missing",
-                "large_model_runner_not_implemented",
                 "nightly_lane_not_configured",
                 "large_model_execution_receipt_missing",
                 "large_model_scorecard_or_review_missing",
             ),
             claim_boundary=(
-                "OpenSees mega-tall/large-model policy only; this is not a large-model "
-                "execution, memory, runtime, or accuracy receipt."
+                "OpenSees mega-tall/large-model policy only. A local operator receipt "
+                "runner exists, but this row is not a large-model execution, memory, "
+                "runtime, or accuracy receipt."
             ),
             existing_receipts=(
                 {
@@ -180,8 +180,10 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                     "current_large_model_execution_receipt_count": 0,
                     "crash_oom_free_execution_count": 0,
                     "scorecard_or_review_count": 0,
+                    "runner_command_ready": True,
                     "claim_boundary": (
-                        "Large-model runner readiness contract only; no acquired source, "
+                        "Large-model runner readiness contract only; runner command and "
+                        "resource envelope exist, but there is still no acquired source, "
                         "license approval, checksum, reference output, normalized model, "
                         "execution, crash/OOM-free result, or scorecard evidence."
                     ),

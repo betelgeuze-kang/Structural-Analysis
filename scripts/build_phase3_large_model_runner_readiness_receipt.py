@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a blocked Phase 3 large-model runner readiness receipt."""
+"""Build a conservative Phase 3 large-model runner readiness receipt."""
 
 from __future__ import annotations
 
@@ -26,7 +26,30 @@ DEFAULT_OUT = PRODUCTIZATION / "phase3_large_model_runner_readiness_receipt.json
 LARGE_MODEL_INPUTS = [
     Path("src/structural_analysis/benchmark/acquisition.py"),
     Path("scripts/build_phase3_large_model_runner_readiness_receipt.py"),
+    Path("scripts/run_phase3_large_model_execution_receipt.py"),
 ]
+RUNNER_SCRIPT = Path("scripts/run_phase3_large_model_execution_receipt.py")
+RUNNER_COMMAND_TEMPLATE = (
+    "python3 scripts/run_phase3_large_model_execution_receipt.py "
+    "--model OPERATOR_ATTACHED_MODEL.json "
+    "--source-id OPERATOR_ATTACHED_SOURCE_ID "
+    "--case-id OPERATOR_ATTACHED_CASE_ID "
+    "--source-sha256 OPERATOR_ATTACHED_SHA256 "
+    "--scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json "
+    "--out implementation/phase1/release_evidence/productization/"
+    "large_model_execution_receipts/OPERATOR_ATTACHED_CASE_ID.execution_receipt.json "
+    "--result-out implementation/phase1/release_evidence/productization/"
+    "large_model_execution_receipts/OPERATOR_ATTACHED_CASE_ID.result.json "
+    "--report-out implementation/phase1/release_evidence/productization/"
+    "large_model_execution_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json "
+    "--analysis-type model_health --fail-blocked"
+)
+RESOURCE_ENVELOPE = {
+    "default_timeout_seconds": 7200,
+    "default_memory_limit_gb": 64.0,
+    "artifact_retention_policy": "operator_attached_execution_receipt_result_and_validation_report",
+    "execution_scope": "operator_workstation_or_scheduled_self_hosted_runner",
+}
 REQUIRED_EVIDENCE = (
     {
         "id": "authoritative_source",
@@ -57,18 +80,6 @@ REQUIRED_EVIDENCE = (
         "required": "Canonical model normalization with units, coordinates, and mapping coverage.",
         "status": "missing",
         "blocker": "normalization_not_implemented",
-    },
-    {
-        "id": "runner_command",
-        "required": "Repeatable large-model runner command with selected model inputs and output paths.",
-        "status": "missing",
-        "blocker": "large_model_runner_not_implemented",
-    },
-    {
-        "id": "resource_envelope",
-        "required": "Declared workstation/nightly CPU, memory, timeout, and artifact retention limits.",
-        "status": "missing",
-        "blocker": "nightly_lane_not_configured",
     },
     {
         "id": "execution_receipt",
@@ -114,8 +125,44 @@ def build_phase3_large_model_runner_readiness_receipt(
     source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
+    runner_script = repo_root / RUNNER_SCRIPT
+    runner_command_ready = runner_script.exists()
     evidence_rows = [dict(row, contract_pass=False) for row in REQUIRED_EVIDENCE]
-    blockers = sorted({str(row["blocker"]) for row in REQUIRED_EVIDENCE})
+    evidence_rows.extend(
+        [
+            {
+                "id": "runner_command",
+                "required": (
+                    "Repeatable large-model runner command with selected model inputs "
+                    "and output paths."
+                ),
+                "status": "ready" if runner_command_ready else "missing",
+                "contract_pass": runner_command_ready,
+                "blocker": "" if runner_command_ready else "large_model_runner_not_implemented",
+                "runner_command_template": RUNNER_COMMAND_TEMPLATE,
+                "runner_script": RUNNER_SCRIPT.as_posix(),
+            },
+            {
+                "id": "resource_envelope",
+                "required": (
+                    "Declared workstation/nightly CPU, memory, timeout, and artifact "
+                    "retention limits."
+                ),
+                "status": "ready",
+                "contract_pass": True,
+                "blocker": "",
+                "resource_envelope": RESOURCE_ENVELOPE,
+            },
+        ]
+    )
+    blockers = sorted(
+        {
+            str(row["blocker"])
+            for row in evidence_rows
+            if row.get("contract_pass") is not True and str(row.get("blocker", ""))
+        }
+    )
+    required_evidence_pass_count = sum(1 for row in evidence_rows if row.get("contract_pass") is True)
     return {
         "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -135,8 +182,11 @@ def build_phase3_large_model_runner_readiness_receipt(
         "crash_oom_free_execution_count": 0,
         "scorecard_or_review_count": 0,
         "required_evidence_count": len(evidence_rows),
-        "required_evidence_pass_count": 0,
+        "required_evidence_pass_count": required_evidence_pass_count,
         "required_evidence": evidence_rows,
+        "runner_command_ready": runner_command_ready,
+        "runner_command_template": RUNNER_COMMAND_TEMPLATE,
+        "resource_envelope": RESOURCE_ENVELOPE,
         "runner_receipt_template": {
             "schema_version": "phase3-large-model-execution-receipt.v1",
             "source_id": "OPERATOR_ATTACHED_SOURCE_ID",
@@ -159,18 +209,20 @@ def build_phase3_large_model_runner_readiness_receipt(
         "blockers": blockers,
         "owner_action": (
             "Acquire two licensed large OpenSees/reference models, attach checksums and "
-            "reference outputs, normalize them into the canonical model, configure the "
-            "nightly/workstation runner, then attach crash/OOM-free execution receipts "
-            "and scorecard or approved REVIEW evidence."
+            "reference outputs, normalize them into the canonical model, run the "
+            "operator execution receipt command for each model, then attach crash/"
+            "OOM-free execution receipts and scorecard or approved REVIEW evidence."
         ),
         "summary_line": (
             "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | "
-            f"evidence=0/{len(evidence_rows)}"
+            f"evidence={required_evidence_pass_count}/{len(evidence_rows)}"
         ),
         "claim_boundary": (
             "This receipt is a readiness contract for large-model execution evidence. "
-            "It does not acquire sources, approve licenses, run mega-tall models, prove "
-            "crash/OOM-free behavior, create scorecards, or close Phase 3/Developer Preview RC."
+            "The runner command and resource envelope are implemented, but this does "
+            "not acquire sources, approve licenses, run mega-tall models, prove crash/"
+            "OOM-free behavior, create scorecards, satisfy 2/2 large executions, or "
+            "close Phase 3/Developer Preview RC."
         ),
     }
 

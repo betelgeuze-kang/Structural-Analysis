@@ -1021,6 +1021,13 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "required_evidence_count": int(large_model_runner.get("required_evidence_count", 0) or 0),
             "required_evidence_pass_count": int(large_model_runner.get("required_evidence_pass_count", 0) or 0),
             "blockers": large_runner_blockers,
+            "runner_command_ready": bool(large_model_runner.get("runner_command_ready") is True),
+            "runner_command_template": str(large_model_runner.get("runner_command_template", "")),
+            "resource_envelope": (
+                large_model_runner.get("resource_envelope")
+                if isinstance(large_model_runner.get("resource_envelope"), dict)
+                else {}
+            ),
             "runner_receipt_template": (
                 large_model_runner.get("runner_receipt_template")
                 if isinstance(large_model_runner.get("runner_receipt_template"), dict)

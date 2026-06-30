@@ -33,15 +33,20 @@ def test_large_model_runner_readiness_receipt_blocks_without_execution_evidence(
     assert payload["current_large_model_execution_receipt_count"] == 0
     assert payload["crash_oom_free_execution_count"] == 0
     assert payload["scorecard_or_review_count"] == 0
-    assert payload["required_evidence_pass_count"] == 0
+    assert payload["required_evidence_pass_count"] == 2
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
-    assert "large_model_runner_not_implemented" in payload["blockers"]
+    assert payload["runner_command_ready"] is True
+    assert "run_phase3_large_model_execution_receipt.py" in payload["runner_command_template"]
+    assert payload["resource_envelope"]["default_timeout_seconds"] == 7200
+    assert "large_model_runner_not_implemented" not in payload["blockers"]
+    assert "nightly_lane_not_configured" not in payload["blockers"]
     assert "large_model_execution_receipt_missing" in payload["blockers"]
     assert "large_model_scorecard_or_review_missing" in payload["blockers"]
     assert payload["runner_receipt_template"]["schema_version"] == "phase3-large-model-execution-receipt.v1"
     assert payload["runner_receipt_template"]["crashed"] is False
     assert payload["runner_receipt_template"]["oom"] is False
     assert payload["runner_receipt_template"]["contract_pass"] is False
+    assert "runner command and resource envelope are implemented" in payload["claim_boundary"]
     assert "does not acquire sources" in payload["claim_boundary"]
 
 

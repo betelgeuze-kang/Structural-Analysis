@@ -57,6 +57,20 @@ def _blockers(payload: dict[str, Any]) -> list[str]:
     return [str(blocker) for blocker in payload.get("blockers", []) if str(blocker)]
 
 
+def _acquisition_blockers_for_lanes(acquisition_plan: dict[str, Any], lanes: set[str]) -> list[str]:
+    rows = acquisition_plan.get("rows")
+    rows = rows if isinstance(rows, list) else []
+    blockers: list[str] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        row_lanes = {str(lane) for lane in row.get("lanes", [])}
+        if not lanes.intersection(row_lanes):
+            continue
+        blockers.extend(str(blocker) for blocker in row.get("blockers", []) if str(blocker))
+    return sorted(dict.fromkeys(blockers))
+
+
 def _benchmark_scale_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
     group_specs = [
         (
@@ -169,6 +183,7 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
     repo_root = repo_root.resolve()
     medium = _load_json(repo_root, PHASE3_MEDIUM_MODEL_SCORECARD)
     large = _load_json(repo_root, PHASE3_LARGE_MODEL_RUNNER)
+    acquisition_plan = _load_json(repo_root, PHASE3_ACQUISITION_PLAN)
     summary = _load_json(repo_root, PHASE3_FACTORY_SUMMARY)
 
     medium_required = int(medium.get("required_medium_model_count", 5) or 5)
@@ -189,8 +204,17 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
         and large_crash_oom_free >= large_required
         and large_scorecard_or_review >= large_required
     )
-    medium_blockers = _blockers(medium)
-    large_blockers = _blockers(large)
+    medium_blockers = [
+        *_blockers(medium),
+        *_acquisition_blockers_for_lanes(acquisition_plan, {"opensees-medium"}),
+    ]
+    large_blockers = [
+        *_blockers(large),
+        *_acquisition_blockers_for_lanes(
+            acquisition_plan,
+            {"opensees-megatall", "large-model-performance"},
+        ),
+    ]
     if medium_current < medium_required:
         medium_blockers.append(f"medium_structural_models_current_below_required:{medium_current}/{medium_required}")
     if medium_review < medium_required:

@@ -77,7 +77,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     )
     large_blockers = final_gates["large_models_crash_oom_free"]["blockers"]
     assert "large_structural_models_current_below_required:0/2" in large_blockers
-    assert "large_model_runner_not_implemented" in large_blockers
+    assert "large_model_runner_not_implemented" not in large_blockers
     assert "nightly_lane_not_configured" in large_blockers
     assert "large_model_execution_receipt_missing" in large_blockers
     assert "large_model_scorecard_or_review_missing" in large_blockers
@@ -92,7 +92,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert large_gate_grouping["schema_version"] == "phase6-benchmark-scale-blocker-groups.v1"
     assert large_gate_grouping["blocker_count"] == len(large_blockers)
     assert large_gate_grouping["unassigned_blockers"] == []
-    assert "large_model_runner_not_implemented" in large_gate_grouping["groups"][
+    assert "large_model_execution_receipt_missing" in large_gate_grouping["groups"][
         "large_runner_execution"
     ]["blockers"]
     assert "Policy-only acquisition rows" in " ".join(
@@ -372,6 +372,10 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert quantity_handoff["targets"]["large_structural_models"]["contract_pass"] is False
     assert (
         "large_model_runner_not_implemented"
+        not in quantity_handoff["targets"]["large_structural_models"]["acquisition_blockers"]
+    )
+    assert (
+        "nightly_lane_not_configured"
         in quantity_handoff["targets"]["large_structural_models"]["acquisition_blockers"]
     )
     assert quantity_handoff["targets"]["large_structural_models"]["runner_readiness_receipt"].endswith(
@@ -430,8 +434,14 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert large_runner_handoff["current_large_model_execution_receipt_count"] == 0
     assert large_runner_handoff["crash_oom_free_execution_count"] == 0
     assert large_runner_handoff["scorecard_or_review_count"] == 0
-    assert large_runner_handoff["required_evidence_pass_count"] == 0
-    assert "large_model_runner_not_implemented" in large_runner_handoff["blockers"]
+    assert large_runner_handoff["required_evidence_pass_count"] == 2
+    assert large_runner_handoff["runner_command_ready"] is True
+    assert "run_phase3_large_model_execution_receipt.py" in large_runner_handoff[
+        "runner_command_template"
+    ]
+    assert large_runner_handoff["resource_envelope"]["default_memory_limit_gb"] == 64.0
+    assert "large_model_runner_not_implemented" not in large_runner_handoff["blockers"]
+    assert "large_model_execution_receipt_missing" in large_runner_handoff["blockers"]
     assert large_runner_handoff["runner_receipt_template"]["schema_version"] == (
         "phase3-large-model-execution-receipt.v1"
     )
