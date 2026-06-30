@@ -126,7 +126,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 12,
+      "blocker_count": 9,
       "blockers": [
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
         "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -136,10 +136,7 @@
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight_not_synced",
         "pm_release::github_sync::github_sync_remote_sync_pending",
-        "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
+        "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
       ],
       "description": "Developer Preview productization evidence: release freshness/sync, CI/runner streaks, generated artifact consistency, and human UX workflow observation.",
       "root_streams": [
@@ -149,7 +146,7 @@
       ]
     }
   },
-  "blocker_count": 40,
+  "blocker_count": 37,
   "blockers": [
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
     "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -187,10 +184,7 @@
     "pm_release::github_sync::github_sync_preflight_not_synced",
     "pm_release::github_sync::github_sync_remote_sync_pending",
     "pm_release::security::license_status_not_configured",
-    "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-    "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
-    "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-    "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
+    "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
   ],
   "claim_boundary": {
     "assisted_service_pilot": "assisted_service_pilot_ready is the engineer-review workstation service track. It requires workstation delivery 8/8, supported-scope guard, full quality, clean GitHub sync, real human UX observation, product/legal license approval, acceptance package, and explicit proxy/fallback/engineer-review boundaries. It does not relax solver_product gates.",
@@ -209,9 +203,8 @@
   "components": {
     "assisted_service_pilot": {
       "acceptance_package_ready": true,
-      "blocker_count": 5,
+      "blocker_count": 4,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "full_quality_not_ready",
         "github_sync_not_clean",
         "human_ux_observation_not_ready",
@@ -233,7 +226,7 @@
       "human_ux_observation_ready": false,
       "license_approval_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false,
+      "snapshot_source_state_consistent": true,
       "supported_scope_guard_ready": true,
       "workstation_delivery_8_of_8": true
     },
@@ -346,12 +339,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 5,
+      "blocker_count": 6,
       "category_counts": {
         "benchmark": 0,
         "future commercial": 32,
         "numerical": 4,
-        "software product": 1
+        "software product": 2
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -2844,9 +2837,8 @@
       "remote_github_sync_clean": false
     },
     "solver_product": {
-      "blocker_count": 6,
+      "blocker_count": 5,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "independent_product_not_ready",
         "g1_full_mesh_full_load_not_ready",
         "g1_full_load_hip_newton_lane_not_ready",
@@ -2860,13 +2852,13 @@
       "g1_full_mesh_full_load_ready": false,
       "independent_product_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false
+      "snapshot_source_state_consistent": true
     }
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_fresh": false,
+  "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-30T14:54:55.083727+00:00",
+  "generated_at": "2026-06-30T14:57:30.316119+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
@@ -2876,8 +2868,8 @@
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:e228e436effc06ee990db8cecfc2e52ec4fe463dd62d66cfe5f33136cb69eb5c",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:9412702c67789889cbff2d1b1a4d0236e4b926737b0a0b82d0961f1b0a6954d2",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:c5a037a1c012126766a071a09933e13a4056cb3d484a4acbe1a706b29b539e7d",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:86d67c3f82f3b0c66e9b60a91caa43adf04ca726648c5df384e3c8c752e086fd",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f3ecb8704c08819375c08e3ba94f717c8be17174c73585d7c9fb55ac1a71b1d3",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:15a320f1fc8997573cc82196e060a4d34ccf4982209a114daa48cc51ce2b113b",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:0096877abcb9656a6af795f5f113c9ffbabc1240dfaf6c93c8596cbe1d36d625",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:5659fe4dcd33baea7a1657f00124f2416de3106344e5a5f96bdf88c75f0e92f0",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:9f778564f2324c807ee54b0475ac507cb2392e2b922d8151a7767e96363a9fac",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e49185dff08cef0bcc71da292ce4e61d2503510b4416d9044eee350eb2235458",
@@ -2890,8 +2882,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:d15528d18458cd950beeebb1fa8e5e52fa7ccb96c52cdde70c95fe9b0f4b3474",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:a61800d5015c025d255fbbb9a5f73ac78bf9be62f1405e3c4ee2ca9d0bd816f4",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:080ce889538443cf3853e2dd3817039dea1136196913ed8c25298d5cb9262f13",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:7782654fffaafb8810f32b85cc9e6d62a31dcaa3437de458ad9d6415f1e56628",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7f39549f949d731e55fe69f1de9363c2c7b63e83e350023af6f31906ba761359",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:3e129649c5a06b21cad3ee8e39f0543fd4cb54f8bf3121aa4704688bcf430a66",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:b87844fbe6607f6e496d604e81807cee075e9ebd00f3b313da55d428f0c9ba17",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:e19ccd54215e5537053af0437f8dacc576459d9be20a726a3cf0d26669c70d77",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2900,7 +2892,7 @@
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
-  "reason_code": "STALE_OR_INCONSISTENT",
+  "reason_code": "BLOCKED",
   "release_decision": {
     "approval_token_count": 7,
     "blocked_release_count": 8,
@@ -3523,23 +3515,20 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 6,
+      "blocker_count": 3,
       "blockers": [
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight_not_synced",
-        "pm_release::github_sync::github_sync_remote_sync_pending",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
+        "pm_release::github_sync::github_sync_remote_sync_pending"
       ]
     }
   },
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "snapshot_source_state_consistent": false,
+  "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "da3ff469a439434a57fb15710c23d14c8606afb4",
-  "stale_or_inconsistent": true,
+  "source_commit_sha": "8632a6fbee5409f096674b160606fda82f223262",
+  "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -3627,27 +3616,24 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [
-          "scripts/build_pm_release_blocker_action_register.py",
-          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
-          "scripts/materialize_pocketmd_lite_topk_survival_report.py",
-          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
-          "scripts/report_pm_release_gate.py"
-        ],
-        "generated_at": "2026-06-30T14:29:56.872410+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-30T14:57:26.163305+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "5998ca865bbfe9f602129a41a6dc7650d958e264",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_matches_head": true,
+        "source_commit_sha": "8632a6fbee5409f096674b160606fda82f223262",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3657,6 +3643,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3675,6 +3667,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3684,6 +3679,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3702,6 +3703,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3711,6 +3715,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3729,6 +3739,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3738,6 +3751,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3754,42 +3773,53 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/build_pm_release_blocker_action_register.py",
-          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
-          "scripts/materialize_pocketmd_lite_topk_survival_report.py",
-          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
         ],
-        "generated_at": "2026-06-30T14:32:12.114021+00:00",
+        "generated_at": "2026-06-30T14:56:43.072485+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "12affe4358e6a34bc809528c9a8a1685c73ab80e",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "f775668ad48308bab9e6dc328fc1deeffd6e521e",
+        "source_state_fresh": true,
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_pm_release_blocker_action_register.py",
-          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
-          "scripts/materialize_pocketmd_lite_topk_survival_report.py",
-          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
         ],
-        "generated_at": "2026-06-30T14:32:12.174407+00:00",
+        "generated_at": "2026-06-30T14:56:43.010351+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "12affe4358e6a34bc809528c9a8a1685c73ab80e",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "f775668ad48308bab9e6dc328fc1deeffd6e521e",
+        "source_state_fresh": true,
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
@@ -3800,6 +3830,11 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
           "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -3819,6 +3854,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3828,6 +3866,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3846,6 +3890,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3855,6 +3902,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3873,6 +3926,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3882,6 +3938,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3900,6 +3962,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3909,6 +3974,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3927,6 +3998,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3936,6 +4010,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3954,6 +4034,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3963,6 +4046,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3981,6 +4070,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -3990,6 +4082,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4008,6 +4106,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -4017,6 +4118,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4035,6 +4142,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -4044,6 +4154,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4062,6 +4178,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -4071,6 +4190,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4089,6 +4214,9 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/customer_shadow_evidence_status.json",
           "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
           "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
           "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
           "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -4098,6 +4226,12 @@
           "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4133,7 +4267,10 @@
     },
     "worktree": {
       "dirty": false,
-      "dirty_paths": [],
+      "dirty_paths": [
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -4156,9 +4293,12 @@
         "status": "ready",
         "track_or_add_required_path_count": 0
       },
-      "status_rows": []
+      "status_rows": [
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
     }
   },
-  "status": "stale_or_inconsistent",
+  "status": "blocked",
   "workstation_delivery_ready": true
 }
