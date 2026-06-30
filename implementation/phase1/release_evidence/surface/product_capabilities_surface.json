@@ -1325,7 +1325,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-06-30T06:38:48.848926+00:00",
+  "generated_at": "2026-06-30T06:39:49.462540+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:d5f27e19224137df501234c6ddc5bcf894d3a97442329db6d361baca7168f8d5",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:beb648a879262dbf52294fb7a9df05ffe59f20aa9c5d32d2a4ae0d06511dc496",
@@ -1373,7 +1373,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "5dfd6afd6119f488537644e4666e47bf9ff73a09",
+  "source_commit_sha": "72e9b1f415eb0ab0c21cbcd64dabd46a2cc699af",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
