@@ -562,6 +562,16 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_2["summary"]["vina_gnina_comparison_adapter_summary"][
         "real_comparison_case_count"
     ] == 0
+    assert (
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
+        in phase_2["evidence_artifacts"]
+    )
+    assert phase_2["summary"]["harness_bundle_artifact"].endswith(
+        "public_benchmark_harness_bundle.json"
+    )
+    assert phase_2["summary"]["harness_bundle_index"]["artifact"] == (
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
+    )
     assert "attach_dud_e_lit_pcba_enrichment_intake" in phase_2["next_actions"]
     assert "attach_vina_gnina_comparison_intake" in phase_2["next_actions"]
 

@@ -48,7 +48,8 @@
     "bottleneck": "public_benchmark_source_of_truth_not_ready",
     "evidence_artifacts": [
       "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-      "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+      "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+      "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
     ],
     "first_blocked_target": "casf_pdbbind_subset_intake",
     "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -115,7 +116,8 @@
     "bottleneck": "public_benchmark_source_of_truth_not_ready",
     "evidence_artifacts": [
       "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-      "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+      "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+      "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
     ],
     "first_blocked_target": "casf_pdbbind_subset_intake",
     "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -176,7 +178,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T17:23:35.495603+00:00",
+  "generated_at": "2026-06-30T17:33:10.505817+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:1299c786ce3d9a8086ffb6ef54a9b71727cc3d59b419491f2b7afb82a43ee376",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:87313bdf5cac81f41fc9739e76e751ac95cfad3152f3d964370f2f73f1f25eec",
@@ -187,15 +189,16 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:5b9a691a11468a2aec5214202e86b47c59fda0b3254f9a42ade70ec650b7288f",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:f1c6612462662c6ef1fed38aa1b45c1779e0a93f7072133c3ab46a8c9c9c4a3f",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:70b78ff6ddb6ec4441e85b6d2f4a5d563da2a4be6ab3eb90297c70a113efbd18",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:60f8efcc1580f010f1521f0d355494d55c052b7a264b01ec96ea7e381dade71e",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:2127d917e5e06024b9ee3d4b3a65d559b79c8ae676643d5dd50f064c0e8cf14d",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9ec8f63a1c16605565e1aa270fb0adf5352c306d9acec476e1b353063f4eeadf",
+    "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:0f5036323a68bfcda090637cd9ba12398c2ec131722ed0bd5591eb9b386d5dd4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:ba59fe390f895a854d4f3f7d51921dc262621bc4c6bd4396315ea290302cb1b2",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:362259495c61c684100d4cc269b1178d5a85f7c9778bc5e053ae2d180e93e8fb",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:4c1c070d1d5ffd6e9ad92367b34f29c4adecbeb1f1a36eb00cb8b4e1dd365d8c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:30a83ea2f7d883ca8db99b6c7191a2270da8148b95c822d2a91a15b68d02b592",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:c610de914991d4ed7b39302c32dd62b1a822011772574efd293a4df5d58e0bbc",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:dea8d536b0a7677759207edff403cb0e2fd58bd0a1ac018c7899f7dbc9450a9b",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:bd3c5a6c22f4d496d764f9e45c6c8895497e4373fbe4760a4209b5f0f950cfd3",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:b359e26dcd9ba2e6d5671868e84ea9407b31ce1235312d5fb4d58e948ccbc806",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:be309722ffdb0158213ba0efd4ff2821278e76d95eca7f9503d10ecdb4df0e0f",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:7ea30ad322ea746c030af1aec707363f76ceebad6c14f430d9a8219a6e224ee0",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:f3d768ed86985931216b91e8298f60c4b6528deb324c08ae0cc3067da6395b25"
   },
   "mutation_allowed": false,
@@ -261,7 +264,8 @@
       "bottleneck": "public_benchmark_source_of_truth_not_ready",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
       ],
       "first_blocked_target": "casf_pdbbind_subset_intake",
       "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -328,7 +332,8 @@
       "bottleneck": "public_benchmark_source_of_truth_not_ready",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
       ],
       "first_blocked_target": "casf_pdbbind_subset_intake",
       "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -704,7 +709,8 @@
       "bottleneck": "public_benchmark_source_of_truth_not_ready",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
       ],
       "first_blocked_target": "casf_pdbbind_subset_intake",
       "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -936,7 +942,8 @@
       "bottleneck": "public_benchmark_source_of_truth_not_ready",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
       ],
       "first_blocked_target": "casf_pdbbind_subset_intake",
       "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -1007,7 +1014,8 @@
       "bottleneck": "public_benchmark_source_of_truth_not_ready",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
       ],
       "first_blocked_target": "casf_pdbbind_subset_intake",
       "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -1055,7 +1063,8 @@
       "bottleneck": "public_benchmark_source_of_truth_not_ready",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
       ],
       "first_blocked_target": "casf_pdbbind_subset_intake",
       "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -1120,7 +1129,8 @@
       "bottleneck": "public_benchmark_source_of_truth_not_ready",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
       ],
       "first_blocked_target": "casf_pdbbind_subset_intake",
       "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -2005,7 +2015,8 @@
       "bottleneck": "public_benchmark_source_of_truth_not_ready",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
       ],
       "first_blocked_target": "casf_pdbbind_subset_intake",
       "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -2440,6 +2451,15 @@
           }
         ],
         "gate_unblock_plan_count": 4,
+        "harness_bundle_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
+        "harness_bundle_index": {
+          "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
+          "artifact_index_command": "python3 scripts/materialize_public_benchmark_harness_bundle.py --out implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
+          "claim_boundary": "Indexes local public-benchmark harness artifacts only; it does not fetch, license, redistribute, or approve external benchmark data.",
+          "materialization_report": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle_materialization_report.json",
+          "schema_version": "public-benchmark-harness-bundle.v1",
+          "status": "ready_for_local_artifact_index"
+        },
         "minimum_subset_case_count": 12,
         "operator_evidence_gap_count": 4,
         "operator_evidence_gap_register": [
@@ -3972,7 +3992,7 @@
       ]
     }
   },
-  "source_commit_sha": "2d0a40b0964cabe48a41496e04950c427ea2184f",
+  "source_commit_sha": "900af1a8a0a3f62964dae87e7b45b06aca939c0e",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
