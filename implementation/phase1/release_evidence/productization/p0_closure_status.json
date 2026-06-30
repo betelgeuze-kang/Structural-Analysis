@@ -211,7 +211,7 @@
       "status": "closed"
     }
   ],
-  "generated_at": "2026-06-30T02:21:37.440841+00:00",
+  "generated_at": "2026-06-30T02:26:46.973739+00:00",
   "input_checksums": {
     "implementation/phase1/element_material_breadth_gate_report.json": "sha256:a92cecd8599d94ed8280ade651f861dd87b6f501b7cdad856f91c99afdbcc181",
     "implementation/phase1/general_fe_contact_benchmark_gate_report.json": "sha256:23eeabfe177b3579444428b646e4835bc4c07cb62111ca0889516ae05965997e",
@@ -238,6 +238,6 @@
   "reuse_policy": "status_rebuilt_from_existing_release_and_p0_gate_receipts",
   "reused_evidence": true,
   "schema_version": "p0-closure-status.v1",
-  "source_commit_sha": "17b1e4b7863a7d05e8ab58ca1981c4720c9e7acb",
+  "source_commit_sha": "8b8bb2bb41fd2477f05dbd5efd4fb8c05cd7879e",
   "status": "closed"
 }

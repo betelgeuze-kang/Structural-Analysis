@@ -11,10 +11,10 @@
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T02:24:52.483187+00:00",
+  "generated_at": "2026-06-30T02:26:51.443098+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:839bd95194c384b30958368190d0180a1d922bb47e4c1ddb0747938d062bf6cd",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2d3d00632dd20fe78a2e91b15e8b64d83d4eae1d7d4f03d672c2d97ce4485ea8",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:05c7a048652f929f4fcda147eb3c1506b0eb425df5d4aca138e26e8ccd65a39d",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:4c9951e98e46a38624b6944ecfce9dfb52e35c8c8fab58a4c485ed6f1d6352d2",
     "scripts/build_pm_release_gate_completion_audit.py": "sha256:39246c0a8e4784455e85036062d2aa268cbe4c01393b924790e076d86a9b81cc"
   },
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -172,7 +172,7 @@
       "summary_snapshot": {
         "artifact_count": 15,
         "blocker_count": 0,
-        "current_source_commit_sha": "17b1e4b7863a7d05e8ab58ca1981c4720c9e7acb",
+        "current_source_commit_sha": "8b8bb2bb41fd2477f05dbd5efd4fb8c05cd7879e",
         "max_age_days": 30.0,
         "pass_count": 15
       },
@@ -2523,7 +2523,7 @@
     "reason": "Completion audit snapshots exclude volatile timestamps and hashes. Support bundle manifests hash this audit as an output artifact, so the audit avoids embedding support-bundle archive hashes that would create circular freshness claims.",
     "stable_summary_snapshot": true
   },
-  "source_commit_sha": "17b1e4b7863a7d05e8ab58ca1981c4720c9e7acb",
+  "source_commit_sha": "8b8bb2bb41fd2477f05dbd5efd4fb8c05cd7879e",
   "summary": {
     "blocked_external_owner_input_ready_count": 3,
     "blocked_handoff_incomplete_count": 0,
