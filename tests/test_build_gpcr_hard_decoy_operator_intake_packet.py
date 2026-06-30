@@ -64,8 +64,41 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "OPRM1",
     ]
     assert packet["gate_unblock_plan_count"] == 3
+    assert packet["target_execution_preflight_count"] == 3
+    assert packet["first_target_execution_preflight_blocker"]["target_id"] == "DRD2"
+    assert packet["first_target_execution_preflight_blocker"]["first_blocker"] == (
+        "DRD2:ranking_pr_auc_ci_low_required"
+    )
     assert packet["minimum_target_count"] == 3
     assert packet["minimum_metric_field_count_per_target"] == 4
+    preflight = {row["target_id"]: row for row in packet["target_execution_preflight"]}
+    assert set(preflight) == {"DRD2", "HTR2A", "OPRM1"}
+    assert preflight["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
+    assert preflight["DRD2"]["current_ready"] is False
+    assert preflight["DRD2"]["phase3_blocked"] is True
+    assert preflight["DRD2"]["missing_operator_fields"] == [
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys",
+    ]
+    assert preflight["DRD2"]["current_values"] == {
+        "decoys_above_positive_count": None,
+        "positive_out_anchored_by_top_decoys": None,
+        "ranking_pr_auc_ci_low": None,
+        "top20_hit_rate": None,
+    }
+    assert preflight["DRD2"]["blocked_phase3_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
+    assert preflight["DRD2"]["root_cause_tags"] == ["operator_values_required"]
+    assert (
+        "materialize_gpcr_hard_decoy_suite_report.py"
+        in preflight["DRD2"]["materialization_command"]
+    )
     gate_plan = {row["target_id"]: row for row in packet["gate_unblock_plan"]}
     assert set(gate_plan) == {"DRD2", "HTR2A", "OPRM1"}
     assert gate_plan["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
@@ -102,6 +135,11 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     ]
     assert packet["current_suite_status"]["first_blocked_target"] == "DRD2"
     assert packet["current_suite_status"]["blocker_count"] == 12
+    assert packet["summary"]["target_execution_preflight_count"] == 3
+    assert packet["summary"]["first_target_execution_preflight_target"] == "DRD2"
+    assert packet["summary"]["first_target_execution_preflight_blocker"] == (
+        "DRD2:ranking_pr_auc_ci_low_required"
+    )
 
 
 def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> None:
@@ -152,4 +190,5 @@ def test_gpcr_hard_decoy_operator_intake_packet_cli_writes_json_and_markdown(
     assert payload["packet_id"] == "gpcr_hard_decoy_operator_intake_packet"
     assert "# GPCR Hard-Decoy Operator Intake Packet" in markdown
     assert "## Gate Unblock Plan" in markdown
+    assert "## Target Execution Preflight" in markdown
     assert "materialize_gpcr_hard_decoy_suite_report" in markdown

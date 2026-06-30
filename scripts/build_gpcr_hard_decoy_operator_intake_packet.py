@@ -60,6 +60,10 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     resolved = path if path.is_absolute() else repo_root / path
     if not resolved.exists():
@@ -109,6 +113,130 @@ def _target_slot(target_id: str) -> dict[str, Any]:
             "verify positive_out_anchored_by_top_decoys is false",
         ],
     }
+
+
+def _target_rows_by_id(payload: dict[str, Any], key: str) -> dict[str, dict[str, Any]]:
+    rows: dict[str, dict[str, Any]] = {}
+    for row in _as_list(payload.get(key)):
+        if not isinstance(row, dict):
+            continue
+        target_id = str(row.get("target_id") or "").strip().upper()
+        if target_id:
+            rows[target_id] = row
+    return rows
+
+
+def _target_missing_fields(row: dict[str, Any]) -> list[str]:
+    missing: list[str] = []
+    for field in REQUIRED_OPERATOR_FIELDS:
+        if field == "target_id":
+            continue
+        if row.get(field) is None:
+            missing.append(field)
+    return missing
+
+
+def _target_blocked_criteria(
+    *,
+    target_id: str,
+    suite: dict[str, Any],
+) -> list[str]:
+    criteria = [
+        row
+        for row in _as_list(_as_dict(suite.get("phase3_exit_gate")).get("criteria"))
+        if isinstance(row, dict)
+    ]
+    blocked = [
+        str(row.get("criterion_id") or "")
+        for row in criteria
+        if target_id in [str(item) for item in _as_list(row.get("failed_targets"))]
+    ]
+    return [
+        criterion
+        for criterion in blocked
+        if criterion
+    ] or list(PHASE3_EXIT_CRITERIA_BY_FIELD.values())
+
+
+def _target_execution_preflight_checklist(
+    *,
+    template: dict[str, Any],
+    suite: dict[str, Any],
+    materialize_command: str,
+) -> list[dict[str, Any]]:
+    template_rows = _target_rows_by_id(template, "targets")
+    suite_rows = _target_rows_by_id(suite, "target_rows")
+    rows: list[dict[str, Any]] = []
+    for index, target_id in enumerate(REQUIRED_TARGETS, start=1):
+        template_row = template_rows.get(target_id, {"target_id": target_id})
+        suite_row = suite_rows.get(target_id, {})
+        blockers = [str(row) for row in _as_list(suite_row.get("blockers"))]
+        missing_fields = _target_missing_fields(template_row)
+        current_values = {
+            field: template_row.get(field)
+            for field in REQUIRED_OPERATOR_FIELDS
+            if field != "target_id"
+        }
+        current_ready = bool(
+            suite_row.get("status") == "pass"
+            and suite_row.get("contract_pass") is True
+            and not blockers
+        )
+        first_blocker = (
+            blockers[0]
+            if blockers
+            else (
+                f"{target_id}:{missing_fields[0]}_required"
+                if missing_fields
+                else ""
+            )
+        )
+        rows.append(
+            {
+                "target_priority": index,
+                "target_id": target_id,
+                "slot_id": f"{target_id.lower()}_hard_decoy_metrics",
+                "status": "ready" if current_ready else "operator_input_required",
+                "current_ready": current_ready,
+                "phase3_blocked": not current_ready,
+                "blocked_phase3_criteria": _target_blocked_criteria(
+                    target_id=target_id,
+                    suite=suite,
+                )
+                if not current_ready
+                else [],
+                "missing_operator_fields": missing_fields,
+                "current_values": current_values,
+                "suite_status": str(suite_row.get("status") or "missing"),
+                "suite_contract_pass": suite_row.get("contract_pass"),
+                "root_cause_tags": [
+                    str(row) for row in _as_list(suite_row.get("root_cause_tags"))
+                ],
+                "first_blocker": first_blocker,
+                "blockers": blockers,
+                "minimum_evidence": {
+                    "target_id": target_id,
+                    "required_operator_fields": list(REQUIRED_OPERATOR_FIELDS),
+                    "criterion_by_field": dict(PHASE3_EXIT_CRITERIA_BY_FIELD),
+                    "thresholds": {
+                        "ranking_pr_auc_ci_low": f">={EXIT_CRITERIA['ranking_pr_auc_ci_low_min']}",
+                        "top20_hit_rate": f">={EXIT_CRITERIA['top20_hit_rate_min']}",
+                        "decoys_above_positive_count": f"<={EXIT_CRITERIA['decoys_above_positive_count_max']}",
+                        "positive_out_anchored_by_top_decoys": EXIT_CRITERIA[
+                            "positive_out_anchored_by_top_decoys_allowed"
+                        ],
+                    },
+                },
+                "materialization_command": materialize_command,
+                "validation_command": materialize_command,
+                "claim_boundary": (
+                    "This row is a read-only preflight over the current GPCR operator "
+                    "template and suite report. It does not infer missing metrics or "
+                    "promote broad GPCR claims."
+                ),
+            }
+        )
+    return rows
 
 
 def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
@@ -177,6 +305,15 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         f"--out {DEFAULT_GOAL_BOTTLENECK}"
     )
     gate_unblock_plan = _gate_unblock_plan(materialize_command=materialize_command)
+    target_execution_preflight = _target_execution_preflight_checklist(
+        template=template,
+        suite=suite,
+        materialize_command=materialize_command,
+    )
+    first_target_preflight_blocker = next(
+        (row for row in target_execution_preflight if not row["current_ready"]),
+        {},
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -207,6 +344,9 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "required_slot_count": len(REQUIRED_TARGETS),
         "gate_unblock_plan": gate_unblock_plan,
         "gate_unblock_plan_count": len(gate_unblock_plan),
+        "target_execution_preflight": target_execution_preflight,
+        "target_execution_preflight_count": len(target_execution_preflight),
+        "first_target_execution_preflight_blocker": first_target_preflight_blocker,
         "minimum_target_count": len(REQUIRED_TARGETS),
         "minimum_metric_field_count_per_target": len(REQUIRED_OPERATOR_FIELDS) - 1,
         "operator_template": {
@@ -287,6 +427,13 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             "minimum_metric_field_count_per_target": len(REQUIRED_OPERATOR_FIELDS) - 1,
             "current_blocker_count": len(blockers),
             "first_blocked_target": first_blocked_target,
+            "target_execution_preflight_count": len(target_execution_preflight),
+            "first_target_execution_preflight_target": str(
+                first_target_preflight_blocker.get("target_id") or ""
+            ),
+            "first_target_execution_preflight_blocker": str(
+                first_target_preflight_blocker.get("first_blocker") or ""
+            ),
             "broad_gpcr_family_claim_safe": False,
         },
         "summary_line": (
@@ -327,6 +474,23 @@ def _markdown(payload: dict[str, Any]) -> str:
         )
         minimum = json.dumps(row["minimum_evidence"], ensure_ascii=False, sort_keys=True)
         lines.append(f"| `{row['target_id']}` | {criteria} | `{minimum}` |")
+    lines.extend(
+        [
+            "",
+            "## Target Execution Preflight",
+            "",
+            "| Target | Ready | Missing Fields | First Blocker |",
+            "|---|---|---|---|",
+        ]
+    )
+    for row in payload["target_execution_preflight"]:
+        missing = ", ".join(
+            f"`{field}`" for field in row["missing_operator_fields"]
+        )
+        lines.append(
+            f"| `{row['target_id']}` | `{row['current_ready']}` | "
+            f"{missing or '`none`'} | `{row['first_blocker']}` |"
+        )
     lines.extend(["", "## Materialization Sequence", ""])
     for step in payload["materialization_sequence"]:
         lines.append(f"- `{step['step_id']}`: `{step['command']}`")
