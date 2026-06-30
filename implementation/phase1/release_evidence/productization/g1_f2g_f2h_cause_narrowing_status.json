@@ -1,0 +1,102 @@
+{
+  "blockers": [],
+  "claim_boundary": "This receipt narrows the next G1 diagnostic direction from existing F2g/F2h evidence. It does not close G1, promote full-load 1.0, or prove production ROCm/HIP residency.",
+  "contract_pass": true,
+  "disallowed_promotions": [
+    "no_G1_closure_claim",
+    "no_full_load_1p0_claim",
+    "no_row_only_correction_promotion",
+    "no_production_rocm_hip_residency_claim"
+  ],
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_signals": {
+    "boundary_subsystem_not_full_global_tangent": true,
+    "direct_elastic_link_endpoint_count": 0,
+    "direct_support_member_count": 0,
+    "distributed_translation_rotation_packet_present": true,
+    "dominant_near_null_rows": 64,
+    "elastic_link_graph_transfer_disfavored": true,
+    "elastic_link_reachable_to_support_count": 0,
+    "f2h_lightweight_0p1_0p2_0p4_ready": true,
+    "f2h_residual_growth_factor_0p1_to_0p4": 4.7992763502884115,
+    "f2h_residual_trend_across_increasing_load": "nondecreasing",
+    "global_frame_shell_tangent_integration_ready": false,
+    "support_or_link_row_gap_disfavored": true
+  },
+  "generated_at": "2026-06-30T06:34:43.024382+00:00",
+  "hypothesis_rank": [
+    {
+      "classification": "deprioritized",
+      "evidence": [
+        "direct_support_member_count=0/64",
+        "direct_elastic_link_endpoint_count=0/64",
+        "elastic_link_reachable_to_support_count=0/64"
+      ],
+      "hypothesis": "direct_support_or_elastic_link_row_missing",
+      "next_action": "stop_row_only_support_or_elastic_link_corrections_unless_new_authoritative_rows_are_found"
+    },
+    {
+      "classification": "primary_next_slice",
+      "evidence": [
+        "dominant near-null rows are not support members or elastic-link endpoints",
+        "elastic-link graph does not reach authored supports for dominant rows",
+        "boundary spring context is not full global frame/shell tangent integration"
+      ],
+      "hypothesis": "global_connectivity_or_load_path_transfer_gap",
+      "next_action": "audit_full_structural_connectivity_and_load_path_transfer_before_more_row_corrections"
+    },
+    {
+      "classification": "active_secondary",
+      "evidence": [
+        "near-null packet is distributed translation/rotation-like",
+        "F2h 0.1->0.2->0.4 status=ready",
+        "residual_trend=nondecreasing"
+      ],
+      "hypothesis": "weak_restraint_or_geometric_softening",
+      "next_action": "compare load-dependent near-null packets and geometric stiffness contributions at 0.2 and 0.4"
+    },
+    {
+      "classification": "required_for_closure",
+      "evidence": [
+        "G1 full-load HIP/Newton lane remains blocked"
+      ],
+      "hypothesis": "consistent_residual_jacobian_newton_gap",
+      "next_action": "continue consistent residual/Jacobian Newton path before any G1 promotion"
+    },
+    {
+      "classification": "required_for_production_residency",
+      "evidence": [
+        "hip_consistency_proof_source_commit_sha_mismatch",
+        "hip_consistency_proof_production_hip_path_not_proven",
+        "hip_consistency_proof_gate_not_passed",
+        "hip_consistency_proof_has_blockers",
+        "hip_consistency_proof_runtime::dev_kfd_missing",
+        "hip_consistency_proof_runtime::dev_dri_missing",
+        "production HIP/JVP lane is not proven by the non-promoting F2g/F2h receipts"
+      ],
+      "hypothesis": "production_rocm_hip_residual_jvp_lane_gap",
+      "next_action": "build/execute production ROCm HIP residual/JVP worker when runtime devices are available"
+    }
+  ],
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:cf553013426c1233aa129b6021b72ca931d1be74e7544b12f54c92eb546001db",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:9c72df297a74ebcb5c594b38e9a02b7fb2730202a778d89aa25bf67f335daa28",
+    "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:cb672e5a3ac1b0d0aa6e95d74e9ef52b25cc33ed13cdc8a4b37c94f7f146f34a",
+    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:3f40c558cc0fae4dbe7e048070e5ec62979e372062b93ed71a109cd56a9a2bbb"
+  },
+  "next_actions": [
+    "stop_row_only_support_or_elastic_link_correction_loop",
+    "audit_full_structural_graph_connectivity_and_load_path_transfer",
+    "compare_load_dependent_near_null_and_geometric_stiffness_at_0p2_0p4",
+    "continue_consistent_residual_jacobian_newton_path",
+    "build_production_rocm_hip_residual_jvp_worker_when_runtime_available"
+  ],
+  "promotes_g1_closure": false,
+  "reason_code": "PASS",
+  "reuse_policy": "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice",
+  "reused_evidence": true,
+  "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
+  "source_commit_sha": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+  "status": "ready",
+  "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=global_connectivity_consistent_newton_rocm_lane"
+}

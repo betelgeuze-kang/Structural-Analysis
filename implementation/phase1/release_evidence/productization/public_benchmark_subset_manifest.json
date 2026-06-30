@@ -49,16 +49,16 @@
   "claim_boundary": "This manifest is a Tier beta source-of-truth seed. It defines the minimum CASF/PDBBind subset contract, operator slots, case-row schema, and validation command, but it does not attach or redistribute public benchmark source files and does not claim benchmark results.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:20:23.079726+00:00",
+  "generated_at": "2026-06-30T06:34:43.106752+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d48996cec4da85078de2954832d4ec0a7973f0c6a01bedcfc783fc3faf5825cb",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:a4397c9b155ad296d665465af64b9b0054a5e286b411ea652c0a85266de016a4",
-    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:8826a9d99b7355d6333ca1863ef65460303c22baff3357d367a312a66c3e9dcb",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:23aa9f0b15a76fc44725f0e47dbc3526363ae28bff3f810e91c31598994f7e51",
+    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:147b3fd1bbd0a5edce98ab1657763b0bf79cddbd362da968a591c1a25d107a55",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:031c17195862f073c2d17cdc71bf99e9d6c06517092ae8255dc26f8767d05d2e",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:417e27de7f26dd9b87cbe1017630694c9a3c513eb03ce475853f1cde8fd23640",
-    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c21641e971fd7675a2a3d24cb6a11a1c2a7bee7f3322cfbd5b931803f4884ba",
+    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:5d4df26f2457a692c2ee89eb4022c522d57bf2b8a071544e720ec87107b66a79",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:eab5faa0e1f3acf11e7779bcd25ccdaa9066092e1fb3754b8e38d1bedb33098d",
@@ -125,7 +125,7 @@
       "status": "source_material_required"
     }
   ],
-  "source_commit_sha": "02c3eff5dea431e6d927a69b2fd191aaebf0059e",
+  "source_commit_sha": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
   "source_families": [
     "CASF/PDBBind"
   ],

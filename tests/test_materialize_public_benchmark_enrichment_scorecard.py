@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -35,9 +36,13 @@ def _target(
         "score_direction": score_direction,
         "scored_molecules": scored_molecules,
         "source_license_or_accession": f"{benchmark_family}:{target_id}",
-        "source_checksum": f"sha256:{benchmark_family}-{target_id}",
+        "source_checksum": _checksum(f"{benchmark_family}:{target_id}"),
         "provenance_ref": f"operator://{benchmark_family}/{target_id}",
     }
+
+
+def _checksum(seed: str) -> str:
+    return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
 def _molecule(molecule_id: str, *, is_active: bool, score: float) -> dict[str, object]:
@@ -142,6 +147,23 @@ def test_public_benchmark_enrichment_materializer_blocks_bad_rows() -> None:
     assert "bad_target:benchmark_family_unsupported" in scorecard["blockers"]
     assert "bad_target:score_direction_invalid" in scorecard["blockers"]
     assert "bad_target:molecule_0:score_invalid" in scorecard["blockers"]
+
+
+def test_public_benchmark_enrichment_materializer_blocks_invalid_checksum() -> None:
+    intake = _valid_intake()
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    first_target = targets[0]
+    assert isinstance(first_target, dict)
+    first_target["source_checksum"] = "sha256:not-a-real-digest"
+
+    scorecard = module.materialize_enrichment_scorecard(intake, repo_root=REPO_ROOT)
+
+    assert scorecard["status"] == "operator_evidence_required"
+    assert scorecard["contract_pass"] is False
+    assert scorecard["first_blocked_target"] == "aa2ar"
+    assert "aa2ar:source_checksum_invalid" in scorecard["blockers"]
+    assert "operator_receipts_required" in scorecard["root_cause_tags"]
 
 
 def test_public_benchmark_enrichment_materializer_cli_writes_scorecard_and_report(

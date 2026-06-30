@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any
 
@@ -42,6 +43,7 @@ REQUIRED_ENGINE_RUN_FIELDS = (
     "score",
     "score_direction",
 )
+SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -66,6 +68,10 @@ def _number(value: Any) -> float | None:
 
 def _boolean(value: Any) -> bool | None:
     return value if isinstance(value, bool) else None
+
+
+def _is_sha256_ref(value: str) -> bool:
+    return bool(SOURCE_CHECKSUM_PATTERN.fullmatch(value))
 
 
 def _engine_id(value: Any) -> str:
@@ -189,6 +195,9 @@ def _normalize_case(row: dict[str, Any], *, index: int) -> dict[str, Any]:
         if field in row and not value:
             blockers.append(f"{case_key}:{field}_blank")
             root_cause_tags.append("operator_values_required")
+    if "source_checksum" in row and source_checksum and not _is_sha256_ref(source_checksum):
+        blockers.append(f"{case_key}:source_checksum_invalid")
+        root_cause_tags.append("operator_receipts_required")
 
     raw_runs = _as_list(row.get("engine_runs"))
     if not raw_runs:

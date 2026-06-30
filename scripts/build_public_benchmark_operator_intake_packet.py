@@ -87,6 +87,10 @@ OPERATOR_TEMPLATE_SCHEMA_VERSION = "public-benchmark-operator-template.v1"
 PUBLIC_BENCHMARK_ROUTE = "/product/public-benchmark"
 PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE = "/product/public-benchmark/operator-intake"
 TIER_BETA_MINIMUM_SUBSET_CASE_COUNT = 12
+SOURCE_CHECKSUM_POLICY = {
+    "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+    "required_receipt_field": "source_checksum",
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -610,6 +614,7 @@ def build_public_benchmark_operator_intake_packet(
                 "ready_target_count": 1,
                 "supported_families": list(SUPPORTED_FAMILIES),
                 "required_molecule_fields": list(REQUIRED_MOLECULE_FIELDS),
+                "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
                 "receipt_fields": [
                     "source_license_or_accession",
                     "source_checksum",
@@ -646,6 +651,7 @@ def build_public_benchmark_operator_intake_packet(
                 "required_engine_run_fields": list(
                     VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS
                 ),
+                "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
                 "receipt_fields": [
                     "source_license_or_accession",
                     "source_checksum",

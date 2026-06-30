@@ -116,6 +116,17 @@ def _write_minimal_inputs(repo_root: Path) -> None:
         {"contract_pass": False, "blockers": ["full_load_hip_newton_not_closed"]},
     )
     _write_json(
+        productization / "g1_f2g_f2h_cause_narrowing_status.json",
+        {
+            "status": "ready",
+            "contract_pass": True,
+            "evidence_signals": {
+                "support_or_link_row_gap_disfavored": True,
+                "f2h_lightweight_0p1_0p2_0p4_ready": True,
+            },
+        },
+    )
+    _write_json(
         repo_root / "implementation/phase1/customer_shadow_evidence_status.json",
         {"summary": {"completed_shadow_case_count": 1, "min_completed_shadow_cases": 3}},
     )
@@ -146,6 +157,18 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     assert stages["g1_solver_closure"]["blockers"] == [
         "full_load_hip_newton_not_closed"
     ]
+    assert (
+        stages["g1_solver_closure"]["summary"]["f2g_f2h_cause_narrowing_status"]
+        == "ready"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"]["recommended_g1_next_direction"]
+        == "global_connectivity_consistent_newton_rocm_lane"
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json"
+        in stages["g1_solver_closure"]["evidence_artifacts"]
+    )
     assert stages["paid_pilot_readiness"]["blockers"] == [
         "customer_shadow_below_required:1/3",
         "external_benchmark_receipts_pending:1/4",

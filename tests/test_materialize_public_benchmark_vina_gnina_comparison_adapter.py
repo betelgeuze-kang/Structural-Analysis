@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -44,6 +45,10 @@ def _engine_run(
     }
 
 
+def _checksum(seed: str) -> str:
+    return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
+
+
 def _case(case_id: str) -> dict[str, object]:
     return {
         "case_id": case_id,
@@ -55,7 +60,7 @@ def _case(case_id: str) -> dict[str, object]:
             _engine_run("gnina", rmsd=2.2, pose_success=False, score=-6.9),
         ],
         "source_license_or_accession": f"CASF/PDBBind:{case_id}",
-        "source_checksum": f"sha256:{case_id}",
+        "source_checksum": _checksum(case_id),
         "provenance_ref": f"operator://vina-gnina/{case_id}",
     }
 
@@ -139,6 +144,26 @@ def test_vina_gnina_comparison_adapter_blocks_bad_rows() -> None:
     assert "bad_case:engine_run_0:engine_id_unsupported" in adapter["blockers"]
     assert "bad_case:vina_engine_run_missing" in adapter["blockers"]
     assert "bad_case:gnina_engine_run_missing" in adapter["blockers"]
+
+
+def test_vina_gnina_comparison_adapter_blocks_invalid_checksum() -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    first_case["source_checksum"] = "sha256:not-a-real-digest"
+
+    adapter = module.materialize_vina_gnina_comparison_adapter(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert adapter["status"] == "operator_evidence_required"
+    assert adapter["contract_pass"] is False
+    assert adapter["first_blocked_target"] == "case_a"
+    assert "case_a:source_checksum_invalid" in adapter["blockers"]
+    assert "operator_receipts_required" in adapter["root_cause_tags"]
 
 
 def test_vina_gnina_comparison_adapter_cli_writes_adapter_and_report(

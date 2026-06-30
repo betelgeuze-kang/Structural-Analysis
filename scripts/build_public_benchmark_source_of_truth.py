@@ -93,6 +93,10 @@ ENRICHMENT_SCORECARD_SCHEMA_VERSION = "public-benchmark-enrichment-scorecard.v1"
 
 PUBLIC_BENCHMARK_ROUTE = "/product/public-benchmark"
 PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE = "/product/public-benchmark/operator-intake"
+SOURCE_CHECKSUM_POLICY = {
+    "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+    "required_receipt_field": "source_checksum",
+}
 
 
 def _source_input_paths() -> list[Path]:
@@ -492,6 +496,7 @@ def build_enrichment_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "provenance_ref",
             ],
             "required_molecule_fields": ["molecule_id", "is_active", "score"],
+            "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             "materialization_command": (
                 "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py "
                 "--intake <operator-dud-e-lit-pcba-enrichment-intake.json> "
@@ -594,6 +599,7 @@ def build_vina_gnina_comparison_adapter(*, repo_root: Path = ROOT) -> dict[str, 
             "required_case_fields": list(VINA_GNINA_REQUIRED_CASE_FIELDS),
             "required_engine_run_fields": list(VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS),
             "supported_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+            "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             "template": {"cases": [_vina_gnina_case_template()]},
             "materialization_command": (
                 "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "

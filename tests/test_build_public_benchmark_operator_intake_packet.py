@@ -165,6 +165,10 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     ]
     assert packet["supported_enrichment_families"] == ["DUD-E", "LIT-PCBA"]
     assert packet["required_molecule_fields"] == ["molecule_id", "is_active", "score"]
+    assert enrichment["minimum_evidence"]["source_checksum_policy"] == {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum",
+    }
     assert (
         "materialize_public_benchmark_enrichment_scorecard.py"
         in enrichment["validation_command"]
@@ -197,6 +201,10 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert comparison["validation_command"] == comparison["materialization_command"]
     assert packet["supported_comparison_engines"] == ["vina", "gnina"]
     assert "symmetry_aware_rmsd_angstrom" in packet["required_engine_run_fields"]
+    assert comparison["minimum_evidence"]["source_checksum_policy"] == {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum",
+    }
     assert packet["gate_unblock_plan_count"] == 4
     assert packet["minimum_subset_case_count"] == 12
     assert packet["summary"]["first_blocked_target"] == "casf_pdbbind_subset_intake"
@@ -237,9 +245,21 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert gate_plan["dud_e_lit_pcba_enrichment_intake"]["minimum_evidence"][
         "supported_families"
     ] == ["DUD-E", "LIT-PCBA"]
+    assert gate_plan["dud_e_lit_pcba_enrichment_intake"]["minimum_evidence"][
+        "source_checksum_policy"
+    ] == {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum",
+    }
     assert gate_plan["vina_gnina_comparison_intake"]["minimum_evidence"][
         "required_engines"
     ] == ["vina", "gnina"]
+    assert gate_plan["vina_gnina_comparison_intake"]["minimum_evidence"][
+        "source_checksum_policy"
+    ] == {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum",
+    }
 
     gap_register = {
         row["slot_id"]: row for row in packet["operator_evidence_gap_register"]

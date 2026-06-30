@@ -681,6 +681,10 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert enrichment["materializer"]["schema_version"] == (
         "public-benchmark-enrichment-materialization.v1"
     )
+    assert enrichment["materializer"]["source_checksum_policy"] == {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum",
+    }
     assert (
         "materialize_public_benchmark_enrichment_scorecard.py"
         in enrichment["materializer"]["materialization_command"]
@@ -701,6 +705,10 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert vina_gnina["materializer"]["schema_version"] == (
         "public-benchmark-vina-gnina-comparison-materialization.v1"
     )
+    assert vina_gnina["materializer"]["source_checksum_policy"] == {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum",
+    }
     assert (
         "materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         in vina_gnina["materializer"]["materialization_command"]

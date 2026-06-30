@@ -163,25 +163,25 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T06:27:45.937032+00:00",
+  "generated_at": "2026-06-30T06:34:32.605311+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:d5f27e19224137df501234c6ddc5bcf894d3a97442329db6d361baca7168f8d5",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:dbe8a09a77f11d85a148751721fc71d0c8ac0e087ca3038f575c8f5f9a63855d",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:f61f2d4409e819257e8469060e1f9ce785c80fd7b1d782b1511e4842e821def2",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:88048d6298647680a9050e8ea8d50dbd3ec951b065709f50ae76a72e4df7e4dc",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:e7c60744d7e2b1dadcbefaaa4c78d1ea1dc67da73c78ed61401d36f39eb87ba1",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:bd1b247f5912ec7596fb0385ca658ccd6c42874ad404e5e807530b2e2fc9062c",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:8f83ee0e835cebf583587e145e957954241c75cfc030b50b8b9564540b862a9e",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:f74885aa4ba34963fb81ba2162d03a07ffb658bbff5939a34e919521212efe35",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:ef50c77b0801fe9fcfd65e36994db0ae0130b3a32edc7ef336297402a16f070e",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:85ecd355c2bf43127493de692827b84d325dea3d2535ad7a23a4988abe5424ce",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:5613044e907cde8c6a6f614bf5d7f08dcf19c526321208b1bb17898b0bf4e27d",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:955c19a8eb2711fc21ab2a64813b1a3e75159274a49293a98eba1aede1180085",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:0c7c8a653095722d248b14796bac0188e3781cb7722bbbca1dcad886f1cc0c03",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:bd185c5c81480e447190c647f57191cebacdcd42fe8300ae034a5e97140d1d66",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:acb9d9b6dd45d3a23abf53bdde379725a4eb62b5e0a62eb2e52918356b09b32a",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a0db6b959e67e12378b2afc9698f95dfe7cfbbcde9d5b0e532c2657482d7d927",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:dafc79af0c0831b41777c130cffda90c0044a54283a28b3e72398ce1e27566ab",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:34e394207c08b1a74bc199cc10d0e630812206f6da67f34ce0bc43a8be225c93",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:96257385404517d03016a14e2d01ddc6b7fdfc65ffadb1c949cca1e3928ee204",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:1c0c612ef997961af29abda768027050df1461fd506eebb3b5d4eeff4b626cd6",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:aa02871bdedc946a0d3ee28d4fbedc45aade1a4bd3d357808ff2138f7b0edd02",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:9249e60dfde918d8d47d35ba797ec1fea14a46fc275daa69f7aa341cd50841c9",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
@@ -935,6 +935,10 @@
           "is_active",
           "score"
         ],
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        },
         "supported_families": [
           "DUD-E",
           "LIT-PCBA"
@@ -998,7 +1002,11 @@
         "required_engines": [
           "vina",
           "gnina"
-        ]
+        ],
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        }
       },
       "phase_id": "phase_2_public_benchmark_harness",
       "phase_label": "Phase 2",
@@ -2072,6 +2080,10 @@
                 "is_active",
                 "score"
               ],
+              "source_checksum_policy": {
+                "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+                "required_receipt_field": "source_checksum"
+              },
               "supported_families": [
                 "DUD-E",
                 "LIT-PCBA"
@@ -2107,7 +2119,11 @@
               "required_engines": [
                 "vina",
                 "gnina"
-              ]
+              ],
+              "source_checksum_policy": {
+                "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+                "required_receipt_field": "source_checksum"
+              }
             },
             "slot_id": "vina_gnina_comparison_intake",
             "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
@@ -2214,6 +2230,10 @@
                 "is_active",
                 "score"
               ],
+              "source_checksum_policy": {
+                "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+                "required_receipt_field": "source_checksum"
+              },
               "supported_families": [
                 "DUD-E",
                 "LIT-PCBA"
@@ -2259,7 +2279,11 @@
               "required_engines": [
                 "vina",
                 "gnina"
-              ]
+              ],
+              "source_checksum_policy": {
+                "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+                "required_receipt_field": "source_checksum"
+              }
             },
             "slot_id": "vina_gnina_comparison_intake",
             "slot_priority": 4,
@@ -2370,6 +2394,10 @@
                 "is_active",
                 "score"
               ],
+              "source_checksum_policy": {
+                "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+                "required_receipt_field": "source_checksum"
+              },
               "supported_families": [
                 "DUD-E",
                 "LIT-PCBA"
@@ -2418,7 +2446,11 @@
               "required_engines": [
                 "vina",
                 "gnina"
-              ]
+              ],
+              "source_checksum_policy": {
+                "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+                "required_receipt_field": "source_checksum"
+              }
             },
             "operator_intake_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
             "operator_intake_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md",
@@ -3382,7 +3414,7 @@
       ]
     }
   },
-  "source_commit_sha": "c725d3e3f33bdcf7733791fe7852206aa12ac6b2",
+  "source_commit_sha": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
