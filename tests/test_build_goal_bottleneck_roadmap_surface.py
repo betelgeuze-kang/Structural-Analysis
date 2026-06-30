@@ -260,6 +260,22 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "oprm1_hard_decoy_metrics",
         "top_k_refinement_rows",
     ]
+    handoff_ids = {
+        row["slot_id"]: row["handoff_id"]
+        for row in surface["operator_evidence_handoff_slot_queue"]
+    }
+    assert handoff_ids["drd2_hard_decoy_metrics"] == (
+        "gpcr_hard_decoy::drd2_hard_decoy_metrics"
+    )
+    assert handoff_ids["htr2a_hard_decoy_metrics"] == (
+        "gpcr_hard_decoy::htr2a_hard_decoy_metrics"
+    )
+    assert handoff_ids["oprm1_hard_decoy_metrics"] == (
+        "gpcr_hard_decoy::oprm1_hard_decoy_metrics"
+    )
+    assert handoff_ids["top_k_refinement_rows"] == (
+        "pocketmd_lite::top_k_refinement_rows"
+    )
     assert surface["first_operator_evidence_handoff_slot"]["slot_id"] == (
         "casf_pdbbind_subset_intake"
     )
@@ -537,6 +553,9 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_3["summary"]["operator_evidence_gap_count"] == 3
     assert phase_3["summary"]["first_operator_evidence_gap"]["slot_id"] == (
         "drd2_hard_decoy_metrics"
+    )
+    assert phase_3["summary"]["first_operator_evidence_gap"]["handoff_id"] == (
+        "gpcr_hard_decoy::drd2_hard_decoy_metrics"
     )
     assert phase_3["summary"]["first_operator_evidence_gap"]["target_id"] == "DRD2"
     assert phase_3["summary"]["first_operator_evidence_gap"][

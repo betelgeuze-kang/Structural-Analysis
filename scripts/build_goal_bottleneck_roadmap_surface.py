@@ -126,6 +126,19 @@ def _dedupe(rows: list[str]) -> list[str]:
     return deduped
 
 
+def _operator_handoff_id(
+    *, namespace: str, phase_id: str = "", slot_id: str = "", fallback: Any = ""
+) -> str:
+    existing = str(fallback or "")
+    if existing:
+        return existing
+    slot = str(slot_id or "")
+    if slot:
+        return f"{namespace or phase_id}::{slot}"
+    phase = str(phase_id or "")
+    return f"{namespace}::{phase}" if namespace and phase else phase
+
+
 def _first_gate_blocker(gate: dict[str, Any]) -> str:
     for criterion in _as_list(gate.get("criteria")):
         if not isinstance(criterion, dict) or _as_bool(criterion.get("pass")):
@@ -740,6 +753,12 @@ def _gpcr_row(
     operator_evidence_gap_register = [
         {
             "slot_priority": index,
+            "handoff_id": _operator_handoff_id(
+                namespace="gpcr_hard_decoy",
+                phase_id="phase_3_gpcr_hard_decoy_closure",
+                slot_id=str(row.get("slot_id") or ""),
+                fallback=row.get("handoff_id"),
+            ),
             "slot_id": str(row.get("slot_id") or ""),
             "target_id": str(row.get("target_id") or ""),
             "status": str(row.get("status") or "")
@@ -928,6 +947,12 @@ def _pocketmd_row(
     operator_evidence_gap_register = [
         {
             "slot_priority": index,
+            "handoff_id": _operator_handoff_id(
+                namespace="pocketmd_lite",
+                phase_id="phase_4_pocketmd_lite",
+                slot_id=str(row.get("slot_id") or ""),
+                fallback=row.get("handoff_id"),
+            ),
             "slot_id": str(row.get("slot_id") or ""),
             "status": str(row.get("status") or "")
             or operator_status_by_slot.get(str(row.get("slot_id") or ""), ""),
@@ -1090,6 +1115,12 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
         queue.append(
             {
                 "queue_priority": index,
+                "handoff_id": _operator_handoff_id(
+                    namespace=str(row.get("bottleneck") or ""),
+                    phase_id=str(row.get("phase_id") or ""),
+                    slot_id=str(first_gap.get("slot_id") or ""),
+                    fallback=first_gap.get("handoff_id"),
+                ),
                 "phase_id": str(row.get("phase_id") or ""),
                 "phase_label": str(row.get("phase_label") or ""),
                 "roadmap_item": str(row.get("roadmap_item") or ""),
@@ -1165,7 +1196,12 @@ def _operator_evidence_handoff_slot_queue(
                     "root_cause_tags": [
                         str(tag) for tag in _as_list(row.get("root_cause_tags"))
                     ],
-                    "handoff_id": str(slot.get("handoff_id") or ""),
+                    "handoff_id": _operator_handoff_id(
+                        namespace=str(row.get("bottleneck") or ""),
+                        phase_id=str(row.get("phase_id") or ""),
+                        slot_id=str(slot.get("slot_id") or ""),
+                        fallback=slot.get("handoff_id"),
+                    ),
                     "slot_id": str(slot.get("slot_id") or ""),
                     "target_id": str(slot.get("target_id") or ""),
                     "status": str(slot.get("status") or ""),
