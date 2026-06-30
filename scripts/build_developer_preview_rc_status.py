@@ -676,7 +676,7 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             ),
             blocker_grouping_metadata=benchmark_large_blocker_grouping,
             notes=[
-                "Requires acquired large-model sources, runner/nightly lane evidence, "
+                "Requires acquired large-model sources, runner command evidence, "
                 "and crash/OOM-free execution receipts. Policy-only acquisition rows "
                 "do not satisfy this final gate."
             ],

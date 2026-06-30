@@ -748,6 +748,11 @@ def _phase2_slice_progress(
     vina_gnina_case_count = int(
         vina_gnina_comparison_adapter["real_comparison_case_count"]
     )
+    pose_coordinate_blockers = []
+    if pose_real_case_count < target_subset_case_count:
+        pose_coordinate_blockers.append("public_benchmark_real_pose_predictions_missing")
+    if rmsd_real_case_count < target_subset_case_count:
+        pose_coordinate_blockers.append("public_benchmark_real_rmsd_rows_missing")
     completed_slices = [
         {
             "slice_id": "public_benchmark_source_of_truth_spec",
@@ -801,36 +806,52 @@ def _phase2_slice_progress(
             ),
         },
     ]
-    blocked_slices = [
-        {
-            "slice_id": "casf_pdbbind_subset_materialization",
-            "status": "operator_source_material_required",
-            "current": subset_materialized_count,
-            "required": target_subset_case_count,
-            "blockers": list(subset_manifest["blockers"]),
-        },
-        {
-            "slice_id": "real_pose_coordinate_materialization",
-            "status": "operator_pose_coordinates_required",
-            "current": pose_real_case_count,
-            "required": target_subset_case_count,
-            "blockers": ["public_benchmark_real_pose_predictions_missing"],
-        },
-        {
-            "slice_id": "dud_e_lit_pcba_enrichment_materialization",
-            "status": "operator_enrichment_rows_required",
-            "current": enrichment_target_count,
-            "required": ">=1_ready_target_with_active_decoy_labels",
-            "blockers": list(enrichment_scorecard["blockers"]),
-        },
-        {
-            "slice_id": "vina_gnina_comparison_materialization",
-            "status": "operator_engine_comparison_rows_required",
-            "current": vina_gnina_case_count,
-            "required": ">=1_case_with_vina_and_gnina_engine_runs",
-            "blockers": list(vina_gnina_comparison_adapter["blockers"]),
-        },
-    ]
+    blocked_slices = []
+    if subset_materialized_count < target_subset_case_count:
+        blocked_slices.append(
+            {
+                "slice_id": "casf_pdbbind_subset_materialization",
+                "status": "operator_source_material_required",
+                "current": subset_materialized_count,
+                "required": target_subset_case_count,
+                "blockers": list(subset_manifest["blockers"]),
+            }
+        )
+    if pose_coordinate_blockers:
+        blocked_slices.append(
+            {
+                "slice_id": "real_pose_coordinate_materialization",
+                "status": "operator_pose_coordinates_required",
+                "current": {
+                    "real_pose_case_count": pose_real_case_count,
+                    "real_rmsd_case_count": rmsd_real_case_count,
+                },
+                "required": target_subset_case_count,
+                "blockers": pose_coordinate_blockers,
+            }
+        )
+    if not bool(enrichment_scorecard["public_benchmark_enrichment_ready"]):
+        blocked_slices.append(
+            {
+                "slice_id": "dud_e_lit_pcba_enrichment_materialization",
+                "status": "operator_enrichment_rows_required",
+                "current": enrichment_target_count,
+                "required": ">=1_ready_target_with_active_decoy_labels",
+                "blockers": list(enrichment_scorecard["blockers"]),
+            }
+        )
+    if not bool(
+        vina_gnina_comparison_adapter["public_benchmark_engine_comparison_ready"]
+    ):
+        blocked_slices.append(
+            {
+                "slice_id": "vina_gnina_comparison_materialization",
+                "status": "operator_engine_comparison_rows_required",
+                "current": vina_gnina_case_count,
+                "required": ">=1_case_with_vina_and_gnina_engine_runs",
+                "blockers": list(vina_gnina_comparison_adapter["blockers"]),
+            }
+        )
     return {
         "completed_slices": completed_slices,
         "blocked_slices": blocked_slices,
@@ -846,7 +867,9 @@ def _phase2_slice_progress(
             "tier_beta_failed_criterion_count": int(
                 tier_beta_gate["failed_criterion_count"]
             ),
-            "next_unblock_slice_id": blocked_slices[0]["slice_id"],
+            "next_unblock_slice_id": (
+                blocked_slices[0]["slice_id"] if blocked_slices else ""
+            ),
             "claim_boundary": (
                 "Completed slices are repo-local contracts or synthetic dry-runs. "
                 "Blocked slices require operator-attached public benchmark rows and "
@@ -949,6 +972,8 @@ def build_source_of_truth(
     ]
     tier_beta_gate["failed_criterion_count"] = len(failed_gate_criteria)
     tier_beta_gate["failed_criteria"] = failed_gate_criteria
+    tier_beta_ready = not failed_gate_criteria
+    tier_beta_gate["status"] = "ready" if tier_beta_ready else "blocked"
     symmetry_rmsd_scorecard_summary = {
         "status": rmsd_scorecard["status"],
         "dry_run_case_count": rmsd_scorecard["dry_run_case_count"],
@@ -977,17 +1002,24 @@ def build_source_of_truth(
             first_manifest_contract = candidate
         break
     first_manifest_contract_id = str(first_manifest_contract.get("contract_id") or "")
-    root_cause_tags = [
-        "operator_source_material_required",
-        "operator_receipts_required",
-    ]
-    blockers = [
-        "casf_pdbbind_source_material_not_attached",
-        "public_benchmark_real_pose_predictions_missing",
-        "dud_e_lit_pcba_enrichment_rows_missing",
-        "vina_gnina_comparison_rows_missing",
-        "public_benchmark_external_receipts_missing",
-    ]
+    blockers = []
+    if subset_materialized_count < target_subset_case_count:
+        blockers.append("casf_pdbbind_source_material_not_attached")
+    if pose_real_case_count < target_subset_case_count:
+        blockers.append("public_benchmark_real_pose_predictions_missing")
+    if rmsd_real_case_count < target_subset_case_count:
+        blockers.append("public_benchmark_real_rmsd_rows_missing")
+    if not enrichment_ready:
+        blockers.append("dud_e_lit_pcba_enrichment_rows_missing")
+    if not engine_comparison_ready:
+        blockers.append("vina_gnina_comparison_rows_missing")
+    if not external_receipts_ready:
+        blockers.append("public_benchmark_external_receipts_missing")
+    root_cause_tags = (
+        ["operator_source_material_required", "operator_receipts_required"]
+        if blockers
+        else []
+    )
     blocked_operator_slot_count = sum(
         1 for row in operator_evidence_gap_register if row["tier_beta_blocked"]
     )
@@ -1076,9 +1108,10 @@ def build_source_of_truth(
     return {
         "schema_version": SCHEMA_VERSION,
         **metadata,
-        "status": "seed_ready_materialization_blocked",
+        "status": "ready" if tier_beta_ready else "seed_ready_materialization_blocked",
         "summary_line": (
-            "Public benchmark source-of-truth: BLOCKED | "
+            "Public benchmark source-of-truth: "
+            f"{'READY' if tier_beta_ready else 'BLOCKED'} | "
             f"completed_slices={slice_progress['materialization_progress']['completed_slice_count']} | "
             f"blocked_slices={slice_progress['materialization_progress']['blocked_slice_count']} | "
             f"first_blocker={blockers[0] if blockers else 'none'}"
@@ -1096,8 +1129,8 @@ def build_source_of_truth(
             "artifact": str(DEFAULT_SOURCE_OF_TRUTH_OUT),
             "mutation_allowed": False,
         },
-        "tier_beta_ready": False,
-        "public_benchmark_ready": False,
+        "tier_beta_ready": tier_beta_ready,
+        "public_benchmark_ready": tier_beta_ready,
         "blocker_count": len(blockers),
         "first_blocker": blockers[0] if blockers else "",
         "first_blocked_target": first_blocked_target,

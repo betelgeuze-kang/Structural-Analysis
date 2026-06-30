@@ -78,7 +78,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     large_blockers = final_gates["large_models_crash_oom_free"]["blockers"]
     assert "large_structural_models_current_below_required:0/2" in large_blockers
     assert "large_model_runner_not_implemented" not in large_blockers
-    assert "nightly_lane_not_configured" in large_blockers
+    assert "nightly_lane_not_configured" not in large_blockers
     assert "large_model_execution_receipt_missing" in large_blockers
     assert "large_model_scorecard_or_review_missing" in large_blockers
     assert "large_model_execution_count_below_required:0/2" in large_blockers
@@ -380,7 +380,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     )
     assert (
         "nightly_lane_not_configured"
-        in quantity_handoff["targets"]["large_structural_models"]["acquisition_blockers"]
+        not in quantity_handoff["targets"]["large_structural_models"]["acquisition_blockers"]
     )
     assert quantity_handoff["targets"]["large_structural_models"]["runner_readiness_receipt"].endswith(
         "phase3_large_model_runner_readiness_receipt.json"

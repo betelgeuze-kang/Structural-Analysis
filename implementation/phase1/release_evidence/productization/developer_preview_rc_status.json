@@ -127,7 +127,7 @@
           "large_runner_execution": {
             "blocker_count": 0,
             "blockers": [],
-            "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+            "description": "Large-model runner, execution receipt, and review gaps.",
             "scope": "large_model_execution_lane"
           },
           "medium_quantity_shortfall": {
@@ -191,7 +191,7 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 12,
+        "blocker_count": 11,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
@@ -206,13 +206,12 @@
             "scope": "large_model_quantity_gate"
           },
           "large_runner_execution": {
-            "blocker_count": 3,
+            "blocker_count": 2,
             "blockers": [
               "large_model_execution_receipt_missing",
-              "large_model_scorecard_or_review_missing",
-              "nightly_lane_not_configured"
+              "large_model_scorecard_or_review_missing"
             ],
-            "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+            "description": "Large-model runner, execution receipt, and review gaps.",
             "scope": "large_model_execution_lane"
           },
           "medium_quantity_shortfall": {
@@ -257,7 +256,6 @@
         "large_model_execution_receipt_missing",
         "large_model_scorecard_or_review_missing",
         "license_review_pending",
-        "nightly_lane_not_configured",
         "reference_outputs_missing",
         "source_url_verification_pending",
         "normalization_not_implemented",
@@ -269,7 +267,7 @@
       "evidence": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json; implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json; implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json; implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json",
       "item": "large_models_crash_oom_free",
       "notes": [
-        "Requires acquired large-model sources, runner/nightly lane evidence, and crash/OOM-free execution receipts. Policy-only acquisition rows do not satisfy this final gate."
+        "Requires acquired large-model sources, runner command evidence, and crash/OOM-free execution receipts. Policy-only acquisition rows do not satisfy this final gate."
       ],
       "status": "blocked"
     },
@@ -521,14 +519,14 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T07:14:20.988445+00:00",
+  "generated_at": "2026-06-30T07:21:33.203772+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f632a427242f536324b2f21bdd13fadc473ef8130ea4a8217e5c2d68a864ffdb",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:ab4837a6e5b37bda4c7c7d0c23eeaddc2d5c0bfa09881264085143f961e0c438",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:0239ce019bfe5648801dcebca01a8d97a43447ae055af6ed912ac1c99c551b33",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:ee62729a57f11a821aabcfd4c03bf3982dc7fe373aa1de6f0f883ed5ed924b1d",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:5f260906e9a375cebce8270295073d6558703ed6b586ccd92ca4aa8bd0b5b3f5",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:adf3253b3226fa60432c689387d630946cf5480bc4151e870893fb99a25256be",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
@@ -541,7 +539,7 @@
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:f274a33a1d8149a559da635d1c71f107bc5916f85936c689ee1aae3413ed597d",
-    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:d9d1bfdc57549fe241a6cf45cd7961e80bca1646e5e8e1f8b3c1e658a572da4d",
+    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:0e672e84ae72ba416d5e3975fc6af82e5a8a2ea1696ee993398fbb92777454ae",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:650baf0ab3cc97b83af694043704442c15bf6fea9f629af84c2c91549303e5f5",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:39e33073b9cd2cc9f0fef3490142ac175fffc3dadfa94cb9d1d1e4a7fc6a5bb9",
@@ -555,7 +553,7 @@
     "benchmark_quantity_handoff": {
       "acquisition_plan": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
       "benchmark_scale_blocker_grouping": {
-        "blocker_count": 16,
+        "blocker_count": 15,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
@@ -570,13 +568,12 @@
             "scope": "large_model_quantity_gate"
           },
           "large_runner_execution": {
-            "blocker_count": 3,
+            "blocker_count": 2,
             "blockers": [
               "large_model_execution_receipt_missing",
-              "large_model_scorecard_or_review_missing",
-              "nightly_lane_not_configured"
+              "large_model_scorecard_or_review_missing"
             ],
-            "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+            "description": "Large-model runner, execution receipt, and review gaps.",
             "scope": "large_model_execution_lane"
           },
           "medium_quantity_shortfall": {
@@ -646,13 +643,12 @@
             "large_model_execution_receipt_missing",
             "large_model_scorecard_or_review_missing",
             "license_review_pending",
-            "nightly_lane_not_configured",
             "reference_outputs_missing",
             "source_url_verification_pending"
           ],
           "benchmark_scale_gate": {
             "blocker_grouping_metadata": {
-              "blocker_count": 12,
+              "blocker_count": 11,
               "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
               "groups": {
                 "large_quantity_shortfall": {
@@ -667,13 +663,12 @@
                   "scope": "large_model_quantity_gate"
                 },
                 "large_runner_execution": {
-                  "blocker_count": 3,
+                  "blocker_count": 2,
                   "blockers": [
                     "large_model_execution_receipt_missing",
-                    "large_model_scorecard_or_review_missing",
-                    "nightly_lane_not_configured"
+                    "large_model_scorecard_or_review_missing"
                   ],
-                  "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+                  "description": "Large-model runner, execution receipt, and review gaps.",
                   "scope": "large_model_execution_lane"
                 },
                 "medium_quantity_shortfall": {
@@ -721,7 +716,6 @@
               "large_model_scorecard_or_review_missing",
               "large_structural_models_current_below_required:0/2",
               "license_review_pending",
-              "nightly_lane_not_configured",
               "normalization_not_implemented",
               "reference_outputs_missing",
               "source_url_verification_pending"
@@ -774,7 +768,7 @@
                 "large_runner_execution": {
                   "blocker_count": 0,
                   "blockers": [],
-                  "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+                  "description": "Large-model runner, execution receipt, and review gaps.",
                   "scope": "large_model_execution_lane"
                 },
                 "medium_quantity_shortfall": {
@@ -1391,7 +1385,7 @@
     },
     "large_model_runner_handoff": {
       "benchmark_scale_blocker_grouping": {
-        "blocker_count": 12,
+        "blocker_count": 11,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
@@ -1406,13 +1400,12 @@
             "scope": "large_model_quantity_gate"
           },
           "large_runner_execution": {
-            "blocker_count": 3,
+            "blocker_count": 2,
             "blockers": [
               "large_model_execution_receipt_missing",
-              "large_model_scorecard_or_review_missing",
-              "nightly_lane_not_configured"
+              "large_model_scorecard_or_review_missing"
             ],
-            "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+            "description": "Large-model runner, execution receipt, and review gaps.",
             "scope": "large_model_execution_lane"
           },
           "medium_quantity_shortfall": {
@@ -1454,7 +1447,7 @@
       "benchmark_scale_contract_pass": false,
       "benchmark_scale_gate": {
         "blocker_grouping_metadata": {
-          "blocker_count": 12,
+          "blocker_count": 11,
           "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
           "groups": {
             "large_quantity_shortfall": {
@@ -1469,13 +1462,12 @@
               "scope": "large_model_quantity_gate"
             },
             "large_runner_execution": {
-              "blocker_count": 3,
+              "blocker_count": 2,
               "blockers": [
                 "large_model_execution_receipt_missing",
-                "large_model_scorecard_or_review_missing",
-                "nightly_lane_not_configured"
+                "large_model_scorecard_or_review_missing"
               ],
-              "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+              "description": "Large-model runner, execution receipt, and review gaps.",
               "scope": "large_model_execution_lane"
             },
             "medium_quantity_shortfall": {
@@ -1523,7 +1515,6 @@
           "large_model_scorecard_or_review_missing",
           "large_structural_models_current_below_required:0/2",
           "license_review_pending",
-          "nightly_lane_not_configured",
           "normalization_not_implemented",
           "reference_outputs_missing",
           "source_url_verification_pending"
@@ -1830,7 +1821,7 @@
           "large_runner_execution": {
             "blocker_count": 0,
             "blockers": [],
-            "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+            "description": "Large-model runner, execution receipt, and review gaps.",
             "scope": "large_model_execution_lane"
           },
           "medium_quantity_shortfall": {
@@ -1889,7 +1880,7 @@
             "large_runner_execution": {
               "blocker_count": 0,
               "blockers": [],
-              "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+              "description": "Large-model runner, execution receipt, and review gaps.",
               "scope": "large_model_execution_lane"
             },
             "medium_quantity_shortfall": {
@@ -2033,11 +2024,11 @@
       "medium_model_pass_or_review_missing",
       "modeling_assumption_diagnosis_execution_missing",
       "modeling_convention_declarations_missing",
-      "nightly_lane_not_configured",
       "normalization_not_implemented",
       "opensees_medium_scorecard_execution_missing",
       "operator_comparison_trace_rows_missing",
-      "operator_file_checksums_missing"
+      "operator_file_checksums_missing",
+      "operator_files_missing"
     ],
     "phase5_gui_workflow_handoff": {
       "actual_gui_workflow_step_partial_count": 0,
@@ -2436,6 +2427,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "4fd8b834a24ec3ef5fa5b19d80245c9e28cbd3e7",
+  "source_commit_sha": "4930a7a70f2beed468da8eebee74494607122118",
   "status": "blocked"
 }

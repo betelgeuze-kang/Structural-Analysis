@@ -123,10 +123,9 @@ def _benchmark_scale_blocker_grouping_metadata(blockers: list[str]) -> dict[str,
             "large_runner_execution",
             {
                 "scope": "large_model_execution_lane",
-                "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+                "description": "Large-model runner, execution receipt, and review gaps.",
                 "matches": (
                     "large_model_runner_not_implemented",
-                    "nightly_lane_not_configured",
                     "large_model_execution_receipt_missing",
                     "large_model_scorecard_or_review_missing",
                 ),

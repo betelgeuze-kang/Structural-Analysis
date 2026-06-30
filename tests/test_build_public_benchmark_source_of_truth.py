@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 from pathlib import Path
@@ -50,7 +51,15 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     }
     assert source["tier_beta_ready"] is False
     assert source["public_benchmark_ready"] is False
-    assert source["blocker_count"] == 5
+    assert source["blocker_count"] == 6
+    assert source["blockers"] == [
+        "casf_pdbbind_source_material_not_attached",
+        "public_benchmark_real_pose_predictions_missing",
+        "public_benchmark_real_rmsd_rows_missing",
+        "dud_e_lit_pcba_enrichment_rows_missing",
+        "vina_gnina_comparison_rows_missing",
+        "public_benchmark_external_receipts_missing",
+    ]
     assert source["first_blocker"] == "casf_pdbbind_source_material_not_attached"
     assert source["first_blocked_target"] == "casf_pdbbind_subset_intake"
     assert source["first_required_operator_slot"] == "casf_pdbbind_subset_intake"
@@ -126,6 +135,17 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "external receipts before Tier beta can be claimed."
         ),
     }
+    pose_blocked_slice = {
+        row["slice_id"]: row for row in source["blocked_slices"]
+    }["real_pose_coordinate_materialization"]
+    assert pose_blocked_slice["current"] == {
+        "real_pose_case_count": 0,
+        "real_rmsd_case_count": 0,
+    }
+    assert pose_blocked_slice["blockers"] == [
+        "public_benchmark_real_pose_predictions_missing",
+        "public_benchmark_real_rmsd_rows_missing",
+    ]
     assert source["operator_handoff_queue_count"] == 4
     assert source["first_operator_handoff"]["handoff_id"] == (
         "public_benchmark::casf_pdbbind_subset_intake"
@@ -717,6 +737,105 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         in vina_gnina["input_checksums"]
     )
+
+
+def test_public_benchmark_source_of_truth_ready_is_derived_from_gate() -> None:
+    artifacts = module.build_public_benchmark_artifacts(repo_root=REPO_ROOT)
+    subset = copy.deepcopy(artifacts["subset_manifest"])
+    pose_packet = copy.deepcopy(artifacts["pose_validity_packet"])
+    rmsd = copy.deepcopy(artifacts["rmsd_scorecard"])
+    enrichment = copy.deepcopy(artifacts["enrichment_scorecard"])
+    vina_gnina = copy.deepcopy(artifacts["vina_gnina_comparison_adapter"])
+    external_receipts = copy.deepcopy(artifacts["external_receipts_validation"])
+
+    checksum = "sha256:" + "a" * 64
+    subset["target_subset_case_count"] = 1
+    subset["materialized_case_count"] = 1
+    subset["blockers"] = []
+    subset["case_rows"] = [
+        {
+            "case_id": "case_a",
+            "source_family": "CASF/PDBBind",
+            "complex_id": "1abc",
+            "protein_structure_path": "benchmarks/case_a/protein.pdb",
+            "reference_ligand_path": "benchmarks/case_a/ref.sdf",
+            "predicted_ligand_path_or_docking_run_id": "benchmarks/case_a/pred.sdf",
+            "ligand_atom_order_contract": {
+                "atom_count": 2,
+                "atom_ids": ["C1", "O1"],
+            },
+            "symmetry_permutation_contract": {"permutations": [[0, 1]]},
+            "source_license_or_accession": "PDBBind:1abc",
+            "source_checksum": checksum,
+            "source_file_checksums": {
+                "benchmarks/case_a/protein.pdb": checksum,
+                "benchmarks/case_a/ref.sdf": checksum,
+                "benchmarks/case_a/pred.sdf": checksum,
+            },
+            "provenance_ref": "operator://casf-pdbbind/case_a",
+            "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+            "rmsd_threshold_angstrom": 2.0,
+        }
+    ]
+    pose_packet["dry_run_validation"]["real_benchmark_case_count"] = 1
+    rmsd["real_benchmark_case_count"] = 1
+    rmsd["rows"][0]["source_family"] = "CASF/PDBBind"
+    enrichment.update(
+        {
+            "status": "ready",
+            "contract_pass": True,
+            "public_benchmark_enrichment_ready": True,
+            "real_enrichment_target_count": 1,
+            "blockers": [],
+        }
+    )
+    vina_gnina.update(
+        {
+            "status": "ready",
+            "contract_pass": True,
+            "public_benchmark_engine_comparison_ready": True,
+            "real_comparison_case_count": 1,
+            "blockers": [],
+        }
+    )
+    external_receipts.update(
+        {
+            "status": "ready",
+            "public_benchmark_external_receipts_ready": True,
+            "materialized_row_count": 3,
+            "receipt_complete_row_count": 3,
+            "receipt_blocked_row_count": 0,
+            "receipt_rows": [],
+            "blockers": [],
+        }
+    )
+
+    source = module.build_source_of_truth(
+        subset_manifest=subset,
+        pose_validity_packet=pose_packet,
+        rmsd_scorecard=rmsd,
+        enrichment_scorecard=enrichment,
+        vina_gnina_comparison_adapter=vina_gnina,
+        external_receipts_validation=external_receipts,
+        operator_intake_packet=artifacts["operator_intake_packet"],
+        repo_root=REPO_ROOT,
+    )
+
+    assert source["status"] == "ready"
+    assert source["tier_beta_gate"]["status"] == "ready"
+    assert source["tier_beta_gate"]["failed_criterion_count"] == 0
+    assert source["tier_beta_gate"]["failed_criteria"] == []
+    assert source["tier_beta_ready"] is True
+    assert source["public_benchmark_ready"] is True
+    assert source["blockers"] == []
+    assert source["blocker_count"] == 0
+    assert source["first_blocker"] == ""
+    assert source["blocked_operator_slot_count"] == 0
+    assert source["operator_handoff_queue_count"] == 0
+    assert source["materialization_progress"]["blocked_slice_count"] == 0
+    assert source["materialization_progress"]["next_unblock_slice_id"] == ""
+    assert source["subset_manifest_validation"]["public_benchmark_ready"] is True
+    assert "READY" in source["summary_line"]
 
 
 def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
