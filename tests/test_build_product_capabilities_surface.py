@@ -180,7 +180,9 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert public_benchmark["summary"]["harness_bundle_artifact"].endswith(
         "public_benchmark_harness_bundle.json"
     )
-    assert public_benchmark["summary"]["harness_bundle_status"] == "ready"
+    assert public_benchmark["summary"]["harness_bundle_status"] == (
+        "artifact_bundle_incomplete"
+    )
     assert public_benchmark["summary"]["harness_bundle_artifact_count"] == 7
     assert public_benchmark["summary"]["harness_bundle_missing_artifact_count"] == 0
     assert public_benchmark["summary"]["harness_bundle_index"]["status"] == (
@@ -275,7 +277,9 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert public_benchmark["summary"]["harness_bundle_artifact"].endswith(
         "public_benchmark_harness_bundle.json"
     )
-    assert public_benchmark["summary"]["harness_bundle_status"] == "ready"
+    assert public_benchmark["summary"]["harness_bundle_status"] == (
+        "artifact_bundle_incomplete"
+    )
     assert public_benchmark["summary"]["harness_bundle_artifact_count"] == 7
     assert (
         public_benchmark["summary"]["harness_bundle_index"]["artifact"]

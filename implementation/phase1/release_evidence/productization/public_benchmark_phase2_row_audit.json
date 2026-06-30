@@ -107,11 +107,11 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T21:06:11.486245+00:00",
+  "generated_at": "2026-06-30T21:27:31.732353+00:00",
   "input_checksums": {
-    "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:76211b24aecd3975d2ce64329d585d53fd7f2294e21bfa6dd80c5b5a58292684",
+    "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:4fed2e931e61207502bddcca7ade9b320ac5a5222bf7cf7734132153e72ee0b8",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:90625fca52b30ddc76459bc9b7116b3a8d2b99ebc9f4ac0c023433700b1b8c93",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:24d7f4e912bcbb64579c5c3ce1d1795642bc5fb37dffc5cae689b28ea2a2bdf8"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:2c6c393ea0de6bfd5389685a6c7fa04c1353a2aa8b99b7d5003ed6957e2c78dd"
   },
   "missing_row_inputs": [
     "subset_rows",
@@ -128,7 +128,7 @@
       "count_field": "real_benchmark_case_count",
       "criterion_id": "casf_pdbbind_pose_success_harness_ready",
       "ready_field": "pose_success_harness_ready",
-      "required_minimum_count": 1,
+      "required_minimum_count": 12,
       "requirement": "CASF/PDBBind pose-success harness"
     },
     {
@@ -137,7 +137,7 @@
       "count_field": "real_benchmark_case_count",
       "criterion_id": "symmetry_aware_ligand_rmsd_ready",
       "ready_field": "scorecard_ready",
-      "required_minimum_count": 1,
+      "required_minimum_count": 12,
       "requirement": "Symmetry-aware ligand RMSD scorecard"
     },
     {
@@ -146,7 +146,7 @@
       "count_field": "real_benchmark_case_count",
       "criterion_id": "posebusters_style_pose_validity_ready",
       "ready_field": "posebusters_validity_ready",
-      "required_minimum_count": 1,
+      "required_minimum_count": 12,
       "requirement": "PoseBusters-style pose validity packet"
     },
     {
@@ -201,6 +201,23 @@
       "materialization_chain": [
         "materialize_public_benchmark_enrichment_scorecard"
       ],
+      "minimum_phase2_component_counts": {
+        "casf_pdbbind_pose_success_harness": {
+          "real_benchmark_case_count": 12
+        },
+        "dud_e_or_lit_pcba_enrichment": {
+          "real_enrichment_target_count": 1
+        },
+        "posebusters_style_pose_validity": {
+          "real_benchmark_case_count": 12
+        },
+        "symmetry_aware_ligand_rmsd": {
+          "real_benchmark_case_count": 12
+        },
+        "vina_gnina_comparison_adapter": {
+          "real_comparison_case_count": 1
+        }
+      },
       "required_molecule_fields": [
         "molecule_id",
         "is_active",
@@ -233,6 +250,23 @@
     "phase2_outputs": {
       "artifact_bundle": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
       "harness_materialization_report": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle_materialization_report.json",
+      "minimum_phase2_component_counts": {
+        "casf_pdbbind_pose_success_harness": {
+          "real_benchmark_case_count": 12
+        },
+        "dud_e_or_lit_pcba_enrichment": {
+          "real_enrichment_target_count": 1
+        },
+        "posebusters_style_pose_validity": {
+          "real_benchmark_case_count": 12
+        },
+        "symmetry_aware_ligand_rmsd": {
+          "real_benchmark_case_count": 12
+        },
+        "vina_gnina_comparison_adapter": {
+          "real_comparison_case_count": 1
+        }
+      },
       "operator_bundle": "implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
       "out_dir": "implementation/phase1/release_evidence/productization",
       "required_artifact_roles": [
@@ -270,6 +304,23 @@
         "materialize_public_benchmark_rmsd_scorecard",
         "materialize_public_benchmark_pose_success_harness"
       ],
+      "minimum_phase2_component_counts": {
+        "casf_pdbbind_pose_success_harness": {
+          "real_benchmark_case_count": 12
+        },
+        "dud_e_or_lit_pcba_enrichment": {
+          "real_enrichment_target_count": 1
+        },
+        "posebusters_style_pose_validity": {
+          "real_benchmark_case_count": 12
+        },
+        "symmetry_aware_ligand_rmsd": {
+          "real_benchmark_case_count": 12
+        },
+        "vina_gnina_comparison_adapter": {
+          "real_comparison_case_count": 1
+        }
+      },
       "paired_row_inputs_required": [
         "subset_rows"
       ],
@@ -310,6 +361,23 @@
         "materialize_public_benchmark_pose_validity_input",
         "materialize_public_benchmark_pose_success_harness"
       ],
+      "minimum_phase2_component_counts": {
+        "casf_pdbbind_pose_success_harness": {
+          "real_benchmark_case_count": 12
+        },
+        "dud_e_or_lit_pcba_enrichment": {
+          "real_enrichment_target_count": 1
+        },
+        "posebusters_style_pose_validity": {
+          "real_benchmark_case_count": 12
+        },
+        "symmetry_aware_ligand_rmsd": {
+          "real_benchmark_case_count": 12
+        },
+        "vina_gnina_comparison_adapter": {
+          "real_comparison_case_count": 1
+        }
+      },
       "required_case_fields": [
         "case_id",
         "source_family",
@@ -377,6 +445,23 @@
       "materialization_chain": [
         "materialize_public_benchmark_vina_gnina_comparison_adapter"
       ],
+      "minimum_phase2_component_counts": {
+        "casf_pdbbind_pose_success_harness": {
+          "real_benchmark_case_count": 12
+        },
+        "dud_e_or_lit_pcba_enrichment": {
+          "real_enrichment_target_count": 1
+        },
+        "posebusters_style_pose_validity": {
+          "real_benchmark_case_count": 12
+        },
+        "symmetry_aware_ligand_rmsd": {
+          "real_benchmark_case_count": 12
+        },
+        "vina_gnina_comparison_adapter": {
+          "real_comparison_case_count": 1
+        }
+      },
       "required_case_fields": [
         "case_id",
         "source_family",
@@ -420,6 +505,6 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "5f0fa471983c8fe742123cde1de57b394feb0b28",
+  "source_commit_sha": "8d2b3b058ff63c5ba01729a419be2f69ae1ecc5b",
   "status": "operator_evidence_required"
 }
