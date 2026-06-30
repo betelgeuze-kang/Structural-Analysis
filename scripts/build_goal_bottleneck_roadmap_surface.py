@@ -417,6 +417,63 @@ def _public_benchmark_row(
         for row in _as_list(public_benchmark.get("operator_evidence_gap_register"))
         if isinstance(row, dict)
     ]
+    operator_handoff_queue = [
+        {
+            "queue_priority": _as_int(row.get("queue_priority")),
+            "handoff_id": str(row.get("handoff_id") or ""),
+            "route": str(row.get("route") or ""),
+            "operator_intake_artifact": str(row.get("operator_intake_artifact") or ""),
+            "operator_intake_markdown_artifact": str(
+                row.get("operator_intake_markdown_artifact") or ""
+            ),
+            "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
+            "first_next_action": str(row.get("first_next_action") or ""),
+            "template_artifact": str(row.get("template_artifact") or ""),
+            "blocked_tier_beta_criteria": [
+                str(item) for item in _as_list(row.get("blocked_tier_beta_criteria"))
+            ],
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(row.get("validation_command") or ""),
+            "depends_on": [str(item) for item in _as_list(row.get("depends_on"))],
+        }
+        for row in _as_list(public_benchmark.get("operator_handoff_queue"))
+        if isinstance(row, dict)
+    ]
+    if not operator_handoff_queue:
+        operator_handoff_queue = [
+            {
+                "queue_priority": _as_int(row.get("slot_priority")),
+                "handoff_id": f"public_benchmark::{row.get('slot_id') or ''}",
+                "route": "/product/public-benchmark/operator-intake",
+                "operator_intake_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE),
+                "operator_intake_markdown_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_operator_intake_packet.md"
+                ),
+                "slot_id": str(row.get("slot_id") or ""),
+                "status": str(row.get("status") or ""),
+                "first_next_action": str(row.get("first_next_action") or ""),
+                "template_artifact": str(row.get("template_artifact") or ""),
+                "blocked_tier_beta_criteria": [
+                    str(item)
+                    for item in _as_list(row.get("blocked_tier_beta_criteria"))
+                ],
+                "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+                "materialization_steps": [
+                    str(item) for item in _as_list(row.get("materialization_steps"))
+                ],
+                "materialization_command": "",
+                "validation_command": "",
+                "depends_on": [],
+            }
+            for row in operator_evidence_gap_register
+            if _as_bool(row.get("tier_beta_blocked"))
+        ]
     tier_beta_criteria = [
         {
             "criterion_id": str(row.get("criterion_id") or ""),
@@ -443,6 +500,19 @@ def _public_benchmark_row(
             ),
             {},
         )
+    operator_handoff_queue = [
+        _as_dict(row)
+        for row in _as_list(
+            public_benchmark.get("operator_handoff_queue")
+            or capability_summary.get("operator_handoff_queue")
+        )
+        if isinstance(row, dict)
+    ]
+    first_operator_handoff = _as_dict(
+        public_benchmark.get("first_operator_handoff")
+        or capability_summary.get("first_operator_handoff")
+        or (operator_handoff_queue[0] if operator_handoff_queue else {})
+    )
     first_blocked_target = str(
         action.get("first_blocked_target")
         or public_benchmark.get("first_blocked_target")
@@ -517,9 +587,25 @@ def _public_benchmark_row(
                 public_benchmark.get("operator_evidence_gap_count")
                 or len(operator_evidence_gap_register)
             ),
+            "operator_handoff_queue_count": _as_int(
+                public_benchmark.get("operator_handoff_queue_count")
+                or capability_summary.get("operator_handoff_queue_count")
+                or len(operator_handoff_queue)
+            ),
+            "first_operator_handoff": first_operator_handoff,
+            "operator_handoff_queue": operator_handoff_queue,
             "first_operator_evidence_gap": _as_dict(
                 first_operator_evidence_gap
             ),
+            "operator_handoff_queue_count": _as_int(
+                public_benchmark.get("operator_handoff_queue_count")
+                or len(operator_handoff_queue)
+            ),
+            "first_operator_handoff": _as_dict(
+                public_benchmark.get("first_operator_handoff")
+                or (operator_handoff_queue[0] if operator_handoff_queue else {})
+            ),
+            "operator_handoff_queue": operator_handoff_queue,
             "minimum_subset_case_count": _as_int(
                 public_benchmark_operator_intake.get("minimum_subset_case_count")
                 or source_operator_summary.get("minimum_subset_case_count")
