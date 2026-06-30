@@ -79,6 +79,7 @@ DEFAULT_EXTERNAL_RECEIPTS_VALIDATION = (
 DEFAULT_HARNESS_BUNDLE_REPORT = (
     PRODUCTIZATION / "public_benchmark_harness_bundle_materialization_report.json"
 )
+DEFAULT_HARNESS_BUNDLE = PRODUCTIZATION / "public_benchmark_harness_bundle.json"
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_OPERATOR_TEMPLATE_DIR = PRODUCTIZATION
@@ -775,6 +776,10 @@ def build_public_benchmark_operator_intake_packet(
         f"--out-report {DEFAULT_HARNESS_BUNDLE_REPORT} "
         "--fail-blocked"
     )
+    harness_bundle_index = (
+        "python3 scripts/materialize_public_benchmark_harness_bundle.py "
+        f"--out {DEFAULT_HARNESS_BUNDLE}"
+    )
     refresh_source = (
         "python3 scripts/build_public_benchmark_source_of_truth.py "
         f"--source-of-truth-out {DEFAULT_SOURCE_OF_TRUTH} "
@@ -1104,8 +1109,10 @@ def build_public_benchmark_operator_intake_packet(
         "operator_bundle_materialization": {
             "schema_version": "public-benchmark-harness-bundle-materialization.v1",
             "command": harness_bundle_materialization,
+            "artifact_index_command": harness_bundle_index,
             "bundle_artifact": "<operator-public-benchmark-bundle.json>",
             "produces": {
+                "artifact_bundle": str(DEFAULT_HARNESS_BUNDLE),
                 "bundle_report": str(DEFAULT_HARNESS_BUNDLE_REPORT),
                 "subset_manifest": str(DEFAULT_SUBSET_MANIFEST),
                 "pose_validity_input": str(DEFAULT_POSE_VALIDITY_INPUT),
@@ -1161,6 +1168,7 @@ def build_public_benchmark_operator_intake_packet(
             "enrichment_scorecard": str(DEFAULT_ENRICHMENT_SCORECARD),
             "vina_gnina_comparison_adapter": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
             "external_receipts_validation": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
+            "harness_bundle": str(DEFAULT_HARNESS_BUNDLE),
             "harness_bundle_report": str(DEFAULT_HARNESS_BUNDLE_REPORT),
             "operator_templates": operator_template_artifacts,
         },
