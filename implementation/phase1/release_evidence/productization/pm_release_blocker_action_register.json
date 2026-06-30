@@ -24,10 +24,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T07:41:47.304818+00:00",
+  "generated_at": "2026-06-30T07:55:56.867577+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f00f4df1995bfc0aa8cb5f79b6be84f1316506c4cd961750b0812256e339af61",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:51e2f66216eb83843eda24b032955ffb48fe523ade2c7f498e3344926bc566d1",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9f122431926c3c6d48bf15fce466082b9701017890ac661257d3a62325c61686",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:3ead985f250746bad88b6d92dc0da484a53931ee43105e713436be460cfa7610",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -45,6 +45,12 @@
   "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
   "release_decision_operator_actions": [
+    {
+      "action_id": "attach_missing_evidence_surfaces",
+      "artifact": "implementation/phase1/release_evidence/surface",
+      "reason": "one or more expected evidence surface inputs are missing",
+      "status": "evidence_required"
+    },
     {
       "action_id": "resolve_h_bond_evidence_surface",
       "artifact": "h_bond_backmap_evidence_surface",
@@ -962,7 +968,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "99bab02827b34d002954b2c269d53bb2320f4112",
+  "source_commit_sha": "dba240d6a9d9f4d3388c13528fb2ccd3fbcab20b",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
@@ -983,6 +989,6 @@
     "release_area_gate_ready": false,
     "release_area_green_count": 13,
     "release_area_total_count": 16,
-    "release_decision_operator_action_count": 4
+    "release_decision_operator_action_count": 5
   }
 }

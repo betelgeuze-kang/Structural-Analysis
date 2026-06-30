@@ -1,7 +1,11 @@
 {
   "blockers": [
-    "pocketmd_lite_topk_refinement_rows_required",
-    "pocketmd_lite_survival_report_blocked",
+    "pocketmd_lite_topk_candidate_rows_missing",
+    "pocketmd_lite_local_min_survival_rows_missing",
+    "pocketmd_lite_contact_persistence_rows_missing",
+    "pocketmd_lite_h_bond_persistence_rows_missing",
+    "pocketmd_lite_clash_relief_rows_missing",
+    "pocketmd_lite_uncertainty_rows_missing",
     "pocketmd_lite_broad_all_atom_fep_claim_locked"
   ],
   "claim_boundary": "PocketMD Lite is exposed as a bounded science product surface for top-k local refinement evidence only. Broad all-atom MD, FEP, long-timescale dynamics, and de novo binding claims remain locked.",
@@ -66,7 +70,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T06:53:41.442273+00:00",
+  "generated_at": "2026-06-30T07:55:35.625799+00:00",
   "goal_roadmap_linkage": {
     "bottleneck": "pocketmd_lite_science_product_surface_locked",
     "next_goal_actions": [
@@ -80,8 +84,8 @@
     "roadmap_item": "PocketMD Lite science product surface"
   },
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:8b1110f6c577187dcc08b3fba9cf426c53807c8108d9796ef1aebc55aeb39ff4",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:1a65430ba11b2c5c42ffd1ec80b41ab0671b3e50387b6e42e743ffda4de44ad4"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:ced9c90b1cdddc1220f44f4c357340c50e2e463af7a324bcf19bfd3c71e94964",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2820e22baf6e519047b9d670b3c3bd9ec86ef2e08ece066f64b71acc640cd5cc"
   },
   "linked_artifacts": {
     "contract": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
@@ -300,7 +304,7 @@
       },
       {
         "blockers": [
-          "pocketmd_lite_contact_hbond_persistence_rows_missing"
+          "pocketmd_lite_contact_persistence_rows_missing"
         ],
         "criterion_id": "contact_persistence_materialized",
         "current": null,
@@ -310,7 +314,7 @@
       },
       {
         "blockers": [
-          "pocketmd_lite_contact_hbond_persistence_rows_missing"
+          "pocketmd_lite_h_bond_persistence_rows_missing"
         ],
         "criterion_id": "h_bond_persistence_materialized",
         "current": null,
@@ -319,7 +323,9 @@
         "required": "present"
       },
       {
-        "blockers": [],
+        "blockers": [
+          "pocketmd_lite_clash_relief_rows_missing"
+        ],
         "criterion_id": "clash_relief_materialized",
         "current": null,
         "metric_key": "clash_relief_rate",
@@ -340,7 +346,9 @@
         "blockers": [
           "pocketmd_lite_topk_candidate_rows_missing",
           "pocketmd_lite_local_min_survival_rows_missing",
-          "pocketmd_lite_contact_hbond_persistence_rows_missing",
+          "pocketmd_lite_contact_persistence_rows_missing",
+          "pocketmd_lite_h_bond_persistence_rows_missing",
+          "pocketmd_lite_clash_relief_rows_missing",
           "pocketmd_lite_uncertainty_rows_missing"
         ],
         "criterion_id": "report_blockers_resolved",
@@ -408,7 +416,7 @@
   ],
   "schema_version": "pocketmd-lite-science-product-surface.v1",
   "science_surface_family": "pocketmd_lite",
-  "source_commit_sha": "810d694d34e650f9f8a0180781cadcb22898c00b",
+  "source_commit_sha": "dba240d6a9d9f4d3388c13528fb2ccd3fbcab20b",
   "status": "locked",
   "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
   "surface_id": "pocketmd_lite_science_product_surface",

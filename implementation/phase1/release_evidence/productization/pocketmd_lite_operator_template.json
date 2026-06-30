@@ -3,10 +3,10 @@
   "claim_boundary": "This is a fillable operator template seed for bounded PocketMD Lite top-k refinement rows. It is not refinement evidence and does not unlock broad all-atom MD, FEP, long-timescale dynamics, or de novo binding claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:53:41.435184+00:00",
+  "generated_at": "2026-06-30T07:55:35.619351+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:8b1110f6c577187dcc08b3fba9cf426c53807c8108d9796ef1aebc55aeb39ff4",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:1a65430ba11b2c5c42ffd1ec80b41ab0671b3e50387b6e42e743ffda4de44ad4"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:ced9c90b1cdddc1220f44f4c357340c50e2e463af7a324bcf19bfd3c71e94964",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2820e22baf6e519047b9d670b3c3bd9ec86ef2e08ece066f64b71acc640cd5cc"
   },
   "intake_artifact": "<operator-pocketmd-lite-intake.json>",
   "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -33,7 +33,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-operator-template.v1",
   "slot_id": "top_k_refinement_rows",
-  "source_commit_sha": "810d694d34e650f9f8a0180781cadcb22898c00b",
+  "source_commit_sha": "dba240d6a9d9f4d3388c13528fb2ccd3fbcab20b",
   "status": "operator_template_seed",
   "template": {
     "cases": [

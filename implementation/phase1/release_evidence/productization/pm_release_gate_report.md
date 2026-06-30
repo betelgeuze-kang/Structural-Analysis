@@ -17,11 +17,11 @@
 - `release_allowed`: `False`
 - `blocked_release_count`: `5`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `13`
+- `operator_action_count`: `14`
 - `approval_token_count`: `4`
 - `stale_artifact_count`: `0`
 - `evidence_surface_count`: `12`
-- `missing_evidence_surface_count`: `0`
+- `missing_evidence_surface_count`: `1`
 - `locked_evidence_surface_count`: `3`
 - `h_bond_evidence_surface_present`: `True`
 - `gpcr_evidence_surface_present`: `True`

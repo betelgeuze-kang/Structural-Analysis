@@ -8,10 +8,10 @@
   "claim_boundary": "PocketMD Lite is a bounded top-k refinement surface. It reports local-min survival, contact persistence, H-bond persistence, clash relief, and uncertainty for already-ranked candidates only. It does not claim broad all-atom MD, FEP, long-timescale dynamics, or autonomous docking accuracy.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:53:41.433104+00:00",
+  "generated_at": "2026-06-30T07:55:35.617485+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:8b1110f6c577187dcc08b3fba9cf426c53807c8108d9796ef1aebc55aeb39ff4",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:1a65430ba11b2c5c42ffd1ec80b41ab0671b3e50387b6e42e743ffda4de44ad4"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:ced9c90b1cdddc1220f44f4c357340c50e2e463af7a324bcf19bfd3c71e94964",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2820e22baf6e519047b9d670b3c3bd9ec86ef2e08ece066f64b71acc640cd5cc"
   },
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -108,7 +108,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-contract.v1",
   "scope": "top_k_lite_refinement_only",
-  "source_commit_sha": "810d694d34e650f9f8a0180781cadcb22898c00b",
+  "source_commit_sha": "dba240d6a9d9f4d3388c13528fb2ccd3fbcab20b",
   "status": "contract_ready_operator_evidence_required",
   "top_k_policy": {
     "candidate_scope": "top_k_candidates_only",

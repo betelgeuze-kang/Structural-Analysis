@@ -2,7 +2,9 @@
   "blockers": [
     "pocketmd_lite_topk_candidate_rows_missing",
     "pocketmd_lite_local_min_survival_rows_missing",
-    "pocketmd_lite_contact_hbond_persistence_rows_missing",
+    "pocketmd_lite_contact_persistence_rows_missing",
+    "pocketmd_lite_h_bond_persistence_rows_missing",
+    "pocketmd_lite_clash_relief_rows_missing",
     "pocketmd_lite_uncertainty_rows_missing"
   ],
   "claim_boundary": "This report is a seed shape for PocketMD Lite evidence. With zero real refinement rows it is intentionally blocked and cannot support a product claim.",
@@ -66,10 +68,10 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T06:53:41.437117+00:00",
+  "generated_at": "2026-06-30T07:55:35.621079+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:8b1110f6c577187dcc08b3fba9cf426c53807c8108d9796ef1aebc55aeb39ff4",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:1a65430ba11b2c5c42ffd1ec80b41ab0671b3e50387b6e42e743ffda4de44ad4"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:ced9c90b1cdddc1220f44f4c357340c50e2e463af7a324bcf19bfd3c71e94964",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2820e22baf6e519047b9d670b3c3bd9ec86ef2e08ece066f64b71acc640cd5cc"
   },
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -291,7 +293,7 @@
       },
       {
         "blockers": [
-          "pocketmd_lite_contact_hbond_persistence_rows_missing"
+          "pocketmd_lite_contact_persistence_rows_missing"
         ],
         "criterion_id": "contact_persistence_materialized",
         "current": null,
@@ -301,7 +303,7 @@
       },
       {
         "blockers": [
-          "pocketmd_lite_contact_hbond_persistence_rows_missing"
+          "pocketmd_lite_h_bond_persistence_rows_missing"
         ],
         "criterion_id": "h_bond_persistence_materialized",
         "current": null,
@@ -310,7 +312,9 @@
         "required": "present"
       },
       {
-        "blockers": [],
+        "blockers": [
+          "pocketmd_lite_clash_relief_rows_missing"
+        ],
         "criterion_id": "clash_relief_materialized",
         "current": null,
         "metric_key": "clash_relief_rate",
@@ -331,7 +335,9 @@
         "blockers": [
           "pocketmd_lite_topk_candidate_rows_missing",
           "pocketmd_lite_local_min_survival_rows_missing",
-          "pocketmd_lite_contact_hbond_persistence_rows_missing",
+          "pocketmd_lite_contact_persistence_rows_missing",
+          "pocketmd_lite_h_bond_persistence_rows_missing",
+          "pocketmd_lite_clash_relief_rows_missing",
           "pocketmd_lite_uncertainty_rows_missing"
         ],
         "criterion_id": "report_blockers_resolved",
@@ -394,10 +400,10 @@
   ],
   "rows": [],
   "schema_version": "pocketmd-lite-topk-survival-report.v1",
-  "source_commit_sha": "810d694d34e650f9f8a0180781cadcb22898c00b",
+  "source_commit_sha": "dba240d6a9d9f4d3388c13528fb2ccd3fbcab20b",
   "status": "operator_evidence_required",
   "summary": {
-    "blocker_count": 4,
+    "blocker_count": 6,
     "clash_relief_rate": null,
     "contact_persistence_rate_median": null,
     "h_bond_persistence_rate_median": null,
@@ -406,6 +412,6 @@
     "top_k_candidate_count": 0,
     "uncertainty_width_median": null
   },
-  "summary_line": "PocketMD Lite top-k survival report: LOCKED | first_blocked_target=top_k_refinement_operator_intake | blockers=4",
+  "summary_line": "PocketMD Lite top-k survival report: LOCKED | first_blocked_target=top_k_refinement_operator_intake | blockers=6",
   "top_k_candidate_count": 0
 }

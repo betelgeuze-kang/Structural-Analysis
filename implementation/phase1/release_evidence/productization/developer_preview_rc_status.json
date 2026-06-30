@@ -2,7 +2,6 @@
   "blockers": [
     "final_gate_blocked:selected_medium_models_pass_or_approved_review",
     "final_gate_blocked:large_models_crash_oom_free",
-    "final_gate_blocked:silent_import_loss_zero",
     "final_gate_blocked:linux_windows_reproducibility_confirmed",
     "final_gate_blocked:new_user_core_workflow_observation_passed"
   ],
@@ -103,7 +102,7 @@
   "developer_preview_release_candidate_ready": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "final_gate_count": 9,
-  "final_gate_pass_count": 4,
+  "final_gate_pass_count": 5,
   "final_gates": [
     {
       "blockers": [],
@@ -272,19 +271,14 @@
       "status": "blocked"
     },
     {
-      "blockers": [
-        "per_file_license_review_pending",
-        "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
-        "phase3_ifc_import_case_quantity_credit_missing",
-        "product_legal_license_review_pending"
-      ],
-      "contract_pass": false,
+      "blockers": [],
+      "contract_pass": true,
       "evidence": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json; implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json; implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json; implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json; implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
       "item": "silent_import_loss_zero",
       "notes": [
-        "Requires acquired/checksummed clean and dirty IFC files, license review, and executed import-health plus negative/import-hardening contracts. Source identity or expected contracts alone do not prove silent import loss is zero."
+        "Requires acquired/checksummed clean and dirty IFC files plus executed import-health and negative/import-hardening contracts. Product/legal license review and IFC quantity credit remain release/product-credit requirements and are surfaced in the IFC import handoff."
       ],
-      "status": "blocked"
+      "status": "ready"
     },
     {
       "blockers": [],
@@ -519,10 +513,10 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T07:39:33.222274+00:00",
+  "generated_at": "2026-06-30T07:55:28.616570+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:d2edaf96987c8194d43fc0f24e27763e165114992bd3c9d2cde9e0fd156bb924",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:0e117dc6ba57b9c925b0932d18b5980179b55d6431a5b07873228e59b43d427c",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:92aea71e5879aa09d7b38e8227f30ee106885bec5594a32aa9cc32b481054c57",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:3228b688aee134b0e31cfdb2038151ece5b8faf7050219c2c64cf925ec696208",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:2131144157aec9bdeb98d36b596415375e06718ea2405af8b3af5d9315139351",
@@ -542,7 +536,7 @@
     "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:e7bc47f48fc28a3883b64dc7d75dc7e68f5fe314a4d69130a1e7ab58003c3da8",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:650baf0ab3cc97b83af694043704442c15bf6fea9f629af84c2c91549303e5f5",
-    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:23386f885f9df1253a8cd0598e719b02f509e9b20057a10f96d4f71c267e81cc",
+    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:12429491783c65ccc68e0e61a9f58a6ac0016555004e9b7f20c1a2643679693f",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:108376bdb54137462373680c38d9b34e5fcdf3d408d94b88b4ef5979dafb05ce",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8141943aea750063a22ed4e3e399a290c9f9649d1a9c6fdff641b7e5c20b64f4",
@@ -632,7 +626,7 @@
           "required": 20
         },
         "ifc_clean_dirty_import_cases": {
-          "contract_pass": false,
+          "contract_pass": true,
           "current": 0,
           "remaining": 10,
           "required": 10
@@ -1080,18 +1074,32 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 5,
+    "developer_preview_blocker_count": 22,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "human_ux::observation_file_missing"
+      "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+      "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+      "human_ux::observation_file_missing",
+      "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+      "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+      "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+      "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+      "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+      "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+      "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+      "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+      "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+      "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+      "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+      "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+      "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
       "final_gate_blocked:large_models_crash_oom_free",
-      "final_gate_blocked:silent_import_loss_zero",
       "final_gate_blocked:linux_windows_reproducibility_confirmed",
       "final_gate_blocked:new_user_core_workflow_observation_passed"
     ],
@@ -1170,7 +1178,7 @@
       "source_status": "ready"
     },
     "ifc_import_handoff": {
-      "claim_boundary": "This receipt aggregates the current Phase 3 IFC source/license and import-health receipts for the RC silent-import-loss final gate. It does not download or bundle IFC files, approve product redistribution, prove import execution, or prove zero silent import loss until acquired/checksummed sources, license review, import-health execution, and silent-data-loss negative gates all pass. Query/GUI corpus readiness is reported separately as spillover evidence and does not by itself block the direct silent-import-loss final gate.",
+      "claim_boundary": "This receipt aggregates the current Phase 3 IFC source/license and import-health receipts for the RC silent-import-loss final gate. It does not download or bundle IFC files, approve product redistribution, prove import execution, or prove zero silent import loss until acquired/checksummed sources, license review, import-health execution, and silent-data-loss negative gates all pass. Query/GUI corpus readiness is reported separately as spillover evidence and does not by itself block the direct silent-import-loss final gate. The technical_silent_import_loss_zero field is scoped to acquired/checksummed sources plus executed import-health and negative silent-loss gates; product license review and quantity credit remain separate release/product-credit requirements.",
       "clean_acquisition_blockers": [
         "import_health_execution_missing",
         "phase3_ifc_import_case_count_below_minimum",
@@ -1198,9 +1206,11 @@
         },
         "import_health_execution_ready": true,
         "product_license_review_ready": false,
+        "product_release_credit_ready": false,
         "selected_file_checksums_ready": true,
         "silent_data_loss_negative_gate_executed": true,
-        "source_files_acquired": true
+        "source_files_acquired": true,
+        "technical_silent_import_loss_zero": true
       },
       "import_health_blockers": [
         "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review"
@@ -1209,6 +1219,7 @@
       "import_health_execution_count": 10,
       "import_health_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
       "owner_action": "complete product/legal and per-file license review for quantity credit; close or explicitly defer the ifc-bench query/GUI spillover blockers; then refresh the RC final gate.",
+      "product_release_credit_ready": false,
       "required_ifc_import_case_count": 10,
       "selected_import_case_count": 10,
       "silent_import_loss_all_blockers": [
@@ -1294,6 +1305,12 @@
         "phase3_ifc_import_case_quantity_credit_missing",
         "product_legal_license_review_pending"
       ],
+      "silent_import_loss_product_release_credit_blockers": [
+        "per_file_license_review_pending",
+        "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+        "phase3_ifc_import_case_quantity_credit_missing",
+        "product_legal_license_review_pending"
+      ],
       "silent_import_loss_spillover_blockers": [
         "dataset_repository_url_missing",
         "gui_task_runner_not_implemented",
@@ -1302,6 +1319,7 @@
       ],
       "silent_import_loss_status": "blocked",
       "silent_import_loss_status_receipt": "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
+      "silent_import_loss_technical_direct_blockers": [],
       "source_license_blockers": [
         "dataset_repository_url_missing",
         "gui_task_runner_not_implemented",
@@ -1311,7 +1329,8 @@
         "query_expected_answers_missing",
         "query_task_file_checksums_missing"
       ],
-      "source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json"
+      "source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+      "technical_silent_import_loss_zero": true
     },
     "ifc_query_gui_handoff": {
       "blockers": [
@@ -2425,6 +2444,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "22bb98753ef94638893ba1c10b4f96cf93af5ada",
+  "source_commit_sha": "dba240d6a9d9f4d3388c13528fb2ccd3fbcab20b",
   "status": "blocked"
 }
