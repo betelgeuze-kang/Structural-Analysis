@@ -80,6 +80,9 @@ def test_pose_validity_input_materializer_builds_ready_real_case() -> None:
     assert payload["status"] == "ready"
     assert payload["pose_validity_ready"] is True
     assert payload["real_benchmark_case_count"] == 1
+    assert payload["real_pose_case_count"] == 1
+    assert payload["materialization_report"]["real_benchmark_case_count"] == 1
+    assert payload["materialization_report"]["real_pose_case_count"] == 1
     assert payload["blockers"] == []
     case = payload["cases"][0]
     assert case["source_family"] == "CASF/PDBBind"

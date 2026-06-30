@@ -387,6 +387,18 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
         "public_benchmark_external_receipts_validation.public_benchmark_external_receipts_ready == true",
         "public_benchmark_source_of_truth.public_benchmark_ready == true"
     ]
+    assert (
+        "public_benchmark_pose_validity_input.real_benchmark_case_count >= 12"
+        in packet["acceptance_criteria"]
+    )
+    assert (
+        "public_benchmark_pose_validity_packet.posebusters_validity_ready == true"
+        in packet["acceptance_criteria"]
+    )
+    assert (
+        "public_benchmark_symmetry_rmsd_scorecard.scorecard_ready == true"
+        in packet["acceptance_criteria"]
+    )
     assert packet["next_actions"][0] == "fill_public_benchmark_operator_intake_packet"
     assert packet["next_actions"][-1] == "regenerate_goal_bottleneck_roadmap_surface"
     assert packet["linked_artifacts"]["source_of_truth"] == (
@@ -441,3 +453,131 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     assert template["operator_values_filled"] is False
     assert "# Public Benchmark Operator Intake Packet" in markdown
     assert "materialize_subset_manifest" in markdown
+
+
+def test_public_benchmark_execution_preflight_uses_canonical_ready_fields(
+    tmp_path: Path,
+) -> None:
+    productization = tmp_path / "implementation/phase1/release_evidence/productization"
+    productization.mkdir(parents=True)
+
+    artifacts = {
+        module.DEFAULT_SUBSET_MANIFEST: {
+            "schema_version": "public-benchmark-subset-manifest.v1",
+            "status": "ready",
+            "public_benchmark_ready": True,
+            "materialized_case_count": 12,
+            "target_subset_case_count": 12,
+            "blockers": [],
+        },
+        module.DEFAULT_POSE_VALIDITY_INPUT: {
+            "schema_version": "public-benchmark-pose-validity-input.v1",
+            "status": "ready",
+            "pose_validity_ready": True,
+            "real_benchmark_case_count": 12,
+            "blockers": [],
+        },
+        module.DEFAULT_POSE_VALIDITY_PACKET: {
+            "schema_version": "public-benchmark-pose-validity-packet.v1",
+            "status": "posebusters_validity_materialization_required",
+            "posebusters_validity_ready": False,
+            "real_benchmark_case_count": 12,
+            "blockers": [],
+        },
+        module.DEFAULT_RMSD_SCORECARD: {
+            "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
+            "status": "rmsd_materialization_required",
+            "scorecard_ready": False,
+            "real_benchmark_case_count": 12,
+            "dry_run_case_count": 0,
+            "blockers": [],
+        },
+    }
+    for raw_path, payload in artifacts.items():
+        path = tmp_path / raw_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload), encoding="utf-8")
+
+    rows = module._execution_preflight_checklist(
+        repo_root=tmp_path,
+        materialization_sequence=[
+            {
+                "step_id": "materialize_subset_manifest",
+                "produces": str(module.DEFAULT_SUBSET_MANIFEST),
+            },
+            {
+                "step_id": "materialize_pose_validity_input",
+                "produces": str(module.DEFAULT_POSE_VALIDITY_INPUT),
+            },
+            {
+                "step_id": "materialize_posebusters_validity_packet",
+                "produces": str(module.DEFAULT_POSE_VALIDITY_PACKET),
+            },
+            {
+                "step_id": "materialize_symmetry_rmsd_scorecard",
+                "produces": str(module.DEFAULT_RMSD_SCORECARD),
+            },
+        ],
+        slots=[
+            {"slot_id": "casf_pdbbind_subset_intake"},
+            {"slot_id": "pose_coordinate_intake"},
+        ],
+        source_blocker_detail_register=[],
+    )
+    by_step = {row["step_id"]: row for row in rows}
+
+    assert by_step["materialize_pose_validity_input"]["current_ready"] is True
+    assert by_step["materialize_pose_validity_input"]["current_artifact"][
+        "ready_values"
+    ] == {
+        "pose_validity_ready": True,
+        "real_benchmark_case_count": 12,
+    }
+    assert by_step["materialize_posebusters_validity_packet"]["current_ready"] is False
+    assert by_step["materialize_symmetry_rmsd_scorecard"]["current_ready"] is False
+
+    packet = artifacts[module.DEFAULT_POSE_VALIDITY_PACKET]
+    packet["posebusters_validity_ready"] = True
+    packet["status"] = "ready"
+    (tmp_path / module.DEFAULT_POSE_VALIDITY_PACKET).write_text(
+        json.dumps(packet),
+        encoding="utf-8",
+    )
+    scorecard = artifacts[module.DEFAULT_RMSD_SCORECARD]
+    scorecard["scorecard_ready"] = True
+    scorecard["status"] = "ready"
+    (tmp_path / module.DEFAULT_RMSD_SCORECARD).write_text(
+        json.dumps(scorecard),
+        encoding="utf-8",
+    )
+
+    rows = module._execution_preflight_checklist(
+        repo_root=tmp_path,
+        materialization_sequence=[
+            {
+                "step_id": "materialize_subset_manifest",
+                "produces": str(module.DEFAULT_SUBSET_MANIFEST),
+            },
+            {
+                "step_id": "materialize_pose_validity_input",
+                "produces": str(module.DEFAULT_POSE_VALIDITY_INPUT),
+            },
+            {
+                "step_id": "materialize_posebusters_validity_packet",
+                "produces": str(module.DEFAULT_POSE_VALIDITY_PACKET),
+            },
+            {
+                "step_id": "materialize_symmetry_rmsd_scorecard",
+                "produces": str(module.DEFAULT_RMSD_SCORECARD),
+            },
+        ],
+        slots=[
+            {"slot_id": "casf_pdbbind_subset_intake"},
+            {"slot_id": "pose_coordinate_intake"},
+        ],
+        source_blocker_detail_register=[],
+    )
+    by_step = {row["step_id"]: row for row in rows}
+
+    assert by_step["materialize_posebusters_validity_packet"]["current_ready"] is True
+    assert by_step["materialize_symmetry_rmsd_scorecard"]["current_ready"] is True

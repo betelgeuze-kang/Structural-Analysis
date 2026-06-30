@@ -128,6 +128,7 @@ def materialize_pose_validity_input(
     if pose_intake_path is not None:
         input_paths.append(pose_intake_path)
 
+    real_benchmark_case_count = validation["real_benchmark_case_count"]
     return {
         "schema_version": POSE_INPUT_SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -141,7 +142,8 @@ def materialize_pose_validity_input(
         "pose_validity_ready": ready,
         "required_pose_fields": list(REQUIRED_POSE_FIELDS),
         "case_count": len(cases),
-        "real_benchmark_case_count": validation["real_benchmark_case_count"],
+        "real_benchmark_case_count": real_benchmark_case_count,
+        "real_pose_case_count": real_benchmark_case_count,
         "cases": cases,
         "validation": validation,
         "blockers": blockers,
@@ -150,6 +152,8 @@ def materialize_pose_validity_input(
             "subset_manifest_case_count": len(subset_by_case_id),
             "pose_intake_case_count": len(pose_rows),
             "materialized_pose_case_count": len(cases),
+            "real_benchmark_case_count": real_benchmark_case_count,
+            "real_pose_case_count": real_benchmark_case_count,
             "materialization_blocker_count": len(materialization_blockers),
             "validation_blocker_count": int(validation["blocker_count"]),
             "pose_validity_ready": ready,
