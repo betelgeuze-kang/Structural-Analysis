@@ -450,6 +450,64 @@ def _ranked_findings(summary: dict[str, Any]) -> list[dict[str, Any]]:
     return sorted(findings, key=lambda row: int(row["rank"]))
 
 
+def _decision_record(summary: dict[str, Any]) -> dict[str, Any]:
+    classification = str(summary.get("global_connectivity_classification") or "")
+    dominant = int(summary.get("dominant_node_count") or 0)
+    element_reachable = int(
+        summary.get("dominant_nodes_element_reachable_to_support_count") or 0
+    )
+    element_unreachable = int(
+        summary.get("dominant_nodes_without_element_path_to_support_count") or 0
+    )
+    element_graph_closes_dominant_packet = bool(
+        dominant > 0
+        and element_reachable >= dominant
+        and element_unreachable == 0
+        and classification == "element_graph_connects_dominant_modes_to_supports"
+    )
+    if element_graph_closes_dominant_packet:
+        row_only_decision = "stop"
+        primary_next_lane = "consistent_residual_jacobian_newton_rocm_worker"
+        rationale = [
+            f"{element_reachable}/{dominant} dominant near-null nodes reach authored supports through structural elements.",
+            "A direct support-row or elastic-link-row absence is no longer the leading G1 explanation.",
+            "Further G1 progress requires consistent residual/Jacobian Newton evidence and a production ROCm/HIP residual/JVP lane.",
+        ]
+        required_next_receipts = [
+            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+            "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+        ]
+    else:
+        row_only_decision = "hold_pending_connectivity_mapping"
+        primary_next_lane = "structural_connectivity_load_path_mapping"
+        rationale = [
+            f"{element_reachable}/{dominant} dominant near-null nodes reach authored supports through structural elements.",
+            "Connectivity/load-path mapping remains a primary diagnostic before a G1 promotion decision.",
+        ]
+        required_next_receipts = [
+            "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json",
+            "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
+        ]
+    return {
+        "schema_version": "g1-global-connectivity-decision-record.v1",
+        "classification": classification,
+        "dominant_node_count": dominant,
+        "dominant_nodes_element_reachable_to_support_count": element_reachable,
+        "dominant_nodes_without_element_path_to_support_count": element_unreachable,
+        "element_graph_closes_dominant_packet": element_graph_closes_dominant_packet,
+        "row_only_support_or_elastic_link_correction_decision": row_only_decision,
+        "row_only_correction_loop_stopped": bool(element_graph_closes_dominant_packet),
+        "primary_next_lane": primary_next_lane,
+        "required_next_receipts": required_next_receipts,
+        "rationale": rationale,
+        "claim_boundary": (
+            "This decision record only routes the next G1 diagnostic slice. It does "
+            "not prove full-load 1.0 equilibrium, material Newton breadth, or "
+            "production ROCm/HIP residency."
+        ),
+    }
+
+
 def build_audit(
     *,
     repo_root: Path = ROOT,
@@ -565,6 +623,7 @@ def build_audit(
         "element_type_counts": dict(sorted(Counter(str(row["type"]) for row in elements).items())),
     }
     findings = _ranked_findings(summary)
+    decision_record = _decision_record(summary)
     ready = bool(not blockers)
     return {
         "schema_version": SCHEMA_VERSION,
@@ -594,6 +653,7 @@ def build_audit(
             f"element_reachable={element_reachable}/{len(dominant_nodes)}"
         ),
         "summary": summary,
+        "decision_record": decision_record,
         "dominant_node_summaries": dominant_summaries,
         "dominant_dof_rows": [
             {
@@ -611,6 +671,9 @@ def build_audit(
         ],
         "ranked_findings": findings,
         "next_actions": [
+            "stop_row_only_support_or_elastic_link_correction_loop"
+            if decision_record["row_only_correction_loop_stopped"]
+            else "inspect_disconnected_structural_components_and_load_path_mapping",
             "if_element_graph_connects_dominant_nodes_shift_to_consistent_residual_jacobian_newton",
             "if_element_graph_gap_detected_inspect_disconnected_structural_components_and_load_path_mapping",
             "keep_G1_full_load_and_rocm_hip_promotions_blocked_until_terminal_receipts_pass",
