@@ -44,6 +44,7 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
     REQUIRED_CASE_FIELDS as VINA_GNINA_REQUIRED_CASE_FIELDS,
     REQUIRED_ENGINE_RUN_FIELDS as VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS,
     SCHEMA_VERSION as VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
+    SUPPORTED_BENCHMARK_SPLITS as VINA_GNINA_SUPPORTED_BENCHMARK_SPLITS,
     SUPPORTED_ENGINES as VINA_GNINA_SUPPORTED_ENGINES,
 )
 from validate_public_benchmark_external_receipts import (  # noqa: E402
@@ -223,6 +224,7 @@ def _vina_gnina_case_template() -> dict[str, Any]:
     return {
         "case_id": "casf_pdbbind_subset_001",
         "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
         "complex_id": "SOURCE_COMPLEX_ID",
         "reference_pose_id": "SOURCE_COMPLEX_ID_reference_ligand",
         "engine_runs": [
@@ -889,6 +891,7 @@ def build_public_benchmark_operator_intake_packet(
             template={"cases": [_vina_gnina_case_template()]},
             owner_actions=[
                 "attach Vina and GNINA run rows for the same materialized benchmark cases",
+                "preserve benchmark_split from the materialized subset manifest",
                 "include symmetry-aware RMSD and pose_success values for every engine run",
                 "preserve docking run receipts, source accession or license references, and checksums",
                 "run the Vina/GNINA comparison materializer with --fail-blocked",
@@ -902,6 +905,8 @@ def build_public_benchmark_operator_intake_packet(
             minimum_evidence={
                 "comparison_case_count": 1,
                 "required_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+                "benchmark_split_source": str(DEFAULT_SUBSET_MANIFEST),
+                "supported_benchmark_splits": list(VINA_GNINA_SUPPORTED_BENCHMARK_SPLITS),
                 "required_engine_run_fields": list(
                     VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS
                 ),

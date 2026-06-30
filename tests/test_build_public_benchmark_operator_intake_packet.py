@@ -221,6 +221,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert comparison["required_fields"] == [
         "case_id",
         "source_family",
+        "benchmark_split",
         "complex_id",
         "reference_pose_id",
         "engine_runs",
@@ -239,6 +240,17 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert comparison["validation_command"] == comparison["materialization_command"]
     assert packet["supported_comparison_engines"] == ["vina", "gnina"]
     assert "symmetry_aware_rmsd_angstrom" in packet["required_engine_run_fields"]
+    assert comparison["template"]["cases"][0]["benchmark_split"] == "CASF-core"
+    assert comparison["minimum_evidence"]["benchmark_split_source"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_subset_manifest.json"
+    )
+    assert comparison["minimum_evidence"]["supported_benchmark_splits"] == [
+        "CASF-core",
+        "PDBBind-core",
+        "PDBBind-refined",
+        "PDBBind-general",
+    ]
     assert comparison["minimum_evidence"]["source_checksum_policy"] == {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
         "required_receipt_field": "source_checksum",

@@ -24,9 +24,16 @@ DEFAULT_ADAPTER_OUT = PRODUCTIZATION / "public_benchmark_vina_gnina_comparison_a
 SCHEMA_VERSION = "public-benchmark-vina-gnina-comparison-materialization.v1"
 ADAPTER_SCHEMA_VERSION = "public-benchmark-vina-gnina-comparison-adapter.v1"
 SUPPORTED_ENGINES = ("vina", "gnina")
+SUPPORTED_BENCHMARK_SPLITS = (
+    "CASF-core",
+    "PDBBind-core",
+    "PDBBind-refined",
+    "PDBBind-general",
+)
 REQUIRED_CASE_FIELDS = (
     "case_id",
     "source_family",
+    "benchmark_split",
     "complex_id",
     "reference_pose_id",
     "engine_runs",
@@ -95,6 +102,16 @@ def _median(values: list[float]) -> float | None:
     if len(ordered) % 2:
         return ordered[midpoint]
     return (ordered[midpoint - 1] + ordered[midpoint]) / 2.0
+
+
+def _counts_by_key(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        value = _string(row.get(key))
+        if not value:
+            continue
+        counts[value] = counts.get(value, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def _case_key(row: dict[str, Any], index: int) -> str:
@@ -177,6 +194,7 @@ def _normalize_case(row: dict[str, Any], *, index: int) -> dict[str, Any]:
 
     case_id = _string(row.get("case_id"))
     source_family = _string(row.get("source_family"))
+    benchmark_split = _string(row.get("benchmark_split"))
     complex_id = _string(row.get("complex_id"))
     reference_pose_id = _string(row.get("reference_pose_id"))
     source_license = _string(row.get("source_license_or_accession"))
@@ -186,6 +204,7 @@ def _normalize_case(row: dict[str, Any], *, index: int) -> dict[str, Any]:
     for field, value in {
         "case_id": case_id,
         "source_family": source_family,
+        "benchmark_split": benchmark_split,
         "complex_id": complex_id,
         "reference_pose_id": reference_pose_id,
         "source_license_or_accession": source_license,
@@ -198,6 +217,13 @@ def _normalize_case(row: dict[str, Any], *, index: int) -> dict[str, Any]:
     if "source_checksum" in row and source_checksum and not _is_sha256_ref(source_checksum):
         blockers.append(f"{case_key}:source_checksum_invalid")
         root_cause_tags.append("operator_receipts_required")
+    if (
+        "benchmark_split" in row
+        and benchmark_split
+        and benchmark_split not in SUPPORTED_BENCHMARK_SPLITS
+    ):
+        blockers.append(f"{case_key}:unsupported_benchmark_split")
+        root_cause_tags.append("operator_values_required")
 
     raw_runs = _as_list(row.get("engine_runs"))
     if not raw_runs:
@@ -236,6 +262,7 @@ def _normalize_case(row: dict[str, Any], *, index: int) -> dict[str, Any]:
     return {
         "case_id": case_id,
         "source_family": source_family,
+        "benchmark_split": benchmark_split,
         "complex_id": complex_id,
         "reference_pose_id": reference_pose_id,
         "engine_runs": engine_runs,
@@ -319,6 +346,7 @@ def materialize_vina_gnina_comparison_adapter(
         "vina_gnina_operator_intake" if blockers else "",
     )
     engine_summaries = _engine_summaries(case_rows)
+    benchmark_split_counts = _counts_by_key(case_rows, "benchmark_split")
     input_paths = [
         Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py")
     ]
@@ -339,16 +367,20 @@ def materialize_vina_gnina_comparison_adapter(
         "real_comparison_case_count": len(case_rows),
         "case_rows": case_rows,
         "engine_summaries": engine_summaries,
+        "benchmark_split_counts": benchmark_split_counts,
         "summary": {
             "case_count": len(case_rows),
             "ready_case_count": sum(1 for row in case_rows if row["contract_pass"]),
             "engine_count": len(SUPPORTED_ENGINES),
             "supported_engines": list(SUPPORTED_ENGINES),
+            "supported_benchmark_splits": list(SUPPORTED_BENCHMARK_SPLITS),
+            "benchmark_split_counts": benchmark_split_counts,
             "blocker_count": len(blockers),
         },
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
         "required_engine_run_fields": list(REQUIRED_ENGINE_RUN_FIELDS),
         "supported_engines": list(SUPPORTED_ENGINES),
+        "supported_benchmark_splits": list(SUPPORTED_BENCHMARK_SPLITS),
         "first_blocked_target": first_blocked_target,
         "root_cause_tags": root_cause_tags,
         "blockers": blockers,
@@ -357,6 +389,7 @@ def materialize_vina_gnina_comparison_adapter(
             "operator_case_count": len(raw_cases),
             "materialized_case_count": len(case_rows),
             "ready_case_count": sum(1 for row in case_rows if row["contract_pass"]),
+            "benchmark_split_counts": benchmark_split_counts,
             "blocker_count": len(blockers),
             "public_benchmark_engine_comparison_ready": ready,
         },

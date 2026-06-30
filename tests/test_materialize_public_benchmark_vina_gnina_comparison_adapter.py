@@ -53,6 +53,7 @@ def _case(case_id: str) -> dict[str, object]:
     return {
         "case_id": case_id,
         "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
         "complex_id": f"{case_id}_complex",
         "reference_pose_id": f"{case_id}_reference",
         "engine_runs": [
@@ -83,6 +84,15 @@ def test_vina_gnina_comparison_adapter_materializes_engine_summary() -> None:
     assert adapter["public_benchmark_engine_comparison_ready"] is True
     assert adapter["real_comparison_case_count"] == 2
     assert adapter["blockers"] == []
+    assert adapter["case_rows"][0]["benchmark_split"] == "CASF-core"
+    assert adapter["benchmark_split_counts"] == {"CASF-core": 2}
+    assert adapter["summary"]["benchmark_split_counts"] == {"CASF-core": 2}
+    assert adapter["summary"]["supported_benchmark_splits"] == [
+        "CASF-core",
+        "PDBBind-core",
+        "PDBBind-refined",
+        "PDBBind-general",
+    ]
     summaries = {row["engine_id"]: row for row in adapter["engine_summaries"]}
     assert summaries["vina"]["run_count"] == 2
     assert summaries["vina"]["pose_success_rate"] == 1.0
@@ -116,6 +126,7 @@ def test_vina_gnina_comparison_adapter_blocks_bad_rows() -> None:
                 {
                     "case_id": "bad_case",
                     "source_family": "",
+                    "benchmark_split": "private_split",
                     "complex_id": "complex",
                     "reference_pose_id": "ref",
                     "engine_runs": [
@@ -141,6 +152,7 @@ def test_vina_gnina_comparison_adapter_blocks_bad_rows() -> None:
     assert adapter["status"] == "operator_evidence_required"
     assert adapter["first_blocked_target"] == "bad_case"
     assert "bad_case:source_family_blank" in adapter["blockers"]
+    assert "bad_case:unsupported_benchmark_split" in adapter["blockers"]
     assert "bad_case:engine_run_0:engine_id_unsupported" in adapter["blockers"]
     assert "bad_case:vina_engine_run_missing" in adapter["blockers"]
     assert "bad_case:gnina_engine_run_missing" in adapter["blockers"]

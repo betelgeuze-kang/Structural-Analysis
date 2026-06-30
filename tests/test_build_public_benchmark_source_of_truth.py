@@ -790,8 +790,19 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert vina_gnina["public_benchmark_engine_comparison_ready"] is False
     assert vina_gnina["real_comparison_case_count"] == 0
     assert vina_gnina["supported_engines"] == ["vina", "gnina"]
+    assert vina_gnina["supported_benchmark_splits"] == [
+        "CASF-core",
+        "PDBBind-core",
+        "PDBBind-refined",
+        "PDBBind-general",
+    ]
+    assert vina_gnina["benchmark_split_counts"] == {}
     assert vina_gnina["materializer"]["schema_version"] == (
         "public-benchmark-vina-gnina-comparison-materialization.v1"
+    )
+    assert "benchmark_split" in vina_gnina["materializer"]["required_case_fields"]
+    assert vina_gnina["materializer"]["template"]["cases"][0]["benchmark_split"] == (
+        "CASF-core"
     )
     assert vina_gnina["materializer"]["source_checksum_policy"] == {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",

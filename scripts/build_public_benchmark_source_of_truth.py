@@ -54,6 +54,7 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
     REQUIRED_CASE_FIELDS as VINA_GNINA_REQUIRED_CASE_FIELDS,
     REQUIRED_ENGINE_RUN_FIELDS as VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS,
     SCHEMA_VERSION as VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
+    SUPPORTED_BENCHMARK_SPLITS as VINA_GNINA_SUPPORTED_BENCHMARK_SPLITS,
     SUPPORTED_ENGINES as VINA_GNINA_SUPPORTED_ENGINES,
 )
 from build_public_benchmark_operator_intake_packet import (  # noqa: E402
@@ -534,6 +535,7 @@ def _vina_gnina_case_template() -> dict[str, Any]:
     return {
         "case_id": "casf_pdbbind_subset_001",
         "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
         "complex_id": "SOURCE_COMPLEX_ID",
         "reference_pose_id": "SOURCE_COMPLEX_ID_reference_ligand",
         "engine_runs": [
@@ -595,11 +597,14 @@ def build_vina_gnina_comparison_adapter(*, repo_root: Path = ROOT) -> dict[str, 
             }
             for engine_id in VINA_GNINA_SUPPORTED_ENGINES
         ],
+        "benchmark_split_counts": {},
         "summary": {
             "case_count": 0,
             "ready_case_count": 0,
             "engine_count": len(VINA_GNINA_SUPPORTED_ENGINES),
             "supported_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+            "supported_benchmark_splits": list(VINA_GNINA_SUPPORTED_BENCHMARK_SPLITS),
+            "benchmark_split_counts": {},
             "blocker_count": len(blockers),
         },
         "materializer": {
@@ -609,6 +614,7 @@ def build_vina_gnina_comparison_adapter(*, repo_root: Path = ROOT) -> dict[str, 
             "required_case_fields": list(VINA_GNINA_REQUIRED_CASE_FIELDS),
             "required_engine_run_fields": list(VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS),
             "supported_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+            "supported_benchmark_splits": list(VINA_GNINA_SUPPORTED_BENCHMARK_SPLITS),
             "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             "template": {"cases": [_vina_gnina_case_template()]},
             "materialization_command": (
@@ -626,6 +632,7 @@ def build_vina_gnina_comparison_adapter(*, repo_root: Path = ROOT) -> dict[str, 
             ),
         },
         "supported_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+        "supported_benchmark_splits": list(VINA_GNINA_SUPPORTED_BENCHMARK_SPLITS),
         "blockers": blockers,
         "claim_boundary": (
             "This seed defines the Vina/GNINA comparison adapter shape and materializer "
