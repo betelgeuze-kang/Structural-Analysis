@@ -141,7 +141,6 @@ def _receipt_commit_allowed_path(path: str) -> bool:
 def _g1_hip_freshness_relevant_path(path: str) -> bool:
     relevant_exact_paths = {
         "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-        "scripts/run_g1_full_load_hip_newton_lane.py",
     }
     if path in relevant_exact_paths:
         return True
