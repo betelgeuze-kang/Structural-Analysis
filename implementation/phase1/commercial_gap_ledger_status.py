@@ -3253,6 +3253,47 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     g1_full_load_hip_consistency = _get(
         g1_full_load_hip_newton_lane, "hip_consistency_proof", default={}
     )
+    g1_full_load_hip_runtime_blockers = _get(
+        g1_full_load_hip_consistency,
+        "runtime_blockers",
+        default=[],
+    )
+    if not isinstance(g1_full_load_hip_runtime_blockers, list):
+        g1_full_load_hip_runtime_blockers = []
+    g1_full_load_hip_receipt_blockers = _get(
+        g1_full_load_hip_consistency,
+        "receipt_blockers",
+        default=[],
+    )
+    if not isinstance(g1_full_load_hip_receipt_blockers, list):
+        g1_full_load_hip_receipt_blockers = []
+    g1_full_load_hip_worker = _as_dict(
+        _get(
+            g1_full_load_hip_consistency,
+            "production_rocm_hip_residual_jvp_worker",
+            default={},
+        )
+    )
+    g1_full_load_hip_worker_blockers = _as_list(
+        g1_full_load_hip_worker.get("blockers")
+    )
+    g1_full_load_hip_worker_ready = bool(
+        g1_full_load_hip_worker.get("ready")
+        and str(g1_full_load_hip_worker.get("status", "")).lower() == "ready"
+    )
+    g1_raw_production_hip_residual_jacobian_path = bool(
+        _get(
+            g1_full_load_hip_consistency,
+            "production_hip_residual_jacobian_path",
+            default=False,
+        )
+    )
+    g1_effective_production_hip_residual_jacobian_path = bool(
+        g1_raw_production_hip_residual_jacobian_path
+        and not g1_full_load_hip_runtime_blockers
+        and not g1_full_load_hip_receipt_blockers
+        and g1_full_load_hip_worker_ready
+    )
     g1_full_load_gate_closed = bool(
         g1_full_load_hip_newton_lane.get("full_load_input_pass")
         and _get(g1_full_load_child_gate, "full_load_closure_passed", default=False)
@@ -3262,11 +3303,7 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         and _get(g1_full_load_child_gate, "material_newton_breadth_passed", default=False)
     )
     g1_production_rocm_hip_residency_closed = bool(
-        _get(
-            g1_full_load_hip_consistency,
-            "production_hip_residual_jacobian_path",
-            default=False,
-        )
+        g1_effective_production_hip_residual_jacobian_path
         and _get(
             g1_full_load_hip_consistency,
             "consistent_residual_jacobian_newton_gate_passed",
@@ -3770,20 +3807,24 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                             "runtime_blockers": [],
                         },
                         "observed": {
-                            "production_hip_residual_jacobian_path": _get(
-                                g1_full_load_hip_consistency,
-                                "production_hip_residual_jacobian_path",
-                                default=False,
+                            "production_hip_residual_jacobian_path": (
+                                g1_effective_production_hip_residual_jacobian_path
+                            ),
+                            "raw_production_hip_residual_jacobian_path": (
+                                g1_raw_production_hip_residual_jacobian_path
                             ),
                             "consistent_residual_jacobian_newton_gate_passed": _get(
                                 g1_full_load_hip_consistency,
                                 "consistent_residual_jacobian_newton_gate_passed",
                                 default=False,
                             ),
-                            "runtime_blockers": _get(
-                                g1_full_load_hip_consistency,
-                                "runtime_blockers",
-                                default=[],
+                            "runtime_blockers": g1_full_load_hip_runtime_blockers,
+                            "receipt_blockers": g1_full_load_hip_receipt_blockers,
+                            "production_rocm_hip_residual_jvp_worker_ready": (
+                                g1_full_load_hip_worker_ready
+                            ),
+                            "production_rocm_hip_residual_jvp_worker_blockers": (
+                                g1_full_load_hip_worker_blockers
                             ),
                             "execution_mode": _get(
                                 g1_full_load_hip_consistency,
@@ -3794,11 +3835,7 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                         "non_closing_reasons": [
                             *(
                                 ["production_hip_path_not_proven"]
-                                if not _get(
-                                    g1_full_load_hip_consistency,
-                                    "production_hip_residual_jacobian_path",
-                                    default=False,
-                                )
+                                if not g1_effective_production_hip_residual_jacobian_path
                                 else []
                             ),
                             *(
@@ -3812,11 +3849,17 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                             ),
                             *(
                                 ["hip_runtime_blockers_present"]
-                                if _get(
-                                    g1_full_load_hip_consistency,
-                                    "runtime_blockers",
-                                    default=[],
-                                )
+                                if g1_full_load_hip_runtime_blockers
+                                else []
+                            ),
+                            *(
+                                ["hip_receipt_blockers_present"]
+                                if g1_full_load_hip_receipt_blockers
+                                else []
+                            ),
+                            *(
+                                ["production_rocm_hip_residual_jvp_worker_not_ready"]
+                                if not g1_full_load_hip_worker_ready
                                 else []
                             ),
                         ],
