@@ -20,7 +20,7 @@
     },
     "future commercial": {
       "blocked": true,
-      "blocker_count": 32,
+      "blocker_count": 33,
       "blockers": [
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
         "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -49,6 +49,7 @@
         "license_server::operation_readiness_missing",
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight_not_synced",
         "pm_release::github_sync::github_sync_remote_sync_pending",
@@ -85,7 +86,7 @@
   },
   "developer_preview_ready": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "future_commercial_blocker_count": 32,
+  "future_commercial_blocker_count": 33,
   "future_commercial_blockers": [
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
     "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -114,6 +115,7 @@
     "license_server::operation_readiness_missing",
     "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
     "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
     "pm_release::github_sync::github_sync_preflight_not_synced",
     "pm_release::github_sync::github_sync_remote_sync_pending",
@@ -194,7 +196,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T20:51:48.525484+00:00",
+  "generated_at": "2026-06-30T21:01:15.301268+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -213,11 +215,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:aa99a071686f260442bc2a28a3398314aacc0339feedd9df88735b957b5e5bad",
+      "input_checksum": "sha256:8407dd59f1e77a61db4183e56948ee103ed1deb9c9fcae608a44fd315526fbd2",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "05756db6d7c8be67e1b210f3854cc0ade1a776b0",
+      "source_commit_sha": "0ab334c3f719cb68e9cef56b3f08cb346912537c",
       "status": "blocked"
     }
   },
@@ -225,7 +227,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4d1d5489b9c5dd4f2b89948337c509f2d4199014270972a3bf9c826278b65f3e",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:aa99a071686f260442bc2a28a3398314aacc0339feedd9df88735b957b5e5bad"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:8407dd59f1e77a61db4183e56948ee103ed1deb9c9fcae608a44fd315526fbd2"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -1693,6 +1695,7 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
@@ -1702,6 +1705,7 @@
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
           "scripts/materialize_science_actual_closure_from_rows.py",
@@ -1730,6 +1734,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
@@ -1740,6 +1745,7 @@
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_operator_bundle_from_rows.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
           "tests/test_materialize_science_actual_closure_from_rows.py",
@@ -1925,8 +1931,9 @@
       },
       "release freshness/sync": {
         "blocked": true,
-        "blocker_count": 3,
+        "blocker_count": 4,
         "blockers": [
+          "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
           "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
           "pm_release::github_sync::github_sync_preflight_not_synced",
           "pm_release::github_sync::github_sync_remote_sync_pending"
@@ -2126,6 +2133,6 @@
       }
     }
   },
-  "source_commit_sha": "05756db6d7c8be67e1b210f3854cc0ade1a776b0",
+  "source_commit_sha": "0ab334c3f719cb68e9cef56b3f08cb346912537c",
   "status": "blocked"
 }

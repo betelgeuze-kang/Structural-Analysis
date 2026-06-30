@@ -12,7 +12,7 @@ Structural product roadmap: BLOCKED | evidence_progress=62.5% | stage_average=53
 - `pm_milestones`: `5/5`
 - `pm_release_areas`: `12/16`
 - `release_ready`: `False`
-- `snapshot_blocker_count`: `37`
+- `snapshot_blocker_count`: `38`
 - `snapshot_status`: `blocked`
 - `workstation_delivery_ready`: `True`
 
@@ -28,7 +28,7 @@ Structural product roadmap: BLOCKED | evidence_progress=62.5% | stage_average=53
   - next action: `close_medium_model_pass_or_approved_review_gate`
 - `g1_solver_closure`: partial (1/2, 50.0%)
   - first blocker: `checkpoint_load_scale_below_required_full_load`
-  - next action: `continue_from_global_connectivity_and_consistent_newton_path`
+  - next action: `generate_full_load_1p0_checkpoint_candidate`
 - `paid_pilot_readiness`: partial (1/4, 25.0%)
   - first blocker: `customer_shadow_below_required:0/3`
   - next action: `complete_3_customer_shadow_cases`

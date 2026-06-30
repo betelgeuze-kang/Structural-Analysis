@@ -11,25 +11,25 @@
     "pm_milestones": "5/5",
     "pm_release_areas": "12/16",
     "release_ready": false,
-    "snapshot_blocker_count": 37,
+    "snapshot_blocker_count": 38,
     "snapshot_status": "blocked",
     "workstation_delivery_ready": true
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 62.5,
-  "generated_at": "2026-06-30T20:51:53.966831+00:00",
+  "generated_at": "2026-06-30T21:01:38.114042+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:f072ae1fb2bb0f42266c520a4504a707322ceb5bdca27176d497166bc00b362d",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:143d96303976defe13e3a60588a5451805b7da804f2364fe91e667fedc01878d",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:b98162d5899f707dd17b16ef8ba858be0b7b1639d2a14fdaa119d7ce2e362939",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:5c3e26700321a011cafcd59f0c087361e2244b160671def8c5c123140a06fa6b",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c2236771a1c33100c32f55939277ac075193e14af6bbe9f1147cd4d04c76ee12",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:5ba1ebdc53f6efd82fdc88a27c545045643eb0b6b04bb26719af8fc2a79bda66",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:db9b2966938f78149f9f1ecd1c45fc19218397c0962ebf2208d69079bff07411",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:834d8ee130cd022f4fc2814683bcc827604f790ec950e7148d414d08e8c7da08",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:0acd0ee6afd24bff55efbf7794a959add37d1aa45666be47cc0faba05d6d8660",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:decbc8f6b5bda1f0132f1ed87587592acba9279356342b7a93853308bd182426",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:fc85cc453db145bc1f3e5bd5a2d382bbfdaed1e1140684ef416b079ae5d2404a",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:1c4ed64659fb46a5e3fdb336993fdd405c06655c5057999f2117b1f9343482eb",
-    "scripts/build_structural_product_development_roadmap.py": "sha256:4a630e5a886be91cac2096bf7254f53a1381d1470588b8535c0322a25e556c86"
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:550b4987ef25a6898d84f713ce1926847f5fd7b78ede8ac8b0fc291fe631a55b",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:64b599a2fa6ec62d6d8e4482d17ed1a1d8e3ce35b2982c8533a987840a19a24e",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:c720aab87837ebaf472988dc5ae74d75c694cce8b0a57ea95ce40758108f9a16",
+    "scripts/build_structural_product_development_roadmap.py": "sha256:14ce7e04c91a33c773d94833c64fe4d3e937d8cb7c7a04b15e3d7d4211a2453f"
   },
   "passed_evidence_requirement_count": 30,
   "primary_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -64,7 +64,7 @@
       "summary": {
         "fresh_artifact_count": 18,
         "fresh_artifact_pass_count": 18,
-        "snapshot_blocker_count": 37,
+        "snapshot_blocker_count": 38,
         "stale_or_inconsistent": false
       }
     },
@@ -76,6 +76,7 @@
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
@@ -153,6 +154,9 @@
       ],
       "label": "G1 solver closure",
       "next_actions": [
+        "generate_full_load_1p0_checkpoint_candidate",
+        "close_consistent_residual_jacobian_newton_gate",
+        "preserve_non_promoting_boundary_until_all_g1_receipts_pass",
         "continue_from_global_connectivity_and_consistent_newton_path",
         "stop_row_only_support_or_elastic_link_correction_loop",
         "prove_full_load_1_0_checkpoint",
@@ -273,7 +277,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "05756db6d7c8be67e1b210f3854cc0ade1a776b0",
+  "source_commit_sha": "0ab334c3f719cb68e9cef56b3f08cb346912537c",
   "stage_average_progress_percent": 53.8,
   "stage_count": 7,
   "status": "blocked",
