@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 from pathlib import Path
+import random
 import sys
 from typing import Any
 
@@ -52,6 +54,8 @@ PHASE3_MATERIALIZATION_STEPS = [
     "refresh_goal_bottleneck_roadmap_surface",
 ]
 RAW_RANKING_ROW_FIELDS = ("molecule_id", "score", "is_positive", "is_decoy")
+RANKING_PR_AUC_CI_CONFIDENCE_LEVEL = 0.95
+RANKING_PR_AUC_BOOTSTRAP_REPLICATES = 512
 
 
 def _slot_id_for_target(target_id: str) -> str:
@@ -82,6 +86,29 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
                 "no_positive_out_anchored_by_top_decoys"
             ),
         },
+        "accepted_input_modes": [
+            {
+                "mode": "summary_metrics",
+                "required_fields": [
+                    "target_id",
+                    "ranking_pr_auc_ci_low",
+                    "top20_hit_rate",
+                    "decoys_above_positive_count",
+                    "positive_out_anchored_by_top_decoys",
+                ],
+            },
+            {
+                "mode": "raw_hard_decoy_rows",
+                "required_fields": ["target_id", "score_direction", "hard_decoy_rows"],
+                "required_row_fields": list(RAW_RANKING_ROW_FIELDS),
+                "computed_fields": [
+                    "ranking_pr_auc_ci_low",
+                    "top20_hit_rate",
+                    "decoys_above_positive_count",
+                    "positive_out_anchored_by_top_decoys",
+                ],
+            },
+        ],
     }
 
 
@@ -256,6 +283,66 @@ def _average_precision(ranked_rows: list[dict[str, Any]], positive_count: int) -
     return precision_sum / positive_count
 
 
+def _stable_bootstrap_seed(target_id: str, rows: list[dict[str, Any]]) -> int:
+    payload = {
+        "target_id": target_id,
+        "rows": [
+            {
+                "molecule_id": str(row["molecule_id"]),
+                "score": float(row["score"]),
+                "is_positive": bool(row["is_positive"]),
+                "is_decoy": bool(row["is_decoy"]),
+            }
+            for row in rows
+        ],
+    }
+    digest = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).digest()
+    return int.from_bytes(digest[:8], "big")
+
+
+def _rank_rows(rows: list[dict[str, Any]], *, score_direction: str) -> list[dict[str, Any]]:
+    return sorted(
+        rows,
+        key=lambda ranked_row: (float(ranked_row["score"]), str(ranked_row["molecule_id"])),
+        reverse=score_direction == "higher_is_better",
+    )
+
+
+def _bootstrap_average_precision_ci_low(
+    *,
+    target_id: str,
+    normalized_rows: list[dict[str, Any]],
+    score_direction: str,
+    confidence_level: float = RANKING_PR_AUC_CI_CONFIDENCE_LEVEL,
+    replicate_count: int = RANKING_PR_AUC_BOOTSTRAP_REPLICATES,
+) -> float | None:
+    positives = [row for row in normalized_rows if row["is_positive"]]
+    decoys = [row for row in normalized_rows if row["is_decoy"]]
+    if not positives or not decoys or replicate_count <= 0:
+        return None
+    rng = random.Random(_stable_bootstrap_seed(target_id, normalized_rows))
+    bootstrap_values: list[float] = []
+    for _index in range(replicate_count):
+        sampled_rows = [
+            rng.choice(positives) for _positive_index in range(len(positives))
+        ] + [rng.choice(decoys) for _decoy_index in range(len(decoys))]
+        ranked_sample = _rank_rows(sampled_rows, score_direction=score_direction)
+        score = _average_precision(ranked_sample, len(positives))
+        if score is not None:
+            bootstrap_values.append(score)
+    if not bootstrap_values:
+        return None
+    bootstrap_values.sort()
+    lower_tail = max((1.0 - confidence_level) / 2.0, 0.0)
+    lower_index = min(
+        len(bootstrap_values) - 1,
+        max(0, int(math.floor(lower_tail * len(bootstrap_values)))),
+    )
+    return float(bootstrap_values[lower_index])
+
+
 def _computed_hard_decoy_metrics(
     target_id: str,
     row: dict[str, Any],
@@ -323,11 +410,7 @@ def _computed_hard_decoy_metrics(
             "calculation_status": "blocked",
         }, blockers, root_cause_tags
 
-    ranked_rows = sorted(
-        normalized_rows,
-        key=lambda ranked_row: float(ranked_row["score"]),
-        reverse=score_direction == "higher_is_better",
-    )
+    ranked_rows = _rank_rows(normalized_rows, score_direction=score_direction)
     ranked_with_positions = [
         {**ranked_row, "rank": index}
         for index, ranked_row in enumerate(ranked_rows, start=1)
@@ -357,15 +440,25 @@ def _computed_hard_decoy_metrics(
         decoy_ranks and any(rank > best_decoy_rank for rank in positive_ranks)
     )
     average_precision = _average_precision(ranked_with_positions, positive_count)
+    average_precision_ci_low = _bootstrap_average_precision_ci_low(
+        target_id=target_id,
+        normalized_rows=normalized_rows,
+        score_direction=score_direction,
+    )
     return {
         "hard_decoy_row_count": len(raw_rows),
         "valid_hard_decoy_row_count": len(normalized_rows),
         "score_direction": score_direction,
         "ranking_pr_auc": average_precision,
+        "ranking_pr_auc_ci_low": average_precision_ci_low,
+        "ranking_pr_auc_ci_confidence_level": RANKING_PR_AUC_CI_CONFIDENCE_LEVEL,
+        "ranking_pr_auc_ci_method": "deterministic_stratified_bootstrap_average_precision",
+        "ranking_pr_auc_ci_replicates": RANKING_PR_AUC_BOOTSTRAP_REPLICATES,
         "top20_hit_rate": top20_hit_rate,
         "decoys_above_positive_count": decoys_above_positive_count,
         "positive_out_anchored_by_top_decoys": positive_out_anchored_by_top_decoys,
         "calculation_method": (
+            "ranking_pr_auc_ci_low=deterministic_stratified_bootstrap_average_precision; "
             "top20_hit_rate=positive_fraction_in_top_min_20_rows; "
             "decoys_above_positive_count=decoys_before_best_positive; "
             "positive_out_anchored_by_top_decoys=any_positive_ranked_below_best_decoy"
@@ -427,6 +520,17 @@ def _computed_metric_consistency_blockers(
     if ranking_ci_low is not None and ranking_pr_auc is not None and ranking_ci_low > ranking_pr_auc:
         blockers.append(f"{target_id}:ranking_pr_auc_ci_low_above_computed_pr_auc")
         root_cause_tags.append("hard_decoy_metric_inconsistency")
+    computed_ci_low = _number(computed_metrics.get("ranking_pr_auc_ci_low"))
+    if (
+        ranking_ci_low is not None
+        and computed_ci_low is not None
+        and ranking_ci_low > computed_ci_low
+        and not _float_matches(ranking_ci_low, computed_ci_low)
+    ):
+        blockers.append(
+            f"{target_id}:ranking_pr_auc_ci_low_inconsistent_with_hard_decoy_rows"
+        )
+        root_cause_tags.append("hard_decoy_metric_inconsistency")
     return blockers, root_cause_tags
 
 
@@ -456,7 +560,7 @@ def _target_result(target_id: str, row: dict[str, Any]) -> dict[str, Any]:
     computed_metrics, computed_blockers, computed_root_causes = (
         _computed_hard_decoy_metrics(target_id, row)
     )
-    ranking = _number(row.get("ranking_pr_auc_ci_low"))
+    ranking = _number(_metric_value(row, computed_metrics, "ranking_pr_auc_ci_low"))
     top20 = _number(_metric_value(row, computed_metrics, "top20_hit_rate"))
     decoys_above = _integer(
         _metric_value(row, computed_metrics, "decoys_above_positive_count")

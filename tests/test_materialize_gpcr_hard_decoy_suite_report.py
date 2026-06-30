@@ -52,7 +52,6 @@ def _decoy_first_hard_decoy_rows() -> list[dict[str, object]]:
 def _passing_target_from_rows(target_id: str) -> dict[str, object]:
     return {
         "target_id": target_id,
-        "ranking_pr_auc_ci_low": 0.80,
         "score_direction": "higher_is_better",
         "hard_decoy_rows": _positive_first_hard_decoy_rows(),
     }
@@ -108,6 +107,11 @@ def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows() -> Non
     assert first_row["decoys_above_positive_count"] == 0
     assert first_row["positive_out_anchored_by_top_decoys"] is False
     assert first_row["computed_hard_decoy_metrics"]["ranking_pr_auc"] == 1.0
+    assert first_row["ranking_pr_auc_ci_low"] == 1.0
+    assert first_row["computed_hard_decoy_metrics"]["ranking_pr_auc_ci_low"] == 1.0
+    assert first_row["computed_hard_decoy_metrics"]["ranking_pr_auc_ci_method"] == (
+        "deterministic_stratified_bootstrap_average_precision"
+    )
     assert first_row["computed_hard_decoy_metrics"]["calculation_status"] == "computed"
 
 
@@ -312,6 +316,38 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                     "no_positive_out_anchored_by_top_decoys"
                 ),
             },
+            "accepted_input_modes": [
+                {
+                    "mode": "summary_metrics",
+                    "required_fields": [
+                        "target_id",
+                        "ranking_pr_auc_ci_low",
+                        "top20_hit_rate",
+                        "decoys_above_positive_count",
+                        "positive_out_anchored_by_top_decoys",
+                    ],
+                },
+                {
+                    "mode": "raw_hard_decoy_rows",
+                    "required_fields": [
+                        "target_id",
+                        "score_direction",
+                        "hard_decoy_rows",
+                    ],
+                    "required_row_fields": [
+                        "molecule_id",
+                        "score",
+                        "is_positive",
+                        "is_decoy",
+                    ],
+                    "computed_fields": [
+                        "ranking_pr_auc_ci_low",
+                        "top20_hit_rate",
+                        "decoys_above_positive_count",
+                        "positive_out_anchored_by_top_decoys",
+                    ],
+                },
+            ],
         },
         "materialization_steps": [
             "materialize_gpcr_hard_decoy_suite_report",
