@@ -1360,6 +1360,9 @@ def build_source_of_truth(
             "receipt_blocked_row_count": external_receipts_validation[
                 "receipt_blocked_row_count"
             ],
+            "receipt_coverage": dict(
+                external_receipts_validation.get("receipt_coverage") or {}
+            ),
             "blockers": external_receipts_validation["blockers"],
         },
         "external_receipts_validation": external_receipts_validation,

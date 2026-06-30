@@ -20,6 +20,16 @@ REQUIRED_SUBSET_RECEIPT_FIELDS = (
     *REQUIRED_RECEIPT_FIELDS,
     "source_file_checksums",
 )
+EXPECTED_ARTIFACT_ROLES = (
+    "casf_pdbbind_subset_manifest",
+    "dud_e_lit_pcba_enrichment_scorecard",
+    "vina_gnina_comparison_adapter",
+)
+REQUIRED_RECEIPT_FIELDS_BY_ARTIFACT_ROLE = {
+    "casf_pdbbind_subset_manifest": REQUIRED_SUBSET_RECEIPT_FIELDS,
+    "dud_e_lit_pcba_enrichment_scorecard": REQUIRED_RECEIPT_FIELDS,
+    "vina_gnina_comparison_adapter": REQUIRED_RECEIPT_FIELDS,
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -83,6 +93,79 @@ def _row_key(prefix: str, row: dict[str, Any], index: int) -> str:
         or f"row_{index + 1}"
     )
     return f"{prefix}:{row_id}"
+
+
+def receipt_coverage_summary(receipt_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    role_rows: dict[str, list[dict[str, Any]]] = {
+        role: [] for role in EXPECTED_ARTIFACT_ROLES
+    }
+    for row in receipt_rows:
+        role = _string(row.get("artifact_role"))
+        if role not in role_rows:
+            role_rows[role] = []
+        role_rows[role].append(row)
+
+    role_summaries = []
+    for role in sorted(role_rows):
+        rows = role_rows[role]
+        complete_count = sum(1 for row in rows if bool(row.get("contract_pass")))
+        blocked_count = len(rows) - complete_count
+        blockers = [
+            str(blocker)
+            for row in rows
+            for blocker in _as_list(row.get("blockers"))
+            if str(blocker)
+        ]
+        role_summaries.append(
+            {
+                "artifact_role": role,
+                "materialized_row_count": len(rows),
+                "receipt_complete_row_count": complete_count,
+                "receipt_blocked_row_count": blocked_count,
+                "required_receipt_fields": list(
+                    REQUIRED_RECEIPT_FIELDS_BY_ARTIFACT_ROLE.get(
+                        role,
+                        REQUIRED_RECEIPT_FIELDS,
+                    )
+                ),
+                "blocker_count": len(blockers),
+                "blockers": blockers,
+            }
+        )
+
+    missing_expected_roles = [
+        role
+        for role in EXPECTED_ARTIFACT_ROLES
+        if not role_rows.get(role)
+    ]
+    complete_expected_roles = [
+        row["artifact_role"]
+        for row in role_summaries
+        if row["artifact_role"] in EXPECTED_ARTIFACT_ROLES
+        and row["materialized_row_count"] > 0
+        and row["receipt_blocked_row_count"] == 0
+    ]
+    return {
+        "expected_artifact_roles": list(EXPECTED_ARTIFACT_ROLES),
+        "expected_artifact_role_count": len(EXPECTED_ARTIFACT_ROLES),
+        "materialized_artifact_role_count": len(
+            [
+                role
+                for role in EXPECTED_ARTIFACT_ROLES
+                if role_rows.get(role)
+            ]
+        ),
+        "receipt_complete_artifact_role_count": len(complete_expected_roles),
+        "missing_expected_artifact_role_count": len(missing_expected_roles),
+        "missing_expected_artifact_roles": missing_expected_roles,
+        "role_summaries": role_summaries,
+        "claim_boundary": (
+            "Receipt coverage is grouped by benchmark artifact role. A role is covered "
+            "only when at least one materialized row exists and every required receipt "
+            "field for that role validates locally; this does not approve licenses or "
+            "fetch external benchmark data."
+        ),
+    }
 
 
 def validate_external_receipts(
@@ -163,6 +246,7 @@ def validate_external_receipts(
     if not receipt_rows:
         blockers.append("public_benchmark_external_receipts_missing")
     ready = bool(receipt_rows and not blockers)
+    receipt_coverage = receipt_coverage_summary(receipt_rows)
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "ready" if ready else "operator_receipts_required",
@@ -177,6 +261,7 @@ def validate_external_receipts(
         ),
         "required_receipt_fields": list(REQUIRED_RECEIPT_FIELDS),
         "required_subset_receipt_fields": list(REQUIRED_SUBSET_RECEIPT_FIELDS),
+        "receipt_coverage": receipt_coverage,
         "receipt_rows": receipt_rows,
         "blocker_count": len(blockers),
         "blockers": blockers,

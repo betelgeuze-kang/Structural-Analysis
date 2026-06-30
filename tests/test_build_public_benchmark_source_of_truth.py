@@ -331,6 +331,16 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "vina_gnina_external_receipts_missing",
         ],
     }
+    assert source["external_receipts_summary"]["receipt_coverage"][
+        "missing_expected_artifact_roles"
+    ] == [
+        "casf_pdbbind_subset_manifest",
+        "dud_e_lit_pcba_enrichment_scorecard",
+        "vina_gnina_comparison_adapter",
+    ]
+    assert source["external_receipts_summary"]["receipt_coverage"][
+        "receipt_complete_artifact_role_count"
+    ] == 0
     assert source["pose_validity_packet_summary"] == {
         "status": "ready_for_dry_run",
         "check_count": 7,

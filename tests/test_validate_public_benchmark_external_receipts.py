@@ -50,6 +50,15 @@ def test_external_receipts_block_when_no_materialized_rows() -> None:
     assert result["public_benchmark_external_receipts_ready"] is False
     assert result["blockers"] == ["public_benchmark_external_receipts_missing"]
     assert result["materialized_row_count"] == 0
+    coverage = result["receipt_coverage"]
+    assert coverage["expected_artifact_role_count"] == 3
+    assert coverage["materialized_artifact_role_count"] == 0
+    assert coverage["receipt_complete_artifact_role_count"] == 0
+    assert coverage["missing_expected_artifact_roles"] == [
+        "casf_pdbbind_subset_manifest",
+        "dud_e_lit_pcba_enrichment_scorecard",
+        "vina_gnina_comparison_adapter",
+    ]
 
 
 def test_external_receipts_pass_for_complete_rows() -> None:
@@ -82,6 +91,21 @@ def test_external_receipts_pass_for_complete_rows() -> None:
     assert result["materialized_row_count"] == 3
     assert result["receipt_complete_row_count"] == 3
     assert result["blockers"] == []
+    coverage = result["receipt_coverage"]
+    assert coverage["materialized_artifact_role_count"] == 3
+    assert coverage["receipt_complete_artifact_role_count"] == 3
+    assert coverage["missing_expected_artifact_roles"] == []
+    role_summaries = {
+        row["artifact_role"]: row for row in coverage["role_summaries"]
+    }
+    assert role_summaries["casf_pdbbind_subset_manifest"][
+        "required_receipt_fields"
+    ] == [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums",
+    ]
 
 
 def test_external_receipts_require_subset_provenance_and_valid_checksums() -> None:
@@ -99,6 +123,13 @@ def test_external_receipts_require_subset_provenance_and_valid_checksums() -> No
     assert result["blockers"] == [
         "subset_manifest:case_a:provenance_ref_blank",
         "subset_manifest:case_a:source_file_checksum_0_invalid",
+    ]
+    coverage = result["receipt_coverage"]
+    assert coverage["materialized_artifact_role_count"] == 1
+    assert coverage["receipt_complete_artifact_role_count"] == 0
+    assert coverage["missing_expected_artifact_roles"] == [
+        "dud_e_lit_pcba_enrichment_scorecard",
+        "vina_gnina_comparison_adapter",
     ]
 
 
