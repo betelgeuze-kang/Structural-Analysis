@@ -308,7 +308,7 @@
       ]
     }
   ],
-  "generated_at": "2026-06-30T12:11:42.047719+00:00",
+  "generated_at": "2026-06-30T12:13:23.564157+00:00",
   "input_checksums": {
     "README.md": "sha256:c03f547f4590336d994549c1b20cc528e4b16051a925e7d1d158014e52ecb634",
     "docs/commercialization-gap-current-state.md": "sha256:1de814bcbfbb352e7ec49f318f9b7e58cacad11fa706bad58dad1e078c80ef0d",
@@ -317,8 +317,8 @@
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:e4b554d70eb56f31f6c2ef936ac19900174215cb659c6aa9b3b009ccf59d44de",
     "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json": "sha256:354b1366310cda776eb205fc90d6ab5fe4c3ad0b93ad5a74897e34b97fd2bc51",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:e245c8ec12495b8f392c423db591f53b8c5523f18fa216bcafa61586207f3028",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e4b328c52e3488e2c31b40ab7a692cce2cb7c4f173c76eaa059d9c548b536f7d",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d75effdfe490c479f51503b7263cb7b5b5d867eaba7c34fb3cb97fb201cd2ab5",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1e730be23a4852f6cf34396886a512959ea03944551ce99f5d23304718247fc6",
     "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json": "sha256:3283b6c16ab8997a097914b70681416ee75071fbd61c8f4f7c3f4c3d484cc383",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:3f79df66b36a7a48c649b95ca9438b40cc697eb471079191cd81f0a790d6cc1d",
     "implementation/phase1/support_bundle_manifest.json": "sha256:951a4fa774e682fb9850477c32ce541ad4040291301a2103fcb50ecab981559a"
@@ -373,7 +373,7 @@
       "pass": true
     }
   ],
-  "source_commit_sha": "a705fe6db686db0a4d7434676c6e78549b901082",
+  "source_commit_sha": "c61d30eb277bf8a1fc0c94082108e430b3511260",
   "summary": {
     "claim_boundary_docs": [
       "README.md",

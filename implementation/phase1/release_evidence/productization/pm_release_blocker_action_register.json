@@ -10,10 +10,11 @@
   },
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 9,
+    "release_area_blocker_count": 10,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+      "evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
@@ -22,21 +23,22 @@
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
     ],
-    "release_area_green_count": 12,
-    "release_area_summary": "12/16",
+    "release_area_green_count": 11,
+    "release_area_summary": "11/16",
     "release_area_total_count": 16
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T12:11:41.969305+00:00",
+  "generated_at": "2026-06-30T12:13:23.483317+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e4b328c52e3488e2c31b40ab7a692cce2cb7c4f173c76eaa059d9c548b536f7d",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9c6f17faa343d16165138156e98c24da82e05e1f0a77597977425d47cb369a08",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1e730be23a4852f6cf34396886a512959ea03944551ce99f5d23304718247fc6",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:c49c325f749c123bb8238fdaac973850bf2c0455b80f1573e802389696971760",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
     "Collect 18 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
@@ -50,9 +52,15 @@
     "Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence."
   ],
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/16 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
   "release_decision_operator_actions": [
+    {
+      "action_id": "refresh_release_evidence_freshness",
+      "artifact": "release_evidence_freshness_report",
+      "reason": "release_evidence_freshness_report has stale or incomplete source-of-truth blockers",
+      "status": "refresh_required"
+    },
     {
       "action_id": "attach_missing_evidence_surfaces",
       "artifact": "implementation/phase1/release_evidence/surface",
@@ -503,6 +511,75 @@
     },
     {
       "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`"
+      ],
+      "blocker_code": "developer_preview_rc_status::input_dependency_newer_than_artifact",
+      "blocker_id": "evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "evidence_artifacts": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_snapshot": {
+        "artifact_count": 15,
+        "blocker_count": 1,
+        "current_source_commit_sha": "c61d30eb277bf8a1fc0c94082108e430b3511260",
+        "max_age_days": 30.0,
+        "pass_count": 14
+      },
+      "evidence_status": {
+        "artifact_count": 15,
+        "blocker_count": 1,
+        "dependency_mtime_rows_pass": false,
+        "engine_version_rows_present": true,
+        "input_checksum_rows_present": true,
+        "pass_count": 14,
+        "reuse_marker_rows_present": true,
+        "source_commit_rows_match": true,
+        "state": "release_evidence_metadata_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "evidence_freshness",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "release_evidence_metadata_required",
+      "scope": "release_area",
+      "status": "open",
+      "title": "Evidence Freshness",
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
         "`ux_new_user_observation_report.json.contract_pass == true`",
         "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
         "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`"
@@ -762,8 +839,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 1,
-        "main_ahead_count": 1,
+        "feature_ahead_count": 2,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -774,9 +851,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 1,
+        "feature_ahead_count": 2,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 1,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -839,8 +916,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 1,
-        "main_ahead_count": 1,
+        "feature_ahead_count": 2,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -851,9 +928,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 1,
+        "feature_ahead_count": 2,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 1,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -916,8 +993,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 1,
-        "main_ahead_count": 1,
+        "feature_ahead_count": 2,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -928,9 +1005,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 1,
+        "feature_ahead_count": 2,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 1,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -993,8 +1070,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 1,
-        "main_ahead_count": 1,
+        "feature_ahead_count": 2,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -1005,9 +1082,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 1,
+        "feature_ahead_count": 2,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 1,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -1298,27 +1375,27 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "a705fe6db686db0a4d7434676c6e78549b901082",
+  "source_commit_sha": "c61d30eb277bf8a1fc0c94082108e430b3511260",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 13,
     "external_owner_input_ready_count": 13,
     "full_release_gate_ready": false,
-    "ga_enterprise_blocker_count": 13,
+    "ga_enterprise_blocker_count": 14,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 13,
+    "handoff_ready_count": 14,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "local_remediation_ready_count": 0,
+    "local_remediation_ready_count": 1,
     "milestone_blocker_count": 0,
-    "open_blocker_count": 13,
+    "open_blocker_count": 14,
     "owner_input_required_count": 13,
     "paid_pilot_candidate": true,
-    "release_area_blocker_count": 9,
+    "release_area_blocker_count": 10,
     "release_area_gate_ready": false,
-    "release_area_green_count": 12,
+    "release_area_green_count": 11,
     "release_area_total_count": 16,
-    "release_decision_operator_action_count": 5
+    "release_decision_operator_action_count": 6
   }
 }

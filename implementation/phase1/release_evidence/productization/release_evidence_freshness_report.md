@@ -1,15 +1,15 @@
 # Release Evidence Freshness
 
-- `contract_pass`: `False`
-- `reason_code`: `ERR_RELEASE_EVIDENCE_FRESHNESS`
-- `current_source_commit_sha`: `a705fe6db686db0a4d7434676c6e78549b901082`
-- `blockers`: `p1_benchmark_breadth_status::input_dependency_newer_than_artifact, evidence_console_scope_status::input_dependency_newer_than_artifact, developer_preview_rc_status::input_dependency_newer_than_artifact`
+- `contract_pass`: `True`
+- `reason_code`: `PASS`
+- `current_source_commit_sha`: `c61d30eb277bf8a1fc0c94082108e430b3511260`
+- `blockers`: `none`
 
 | Artifact | Status | Blockers | Newer Dependencies |
 |---|---|---|---|
 | `p0_closure_status` | `pass` | `none` | none |
 | `p1_readiness_status` | `pass` | `none` | none |
-| `p1_benchmark_breadth_status` | `blocked` | `input_dependency_newer_than_artifact` | `/home/betelgeuze/건축구조분석/implementation/phase1/release/external_benchmark_submission_readiness.json` |
+| `p1_benchmark_breadth_status` | `pass` | `none` | none |
 | `real_project_corpus_measured_status` | `pass` | `none` | none |
 | `customer_shadow_evidence_status` | `pass` | `none` | none |
 | `customer_shadow_evidence_intake_packet` | `pass` | `none` | none |
@@ -17,8 +17,8 @@
 | `residual_level3_status` | `pass` | `none` | none |
 | `g1_direct_residual_terminal_gate_report` | `pass` | `none` | none |
 | `g1_shell_material_budgeted_continuation_status` | `pass` | `none` | none |
-| `evidence_console_scope_status` | `blocked` | `input_dependency_newer_than_artifact` | `/home/betelgeuze/건축구조분석/implementation/phase1/customer_shadow_evidence_status.json` |
-| `developer_preview_rc_status` | `blocked` | `input_dependency_newer_than_artifact` | `/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/developer_preview_readiness.json` |
+| `evidence_console_scope_status` | `pass` | `none` | none |
+| `developer_preview_rc_status` | `pass` | `none` | none |
 | `public_benchmark_source_of_truth` | `pass` | `none` | none |
 | `accuracy_parity_scorecard` | `pass` | `none` | none |
 | `product_production_ai_checkpoint_readiness` | `pass` | `none` | none |

@@ -385,7 +385,7 @@
       "summary_line": "Korean source collect: PASS | sources=22 | collected=10 | metadata_only=12 | rejected=0 | bytes=6628988 | seed_complete=22 | exact_topology=7 | native_writeback=7 | curated_local_ifc=5/7 | p0_focus=18"
     }
   ],
-  "generated_at": "2026-06-30T12:09:17.467921+00:00",
+  "generated_at": "2026-06-30T12:13:06.647765+00:00",
   "input_checksums": {
     "implementation/phase1/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
     "implementation/phase1/hf_benchmark_report.atwood_open.json": "sha256:5cf552c1aa8c5ca61b5677bf2dad3fc13c5876a962034a882e5834c2e5229320",
@@ -398,7 +398,7 @@
     "implementation/phase1/open_data/korea/korean_public_structure_collection_report.json": "sha256:5f440ab967a05a6303c30acb4b1f68bb86c9229219989ebef0aec0d1ddc1f711",
     "implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_benchmark_gate_report.json": "sha256:23ff66874024c15d800a9f2b359bb11435d9520899a719100821487be0bb0962",
     "implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json": "sha256:2e6bdaab47358db2788928716d5a880403a02270cb6f3a6ccd674938e0a18661",
-    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:bad8d1df3671a318cb45f66295788a7ea883509a026f042c2f39a693b4825f5f",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:cfd5ab3225524a43e71c14fa3e1df151fe18f31a8d5875407854fa97928ab58f",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:e23c71d5c9a5104fe680bd958f018ed33b59ad46abbb877fbb8c922dc8cddcfe",
     "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:f2c8afe4e3f68a85719d8fe416908bfb77051b8fe47c30e61b73fb69dc9c6afb"
   },
@@ -410,7 +410,7 @@
   "reuse_policy": "status_rebuilt_from_existing_p1_readiness_commercial_benchmark_and_sidecar_receipts",
   "reused_evidence": true,
   "schema_version": "p1-benchmark-breadth-status.v1",
-  "source_commit_sha": "b0e100eecc5f8a4879cd85336d3cf79c661ef34b",
+  "source_commit_sha": "c61d30eb277bf8a1fc0c94082108e430b3511260",
   "status": "ready",
   "summary": {
     "benchmark_report_count": 10,
