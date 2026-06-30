@@ -33,11 +33,11 @@
     "raw_data_retained_by_customer": true,
     "redistribution_allowed": false
   },
-  "generated_at": "2026-06-30T04:31:33.281461+00:00",
+  "generated_at": "2026-06-30T04:34:02.230206+00:00",
   "input_checksums": {
     "docs/templates/customer_shadow_evidence.template.json": "sha256:84ceb4076599b4b3c9f731c42612acd10c869cfca43cb62d7cdf9ed68705b4e1",
     "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:db530761321ba8a1bd3e16ba81c5ea4579aeecea296ea0bda34ee070f530e802",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:96993ef3607ab675c8fe80fca63e08260555df288b53a3ce7cc1a689c2acd393"
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:00d52f86e9ab20b560bed76a3874159dcafe88b84b8c1c8b76e7970c3b021ebd"
   },
   "intake_slots": [
     {
@@ -148,7 +148,7 @@
   "reused_evidence": true,
   "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
   "schema_version": "customer-shadow-evidence-intake-packet.v1",
-  "source_commit_sha": "b6f09a720fa2780ab5604037c784997b6366cc6c",
+  "source_commit_sha": "26fbd982efdfb54155d6b54939660fc3510caa68",
   "status": "implementation/phase1/customer_shadow_evidence_status.json",
   "summary": {
     "allowed_reviewer_decisions": [

@@ -257,9 +257,9 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-06-30T04:31:33.375388+00:00",
+  "generated_at": "2026-06-30T04:34:02.326896+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a989b47785730ea6d92c7918c858a6aff7b7e23e2955534fd3ae06d9eb8ecd18",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:c52e4b00573350c470ec92a45a80b469a757504b19e6db42f193a2c38e10ee7b",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9de55f1e3621373dea693bfa0d1db255a0d630e649080731b1642dfaf6907b10",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
@@ -1057,7 +1057,7 @@
   ],
   "route": "/product/public-benchmark/operator-intake",
   "schema_version": "public-benchmark-operator-intake-packet.v1",
-  "source_commit_sha": "b6f09a720fa2780ab5604037c784997b6366cc6c",
+  "source_commit_sha": "26fbd982efdfb54155d6b54939660fc3510caa68",
   "source_of_truth_blockers": [
     "casf_pdbbind_source_material_not_attached",
     "public_benchmark_real_pose_predictions_missing",
