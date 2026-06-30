@@ -50,7 +50,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-06-30T08:14:02.468462+00:00",
+  "generated_at": "2026-06-30T11:00:11.716063+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -96,7 +96,7 @@
     {
       "classification": "required_for_production_residency",
       "evidence": [
-        "hip_consistency_proof_production_hip_path_not_proven",
+        "hip_consistency_proof_source_commit_sha_mismatch",
         "hip_consistency_proof_gate_not_passed",
         "hip_consistency_proof_has_blockers",
         "production HIP/JVP lane is not proven by the non-promoting F2g/F2h receipts"
@@ -106,10 +106,10 @@
     }
   ],
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:cf553013426c1233aa129b6021b72ca931d1be74e7544b12f54c92eb546001db",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:598b53358c9190ccdadd7b1a8959cef5c7773b8b780cf87cc5a0509340e29cfc",
-    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:196d6080a0666b42929bca7eff13c13c1ef884982814cacc1f4c589740f996d9",
-    "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:cb672e5a3ac1b0d0aa6e95d74e9ef52b25cc33ed13cdc8a4b37c94f7f146f34a",
+    "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:4f72a8fc36405ae4cbc65647f97b94adb6537dcc5b343fa9ee9a796037cab2e0",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:99953a0a4b6315a8941a6e7405952df2196cb8a0d4699ce9d82c8e537b3893cc",
+    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:a30303823f7d68004048af9964229211d83c99d08c1ef88a3d00f47eb2e5fe67",
+    "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:850ebe4c2a26151813761d5ff05f7f28afbedae4efcf3adec2cb9b83ffab83f8",
     "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:a6bf5c0361464b751e81f8c060c41f7c808fa7c29cc39eb4bacb24b931c7bbcb"
   },
   "next_actions": [
@@ -124,7 +124,7 @@
   "reuse_policy": "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice",
   "reused_evidence": true,
   "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
-  "source_commit_sha": "f6f16b2db8a8bb8900b4f24d5c3b032f3ce3bb64",
+  "source_commit_sha": "dc500f972c87c48db884e48b3980994adffc99e0",
   "status": "ready",
   "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=consistent_residual_jacobian_newton_rocm_worker"
 }

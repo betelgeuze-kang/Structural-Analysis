@@ -5,7 +5,7 @@
   "generated_at": "2026-06-30T07:21:55.827350+00:00",
   "input_checksums": {
     ".github/workflows": "dir-sha256:8acb8a126ead40b2ce6a7ce24dbb8569bfdb9d927ed74296b6bc740c056936e3",
-    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:813b0061a7acb00db71f8084681235b0f5890f6cc7e4e3583cfdaa6cdcb6ca00"
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:b7ae59fb78336d400a679b75289fc378c6602cf7f7c11bb7ad4643064c6677c1"
   },
   "lanes": {
     "nightly": {
@@ -1196,7 +1196,7 @@
   "repo": "betelgeuze-kang/Structural-Analysis",
   "reused_evidence": true,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "1a03249a4ae341630be5a8ec07bff509b1db75a0",
+  "source_commit_sha": "5a965b2bb90cdde0e8871331fb69eb1af5bb2fa7",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 0,
@@ -1214,7 +1214,7 @@
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 8,
-    "local_workflow_metadata_generated_at": "2026-06-30T10:53:16.723926+00:00",
+    "local_workflow_metadata_generated_at": "2026-06-30T11:01:29.773848+00:00",
     "local_workflows": [
       {
         "exists": true,

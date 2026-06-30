@@ -1428,7 +1428,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T10:53:16.476739+00:00",
+  "generated_at": "2026-06-30T11:01:29.530659+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       "scripts/build_public_benchmark_operator_intake_packet.py",
@@ -1439,7 +1439,6 @@
       "scripts/materialize_public_benchmark_subset_manifest.py",
       "scripts/validate_public_benchmark_pose_validity.py",
       "scripts/validate_public_benchmark_subset_manifest.py",
-      "tests/test_build_goal_bottleneck_roadmap_surface.py",
       "tests/test_build_public_benchmark_operator_intake_packet.py",
       "tests/test_build_public_benchmark_source_of_truth.py",
       "tests/test_materialize_public_benchmark_pose_validity_input.py",
@@ -1489,6 +1488,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "1a03249a4ae341630be5a8ec07bff509b1db75a0",
+  "source_commit_sha": "5a965b2bb90cdde0e8871331fb69eb1af5bb2fa7",
   "status": "blocked"
 }
