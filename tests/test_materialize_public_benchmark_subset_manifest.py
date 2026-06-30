@@ -48,6 +48,7 @@ def _case_descriptor(root: Path, case_id: str) -> dict[str, object]:
             "permutations": [[0, 1, 2], [0, 2, 1]],
         },
         "source_license_or_accession": "operator-attached-casf-pdbbind-accession",
+        "provenance_ref": f"operator://casf-pdbbind/{case_id}",
     }
 
 

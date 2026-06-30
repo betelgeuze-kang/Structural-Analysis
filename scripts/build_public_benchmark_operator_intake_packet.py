@@ -43,6 +43,9 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
     SCHEMA_VERSION as VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
     SUPPORTED_ENGINES as VINA_GNINA_SUPPORTED_ENGINES,
 )
+from validate_public_benchmark_external_receipts import (  # noqa: E402
+    SCHEMA_VERSION as EXTERNAL_RECEIPT_VALIDATION_SCHEMA_VERSION,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -59,6 +62,9 @@ DEFAULT_RMSD_SCORECARD = (
 )
 DEFAULT_ENRICHMENT_SCORECARD = (
     PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
+)
+DEFAULT_EXTERNAL_RECEIPTS_VALIDATION = (
+    PRODUCTIZATION / "public_benchmark_external_receipts_validation.json"
 )
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
@@ -115,6 +121,7 @@ def _input_paths(source_of_truth_path: Path) -> list[Path]:
         Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
         Path("scripts/materialize_public_benchmark_enrichment_scorecard.py"),
         Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
+        Path("scripts/validate_public_benchmark_external_receipts.py"),
         Path("scripts/validate_public_benchmark_subset_manifest.py"),
         Path("scripts/validate_public_benchmark_pose_validity.py"),
         source_of_truth_path,
@@ -155,6 +162,7 @@ def _subset_case_template() -> dict[str, Any]:
         },
         "source_license_or_accession": "operator_supplied_accession_or_license_ref",
         "source_checksum": "sha256:operator_supplied_source_bundle_checksum",
+        "provenance_ref": "operator_supplied_subset_preparation_receipt",
     }
 
 
@@ -272,7 +280,11 @@ def _casf_pdbbind_subset_manifest_contract(
                 ],
             },
         ],
-        "receipt_fields": ["source_license_or_accession", "source_checksum"],
+        "receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+        ],
         "checksum_policy": {
             "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
             "source_checksum": (
@@ -456,6 +468,13 @@ def build_public_benchmark_operator_intake_packet(
         f"--out-report {PRODUCTIZATION / 'public_benchmark_vina_gnina_materialization_report.json'} "
         "--fail-blocked"
     )
+    external_receipt_validation = (
+        "python3 scripts/validate_public_benchmark_external_receipts.py "
+        f"--subset-manifest {DEFAULT_SUBSET_MANIFEST} "
+        f"--enrichment-scorecard {DEFAULT_ENRICHMENT_SCORECARD} "
+        f"--vina-gnina-comparison-adapter {DEFAULT_VINA_GNINA_COMPARISON_ADAPTER} "
+        f"--out {DEFAULT_EXTERNAL_RECEIPTS_VALIDATION} --fail-blocked"
+    )
     refresh_source = (
         "python3 scripts/build_public_benchmark_source_of_truth.py "
         f"--source-of-truth-out {DEFAULT_SOURCE_OF_TRUTH} "
@@ -463,7 +482,8 @@ def build_public_benchmark_operator_intake_packet(
         f"--pose-validity-packet-out {DEFAULT_POSE_VALIDITY_PACKET} "
         f"--rmsd-scorecard-out {DEFAULT_RMSD_SCORECARD} "
         f"--enrichment-scorecard-out {DEFAULT_ENRICHMENT_SCORECARD} "
-        f"--vina-gnina-comparison-adapter-out {DEFAULT_VINA_GNINA_COMPARISON_ADAPTER}"
+        f"--vina-gnina-comparison-adapter-out {DEFAULT_VINA_GNINA_COMPARISON_ADAPTER} "
+        f"--external-receipts-validation-out {DEFAULT_EXTERNAL_RECEIPTS_VALIDATION}"
     )
     casf_pdbbind_manifest_contract = _casf_pdbbind_subset_manifest_contract(
         materialization_command=subset_materialization,
@@ -512,7 +532,11 @@ def build_public_benchmark_operator_intake_packet(
                 "ligand_atom_order_contract_fields": ["atom_count", "atom_ids"],
                 "symmetry_permutation_contract_fields": ["permutations"],
                 "materialized_manifest_fields": ["source_file_checksums"],
-                "receipt_fields": ["source_license_or_accession", "source_checksum"],
+                "receipt_fields": [
+                    "source_license_or_accession",
+                    "source_checksum",
+                    "provenance_ref",
+                ],
             },
             materialization_steps=["materialize_subset_manifest"],
             manifest_contract=casf_pdbbind_manifest_contract,
@@ -718,6 +742,12 @@ def build_public_benchmark_operator_intake_packet(
                 "produces": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
             },
             {
+                "step_id": "validate_external_receipts",
+                "schema_version": EXTERNAL_RECEIPT_VALIDATION_SCHEMA_VERSION,
+                "command": external_receipt_validation,
+                "produces": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
+            },
+            {
                 "step_id": "refresh_public_benchmark_source_of_truth",
                 "schema_version": "public-benchmark-source-of-truth.v1",
                 "command": refresh_source,
@@ -732,6 +762,7 @@ def build_public_benchmark_operator_intake_packet(
             "public_benchmark_symmetry_rmsd_scorecard.real_benchmark_case_count >= 12",
             "public_benchmark_enrichment_scorecard.public_benchmark_enrichment_ready == true",
             "public_benchmark_vina_gnina_comparison_adapter.public_benchmark_engine_comparison_ready == true",
+            "public_benchmark_external_receipts_validation.public_benchmark_external_receipts_ready == true",
             "public_benchmark_source_of_truth.public_benchmark_ready == true",
         ],
         "supported_enrichment_families": list(SUPPORTED_FAMILIES),
@@ -746,6 +777,7 @@ def build_public_benchmark_operator_intake_packet(
             "rmsd_scorecard": str(DEFAULT_RMSD_SCORECARD),
             "enrichment_scorecard": str(DEFAULT_ENRICHMENT_SCORECARD),
             "vina_gnina_comparison_adapter": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
+            "external_receipts_validation": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
             "operator_templates": operator_template_artifacts,
         },
         "next_actions": [
@@ -755,6 +787,7 @@ def build_public_benchmark_operator_intake_packet(
             "run_public_benchmark_rmsd_scorecard_materializer",
             "run_public_benchmark_enrichment_materializer",
             "run_public_benchmark_vina_gnina_comparison_materializer",
+            "validate_public_benchmark_external_receipts",
             "refresh_public_benchmark_source_of_truth",
             "regenerate_goal_bottleneck_roadmap_surface",
         ],

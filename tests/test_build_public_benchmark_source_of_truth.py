@@ -78,7 +78,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "operator_receipts_required",
     ]
     assert source["summary_line"] == (
-        "Public benchmark source-of-truth: BLOCKED | completed_slices=5 | "
+        "Public benchmark source-of-truth: BLOCKED | completed_slices=6 | "
         "blocked_slices=4 | first_blocker=casf_pdbbind_source_material_not_attached"
     )
     assert source["source_tracking"]["mode"] == "direct_builder_source_tracking"
@@ -99,6 +99,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "symmetry_aware_rmsd_scorer_dry_run": "dry_run_ready",
         "posebusters_style_validity_packet_shape": "dry_run_ready",
         "operator_intake_handoff_packet": "ready_for_operator_input",
+        "public_benchmark_external_receipt_contract": "contract_ready",
     }
     assert {
         row["slice_id"]: row["status"] for row in source["blocked_slices"]
@@ -109,7 +110,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "vina_gnina_comparison_materialization": "operator_engine_comparison_rows_required",
     }
     assert source["materialization_progress"] == {
-        "completed_slice_count": 5,
+        "completed_slice_count": 6,
         "blocked_slice_count": 4,
         "target_subset_case_count": 12,
         "materialized_subset_case_count": 0,
@@ -187,7 +188,11 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "ligand_atom_order_contract_fields": ["atom_count", "atom_ids"],
             "symmetry_permutation_contract_fields": ["permutations"],
             "materialized_manifest_fields": ["source_file_checksums"],
-            "receipt_fields": ["source_license_or_accession", "source_checksum"],
+            "receipt_fields": [
+                "source_license_or_accession",
+                "source_checksum",
+                "provenance_ref",
+            ],
         },
         "materialization_command": (
             "python3 scripts/materialize_public_benchmark_subset_manifest.py "
@@ -321,6 +326,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "symmetry_permutation_contract",
             "source_license_or_accession",
             "source_checksum",
+            "provenance_ref",
         ],
         "local_source_file_fields": [
             "protein_structure_path",
@@ -571,6 +577,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "symmetry_permutation_contract",
         "source_license_or_accession",
         "source_checksum",
+        "provenance_ref",
     ]
     assert subset["case_row_schema"]["template"]["source_family"] == "CASF/PDBBind"
     assert (

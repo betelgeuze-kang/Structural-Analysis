@@ -23,6 +23,12 @@ from validate_public_benchmark_subset_manifest import (  # noqa: E402
     REQUIRED_CASE_FIELDS,
     validate_subset_manifest,
 )
+from validate_public_benchmark_external_receipts import (  # noqa: E402
+    REQUIRED_RECEIPT_FIELDS,
+    REQUIRED_SUBSET_RECEIPT_FIELDS,
+    SCHEMA_VERSION as EXTERNAL_RECEIPT_VALIDATION_SCHEMA_VERSION,
+    validate_external_receipts,
+)
 from validate_public_benchmark_pose_validity import (  # noqa: E402
     REQUIRED_POSE_FIELDS,
     validate_pose_validity_payload,
@@ -73,6 +79,9 @@ DEFAULT_ENRICHMENT_SCORECARD_OUT = (
 DEFAULT_VINA_GNINA_ADAPTER_OUT = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_comparison_adapter.json"
 )
+DEFAULT_EXTERNAL_RECEIPTS_VALIDATION_OUT = (
+    PRODUCTIZATION / "public_benchmark_external_receipts_validation.json"
+)
 DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT = DEFAULT_OPERATOR_INTAKE_PACKET_OUT.with_suffix(
     ".md"
 )
@@ -97,6 +106,7 @@ def _source_input_paths() -> list[Path]:
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
         Path("scripts/build_public_benchmark_operator_intake_packet.py"),
         Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+        Path("scripts/validate_public_benchmark_external_receipts.py"),
         Path("scripts/validate_public_benchmark_pose_validity.py"),
         Path("scripts/validate_public_benchmark_subset_manifest.py"),
     ]
@@ -125,6 +135,7 @@ def _case_row_template() -> dict[str, Any]:
         },
         "source_license_or_accession": "",
         "source_checksum": "",
+        "provenance_ref": "",
         "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "rmsd_threshold_angstrom": DEFAULT_THRESHOLD_ANGSTROM,
     }
@@ -155,6 +166,7 @@ def _operator_slot(
             "symmetry_permutation_contract",
             "source_license_or_accession",
             "source_checksum",
+            "provenance_ref",
         ],
         "blockers": [
             "public_source_files_not_attached",
@@ -708,6 +720,7 @@ def _phase2_slice_progress(
     rmsd_scorecard: dict[str, Any],
     enrichment_scorecard: dict[str, Any],
     vina_gnina_comparison_adapter: dict[str, Any],
+    external_receipts_validation: dict[str, Any],
     operator_intake_packet: dict[str, Any],
     tier_beta_gate: dict[str, Any],
 ) -> dict[str, Any]:
@@ -759,6 +772,19 @@ def _phase2_slice_progress(
             "status": "ready_for_operator_input",
             "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
             "required_slot_count": int(operator_intake_packet["required_slot_count"]),
+        },
+        {
+            "slice_id": "public_benchmark_external_receipt_contract",
+            "status": "contract_ready",
+            "artifact": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION_OUT),
+            "required_receipt_fields": list(REQUIRED_RECEIPT_FIELDS),
+            "required_subset_receipt_fields": list(REQUIRED_SUBSET_RECEIPT_FIELDS),
+            "materialized_row_count": int(
+                external_receipts_validation["materialized_row_count"]
+            ),
+            "receipt_complete_row_count": int(
+                external_receipts_validation["receipt_complete_row_count"]
+            ),
         },
     ]
     blocked_slices = [
@@ -823,6 +849,7 @@ def build_source_of_truth(
     rmsd_scorecard: dict[str, Any],
     enrichment_scorecard: dict[str, Any],
     vina_gnina_comparison_adapter: dict[str, Any],
+    external_receipts_validation: dict[str, Any],
     operator_intake_packet: dict[str, Any],
     repo_root: Path = ROOT,
 ) -> dict[str, Any]:
@@ -835,6 +862,9 @@ def build_source_of_truth(
     enrichment_ready = bool(enrichment_scorecard["public_benchmark_enrichment_ready"])
     engine_comparison_ready = bool(
         vina_gnina_comparison_adapter["public_benchmark_engine_comparison_ready"]
+    )
+    external_receipts_ready = bool(
+        external_receipts_validation["public_benchmark_external_receipts_ready"]
     )
     tier_beta_gate = {
         "status": "blocked",
@@ -891,10 +921,12 @@ def build_source_of_truth(
             },
             {
                 "criterion_id": "external_receipts_attached",
-                "pass": False,
-                "current": 0,
+                "pass": external_receipts_ready,
+                "current": external_receipts_validation["receipt_complete_row_count"],
                 "required": "source_license_or_accession_and_provenance_receipts_for_all_materialized_rows",
-                "blockers": ["public_benchmark_external_receipts_missing"],
+                "blockers": external_receipts_validation["blockers"]
+                if not external_receipts_ready
+                else [],
             },
         ],
     }
@@ -1023,6 +1055,7 @@ def build_source_of_truth(
         rmsd_scorecard=rmsd_scorecard,
         enrichment_scorecard=enrichment_scorecard,
         vina_gnina_comparison_adapter=vina_gnina_comparison_adapter,
+        external_receipts_validation=external_receipts_validation,
         operator_intake_packet=operator_intake_packet,
         tier_beta_gate=tier_beta_gate,
     )
@@ -1149,6 +1182,42 @@ def build_source_of_truth(
             ],
             "supported_engines": vina_gnina_comparison_adapter["supported_engines"],
             "blockers": vina_gnina_comparison_adapter["blockers"],
+        },
+        "external_receipts_summary": {
+            "status": external_receipts_validation["status"],
+            "public_benchmark_external_receipts_ready": external_receipts_validation[
+                "public_benchmark_external_receipts_ready"
+            ],
+            "materialized_row_count": external_receipts_validation[
+                "materialized_row_count"
+            ],
+            "receipt_complete_row_count": external_receipts_validation[
+                "receipt_complete_row_count"
+            ],
+            "receipt_blocked_row_count": external_receipts_validation[
+                "receipt_blocked_row_count"
+            ],
+            "blockers": external_receipts_validation["blockers"],
+        },
+        "external_receipts_validation": external_receipts_validation,
+        "external_receipts_validator": {
+            "schema_version": EXTERNAL_RECEIPT_VALIDATION_SCHEMA_VERSION,
+            "status": "ready_for_materialized_rows",
+            "required_receipt_fields": list(REQUIRED_RECEIPT_FIELDS),
+            "required_subset_receipt_fields": list(REQUIRED_SUBSET_RECEIPT_FIELDS),
+            "validation_command": (
+                "python3 scripts/validate_public_benchmark_external_receipts.py "
+                "--subset-manifest implementation/phase1/release_evidence/"
+                "productization/public_benchmark_subset_manifest.json "
+                "--enrichment-scorecard implementation/phase1/release_evidence/"
+                "productization/public_benchmark_enrichment_scorecard.json "
+                "--vina-gnina-comparison-adapter implementation/phase1/"
+                "release_evidence/productization/"
+                "public_benchmark_vina_gnina_comparison_adapter.json "
+                "--out implementation/phase1/release_evidence/productization/"
+                "public_benchmark_external_receipts_validation.json --fail-blocked"
+            ),
+            "claim_boundary": external_receipts_validation["claim_boundary"],
         },
         "operator_intake_packet": {
             "schema_version": operator_intake_packet["schema_version"],
@@ -1349,6 +1418,11 @@ def build_public_benchmark_artifacts(
     vina_gnina_comparison_adapter = build_vina_gnina_comparison_adapter(
         repo_root=repo_root
     )
+    external_receipts_validation = validate_external_receipts(
+        subset_manifest=subset_manifest,
+        enrichment_scorecard=enrichment_scorecard,
+        vina_gnina_comparison_adapter=vina_gnina_comparison_adapter,
+    )
     operator_intake_packet = build_public_benchmark_operator_intake_packet(
         repo_root=repo_root,
         operator_template_dir=operator_template_dir,
@@ -1359,6 +1433,7 @@ def build_public_benchmark_artifacts(
         rmsd_scorecard=rmsd_scorecard,
         enrichment_scorecard=enrichment_scorecard,
         vina_gnina_comparison_adapter=vina_gnina_comparison_adapter,
+        external_receipts_validation=external_receipts_validation,
         operator_intake_packet=operator_intake_packet,
         repo_root=repo_root,
     )
@@ -1369,6 +1444,7 @@ def build_public_benchmark_artifacts(
         "rmsd_scorecard": rmsd_scorecard,
         "enrichment_scorecard": enrichment_scorecard,
         "vina_gnina_comparison_adapter": vina_gnina_comparison_adapter,
+        "external_receipts_validation": external_receipts_validation,
         "operator_intake_packet": operator_intake_packet,
     }
 
@@ -1382,6 +1458,7 @@ def write_public_benchmark_artifacts(
     rmsd_scorecard_out: Path = DEFAULT_RMSD_SCORECARD_OUT,
     enrichment_scorecard_out: Path = DEFAULT_ENRICHMENT_SCORECARD_OUT,
     vina_gnina_comparison_adapter_out: Path = DEFAULT_VINA_GNINA_ADAPTER_OUT,
+    external_receipts_validation_out: Path = DEFAULT_EXTERNAL_RECEIPTS_VALIDATION_OUT,
     operator_intake_packet_out: Path = DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
     operator_intake_packet_md_out: Path = DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT,
     operator_template_dir: Path = DEFAULT_OPERATOR_TEMPLATE_DIR,
@@ -1397,6 +1474,7 @@ def write_public_benchmark_artifacts(
         "rmsd_scorecard": rmsd_scorecard_out,
         "enrichment_scorecard": enrichment_scorecard_out,
         "vina_gnina_comparison_adapter": vina_gnina_comparison_adapter_out,
+        "external_receipts_validation": external_receipts_validation_out,
         "operator_intake_packet": operator_intake_packet_out,
     }
     for key, out_path in outputs.items():
@@ -1460,6 +1538,11 @@ def main(argv: list[str] | None = None) -> int:
         default=DEFAULT_VINA_GNINA_ADAPTER_OUT,
     )
     parser.add_argument(
+        "--external-receipts-validation-out",
+        type=Path,
+        default=DEFAULT_EXTERNAL_RECEIPTS_VALIDATION_OUT,
+    )
+    parser.add_argument(
         "--operator-intake-packet-out",
         type=Path,
         default=DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
@@ -1482,6 +1565,7 @@ def main(argv: list[str] | None = None) -> int:
         rmsd_scorecard_out=args.rmsd_scorecard_out,
         enrichment_scorecard_out=args.enrichment_scorecard_out,
         vina_gnina_comparison_adapter_out=args.vina_gnina_comparison_adapter_out,
+        external_receipts_validation_out=args.external_receipts_validation_out,
         operator_intake_packet_out=args.operator_intake_packet_out,
         operator_intake_packet_md_out=args.operator_intake_packet_md_out,
         operator_template_dir=args.operator_template_dir,

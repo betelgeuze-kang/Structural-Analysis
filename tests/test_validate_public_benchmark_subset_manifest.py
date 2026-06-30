@@ -37,6 +37,7 @@ def _complete_row(case_id: str) -> dict[str, object]:
         },
         "source_license_or_accession": "operator-attached-accession",
         "source_checksum": source_checksum,
+        "provenance_ref": "operator://casf-pdbbind/case",
         "source_file_checksums": {
             f"benchmarks/{case_id}/protein.pdb": "sha256:" + "b" * 64,
             f"benchmarks/{case_id}/ligand_ref.sdf": "sha256:" + "c" * 64,

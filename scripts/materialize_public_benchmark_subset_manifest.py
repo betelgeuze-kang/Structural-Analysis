@@ -92,6 +92,7 @@ def _case_row_template() -> dict[str, Any]:
         },
         "source_license_or_accession": "",
         "source_checksum": "",
+        "provenance_ref": "",
     }
 
 

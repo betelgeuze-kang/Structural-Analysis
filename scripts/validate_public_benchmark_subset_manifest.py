@@ -27,6 +27,7 @@ REQUIRED_CASE_FIELDS = (
     "symmetry_permutation_contract",
     "source_license_or_accession",
     "source_checksum",
+    "provenance_ref",
 )
 
 

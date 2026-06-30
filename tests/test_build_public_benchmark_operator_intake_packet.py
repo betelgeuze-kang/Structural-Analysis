@@ -103,6 +103,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "symmetry_permutation_contract",
         "source_license_or_accession",
         "source_checksum",
+        "provenance_ref",
         "ligand_atom_order_contract.atom_count",
         "ligand_atom_order_contract.atom_ids",
         "symmetry_permutation_contract.permutations",
@@ -255,15 +256,21 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
         "materialize_symmetry_rmsd_scorecard",
         "materialize_enrichment_scorecard",
         "materialize_vina_gnina_comparison_adapter",
+        "validate_external_receipts",
         "refresh_public_benchmark_source_of_truth",
     ]
-    assert packet["acceptance_criteria"][-1] == (
+    assert packet["acceptance_criteria"][-2:] == [
+        "public_benchmark_external_receipts_validation.public_benchmark_external_receipts_ready == true",
         "public_benchmark_source_of_truth.public_benchmark_ready == true"
-    )
+    ]
     assert packet["next_actions"][0] == "fill_public_benchmark_operator_intake_packet"
     assert packet["next_actions"][-1] == "regenerate_goal_bottleneck_roadmap_surface"
     assert packet["linked_artifacts"]["source_of_truth"] == (
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json"
+    )
+    assert packet["linked_artifacts"]["external_receipts_validation"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_external_receipts_validation.json"
     )
     assert packet["operator_template_schema_version"] == (
         "public-benchmark-operator-template.v1"
