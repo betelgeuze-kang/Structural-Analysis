@@ -24,11 +24,11 @@
   "current_large_model_execution_receipt_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T07:14:19.185239+00:00",
+  "generated_at": "2026-06-30T07:26:36.833024+00:00",
   "input_checksums": {
     "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:a7a6f6f415f00b6cd49f68a13f888e29ba32c40f18191340716d7fba367924e4",
     "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:d1c74f0c76e85c7e7b75e77e86b12f81dc5434f0a4a485a91143ca0245c298b5"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:cce4195b4798fc23ca1c0ee683c9564e2656fdd1f6c3d4ef3f6c4cbd032c6ccd"
   },
   "lanes": [
     "opensees-megatall",
@@ -141,7 +141,7 @@
   },
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
-  "source_commit_sha": "4fd8b834a24ec3ef5fa5b19d80245c9e28cbd3e7",
+  "source_commit_sha": "edf869b7595a24e23e000d6a5883c68b2d19134f",
   "source_id": "opensees_megatall_model_2_large",
   "status": "blocked",
   "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | evidence=2/9"

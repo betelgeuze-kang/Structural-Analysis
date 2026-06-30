@@ -525,7 +525,7 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-06-30T07:22:52.270394+00:00",
+  "generated_at": "2026-06-30T07:26:36.978376+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:8826a9d99b7355d6333ca1863ef65460303c22baff3357d367a312a66c3e9dcb",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:ccfab6016e292d4bbffb3e5b747b1dd91efbd9e143c8394b0b6f0cf499b2ed0f",
@@ -1765,7 +1765,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "4930a7a70f2beed468da8eebee74494607122118",
+  "source_commit_sha": "edf869b7595a24e23e000d6a5883c68b2d19134f",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

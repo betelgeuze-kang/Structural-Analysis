@@ -21,14 +21,14 @@
   "current_medium_model_scorecard_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T07:14:15.198005+00:00",
+  "generated_at": "2026-06-30T07:26:32.913697+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:46a9fd3ae7fd9904b988c56fa79021e1ed57f8de26316c4501e563e8fa9809b2",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:1f7e307b69037e4587b9cdf776762e4d4d2cafc6e97e41c795ba74e34c5014e1",
     "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:d1c74f0c76e85c7e7b75e77e86b12f81dc5434f0a4a485a91143ca0245c298b5"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:cce4195b4798fc23ca1c0ee683c9564e2656fdd1f6c3d4ef3f6c4cbd032c6ccd"
   },
   "lanes": [
     "opensees-medium"
@@ -158,7 +158,7 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "4fd8b834a24ec3ef5fa5b19d80245c9e28cbd3e7",
+  "source_commit_sha": "edf869b7595a24e23e000d6a5883c68b2d19134f",
   "source_id": "opensees_scbf16b_medium_candidate",
   "status": "blocked",
   "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=3/9"
