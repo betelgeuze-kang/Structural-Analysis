@@ -28,7 +28,7 @@
     "global_frame_shell_tangent_integration_ready": false,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-06-30T06:54:57.314356+00:00",
+  "generated_at": "2026-06-30T06:56:10.253371+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -88,8 +88,8 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:cf553013426c1233aa129b6021b72ca931d1be74e7544b12f54c92eb546001db",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:0c5a0c2edbd6c5dfb54248a576628ee1b763c8ec68d54e34eed8deb5d5f057cd",
-    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:39d18071ec1c70a3cb7e1c21dac11bdb01a1794b63e9e88fd632aa18b299822e",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:10c040f763f461c536bbc702aa203fe5a1744ae074bdd1901f886f6d9857993b",
+    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5f03056fec4414ee4759eb9b89413077b887a822a6df4c787ccc9b8f77825eba",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:cb672e5a3ac1b0d0aa6e95d74e9ef52b25cc33ed13cdc8a4b37c94f7f146f34a",
     "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:0bd893946f07cb24456bfeaa9b346d83b83f5e6e788aaaefe758f395c4e0aa7b"
   },
@@ -105,7 +105,7 @@
   "reuse_policy": "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice",
   "reused_evidence": true,
   "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
-  "source_commit_sha": "810d694d34e650f9f8a0180781cadcb22898c00b",
+  "source_commit_sha": "f269f5db33493b3773b7d6965423d855f38715fe",
   "status": "ready",
   "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=global_connectivity_consistent_newton_rocm_lane"
 }
