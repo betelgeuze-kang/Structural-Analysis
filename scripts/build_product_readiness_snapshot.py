@@ -461,6 +461,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/report_pm_release_gate.py",
         },
         "non_snapshot_product_surfaces": {
+            "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
             "scripts/build_goal_bottleneck_roadmap_surface.py",
             "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
             "scripts/build_gpcr_hard_decoy_product_report.py",
