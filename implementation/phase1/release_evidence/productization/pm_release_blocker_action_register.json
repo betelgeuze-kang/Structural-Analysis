@@ -24,10 +24,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T04:39:17.140273+00:00",
+  "generated_at": "2026-06-30T05:34:19.707945+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0fc071d8b3a9846b9657548442c2c6b633f1e2af4812aba82b80eb26b4f54322",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:7ac155aa84d8a60fd157dfd151b458a654b73b0a184baad13bbde55eac66ae72",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:94ad9801327ef8f253290b7348daa75149f2da5de86dc43c3f6aed45fe48dae3",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:af10124e65491d9daf6dfc04712ed27b4ff6221fa184e1337c9a3a3851f09973",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -276,9 +276,9 @@
         "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
       },
       "evidence_snapshot": {
-        "ci_streak_source_evidence_age_hours": 0.0,
+        "ci_streak_source_evidence_age_hours": 0.016,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-06-29T23:14:45.011876+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-06-30T05:18:35.942350+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
         "nightly_github_actions_pass_streak_count": 0,
@@ -305,9 +305,9 @@
           "push",
           "workflow_dispatch"
         ],
-        "pr_missing_consecutive_pass_count": 30,
+        "pr_missing_consecutive_pass_count": 18,
         "pr_owner_action": "Collect 18 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
-        "pr_pass_streak_count": 0,
+        "pr_pass_streak_count": 12,
         "pr_pull_request_run_source_present": true,
         "pr_source_evidence_release_credit_pass": false,
         "pr_streak_source": "github_actions",
@@ -318,9 +318,9 @@
         "github_actions_job_start_blocker_count": 0,
         "lane": "pr",
         "local_consecutive_pass_count": 2,
-        "missing_consecutive_pass_count": 30,
+        "missing_consecutive_pass_count": 18,
         "pull_request_run_source_present": true,
-        "release_consecutive_pass_count": 0,
+        "release_consecutive_pass_count": 12,
         "required_consecutive_pass_count": 30,
         "source_policy": "github_actions_required",
         "state": "missing_tracked_ci_streak_evidence",
@@ -383,9 +383,9 @@
         "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
       },
       "evidence_snapshot": {
-        "ci_streak_source_evidence_age_hours": 0.0,
+        "ci_streak_source_evidence_age_hours": 0.016,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-06-29T23:14:45.011876+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-06-30T05:18:35.942350+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
         "nightly_github_actions_pass_streak_count": 0,
@@ -412,9 +412,9 @@
           "push",
           "workflow_dispatch"
         ],
-        "pr_missing_consecutive_pass_count": 30,
+        "pr_missing_consecutive_pass_count": 18,
         "pr_owner_action": "Collect 18 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
-        "pr_pass_streak_count": 0,
+        "pr_pass_streak_count": 12,
         "pr_pull_request_run_source_present": true,
         "pr_source_evidence_release_credit_pass": false,
         "pr_streak_source": "github_actions",
@@ -960,7 +960,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "8abebbde97c24208edc2b2a2e69b434bc4892877",
+  "source_commit_sha": "da66a14a1204159977380285c806366f85d79d51",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
