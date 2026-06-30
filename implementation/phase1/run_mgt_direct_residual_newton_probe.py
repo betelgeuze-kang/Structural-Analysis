@@ -6877,6 +6877,13 @@ def run_mgt_direct_residual_newton_probe(
                     current_free = trial_frees[best_gate_trial_index]
                     current_residual = trial_residuals[best_gate_trial_index]
                     current_rhs = trial_rhs_vectors[best_gate_trial_index]
+                    terminal_row_tangent_refresh_required = bool(
+                        terminal_row_promotion
+                        and matrix_free_global_krylov.get(
+                            "accepted_state_tangent_refresh_deferred_to"
+                        )
+                        == GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW
+                    )
                     row_acceptance_refresh_meta = {
                         "accepted_state_refresh_backend": str(
                             accepted_trial.get("residual_batch_backend")
@@ -6888,7 +6895,7 @@ def run_mgt_direct_residual_newton_probe(
                             "accepted_row_candidate_hip_batch_replay"
                         ),
                     }
-                    if terminal_row_promotion:
+                    if terminal_row_promotion and not terminal_row_tangent_refresh_required:
                         row_acceptance_refresh_meta.update(
                             {
                                 "accepted_state_tangent_refresh_backend": (
@@ -6901,6 +6908,10 @@ def run_mgt_direct_residual_newton_probe(
                             }
                         )
                     else:
+                        if terminal_row_tangent_refresh_required:
+                            row_acceptance_refresh_meta[
+                                "terminal_row_tangent_refresh_required_for_global_defer"
+                            ] = True
                         if jacobian_mode == "finite_difference":
                             refresh_support_cols = (
                                 list(accepted_candidate_meta.get("support_columns", []))
