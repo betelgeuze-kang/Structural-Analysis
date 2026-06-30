@@ -10,11 +10,10 @@
   },
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 10,
+    "release_area_blocker_count": 9,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-      "evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
@@ -23,22 +22,22 @@
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
     ],
-    "release_area_green_count": 11,
-    "release_area_summary": "11/16",
+    "release_area_green_count": 12,
+    "release_area_summary": "12/16",
     "release_area_total_count": 16
   },
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T12:13:23.522329+00:00",
+  "generated_at": "2026-06-30T12:14:48.134992+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d75effdfe490c479f51503b7263cb7b5b5d867eaba7c34fb3cb97fb201cd2ab5",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1e730be23a4852f6cf34396886a512959ea03944551ce99f5d23304718247fc6",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:6638f3b1d1f330ed9bf99a1d1662250e2ffd36accd4f804bb1902e2225819a61",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:573ca24719bd89436222393e405ae7a5c79544f8a26f1758fd11580bf6871059",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:c1d51c93e91a69095fab5303dfe3d4331003c783b636386a2b9f26fa03b1d8e0"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
   "reuse_policy": "pm_release_blocker_closure_board_aggregates_action_register_and_pm_report",
   "reused_evidence": true,
@@ -118,40 +117,6 @@
       "scope": "release_area",
       "verification_commands": [
         "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
-    {
-      "acceptance_criteria": [
-        "`release_evidence_freshness_report.json.contract_pass == true`",
-        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
-        "`evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`"
-      ],
-      "blocker_id": "evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact",
-      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
-      "closure_state": "local_remediation_ready",
-      "evidence_state": "release_evidence_metadata_missing",
-      "external_input_required": false,
-      "handoff_ready": true,
-      "handoff_state": "local_remediation_ready",
-      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
-      "owner": "release_owner",
-      "owner_input_required": false,
-      "primary_evidence_artifacts": {
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
-      },
-      "reproduction_commands": [
-        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "resolution_type": "release_evidence_metadata_required",
-      "scope": "release_area",
-      "verification_commands": [
-        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
     },
@@ -548,39 +513,38 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "c61d30eb277bf8a1fc0c94082108e430b3511260",
+  "source_commit_sha": "41b49045b0d8a4304887aa97614cfc88ee917b2c",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
     "all_open_blockers_have_handoff": true,
     "closure_state_counts": {
-      "external_owner_input_ready": 13,
-      "local_remediation_ready": 1
+      "external_owner_input_ready": 13
     },
     "external_input_required_count": 13,
     "external_owner_input_ready_count": 13,
     "full_release_gate_ready": false,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 14,
+    "handoff_ready_count": 13,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "local_remediation_ready_count": 1,
+    "local_remediation_ready_count": 0,
     "missing_from_action_register": [],
     "missing_from_action_register_count": 0,
-    "open_blocker_count": 14,
+    "open_blocker_count": 13,
     "owner_input_required_count": 13,
     "paid_pilot_candidate": true,
-    "pm_report_blocker_count": 14,
+    "pm_report_blocker_count": 13,
     "pm_report_loaded": true,
-    "register_blocker_count": 14,
-    "register_open_blocker_count": 14,
-    "release_area_blocker_count": 10,
+    "register_blocker_count": 13,
+    "register_open_blocker_count": 13,
+    "release_area_blocker_count": 9,
     "release_area_gate_ready": false,
-    "release_area_green_count": 11,
+    "release_area_green_count": 12,
     "release_area_total_count": 16,
     "stale_action_register_blocker_count": 0,
     "stale_action_register_blockers": []
   },
-  "summary_line": "PM release blocker closure board: BLOCKED | open=14 | external_owner_ready=13 | handoff_not_ready=0"
+  "summary_line": "PM release blocker closure board: BLOCKED | open=13 | external_owner_ready=13 | handoff_not_ready=0"
 }
