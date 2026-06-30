@@ -211,11 +211,75 @@ def _assess_hip_required_direct_probe_payload(
                 blockers.append(f"consistent_residual_jacobian::{blocker}")
     if gate_assessment.get("fallback_zero_passed") is not True:
         blockers.append("hip_direct_probe_fallback_zero_not_closed")
+    hip_contract_rows = residual_contract.get("hip_residual_engine_rows")
+    hip_contract_rows = hip_contract_rows if isinstance(hip_contract_rows, list) else []
+    hip_contract_blockers = residual_contract.get("hip_residual_engine_blockers")
+    hip_contract_blockers = (
+        hip_contract_blockers if isinstance(hip_contract_blockers, list) else []
+    )
+    consistent_blockers = (
+        gate_assessment.get("consistent_residual_jacobian_newton_blockers")
+        or residual_contract.get("consistent_residual_jacobian_newton_blockers")
+        or []
+    )
+    consistent_blockers = (
+        consistent_blockers if isinstance(consistent_blockers, list) else []
+    )
+    material_blockers = (
+        gate_assessment.get("material_newton_breadth_blockers")
+        or residual_contract.get("material_newton_breadth_blockers")
+        or []
+    )
+    material_blockers = material_blockers if isinstance(material_blockers, list) else []
+    fallback_zero_audit = gate_assessment.get("fallback_zero_audit")
+    fallback_zero_audit = fallback_zero_audit if isinstance(fallback_zero_audit, dict) else {}
     return {
         "production_hip_residual_jacobian_path": production_hip_path,
         "hip_residual_engine_contract_passed": hip_contract_passed,
         "consistent_residual_jacobian_newton_gate_passed": consistent_gate_passed,
         "blockers": sorted(dict.fromkeys(blockers)),
+        "hip_residual_engine_contract": {
+            "required": hip_required,
+            "passed": hip_contract_passed,
+            "required_lane_count": int(
+                residual_contract.get("hip_residual_engine_required_lane_count", 0)
+                or 0
+            ),
+            "passed_lane_count": int(
+                residual_contract.get("hip_residual_engine_passed_lane_count", 0)
+                or 0
+            ),
+            "backends": residual_contract.get("hip_residual_engine_backends") or [],
+            "blockers": [
+                item for item in hip_contract_blockers if isinstance(item, str)
+            ],
+            "rows": hip_contract_rows,
+        },
+        "gate_assessment": {
+            "direct_residual_gate_passed": bool(
+                gate_assessment.get("direct_residual_gate_passed")
+            ),
+            "relative_increment_gate_passed": bool(
+                gate_assessment.get("relative_increment_gate_passed")
+            ),
+            "full_load_closure_passed": bool(
+                gate_assessment.get("full_load_closure_passed")
+            ),
+            "consistent_residual_jacobian_newton_passed": consistent_gate_passed,
+            "consistent_residual_jacobian_newton_blockers": [
+                item for item in consistent_blockers if isinstance(item, str)
+            ],
+            "material_newton_breadth_passed": bool(
+                gate_assessment.get("material_newton_breadth_passed")
+            ),
+            "material_newton_breadth_blockers": [
+                item for item in material_blockers if isinstance(item, str)
+            ],
+            "fallback_zero_passed": bool(gate_assessment.get("fallback_zero_passed")),
+            "fallback_zero_boundary_count": int(
+                fallback_zero_audit.get("fallback_zero_boundary_count", 0) or 0
+            ),
+        },
         "matrix_free_global_krylov": {
             "enabled": bool(global_krylov.get("enabled")),
             "attempted": bool(global_krylov.get("attempted")),
@@ -405,10 +469,19 @@ def _production_rocm_hip_residual_jvp_worker_contract(
         blockers.append("current_tangent_residual_row_hip_replay_not_proven")
     if row_correction.get("accepted_state_tangent_refresh_cpu_used") is True:
         blockers.append("current_tangent_residual_row_tangent_refresh_cpu_used")
+    g1_closure_gate_blockers: list[str] = []
     if proof.get("consistent_residual_jacobian_newton_gate_passed") is not True:
-        blockers.append("consistent_residual_jacobian_newton_gate_not_passed")
+        g1_closure_gate_blockers.append(
+            "consistent_residual_jacobian_newton_gate_not_passed"
+        )
+    blockers.extend(g1_closure_gate_blockers)
 
     blockers = sorted(dict.fromkeys(blockers))
+    g1_closure_gate_blockers = sorted(dict.fromkeys(g1_closure_gate_blockers))
+    residual_jvp_worker_path_blockers = [
+        blocker for blocker in blockers if blocker not in set(g1_closure_gate_blockers)
+    ]
+    residual_jvp_worker_path_ready = not residual_jvp_worker_path_blockers
     return {
         "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
         "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
@@ -416,6 +489,10 @@ def _production_rocm_hip_residual_jvp_worker_contract(
         "ready": not blockers,
         "status": "ready" if not blockers else "blocked",
         "blockers": blockers,
+        "residual_jvp_worker_path_ready": residual_jvp_worker_path_ready,
+        "residual_jvp_worker_path_blockers": residual_jvp_worker_path_blockers,
+        "g1_closure_gate_ready": not g1_closure_gate_blockers,
+        "g1_closure_gate_blockers": g1_closure_gate_blockers,
         "required_for_g1_closure": True,
         "promotes_g1_closure": False,
         "cpu_fallback_allowed": False,
@@ -477,7 +554,9 @@ def _production_rocm_hip_residual_jvp_worker_contract(
             "residual/JVP lane. It records required device-resident residual/JVP "
             "behavior and blocks G1 promotion unless the child proof retains "
             "global JVP rows, uses HIP for the accepted-state tangent refresh, "
-            "and avoids CPU fallback."
+            "avoids CPU fallback, and the consistent residual/Jacobian Newton "
+            "gate passes. residual_jvp_worker_path_ready isolates the HIP "
+            "residual/JVP worker proof from the remaining G1 closure gate."
         ),
     }
 
@@ -2256,6 +2335,10 @@ def run_mgt_residual_jacobian_consistency_probe(
                 "consistent_residual_jacobian_newton_gate_passed": bool(
                     hip_proof["consistent_residual_jacobian_newton_gate_passed"]
                 ),
+                "hip_residual_engine_contract": hip_proof[
+                    "hip_residual_engine_contract"
+                ],
+                "gate_assessment": hip_proof["gate_assessment"],
                 "matrix_free_global_krylov": hip_proof[
                     "matrix_free_global_krylov"
                 ],
