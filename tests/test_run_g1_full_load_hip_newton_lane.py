@@ -925,6 +925,35 @@ def test_hip_proof_lane_wrapper_change_does_not_stale_proof_source(
     ]
 
 
+def test_hip_proof_benchmark_acquisition_change_does_not_stale_g1_lane(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(proof, source_commit_sha="proof-commit")
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_rev_parse",
+        lambda ref: {"proof-commit": "proof-sha", "lane-commit": "lane-sha"}.get(ref, ""),
+    )
+    changed_paths = ["src/structural_analysis/benchmark/acquisition.py"]
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_diff_name_only",
+        lambda base, head: changed_paths,
+    )
+
+    summary, blockers = run_g1_full_load_hip_newton_lane._hip_consistency_proof_assessment(
+        proof_json=proof,
+        lane_source_commit_sha="lane-commit",
+    )
+
+    assert "hip_consistency_proof_source_commit_sha_mismatch" not in blockers
+    assert summary["source_state_fresh"] is True
+    assert summary["source_state_kind"] == "non_g1_hip_paths_changed"
+    assert summary["changed_paths_since_source_commit"] == changed_paths
+
+
 def test_child_reused_evidence_blocks_lane_promotion(
     tmp_path: Path,
     monkeypatch: Any,

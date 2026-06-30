@@ -144,6 +144,11 @@ def _g1_hip_freshness_relevant_path(path: str) -> bool:
     }
     if path in relevant_exact_paths:
         return True
+    unrelated_prefixes = (
+        "src/structural_analysis/benchmark/",
+    )
+    if path.startswith(unrelated_prefixes):
+        return False
     relevant_prefixes = (
         "implementation/phase1/src/",
         "src/structural_analysis/",
