@@ -55,6 +55,55 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "artifact": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
         "mutation_allowed": False,
     }
+    assert surface["capability_count"] == 5
+    assert surface["ready_capability_count"] == 1
+    assert surface["blocked_capability_count"] == 4
+    assert surface["blocked_capability_register_count"] == 4
+    assert surface["first_blocked_capability_id"] == "public_benchmark_harness"
+    assert surface["first_blocked_capability_next_action"] == (
+        "attach at least 12 local CASF/PDBBind case descriptors"
+    )
+    assert [
+        row["capability_id"] for row in surface["blocked_capability_register"]
+    ] == [
+        "public_benchmark_harness",
+        "h_bond_backmap_evidence",
+        "gpcr_hard_decoy_evidence",
+        "pocketmd_lite_top_k_refinement",
+    ]
+    blocked_register = {
+        row["capability_id"]: row for row in surface["blocked_capability_register"]
+    }
+    first_blocked_capability = surface["first_blocked_capability"]
+    assert first_blocked_capability["first_blocked_target"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert first_blocked_capability["operator_intake_route"] == (
+        "/product/public-benchmark/operator-intake"
+    )
+    assert first_blocked_capability["operator_intake_required_slot_count"] == 4
+    assert first_blocked_capability["handoff_slot"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert first_blocked_capability["handoff_slot"]["blocked_criteria"] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
+    assert first_blocked_capability["handoff_slot"][
+        "template_artifact"
+    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
+    assert blocked_register["gpcr_hard_decoy_evidence"]["handoff_slot"][
+        "status"
+    ] == "operator_input_required"
+    assert blocked_register["gpcr_hard_decoy_evidence"]["handoff_slot"][
+        "validation_command"
+    ].startswith("python3 scripts/materialize_gpcr_hard_decoy_suite_report.py")
+    assert blocked_register["pocketmd_lite_top_k_refinement"][
+        "first_blocked_target"
+    ] == "top_k_refinement_operator_intake"
+    assert blocked_register["pocketmd_lite_top_k_refinement"]["handoff_slot"][
+        "materialization_command"
+    ].startswith("python3 scripts/materialize_pocketmd_lite_topk_survival_report.py")
 
     assert {
         "structural_solver_restricted_alpha_surface",
@@ -225,6 +274,12 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     pocketmd = rows["pocketmd_lite_top_k_refinement"]
     assert pocketmd["state"] == "blocked"
     assert pocketmd["summary"]["product_surface_ready"] is False
+    assert pocketmd["summary"]["first_blocked_target"] == (
+        "top_k_refinement_operator_intake"
+    )
+    assert pocketmd["summary"]["root_cause_tags"] == [
+        "operator_refinement_rows_required"
+    ]
     assert pocketmd["summary"]["operator_intake_packet_status"] == (
         "ready_for_operator_input"
     )

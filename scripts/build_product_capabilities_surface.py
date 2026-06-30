@@ -121,6 +121,14 @@ def _blockers(payload: dict[str, Any]) -> list[str]:
     return [str(row) for row in _as_list(payload.get("blockers"))]
 
 
+def _first_str(values: list[Any]) -> str:
+    for value in values:
+        text = str(value or "")
+        if text:
+            return text
+    return ""
+
+
 def _dedupe(values: list[str]) -> list[str]:
     seen: set[str] = set()
     deduped: list[str] = []
@@ -134,6 +142,100 @@ def _dedupe(values: list[str]) -> list[str]:
 def _surface_summary(payload: dict[str, Any]) -> dict[str, Any]:
     summary = _as_dict(payload.get("summary"))
     return summary if summary else _as_dict(payload.get("readiness_summary"))
+
+
+def _first_dict(values: list[Any]) -> dict[str, Any]:
+    for value in values:
+        if isinstance(value, dict):
+            return value
+    return {}
+
+
+def _capability_handoff_slot(summary: dict[str, Any]) -> dict[str, Any]:
+    slot = (
+        _as_dict(summary.get("first_operator_evidence_gap"))
+        or _as_dict(summary.get("first_operator_handoff"))
+        or _first_dict(_as_list(summary.get("operator_handoff_queue")))
+        or _first_dict(_as_list(summary.get("operator_evidence_gap_register")))
+        or _first_dict(_as_list(summary.get("gate_unblock_plan")))
+        or _first_dict(_as_list(summary.get("operator_intake_slots")))
+        or _first_dict(_as_list(summary.get("operator_target_slots")))
+    )
+    if not slot:
+        return {}
+    blocked_criteria = (
+        _as_list(slot.get("blocked_tier_beta_criteria"))
+        or _as_list(slot.get("blocked_phase3_criteria"))
+        or _as_list(slot.get("blocked_phase4_criteria"))
+        or _as_list(slot.get("blocked_criteria"))
+        or _as_list(slot.get("unblocks_tier_beta_criteria"))
+        or _as_list(slot.get("unblocks_phase3_criteria"))
+        or _as_list(slot.get("unblocks_phase4_criteria"))
+    )
+    return {
+        "slot_id": str(slot.get("slot_id") or ""),
+        "target_id": str(slot.get("target_id") or ""),
+        "handoff_id": str(slot.get("handoff_id") or ""),
+        "status": str(slot.get("status") or ""),
+        "blocked_criteria": [str(row) for row in blocked_criteria],
+        "first_next_action": str(slot.get("first_next_action") or ""),
+        "template_artifact": str(slot.get("template_artifact") or ""),
+        "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
+        "materialization_steps": [
+            str(row) for row in _as_list(slot.get("materialization_steps"))
+        ],
+        "materialization_command": str(slot.get("materialization_command") or ""),
+        "validation_command": str(slot.get("validation_command") or ""),
+    }
+
+
+def _blocked_capability_register(
+    capability_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    blocked_rows = [
+        row
+        for row in capability_rows
+        if str(row.get("state") or "") != "ready"
+    ]
+    register: list[dict[str, Any]] = []
+    for index, row in enumerate(blocked_rows, start=1):
+        summary = _as_dict(row.get("summary"))
+        next_actions = [str(action) for action in _as_list(row.get("next_actions"))]
+        handoff_slot = _capability_handoff_slot(summary)
+        first_next_action = _first_str(
+            [handoff_slot.get("first_next_action"), *next_actions]
+        )
+        register.append(
+            {
+                "queue_priority": index,
+                "capability_id": str(row.get("capability_id") or ""),
+                "title": str(row.get("title") or ""),
+                "capability_kind": str(row.get("capability_kind") or ""),
+                "state": str(row.get("state") or ""),
+                "contract_pass": bool(row.get("contract_pass")),
+                "blocker_count": int(row.get("blocker_count") or 0),
+                "first_blocked_target": str(summary.get("first_blocked_target") or ""),
+                "root_cause_tags": [
+                    str(tag) for tag in _as_list(summary.get("root_cause_tags"))
+                ],
+                "first_next_action": first_next_action,
+                "operator_intake_route": str(
+                    summary.get("operator_intake_route") or ""
+                ),
+                "operator_intake_packet_status": str(
+                    summary.get("operator_intake_packet_status") or ""
+                ),
+                "operator_intake_required_slot_count": int(
+                    summary.get("operator_intake_required_slot_count") or 0
+                ),
+                "gate_unblock_plan_count": int(
+                    summary.get("gate_unblock_plan_count") or 0
+                ),
+                "handoff_slot": handoff_slot,
+                "evidence_artifact_count": len(_as_list(row.get("evidence_artifacts"))),
+            }
+        )
+    return register
 
 
 def _capability_row(
@@ -463,6 +565,7 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
     gate_unblock_plan = [
         {
             "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
             "unblocks_phase4_criteria": [
                 str(item) for item in _as_list(row.get("unblocks_phase4_criteria"))
             ],
@@ -474,6 +577,8 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(row.get("validation_command") or ""),
         }
         for row in _as_list(operator_intake.get("gate_unblock_plan"))
         if isinstance(row, dict)
@@ -499,6 +604,18 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
         next_actions=_dedupe(_next_actions(operator_intake) + _next_actions(surface)),
         summary={
             "surface_status": str(surface.get("status") or ""),
+            "first_blocked_target": str(
+                topk_report.get("first_blocked_target")
+                or surface.get("first_blocked_target")
+                or ""
+            ),
+            "root_cause_tags": [
+                str(row)
+                for row in _as_list(
+                    topk_report.get("root_cause_tags")
+                    or surface.get("root_cause_tags")
+                )
+            ],
             "product_surface_ready": ready,
             "real_refinement_case_count": _surface_summary(surface).get("real_refinement_case_count", 0),
             "top_k_candidate_count": _surface_summary(surface).get("top_k_candidate_count", 0),
@@ -555,6 +672,9 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
                 str(row) for row in _as_list(phase4_exit_gate.get("failed_criteria"))
             ],
             "phase4_exit_gate_criteria": phase4_criteria,
+            "first_operator_evidence_gap": _as_dict(
+                topk_report.get("first_operator_evidence_gap")
+            ),
             "operator_intake_slots": operator_slots,
             "gate_unblock_plan": gate_unblock_plan,
         },
@@ -663,6 +783,7 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
         {
             "slot_id": str(row.get("slot_id") or ""),
             "target_id": str(row.get("target_id") or ""),
+            "status": str(row.get("status") or ""),
             "unblocks_phase3_criteria": [
                 str(item) for item in _as_list(row.get("unblocks_phase3_criteria"))
             ],
@@ -671,6 +792,8 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(row.get("validation_command") or ""),
         }
         for row in _as_list(
             operator_intake.get("gate_unblock_plan")
@@ -786,6 +909,10 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
     ]
     ready_count = sum(1 for row in capability_rows if row["state"] == "ready")
     blocked_rows = [row for row in capability_rows if row["state"] != "ready"]
+    blocked_capability_register = _blocked_capability_register(capability_rows)
+    first_blocked_capability = (
+        blocked_capability_register[0] if blocked_capability_register else {}
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -807,6 +934,15 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
         "ready_capability_count": ready_count,
         "blocked_capability_count": len(blocked_rows),
         "capability_rows": capability_rows,
+        "blocked_capability_register_count": len(blocked_capability_register),
+        "first_blocked_capability_id": str(
+            first_blocked_capability.get("capability_id") or ""
+        ),
+        "first_blocked_capability_next_action": str(
+            first_blocked_capability.get("first_next_action") or ""
+        ),
+        "first_blocked_capability": first_blocked_capability,
+        "blocked_capability_register": blocked_capability_register,
         "blockers": [],
         "first_blocked_target": "",
         "root_cause_tags": [],

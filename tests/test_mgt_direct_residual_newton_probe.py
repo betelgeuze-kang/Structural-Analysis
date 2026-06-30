@@ -1422,6 +1422,89 @@ def test_g1_fallback_zero_audit_fails_global_krylov_missing_tangent_refresh() ->
     assert "global_krylov_hip_required_tangent_refresh_missing" in boundaries
 
 
+def test_g1_fallback_zero_audit_accepts_global_defer_closed_by_row_hip_fd_refresh() -> None:
+    global_krylov = {
+        "enabled": True,
+        "attempted": True,
+        "promoted_to_final_state": True,
+        "batch_replay_backend": "hip_full_residual",
+        "require_hip_batch_replay": True,
+        "accepted_state_refresh_backend": "hip_full_residual",
+        "accepted_state_refresh_hip_used": True,
+        "accepted_state_refresh_cpu_used": False,
+        "accepted_state_tangent_refresh_backend": (
+            direct_probe.GLOBAL_TANGENT_REFRESH_DEFERRED_BACKEND
+        ),
+        "accepted_state_tangent_refresh_deferred_to": (
+            direct_probe.GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW
+        ),
+        "accepted_state_tangent_refresh_closure_blocked": True,
+        "accepted_state_tangent_refresh_closure_blocker": (
+            direct_probe.GLOBAL_TANGENT_REFRESH_DEFERRED_BLOCKER
+        ),
+        "accepted_state_tangent_refresh_cpu_used": False,
+    }
+    row_correction = {
+        "enabled": True,
+        "attempted": True,
+        "promoted_to_final_state": True,
+        "batch_replay_backend": "hip_full_residual",
+        "require_hip_batch_replay": True,
+        "accepted_state_refresh_backend": "hip_full_residual",
+        "accepted_state_refresh_hip_used": True,
+        "accepted_state_refresh_cpu_used": False,
+        "accepted_state_tangent_refresh_backend": "hip_finite_difference_residual_jvp",
+        "accepted_state_tangent_refresh_hip_used": True,
+        "accepted_state_tangent_refresh_cpu_used": False,
+    }
+
+    audit = _g1_fallback_zero_audit(global_krylov, row_correction)
+    contract = _g1_hip_residual_engine_contract(global_krylov, row_correction)
+
+    assert audit["fallback_zero_passed"] is True
+    assert contract["hip_residual_engine_contract_passed"] is True
+    assert contract["hip_residual_engine_blockers"] == []
+
+
+def test_g1_fallback_zero_audit_blocks_global_defer_without_row_hip_fd_refresh() -> None:
+    global_krylov = {
+        "enabled": True,
+        "attempted": True,
+        "promoted_to_final_state": True,
+        "batch_replay_backend": "hip_full_residual",
+        "require_hip_batch_replay": True,
+        "accepted_state_refresh_backend": "hip_full_residual",
+        "accepted_state_refresh_hip_used": True,
+        "accepted_state_refresh_cpu_used": False,
+        "accepted_state_tangent_refresh_backend": (
+            direct_probe.GLOBAL_TANGENT_REFRESH_DEFERRED_BACKEND
+        ),
+        "accepted_state_tangent_refresh_deferred_to": (
+            direct_probe.GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW
+        ),
+        "accepted_state_tangent_refresh_deferred_reason": "fixture_defer",
+        "accepted_state_tangent_refresh_cpu_used": False,
+    }
+    row_correction = {
+        "enabled": True,
+        "attempted": False,
+        "promoted_to_final_state": False,
+        "batch_replay_backend": "hip_full_residual",
+        "require_hip_batch_replay": True,
+    }
+
+    audit = _g1_fallback_zero_audit(global_krylov, row_correction)
+    contract = _g1_hip_residual_engine_contract(global_krylov, row_correction)
+
+    boundaries = {b["boundary"] for b in audit["fallback_zero_boundaries"]}
+    assert audit["fallback_zero_passed"] is False
+    assert "global_krylov_hip_required_tangent_refresh_missing" in boundaries
+    assert (
+        "matrix_free_global_krylov::accepted_state_tangent_refresh_not_hip"
+        in contract["hip_residual_engine_blockers"]
+    )
+
+
 def test_g1_fallback_zero_audit_fails_global_krylov_cpu_fallback_suppressed() -> None:
     audit = _g1_fallback_zero_audit(
         global_krylov={

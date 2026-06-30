@@ -70,6 +70,13 @@ HIP_RESIDUAL_BATCH_REPLAY_BACKENDS = {
     "hip_full_residual_resident",
     "rust_hip_full_residual_ffi",
 }
+GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW = "current_tangent_residual_row_correction"
+GLOBAL_TANGENT_REFRESH_DEFERRED_BACKEND = (
+    "deferred_to_current_tangent_residual_row_hip_fd_jvp"
+)
+GLOBAL_TANGENT_REFRESH_DEFERRED_BLOCKER = (
+    "rocm_hip_deferred_row_tangent_refresh_not_closed"
+)
 ROCM_VISIBILITY_SETTING_KEYS = (
     "HIP_VISIBLE_DEVICES",
     "ROCR_VISIBLE_DEVICES",
@@ -1277,6 +1284,39 @@ def _can_use_hip_acceptance_residual_refresh(
     )
 
 
+def _row_tangent_refresh_closes_global_defer(row_correction: dict[str, Any]) -> bool:
+    backend = str(row_correction.get("accepted_state_tangent_refresh_backend", "") or "")
+    return bool(
+        row_correction.get("accepted_state_tangent_refresh_hip_used")
+        and not row_correction.get("accepted_state_tangent_refresh_cpu_used")
+        and not row_correction.get("accepted_state_tangent_refresh_closure_blocked")
+        and not row_correction.get("hip_required_tangent_refresh_unavailable_after_promotion")
+        and not row_correction.get("frozen_support_graph_after_hip_residual_promotion")
+        and not backend.startswith("not_refreshed")
+        and not backend.startswith("frozen_")
+    )
+
+
+def _component_tangent_refresh_missing(
+    component: dict[str, Any],
+    *,
+    downstream_hip_tangent_refresh: bool = False,
+) -> bool:
+    backend = str(component.get("accepted_state_tangent_refresh_backend", "") or "")
+    if (
+        component.get("accepted_state_tangent_refresh_deferred_to")
+        == GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW
+    ):
+        return not downstream_hip_tangent_refresh
+    return bool(
+        component.get("accepted_state_tangent_refresh_closure_blocked")
+        or component.get("hip_required_tangent_refresh_unavailable_after_promotion")
+        or component.get("frozen_support_graph_after_hip_residual_promotion")
+        or backend.startswith("not_refreshed")
+        or backend.startswith("frozen_")
+    )
+
+
 def _g1_fallback_zero_audit(
     global_krylov: dict[str, Any],
     row_correction: dict[str, Any],
@@ -1290,16 +1330,6 @@ def _g1_fallback_zero_audit(
         return bool(
             not component.get("accepted_state_refresh_hip_used")
             or backend not in HIP_RESIDUAL_REPLAY_BACKENDS
-        )
-
-    def _hip_required_tangent_refresh_missing(component: dict[str, Any]) -> bool:
-        backend = str(component.get("accepted_state_tangent_refresh_backend", "") or "")
-        return bool(
-            component.get("accepted_state_tangent_refresh_closure_blocked")
-            or component.get("hip_required_tangent_refresh_unavailable_after_promotion")
-            or component.get("frozen_support_graph_after_hip_residual_promotion")
-            or backend.startswith("not_refreshed")
-            or backend.startswith("frozen_")
         )
 
     def _list(value: Any) -> list[Any]:
@@ -1331,6 +1361,9 @@ def _g1_fallback_zero_audit(
     row_promoted = bool(row_correction.get("promoted_to_final_state"))
     row_attempted = bool(row_correction.get("attempted"))
     row_hip_required = bool(row_correction.get("require_hip_batch_replay"))
+    row_tangent_refresh_closes_global_defer = (
+        _row_tangent_refresh_closes_global_defer(row_correction)
+    )
 
     if (global_promoted or global_attempted) and global_hip_required:
         if global_krylov.get("host_krylov_solver_used"):
@@ -1400,7 +1433,10 @@ def _g1_fallback_zero_audit(
                     "detail": "cpu_tangent_refresh_used",
                 }
             )
-        if _hip_required_tangent_refresh_missing(global_krylov):
+        if _component_tangent_refresh_missing(
+            global_krylov,
+            downstream_hip_tangent_refresh=row_tangent_refresh_closes_global_defer,
+        ):
             boundaries.append(
                 {
                     "boundary": "global_krylov_hip_required_tangent_refresh_missing",
@@ -1410,6 +1446,10 @@ def _g1_fallback_zero_audit(
                     "reason": (
                         global_krylov.get("accepted_state_tangent_refresh_closure_blocker")
                         or global_krylov.get("accepted_state_tangent_refresh_skipped_reason")
+                        or global_krylov.get("accepted_state_tangent_refresh_deferred_reason")
+                    ),
+                    "deferred_to": global_krylov.get(
+                        "accepted_state_tangent_refresh_deferred_to"
                     ),
                 }
             )
@@ -1457,7 +1497,7 @@ def _g1_fallback_zero_audit(
                     "detail": "row_cpu_tangent_refresh_used",
                 }
             )
-        if _hip_required_tangent_refresh_missing(row_correction):
+        if _component_tangent_refresh_missing(row_correction):
             boundaries.append(
                 {
                     "boundary": "row_correction_hip_required_tangent_refresh_missing",
@@ -1501,8 +1541,16 @@ def _g1_hip_residual_engine_contract(
     row_correction: dict[str, Any],
 ) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
+    row_tangent_refresh_closes_global_defer = (
+        _row_tangent_refresh_closes_global_defer(row_correction)
+    )
 
-    def _component_row(name: str, component: dict[str, Any]) -> None:
+    def _component_row(
+        name: str,
+        component: dict[str, Any],
+        *,
+        downstream_hip_tangent_refresh: bool = False,
+    ) -> None:
         active = bool(
             component.get("enabled")
             or component.get("attempted")
@@ -1540,6 +1588,11 @@ def _g1_hip_residual_engine_contract(
             blockers.append("accepted_state_refresh_cpu_used")
         if component.get("accepted_state_tangent_refresh_cpu_used"):
             blockers.append("accepted_state_tangent_refresh_cpu_used")
+        if attempted_or_promoted and require_hip and _component_tangent_refresh_missing(
+            component,
+            downstream_hip_tangent_refresh=downstream_hip_tangent_refresh,
+        ):
+            blockers.append("accepted_state_tangent_refresh_not_hip")
         require_hip_krylov = bool(component.get("require_hip_krylov_solver"))
         if require_hip_krylov and not component.get("hip_krylov_solver_used"):
             blockers.append("hip_krylov_solver_not_used")
@@ -1563,7 +1616,11 @@ def _g1_hip_residual_engine_contract(
             }
         )
 
-    _component_row("matrix_free_global_krylov", global_krylov)
+    _component_row(
+        "matrix_free_global_krylov",
+        global_krylov,
+        downstream_hip_tangent_refresh=row_tangent_refresh_closes_global_defer,
+    )
     _component_row("current_tangent_residual_row_correction", row_correction)
 
     required_rows = [row for row in rows if row["active"] and row["require_hip"]]
@@ -1732,6 +1789,17 @@ def run_mgt_direct_residual_newton_probe(
     row_require_hip_batch_replay = bool(
         current_tangent_residual_row_require_hip_batch_replay
         and row_batch_backend in HIP_RESIDUAL_BATCH_REPLAY_BACKENDS
+    )
+    row_hip_fd_tangent_refresh_configured = bool(
+        enable_current_tangent_residual_row_correction
+        and row_require_hip_batch_replay
+        and row_batch_backend in HIP_RESIDUAL_BATCH_REPLAY_BACKENDS
+        and str(current_tangent_residual_row_jacobian_mode).strip()
+        == "finite_difference"
+        and str(current_tangent_residual_row_support_selection).strip()
+        == "target_rows"
+        and current_tangent_residual_row_use_residual_only_assembly
+        and current_tangent_residual_row_batch_fd_replay
     )
     if (
         matrix_free_global_krylov_require_hip_batch_replay
@@ -4760,30 +4828,52 @@ def run_mgt_direct_residual_newton_probe(
                                 "tangent_stiffness_not_refreshed_from_hip_acceptance_path"
                             )
                             if enable_current_tangent_residual_row_correction:
-                                matrix_free_global_krylov[
-                                    "accepted_state_tangent_refresh_backend"
-                                ] = "cpu_full_assembly"
-                                matrix_free_global_krylov[
-                                    "accepted_state_tangent_refresh_cpu_used"
-                                ] = True
-                                matrix_free_global_krylov[
-                                    "accepted_state_tangent_refresh_closure_blocked"
-                                ] = True
-                                matrix_free_global_krylov[
-                                    "accepted_state_tangent_refresh_closure_blocker"
-                                ] = (
-                                    "rocm_hip_acceptance_tangent_refresh_required_for_closure"
-                                )
-                                (
-                                    current_stiffness,
-                                    _current_f_ext,
-                                    _cpu_free,
-                                    _cpu_residual,
-                                    _cpu_rhs,
-                                    _current_meta,
-                                ) = assemble_residual(
-                                    current_u, external_load_override=reference_f_ext
-                                )
+                                if row_hip_fd_tangent_refresh_configured:
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_backend"
+                                    ] = GLOBAL_TANGENT_REFRESH_DEFERRED_BACKEND
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_cpu_used"
+                                    ] = False
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_deferred_to"
+                                    ] = GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_deferred_reason"
+                                    ] = (
+                                        "row_target_finite_difference_hip_batch_replay_configured"
+                                    )
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_closure_blocked"
+                                    ] = True
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_closure_blocker"
+                                    ] = GLOBAL_TANGENT_REFRESH_DEFERRED_BLOCKER
+                                else:
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_backend"
+                                    ] = "cpu_full_assembly"
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_cpu_used"
+                                    ] = True
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_closure_blocked"
+                                    ] = True
+                                    matrix_free_global_krylov[
+                                        "accepted_state_tangent_refresh_closure_blocker"
+                                    ] = (
+                                        "rocm_hip_acceptance_tangent_refresh_required_for_closure"
+                                    )
+                                    (
+                                        current_stiffness,
+                                        _current_f_ext,
+                                        _cpu_free,
+                                        _cpu_residual,
+                                        _cpu_rhs,
+                                        _current_meta,
+                                    ) = assemble_residual(
+                                        current_u, external_load_override=reference_f_ext
+                                    )
                             else:
                                 matrix_free_global_krylov[
                                     "accepted_state_tangent_refresh_backend"
@@ -7103,6 +7193,56 @@ def run_mgt_direct_residual_newton_probe(
                     ),
                 }
             )
+
+    if (
+        matrix_free_global_krylov.get("accepted_state_tangent_refresh_deferred_to")
+        == GLOBAL_TANGENT_REFRESH_DEFERRED_TO_ROW
+    ):
+        row_tangent_backend = str(
+            current_tangent_residual_row_correction.get(
+                "accepted_state_tangent_refresh_backend", ""
+            )
+            or ""
+        )
+        if _row_tangent_refresh_closes_global_defer(
+            current_tangent_residual_row_correction
+        ):
+            matrix_free_global_krylov.update(
+                {
+                    "accepted_state_tangent_refresh_backend": (
+                        "current_tangent_residual_row_hip_finite_difference_residual_jvp"
+                    ),
+                    "accepted_state_tangent_refresh_hip_used": True,
+                    "accepted_state_tangent_refresh_cpu_used": False,
+                    "accepted_state_tangent_refresh_deferred_satisfied": True,
+                    "accepted_state_tangent_refresh_deferred_backend": row_tangent_backend,
+                    "accepted_state_tangent_refresh_deferred_column_count": int(
+                        current_tangent_residual_row_correction.get(
+                            "accepted_state_tangent_refresh_column_count", 0
+                        )
+                        or 0
+                    ),
+                }
+            )
+            matrix_free_global_krylov.pop(
+                "accepted_state_tangent_refresh_closure_blocked", None
+            )
+            matrix_free_global_krylov.pop(
+                "accepted_state_tangent_refresh_closure_blocker", None
+            )
+        else:
+            matrix_free_global_krylov[
+                "accepted_state_tangent_refresh_closure_blocked"
+            ] = True
+            matrix_free_global_krylov[
+                "accepted_state_tangent_refresh_closure_blocker"
+            ] = GLOBAL_TANGENT_REFRESH_DEFERRED_BLOCKER
+            matrix_free_global_krylov[
+                "accepted_state_tangent_refresh_deferred_backend"
+            ] = row_tangent_backend
+            matrix_free_global_krylov[
+                "accepted_state_tangent_refresh_deferred_satisfied"
+            ] = False
 
     best_candidate = (
         min(candidate_rows, key=lambda row: float(row["direct_residual_inf_n"])) if candidate_rows else {}
