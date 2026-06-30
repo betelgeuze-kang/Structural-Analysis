@@ -231,10 +231,61 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     }
     assert packet["gate_unblock_plan_count"] == 4
     assert packet["minimum_subset_case_count"] == 12
+    assert packet["execution_preflight_checklist_count"] == len(
+        packet["materialization_sequence"]
+    )
+    assert packet["first_execution_preflight_blocker"]["step_id"] == (
+        "materialize_subset_manifest"
+    )
+    assert packet["first_execution_preflight_blocker"]["operator_slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert packet["first_execution_preflight_blocker"]["first_blocker"] == (
+        "casf_pdbbind_source_material_not_attached"
+    )
+    execution = {
+        row["step_id"]: row for row in packet["execution_preflight_checklist"]
+    }
+    assert execution["materialize_subset_manifest"]["current_ready"] is False
+    assert execution["materialize_subset_manifest"]["dependency_ready"] is True
+    assert execution["materialize_subset_manifest"]["current_artifact"][
+        "ready_values"
+    ] == {
+        "public_benchmark_ready": False,
+        "materialized_case_count": 0,
+        "target_subset_case_count": 12,
+    }
+    assert execution["materialize_pose_validity_input"]["dependency_states"] == [
+        {
+            "artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_subset_manifest.json"
+            ),
+            "ready": False,
+        }
+    ]
+    assert execution["materialize_pose_validity_input"]["current_artifact"][
+        "artifact_exists"
+    ] is False
+    assert execution["validate_external_receipts"]["first_blocker"] == (
+        "public_benchmark_external_receipts_missing"
+    )
+    assert execution["validate_external_receipts"]["current_artifact"][
+        "ready_values"
+    ]["public_benchmark_external_receipts_ready"] is False
     assert packet["summary"]["first_blocked_target"] == "casf_pdbbind_subset_intake"
     assert packet["summary"]["operator_evidence_gap_count"] == 4
     assert packet["summary"]["first_manifest_contract_id"] == (
         "casf_pdbbind_subset_manifest_contract"
+    )
+    assert packet["summary"]["execution_preflight_checklist_count"] == len(
+        packet["materialization_sequence"]
+    )
+    assert packet["summary"]["first_execution_preflight_step_id"] == (
+        "materialize_subset_manifest"
+    )
+    assert packet["summary"]["first_execution_preflight_blocker"] == (
+        "casf_pdbbind_source_material_not_attached"
     )
     gate_plan = {row["slot_id"]: row for row in packet["gate_unblock_plan"]}
     assert gate_plan["casf_pdbbind_subset_intake"]["unblocks_tier_beta_criteria"] == [

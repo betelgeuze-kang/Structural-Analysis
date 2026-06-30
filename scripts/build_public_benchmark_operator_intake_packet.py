@@ -416,6 +416,226 @@ def _operator_evidence_gap_register(
     return rows
 
 
+def _artifact_preflight_state(
+    *,
+    repo_root: Path,
+    artifact_path: str,
+    ready_checks: list[str],
+) -> dict[str, Any]:
+    path = Path(artifact_path)
+    payload = _load_json(repo_root, path)
+    blockers = [str(row) for row in _as_list(payload.get("blockers"))]
+    ready_values = {
+        key: payload.get(key)
+        for key in ready_checks
+        if key in payload
+    }
+    return {
+        "artifact": artifact_path,
+        "artifact_exists": bool(payload),
+        "schema_version": str(payload.get("schema_version") or ""),
+        "status": str(payload.get("status") or ("missing" if not payload else "")),
+        "contract_pass": payload.get("contract_pass"),
+        "source_commit_sha": str(payload.get("source_commit_sha") or ""),
+        "generated_at": str(payload.get("generated_at") or ""),
+        "ready_values": ready_values,
+        "blockers": blockers,
+    }
+
+
+def _current_ready_from_checks(
+    *,
+    state: dict[str, Any],
+    required_true_fields: list[str],
+    minimum_counts: dict[str, int],
+) -> bool:
+    ready_values = _as_dict(state.get("ready_values"))
+    if not state.get("artifact_exists"):
+        return False
+    for field in required_true_fields:
+        if ready_values.get(field) is not True:
+            return False
+    for field, minimum in minimum_counts.items():
+        try:
+            observed = int(ready_values.get(field) or 0)
+        except Exception:
+            return False
+        if observed < minimum:
+            return False
+    return True
+
+
+def _execution_preflight_checklist(
+    *,
+    repo_root: Path,
+    materialization_sequence: list[dict[str, Any]],
+    slots: list[dict[str, Any]],
+    source_blocker_detail_register: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    slot_by_step: dict[str, str] = {
+        "materialize_subset_manifest": "casf_pdbbind_subset_intake",
+        "materialize_pose_validity_input": "pose_coordinate_intake",
+        "materialize_posebusters_validity_packet": "pose_coordinate_intake",
+        "materialize_symmetry_rmsd_scorecard": "pose_coordinate_intake",
+        "materialize_enrichment_scorecard": "dud_e_lit_pcba_enrichment_intake",
+        "materialize_vina_gnina_comparison_adapter": "vina_gnina_comparison_intake",
+        "validate_external_receipts": "",
+        "refresh_public_benchmark_source_of_truth": "",
+    }
+    depends_on_by_step: dict[str, list[str]] = {
+        "materialize_pose_validity_input": [str(DEFAULT_SUBSET_MANIFEST)],
+        "materialize_posebusters_validity_packet": [str(DEFAULT_POSE_VALIDITY_INPUT)],
+        "materialize_symmetry_rmsd_scorecard": [str(DEFAULT_POSE_VALIDITY_INPUT)],
+        "materialize_vina_gnina_comparison_adapter": [
+            str(DEFAULT_SUBSET_MANIFEST),
+            str(DEFAULT_RMSD_SCORECARD),
+        ],
+        "validate_external_receipts": [
+            str(DEFAULT_SUBSET_MANIFEST),
+            str(DEFAULT_ENRICHMENT_SCORECARD),
+            str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
+        ],
+        "refresh_public_benchmark_source_of_truth": [
+            str(DEFAULT_SUBSET_MANIFEST),
+            str(DEFAULT_POSE_VALIDITY_PACKET),
+            str(DEFAULT_RMSD_SCORECARD),
+            str(DEFAULT_ENRICHMENT_SCORECARD),
+            str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
+            str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
+        ],
+    }
+    checks_by_step: dict[str, dict[str, Any]] = {
+        "materialize_subset_manifest": {
+            "ready_checks": [
+                "public_benchmark_ready",
+                "materialized_case_count",
+                "target_subset_case_count",
+            ],
+            "required_true_fields": ["public_benchmark_ready"],
+            "minimum_counts": {"materialized_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT},
+        },
+        "materialize_pose_validity_input": {
+            "ready_checks": ["pose_validity_ready", "real_pose_case_count"],
+            "required_true_fields": ["pose_validity_ready"],
+            "minimum_counts": {"real_pose_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT},
+        },
+        "materialize_posebusters_validity_packet": {
+            "ready_checks": ["real_benchmark_case_count"],
+            "required_true_fields": [],
+            "minimum_counts": {"real_benchmark_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT},
+        },
+        "materialize_symmetry_rmsd_scorecard": {
+            "ready_checks": ["real_benchmark_case_count", "dry_run_case_count"],
+            "required_true_fields": [],
+            "minimum_counts": {"real_benchmark_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT},
+        },
+        "materialize_enrichment_scorecard": {
+            "ready_checks": [
+                "public_benchmark_enrichment_ready",
+                "real_enrichment_target_count",
+            ],
+            "required_true_fields": ["public_benchmark_enrichment_ready"],
+            "minimum_counts": {"real_enrichment_target_count": 1},
+        },
+        "materialize_vina_gnina_comparison_adapter": {
+            "ready_checks": [
+                "public_benchmark_engine_comparison_ready",
+                "real_comparison_case_count",
+            ],
+            "required_true_fields": ["public_benchmark_engine_comparison_ready"],
+            "minimum_counts": {"real_comparison_case_count": 1},
+        },
+        "validate_external_receipts": {
+            "ready_checks": [
+                "public_benchmark_external_receipts_ready",
+                "receipt_complete_row_count",
+                "materialized_row_count",
+            ],
+            "required_true_fields": ["public_benchmark_external_receipts_ready"],
+            "minimum_counts": {},
+        },
+        "refresh_public_benchmark_source_of_truth": {
+            "ready_checks": ["public_benchmark_ready", "tier_beta_ready", "blocker_count"],
+            "required_true_fields": ["public_benchmark_ready", "tier_beta_ready"],
+            "minimum_counts": {},
+        },
+    }
+    slot_by_id = {str(slot.get("slot_id") or ""): slot for slot in slots}
+    detail_by_slot = {
+        str(row.get("slot_id") or ""): row
+        for row in source_blocker_detail_register
+        if isinstance(row, dict)
+    }
+    artifact_ready_by_path: dict[str, bool] = {}
+    rows: list[dict[str, Any]] = []
+    for index, step in enumerate(materialization_sequence, start=1):
+        step_id = str(step.get("step_id") or "")
+        artifact_path = str(step.get("produces") or "")
+        checks = checks_by_step.get(step_id, {})
+        state = _artifact_preflight_state(
+            repo_root=repo_root,
+            artifact_path=artifact_path,
+            ready_checks=[str(row) for row in _as_list(checks.get("ready_checks"))],
+        )
+        current_ready = _current_ready_from_checks(
+            state=state,
+            required_true_fields=[
+                str(row) for row in _as_list(checks.get("required_true_fields"))
+            ],
+            minimum_counts={
+                str(key): int(value)
+                for key, value in _as_dict(checks.get("minimum_counts")).items()
+            },
+        )
+        artifact_ready_by_path[artifact_path] = current_ready
+        depends_on = depends_on_by_step.get(step_id, [])
+        dependency_states = [
+            {
+                "artifact": path,
+                "ready": bool(artifact_ready_by_path.get(path, False)),
+            }
+            for path in depends_on
+        ]
+        dependency_ready = all(row["ready"] for row in dependency_states)
+        slot_id = slot_by_step.get(step_id, "")
+        slot = slot_by_id.get(slot_id, {})
+        source_detail = detail_by_slot.get(slot_id, {})
+        source_blockers = [
+            str(row) for row in _as_list(source_detail.get("blockers"))
+        ]
+        artifact_blockers = [str(row) for row in _as_list(state.get("blockers"))]
+        first_blocker = (
+            (source_blockers or artifact_blockers or [""])[0]
+            if not current_ready
+            else ""
+        )
+        rows.append(
+            {
+                "step_order": index,
+                "step_id": step_id,
+                "operator_slot_id": slot_id,
+                "status": "ready" if current_ready else "operator_input_required",
+                "current_ready": current_ready,
+                "dependency_ready": dependency_ready,
+                "dependency_states": dependency_states,
+                "depends_on": depends_on,
+                "template_artifact": str(slot.get("template_artifact") or ""),
+                "first_blocker": first_blocker,
+                "source_of_truth_blockers": source_blockers,
+                "artifact_blockers": artifact_blockers,
+                "current_artifact": state,
+                "command": str(step.get("command") or ""),
+                "produces": artifact_path,
+                "claim_boundary": (
+                    "This row is a read-only execution preflight over current local "
+                    "artifacts and source-of-truth blockers. It does not run the "
+                    "materializer or create benchmark evidence."
+                ),
+            }
+        )
+    return rows
+
+
 def build_public_benchmark_operator_intake_packet(
     *,
     repo_root: Path = ROOT,
@@ -673,6 +893,70 @@ def build_public_benchmark_operator_intake_packet(
     operator_template_artifacts = {
         str(slot["slot_id"]): str(slot["template_artifact"]) for slot in slots
     }
+    materialization_sequence = [
+        {
+            "step_id": "materialize_subset_manifest",
+            "schema_version": SUBSET_MATERIALIZER_SCHEMA_VERSION,
+            "command": subset_materialization,
+            "produces": str(DEFAULT_SUBSET_MANIFEST),
+        },
+        {
+            "step_id": "materialize_pose_validity_input",
+            "schema_version": POSE_INPUT_MATERIALIZER_SCHEMA_VERSION,
+            "command": pose_input_materialization,
+            "produces": str(DEFAULT_POSE_VALIDITY_INPUT),
+        },
+        {
+            "step_id": "materialize_posebusters_validity_packet",
+            "schema_version": POSEBUSTERS_MATERIALIZER_SCHEMA_VERSION,
+            "command": posebusters_materialization,
+            "produces": str(DEFAULT_POSE_VALIDITY_PACKET),
+        },
+        {
+            "step_id": "materialize_symmetry_rmsd_scorecard",
+            "schema_version": RMSD_MATERIALIZER_SCHEMA_VERSION,
+            "command": rmsd_materialization,
+            "produces": str(DEFAULT_RMSD_SCORECARD),
+        },
+        {
+            "step_id": "materialize_enrichment_scorecard",
+            "schema_version": ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
+            "command": enrichment_materialization,
+            "produces": str(DEFAULT_ENRICHMENT_SCORECARD),
+        },
+        {
+            "step_id": "materialize_vina_gnina_comparison_adapter",
+            "schema_version": VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
+            "command": vina_gnina_materialization,
+            "produces": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
+        },
+        {
+            "step_id": "validate_external_receipts",
+            "schema_version": EXTERNAL_RECEIPT_VALIDATION_SCHEMA_VERSION,
+            "command": external_receipt_validation,
+            "produces": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
+        },
+        {
+            "step_id": "refresh_public_benchmark_source_of_truth",
+            "schema_version": "public-benchmark-source-of-truth.v1",
+            "command": refresh_source,
+            "produces": str(DEFAULT_SOURCE_OF_TRUTH),
+        },
+    ]
+    execution_preflight_checklist = _execution_preflight_checklist(
+        repo_root=repo_root,
+        materialization_sequence=materialization_sequence,
+        slots=slots,
+        source_blocker_detail_register=source_blocker_detail_register,
+    )
+    first_execution_preflight_blocker = next(
+        (
+            row
+            for row in execution_preflight_checklist
+            if not row["current_ready"]
+        ),
+        {},
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -727,56 +1011,10 @@ def build_public_benchmark_operator_intake_packet(
         "operator_template_artifact_count": len(operator_template_artifacts),
         "operator_template_artifacts": operator_template_artifacts,
         "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
-        "materialization_sequence": [
-            {
-                "step_id": "materialize_subset_manifest",
-                "schema_version": SUBSET_MATERIALIZER_SCHEMA_VERSION,
-                "command": subset_materialization,
-                "produces": str(DEFAULT_SUBSET_MANIFEST),
-            },
-            {
-                "step_id": "materialize_pose_validity_input",
-                "schema_version": POSE_INPUT_MATERIALIZER_SCHEMA_VERSION,
-                "command": pose_input_materialization,
-                "produces": str(DEFAULT_POSE_VALIDITY_INPUT),
-            },
-            {
-                "step_id": "materialize_posebusters_validity_packet",
-                "schema_version": POSEBUSTERS_MATERIALIZER_SCHEMA_VERSION,
-                "command": posebusters_materialization,
-                "produces": str(DEFAULT_POSE_VALIDITY_PACKET),
-            },
-            {
-                "step_id": "materialize_symmetry_rmsd_scorecard",
-                "schema_version": RMSD_MATERIALIZER_SCHEMA_VERSION,
-                "command": rmsd_materialization,
-                "produces": str(DEFAULT_RMSD_SCORECARD),
-            },
-            {
-                "step_id": "materialize_enrichment_scorecard",
-                "schema_version": ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
-                "command": enrichment_materialization,
-                "produces": str(DEFAULT_ENRICHMENT_SCORECARD),
-            },
-            {
-                "step_id": "materialize_vina_gnina_comparison_adapter",
-                "schema_version": VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
-                "command": vina_gnina_materialization,
-                "produces": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
-            },
-            {
-                "step_id": "validate_external_receipts",
-                "schema_version": EXTERNAL_RECEIPT_VALIDATION_SCHEMA_VERSION,
-                "command": external_receipt_validation,
-                "produces": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
-            },
-            {
-                "step_id": "refresh_public_benchmark_source_of_truth",
-                "schema_version": "public-benchmark-source-of-truth.v1",
-                "command": refresh_source,
-                "produces": str(DEFAULT_SOURCE_OF_TRUTH),
-            },
-        ],
+        "materialization_sequence": materialization_sequence,
+        "execution_preflight_checklist": execution_preflight_checklist,
+        "execution_preflight_checklist_count": len(execution_preflight_checklist),
+        "first_execution_preflight_blocker": first_execution_preflight_blocker,
         "acceptance_criteria": [
             "public_benchmark_subset_manifest.materialized_case_count >= 12",
             "public_benchmark_subset_manifest.public_benchmark_ready == true",
@@ -828,6 +1066,13 @@ def build_public_benchmark_operator_intake_packet(
             "operator_template_artifacts": operator_template_artifacts,
             "first_manifest_contract_id": casf_pdbbind_manifest_contract["contract_id"],
             "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+            "execution_preflight_checklist_count": len(execution_preflight_checklist),
+            "first_execution_preflight_step_id": str(
+                first_execution_preflight_blocker.get("step_id") or ""
+            ),
+            "first_execution_preflight_blocker": str(
+                first_execution_preflight_blocker.get("first_blocker") or ""
+            ),
             "source_of_truth_blocker_count": len(source_blockers),
             "source_of_truth_blocker_detail_count": len(source_blocker_detail_register),
             "source_of_truth_status": str(source_of_truth.get("status") or ""),
@@ -877,6 +1122,20 @@ def _markdown(payload: dict[str, Any]) -> str:
             row["minimum_evidence"], ensure_ascii=False, sort_keys=True
         )
         lines.append(f"| `{row['slot_id']}` | {criteria} | `{minimum}` |")
+    lines.extend(
+        [
+            "",
+            "## Execution Preflight",
+            "",
+            "| Step | Ready | Dependency Ready | First Blocker |",
+            "|---|---|---|---|",
+        ]
+    )
+    for row in payload["execution_preflight_checklist"]:
+        lines.append(
+            f"| `{row['step_id']}` | `{row['current_ready']}` | "
+            f"`{row['dependency_ready']}` | `{row['first_blocker']}` |"
+        )
     lines.extend(["", "## Materialization Sequence", ""])
     for step in payload["materialization_sequence"]:
         lines.append(f"- `{step['step_id']}`: `{step['command']}`")
