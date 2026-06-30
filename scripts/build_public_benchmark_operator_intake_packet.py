@@ -33,6 +33,9 @@ from materialize_public_benchmark_posebusters_validity_packet import (  # noqa: 
 from materialize_public_benchmark_rmsd_scorecard import (  # noqa: E402
     SCHEMA_VERSION as RMSD_MATERIALIZER_SCHEMA_VERSION,
 )
+from materialize_public_benchmark_pose_success_harness import (  # noqa: E402
+    SCHEMA_VERSION as POSE_SUCCESS_HARNESS_MATERIALIZER_SCHEMA_VERSION,
+)
 from materialize_public_benchmark_enrichment_scorecard import (  # noqa: E402
     REQUIRED_MOLECULE_FIELDS,
     REQUIRED_TARGET_FIELDS,
@@ -63,6 +66,9 @@ DEFAULT_POSE_VALIDITY_PACKET = (
 )
 DEFAULT_RMSD_SCORECARD = (
     PRODUCTIZATION / "public_benchmark_symmetry_rmsd_scorecard.json"
+)
+DEFAULT_POSE_SUCCESS_HARNESS = (
+    PRODUCTIZATION / "public_benchmark_pose_success_harness.json"
 )
 DEFAULT_ENRICHMENT_SCORECARD = (
     PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
@@ -127,6 +133,7 @@ def _input_paths(source_of_truth_path: Path) -> list[Path]:
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
         Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
+        Path("scripts/materialize_public_benchmark_pose_success_harness.py"),
         Path("scripts/materialize_public_benchmark_enrichment_scorecard.py"),
         Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
         Path("scripts/validate_public_benchmark_external_receipts.py"),
@@ -496,6 +503,7 @@ def _execution_preflight_checklist(
         "materialize_pose_validity_input": "pose_coordinate_intake",
         "materialize_posebusters_validity_packet": "pose_coordinate_intake",
         "materialize_symmetry_rmsd_scorecard": "pose_coordinate_intake",
+        "materialize_pose_success_harness": "pose_coordinate_intake",
         "materialize_enrichment_scorecard": "dud_e_lit_pcba_enrichment_intake",
         "materialize_vina_gnina_comparison_adapter": "vina_gnina_comparison_intake",
         "validate_external_receipts": "",
@@ -505,6 +513,10 @@ def _execution_preflight_checklist(
         "materialize_pose_validity_input": [str(DEFAULT_SUBSET_MANIFEST)],
         "materialize_posebusters_validity_packet": [str(DEFAULT_POSE_VALIDITY_INPUT)],
         "materialize_symmetry_rmsd_scorecard": [str(DEFAULT_POSE_VALIDITY_INPUT)],
+        "materialize_pose_success_harness": [
+            str(DEFAULT_POSE_VALIDITY_PACKET),
+            str(DEFAULT_RMSD_SCORECARD),
+        ],
         "materialize_vina_gnina_comparison_adapter": [
             str(DEFAULT_SUBSET_MANIFEST),
             str(DEFAULT_RMSD_SCORECARD),
@@ -518,6 +530,7 @@ def _execution_preflight_checklist(
             str(DEFAULT_SUBSET_MANIFEST),
             str(DEFAULT_POSE_VALIDITY_PACKET),
             str(DEFAULT_RMSD_SCORECARD),
+            str(DEFAULT_POSE_SUCCESS_HARNESS),
             str(DEFAULT_ENRICHMENT_SCORECARD),
             str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
             str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
@@ -554,6 +567,15 @@ def _execution_preflight_checklist(
                 "dry_run_case_count",
             ],
             "required_true_fields": ["scorecard_ready"],
+            "minimum_counts": {"real_benchmark_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT},
+        },
+        "materialize_pose_success_harness": {
+            "ready_checks": [
+                "pose_success_harness_ready",
+                "real_benchmark_case_count",
+                "pose_success_count",
+            ],
+            "required_true_fields": ["pose_success_harness_ready"],
             "minimum_counts": {"real_benchmark_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT},
         },
         "materialize_enrichment_scorecard": {
@@ -713,6 +735,14 @@ def build_public_benchmark_operator_intake_packet(
         f"--out-report {PRODUCTIZATION / 'public_benchmark_symmetry_rmsd_materialization_report.json'} "
         "--fail-blocked"
     )
+    pose_success_harness_materialization = (
+        "python3 scripts/materialize_public_benchmark_pose_success_harness.py "
+        f"--pose-validity-packet {DEFAULT_POSE_VALIDITY_PACKET} "
+        f"--rmsd-scorecard {DEFAULT_RMSD_SCORECARD} "
+        f"--out-harness {DEFAULT_POSE_SUCCESS_HARNESS} "
+        f"--out-report {PRODUCTIZATION / 'public_benchmark_pose_success_harness_materialization_report.json'} "
+        "--fail-blocked"
+    )
     enrichment_materialization = (
         "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py "
         "--intake <operator-dud-e-lit-pcba-enrichment-intake.json> "
@@ -740,6 +770,7 @@ def build_public_benchmark_operator_intake_packet(
         f"--subset-manifest-out {DEFAULT_SUBSET_MANIFEST} "
         f"--pose-validity-packet-out {DEFAULT_POSE_VALIDITY_PACKET} "
         f"--rmsd-scorecard-out {DEFAULT_RMSD_SCORECARD} "
+        f"--pose-success-harness-out {DEFAULT_POSE_SUCCESS_HARNESS} "
         f"--enrichment-scorecard-out {DEFAULT_ENRICHMENT_SCORECARD} "
         f"--vina-gnina-comparison-adapter-out {DEFAULT_VINA_GNINA_COMPARISON_ADAPTER} "
         f"--external-receipts-validation-out {DEFAULT_EXTERNAL_RECEIPTS_VALIDATION}"
@@ -820,6 +851,7 @@ def build_public_benchmark_operator_intake_packet(
                 "attach reference and predicted ligand atom coordinates in the declared atom order",
                 "keep receptor context and symmetry permutation contracts explicit",
                 "run pose-validity input materialization, PoseBusters-style packet, and RMSD scorecard",
+                "materialize the CASF/PDBBind pose-success harness from packet plus RMSD rows",
             ],
             validation_command=(
                 "python3 scripts/validate_public_benchmark_pose_validity.py "
@@ -830,6 +862,7 @@ def build_public_benchmark_operator_intake_packet(
                 "real_pose_validity_packet_materialized",
                 "symmetry_rmsd_scorecard_real_cases",
                 "posebusters_style_validity_real_ligands",
+                "casf_pdbbind_pose_success_harness_ready",
             ],
             minimum_evidence={
                 "case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
@@ -843,6 +876,7 @@ def build_public_benchmark_operator_intake_packet(
                 "materialize_pose_validity_input",
                 "materialize_posebusters_validity_packet",
                 "materialize_symmetry_rmsd_scorecard",
+                "materialize_pose_success_harness",
             ],
         ),
         _slot(
@@ -958,6 +992,12 @@ def build_public_benchmark_operator_intake_packet(
             "produces": str(DEFAULT_RMSD_SCORECARD),
         },
         {
+            "step_id": "materialize_pose_success_harness",
+            "schema_version": POSE_SUCCESS_HARNESS_MATERIALIZER_SCHEMA_VERSION,
+            "command": pose_success_harness_materialization,
+            "produces": str(DEFAULT_POSE_SUCCESS_HARNESS),
+        },
+        {
             "step_id": "materialize_enrichment_scorecard",
             "schema_version": ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
             "command": enrichment_materialization,
@@ -1063,6 +1103,8 @@ def build_public_benchmark_operator_intake_packet(
             "public_benchmark_pose_validity_packet.posebusters_validity_ready == true",
             "public_benchmark_symmetry_rmsd_scorecard.real_benchmark_case_count >= 12",
             "public_benchmark_symmetry_rmsd_scorecard.scorecard_ready == true",
+            "public_benchmark_pose_success_harness.real_benchmark_case_count >= 12",
+            "public_benchmark_pose_success_harness.pose_success_harness_ready == true",
             "public_benchmark_enrichment_scorecard.public_benchmark_enrichment_ready == true",
             "public_benchmark_vina_gnina_comparison_adapter.public_benchmark_engine_comparison_ready == true",
             "public_benchmark_external_receipts_validation.public_benchmark_external_receipts_ready == true",
@@ -1078,6 +1120,7 @@ def build_public_benchmark_operator_intake_packet(
             "pose_validity_input": str(DEFAULT_POSE_VALIDITY_INPUT),
             "pose_validity_packet": str(DEFAULT_POSE_VALIDITY_PACKET),
             "rmsd_scorecard": str(DEFAULT_RMSD_SCORECARD),
+            "pose_success_harness": str(DEFAULT_POSE_SUCCESS_HARNESS),
             "enrichment_scorecard": str(DEFAULT_ENRICHMENT_SCORECARD),
             "vina_gnina_comparison_adapter": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
             "external_receipts_validation": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
@@ -1088,6 +1131,7 @@ def build_public_benchmark_operator_intake_packet(
             "run_public_benchmark_subset_materializer",
             "run_public_benchmark_pose_validity_materializer",
             "run_public_benchmark_rmsd_scorecard_materializer",
+            "materialize_public_benchmark_pose_success_harness",
             "run_public_benchmark_enrichment_materializer",
             "run_public_benchmark_vina_gnina_comparison_materializer",
             "validate_public_benchmark_external_receipts",

@@ -76,7 +76,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         final_gates["selected_medium_models_pass_or_approved_review"]["notes"]
     )
     large_blockers = final_gates["large_models_crash_oom_free"]["blockers"]
-    assert "large_structural_models_current_below_required:0/2" in large_blockers
+    assert "large_structural_models_current_below_required:0/2" not in large_blockers
+    assert not any(blocker.startswith("large_structural_models_current_below_required") for blocker in large_blockers)
     assert "large_model_runner_not_implemented" not in large_blockers
     assert "nightly_lane_not_configured" not in large_blockers
     assert "large_model_execution_receipt_missing" in large_blockers
@@ -371,9 +372,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert medium_scale_gate["status"] == "blocked"
     assert medium_scale_gate["contract_pass"] is False
     assert "medium_model_pass_or_review_below_required:0/5" in medium_scale_gate["blockers"]
-    assert quantity_handoff["targets"]["large_structural_models"]["current"] == 0
+    assert quantity_handoff["targets"]["large_structural_models"]["current"] == 2
     assert quantity_handoff["targets"]["large_structural_models"]["required"] == 2
-    assert quantity_handoff["targets"]["large_structural_models"]["remaining"] == 2
+    assert quantity_handoff["targets"]["large_structural_models"]["remaining"] == 0
     assert quantity_handoff["targets"]["large_structural_models"]["contract_pass"] is False
     assert (
         "large_model_runner_not_implemented"
@@ -446,7 +447,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert large_runner_handoff["current_large_model_execution_receipt_count"] == 0
     assert large_runner_handoff["crash_oom_free_execution_count"] == 0
     assert large_runner_handoff["scorecard_or_review_count"] == 0
-    assert large_runner_handoff["required_evidence_pass_count"] == 2
+    assert large_runner_handoff["required_evidence_pass_count"] == 4
     assert large_runner_handoff["runner_command_ready"] is True
     assert "run_phase3_large_model_execution_receipt.py" in large_runner_handoff[
         "runner_command_template"
@@ -457,7 +458,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert large_runner_handoff["runner_receipt_template"]["schema_version"] == (
         "phase3-large-model-execution-receipt.v1"
     )
-    assert "Acquire two licensed large" in large_runner_handoff["owner_action"]
+    assert "Complete license review" in large_runner_handoff["owner_action"]
     assert "does not acquire sources" in large_runner_handoff["claim_boundary"]
     ifc_handoff = payload["known_limitations"]["ifc_import_handoff"]
     assert ifc_handoff["silent_import_loss_status_receipt"].endswith(

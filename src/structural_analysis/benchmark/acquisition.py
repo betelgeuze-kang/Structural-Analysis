@@ -146,29 +146,72 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
         BenchmarkAcquisitionSource(
             source_id="opensees_megatall_model_2_large",
             lanes=("opensees-megatall", "large-model-performance"),
-            source_kind="official_open_solver_large_model",
+            source_kind="local_operator_attached_open_solver_large_model_license_review_pending",
             truth_class="independent_reference",
-            acquisition_mode="operator_or_scheduled_runner_download_after_license_review",
-            source_url_or_doi="official_url_pending_license_review:opensees-megatall-model-2",
+            acquisition_mode="local_operator_source_attached_license_review_pending",
+            source_url_or_doi="http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
             license_status="review_required_before_bundling_or_ci_download",
             redistribution_allowed=False,
             commercial_use_allowed=False,
-            checksum_status="missing_until_source_acquired",
+            checksum_status="local_candidate_checksums_attached",
             expected_output_status="missing_until_reference_outputs_ingested",
             normalization_status="not_started",
             reference_result_status="not_ingested",
             blockers=(
-                "source_url_verification_pending",
                 "license_review_pending",
-                "checksum_missing",
                 "reference_outputs_missing",
+                "normalization_not_implemented",
                 "large_model_execution_receipt_missing",
                 "large_model_scorecard_or_review_missing",
             ),
             claim_boundary=(
-                "OpenSees mega-tall/large-model policy only. A local operator receipt "
-                "runner exists, but this row is not a large-model execution, memory, "
-                "runtime, or accuracy receipt."
+                "OpenSees mega-tall/large-model source identity and local checksum "
+                "evidence are attached for Model 1/Model 2. A local operator receipt "
+                "runner exists, but this row is not license approval, reference output "
+                "ingest, canonical normalization, large-model execution, memory, "
+                "runtime, scorecard, or accuracy evidence."
+            ),
+            local_candidate_artifacts=(
+                {
+                    "case_id": "luxinzheng_megatall_model1",
+                    "path": (
+                        "implementation/phase1/open_data/irregular/harvested/"
+                        "torsionally_eccentric_core_tower/extracted/OpenSees_Model/"
+                        "Model1/opensees.tcl"
+                    ),
+                    "format": "tcl",
+                    "origin": "local_operator_attached_public_source",
+                    "sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+                    "size_bytes": 2850355,
+                    "source_url": (
+                        "http://www.luxinzheng.net/download/OpenSEES/"
+                        "Mega-tall_Building_Benchmark_OpenSees.htm"
+                    ),
+                    "source_archive_url": "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip",
+                    "source_of_checksum": (
+                        "implementation/phase1/open_data/irregular/collected/"
+                        "artifacts/luxinzheng_megatall_tcl_model1_local/"
+                        "source_metadata.json"
+                    ),
+                },
+                {
+                    "case_id": "luxinzheng_megatall_model2",
+                    "path": (
+                        "implementation/phase1/open_data/irregular/harvested/"
+                        "torsionally_eccentric_core_tower/extracted/OpenSees_Model/"
+                        "Model2/opensees.tcl"
+                    ),
+                    "format": "tcl",
+                    "origin": "local_operator_attached_public_source",
+                    "sha256": "66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f",
+                    "size_bytes": 6926755,
+                    "source_url": (
+                        "http://www.luxinzheng.net/download/OpenSEES/"
+                        "Mega-tall_Building_Benchmark_OpenSees.htm"
+                    ),
+                    "source_archive_url": "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip",
+                    "source_of_checksum": "local_sha256_over_attached_opensees_tcl",
+                },
             ),
             existing_receipts=(
                 {
@@ -182,11 +225,13 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                     "current_large_model_execution_receipt_count": 0,
                     "crash_oom_free_execution_count": 0,
                     "scorecard_or_review_count": 0,
+                    "source_url_verified_count": 2,
+                    "source_checksum_count": 2,
                     "runner_command_ready": True,
                     "claim_boundary": (
                         "Large-model runner readiness contract only; runner command and "
-                        "resource envelope exist, but there is still no acquired source, "
-                        "license approval, checksum, reference output, normalized model, "
+                        "resource envelope exist and source/checksum candidates are "
+                        "attached, but there is still no license approval, reference output, normalized model, "
                         "execution, crash/OOM-free result, or scorecard evidence."
                     ),
                 },

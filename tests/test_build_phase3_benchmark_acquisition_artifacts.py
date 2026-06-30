@@ -31,7 +31,7 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert payload["non_seed_lane_count"] == 7
     assert payload["non_seed_source_count"] == 6
     assert payload["ready_source_count"] == 0
-    assert payload["local_candidate_source_count"] == 1
+    assert payload["local_candidate_source_count"] == 2
     assert payload["topology_receipt_source_count"] == 6
     assert payload["source_license_receipt_source_count"] == 4
     sample_command = payload["sample_acquisition_command"]
@@ -141,6 +141,14 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
         "opensees-megatall",
         "large-model-performance",
     ]
+    assert large_model["source_url_or_doi"].startswith("http://www.luxinzheng.net/download/OpenSEES/")
+    assert large_model["checksum_status"] == "local_candidate_checksums_attached"
+    assert "source_url_verification_pending" not in large_model["blockers"]
+    assert "checksum_missing" not in large_model["blockers"]
+    assert len(large_model["local_candidate_artifacts"]) == 2
+    assert large_model["local_candidate_artifacts"][0]["case_id"] == "luxinzheng_megatall_model1"
+    assert large_model["local_candidate_artifacts"][1]["case_id"] == "luxinzheng_megatall_model2"
+    assert "normalization_not_implemented" in large_model["blockers"]
     assert "large_model_execution_receipt_missing" in large_model["blockers"]
     assert "large_model_scorecard_or_review_missing" in large_model["blockers"]
     assert large_model["existing_receipts"][0]["path"].endswith(
@@ -148,6 +156,8 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     )
     assert large_model["existing_receipts"][0]["contract_pass"] is False
     assert large_model["existing_receipts"][0]["current_large_model_execution_receipt_count"] == 0
+    assert large_model["existing_receipts"][0]["source_url_verified_count"] == 2
+    assert large_model["existing_receipts"][0]["source_checksum_count"] == 2
     assert large_model["existing_receipts"][0]["runner_command_ready"] is True
     assert "Large-model runner readiness contract only" in large_model["existing_receipts"][0]["claim_boundary"]
     clean_ifc = rows_by_source["buildingsmart_clean_ifc_samples"]
@@ -237,6 +247,8 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
             assert "opensees_medium_runner_command_missing" not in row["blockers"]
             assert "opensees_medium_scorecard_execution_missing" in row["blockers"]
             assert "medium_model_pass_or_review_missing" in row["blockers"]
+        elif row["source_id"] == "opensees_megatall_model_2_large":
+            assert row["checksum_status"] == "local_candidate_checksums_attached"
         else:
             assert row["checksum_status"].startswith("missing")
         if row["source_id"] == "buildingsmart_clean_ifc_samples":

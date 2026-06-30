@@ -32,7 +32,6 @@
     "reference_outputs_missing",
     "silent_data_loss_negative_gate_not_executed",
     "silent_import_loss_gate_not_executed",
-    "source_url_verification_pending",
     "two_reference_solver_comparison_not_available"
   ],
   "claim_boundary": "This receipt defines acquisition, license, checksum, expected-output, and normalization policy for non-seed Phase 3 lanes. It does not download or bundle upstream data, grant redistribution rights, ingest reference results, run OpenSees/buildingSMART/commercial/large-model cases, or close Phase 3.",
@@ -40,7 +39,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T15:18:39.391881+00:00",
+  "generated_at": "2026-06-30T15:50:13.143299+00:00",
   "ifc_import_case_requirement": {
     "blocker": "phase3_ifc_import_case_quantity_credit_missing",
     "claim_boundary": "The Phase 3 roadmap requires at least 10 clean/dirty IFC import cases. Current acquisition evidence contains two clean buildingSMART expected import-health contracts and eight dirty/negative expected block contracts, but zero quantity-credit-ready IFC cases.",
@@ -63,7 +62,7 @@
     "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:54555de9e2e83f8ab8bda0757338207e44a86935684fec668d7ba4f72df68684",
     "scripts/build_phase3_ifc_query_gui_readiness_receipt.py": "sha256:b6c47721aa4d13ad865c2d6232f64d8e5907f749623492f6a6925927ccf75d99",
     "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:c0eb7e47f2e6f2d6b840254c68ec64c7bab49124470813d354ccf0f1257b6866",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:cf9b6bfc6d90f1ce952d5b23925525303ec087096f296fb6ddbfc57c97aad362",
     "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:cc8564b22b2721f405f37fd08b6073bbdb506c57c216a36d5d84658a2c89ab69",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
@@ -72,7 +71,7 @@
     "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
     "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
     "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:275b61ecbc71a9827552451982caa0317a7a1d55412d135577d0a128b873e712"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
   },
   "lanes": [
     "buildingsmart-clean-ifc",
@@ -83,7 +82,7 @@
     "opensees-medium",
     "opensees-megatall"
   ],
-  "local_candidate_source_count": 1,
+  "local_candidate_source_count": 2,
   "non_seed_lane_count": 7,
   "non_seed_source_count": 6,
   "phase3_closure_claim": false,
@@ -166,21 +165,20 @@
       "truth_class": "independent_reference"
     },
     {
-      "acquisition_mode": "operator_or_scheduled_runner_download_after_license_review",
+      "acquisition_mode": "local_operator_source_attached_license_review_pending",
       "blockers": [
-        "source_url_verification_pending",
         "license_review_pending",
-        "checksum_missing",
         "reference_outputs_missing",
+        "normalization_not_implemented",
         "large_model_execution_receipt_missing",
         "large_model_scorecard_or_review_missing"
       ],
-      "checksum_status": "missing_until_source_acquired",
-      "claim_boundary": "OpenSees mega-tall/large-model policy only. A local operator receipt runner exists, but this row is not a large-model execution, memory, runtime, or accuracy receipt.",
+      "checksum_status": "local_candidate_checksums_attached",
+      "claim_boundary": "OpenSees mega-tall/large-model source identity and local checksum evidence are attached for Model 1/Model 2. A local operator receipt runner exists, but this row is not license approval, reference output ingest, canonical normalization, large-model execution, memory, runtime, scorecard, or accuracy evidence.",
       "commercial_use_allowed": false,
       "existing_receipts": [
         {
-          "claim_boundary": "Large-model runner readiness contract only; runner command and resource envelope exist, but there is still no acquired source, license approval, checksum, reference output, normalized model, execution, crash/OOM-free result, or scorecard evidence.",
+          "claim_boundary": "Large-model runner readiness contract only; runner command and resource envelope exist and source/checksum candidates are attached, but there is still no license approval, reference output, normalized model, execution, crash/OOM-free result, or scorecard evidence.",
           "contract_pass": false,
           "crash_oom_free_execution_count": 0,
           "current_large_model_execution_receipt_count": 0,
@@ -188,6 +186,8 @@
           "required_large_model_count": 2,
           "runner_command_ready": true,
           "scorecard_or_review_count": 0,
+          "source_checksum_count": 2,
+          "source_url_verified_count": 2,
           "status": "blocked"
         }
       ],
@@ -197,7 +197,30 @@
         "large-model-performance"
       ],
       "license_status": "review_required_before_bundling_or_ci_download",
-      "local_candidate_artifacts": [],
+      "local_candidate_artifacts": [
+        {
+          "case_id": "luxinzheng_megatall_model1",
+          "format": "tcl",
+          "origin": "local_operator_attached_public_source",
+          "path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl",
+          "sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+          "size_bytes": 2850355,
+          "source_archive_url": "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip",
+          "source_of_checksum": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json",
+          "source_url": "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm"
+        },
+        {
+          "case_id": "luxinzheng_megatall_model2",
+          "format": "tcl",
+          "origin": "local_operator_attached_public_source",
+          "path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl",
+          "sha256": "66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f",
+          "size_bytes": 6926755,
+          "source_archive_url": "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip",
+          "source_of_checksum": "local_sha256_over_attached_opensees_tcl",
+          "source_url": "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm"
+        }
+      ],
       "normalization_status": "not_started",
       "ready_for_phase3_quantity_credit": false,
       "redistribution_allowed": false,
@@ -207,9 +230,9 @@
         "large-model-performance"
       ],
       "source_id": "opensees_megatall_model_2_large",
-      "source_kind": "official_open_solver_large_model",
+      "source_kind": "local_operator_attached_open_solver_large_model_license_review_pending",
       "source_license_receipt_path": "",
-      "source_url_or_doi": "official_url_pending_license_review:opensees-megatall-model-2",
+      "source_url_or_doi": "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
       "truth_class": "independent_reference"
     },
     {
@@ -453,7 +476,6 @@
       "reference_outputs_missing",
       "silent_data_loss_negative_gate_not_executed",
       "silent_import_loss_gate_not_executed",
-      "source_url_verification_pending",
       "two_reference_solver_comparison_not_available"
     ],
     "requires_network": false,
@@ -462,7 +484,7 @@
     "writes_default_artifact_command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py"
   },
   "schema_version": "phase3-benchmark-acquisition-plan.v1",
-  "source_commit_sha": "95db1987c1f4e94d919e87aa1d2ccedea3a835fd",
+  "source_commit_sha": "3c5006d359725645758b6165ac0f953ca431f811",
   "source_license_receipt_source_count": 4,
   "status": "blocked",
   "topology_receipt_source_count": 6

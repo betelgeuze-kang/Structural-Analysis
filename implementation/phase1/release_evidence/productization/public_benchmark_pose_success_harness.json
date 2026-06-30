@@ -1,0 +1,62 @@
+{
+  "blockers": [
+    "public_benchmark_pose_success_harness_rows_missing"
+  ],
+  "case_count": 1,
+  "case_rows": [
+    {
+      "benchmark_split": "synthetic-dry-run",
+      "best_symmetry_permutation": [
+        0,
+        2,
+        1,
+        3
+      ],
+      "case_boundary": "Synthetic dry-run only. Real CASF/PDBBind rows must be materialized through the operator intake before this harness can support a benchmark claim.",
+      "case_id": "dry_run_symmetry_swap_pose",
+      "pose_success": true,
+      "pose_validity_pass": true,
+      "rmsd_threshold_angstrom": 2.0,
+      "source_family": "synthetic",
+      "status": "pass",
+      "symmetry_aware_ligand_rmsd_angstrom": 6.6973807122470445e-16
+    }
+  ],
+  "claim_boundary": "This seed fixes the CASF/PDBBind pose-success harness contract and a synthetic dry-run row. It does not attach public benchmark source files or claim real benchmark pose-success performance.",
+  "contract_pass": true,
+  "dry_run_case_count": 1,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-30T15:47:47.308599+00:00",
+  "input_checksums": {
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9f5ca0916c5d64b5e5e67bc3cd2db8e13cb5cb46bd9feb29675eb9d74dc15089",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:f8e1a93b14d7b10052183958a05a7e27f13da7df5c03966e0c8fcf2f3485d134",
+    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:edd2e1f2c560695f83e4f6dc30489379d16fe7a798541e82179cb5b933a6bf72",
+    "scripts/materialize_public_benchmark_pose_success_harness.py": "sha256:b1031511d159a8dcd03c16abaf49ed894db43dda58978fae32239ba47f28f4a9",
+    "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d0105e3fca20c9072fca8571a0d3ba417302b35c3c8196d2c5c9d36f32ac19a0",
+    "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:d965fae24ace310a8dac00208f8c4d8ff2b2ea356a21254da7b03966ced9678e",
+    "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:d18e8cc8f99d1c8f565340e6a622cd99667b2a837d7c584edfec69a30c9d9037",
+    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:84a2321c26221def7d4fca2ce98dc42832053c40bd464a3a32e2e49e3f44fee0",
+    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:39f2c71e97ac0579ad9504429a63c5478378b939a11675d937eba475e2222bd4",
+    "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
+    "scripts/validate_public_benchmark_external_receipts.py": "sha256:282daac16328284d858b1b76830d6cd9666a9b01d67cf9e8259fbac8dc1f571f",
+    "scripts/validate_public_benchmark_pose_validity.py": "sha256:51c107c5d5c56aaa3fdb63b91f76c515109b86d664effe8fb65922e5c628a3d1",
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:92c904fe51679ae70fa88471c611c53f98559b8e2894592cb96f75dbfa15003e"
+  },
+  "materializer": {
+    "claim_boundary": "The materializer joins the PoseBusters-style validity packet with the symmetry-aware RMSD scorecard and emits per-case pose-success rows. It does not fetch benchmark data or close Tier beta alone.",
+    "materialization_command": "python3 scripts/materialize_public_benchmark_pose_success_harness.py --pose-validity-packet implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json --rmsd-scorecard implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json --out-harness implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness_materialization_report.json --fail-blocked",
+    "schema_version": "public-benchmark-pose-success-harness-materialization.v1",
+    "status": "ready_for_pose_validity_packet_and_rmsd_scorecard"
+  },
+  "pose_failure_count": 0,
+  "pose_success_count": 1,
+  "pose_success_harness_ready": false,
+  "pose_success_rate": 1.0,
+  "pose_validity_pass_count": 1,
+  "real_benchmark_case_count": 0,
+  "reuse_policy": "public_benchmark_pose_success_harness_seed_from_repo_contract",
+  "reused_evidence": false,
+  "schema_version": "public-benchmark-pose-success-harness.v1",
+  "source_commit_sha": "3c5006d359725645758b6165ac0f953ca431f811",
+  "status": "ready_for_real_benchmark_rows"
+}

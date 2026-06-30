@@ -70,6 +70,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "public_benchmark_real_pose_predictions_missing",
         "public_benchmark_real_pose_validity_rows_missing",
         "public_benchmark_real_rmsd_rows_missing",
+        "public_benchmark_pose_success_harness_rows_missing",
         "dud_e_lit_pcba_enrichment_rows_missing",
         "vina_gnina_comparison_rows_missing",
         "public_benchmark_external_receipts_missing",
@@ -345,11 +346,13 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
     ]
     assert gate_plan["pose_coordinate_intake"]["materialization_steps"] == [
         "materialize_pose_validity_input",
         "materialize_posebusters_validity_packet",
         "materialize_symmetry_rmsd_scorecard",
+        "materialize_pose_success_harness",
     ]
     assert gate_plan["dud_e_lit_pcba_enrichment_intake"]["minimum_evidence"][
         "supported_families"
@@ -395,6 +398,7 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
         "materialize_pose_validity_input",
         "materialize_posebusters_validity_packet",
         "materialize_symmetry_rmsd_scorecard",
+        "materialize_pose_success_harness",
         "materialize_enrichment_scorecard",
         "materialize_vina_gnina_comparison_adapter",
         "validate_external_receipts",
@@ -415,6 +419,14 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
     assert (
         "public_benchmark_symmetry_rmsd_scorecard.scorecard_ready == true"
         in packet["acceptance_criteria"]
+    )
+    assert (
+        "public_benchmark_pose_success_harness.pose_success_harness_ready == true"
+        in packet["acceptance_criteria"]
+    )
+    assert packet["linked_artifacts"]["pose_success_harness"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_pose_success_harness.json"
     )
     assert packet["next_actions"][0] == "fill_public_benchmark_operator_intake_packet"
     assert packet["next_actions"][-1] == "regenerate_goal_bottleneck_roadmap_surface"
@@ -509,6 +521,14 @@ def test_public_benchmark_execution_preflight_uses_canonical_ready_fields(
             "dry_run_case_count": 0,
             "blockers": [],
         },
+        module.DEFAULT_POSE_SUCCESS_HARNESS: {
+            "schema_version": "public-benchmark-pose-success-harness.v1",
+            "status": "pose_success_harness_materialization_required",
+            "pose_success_harness_ready": False,
+            "real_benchmark_case_count": 12,
+            "pose_success_count": 0,
+            "blockers": [],
+        },
     }
     for raw_path, payload in artifacts.items():
         path = tmp_path / raw_path
@@ -534,6 +554,10 @@ def test_public_benchmark_execution_preflight_uses_canonical_ready_fields(
                 "step_id": "materialize_symmetry_rmsd_scorecard",
                 "produces": str(module.DEFAULT_RMSD_SCORECARD),
             },
+            {
+                "step_id": "materialize_pose_success_harness",
+                "produces": str(module.DEFAULT_POSE_SUCCESS_HARNESS),
+            },
         ],
         slots=[
             {"slot_id": "casf_pdbbind_subset_intake"},
@@ -552,6 +576,7 @@ def test_public_benchmark_execution_preflight_uses_canonical_ready_fields(
     }
     assert by_step["materialize_posebusters_validity_packet"]["current_ready"] is False
     assert by_step["materialize_symmetry_rmsd_scorecard"]["current_ready"] is False
+    assert by_step["materialize_pose_success_harness"]["current_ready"] is False
 
     packet = artifacts[module.DEFAULT_POSE_VALIDITY_PACKET]
     packet["posebusters_validity_ready"] = True
@@ -565,6 +590,14 @@ def test_public_benchmark_execution_preflight_uses_canonical_ready_fields(
     scorecard["status"] = "ready"
     (tmp_path / module.DEFAULT_RMSD_SCORECARD).write_text(
         json.dumps(scorecard),
+        encoding="utf-8",
+    )
+    harness = artifacts[module.DEFAULT_POSE_SUCCESS_HARNESS]
+    harness["pose_success_harness_ready"] = True
+    harness["status"] = "ready"
+    harness["pose_success_count"] = 12
+    (tmp_path / module.DEFAULT_POSE_SUCCESS_HARNESS).write_text(
+        json.dumps(harness),
         encoding="utf-8",
     )
 
@@ -587,6 +620,10 @@ def test_public_benchmark_execution_preflight_uses_canonical_ready_fields(
                 "step_id": "materialize_symmetry_rmsd_scorecard",
                 "produces": str(module.DEFAULT_RMSD_SCORECARD),
             },
+            {
+                "step_id": "materialize_pose_success_harness",
+                "produces": str(module.DEFAULT_POSE_SUCCESS_HARNESS),
+            },
         ],
         slots=[
             {"slot_id": "casf_pdbbind_subset_intake"},
@@ -598,3 +635,4 @@ def test_public_benchmark_execution_preflight_uses_canonical_ready_fields(
 
     assert by_step["materialize_posebusters_validity_packet"]["current_ready"] is True
     assert by_step["materialize_symmetry_rmsd_scorecard"]["current_ready"] is True
+    assert by_step["materialize_pose_success_harness"]["current_ready"] is True

@@ -1,21 +1,17 @@
 {
   "blocked_by": [
-    "checksum_missing",
     "large_model_execution_receipt_missing",
     "large_model_scorecard_or_review_missing",
     "license_review_pending",
     "normalization_not_implemented",
-    "reference_outputs_missing",
-    "source_url_verification_pending"
+    "reference_outputs_missing"
   ],
   "blockers": [
-    "checksum_missing",
     "large_model_execution_receipt_missing",
     "large_model_scorecard_or_review_missing",
     "license_review_pending",
     "normalization_not_implemented",
-    "reference_outputs_missing",
-    "source_url_verification_pending"
+    "reference_outputs_missing"
   ],
   "claim_boundary": "This receipt is a readiness contract for large-model execution evidence. The runner command and resource envelope are implemented, but this does not acquire sources, approve licenses, run mega-tall models, prove crash/OOM-free behavior, create scorecards, satisfy 2/2 large executions, or close Phase 3/Developer Preview RC.",
   "claim_boundary_version": "developer-preview-core-api-v1",
@@ -35,27 +31,32 @@
     "source_checksum_count": 0,
     "valid_execution_case_count": 0
   },
-  "generated_at": "2026-06-30T13:58:09.904539+00:00",
+  "generated_at": "2026-06-30T15:50:13.127640+00:00",
   "input_checksums": {
+    "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json": "sha256:efe4af8459fc34480a3e5bb6e62dc4022f1bf5bed51c49d428e8847e5c1556d8",
+    "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+    "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl": "sha256:66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f",
     "implementation/phase1/release_evidence/productization/large_model_execution_receipts": "missing",
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:c0eb7e47f2e6f2d6b840254c68ec64c7bab49124470813d354ccf0f1257b6866",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:cf9b6bfc6d90f1ce952d5b23925525303ec087096f296fb6ddbfc57c97aad362",
     "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:cce4195b4798fc23ca1c0ee683c9564e2656fdd1f6c3d4ef3f6c4cbd032c6ccd"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
   },
   "lanes": [
     "opensees-megatall",
     "large-model-performance"
   ],
   "large_model_execution_claim": false,
-  "owner_action": "Acquire two licensed large OpenSees/reference models, attach checksums and reference outputs, normalize them into the canonical model, run the operator execution receipt command for each model, then attach crash/OOM-free execution receipts and scorecard or approved REVIEW evidence.",
+  "owner_action": "Complete license review for the attached large OpenSees/reference models, attach reference outputs, normalize them into the canonical model, run the operator execution receipt command for each model, then attach crash/OOM-free execution receipts and scorecard or approved REVIEW evidence.",
   "phase3_closure_claim": false,
   "required_evidence": [
     {
-      "blocker": "source_url_verification_pending",
-      "contract_pass": false,
+      "blocker": "",
+      "contract_pass": true,
+      "current_source_url_candidate_count": 2,
       "id": "authoritative_source",
       "required": "Verified upstream source URL or DOI for each selected large model.",
-      "status": "missing"
+      "required_source_url_candidate_count": 2,
+      "status": "ready"
     },
     {
       "blocker": "license_review_pending",
@@ -65,13 +66,13 @@
       "status": "missing"
     },
     {
-      "blocker": "checksum_missing",
-      "contract_pass": false,
-      "current_source_checksum_count": 0,
+      "blocker": "",
+      "contract_pass": true,
+      "current_source_checksum_count": 2,
       "id": "source_checksum",
       "required": "SHA256 for each acquired source file or archive.",
       "required_source_checksum_count": 2,
-      "status": "missing"
+      "status": "ready"
     },
     {
       "blocker": "reference_outputs_missing",
@@ -129,7 +130,7 @@
     }
   ],
   "required_evidence_count": 9,
-  "required_evidence_pass_count": 2,
+  "required_evidence_pass_count": 4,
   "required_large_model_count": 2,
   "resource_envelope": {
     "artifact_retention_policy": "operator_attached_execution_receipt_result_and_validation_report",
@@ -159,9 +160,54 @@
   },
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
-  "source_checksum_count": 0,
-  "source_commit_sha": "cde7573e4c67f5e33dce7d06c76a823bae7b6d3e",
+  "source_checksum_count": 2,
+  "source_commit_sha": "3c5006d359725645758b6165ac0f953ca431f811",
   "source_id": "opensees_megatall_model_2_large",
+  "source_identity_inventory": {
+    "claim_boundary": "This inventory records already-collected local large-model source files, their SHA256 values, and source URL metadata. It does not approve licenses, create reference outputs, normalize models, execute analyses, or count as large-model PASS/REVIEW evidence.",
+    "schema_version": "phase3-large-model-source-identity-inventory.v1",
+    "source_candidates": [
+      {
+        "case_id": "luxinzheng_megatall_model1",
+        "metadata_sha256": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+        "metadata_sha256_match": true,
+        "source_checksum_present": true,
+        "source_exists": true,
+        "source_id": "luxinzheng_megatall_tcl_model1_local",
+        "source_metadata": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json",
+        "source_path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl",
+        "source_sha256": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+        "source_size_bytes": 2850355,
+        "source_url_metadata_present": true,
+        "source_urls": [
+          "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+          "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip"
+        ],
+        "title": "OpenSees 606 m mega-tall building Model 1 TCL"
+      },
+      {
+        "case_id": "luxinzheng_megatall_model2",
+        "metadata_sha256": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+        "metadata_sha256_match": false,
+        "source_checksum_present": true,
+        "source_exists": true,
+        "source_id": "luxinzheng_megatall_tcl_model2_local",
+        "source_metadata": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json",
+        "source_path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl",
+        "source_sha256": "sha256:66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f",
+        "source_size_bytes": 6926755,
+        "source_url_metadata_present": true,
+        "source_urls": [
+          "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+          "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip"
+        ],
+        "title": "OpenSees 606 m mega-tall building Model 2 TCL"
+      }
+    ],
+    "source_checksum_count": 2,
+    "source_url_candidate_count": 2
+  },
+  "source_url_verified_count": 2,
   "status": "blocked",
-  "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | evidence=2/9"
+  "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | evidence=4/9"
 }

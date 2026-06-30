@@ -29,6 +29,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     subset = artifacts["subset_manifest"]
     pose_packet = artifacts["pose_validity_packet"]
     rmsd = artifacts["rmsd_scorecard"]
+    pose_harness = artifacts["pose_success_harness"]
     enrichment = artifacts["enrichment_scorecard"]
     vina_gnina = artifacts["vina_gnina_comparison_adapter"]
 
@@ -51,7 +52,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     }
     assert source["tier_beta_ready"] is False
     assert source["public_benchmark_ready"] is False
-    assert source["blocker_count"] == 9
+    assert source["blocker_count"] == 10
     assert source["blockers"] == [
         "casf_pdbbind_source_material_not_attached",
         "casf_pdbbind_case_checksums_missing",
@@ -59,6 +60,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "public_benchmark_real_pose_predictions_missing",
         "public_benchmark_real_pose_validity_rows_missing",
         "public_benchmark_real_rmsd_rows_missing",
+        "public_benchmark_pose_success_harness_rows_missing",
         "dud_e_lit_pcba_enrichment_rows_missing",
         "vina_gnina_comparison_rows_missing",
         "public_benchmark_external_receipts_missing",
@@ -90,7 +92,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "operator_receipts_required",
     ]
     assert source["summary_line"] == (
-        "Public benchmark source-of-truth: BLOCKED | completed_slices=6 | "
+        "Public benchmark source-of-truth: BLOCKED | completed_slices=7 | "
         "blocked_slices=5 | first_blocker=casf_pdbbind_source_material_not_attached"
     )
     assert source["source_tracking"]["mode"] == "direct_builder_source_tracking"
@@ -110,6 +112,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "casf_pdbbind_subset_manifest_contract": "contract_ready",
         "symmetry_aware_rmsd_scorer_dry_run": "dry_run_ready",
         "posebusters_style_validity_packet_shape": "dry_run_ready",
+        "casf_pdbbind_pose_success_harness_contract": "contract_ready",
         "operator_intake_handoff_packet": "ready_for_operator_input",
         "public_benchmark_external_receipt_contract": "contract_ready",
     }
@@ -160,18 +163,19 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "next_action"
     ].startswith("attach source_license_or_accession")
     assert source["materialization_progress"] == {
-        "completed_slice_count": 6,
+        "completed_slice_count": 7,
         "blocked_slice_count": 5,
         "target_subset_case_count": 12,
         "materialized_subset_case_count": 0,
         "real_pose_case_count": 0,
         "real_rmsd_case_count": 0,
+        "real_pose_success_harness_case_count": 0,
         "real_enrichment_target_count": 0,
         "real_vina_gnina_comparison_case_count": 0,
         "external_receipt_complete_row_count": 0,
         "external_receipt_complete_artifact_role_count": 0,
         "external_receipt_missing_artifact_role_count": 3,
-        "tier_beta_failed_criterion_count": 7,
+        "tier_beta_failed_criterion_count": 8,
         "next_unblock_slice_id": "casf_pdbbind_subset_materialization",
         "claim_boundary": (
             "Completed slices are repo-local contracts or synthetic dry-runs. "
@@ -185,6 +189,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert pose_blocked_slice["current"] == {
         "real_pose_case_count": 0,
         "real_rmsd_case_count": 0,
+        "real_pose_success_harness_case_count": 0,
     }
     receipt_blocked_slice = {
         row["slice_id"]: row for row in source["blocked_slices"]
@@ -201,6 +206,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "public_benchmark_real_pose_predictions_missing",
         "public_benchmark_real_pose_validity_rows_missing",
         "public_benchmark_real_rmsd_rows_missing",
+        "public_benchmark_pose_success_harness_rows_missing",
     ]
     assert source["operator_handoff_queue_count"] == 4
     assert source["first_operator_handoff"]["handoff_id"] == (
@@ -319,12 +325,13 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["tier_beta_gate"]["status"] == "blocked"
     assert source["tier_beta_gate"]["claim"] == "tier_beta_public_benchmark_harness"
     assert source["tier_beta_gate"]["minimum_subset_case_count"] == 12
-    assert source["tier_beta_gate"]["failed_criterion_count"] == 7
+    assert source["tier_beta_gate"]["failed_criterion_count"] == 8
     assert source["tier_beta_gate"]["failed_criteria"] == [
         "casf_pdbbind_subset_materialized",
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
         "dud_e_lit_pcba_enrichment_ready",
         "vina_gnina_comparison_ready",
         "external_receipts_attached",
@@ -336,6 +343,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "real_pose_validity_packet_materialized": False,
         "symmetry_rmsd_scorecard_real_cases": False,
         "posebusters_style_validity_real_ligands": False,
+        "casf_pdbbind_pose_success_harness_ready": False,
         "dud_e_lit_pcba_enrichment_ready": False,
         "vina_gnina_comparison_ready": False,
         "external_receipts_attached": False,
@@ -362,6 +370,16 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "dry_run_pose_success": True,
     }
     assert source["symmetry_rmsd_scorecard_summary"] == source["symmetry_rmsd_summary"]
+    assert source["pose_success_harness_summary"] == {
+        "status": "ready_for_real_benchmark_rows",
+        "pose_success_harness_ready": False,
+        "case_count": 1,
+        "dry_run_case_count": 1,
+        "real_benchmark_case_count": 0,
+        "pose_success_count": 1,
+        "pose_success_rate": 1.0,
+        "blockers": ["public_benchmark_pose_success_harness_rows_missing"],
+    }
     assert source["enrichment_scorecard_summary"] == {
         "status": "operator_evidence_required",
         "public_benchmark_enrichment_ready": False,
@@ -497,6 +515,19 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "benchmark ligands. It does not infer chemistry or close Tier beta."
         ),
     }
+    assert source["pose_success_harness_materializer"] == {
+        "schema_version": "public-benchmark-pose-success-harness-materialization.v1",
+        "status": "ready_for_pose_validity_packet_and_rmsd_scorecard",
+        "materialization_command": pose_harness["materializer"][
+            "materialization_command"
+        ],
+        "claim_boundary": (
+            "The pose-success harness materializer joins per-case "
+            "PoseBusters-style validity rows with symmetry-aware RMSD rows. It "
+            "does not fetch benchmark data, run docking engines, or close Tier "
+            "beta alone."
+        ),
+    }
     assert source["enrichment_scorecard_materializer"] == {
         "schema_version": "public-benchmark-enrichment-materialization.v1",
         "status": "ready_for_operator_intake",
@@ -628,6 +659,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
     ]
     assert evidence_gap_register["dud_e_lit_pcba_enrichment_intake"][
         "minimum_evidence"
@@ -684,6 +716,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
     ]
     assert gate_plan["vina_gnina_comparison_intake"]["materialization_steps"] == [
         "materialize_vina_gnina_comparison_adapter"
@@ -701,6 +734,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "run_symmetry_aware_rmsd_on_real_subset",
         "run_public_benchmark_rmsd_scorecard_materializer",
         "materialize_posebusters_style_validity_packet_for_real_ligands",
+        "materialize_casf_pdbbind_pose_success_harness",
         "attach_dud_e_lit_pcba_enrichment_intake",
         "run_public_benchmark_enrichment_materializer",
         "attach_vina_gnina_comparison_intake",
@@ -836,6 +870,22 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert score["best_permutation"] == [0, 2, 1, 3]
     assert score["pose_success"] is True
     assert score["best_rmsd_angstrom"] < 1.0e-12
+    assert pose_harness["schema_version"] == "public-benchmark-pose-success-harness.v1"
+    assert pose_harness["contract_pass"] is True
+    assert pose_harness["pose_success_harness_ready"] is False
+    assert pose_harness["real_benchmark_case_count"] == 0
+    assert pose_harness["dry_run_case_count"] == 1
+    assert pose_harness["pose_success_count"] == 1
+    assert pose_harness["blockers"] == [
+        "public_benchmark_pose_success_harness_rows_missing"
+    ]
+    assert pose_harness["materializer"]["schema_version"] == (
+        "public-benchmark-pose-success-harness-materialization.v1"
+    )
+    assert (
+        "materialize_public_benchmark_pose_success_harness.py"
+        in pose_harness["materializer"]["materialization_command"]
+    )
 
     assert enrichment["schema_version"] == "public-benchmark-enrichment-scorecard.v1"
     assert enrichment["status"] == "operator_evidence_required"
@@ -907,6 +957,7 @@ def test_public_benchmark_source_of_truth_ready_is_derived_from_gate() -> None:
     subset = copy.deepcopy(artifacts["subset_manifest"])
     pose_packet = copy.deepcopy(artifacts["pose_validity_packet"])
     rmsd = copy.deepcopy(artifacts["rmsd_scorecard"])
+    pose_harness = copy.deepcopy(artifacts["pose_success_harness"])
     enrichment = copy.deepcopy(artifacts["enrichment_scorecard"])
     vina_gnina = copy.deepcopy(artifacts["vina_gnina_comparison_adapter"])
     external_receipts = copy.deepcopy(artifacts["external_receipts_validation"])
@@ -944,6 +995,18 @@ def test_public_benchmark_source_of_truth_ready_is_derived_from_gate() -> None:
     pose_packet["dry_run_validation"]["real_benchmark_case_count"] = 1
     rmsd["real_benchmark_case_count"] = 1
     rmsd["rows"][0]["source_family"] = "CASF/PDBBind"
+    pose_harness.update(
+        {
+            "status": "ready",
+            "pose_success_harness_ready": True,
+            "contract_pass": True,
+            "real_benchmark_case_count": 1,
+            "dry_run_case_count": 0,
+            "blockers": [],
+        }
+    )
+    pose_harness["case_rows"][0]["source_family"] = "CASF/PDBBind"
+    pose_harness["case_rows"][0]["benchmark_split"] = "CASF-core"
     enrichment.update(
         {
             "status": "ready",
@@ -991,6 +1054,7 @@ def test_public_benchmark_source_of_truth_ready_is_derived_from_gate() -> None:
         subset_manifest=subset,
         pose_validity_packet=pose_packet,
         rmsd_scorecard=rmsd,
+        pose_success_harness=pose_harness,
         enrichment_scorecard=enrichment,
         vina_gnina_comparison_adapter=vina_gnina,
         external_receipts_validation=external_receipts,
@@ -1023,6 +1087,7 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     subset_out = tmp_path / "public_benchmark_subset_manifest.json"
     pose_out = tmp_path / "public_benchmark_pose_validity_packet.json"
     rmsd_out = tmp_path / "public_benchmark_symmetry_rmsd_scorecard.json"
+    pose_harness_out = tmp_path / "public_benchmark_pose_success_harness.json"
     enrichment_out = tmp_path / "public_benchmark_enrichment_scorecard.json"
     vina_gnina_out = tmp_path / "public_benchmark_vina_gnina_comparison_adapter.json"
     operator_out = tmp_path / "public_benchmark_operator_intake_packet.json"
@@ -1035,6 +1100,7 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
         subset_manifest_out=subset_out,
         pose_validity_packet_out=pose_out,
         rmsd_scorecard_out=rmsd_out,
+        pose_success_harness_out=pose_harness_out,
         enrichment_scorecard_out=enrichment_out,
         vina_gnina_comparison_adapter_out=vina_gnina_out,
         operator_intake_packet_out=operator_out,
@@ -1046,6 +1112,7 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     assert subset_out.exists()
     assert pose_out.exists()
     assert rmsd_out.exists()
+    assert pose_harness_out.exists()
     assert enrichment_out.exists()
     assert vina_gnina_out.exists()
     assert operator_out.exists()
@@ -1065,6 +1132,10 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     )
     assert (
         json.loads(rmsd_out.read_text(encoding="utf-8")) == artifacts["rmsd_scorecard"]
+    )
+    assert (
+        json.loads(pose_harness_out.read_text(encoding="utf-8"))
+        == artifacts["pose_success_harness"]
     )
     assert (
         json.loads(enrichment_out.read_text(encoding="utf-8"))

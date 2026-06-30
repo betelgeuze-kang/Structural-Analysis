@@ -47,6 +47,10 @@ from materialize_public_benchmark_posebusters_validity_packet import (  # noqa: 
 from materialize_public_benchmark_rmsd_scorecard import (  # noqa: E402
     SCHEMA_VERSION as RMSD_MATERIALIZER_SCHEMA_VERSION,
 )
+from materialize_public_benchmark_pose_success_harness import (  # noqa: E402
+    HARNESS_SCHEMA_VERSION as POSE_SUCCESS_HARNESS_SCHEMA_VERSION,
+    SCHEMA_VERSION as POSE_SUCCESS_HARNESS_MATERIALIZER_SCHEMA_VERSION,
+)
 from materialize_public_benchmark_enrichment_scorecard import (  # noqa: E402
     SCHEMA_VERSION as ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
     SUPPORTED_FAMILIES,
@@ -76,6 +80,9 @@ DEFAULT_POSE_VALIDITY_PACKET_OUT = (
 )
 DEFAULT_RMSD_SCORECARD_OUT = (
     PRODUCTIZATION / "public_benchmark_symmetry_rmsd_scorecard.json"
+)
+DEFAULT_POSE_SUCCESS_HARNESS_OUT = (
+    PRODUCTIZATION / "public_benchmark_pose_success_harness.json"
 )
 DEFAULT_ENRICHMENT_SCORECARD_OUT = (
     PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
@@ -108,6 +115,7 @@ def _source_input_paths() -> list[Path]:
         Path("scripts/build_public_benchmark_source_of_truth.py"),
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
+        Path("scripts/materialize_public_benchmark_pose_success_harness.py"),
         Path("scripts/materialize_public_benchmark_enrichment_scorecard.py"),
         Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
         Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
@@ -464,6 +472,82 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "The packet defines PoseBusters-style sanity checks for a local harness. It "
             "does not vendor PoseBusters, infer chemistry, or replace toolkit-backed "
             "bond/order/protonation validation once real ligands are attached."
+        ),
+    }
+
+
+def build_pose_success_harness(
+    *,
+    pose_validity_packet: dict[str, Any],
+    rmsd_scorecard: dict[str, Any],
+    repo_root: Path = ROOT,
+) -> dict[str, Any]:
+    dry_run_row = rmsd_scorecard["rows"][0]
+    score = dry_run_row["score"]
+    return {
+        "schema_version": POSE_SUCCESS_HARNESS_SCHEMA_VERSION,
+        **release_evidence_metadata(
+            input_paths=_source_input_paths(),
+            reused_evidence=False,
+            reuse_policy="public_benchmark_pose_success_harness_seed_from_repo_contract",
+            repo_root=repo_root,
+        ),
+        "status": "ready_for_real_benchmark_rows",
+        "contract_pass": True,
+        "pose_success_harness_ready": False,
+        "real_benchmark_case_count": 0,
+        "dry_run_case_count": 1,
+        "case_count": 1,
+        "pose_validity_pass_count": 1,
+        "pose_success_count": 1,
+        "pose_failure_count": 0,
+        "pose_success_rate": 1.0,
+        "materializer": {
+            "schema_version": POSE_SUCCESS_HARNESS_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_pose_validity_packet_and_rmsd_scorecard",
+            "materialization_command": (
+                "python3 scripts/materialize_public_benchmark_pose_success_harness.py "
+                "--pose-validity-packet implementation/phase1/release_evidence/"
+                "productization/public_benchmark_pose_validity_packet.json "
+                "--rmsd-scorecard implementation/phase1/release_evidence/productization/"
+                "public_benchmark_symmetry_rmsd_scorecard.json "
+                "--out-harness implementation/phase1/release_evidence/productization/"
+                "public_benchmark_pose_success_harness.json "
+                "--out-report implementation/phase1/release_evidence/productization/"
+                "public_benchmark_pose_success_harness_materialization_report.json "
+                "--fail-blocked"
+            ),
+            "claim_boundary": (
+                "The materializer joins the PoseBusters-style validity packet with the "
+                "symmetry-aware RMSD scorecard and emits per-case pose-success rows. "
+                "It does not fetch benchmark data or close Tier beta alone."
+            ),
+        },
+        "case_rows": [
+            {
+                "case_id": str(dry_run_row["case_id"]),
+                "source_family": str(dry_run_row["source_family"]),
+                "benchmark_split": str(dry_run_row["benchmark_split"]),
+                "status": "pass",
+                "pose_validity_pass": bool(
+                    pose_validity_packet["dry_run_validation"]["pose_validity_ready"]
+                ),
+                "pose_success": bool(score["pose_success"]),
+                "symmetry_aware_ligand_rmsd_angstrom": score["best_rmsd_angstrom"],
+                "rmsd_threshold_angstrom": score["threshold_angstrom"],
+                "best_symmetry_permutation": score["best_permutation"],
+                "case_boundary": (
+                    "Synthetic dry-run only. Real CASF/PDBBind rows must be "
+                    "materialized through the operator intake before this harness can "
+                    "support a benchmark claim."
+                ),
+            }
+        ],
+        "blockers": ["public_benchmark_pose_success_harness_rows_missing"],
+        "claim_boundary": (
+            "This seed fixes the CASF/PDBBind pose-success harness contract and a "
+            "synthetic dry-run row. It does not attach public benchmark source files "
+            "or claim real benchmark pose-success performance."
         ),
     }
 
@@ -835,6 +919,7 @@ PHASE2_SLICE_TIER_BETA_CRITERIA = {
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
     ],
     "dud_e_lit_pcba_enrichment_materialization": [
         "dud_e_lit_pcba_enrichment_ready",
@@ -988,6 +1073,7 @@ def _phase2_slice_progress(
     subset_manifest: dict[str, Any],
     pose_validity_packet: dict[str, Any],
     rmsd_scorecard: dict[str, Any],
+    pose_success_harness: dict[str, Any],
     enrichment_scorecard: dict[str, Any],
     vina_gnina_comparison_adapter: dict[str, Any],
     external_receipts_validation: dict[str, Any],
@@ -1002,6 +1088,9 @@ def _phase2_slice_progress(
         pose_validity_packet["dry_run_validation"]["real_benchmark_case_count"]
     )
     rmsd_real_case_count = int(rmsd_scorecard["real_benchmark_case_count"])
+    pose_success_harness_real_case_count = int(
+        pose_success_harness["real_benchmark_case_count"]
+    )
     enrichment_target_count = int(enrichment_scorecard["real_enrichment_target_count"])
     vina_gnina_case_count = int(
         vina_gnina_comparison_adapter["real_comparison_case_count"]
@@ -1029,6 +1118,10 @@ def _phase2_slice_progress(
         )
     if rmsd_real_case_count < target_subset_case_count:
         pose_coordinate_blockers.append("public_benchmark_real_rmsd_rows_missing")
+    if pose_success_harness_real_case_count < target_subset_case_count:
+        pose_coordinate_blockers.append(
+            "public_benchmark_pose_success_harness_rows_missing"
+        )
     completed_slices = [
         {
             "slice_id": "public_benchmark_source_of_truth_spec",
@@ -1061,6 +1154,16 @@ def _phase2_slice_progress(
             "artifact": str(DEFAULT_POSE_VALIDITY_PACKET_OUT),
             "check_count": len(pose_validity_packet["checks"]),
             "real_benchmark_case_count": pose_real_case_count,
+        },
+        {
+            "slice_id": "casf_pdbbind_pose_success_harness_contract",
+            "status": "contract_ready",
+            "artifact": str(DEFAULT_POSE_SUCCESS_HARNESS_OUT),
+            "materializer_schema_version": pose_success_harness["materializer"][
+                "schema_version"
+            ],
+            "dry_run_case_count": int(pose_success_harness["dry_run_case_count"]),
+            "real_benchmark_case_count": pose_success_harness_real_case_count,
         },
         {
             "slice_id": "operator_intake_handoff_packet",
@@ -1101,6 +1204,9 @@ def _phase2_slice_progress(
                 "current": {
                     "real_pose_case_count": pose_real_case_count,
                     "real_rmsd_case_count": rmsd_real_case_count,
+                    "real_pose_success_harness_case_count": (
+                        pose_success_harness_real_case_count
+                    ),
                 },
                 "required": target_subset_case_count,
                 "blockers": pose_coordinate_blockers,
@@ -1173,6 +1279,9 @@ def _phase2_slice_progress(
             "materialized_subset_case_count": subset_materialized_count,
             "real_pose_case_count": pose_real_case_count,
             "real_rmsd_case_count": rmsd_real_case_count,
+            "real_pose_success_harness_case_count": (
+                pose_success_harness_real_case_count
+            ),
             "real_enrichment_target_count": enrichment_target_count,
             "real_vina_gnina_comparison_case_count": vina_gnina_case_count,
             "external_receipt_complete_row_count": int(
@@ -1204,6 +1313,7 @@ def build_source_of_truth(
     subset_manifest: dict[str, Any],
     pose_validity_packet: dict[str, Any],
     rmsd_scorecard: dict[str, Any],
+    pose_success_harness: dict[str, Any],
     enrichment_scorecard: dict[str, Any],
     vina_gnina_comparison_adapter: dict[str, Any],
     external_receipts_validation: dict[str, Any],
@@ -1223,6 +1333,12 @@ def build_source_of_truth(
         pose_validity_packet["dry_run_validation"]["real_benchmark_case_count"]
     )
     rmsd_real_case_count = int(rmsd_scorecard["real_benchmark_case_count"])
+    pose_success_harness_real_case_count = int(
+        pose_success_harness["real_benchmark_case_count"]
+    )
+    pose_success_harness_ready = bool(
+        pose_success_harness["pose_success_harness_ready"]
+    )
     enrichment_ready = bool(enrichment_scorecard["public_benchmark_enrichment_ready"])
     engine_comparison_ready = bool(
         vina_gnina_comparison_adapter["public_benchmark_engine_comparison_ready"]
@@ -1267,6 +1383,27 @@ def build_source_of_truth(
                 "required": target_subset_case_count,
                 "blockers": ["public_benchmark_real_pose_validity_rows_missing"]
                 if pose_real_case_count < target_subset_case_count
+                else [],
+            },
+            {
+                "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+                "pass": bool(
+                    pose_success_harness_ready
+                    and pose_success_harness_real_case_count >= target_subset_case_count
+                ),
+                "current": {
+                    "real_benchmark_case_count": pose_success_harness_real_case_count,
+                    "pose_success_harness_ready": pose_success_harness_ready,
+                },
+                "required": {
+                    "real_benchmark_case_count": target_subset_case_count,
+                    "pose_success_harness_ready": True,
+                },
+                "blockers": ["public_benchmark_pose_success_harness_rows_missing"]
+                if (
+                    not pose_success_harness_ready
+                    or pose_success_harness_real_case_count < target_subset_case_count
+                )
                 else [],
             },
             {
@@ -1341,6 +1478,11 @@ def build_source_of_truth(
         blockers.append("public_benchmark_real_pose_validity_rows_missing")
     if rmsd_real_case_count < target_subset_case_count:
         blockers.append("public_benchmark_real_rmsd_rows_missing")
+    if (
+        not pose_success_harness_ready
+        or pose_success_harness_real_case_count < target_subset_case_count
+    ):
+        blockers.append("public_benchmark_pose_success_harness_rows_missing")
     if not enrichment_ready:
         blockers.append("dud_e_lit_pcba_enrichment_rows_missing")
     if not engine_comparison_ready:
@@ -1431,6 +1573,7 @@ def build_source_of_truth(
         subset_manifest=subset_manifest,
         pose_validity_packet=pose_validity_packet,
         rmsd_scorecard=rmsd_scorecard,
+        pose_success_harness=pose_success_harness,
         enrichment_scorecard=enrichment_scorecard,
         vina_gnina_comparison_adapter=vina_gnina_comparison_adapter,
         external_receipts_validation=external_receipts_validation,
@@ -1514,6 +1657,11 @@ def build_source_of_truth(
                 "materialization_status": "dry_run_ready_real_ligands_required",
             },
             {
+                "family_id": "casf_pdbbind_pose_success_harness",
+                "role": "case_level_pose_success_harness",
+                "materialization_status": "real_pose_rows_required",
+            },
+            {
                 "family_id": "dud_e_lit_pcba",
                 "role": "enrichment_scorecard",
                 "materialization_status": "operator_intake_required",
@@ -1551,6 +1699,20 @@ def build_source_of_truth(
         },
         "symmetry_rmsd_scorecard_summary": symmetry_rmsd_scorecard_summary,
         "symmetry_rmsd_summary": symmetry_rmsd_scorecard_summary,
+        "pose_success_harness_summary": {
+            "status": pose_success_harness["status"],
+            "pose_success_harness_ready": pose_success_harness[
+                "pose_success_harness_ready"
+            ],
+            "case_count": pose_success_harness["case_count"],
+            "dry_run_case_count": pose_success_harness["dry_run_case_count"],
+            "real_benchmark_case_count": pose_success_harness[
+                "real_benchmark_case_count"
+            ],
+            "pose_success_count": pose_success_harness["pose_success_count"],
+            "pose_success_rate": pose_success_harness["pose_success_rate"],
+            "blockers": pose_success_harness["blockers"],
+        },
         "enrichment_scorecard_summary": {
             "status": enrichment_scorecard["status"],
             "public_benchmark_enrichment_ready": enrichment_scorecard[
@@ -1758,6 +1920,19 @@ def build_source_of_truth(
                 "benchmark ligands. It does not infer chemistry or close Tier beta."
             ),
         },
+        "pose_success_harness_materializer": {
+            "schema_version": POSE_SUCCESS_HARNESS_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_pose_validity_packet_and_rmsd_scorecard",
+            "materialization_command": pose_success_harness["materializer"][
+                "materialization_command"
+            ],
+            "claim_boundary": (
+                "The pose-success harness materializer joins per-case "
+                "PoseBusters-style validity rows with symmetry-aware RMSD rows. It "
+                "does not fetch benchmark data, run docking engines, or close Tier "
+                "beta alone."
+            ),
+        },
         "enrichment_scorecard_materializer": {
             "schema_version": ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
             "status": "ready_for_operator_intake",
@@ -1793,6 +1968,7 @@ def build_source_of_truth(
             "run_symmetry_aware_rmsd_on_real_subset",
             "run_public_benchmark_rmsd_scorecard_materializer",
             "materialize_posebusters_style_validity_packet_for_real_ligands",
+            "materialize_casf_pdbbind_pose_success_harness",
             "attach_dud_e_lit_pcba_enrichment_intake",
             "run_public_benchmark_enrichment_materializer",
             "attach_vina_gnina_comparison_intake",
@@ -1813,6 +1989,11 @@ def build_public_benchmark_artifacts(
     subset_manifest = build_subset_manifest(repo_root=repo_root)
     pose_validity_packet = build_pose_validity_packet(repo_root=repo_root)
     rmsd_scorecard = build_rmsd_scorecard(repo_root=repo_root)
+    pose_success_harness = build_pose_success_harness(
+        pose_validity_packet=pose_validity_packet,
+        rmsd_scorecard=rmsd_scorecard,
+        repo_root=repo_root,
+    )
     enrichment_scorecard = build_enrichment_scorecard(repo_root=repo_root)
     vina_gnina_comparison_adapter = build_vina_gnina_comparison_adapter(
         repo_root=repo_root
@@ -1830,6 +2011,7 @@ def build_public_benchmark_artifacts(
         subset_manifest=subset_manifest,
         pose_validity_packet=pose_validity_packet,
         rmsd_scorecard=rmsd_scorecard,
+        pose_success_harness=pose_success_harness,
         enrichment_scorecard=enrichment_scorecard,
         vina_gnina_comparison_adapter=vina_gnina_comparison_adapter,
         external_receipts_validation=external_receipts_validation,
@@ -1860,6 +2042,7 @@ def build_public_benchmark_artifacts(
         "subset_manifest": subset_manifest,
         "pose_validity_packet": pose_validity_packet,
         "rmsd_scorecard": rmsd_scorecard,
+        "pose_success_harness": pose_success_harness,
         "enrichment_scorecard": enrichment_scorecard,
         "vina_gnina_comparison_adapter": vina_gnina_comparison_adapter,
         "external_receipts_validation": external_receipts_validation,
@@ -1874,6 +2057,7 @@ def write_public_benchmark_artifacts(
     subset_manifest_out: Path = DEFAULT_SUBSET_MANIFEST_OUT,
     pose_validity_packet_out: Path = DEFAULT_POSE_VALIDITY_PACKET_OUT,
     rmsd_scorecard_out: Path = DEFAULT_RMSD_SCORECARD_OUT,
+    pose_success_harness_out: Path = DEFAULT_POSE_SUCCESS_HARNESS_OUT,
     enrichment_scorecard_out: Path = DEFAULT_ENRICHMENT_SCORECARD_OUT,
     vina_gnina_comparison_adapter_out: Path = DEFAULT_VINA_GNINA_ADAPTER_OUT,
     external_receipts_validation_out: Path = DEFAULT_EXTERNAL_RECEIPTS_VALIDATION_OUT,
@@ -1890,6 +2074,7 @@ def write_public_benchmark_artifacts(
         "subset_manifest": subset_manifest_out,
         "pose_validity_packet": pose_validity_packet_out,
         "rmsd_scorecard": rmsd_scorecard_out,
+        "pose_success_harness": pose_success_harness_out,
         "enrichment_scorecard": enrichment_scorecard_out,
         "vina_gnina_comparison_adapter": vina_gnina_comparison_adapter_out,
         "external_receipts_validation": external_receipts_validation_out,
@@ -1946,6 +2131,11 @@ def main(argv: list[str] | None = None) -> int:
         "--rmsd-scorecard-out", type=Path, default=DEFAULT_RMSD_SCORECARD_OUT
     )
     parser.add_argument(
+        "--pose-success-harness-out",
+        type=Path,
+        default=DEFAULT_POSE_SUCCESS_HARNESS_OUT,
+    )
+    parser.add_argument(
         "--enrichment-scorecard-out",
         type=Path,
         default=DEFAULT_ENRICHMENT_SCORECARD_OUT,
@@ -1981,6 +2171,7 @@ def main(argv: list[str] | None = None) -> int:
         subset_manifest_out=args.subset_manifest_out,
         pose_validity_packet_out=args.pose_validity_packet_out,
         rmsd_scorecard_out=args.rmsd_scorecard_out,
+        pose_success_harness_out=args.pose_success_harness_out,
         enrichment_scorecard_out=args.enrichment_scorecard_out,
         vina_gnina_comparison_adapter_out=args.vina_gnina_comparison_adapter_out,
         external_receipts_validation_out=args.external_receipts_validation_out,

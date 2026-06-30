@@ -550,6 +550,10 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
         if isinstance(benchmark_scale.get("large_gate"), dict)
         else {}
     )
+    large_current = max(
+        large_current,
+        int(benchmark_large_gate.get("current_large_source_model_count", 0) or 0),
+    )
     benchmark_large_blocker_grouping = (
         benchmark_large_gate.get("blocker_grouping_metadata")
         if isinstance(benchmark_large_gate.get("blocker_grouping_metadata"), dict)
@@ -727,7 +731,11 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             else list(
                 dict.fromkeys(
                     [
-                        f"large_structural_models_current_below_required:{large_current}/{large_required}",
+                        *(
+                            [f"large_structural_models_current_below_required:{large_current}/{large_required}"]
+                            if large_current < large_required
+                            else []
+                        ),
                         *large_acquisition_blockers,
                         *large_runner_blockers,
                         *benchmark_large_blockers,

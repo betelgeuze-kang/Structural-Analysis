@@ -194,6 +194,7 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
         and medium_review >= medium_required
     )
     large_required = int(large.get("required_large_model_count", 2) or 2)
+    large_source_models = int(large.get("source_url_verified_count", 0) or 0)
     large_execution = int(large.get("current_large_model_execution_receipt_count", 0) or 0)
     large_crash_oom_free = int(large.get("crash_oom_free_execution_count", 0) or 0)
     large_scorecard_or_review = int(large.get("scorecard_or_review_count", 0) or 0)
@@ -218,10 +219,11 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
         medium_blockers.append(f"medium_structural_models_current_below_required:{medium_current}/{medium_required}")
     if medium_review < medium_required:
         medium_blockers.append(f"medium_model_pass_or_review_below_required:{medium_review}/{medium_required}")
-    if large_execution < large_required:
+    if large_source_models < large_required:
         large_blockers.append(
-            f"large_structural_models_current_below_required:{large_execution}/{large_required}"
+            f"large_structural_models_current_below_required:{large_source_models}/{large_required}"
         )
+    if large_execution < large_required:
         large_blockers.append(f"large_model_execution_count_below_required:{large_execution}/{large_required}")
     if large_crash_oom_free < large_required:
         large_blockers.append(
@@ -273,9 +275,12 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
             "status": "ready" if large_pass else "blocked",
             "contract_pass": large_pass,
             "required_large_model_count": large_required,
+            "current_large_source_model_count": large_source_models,
             "current_large_model_execution_receipt_count": large_execution,
             "crash_oom_free_execution_count": large_crash_oom_free,
             "scorecard_or_review_count": large_scorecard_or_review,
+            "source_url_verified_count": int(large.get("source_url_verified_count", 0) or 0),
+            "source_checksum_count": int(large.get("source_checksum_count", 0) or 0),
             "required_evidence_pass_count": int(large.get("required_evidence_pass_count", 0) or 0),
             "blockers": large_blockers,
             "blocker_grouping_metadata": _benchmark_scale_blocker_grouping_metadata(

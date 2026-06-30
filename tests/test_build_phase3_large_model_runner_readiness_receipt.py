@@ -44,13 +44,18 @@ def test_large_model_runner_readiness_receipt_blocks_without_execution_evidence(
     assert payload["current_large_model_execution_receipt_count"] == 0
     assert payload["crash_oom_free_execution_count"] == 0
     assert payload["scorecard_or_review_count"] == 0
-    assert payload["source_checksum_count"] == 0
+    assert payload["source_url_verified_count"] == 2
+    assert payload["source_checksum_count"] == 2
+    assert payload["source_identity_inventory"]["source_url_candidate_count"] == 2
+    assert payload["source_identity_inventory"]["source_checksum_count"] == 2
     assert payload["execution_receipt_inventory"]["receipt_file_count"] == 0
-    assert payload["required_evidence_pass_count"] == 2
+    assert payload["required_evidence_pass_count"] == 4
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
     assert payload["runner_command_ready"] is True
     assert "run_phase3_large_model_execution_receipt.py" in payload["runner_command_template"]
     assert payload["resource_envelope"]["default_timeout_seconds"] == 7200
+    assert "source_url_verification_pending" not in payload["blockers"]
+    assert "checksum_missing" not in payload["blockers"]
     assert "large_model_runner_not_implemented" not in payload["blockers"]
     assert "nightly_lane_not_configured" not in payload["blockers"]
     assert "large_model_execution_receipt_missing" in payload["blockers"]
@@ -92,6 +97,7 @@ def test_large_model_runner_readiness_counts_operator_execution_receipts(tmp_pat
     assert payload["current_large_model_execution_receipt_count"] == 2
     assert payload["crash_oom_free_execution_count"] == 2
     assert payload["scorecard_or_review_count"] == 2
+    assert payload["source_url_verified_count"] == 0
     assert payload["source_checksum_count"] == 2
     assert payload["execution_receipt_inventory"]["valid_execution_case_count"] == 2
     assert payload["required_evidence_pass_count"] == 5

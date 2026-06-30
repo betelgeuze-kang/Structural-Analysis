@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -25,8 +26,43 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_large_model_runner_readiness_receipt.json"
 LARGE_RECEIPT_DIR = PRODUCTIZATION / "large_model_execution_receipts"
 LARGE_RECEIPT_SCHEMA_VERSION = "phase3-large-model-execution-receipt.v1"
+LUXINZHENG_MEGATALL_MODEL1 = Path(
+    "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/"
+    "extracted/OpenSees_Model/Model1/opensees.tcl"
+)
+LUXINZHENG_MEGATALL_MODEL2 = Path(
+    "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/"
+    "extracted/OpenSees_Model/Model2/opensees.tcl"
+)
+LUXINZHENG_MEGATALL_MODEL1_METADATA = Path(
+    "implementation/phase1/open_data/irregular/collected/artifacts/"
+    "luxinzheng_megatall_tcl_model1_local/source_metadata.json"
+)
+LUXINZHENG_SOURCE_PAGE = "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm"
+LUXINZHENG_SOURCE_ARCHIVE = "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip"
+LARGE_SOURCE_CANDIDATES = (
+    {
+        "source_id": "luxinzheng_megatall_tcl_model1_local",
+        "case_id": "luxinzheng_megatall_model1",
+        "title": "OpenSees 606 m mega-tall building Model 1 TCL",
+        "source_path": LUXINZHENG_MEGATALL_MODEL1,
+        "source_metadata": LUXINZHENG_MEGATALL_MODEL1_METADATA,
+        "source_urls": (LUXINZHENG_SOURCE_PAGE, LUXINZHENG_SOURCE_ARCHIVE),
+    },
+    {
+        "source_id": "luxinzheng_megatall_tcl_model2_local",
+        "case_id": "luxinzheng_megatall_model2",
+        "title": "OpenSees 606 m mega-tall building Model 2 TCL",
+        "source_path": LUXINZHENG_MEGATALL_MODEL2,
+        "source_metadata": LUXINZHENG_MEGATALL_MODEL1_METADATA,
+        "source_urls": (LUXINZHENG_SOURCE_PAGE, LUXINZHENG_SOURCE_ARCHIVE),
+    },
+)
 LARGE_MODEL_INPUTS = [
     LARGE_RECEIPT_DIR,
+    LUXINZHENG_MEGATALL_MODEL1,
+    LUXINZHENG_MEGATALL_MODEL2,
+    LUXINZHENG_MEGATALL_MODEL1_METADATA,
     Path("src/structural_analysis/benchmark/acquisition.py"),
     Path("scripts/build_phase3_large_model_runner_readiness_receipt.py"),
     Path("scripts/run_phase3_large_model_execution_receipt.py"),
@@ -131,6 +167,74 @@ def _try_load_json(path: Path) -> dict[str, Any]:
 
 def _safe_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _sha256_or_empty(path: Path) -> str:
+    if not path.exists() or not path.is_file():
+        return ""
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _large_model_source_identity_inventory(repo_root: Path) -> dict[str, Any]:
+    rows: list[dict[str, Any]] = []
+    source_url_case_ids: set[str] = set()
+    source_checksum_case_ids: set[str] = set()
+    for candidate in LARGE_SOURCE_CANDIDATES:
+        source_path = repo_root / candidate["source_path"]
+        metadata_path = repo_root / candidate["source_metadata"]
+        metadata = _try_load_json(metadata_path) if metadata_path.exists() else {}
+        metadata_urls = [
+            str(url)
+            for url in _safe_list(metadata.get("source_urls"))
+            if str(url).startswith(("http://", "https://"))
+        ]
+        fallback_urls = [str(url) for url in candidate["source_urls"] if str(url)]
+        source_urls = metadata_urls or fallback_urls
+        source_sha256 = _sha256_or_empty(source_path)
+        metadata_sha256 = str(metadata.get("sha256") or "")
+        metadata_sha256_match = bool(
+            source_sha256
+            and metadata_sha256
+            and source_sha256 == f"sha256:{metadata_sha256}"
+        )
+        source_exists = source_path.exists()
+        if source_exists and source_urls:
+            source_url_case_ids.add(str(candidate["case_id"]))
+        if source_exists and source_sha256:
+            source_checksum_case_ids.add(str(candidate["case_id"]))
+        rows.append(
+            {
+                "source_id": candidate["source_id"],
+                "case_id": candidate["case_id"],
+                "title": candidate["title"],
+                "source_path": candidate["source_path"].as_posix(),
+                "source_metadata": candidate["source_metadata"].as_posix(),
+                "source_exists": source_exists,
+                "source_size_bytes": source_path.stat().st_size if source_exists else 0,
+                "source_sha256": source_sha256,
+                "metadata_sha256": f"sha256:{metadata_sha256}" if metadata_sha256 else "",
+                "metadata_sha256_match": metadata_sha256_match,
+                "source_urls": source_urls,
+                "source_url_metadata_present": bool(source_urls),
+                "source_checksum_present": bool(source_sha256),
+            }
+        )
+    return {
+        "schema_version": "phase3-large-model-source-identity-inventory.v1",
+        "source_url_candidate_count": len(source_url_case_ids),
+        "source_checksum_count": len(source_checksum_case_ids),
+        "source_candidates": rows,
+        "claim_boundary": (
+            "This inventory records already-collected local large-model source files, "
+            "their SHA256 values, and source URL metadata. It does not approve licenses, "
+            "create reference outputs, normalize models, execute analyses, or count as "
+            "large-model PASS/REVIEW evidence."
+        ),
+    }
 
 
 def _receipt_files(repo_root: Path, receipt_dir: Path) -> list[Path]:
@@ -250,16 +354,31 @@ def build_phase3_large_model_runner_readiness_receipt(
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     receipt_inventory = _large_model_execution_receipt_inventory(repo_root)
+    source_identity_inventory = _large_model_source_identity_inventory(repo_root)
     required_large_model_count = 2
     execution_count = int(receipt_inventory["valid_execution_case_count"])
     crash_oom_free_count = int(receipt_inventory["crash_oom_free_execution_count"])
     scorecard_or_review_count = int(receipt_inventory["scorecard_or_review_count"])
-    source_checksum_count = int(receipt_inventory["source_checksum_count"])
+    source_url_count = int(source_identity_inventory["source_url_candidate_count"])
+    source_checksum_count = max(
+        int(source_identity_inventory["source_checksum_count"]),
+        int(receipt_inventory["source_checksum_count"]),
+    )
     runner_script = repo_root / RUNNER_SCRIPT
     runner_command_ready = runner_script.exists()
     evidence_rows: list[dict[str, Any]] = []
     for row in REQUIRED_EVIDENCE:
-        if row["id"] == "source_checksum":
+        if row["id"] == "authoritative_source":
+            evidence_rows.append(
+                _counted_evidence_row(
+                    row,
+                    current=source_url_count,
+                    required=required_large_model_count,
+                    current_key="current_source_url_candidate_count",
+                    required_key="required_source_url_candidate_count",
+                )
+            )
+        elif row["id"] == "source_checksum":
             evidence_rows.append(
                 _counted_evidence_row(
                     row,
@@ -344,7 +463,9 @@ def build_phase3_large_model_runner_readiness_receipt(
         "current_large_model_execution_receipt_count": execution_count,
         "crash_oom_free_execution_count": crash_oom_free_count,
         "scorecard_or_review_count": scorecard_or_review_count,
+        "source_url_verified_count": source_url_count,
         "source_checksum_count": source_checksum_count,
+        "source_identity_inventory": source_identity_inventory,
         "execution_receipt_inventory": receipt_inventory,
         "required_evidence_count": len(evidence_rows),
         "required_evidence_pass_count": required_evidence_pass_count,
@@ -373,13 +494,13 @@ def build_phase3_large_model_runner_readiness_receipt(
         "blocked_by": blockers,
         "blockers": blockers,
         "owner_action": (
-            "Acquire two licensed large OpenSees/reference models, attach checksums and "
-            "reference outputs, normalize them into the canonical model, run the "
-            "operator execution receipt command for each model, then attach crash/"
+            "Complete license review for the attached large OpenSees/reference models, "
+            "attach reference outputs, normalize them into the canonical model, run "
+            "the operator execution receipt command for each model, then attach crash/"
             "OOM-free execution receipts and scorecard or approved REVIEW evidence."
         ),
         "summary_line": (
-            "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | "
+            f"Phase 3 large-model runner readiness: BLOCKED | executions={execution_count}/2 | "
             f"evidence={required_evidence_pass_count}/{len(evidence_rows)}"
         ),
         "claim_boundary": (
