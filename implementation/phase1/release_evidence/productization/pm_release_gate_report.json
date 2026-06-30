@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-30T07:28:26.279161+00:00",
+  "generated_at": "2026-06-30T07:32:43.644852+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -110,13 +110,13 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:f57cbdc79369400f1eb747139f8f717a5f8f41e92b3f21c143d41100b0bd2179",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:be6c6956fc1ca073833f676f3db36459417d915efdf98aa0b936bc0677d18bc7",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:2accfaba9ed36872a2ecde9a75d729e7585fb354734326946a63bb417dbfb47b",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:364613a9d2e6e559d58408e10f08835c4fd173acff062fea0457810faf926564",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:126fe0c62e85124c9397ff1ff3be45b5255ec5eec6d2a6a8705d13d9f2b9aa29",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:4ac129270a848082cb91311a59366e4ee56048b80d34a8026d67107372850cb7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:54c3093a6ca3409d697ffcd2648c5a67b5f4abce2603300130812cc529258d64",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:18b52265aafa6fce3e1d7b78959b9cbcbeee3dbd4ee4fe19171783ef934a86f4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:b2a43548296c5b288301016689b88f417f4626464ea5997432b612353cedaf8e",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a9ac6410d5da542e9bce800fb6792e4b2b42ac18e3aa6b21518695d5e17afed9",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -130,7 +130,7 @@
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:0d57c89df5c33d8fba0557d7f8cf421c301ed4bfe754a95b892df3abecaca0ed",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:f725b10f952da7fec186ac1e05bcf2bee83f3a3f854c1c8aecc72e1b79aad62b",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:440f7cc3a20d4baee7f50277758cdf4a157625208e36a4d289b6569f904bf8c7",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:6ff48a2a121ebf9ae857c40677d414d47c2dd795d5d11bcd62df9065b0d97118",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
@@ -515,7 +515,7 @@
       "summary": {
         "artifact_count": 15,
         "blocker_count": 0,
-        "current_source_commit_sha": "95a9903ab5f738e9b830f14bcfb667a7b6e74469",
+        "current_source_commit_sha": "6c6b2f0ade0f6c82b0a838d9e1413781256d4c92",
         "max_age_days": 30.0,
         "pass_count": 15
       },
@@ -1270,6 +1270,7 @@
         "blockers": [
           "casf_pdbbind_source_material_not_attached",
           "public_benchmark_real_pose_predictions_missing",
+          "public_benchmark_real_pose_validity_rows_missing",
           "public_benchmark_real_rmsd_rows_missing",
           "dud_e_lit_pcba_enrichment_rows_missing",
           "vina_gnina_comparison_rows_missing",
@@ -1384,6 +1385,7 @@
     "public_benchmark_source_of_truth_blockers": [
       "casf_pdbbind_source_material_not_attached",
       "public_benchmark_real_pose_predictions_missing",
+      "public_benchmark_real_pose_validity_rows_missing",
       "public_benchmark_real_rmsd_rows_missing",
       "dud_e_lit_pcba_enrichment_rows_missing",
       "vina_gnina_comparison_rows_missing",
@@ -1521,6 +1523,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "95a9903ab5f738e9b830f14bcfb667a7b6e74469",
+  "source_commit_sha": "6c6b2f0ade0f6c82b0a838d9e1413781256d4c92",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }

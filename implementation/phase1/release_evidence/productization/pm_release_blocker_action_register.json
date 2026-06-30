@@ -24,10 +24,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T07:28:26.147622+00:00",
+  "generated_at": "2026-06-30T07:32:43.508646+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e0b6bfe6659b157f40414729baa7797afb03397f32f07bbbc9404d045a81fbcc",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:18b52265aafa6fce3e1d7b78959b9cbcbeee3dbd4ee4fe19171783ef934a86f4",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f7633450138ab65b206bac602f01aa572aeaff8100dbdc5a6a4c2569db7467c8",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a9ac6410d5da542e9bce800fb6792e4b2b42ac18e3aa6b21518695d5e17afed9",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -147,6 +147,7 @@
       "blockers": [
         "casf_pdbbind_source_material_not_attached",
         "public_benchmark_real_pose_predictions_missing",
+        "public_benchmark_real_pose_validity_rows_missing",
         "public_benchmark_real_rmsd_rows_missing",
         "dud_e_lit_pcba_enrichment_rows_missing",
         "vina_gnina_comparison_rows_missing",
@@ -961,7 +962,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "95a9903ab5f738e9b830f14bcfb667a7b6e74469",
+  "source_commit_sha": "6c6b2f0ade0f6c82b0a838d9e1413781256d4c92",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
