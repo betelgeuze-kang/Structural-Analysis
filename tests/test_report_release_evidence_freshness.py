@@ -164,6 +164,19 @@ def test_release_evidence_freshness_allows_receipt_only_input_commit_drift(
     assert changed_paths == []
 
 
+def test_release_evidence_freshness_allows_canonical_receipt_boundary_paths() -> None:
+    assert freshness._receipt_commit_allowed_path(
+        "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json"
+    )
+    assert freshness._receipt_commit_allowed_path(
+        "implementation/phase1/customer_shadow_evidence_status.json"
+    )
+    assert freshness._receipt_commit_allowed_path(
+        "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+    )
+    assert not freshness._receipt_commit_allowed_path("src/structural_analysis/core.py")
+
+
 def test_release_evidence_freshness_default_artifacts_include_real_project_and_customer_shadow(
     tmp_path: Path,
 ) -> None:

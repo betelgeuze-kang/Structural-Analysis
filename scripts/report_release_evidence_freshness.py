@@ -350,7 +350,12 @@ def _input_checksum_paths(repo_root: Path, input_checksum: Any) -> list[Path]:
 
 def _receipt_commit_allowed_path(path: str) -> bool:
     normalized = str(path or "").replace("\\", "/").lstrip("./")
-    return normalized.startswith("implementation/phase1/release_evidence/productization/")
+    if normalized.startswith("implementation/phase1/release_evidence/productization/"):
+        return True
+    return normalized in {
+        "implementation/phase1/customer_shadow_evidence_status.json",
+        "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+    }
 
 
 def _source_state_matches(
