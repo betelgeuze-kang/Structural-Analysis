@@ -29,6 +29,7 @@ DEFAULT_OPERATOR_INTAKE_OUT = PRODUCTIZATION / "pocketmd_lite_operator_intake_pa
 DEFAULT_OPERATOR_INTAKE_MD_OUT = DEFAULT_OPERATOR_INTAKE_OUT.with_suffix(".md")
 DEFAULT_OPERATOR_TEMPLATE_OUT = PRODUCTIZATION / "pocketmd_lite_operator_template.json"
 DEFAULT_SURFACE_OUT = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
+RAW_ROW_IMPORTER_SCRIPT = Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py")
 
 CONTRACT_SCHEMA_VERSION = "pocketmd-lite-contract.v1"
 SURVIVAL_REPORT_SCHEMA_VERSION = "pocketmd-lite-topk-survival-report.v1"
@@ -69,6 +70,7 @@ def _json_text(payload: dict[str, Any]) -> str:
 def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_pocketmd_lite_product_surface.py"),
+        RAW_ROW_IMPORTER_SCRIPT,
         Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
     ]
 
@@ -129,6 +131,7 @@ def _materializer_contract() -> dict[str, Any]:
             "science_product_surface": str(DEFAULT_SURFACE_OUT),
         },
         "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+        "raw_row_importer": _raw_row_importer_contract(),
         "command": (
             "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
             "--intake <operator-pocketmd-lite-intake.json> "
@@ -136,6 +139,22 @@ def _materializer_contract() -> dict[str, Any]:
             f"--out-report {DEFAULT_SURVIVAL_REPORT_OUT} "
             f"--out-surface {DEFAULT_SURFACE_OUT} "
             "--fail-blocked"
+        ),
+    }
+
+
+def _raw_row_importer_contract() -> dict[str, Any]:
+    return {
+        "script": str(RAW_ROW_IMPORTER_SCRIPT),
+        "status": "ready_for_raw_operator_rows",
+        "supported_source_formats": ["csv", "tsv", "json"],
+        "required_output_key": "cases",
+        "output_intake": "<operator-pocketmd-lite-intake.json>",
+        "command": (
+            "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
+            "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> "
+            "--out <operator-pocketmd-lite-intake.json> "
+            "--source-id <source-id> --source-license <license>"
         ),
     }
 
@@ -165,6 +184,7 @@ def _operator_intake_schema() -> dict[str, Any]:
             "remain out of scope."
         ),
         "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+        "raw_row_importer": _raw_row_importer_contract(),
         "template": {
             "case_id": "pocketmd_lite_case_001",
             "source_family": "CASF/PDBBind or GPCR operator intake",
@@ -189,6 +209,7 @@ def _operator_gate_unblock_plan(
     required_case_fields: list[str],
     materializer_command: str,
 ) -> list[dict[str, Any]]:
+    raw_row_importer = _raw_row_importer_contract()
     return [
         {
             "slot_id": "top_k_refinement_rows",
@@ -211,9 +232,13 @@ def _operator_gate_unblock_plan(
                 "required_case_fields": required_case_fields,
                 "receipt_fields": ["provenance_ref", "source_checksum"],
                 "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+                "raw_row_supported_formats": raw_row_importer["supported_source_formats"],
             },
             "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+            "raw_row_importer": raw_row_importer,
+            "raw_row_import_command": raw_row_importer["command"],
             "materialization_steps": [
+                "materialize_pocketmd_lite_operator_intake_from_rows",
                 "materialize_pocketmd_lite_topk_survival_report",
                 "refresh_product_capabilities_surface",
                 "refresh_goal_bottleneck_roadmap_surface",
@@ -248,6 +273,8 @@ def _operator_handoff_context(
         ],
         "first_next_action": "attach top-k candidate refinement rows",
         "template_artifact": str(first_gate.get("template_artifact") or ""),
+        "raw_row_importer": dict(first_gate.get("raw_row_importer") or {}),
+        "raw_row_import_command": str(first_gate.get("raw_row_import_command") or ""),
         "minimum_evidence": dict(first_gate.get("minimum_evidence") or {}),
         "materialization_steps": [
             str(row) for row in first_gate.get("materialization_steps", [])
@@ -268,6 +295,9 @@ def _operator_handoff_context(
         "materialization_steps": list(
             first_operator_evidence_gap["materialization_steps"]
         ),
+        "raw_row_import_command": first_operator_evidence_gap[
+            "raw_row_import_command"
+        ],
         "materialization_command": first_operator_evidence_gap[
             "materialization_command"
         ],
@@ -393,6 +423,7 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "operator_handoff_summary": handoff_context["operator_handoff_summary"],
         "blockers": blockers,
         "next_actions": [
+            "materialize_pocketmd_lite_operator_intake_from_rows",
             "fill_pocketmd_lite_operator_intake_packet",
             "attach_top_k_candidate_refinement_rows",
             "run_pocketmd_lite_topk_survival_materializer",
@@ -513,6 +544,7 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_OUT),
             "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
             "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+            "operator_raw_row_importer": str(RAW_ROW_IMPORTER_SCRIPT),
             "science_product_surface": str(DEFAULT_SURFACE_OUT),
         },
         "phase4_exit_gate_reference": {
@@ -534,11 +566,13 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "source_artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
             "markdown_artifact": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
             "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+            "raw_row_importer": _raw_row_importer_contract(),
             "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
             "required_slot_id": "top_k_refinement_rows",
             "case_key": "cases",
         },
         "operator_next_actions": [
+            "materialize_pocketmd_lite_operator_intake_from_rows",
             "fill_pocketmd_lite_operator_intake_packet",
             "attach_top_k_candidate_refinement_rows",
             "run_pocketmd_lite_topk_survival_materializer",
@@ -554,6 +588,7 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "broad_all_atom_md_claim remains locked unless separately evidenced",
         ],
         "materializer": _materializer_contract(),
+        "raw_row_importer": _raw_row_importer_contract(),
         "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
         "claim_boundary": (
             "This handoff prepares the bounded PocketMD Lite evidence path only. It is "
@@ -593,6 +628,7 @@ def build_operator_template(
         "template": {
             operator_schema.get("case_key", "cases"): [template],
         },
+        "raw_row_importer": _raw_row_importer_contract(),
         "materialization_command": materializer_command,
         "validation_command": materializer_command,
         "claim_boundary": (
@@ -624,6 +660,7 @@ def build_operator_intake_packet(
         f"--out-report {DEFAULT_SURVIVAL_REPORT_OUT} "
         f"--out-surface {DEFAULT_SURFACE_OUT} --fail-blocked"
     )
+    raw_row_importer = _raw_row_importer_contract()
     gate_unblock_plan = _operator_gate_unblock_plan(
         required_case_fields=required_case_fields,
         materializer_command=materializer_command,
@@ -660,6 +697,7 @@ def build_operator_intake_packet(
         "required_case_fields": required_case_fields,
         "required_metrics": [row["metric_id"] for row in contract.get("reported_metrics", [])],
         "top_k_policy": contract.get("top_k_policy", {}),
+        "raw_row_importer": raw_row_importer,
         "input_slots": [
             {
                 "slot_id": "top_k_refinement_rows",
@@ -669,9 +707,11 @@ def build_operator_intake_packet(
                 "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
                 "intake_artifact": "<operator-pocketmd-lite-intake.json>",
                 "required_case_fields": required_case_fields,
+                "raw_row_importer": raw_row_importer,
                 "template": template,
                 "owner_actions": [
                     "attach already-ranked top-k candidate refinement rows",
+                    "run materialize_pocketmd_lite_operator_intake_from_rows for CSV/TSV/JSON rows",
                     "fill local_min_survived as a boolean for every candidate",
                     "fill contact_persistence_rate and h_bond_persistence_rate as fractions",
                     "fill clash_count_before and clash_count_after as non-negative integers",
@@ -693,7 +733,14 @@ def build_operator_intake_packet(
         },
         "materialization_sequence": [
             {
+                "step_id": "materialize_pocketmd_lite_operator_intake_from_rows",
+                "schema_version": "pocketmd-lite-operator-intake.v1",
+                "command": raw_row_importer["command"],
+                "produces": "<operator-pocketmd-lite-intake.json>",
+            },
+            {
                 "step_id": "fill_pocketmd_lite_operator_intake_packet",
+                "mode": "manual_template_fallback",
                 "command": (
                     "create <operator-pocketmd-lite-intake.json> from "
                     f"{DEFAULT_OPERATOR_TEMPLATE_OUT}"
@@ -750,8 +797,10 @@ def build_operator_intake_packet(
             "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_OUT),
             "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
             "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+            "operator_raw_row_importer": str(RAW_ROW_IMPORTER_SCRIPT),
         },
         "next_actions": [
+            "materialize_pocketmd_lite_operator_intake_from_rows",
             "fill_pocketmd_lite_operator_intake_packet",
             "attach_top_k_candidate_refinement_rows",
             "run_pocketmd_lite_topk_survival_materializer",
@@ -763,6 +812,7 @@ def build_operator_intake_packet(
             "required_case_field_count": len(required_case_fields),
             "gate_unblock_plan_count": len(gate_unblock_plan),
             "operator_template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+            "raw_row_importer_script": str(RAW_ROW_IMPORTER_SCRIPT),
             "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
             "minimum_top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
             "current_blocker_count": len(blockers),
@@ -879,6 +929,7 @@ def build_surface(
             "roadmap_item": "PocketMD Lite science product surface",
             "bottleneck": "pocketmd_lite_science_product_surface_locked",
             "next_goal_actions": [
+                "materialize_pocketmd_lite_operator_intake_from_rows",
                 "fill_pocketmd_lite_operator_intake_packet",
                 "run_pocketmd_lite_topk_survival_materializer",
                 "publish_pocketmd_lite_readonly_api",
@@ -887,6 +938,7 @@ def build_surface(
             ],
         },
         "next_actions": [
+            "materialize_pocketmd_lite_operator_intake_from_rows",
             "fill_pocketmd_lite_operator_intake_packet",
             "attach_top_k_candidate_refinement_rows",
             "run_pocketmd_lite_topk_survival_materializer",

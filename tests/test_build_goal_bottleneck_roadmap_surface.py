@@ -827,10 +827,15 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "report_blockers_resolved",
     ]
     assert gate_plan["materialization_steps"] == [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
         "materialize_pocketmd_lite_topk_survival_report",
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface",
     ]
+    assert (
+        "materialize_pocketmd_lite_operator_intake_from_rows.py"
+        in gate_plan["raw_row_import_command"]
+    )
     assert (
         "materialize_pocketmd_lite_topk_survival_report.py"
         in gate_plan["materialization_command"]
@@ -840,6 +845,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         phase_4["summary"]["first_operator_evidence_gap"]["validation_command"]
         == gate_plan["validation_command"]
     )
+    assert "materialize_pocketmd_lite_operator_intake_from_rows" in phase_4["next_actions"]
     assert "fill_pocketmd_lite_operator_intake_packet" in phase_4["next_actions"]
     assert "regenerate_goal_bottleneck_action_board" in phase_4["next_actions"]
 

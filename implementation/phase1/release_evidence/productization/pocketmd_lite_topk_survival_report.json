@@ -25,12 +25,18 @@
     "first_next_action": "attach top-k candidate refinement rows",
     "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
     "materialization_steps": [
+      "materialize_pocketmd_lite_operator_intake_from_rows",
       "materialize_pocketmd_lite_topk_survival_report",
       "refresh_product_capabilities_surface",
       "refresh_goal_bottleneck_roadmap_surface"
     ],
     "minimum_evidence": {
       "candidate_scope": "upstream_ranked_top_k_candidates_only",
+      "raw_row_supported_formats": [
+        "csv",
+        "tsv",
+        "json"
+      ],
       "real_refinement_case_count": 1,
       "receipt_fields": [
         "provenance_ref",
@@ -62,15 +68,29 @@
     "preserves_phase4_criteria": [
       "broad_all_atom_fep_claims_locked"
     ],
+    "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+    "raw_row_importer": {
+      "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+      "output_intake": "<operator-pocketmd-lite-intake.json>",
+      "required_output_key": "cases",
+      "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "status": "ready_for_raw_operator_rows",
+      "supported_source_formats": [
+        "csv",
+        "tsv",
+        "json"
+      ]
+    },
     "slot_id": "top_k_refinement_rows",
     "slot_priority": 1,
     "status": "operator_input_required",
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T14:45:46.073338+00:00",
+  "generated_at": "2026-06-30T17:12:04.786738+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:ced9c90b1cdddc1220f44f4c357340c50e2e463af7a324bcf19bfd3c71e94964",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:94b4b814eb7dddaeac7d9056f99f2a75e5444d0c126cdcba93566af580de9495",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:eadda80242975025b7d2fab487229083a5f0701914319ab0eb8965e9a78643f7",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:f3d768ed86985931216b91e8298f60c4b6528deb324c08ae0cc3067da6395b25"
   },
   "materializer": {
@@ -81,12 +101,25 @@
       "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
       "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
     },
+    "raw_row_importer": {
+      "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+      "output_intake": "<operator-pocketmd-lite-intake.json>",
+      "required_output_key": "cases",
+      "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "status": "ready_for_raw_operator_rows",
+      "supported_source_formats": [
+        "csv",
+        "tsv",
+        "json"
+      ]
+    },
     "required_intake_key": "cases",
     "schema_version": "pocketmd-lite-topk-survival-materialization.v1",
     "script": "scripts/materialize_pocketmd_lite_topk_survival_report.py",
     "status": "ready_for_operator_intake"
   },
   "next_actions": [
+    "materialize_pocketmd_lite_operator_intake_from_rows",
     "fill_pocketmd_lite_operator_intake_packet",
     "attach_top_k_candidate_refinement_rows",
     "run_pocketmd_lite_topk_survival_materializer",
@@ -98,12 +131,18 @@
     {
       "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
       "materialization_steps": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
         "materialize_pocketmd_lite_topk_survival_report",
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface"
       ],
       "minimum_evidence": {
         "candidate_scope": "upstream_ranked_top_k_candidates_only",
+        "raw_row_supported_formats": [
+          "csv",
+          "tsv",
+          "json"
+        ],
         "real_refinement_case_count": 1,
         "receipt_fields": [
           "provenance_ref",
@@ -134,6 +173,19 @@
       "preserves_phase4_criteria": [
         "broad_all_atom_fep_claims_locked"
       ],
+      "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+      "raw_row_importer": {
+        "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+        "output_intake": "<operator-pocketmd-lite-intake.json>",
+        "required_output_key": "cases",
+        "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+        "status": "ready_for_raw_operator_rows",
+        "supported_source_formats": [
+          "csv",
+          "tsv",
+          "json"
+        ]
+      },
       "slot_id": "top_k_refinement_rows",
       "status": "operator_input_required",
       "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
@@ -158,12 +210,18 @@
     "first_next_action": "attach top-k candidate refinement rows",
     "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
     "materialization_steps": [
+      "materialize_pocketmd_lite_operator_intake_from_rows",
       "materialize_pocketmd_lite_topk_survival_report",
       "refresh_product_capabilities_surface",
       "refresh_goal_bottleneck_roadmap_surface"
     ],
     "minimum_evidence": {
       "candidate_scope": "upstream_ranked_top_k_candidates_only",
+      "raw_row_supported_formats": [
+        "csv",
+        "tsv",
+        "json"
+      ],
       "real_refinement_case_count": 1,
       "receipt_fields": [
         "provenance_ref",
@@ -191,6 +249,7 @@
       },
       "top_k_candidate_count": 1
     },
+    "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
     "required_slot_count": 1,
     "route": "/product/pocketmd-lite/operator-intake",
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
@@ -213,12 +272,18 @@
       "first_next_action": "attach top-k candidate refinement rows",
       "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
       "materialization_steps": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
         "materialize_pocketmd_lite_topk_survival_report",
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface"
       ],
       "minimum_evidence": {
         "candidate_scope": "upstream_ranked_top_k_candidates_only",
+        "raw_row_supported_formats": [
+          "csv",
+          "tsv",
+          "json"
+        ],
         "real_refinement_case_count": 1,
         "receipt_fields": [
           "provenance_ref",
@@ -250,6 +315,19 @@
       "preserves_phase4_criteria": [
         "broad_all_atom_fep_claims_locked"
       ],
+      "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+      "raw_row_importer": {
+        "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+        "output_intake": "<operator-pocketmd-lite-intake.json>",
+        "required_output_key": "cases",
+        "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+        "status": "ready_for_raw_operator_rows",
+        "supported_source_formats": [
+          "csv",
+          "tsv",
+          "json"
+        ]
+      },
       "slot_id": "top_k_refinement_rows",
       "slot_priority": 1,
       "status": "operator_input_required",
@@ -400,7 +478,7 @@
   ],
   "rows": [],
   "schema_version": "pocketmd-lite-topk-survival-report.v1",
-  "source_commit_sha": "14427b8e519b30ee97f713d8dede29cea66a34d6",
+  "source_commit_sha": "1470ba4b9ff0b702b516ec65920432aa587b31bc",
   "status": "operator_evidence_required",
   "summary": {
     "blocker_count": 6,

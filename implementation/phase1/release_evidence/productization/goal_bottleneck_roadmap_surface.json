@@ -176,26 +176,26 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T16:58:43.400552+00:00",
+  "generated_at": "2026-06-30T17:12:12.396892+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:1299c786ce3d9a8086ffb6ef54a9b71727cc3d59b419491f2b7afb82a43ee376",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:87313bdf5cac81f41fc9739e76e751ac95cfad3152f3d964370f2f73f1f25eec",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:83feae88bbc9328f3b882ab5df37b55e4dc1fb1b0995211550305bcccad2e232",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:21ef2dd6eee419ea3e1abe9273946465b65ad16ef7c1100bc47a64bd0be20d0b",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:f16ae56a7222abb8f692c0e817e85421a3e1d4a2c9a97453071ce87fd10f7f0a",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:3d338261477aa1618c428a4b9cf57f396387cf9e00ca7bdc89fac3b4fa172886",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:71e56180890908312bae669ab2a20fd817f978b64dc3e5e04b8c4b9287f41f89",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:e5a33c638b945fcf7b547ab40d8069e1dcb05987dce6e2e85cb868ef538a3edf",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:ee483556cec4a3f316100cff1216cc2b89a682c5acf4cba803e3e71bce12501a",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:e5939e8e53b298321c36a32fa6751e0b01968b508f0d7abe5d601aac11941a6d",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:1edb01035083f82389d3cff7ea27bb03a5b47e43b819250fe987ea3288b0cca6",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:5b9a691a11468a2aec5214202e86b47c59fda0b3254f9a42ade70ec650b7288f",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:f1c6612462662c6ef1fed38aa1b45c1779e0a93f7072133c3ab46a8c9c9c4a3f",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:70b78ff6ddb6ec4441e85b6d2f4a5d563da2a4be6ab3eb90297c70a113efbd18",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:e714438aadc8788c801797808e437852eb6c10a47cfd83f975119702d939f3d2",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:5e6c23255de1c0006cdfd22ceeccac1c35557f7d38bb78c6c2afa2e51c4a3979",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9ec8f63a1c16605565e1aa270fb0adf5352c306d9acec476e1b353063f4eeadf",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:30a83ea2f7d883ca8db99b6c7191a2270da8148b95c822d2a91a15b68d02b592",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:c610de914991d4ed7b39302c32dd62b1a822011772574efd293a4df5d58e0bbc",
-    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:678c6c521330f773b9baf45bbb24689c5e9bd413cb7e323b0e64460bdf888735",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:3c600915ce7cedd1b6445ff18122ec2d4c6bb500da64bbb731e35c3083f24daf",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:afe5cddec1571190d0da89289c568a4eef817b79f9d4d0be7f7407db3244e2ff",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:dea8d536b0a7677759207edff403cb0e2fd58bd0a1ac018c7899f7dbc9450a9b",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:91adc155bdd2efa506a76dcef214628f0cf9aaee4ecb313fc0279e39a645a449",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:b359e26dcd9ba2e6d5671868e84ea9407b31ce1235312d5fb4d58e948ccbc806",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:f3d768ed86985931216b91e8298f60c4b6528deb324c08ae0cc3067da6395b25"
   },
   "mutation_allowed": false,
@@ -872,12 +872,18 @@
       ],
       "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
       "materialization_steps": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
         "materialize_pocketmd_lite_topk_survival_report",
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface"
       ],
       "minimum_evidence": {
         "candidate_scope": "upstream_ranked_top_k_candidates_only",
+        "raw_row_supported_formats": [
+          "csv",
+          "tsv",
+          "json"
+        ],
         "real_refinement_case_count": 1,
         "receipt_fields": [
           "provenance_ref",
@@ -1444,12 +1450,18 @@
       ],
       "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
       "materialization_steps": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
         "materialize_pocketmd_lite_topk_survival_report",
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface"
       ],
       "minimum_evidence": {
         "candidate_scope": "upstream_ranked_top_k_candidates_only",
+        "raw_row_supported_formats": [
+          "csv",
+          "tsv",
+          "json"
+        ],
         "real_refinement_case_count": 1,
         "receipt_fields": [
           "provenance_ref",
@@ -1959,7 +1971,7 @@
             "capability_state": "blocked",
             "evidence_artifact_count": 8,
             "first_blocked_target": "top_k_refinement_operator_intake",
-            "first_next_action": "fill_pocketmd_lite_operator_intake_packet",
+            "first_next_action": "materialize_pocketmd_lite_operator_intake_from_rows",
             "locked": true,
             "locked_count": 1,
             "operator_intake_packet_status": "ready_for_operator_input",
@@ -3575,6 +3587,7 @@
         "/product/capabilities"
       ],
       "next_actions": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
         "fill_pocketmd_lite_operator_intake_packet",
         "run_pocketmd_lite_topk_survival_materializer",
         "publish_pocketmd_lite_readonly_api",
@@ -3608,12 +3621,18 @@
           "handoff_id": "pocketmd_lite::top_k_refinement_rows",
           "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
           "materialization_steps": [
+            "materialize_pocketmd_lite_operator_intake_from_rows",
             "materialize_pocketmd_lite_topk_survival_report",
             "refresh_product_capabilities_surface",
             "refresh_goal_bottleneck_roadmap_surface"
           ],
           "minimum_evidence": {
             "candidate_scope": "upstream_ranked_top_k_candidates_only",
+            "raw_row_supported_formats": [
+              "csv",
+              "tsv",
+              "json"
+            ],
             "real_refinement_case_count": 1,
             "receipt_fields": [
               "provenance_ref",
@@ -3645,6 +3664,19 @@
           "preserves_phase4_criteria": [
             "broad_all_atom_fep_claims_locked"
           ],
+          "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+          "raw_row_importer": {
+            "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+            "output_intake": "<operator-pocketmd-lite-intake.json>",
+            "required_output_key": "cases",
+            "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+            "status": "ready_for_raw_operator_rows",
+            "supported_source_formats": [
+              "csv",
+              "tsv",
+              "json"
+            ]
+          },
           "slot_id": "top_k_refinement_rows",
           "slot_priority": 1,
           "status": "operator_input_required",
@@ -3655,12 +3687,18 @@
           {
             "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
             "materialization_steps": [
+              "materialize_pocketmd_lite_operator_intake_from_rows",
               "materialize_pocketmd_lite_topk_survival_report",
               "refresh_product_capabilities_surface",
               "refresh_goal_bottleneck_roadmap_surface"
             ],
             "minimum_evidence": {
               "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "raw_row_supported_formats": [
+                "csv",
+                "tsv",
+                "json"
+              ],
               "real_refinement_case_count": 1,
               "receipt_fields": [
                 "provenance_ref",
@@ -3691,6 +3729,19 @@
             "preserves_phase4_criteria": [
               "broad_all_atom_fep_claims_locked"
             ],
+            "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+            "raw_row_importer": {
+              "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+              "output_intake": "<operator-pocketmd-lite-intake.json>",
+              "required_output_key": "cases",
+              "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+              "status": "ready_for_raw_operator_rows",
+              "supported_source_formats": [
+                "csv",
+                "tsv",
+                "json"
+              ]
+            },
             "slot_id": "top_k_refinement_rows",
             "status": "operator_input_required",
             "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
@@ -3729,12 +3780,18 @@
             "handoff_id": "pocketmd_lite::top_k_refinement_rows",
             "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
             "materialization_steps": [
+              "materialize_pocketmd_lite_operator_intake_from_rows",
               "materialize_pocketmd_lite_topk_survival_report",
               "refresh_product_capabilities_surface",
               "refresh_goal_bottleneck_roadmap_surface"
             ],
             "minimum_evidence": {
               "candidate_scope": "upstream_ranked_top_k_candidates_only",
+              "raw_row_supported_formats": [
+                "csv",
+                "tsv",
+                "json"
+              ],
               "real_refinement_case_count": 1,
               "receipt_fields": [
                 "provenance_ref",
@@ -3766,6 +3823,19 @@
             "preserves_phase4_criteria": [
               "broad_all_atom_fep_claims_locked"
             ],
+            "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+            "raw_row_importer": {
+              "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+              "output_intake": "<operator-pocketmd-lite-intake.json>",
+              "required_output_key": "cases",
+              "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+              "status": "ready_for_raw_operator_rows",
+              "supported_source_formats": [
+                "csv",
+                "tsv",
+                "json"
+              ]
+            },
             "slot_id": "top_k_refinement_rows",
             "slot_priority": 1,
             "status": "operator_input_required",
@@ -3902,7 +3972,7 @@
       ]
     }
   },
-  "source_commit_sha": "49cb04ed197d3e7f71cc7774d2110b4307dffade",
+  "source_commit_sha": "1470ba4b9ff0b702b516ec65920432aa587b31bc",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

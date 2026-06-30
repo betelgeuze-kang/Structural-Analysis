@@ -931,6 +931,8 @@ def _pocketmd_row(
             ],
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
             "template_artifact": str(row.get("template_artifact") or ""),
+            "raw_row_importer": _as_dict(row.get("raw_row_importer")),
+            "raw_row_import_command": str(row.get("raw_row_import_command") or ""),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
@@ -967,6 +969,8 @@ def _pocketmd_row(
             else [],
             "first_next_action": "attach top-k candidate refinement rows",
             "template_artifact": str(row.get("template_artifact") or ""),
+            "raw_row_importer": _as_dict(row.get("raw_row_importer")),
+            "raw_row_import_command": str(row.get("raw_row_import_command") or ""),
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))

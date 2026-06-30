@@ -77,6 +77,19 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
             "implementation/phase1/release_evidence/productization/"
             "pocketmd_lite_operator_template.json"
         ),
+        "raw_row_importer": {
+            "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+            "status": "ready_for_raw_operator_rows",
+            "supported_source_formats": ["csv", "tsv", "json"],
+            "required_output_key": "cases",
+            "output_intake": "<operator-pocketmd-lite-intake.json>",
+            "command": (
+                "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
+                "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> "
+                "--out <operator-pocketmd-lite-intake.json> "
+                "--source-id <source-id> --source-license <license>"
+            ),
+        },
         "command": (
             "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
             "--intake <operator-pocketmd-lite-intake.json> "
@@ -160,7 +173,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert survival["operator_handoff_summary"]["materialization_command"] == survival[
         "materializer"
     ]["command"]
-    assert survival["next_actions"][0] == "fill_pocketmd_lite_operator_intake_packet"
+    assert survival["next_actions"][:2] == [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+        "fill_pocketmd_lite_operator_intake_packet",
+    ]
 
     assert api["schema_version"] == "pocketmd-lite-readonly-api.v1"
     assert api["contract_pass"] is True
@@ -295,6 +311,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "required_receipt_field": "source_checksum",
     }
     assert gate_plan["materialization_steps"] == [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
         "materialize_pocketmd_lite_topk_survival_report",
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface",
@@ -302,7 +319,16 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["current_surface_status"]["first_blocked_target"] == (
         "top_k_refinement_operator_intake"
     )
-    assert operator["next_actions"][0] == "fill_pocketmd_lite_operator_intake_packet"
+    assert operator["materialization_sequence"][0]["step_id"] == (
+        "materialize_pocketmd_lite_operator_intake_from_rows"
+    )
+    assert operator["materialization_sequence"][1]["step_id"] == (
+        "fill_pocketmd_lite_operator_intake_packet"
+    )
+    assert operator["next_actions"][:2] == [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+        "fill_pocketmd_lite_operator_intake_packet",
+    ]
     assert operator["acceptance_criteria"][-1].startswith("broad_all_atom_md_claim")
     assert operator_template["schema_version"] == "pocketmd-lite-operator-template.v1"
     assert operator_template["status"] == "operator_template_seed"
@@ -388,12 +414,20 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum",
             },
+            "raw_row_supported_formats": ["csv", "tsv", "json"],
         },
         "materialization_steps": [
+            "materialize_pocketmd_lite_operator_intake_from_rows",
             "materialize_pocketmd_lite_topk_survival_report",
             "refresh_product_capabilities_surface",
             "refresh_goal_bottleneck_roadmap_surface",
         ],
+        "raw_row_import_command": (
+            "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
+            "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> "
+            "--out <operator-pocketmd-lite-intake.json> "
+            "--source-id <source-id> --source-license <license>"
+        ),
         "materialization_command": (
             "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
             "--intake <operator-pocketmd-lite-intake.json> "
@@ -434,6 +468,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "roadmap_item": "PocketMD Lite science product surface",
         "bottleneck": "pocketmd_lite_science_product_surface_locked",
         "next_goal_actions": [
+            "materialize_pocketmd_lite_operator_intake_from_rows",
             "fill_pocketmd_lite_operator_intake_packet",
             "run_pocketmd_lite_topk_survival_materializer",
             "publish_pocketmd_lite_readonly_api",
@@ -497,6 +532,9 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
         ].startswith("sha256:")
         assert payload["input_checksums"][
             "scripts/materialize_pocketmd_lite_topk_survival_report.py"
+        ].startswith("sha256:")
+        assert payload["input_checksums"][
+            "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"
         ].startswith("sha256:")
     assert "# PocketMD Lite Operator Intake Packet" in operator_md_out.read_text(
         encoding="utf-8"
