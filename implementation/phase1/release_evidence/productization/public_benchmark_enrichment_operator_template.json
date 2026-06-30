@@ -4,10 +4,10 @@
   "contract_pass": true,
   "depends_on": [],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T08:34:53.056267+00:00",
+  "generated_at": "2026-06-30T08:52:18.331006+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:e31bdbb136a50b180e5e6785f1db0fe8d640c3cd80459c2cd5dd9714148e1348",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:bc8d4cae8cdd9a82536311906019bc81c30390d8d90ac4083008d2f909fb5764",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:3c597113d59e0bdf5f71638b319c8393f820e130f42d286feb83f12ccfd96797",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:0799eac22f73b7676f73bea67a3b36cecd3c4b2f9bc67a0d85f85de6a8159d71",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:147b3fd1bbd0a5edce98ab1657763b0bf79cddbd362da968a591c1a25d107a55",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:031c17195862f073c2d17cdc71bf99e9d6c06517092ae8255dc26f8767d05d2e",
@@ -58,7 +58,7 @@
   "reused_evidence": true,
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "dud_e_lit_pcba_enrichment_intake",
-  "source_commit_sha": "d9855ab4c34c3c993a99e387d3dbee7738aa05f8",
+  "source_commit_sha": "c5cd25bc8f9039c9e9c59e1c3a9f39ab0ddb1184",
   "status": "operator_template_seed",
   "template": {
     "targets": [
