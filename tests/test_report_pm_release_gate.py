@@ -806,6 +806,74 @@ def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> N
                     "symmetry_rmsd_scorecard_real_cases",
                 ]
             },
+            "operator_intake_packet": {
+                "route": "/product/public-benchmark/operator-intake",
+                "artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_operator_intake_packet.json"
+                ),
+                "markdown_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_operator_intake_packet.md"
+                ),
+            },
+            "operator_handoff_summary": {
+                "route": "/product/public-benchmark/operator-intake",
+                "artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_operator_intake_packet.json"
+                ),
+                "required_slot_count": 4,
+                "blocked_operator_slot_count": 4,
+                "template_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_casf_pdbbind_operator_template.json"
+                ),
+                "minimum_evidence": {
+                    "case_count": 12,
+                    "source_family": "CASF/PDBBind",
+                },
+                "materialization_command": (
+                    "python3 scripts/materialize_public_benchmark_subset_manifest.py "
+                    "--intake <operator-casf-pdbbind-intake.json>"
+                ),
+                "validation_command": (
+                    "python3 scripts/validate_public_benchmark_subset_manifest.py "
+                    "--manifest implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_subset_manifest.json --fail-blocked"
+                ),
+            },
+            "operator_handoff_queue_count": 1,
+            "first_operator_handoff": {
+                "handoff_id": "public_benchmark::casf_pdbbind_subset_intake",
+                "route": "/product/public-benchmark/operator-intake",
+                "operator_intake_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_operator_intake_packet.json"
+                ),
+                "operator_intake_markdown_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_operator_intake_packet.md"
+                ),
+                "slot_id": "casf_pdbbind_subset_intake",
+                "template_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_casf_pdbbind_operator_template.json"
+                ),
+                "minimum_evidence": {
+                    "case_count": 12,
+                    "source_family": "CASF/PDBBind",
+                },
+                "materialization_command": (
+                    "python3 scripts/materialize_public_benchmark_subset_manifest.py "
+                    "--intake <operator-casf-pdbbind-intake.json>"
+                ),
+                "validation_command": (
+                    "python3 scripts/validate_public_benchmark_subset_manifest.py "
+                    "--manifest implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_subset_manifest.json --fail-blocked"
+                ),
+            },
         }
     )
 
@@ -843,6 +911,65 @@ def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> N
             "artifact": (
                 "implementation/phase1/release_evidence/productization/"
                 "public_benchmark_source_of_truth.json"
+            ),
+            "operator_intake_route": "/product/public-benchmark/operator-intake",
+            "operator_intake_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_operator_intake_packet.json"
+            ),
+            "operator_intake_markdown_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_operator_intake_packet.md"
+            ),
+            "operator_template_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_casf_pdbbind_operator_template.json"
+            ),
+            "first_operator_handoff": {
+                "handoff_id": "public_benchmark::casf_pdbbind_subset_intake",
+                "route": "/product/public-benchmark/operator-intake",
+                "operator_intake_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_operator_intake_packet.json"
+                ),
+                "operator_intake_markdown_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_operator_intake_packet.md"
+                ),
+                "slot_id": "casf_pdbbind_subset_intake",
+                "template_artifact": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_casf_pdbbind_operator_template.json"
+                ),
+                "minimum_evidence": {
+                    "case_count": 12,
+                    "source_family": "CASF/PDBBind",
+                },
+                "materialization_command": (
+                    "python3 scripts/materialize_public_benchmark_subset_manifest.py "
+                    "--intake <operator-casf-pdbbind-intake.json>"
+                ),
+                "validation_command": (
+                    "python3 scripts/validate_public_benchmark_subset_manifest.py "
+                    "--manifest implementation/phase1/release_evidence/productization/"
+                    "public_benchmark_subset_manifest.json --fail-blocked"
+                ),
+            },
+            "operator_handoff_queue_count": 1,
+            "blocked_operator_slot_count": 4,
+            "required_slot_count": 4,
+            "minimum_evidence": {
+                "case_count": 12,
+                "source_family": "CASF/PDBBind",
+            },
+            "materialization_command": (
+                "python3 scripts/materialize_public_benchmark_subset_manifest.py "
+                "--intake <operator-casf-pdbbind-intake.json>"
+            ),
+            "validation_command": (
+                "python3 scripts/validate_public_benchmark_subset_manifest.py "
+                "--manifest implementation/phase1/release_evidence/productization/"
+                "public_benchmark_subset_manifest.json --fail-blocked"
             ),
         }
     ]

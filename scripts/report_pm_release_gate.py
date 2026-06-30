@@ -597,6 +597,27 @@ def _public_benchmark_operator_actions(
         or source_summary.get("tier_beta_gate")
     )
     blocked_criteria = _failed_criteria(tier_beta_gate)
+    operator_handoff_summary = _as_dict(
+        public_benchmark_source_of_truth_payload.get("operator_handoff_summary")
+        or source_summary.get("operator_handoff_summary")
+    )
+    operator_intake_packet = _as_dict(
+        public_benchmark_source_of_truth_payload.get("operator_intake_packet")
+        or source_summary.get("operator_intake_packet")
+    )
+    operator_handoff_queue = [
+        row
+        for row in _as_list(
+            public_benchmark_source_of_truth_payload.get("operator_handoff_queue")
+            or source_summary.get("operator_handoff_queue")
+        )
+        if isinstance(row, dict)
+    ]
+    first_operator_handoff = _as_dict(
+        public_benchmark_source_of_truth_payload.get("first_operator_handoff")
+        or source_summary.get("first_operator_handoff")
+        or (operator_handoff_queue[0] if operator_handoff_queue else {})
+    )
     first_blocker = blockers[0] if blockers else ""
     reason = f"public benchmark source-of-truth is {status}; first_blocker={first_blocker}"
     if first_blocked_target:
@@ -605,22 +626,91 @@ def _public_benchmark_operator_actions(
         reason += f"; root_cause_tags={','.join(root_cause_tags)}"
     if next_actions:
         reason += f"; next_action={next_actions[0]}"
-    return [
-        {
-            "action_id": "materialize_public_benchmark_source_of_truth",
-            "status": "public_benchmark_evidence_required",
-            "bottleneck": "public_benchmark_source_of_truth_not_ready",
-            "first_blocker": first_blocker,
-            "first_blocked_target": first_blocked_target,
-            "root_cause_tags": root_cause_tags,
-            "blocked_criteria": blocked_criteria,
-            "blocked_criteria_count": len(blocked_criteria),
-            "blockers": blockers,
-            "next_actions": next_actions,
-            "reason": reason,
-            "artifact": str(DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH),
-        }
-    ]
+    action = {
+        "action_id": "materialize_public_benchmark_source_of_truth",
+        "status": "public_benchmark_evidence_required",
+        "bottleneck": "public_benchmark_source_of_truth_not_ready",
+        "first_blocker": first_blocker,
+        "first_blocked_target": first_blocked_target,
+        "root_cause_tags": root_cause_tags,
+        "blocked_criteria": blocked_criteria,
+        "blocked_criteria_count": len(blocked_criteria),
+        "blockers": blockers,
+        "next_actions": next_actions,
+        "reason": reason,
+        "artifact": str(DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH),
+    }
+    operator_intake_route = str(
+        first_operator_handoff.get("route")
+        or operator_handoff_summary.get("route")
+        or operator_intake_packet.get("route")
+        or ""
+    )
+    operator_intake_artifact = str(
+        first_operator_handoff.get("operator_intake_artifact")
+        or operator_handoff_summary.get("artifact")
+        or operator_intake_packet.get("artifact")
+        or ""
+    )
+    operator_intake_markdown_artifact = str(
+        first_operator_handoff.get("operator_intake_markdown_artifact")
+        or operator_intake_packet.get("markdown_artifact")
+        or ""
+    )
+    operator_template_artifact = str(
+        first_operator_handoff.get("template_artifact")
+        or operator_handoff_summary.get("template_artifact")
+        or ""
+    )
+    if operator_intake_route:
+        action["operator_intake_route"] = operator_intake_route
+    if operator_intake_artifact:
+        action["operator_intake_artifact"] = operator_intake_artifact
+    if operator_intake_markdown_artifact:
+        action["operator_intake_markdown_artifact"] = operator_intake_markdown_artifact
+    if operator_template_artifact:
+        action["operator_template_artifact"] = operator_template_artifact
+    if first_operator_handoff:
+        action["first_operator_handoff"] = first_operator_handoff
+    operator_handoff_queue_count = (
+        public_benchmark_source_of_truth_payload.get("operator_handoff_queue_count")
+        or source_summary.get("operator_handoff_queue_count")
+    )
+    if operator_handoff_queue or operator_handoff_queue_count is not None:
+        action["operator_handoff_queue_count"] = _as_int(
+            operator_handoff_queue_count
+            if operator_handoff_queue_count is not None
+            else len(operator_handoff_queue)
+        )
+    if operator_handoff_summary.get("blocked_operator_slot_count") is not None:
+        action["blocked_operator_slot_count"] = _as_int(
+            operator_handoff_summary.get("blocked_operator_slot_count")
+        )
+    if operator_handoff_summary.get("required_slot_count") is not None:
+        action["required_slot_count"] = _as_int(
+            operator_handoff_summary.get("required_slot_count")
+        )
+    minimum_evidence = _as_dict(
+        first_operator_handoff.get("minimum_evidence")
+        or operator_handoff_summary.get("minimum_evidence")
+    )
+    if minimum_evidence:
+        action["minimum_evidence"] = minimum_evidence
+    materialization_command = str(
+        first_operator_handoff.get("materialization_command")
+        or operator_handoff_summary.get("materialization_command")
+        or ""
+    )
+    validation_command = str(
+        first_operator_handoff.get("validation_command")
+        or operator_handoff_summary.get("validation_command")
+        or ""
+    )
+    if materialization_command:
+        action["materialization_command"] = materialization_command
+    if validation_command:
+        action["validation_command"] = validation_command
+    return [action]
 
 
 def _release_decision(
