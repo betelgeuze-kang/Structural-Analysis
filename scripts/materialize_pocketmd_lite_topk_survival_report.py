@@ -312,6 +312,34 @@ def _summary(rows: list[dict[str, Any]], blockers: list[str]) -> dict[str, Any]:
     }
 
 
+def _topk_integrity_blockers(rows: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
+    blockers: list[str] = []
+    root_cause_tags: list[str] = []
+    ranks_by_case: dict[tuple[str, int], str] = {}
+    candidates_by_case: dict[tuple[str, str], str] = {}
+    for row in rows:
+        case_id = _string(row.get("case_id"))
+        candidate_id = _string(row.get("candidate_id"))
+        top_k_rank = _integer(row.get("top_k_rank"))
+        if not case_id:
+            continue
+        if top_k_rank is not None:
+            rank_key = (case_id, top_k_rank)
+            if rank_key in ranks_by_case:
+                blockers.append(f"{case_id}:top_k_rank_{top_k_rank}_duplicate")
+                root_cause_tags.append("top_k_integrity_required")
+            else:
+                ranks_by_case[rank_key] = candidate_id
+        if candidate_id:
+            candidate_key = (case_id, candidate_id)
+            if candidate_key in candidates_by_case:
+                blockers.append(f"{case_id}:candidate_id_{candidate_id}_duplicate")
+                root_cause_tags.append("top_k_integrity_required")
+            else:
+                candidates_by_case[candidate_key] = candidate_id
+    return blockers, list(dict.fromkeys(root_cause_tags))
+
+
 def _matching_blockers(blockers: list[str], *needles: str) -> list[str]:
     return [
         blocker
@@ -481,6 +509,9 @@ def materialize_pocketmd_lite_topk_survival_report(
     rows = [_normalize_candidate_row(row, index) for index, row in enumerate(_case_rows(intake))]
     blockers = [blocker for row in rows for blocker in row["blockers"]]
     root_cause_tags = list(dict.fromkeys(tag for row in rows for tag in row["root_cause_tags"]))
+    integrity_blockers, integrity_root_causes = _topk_integrity_blockers(rows)
+    blockers.extend(integrity_blockers)
+    root_cause_tags.extend(integrity_root_causes)
     if not rows:
         blockers.extend(EMPTY_INTAKE_BLOCKERS)
         root_cause_tags.append("operator_refinement_rows_required")
@@ -494,7 +525,9 @@ def materialize_pocketmd_lite_topk_survival_report(
             for row in rows
             if row["blockers"]
         ),
-        "top_k_refinement_operator_intake" if blockers else "",
+        "top_k_refinement_operator_intake"
+        if blockers and not rows
+        else (str(blockers[0]).split(":", 1)[0] if blockers else ""),
     )
     phase4_exit_gate = build_phase4_exit_gate(
         summary=summary,

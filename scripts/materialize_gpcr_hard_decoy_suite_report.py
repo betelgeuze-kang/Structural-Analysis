@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any
@@ -50,6 +51,7 @@ PHASE3_MATERIALIZATION_STEPS = [
     "refresh_product_capabilities_surface",
     "refresh_goal_bottleneck_roadmap_surface",
 ]
+RAW_RANKING_ROW_FIELDS = ("molecule_id", "score", "is_positive", "is_decoy")
 
 
 def _slot_id_for_target(target_id: str) -> str:
@@ -214,6 +216,15 @@ def _boolean(value: Any) -> bool | None:
     return value if isinstance(value, bool) else None
 
 
+def _score_direction(value: Any) -> str:
+    token = str(value or "").strip().lower()
+    if token in {"", "higher", "higher_is_better", "descending"}:
+        return "higher_is_better"
+    if token in {"lower", "lower_is_better", "ascending"}:
+        return "lower_is_better"
+    return token
+
+
 def _row_by_target(intake: dict[str, Any]) -> dict[str, dict[str, Any]]:
     rows: dict[str, dict[str, Any]] = {}
     for row in _as_list(intake.get("targets")):
@@ -223,6 +234,200 @@ def _row_by_target(intake: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if target_id:
             rows[target_id] = row
     return rows
+
+
+def _raw_hard_decoy_rows(row: dict[str, Any]) -> list[dict[str, Any]]:
+    for key in ("hard_decoy_rows", "ranking_rows", "scored_molecules"):
+        rows = _as_list(row.get(key))
+        if rows:
+            return [item for item in rows if isinstance(item, dict)]
+    return []
+
+
+def _average_precision(ranked_rows: list[dict[str, Any]], positive_count: int) -> float | None:
+    if positive_count <= 0:
+        return None
+    precision_sum = 0.0
+    hits = 0
+    for index, ranked_row in enumerate(ranked_rows, start=1):
+        if bool(ranked_row["is_positive"]):
+            hits += 1
+            precision_sum += hits / index
+    return precision_sum / positive_count
+
+
+def _computed_hard_decoy_metrics(
+    target_id: str,
+    row: dict[str, Any],
+) -> tuple[dict[str, Any], list[str], list[str]]:
+    raw_rows = _raw_hard_decoy_rows(row)
+    if not raw_rows:
+        return {}, [], []
+
+    blockers: list[str] = []
+    root_cause_tags: list[str] = []
+    normalized_rows: list[dict[str, Any]] = []
+    score_direction = _score_direction(row.get("score_direction"))
+    if score_direction not in {"higher_is_better", "lower_is_better"}:
+        blockers.append(f"{target_id}:score_direction_invalid")
+        root_cause_tags.append("operator_values_required")
+        score_direction = "higher_is_better"
+
+    for index, raw_row in enumerate(raw_rows):
+        row_key = str(raw_row.get("molecule_id") or f"row_{index + 1}").strip()
+        for field in RAW_RANKING_ROW_FIELDS:
+            if field not in raw_row:
+                blockers.append(f"{target_id}:{row_key}:{field}_missing")
+                root_cause_tags.append("operator_values_required")
+        molecule_id = str(raw_row.get("molecule_id") or "").strip()
+        score = _number(raw_row.get("score"))
+        is_positive = _boolean(raw_row.get("is_positive"))
+        is_decoy = _boolean(raw_row.get("is_decoy"))
+        if "molecule_id" in raw_row and not molecule_id:
+            blockers.append(f"{target_id}:{row_key}:molecule_id_blank")
+            root_cause_tags.append("operator_values_required")
+        if "score" in raw_row and score is None:
+            blockers.append(f"{target_id}:{row_key}:score_invalid")
+            root_cause_tags.append("operator_values_required")
+        if "is_positive" in raw_row and is_positive is None:
+            blockers.append(f"{target_id}:{row_key}:is_positive_invalid")
+            root_cause_tags.append("operator_values_required")
+        if "is_decoy" in raw_row and is_decoy is None:
+            blockers.append(f"{target_id}:{row_key}:is_decoy_invalid")
+            root_cause_tags.append("operator_values_required")
+        if is_positive is not None and is_decoy is not None and is_positive is is_decoy:
+            blockers.append(f"{target_id}:{row_key}:positive_decoy_label_invalid")
+            root_cause_tags.append("operator_values_required")
+        if score is not None and is_positive is not None and is_decoy is not None:
+            normalized_rows.append(
+                {
+                    "molecule_id": molecule_id or row_key,
+                    "score": score,
+                    "is_positive": is_positive,
+                    "is_decoy": is_decoy,
+                }
+            )
+
+    positive_count = sum(1 for ranked_row in normalized_rows if ranked_row["is_positive"])
+    decoy_count = sum(1 for ranked_row in normalized_rows if ranked_row["is_decoy"])
+    if normalized_rows and positive_count == 0:
+        blockers.append(f"{target_id}:positive_rows_missing")
+        root_cause_tags.append("operator_values_required")
+    if normalized_rows and decoy_count == 0:
+        blockers.append(f"{target_id}:decoy_rows_missing")
+        root_cause_tags.append("operator_values_required")
+    if blockers:
+        return {
+            "hard_decoy_row_count": len(raw_rows),
+            "valid_hard_decoy_row_count": len(normalized_rows),
+            "calculation_status": "blocked",
+        }, blockers, root_cause_tags
+
+    ranked_rows = sorted(
+        normalized_rows,
+        key=lambda ranked_row: float(ranked_row["score"]),
+        reverse=score_direction == "higher_is_better",
+    )
+    ranked_with_positions = [
+        {**ranked_row, "rank": index}
+        for index, ranked_row in enumerate(ranked_rows, start=1)
+    ]
+    positive_ranks = [
+        int(ranked_row["rank"])
+        for ranked_row in ranked_with_positions
+        if ranked_row["is_positive"]
+    ]
+    decoy_ranks = [
+        int(ranked_row["rank"])
+        for ranked_row in ranked_with_positions
+        if ranked_row["is_decoy"]
+    ]
+    top20_rows = ranked_with_positions[: min(20, len(ranked_with_positions))]
+    top20_hit_rate = (
+        sum(1 for ranked_row in top20_rows if ranked_row["is_positive"]) / len(top20_rows)
+        if top20_rows
+        else None
+    )
+    first_positive_rank = min(positive_ranks) if positive_ranks else math.inf
+    best_decoy_rank = min(decoy_ranks) if decoy_ranks else math.inf
+    decoys_above_positive_count = sum(
+        1 for rank in decoy_ranks if rank < first_positive_rank
+    )
+    positive_out_anchored_by_top_decoys = bool(
+        decoy_ranks and any(rank > best_decoy_rank for rank in positive_ranks)
+    )
+    average_precision = _average_precision(ranked_with_positions, positive_count)
+    return {
+        "hard_decoy_row_count": len(raw_rows),
+        "valid_hard_decoy_row_count": len(normalized_rows),
+        "score_direction": score_direction,
+        "ranking_pr_auc": average_precision,
+        "top20_hit_rate": top20_hit_rate,
+        "decoys_above_positive_count": decoys_above_positive_count,
+        "positive_out_anchored_by_top_decoys": positive_out_anchored_by_top_decoys,
+        "calculation_method": (
+            "top20_hit_rate=positive_fraction_in_top_min_20_rows; "
+            "decoys_above_positive_count=decoys_before_best_positive; "
+            "positive_out_anchored_by_top_decoys=any_positive_ranked_below_best_decoy"
+        ),
+        "calculation_status": "computed",
+    }, [], []
+
+
+def _metric_value(
+    row: dict[str, Any],
+    computed_metrics: dict[str, Any],
+    field_name: str,
+) -> Any:
+    if field_name in row:
+        return row.get(field_name)
+    return computed_metrics.get(field_name)
+
+
+def _float_matches(left: float, right: float, *, tolerance: float = 1.0e-9) -> bool:
+    return abs(left - right) <= tolerance
+
+
+def _computed_metric_consistency_blockers(
+    target_id: str,
+    row: dict[str, Any],
+    computed_metrics: dict[str, Any],
+) -> tuple[list[str], list[str]]:
+    if computed_metrics.get("calculation_status") != "computed":
+        return [], []
+    blockers: list[str] = []
+    root_cause_tags: list[str] = []
+    comparable_fields = (
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys",
+    )
+    for field_name in comparable_fields:
+        if field_name not in row or computed_metrics.get(field_name) is None:
+            continue
+        supplied = row.get(field_name)
+        computed = computed_metrics[field_name]
+        consistent = supplied is computed
+        if isinstance(computed, bool):
+            consistent = _boolean(supplied) is computed
+        elif isinstance(computed, float):
+            supplied_number = _number(supplied)
+            consistent = (
+                supplied_number is not None
+                and _float_matches(float(supplied_number), computed)
+            )
+        elif isinstance(computed, int):
+            consistent = _integer(supplied) == computed
+        if not consistent:
+            blockers.append(f"{target_id}:{field_name}_inconsistent_with_hard_decoy_rows")
+            root_cause_tags.append("hard_decoy_metric_inconsistency")
+
+    ranking_ci_low = _number(row.get("ranking_pr_auc_ci_low"))
+    ranking_pr_auc = _number(computed_metrics.get("ranking_pr_auc"))
+    if ranking_ci_low is not None and ranking_pr_auc is not None and ranking_ci_low > ranking_pr_auc:
+        blockers.append(f"{target_id}:ranking_pr_auc_ci_low_above_computed_pr_auc")
+        root_cause_tags.append("hard_decoy_metric_inconsistency")
+    return blockers, root_cause_tags
 
 
 def _missing_target_row(target_id: str) -> dict[str, Any]:
@@ -248,16 +453,29 @@ def _missing_target_row(target_id: str) -> dict[str, Any]:
 
 
 def _target_result(target_id: str, row: dict[str, Any]) -> dict[str, Any]:
+    computed_metrics, computed_blockers, computed_root_causes = (
+        _computed_hard_decoy_metrics(target_id, row)
+    )
     ranking = _number(row.get("ranking_pr_auc_ci_low"))
-    top20 = _number(row.get("top20_hit_rate"))
-    decoys_above = _integer(row.get("decoys_above_positive_count"))
+    top20 = _number(_metric_value(row, computed_metrics, "top20_hit_rate"))
+    decoys_above = _integer(
+        _metric_value(row, computed_metrics, "decoys_above_positive_count")
+    )
     out_anchored = _boolean(
-        row.get("positive_out_anchored_by_top_decoys")
+        _metric_value(row, computed_metrics, "positive_out_anchored_by_top_decoys")
         if "positive_out_anchored_by_top_decoys" in row
+        or "positive_out_anchored_by_top_decoys" in computed_metrics
         else row.get("positive_out_anchored_by_top_decoy")
     )
     blockers: list[str] = []
     root_cause_tags: list[str] = []
+    blockers.extend(computed_blockers)
+    root_cause_tags.extend(computed_root_causes)
+    consistency_blockers, consistency_root_causes = (
+        _computed_metric_consistency_blockers(target_id, row, computed_metrics)
+    )
+    blockers.extend(consistency_blockers)
+    root_cause_tags.extend(consistency_root_causes)
 
     if ranking is None:
         blockers.append(f"{target_id}:ranking_pr_auc_ci_low_required")
@@ -296,6 +514,7 @@ def _target_result(target_id: str, row: dict[str, Any]) -> dict[str, Any]:
         "top20_hit_rate": top20,
         "decoys_above_positive_count": decoys_above,
         "positive_out_anchored_by_top_decoys": out_anchored,
+        "computed_hard_decoy_metrics": computed_metrics,
         "criteria": EXIT_CRITERIA,
         "root_cause_tags": deduped_root_causes,
         "blockers": blockers,

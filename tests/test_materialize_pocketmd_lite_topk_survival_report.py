@@ -190,6 +190,37 @@ def test_pocketmd_lite_materializer_blocks_invalid_checksum() -> None:
     assert "operator_receipts_required" in report["root_cause_tags"]
 
 
+def test_pocketmd_lite_materializer_blocks_duplicate_topk_rank() -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    cases.append(
+        _valid_case(
+            case_id="case_a",
+            candidate_id="pose_3",
+            top_k_rank=1,
+            local_min_survived=True,
+            contact_rate=0.9,
+            h_bond_rate=0.7,
+            clash_before=2,
+            clash_after=0,
+            uncertainty_low=-0.1,
+            uncertainty_high=0.2,
+        )
+    )
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["first_blocked_target"] == "case_a"
+    assert "case_a:top_k_rank_1_duplicate" in report["blockers"]
+    assert "top_k_integrity_required" in report["root_cause_tags"]
+
+
 def test_pocketmd_lite_materializer_blocks_empty_intake() -> None:
     report = module.materialize_pocketmd_lite_topk_survival_report(
         {"cases": []},

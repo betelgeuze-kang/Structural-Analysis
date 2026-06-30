@@ -29,6 +29,35 @@ def _passing_target(target_id: str) -> dict[str, object]:
     }
 
 
+def _positive_first_hard_decoy_rows() -> list[dict[str, object]]:
+    return [
+        {"molecule_id": "positive_1", "score": 0.95, "is_positive": True, "is_decoy": False},
+        {"molecule_id": "positive_2", "score": 0.90, "is_positive": True, "is_decoy": False},
+        {"molecule_id": "positive_3", "score": 0.85, "is_positive": True, "is_decoy": False},
+        {"molecule_id": "decoy_1", "score": 0.40, "is_positive": False, "is_decoy": True},
+        {"molecule_id": "decoy_2", "score": 0.10, "is_positive": False, "is_decoy": True},
+    ]
+
+
+def _decoy_first_hard_decoy_rows() -> list[dict[str, object]]:
+    return [
+        {"molecule_id": "decoy_1", "score": 0.99, "is_positive": False, "is_decoy": True},
+        {"molecule_id": "positive_1", "score": 0.90, "is_positive": True, "is_decoy": False},
+        {"molecule_id": "positive_2", "score": 0.85, "is_positive": True, "is_decoy": False},
+        {"molecule_id": "decoy_2", "score": 0.20, "is_positive": False, "is_decoy": True},
+        {"molecule_id": "decoy_3", "score": 0.10, "is_positive": False, "is_decoy": True},
+    ]
+
+
+def _passing_target_from_rows(target_id: str) -> dict[str, object]:
+    return {
+        "target_id": target_id,
+        "ranking_pr_auc_ci_low": 0.80,
+        "score_direction": "higher_is_better",
+        "hard_decoy_rows": _positive_first_hard_decoy_rows(),
+    }
+
+
 def test_gpcr_hard_decoy_suite_passes_required_targets() -> None:
     report = module.materialize_gpcr_hard_decoy_suite_report(
         {"targets": [_passing_target("DRD2"), _passing_target("HTR2A"), _passing_target("OPRM1")]},
@@ -58,6 +87,57 @@ def test_gpcr_hard_decoy_suite_passes_required_targets() -> None:
         "decoys_above_positive_count_max": True,
         "no_positive_out_anchored_by_top_decoys": True,
     }
+
+
+def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows() -> None:
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        {
+            "targets": [
+                _passing_target_from_rows("DRD2"),
+                _passing_target_from_rows("HTR2A"),
+                _passing_target_from_rows("OPRM1"),
+            ]
+        },
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "ready"
+    assert report["broad_gpcr_family_claim_safe"] is True
+    first_row = report["target_rows"][0]
+    assert first_row["top20_hit_rate"] == 0.6
+    assert first_row["decoys_above_positive_count"] == 0
+    assert first_row["positive_out_anchored_by_top_decoys"] is False
+    assert first_row["computed_hard_decoy_metrics"]["ranking_pr_auc"] == 1.0
+    assert first_row["computed_hard_decoy_metrics"]["calculation_status"] == "computed"
+
+
+def test_gpcr_hard_decoy_suite_blocks_metrics_that_conflict_with_raw_rows() -> None:
+    conflicting_drd2 = {
+        **_passing_target("DRD2"),
+        "hard_decoy_rows": _decoy_first_hard_decoy_rows(),
+    }
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        {
+            "targets": [
+                conflicting_drd2,
+                _passing_target("HTR2A"),
+                _passing_target("OPRM1"),
+            ]
+        },
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["first_blocked_target"] == "DRD2"
+    assert (
+        "DRD2:decoys_above_positive_count_inconsistent_with_hard_decoy_rows"
+        in report["blockers"]
+    )
+    assert (
+        "DRD2:positive_out_anchored_by_top_decoys_inconsistent_with_hard_decoy_rows"
+        in report["blockers"]
+    )
+    assert "hard_decoy_metric_inconsistency" in report["root_cause_tags"]
 
 
 def test_gpcr_hard_decoy_suite_blocks_missing_operator_values() -> None:

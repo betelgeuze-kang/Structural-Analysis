@@ -158,6 +158,33 @@ def test_vina_gnina_comparison_adapter_blocks_bad_rows() -> None:
     assert "bad_case:gnina_engine_run_missing" in adapter["blockers"]
 
 
+def test_vina_gnina_comparison_adapter_blocks_pose_success_rmsd_mismatch() -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    engine_runs = first_case["engine_runs"]
+    assert isinstance(engine_runs, list)
+    first_run = engine_runs[0]
+    assert isinstance(first_run, dict)
+    first_run["symmetry_aware_rmsd_angstrom"] = 3.0
+    first_run["pose_success"] = True
+
+    adapter = module.materialize_vina_gnina_comparison_adapter(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert adapter["status"] == "operator_evidence_required"
+    assert adapter["first_blocked_target"] == "case_a"
+    assert (
+        "case_a:engine_run_0:pose_success_inconsistent_with_rmsd_threshold"
+        in adapter["blockers"]
+    )
+    assert "pose_success_rmsd_inconsistent" in adapter["root_cause_tags"]
+
+
 def test_vina_gnina_comparison_adapter_blocks_invalid_checksum() -> None:
     intake = _valid_intake()
     cases = intake["cases"]

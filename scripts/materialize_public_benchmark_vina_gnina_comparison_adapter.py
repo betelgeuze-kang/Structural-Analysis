@@ -23,6 +23,7 @@ DEFAULT_ADAPTER_OUT = PRODUCTIZATION / "public_benchmark_vina_gnina_comparison_a
 
 SCHEMA_VERSION = "public-benchmark-vina-gnina-comparison-materialization.v1"
 ADAPTER_SCHEMA_VERSION = "public-benchmark-vina-gnina-comparison-adapter.v1"
+DEFAULT_POSE_SUCCESS_RMSD_THRESHOLD_ANGSTROM = 2.0
 SUPPORTED_ENGINES = ("vina", "gnina")
 SUPPORTED_BENCHMARK_SPLITS = (
     "CASF-core",
@@ -139,6 +140,12 @@ def _normalize_engine_run(
     pose_success = _boolean(row.get("pose_success"))
     score = _number(row.get("score"))
     score_direction = _direction(row.get("score_direction"))
+    threshold = _number(
+        row.get(
+            "pose_success_rmsd_threshold_angstrom",
+            DEFAULT_POSE_SUCCESS_RMSD_THRESHOLD_ANGSTROM,
+        )
+    )
 
     if "engine_id" in row and engine_id not in SUPPORTED_ENGINES:
         blockers.append(f"{run_key}:engine_id_unsupported")
@@ -164,6 +171,16 @@ def _normalize_engine_run(
     }:
         blockers.append(f"{run_key}:score_direction_invalid")
         root_cause_tags.append("operator_values_required")
+    if threshold is None or threshold <= 0.0:
+        blockers.append(f"{run_key}:pose_success_rmsd_threshold_angstrom_invalid")
+        root_cause_tags.append("operator_values_required")
+    elif rmsd is not None and pose_success is not None:
+        expected_pose_success = bool(rmsd <= threshold)
+        if pose_success is not expected_pose_success:
+            blockers.append(
+                f"{run_key}:pose_success_inconsistent_with_rmsd_threshold"
+            )
+            root_cause_tags.append("pose_success_rmsd_inconsistent")
 
     return (
         {
@@ -174,6 +191,7 @@ def _normalize_engine_run(
             "pose_success": pose_success,
             "score": score,
             "score_direction": score_direction,
+            "pose_success_rmsd_threshold_angstrom": threshold,
             "status": "pass" if not blockers else "blocked",
             "contract_pass": not blockers,
             "blockers": blockers,
