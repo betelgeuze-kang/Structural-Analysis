@@ -61,6 +61,8 @@ def test_pose_validity_validator_passes_synthetic_dry_run() -> None:
     assert result["blockers"] == []
     row = result["rows"][0]
     assert row["pass"] is True
+    assert row["source_family"] == "synthetic"
+    assert row["benchmark_split"] == "synthetic-dry-run"
     assert row["rmsd_score"]["best_permutation"] == [0, 2, 1, 3]
 
 

@@ -345,6 +345,8 @@ def build_rmsd_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "rows": [
             {
                 "case_id": dry_run_case["case_id"],
+                "source_family": dry_run_case["source_family"],
+                "benchmark_split": dry_run_case["benchmark_split"],
                 "score": score,
                 "case_boundary": dry_run_case["case_boundary"],
             }

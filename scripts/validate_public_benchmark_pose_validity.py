@@ -100,6 +100,10 @@ def validate_pose_case(
     min_interatomic_distance_angstrom: float = DEFAULT_MIN_INTERATOMIC_DISTANCE_ANGSTROM,
 ) -> dict[str, Any]:
     case_id = str(row.get("case_id") or "case_without_id")
+    traceability = {
+        "source_family": str(row.get("source_family") or ""),
+        "benchmark_split": str(row.get("benchmark_split") or ""),
+    }
     blockers: list[str] = []
     for field in REQUIRED_POSE_FIELDS:
         if row.get(field) in (None, "", [], {}):
@@ -112,6 +116,7 @@ def validate_pose_case(
     except Exception as exc:
         return {
             "case_id": case_id,
+            **traceability,
             "status": "blocked",
             "pass": False,
             "blockers": [*blockers, f"{case_id}:coordinate_finiteness_failed:{exc.__class__.__name__}"],
@@ -141,6 +146,7 @@ def validate_pose_case(
         blockers.append(f"{case_id}:symmetry_aware_ligand_rmsd_above_threshold")
     return {
         "case_id": case_id,
+        **traceability,
         "status": "pass" if not blockers else "blocked",
         "pass": not blockers,
         "atom_count": atom_count,
