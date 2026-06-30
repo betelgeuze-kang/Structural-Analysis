@@ -319,6 +319,35 @@ def test_public_benchmark_phase2_row_audit_blocks_one_case_smoke_rows(
         "symmetry_aware_ligand_rmsd_ready",
         "posebusters_style_pose_validity_ready",
     ]
+    blocked_components = {
+        row["component_id"]: row
+        for row in audit["components"]
+        if not row["ready"]
+    }
+    assert {
+        component_id: row["contract_pass"]
+        for component_id, row in blocked_components.items()
+    } == {
+        "casf_pdbbind_pose_success_harness": False,
+        "symmetry_aware_ligand_rmsd": False,
+        "posebusters_style_pose_validity": False,
+    }
+    assert {
+        component_id: row["source_artifact_contract_pass"]
+        for component_id, row in blocked_components.items()
+    } == {
+        "casf_pdbbind_pose_success_harness": True,
+        "symmetry_aware_ligand_rmsd": True,
+        "posebusters_style_pose_validity": True,
+    }
+    assert {
+        component_id: row["status"]
+        for component_id, row in blocked_components.items()
+    } == {
+        "casf_pdbbind_pose_success_harness": "phase2_count_incomplete",
+        "symmetry_aware_ligand_rmsd": "phase2_count_incomplete",
+        "posebusters_style_pose_validity": "phase2_count_incomplete",
+    }
     assert "phase2_exit_gate::casf_pdbbind_pose_success_harness_ready" in audit[
         "blockers"
     ]

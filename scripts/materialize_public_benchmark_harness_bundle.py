@@ -283,14 +283,28 @@ def _phase2_component_rows(
                 f"{count_field}_below_required:"
                 f"{current_count}<{required_minimum_count}"
             )
-        contract_pass = summary.get("contract_pass") is True
+        source_artifact_contract_pass = summary.get("contract_pass") is True
+        component_contract_pass = bool(
+            summary
+            and summary.get("exists", True)
+            and source_artifact_contract_pass
+            and current_count >= required_minimum_count
+            and not blockers
+        )
+        component_status = str(summary.get("status") or "artifact_missing")
+        if blockers:
+            count_blocked = any(
+                str(blocker).startswith(f"{count_field}_below_required:")
+                for blocker in blockers
+            )
+            component_status = (
+                "phase2_count_incomplete" if count_blocked else "blocked"
+            )
         ready = bool(
             summary
             and summary.get("exists", True)
             and summary.get("ready")
-            and contract_pass
-            and current_count >= required_minimum_count
-            and not blockers
+            and component_contract_pass
         )
         rows.append(
             {
@@ -299,8 +313,9 @@ def _phase2_component_rows(
                 "artifact_role": role,
                 "artifact": str(summary.get("artifact") or ""),
                 "schema_version": str(summary.get("schema_version") or ""),
-                "status": str(summary.get("status") or "artifact_missing"),
-                "contract_pass": contract_pass,
+                "status": component_status,
+                "contract_pass": component_contract_pass,
+                "source_artifact_contract_pass": source_artifact_contract_pass,
                 "ready_field": str(required["ready_field"]),
                 "ready": ready,
                 "count_field": count_field,

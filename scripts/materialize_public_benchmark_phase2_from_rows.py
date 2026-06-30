@@ -310,6 +310,9 @@ def _components_from_report(report: dict[str, Any]) -> list[dict[str, Any]]:
                 "component_id": component_id,
                 "status": str(row.get("status") or ""),
                 "contract_pass": bool(row.get("contract_pass")),
+                "source_artifact_contract_pass": bool(
+                    row.get("source_artifact_contract_pass")
+                ),
                 "ready": bool(row.get("ready")),
                 "materialized": True,
                 "artifact_role": str(row.get("artifact_role") or ""),
