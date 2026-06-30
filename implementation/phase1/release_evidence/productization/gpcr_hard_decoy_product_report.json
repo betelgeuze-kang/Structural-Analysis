@@ -50,7 +50,7 @@
     "promote_broad_gpcr_claim",
     "infer_missing_target_values"
   ],
-  "generated_at": "2026-06-30T12:07:11.785899+00:00",
+  "generated_at": "2026-06-30T12:09:17.751367+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:ef5a5621a926c01e41f2e17feb4dcce40fc0a4ad73caff73e1d21fcdc0585729",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:07b872e618381d80d5d7ac373e33418f91464899f690261225c5ed5b164312ea",
@@ -401,7 +401,7 @@
     "OPRM1:positive_out_anchored_by_top_decoys_required"
   ],
   "science_claim_status": "blocked",
-  "source_commit_sha": "fec7079b2da42aa26444e16c177ed645e1f76a4b",
+  "source_commit_sha": "b0e100eecc5f8a4879cd85336d3cf79c661ef34b",
   "status": "ready_science_claim_blocked",
   "summary": {
     "first_blocked_target": "DRD2",
