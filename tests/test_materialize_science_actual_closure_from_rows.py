@@ -36,15 +36,28 @@ def _write_gpcr_rows(path: Path) -> None:
     ]
     rows = []
     for target_id in ("DRD2", "HTR2A", "OPRM1"):
-        rows.extend(
-            [
-                [target_id, "higher_is_better", f"{target_id}_positive_1", "0.95", "true", "false"],
-                [target_id, "higher_is_better", f"{target_id}_positive_2", "0.90", "true", "false"],
-                [target_id, "higher_is_better", f"{target_id}_positive_3", "0.85", "true", "false"],
-                [target_id, "higher_is_better", f"{target_id}_decoy_1", "0.40", "false", "true"],
-                [target_id, "higher_is_better", f"{target_id}_decoy_2", "0.10", "false", "true"],
-            ]
-        )
+        for index in range(1, 5):
+            rows.append(
+                [
+                    target_id,
+                    "higher_is_better",
+                    f"{target_id}_positive_{index}",
+                    f"{1.0 - index / 100:.2f}",
+                    "true",
+                    "false",
+                ]
+            )
+        for index in range(1, 21):
+            rows.append(
+                [
+                    target_id,
+                    "higher_is_better",
+                    f"{target_id}_decoy_{index}",
+                    f"{0.50 - index / 100:.2f}",
+                    "false",
+                    "true",
+                ]
+            )
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(fieldnames)
@@ -146,6 +159,11 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "positive_out_anchored_by_top_decoys_allowed": False,
         "ranking_pr_auc_ci_low_min": 0.45,
         "top20_hit_rate_min": 0.2,
+    }
+    assert gpcr_contract["raw_row_quality_minimums"] == {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24,
     }
     assert gpcr_contract["required_flat_row_fields"] == [
         "target_id",

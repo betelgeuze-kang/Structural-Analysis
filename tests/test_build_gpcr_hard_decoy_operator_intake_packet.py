@@ -127,10 +127,17 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     ]
     assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"] == {
         "decoys_above_positive_count": "<=0",
-        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+        "hard_decoy_rows": (
+            "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+        ),
         "positive_out_anchored_by_top_decoys": False,
         "ranking_pr_auc_ci_low": ">=0.45",
         "top20_hit_rate": ">=0.2",
+    }
+    assert gate_plan["DRD2"]["minimum_evidence"]["raw_row_quality_minimums"] == {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24,
     }
     assert gate_plan["DRD2"]["minimum_evidence"]["criterion_by_field"] == {
         "decoys_above_positive_count": "decoys_above_positive_count_max",
@@ -189,6 +196,11 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "is_positive",
         "is_decoy",
     ]
+    assert packet["raw_row_import"]["minimum_row_quality_per_target"] == {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24,
+    }
     assert packet["next_actions"][:3] == [
         "attach_gpcr_hard_decoy_raw_row_file",
         "materialize_gpcr_hard_decoy_operator_template_from_rows",
