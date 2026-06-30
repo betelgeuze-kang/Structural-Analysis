@@ -122,6 +122,43 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "vina_gnina_comparison_materialization": "operator_engine_comparison_rows_required",
         "public_benchmark_external_receipts_validation": "operator_receipts_required",
     }
+    blocked_slices_by_id = {
+        row["slice_id"]: row for row in source["blocked_slices"]
+    }
+    assert blocked_slices_by_id["casf_pdbbind_subset_materialization"][
+        "first_blocker"
+    ] == "casf_pdbbind_source_material_not_attached"
+    assert blocked_slices_by_id["casf_pdbbind_subset_materialization"][
+        "first_blocked_target"
+    ] == "casf_pdbbind_subset_intake"
+    assert blocked_slices_by_id["casf_pdbbind_subset_materialization"][
+        "operator_handoff_id"
+    ] == "public_benchmark::casf_pdbbind_subset_intake"
+    assert blocked_slices_by_id["casf_pdbbind_subset_materialization"][
+        "root_cause_tags"
+    ] == ["operator_source_material_required", "operator_receipts_required"]
+    assert blocked_slices_by_id["casf_pdbbind_subset_materialization"][
+        "blocked_tier_beta_criteria"
+    ] == ["casf_pdbbind_subset_materialized", "external_receipts_attached"]
+    assert blocked_slices_by_id["real_pose_coordinate_materialization"][
+        "operator_slot_id"
+    ] == "pose_coordinate_intake"
+    assert blocked_slices_by_id["real_pose_coordinate_materialization"][
+        "next_action"
+    ] == "use case_id values from the materialized CASF/PDBBind subset manifest"
+    assert blocked_slices_by_id["public_benchmark_external_receipts_validation"][
+        "related_operator_slot_ids"
+    ] == [
+        "casf_pdbbind_subset_intake",
+        "dud_e_lit_pcba_enrichment_intake",
+        "vina_gnina_comparison_intake",
+    ]
+    assert blocked_slices_by_id["public_benchmark_external_receipts_validation"][
+        "root_cause_tags"
+    ] == ["operator_receipts_required"]
+    assert blocked_slices_by_id["public_benchmark_external_receipts_validation"][
+        "next_action"
+    ].startswith("attach source_license_or_accession")
     assert source["materialization_progress"] == {
         "completed_slice_count": 6,
         "blocked_slice_count": 5,

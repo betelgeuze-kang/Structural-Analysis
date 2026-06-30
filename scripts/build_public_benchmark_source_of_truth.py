@@ -795,6 +795,169 @@ def _operator_blocker_detail_register(
     return rows
 
 
+PHASE2_SLICE_OPERATOR_SLOT_IDS = {
+    "casf_pdbbind_subset_materialization": ["casf_pdbbind_subset_intake"],
+    "real_pose_coordinate_materialization": ["pose_coordinate_intake"],
+    "dud_e_lit_pcba_enrichment_materialization": [
+        "dud_e_lit_pcba_enrichment_intake"
+    ],
+    "vina_gnina_comparison_materialization": ["vina_gnina_comparison_intake"],
+    "public_benchmark_external_receipts_validation": [
+        "casf_pdbbind_subset_intake",
+        "dud_e_lit_pcba_enrichment_intake",
+        "vina_gnina_comparison_intake",
+    ],
+}
+
+PHASE2_SLICE_ROOT_CAUSE_TAGS = {
+    "casf_pdbbind_subset_materialization": [
+        "operator_source_material_required",
+        "operator_receipts_required",
+    ],
+    "real_pose_coordinate_materialization": ["operator_pose_coordinates_required"],
+    "dud_e_lit_pcba_enrichment_materialization": [
+        "operator_enrichment_rows_required",
+        "operator_receipts_required",
+    ],
+    "vina_gnina_comparison_materialization": [
+        "operator_engine_comparison_rows_required",
+        "operator_receipts_required",
+    ],
+    "public_benchmark_external_receipts_validation": ["operator_receipts_required"],
+}
+
+PHASE2_SLICE_TIER_BETA_CRITERIA = {
+    "casf_pdbbind_subset_materialization": [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ],
+    "real_pose_coordinate_materialization": [
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands",
+    ],
+    "dud_e_lit_pcba_enrichment_materialization": [
+        "dud_e_lit_pcba_enrichment_ready",
+        "external_receipts_attached",
+    ],
+    "vina_gnina_comparison_materialization": [
+        "vina_gnina_comparison_ready",
+        "external_receipts_attached",
+    ],
+    "public_benchmark_external_receipts_validation": ["external_receipts_attached"],
+}
+
+PHASE2_SLICE_NEXT_ACTION = {
+    "public_benchmark_external_receipts_validation": (
+        "attach source_license_or_accession, source_checksum, and provenance_ref "
+        "receipts for the missing public benchmark artifact roles"
+    )
+}
+
+
+def _operator_context_by_slice(
+    *,
+    blocked_slice: dict[str, Any],
+    operator_evidence_gap_register: list[dict[str, Any]],
+    operator_blocker_detail_register: list[dict[str, Any]],
+) -> dict[str, Any]:
+    slice_id = str(blocked_slice.get("slice_id") or "")
+    slot_ids = PHASE2_SLICE_OPERATOR_SLOT_IDS.get(slice_id, [])
+    criteria_ids = PHASE2_SLICE_TIER_BETA_CRITERIA.get(slice_id, [])
+    detail_by_slot = {
+        str(row.get("slot_id") or ""): row
+        for row in operator_blocker_detail_register
+        if isinstance(row, dict)
+    }
+    gap_by_slot = {
+        str(row.get("slot_id") or ""): row
+        for row in operator_evidence_gap_register
+        if isinstance(row, dict)
+    }
+    related_details = [
+        detail_by_slot[slot_id] for slot_id in slot_ids if slot_id in detail_by_slot
+    ]
+    related_gaps = [
+        gap_by_slot[slot_id] for slot_id in slot_ids if slot_id in gap_by_slot
+    ]
+    first_detail = related_details[0] if related_details else {}
+    first_gap = related_gaps[0] if related_gaps else {}
+    first_blocked_target = str(first_detail.get("slot_id") or "")
+    if not first_blocked_target and slot_ids:
+        first_blocked_target = slot_ids[0]
+    blockers = [str(blocker) for blocker in blocked_slice.get("blockers", [])]
+    operator_blockers = []
+    for detail in related_details:
+        operator_blockers.extend(
+            str(blocker) for blocker in detail.get("blockers", []) if str(blocker)
+        )
+    operator_blockers = list(dict.fromkeys(operator_blockers))
+    first_blocker = blockers[0] if blockers else ""
+    first_operator_blocker = str(first_detail.get("first_blocker") or "")
+    next_action = PHASE2_SLICE_NEXT_ACTION.get(slice_id) or str(
+        first_detail.get("first_next_action") or first_gap.get("first_next_action") or ""
+    )
+    return {
+        "operator_slot_id": first_blocked_target,
+        "related_operator_slot_ids": list(slot_ids),
+        "operator_handoff_id": (
+            f"public_benchmark::{first_blocked_target}"
+            if first_blocked_target
+            else ""
+        ),
+        "operator_handoff_ids": [
+            f"public_benchmark::{slot_id}" for slot_id in slot_ids if slot_id
+        ],
+        "first_blocker": first_blocker,
+        "first_operator_blocker": first_operator_blocker,
+        "first_blocked_target": first_blocked_target,
+        "root_cause_tags": list(PHASE2_SLICE_ROOT_CAUSE_TAGS.get(slice_id, [])),
+        "blocked_tier_beta_criteria": list(criteria_ids),
+        "operator_blockers": operator_blockers,
+        "next_action": next_action,
+        "template_artifact": str(
+            first_detail.get("template_artifact")
+            or first_gap.get("template_artifact")
+            or ""
+        ),
+        "materialization_command": str(
+            first_detail.get("materialization_command")
+            or first_gap.get("materialization_command")
+            or ""
+        ),
+        "validation_command": str(
+            first_detail.get("validation_command")
+            or first_gap.get("validation_command")
+            or ""
+        ),
+        "minimum_evidence": dict(
+            first_detail.get("minimum_evidence")
+            or first_gap.get("minimum_evidence")
+            or {}
+        ),
+    }
+
+
+def _attach_operator_context_to_blocked_slices(
+    *,
+    blocked_slices: list[dict[str, Any]],
+    operator_evidence_gap_register: list[dict[str, Any]],
+    operator_blocker_detail_register: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    enriched_slices = []
+    for blocked_slice in blocked_slices:
+        enriched_slice = dict(blocked_slice)
+        enriched_slice.update(
+            _operator_context_by_slice(
+                blocked_slice=blocked_slice,
+                operator_evidence_gap_register=operator_evidence_gap_register,
+                operator_blocker_detail_register=operator_blocker_detail_register,
+            )
+        )
+        enriched_slices.append(enriched_slice)
+    return enriched_slices
+
+
 def _source_tracking_contract(
     *, metadata: dict[str, Any], source_paths: list[Path]
 ) -> dict[str, Any]:
@@ -830,6 +993,8 @@ def _phase2_slice_progress(
     external_receipts_validation: dict[str, Any],
     operator_intake_packet: dict[str, Any],
     tier_beta_gate: dict[str, Any],
+    operator_evidence_gap_register: list[dict[str, Any]],
+    operator_blocker_detail_register: list[dict[str, Any]],
 ) -> dict[str, Any]:
     target_subset_case_count = int(subset_manifest["target_subset_case_count"])
     subset_materialized_count = int(subset_manifest["materialized_case_count"])
@@ -993,6 +1158,11 @@ def _phase2_slice_progress(
                 "blockers": list(external_receipts_validation["blockers"]),
             }
         )
+    blocked_slices = _attach_operator_context_to_blocked_slices(
+        blocked_slices=blocked_slices,
+        operator_evidence_gap_register=operator_evidence_gap_register,
+        operator_blocker_detail_register=operator_blocker_detail_register,
+    )
     return {
         "completed_slices": completed_slices,
         "blocked_slices": blocked_slices,
@@ -1266,6 +1436,8 @@ def build_source_of_truth(
         external_receipts_validation=external_receipts_validation,
         operator_intake_packet=operator_intake_packet,
         tier_beta_gate=tier_beta_gate,
+        operator_evidence_gap_register=operator_evidence_gap_register,
+        operator_blocker_detail_register=operator_blocker_detail_register,
     )
     return {
         "schema_version": SCHEMA_VERSION,
