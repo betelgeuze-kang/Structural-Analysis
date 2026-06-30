@@ -49,7 +49,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "fresh_full_validation_ready": true,
-  "generated_at": "2026-06-30T14:24:13.624647+00:00",
+  "generated_at": "2026-06-30T14:29:00.518708+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
     "docs/commercialization-gap-current-state.md": "sha256:e433ab1cba7fa60be64e509b3586377a353191dbd459d12a5ec8b84b58b283bb",
@@ -355,7 +355,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "29adc7177cd0744a96e16a65902bca82582cc333",
+  "source_commit_sha": "46e65d3429977d3405c266e8c85cd534d5ba4206",
   "status": "ready",
   "summary": {
     "blocker_count": 0,
