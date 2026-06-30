@@ -751,6 +751,9 @@ def _phase2_slice_progress(
     pose_coordinate_blockers = []
     if pose_real_case_count < target_subset_case_count:
         pose_coordinate_blockers.append("public_benchmark_real_pose_predictions_missing")
+        pose_coordinate_blockers.append(
+            "public_benchmark_real_pose_validity_rows_missing"
+        )
     if rmsd_real_case_count < target_subset_case_count:
         pose_coordinate_blockers.append("public_benchmark_real_rmsd_rows_missing")
     completed_slices = [
@@ -1007,6 +1010,7 @@ def build_source_of_truth(
         blockers.append("casf_pdbbind_source_material_not_attached")
     if pose_real_case_count < target_subset_case_count:
         blockers.append("public_benchmark_real_pose_predictions_missing")
+        blockers.append("public_benchmark_real_pose_validity_rows_missing")
     if rmsd_real_case_count < target_subset_case_count:
         blockers.append("public_benchmark_real_rmsd_rows_missing")
     if not enrichment_ready:

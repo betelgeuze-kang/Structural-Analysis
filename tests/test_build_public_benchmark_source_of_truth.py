@@ -51,10 +51,11 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     }
     assert source["tier_beta_ready"] is False
     assert source["public_benchmark_ready"] is False
-    assert source["blocker_count"] == 6
+    assert source["blocker_count"] == 7
     assert source["blockers"] == [
         "casf_pdbbind_source_material_not_attached",
         "public_benchmark_real_pose_predictions_missing",
+        "public_benchmark_real_pose_validity_rows_missing",
         "public_benchmark_real_rmsd_rows_missing",
         "dud_e_lit_pcba_enrichment_rows_missing",
         "vina_gnina_comparison_rows_missing",
@@ -144,6 +145,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     }
     assert pose_blocked_slice["blockers"] == [
         "public_benchmark_real_pose_predictions_missing",
+        "public_benchmark_real_pose_validity_rows_missing",
         "public_benchmark_real_rmsd_rows_missing",
     ]
     assert source["operator_handoff_queue_count"] == 4
