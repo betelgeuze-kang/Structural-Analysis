@@ -150,10 +150,6 @@ def _g1_hip_freshness_relevant_path(path: str) -> bool:
         "scripts/build_g1_",
         "scripts/build_mgt_",
         "scripts/run_mgt_",
-        "tests/test_g1_",
-        "tests/test_mgt_",
-        "tests/test_run_g1_full_load_hip_newton_lane.py",
-        "tests/test_solver_hip_",
     )
     return path.startswith(relevant_prefixes)
 

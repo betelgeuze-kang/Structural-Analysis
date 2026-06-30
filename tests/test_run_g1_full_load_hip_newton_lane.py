@@ -905,7 +905,10 @@ def test_hip_proof_lane_wrapper_change_does_not_stale_proof_source(
     monkeypatch.setattr(
         run_g1_full_load_hip_newton_lane,
         "_git_diff_name_only",
-        lambda base, head: ["scripts/run_g1_full_load_hip_newton_lane.py"],
+        lambda base, head: [
+            "scripts/run_g1_full_load_hip_newton_lane.py",
+            "tests/test_run_g1_full_load_hip_newton_lane.py",
+        ],
     )
 
     summary, blockers = run_g1_full_load_hip_newton_lane._hip_consistency_proof_assessment(
@@ -918,6 +921,7 @@ def test_hip_proof_lane_wrapper_change_does_not_stale_proof_source(
     assert summary["source_state_kind"] == "non_g1_hip_paths_changed"
     assert summary["changed_paths_since_source_commit"] == [
         "scripts/run_g1_full_load_hip_newton_lane.py",
+        "tests/test_run_g1_full_load_hip_newton_lane.py",
     ]
 
 
