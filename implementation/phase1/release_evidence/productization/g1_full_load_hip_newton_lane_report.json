@@ -1428,11 +1428,16 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T10:08:43.091278+00:00",
+  "generated_at": "2026-06-30T10:28:22.671790+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       "scripts/build_goal_bottleneck_roadmap_surface.py",
-      "tests/test_build_goal_bottleneck_roadmap_surface.py"
+      "scripts/build_public_benchmark_operator_intake_packet.py",
+      "scripts/build_public_benchmark_source_of_truth.py",
+      "scripts/validate_public_benchmark_subset_manifest.py",
+      "tests/test_build_goal_bottleneck_roadmap_surface.py",
+      "tests/test_materialize_public_benchmark_subset_manifest.py",
+      "tests/test_validate_public_benchmark_subset_manifest.py"
     ],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -1459,7 +1464,7 @@
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
-    "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:e5ae46bc7ef06012419318b6c3ddef6b0ad913b3907f385de75e4610b0f2451b",
+    "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:b9f0769d0735ca46e0f29a9b1e99aca1c9897f5f9c867fe5a84aafdd0697455c",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:e9b511750729261906c7ce376e110583bade19409cddf527444bc40f51676186",
     "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz": "sha256:e3a48e50edfb68648d1d7c5d720faec45f632de667061be71b30a57a042d1235",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:26231b6d8aea08199264cb3ee4e5f24417d58265664a18c88aa74c579a2ab5e3"
@@ -1474,6 +1479,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "4e21e33a7db60ec6ac8b38394c0b3ec02393e40a",
+  "source_commit_sha": "09767241b73712a55237037fc8b12022d03d0944",
   "status": "blocked"
 }
