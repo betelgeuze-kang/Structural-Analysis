@@ -8,7 +8,7 @@
     "feature_synced_to_head": true,
     "main_fast_forward_possible": true,
     "main_synced_to_head": false,
-    "remote_fetch_ok": null,
+    "remote_fetch_ok": true,
     "remote_safety_ok": true,
     "worktree_clean": true,
     "worktree_only_ignored_evidence_dirty": false
@@ -20,7 +20,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-30T20:33:23.080818+00:00",
+  "generated_at": "2026-06-30T20:51:21.288815+00:00",
   "pending_remote_updates": [
     {
       "action": "fast-forward push current HEAD to main",
@@ -41,8 +41,8 @@
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
   "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
-  "remote_fetch_attempted": false,
-  "remote_fetch_ok": null,
+  "remote_fetch_attempted": true,
+  "remote_fetch_ok": true,
   "remote_mutation_approved": false,
   "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
@@ -52,11 +52,11 @@
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
     "ignored_worktree_status_short": "",
-    "local_head_sha": "f39f80ca5293e11929fd8f56957a9bf14fbf03e9",
-    "main_ahead_count": 158,
+    "local_head_sha": "05756db6d7c8be67e1b210f3854cc0ade1a776b0",
+    "main_ahead_count": 165,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "f39f80ca5293e11929fd8f56957a9bf14fbf03e9",
+    "remote_feature_sha": "05756db6d7c8be67e1b210f3854cc0ade1a776b0",
     "remote_main_ref": "origin/main",
     "remote_main_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
     "remote_safety": {
