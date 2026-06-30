@@ -20,6 +20,42 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
+def _write_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _write_minimal_medium_readiness_inputs(repo_root: Path) -> None:
+    _write_json(
+        repo_root / "implementation/phase1/opensees_topology_report.json",
+        {
+            "contract_pass": True,
+            "metrics": {
+                "beam_element_count": 3,
+                "node_count": 4,
+                "shell_element_count": 1,
+            },
+            "source_provenance": {
+                "source_path": "operator-attached-medium.json",
+                "source_sha256": "sha256:medium",
+            },
+        },
+    )
+    _write_json(
+        repo_root
+        / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        {
+            "rows": [
+                {"case_id": "SCBF16B"},
+                {"case_id": "SCBF16B_shell_beam_mix"},
+            ]
+        },
+    )
+    runner = repo_root / module.RUNNER_SCRIPT
+    runner.parent.mkdir(parents=True, exist_ok=True)
+    runner.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+
+
 def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() -> None:
     payload = module.build_phase3_medium_model_scorecard_readiness_receipt(repo_root=REPO_ROOT)
 
@@ -32,6 +68,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["required_medium_model_count"] == 5
     assert payload["current_medium_model_scorecard_count"] == 0
     assert payload["pass_or_approved_review_count"] == 0
+    assert payload["scorecard_receipt_inventory"]["receipt_file_count"] == 0
     assert payload["local_candidate_artifact_count"] == 2
     assert payload["local_topology_contract_pass"] is True
     assert payload["required_evidence_pass_count"] == 3
@@ -51,6 +88,43 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["scorecard_receipt_template"]["oom"] is False
     assert payload["scorecard_receipt_template"]["contract_pass"] is False
     assert "operator scorecard runner command" in payload["claim_boundary"]
+
+
+def test_medium_model_scorecard_readiness_counts_operator_scorecard_receipts(tmp_path: Path) -> None:
+    _write_minimal_medium_readiness_inputs(tmp_path)
+    receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
+    for index in range(5):
+        _write_json(
+            receipt_dir / f"medium-{index}.scorecard_receipt.json",
+            {
+                "schema_version": "phase3-medium-model-scorecard-receipt.v1",
+                "case_id": f"medium-{index}",
+                "contract_pass": True,
+                "validation_contract_pass": True,
+                "crashed": False,
+                "oom": False,
+                "scorecard_or_review_path": f"approved-review-{index}.json",
+                "blockers": [],
+            },
+        )
+
+    payload = module.build_phase3_medium_model_scorecard_readiness_receipt(
+        repo_root=tmp_path,
+        source_commit_sha="test-sha",
+    )
+
+    assert payload["current_medium_model_scorecard_count"] == 5
+    assert payload["pass_or_approved_review_count"] == 5
+    assert payload["scorecard_receipt_inventory"]["valid_scorecard_case_count"] == 5
+    assert payload["required_evidence_pass_count"] == 5
+    assert "opensees_medium_scorecard_execution_missing" not in payload["blockers"]
+    assert "medium_model_pass_or_review_missing" not in payload["blockers"]
+    assert "source_url_verification_pending" in payload["blockers"]
+    assert "license_review_pending" in payload["blockers"]
+    assert "reference_outputs_missing" in payload["blockers"]
+    assert "normalization_not_implemented" in payload["blockers"]
+    assert payload["contract_pass"] is False
+    assert payload["developer_preview_release_candidate_claim"] is False
 
 
 def test_medium_model_scorecard_readiness_check_detects_missing_output(tmp_path: Path) -> None:

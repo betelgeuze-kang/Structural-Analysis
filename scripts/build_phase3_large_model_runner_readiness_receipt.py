@@ -23,7 +23,10 @@ from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_large_model_runner_readiness_receipt.json"
+LARGE_RECEIPT_DIR = PRODUCTIZATION / "large_model_execution_receipts"
+LARGE_RECEIPT_SCHEMA_VERSION = "phase3-large-model-execution-receipt.v1"
 LARGE_MODEL_INPUTS = [
+    LARGE_RECEIPT_DIR,
     Path("src/structural_analysis/benchmark/acquisition.py"),
     Path("scripts/build_phase3_large_model_runner_readiness_receipt.py"),
     Path("scripts/run_phase3_large_model_execution_receipt.py"),
@@ -119,15 +122,175 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _try_load_json(path: Path) -> dict[str, Any]:
+    try:
+        return _load_json(path)
+    except Exception:
+        return {}
+
+
+def _safe_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _receipt_files(repo_root: Path, receipt_dir: Path) -> list[Path]:
+    resolved = receipt_dir if receipt_dir.is_absolute() else repo_root / receipt_dir
+    if not resolved.exists():
+        return []
+    return sorted(path for path in resolved.glob("*.json") if path.is_file())
+
+
+def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
+    receipt_rows: list[dict[str, Any]] = []
+    execution_case_ids: set[str] = set()
+    crash_oom_free_case_ids: set[str] = set()
+    scorecard_or_review_case_ids: set[str] = set()
+    checksum_case_ids: set[str] = set()
+    for path in _receipt_files(repo_root, LARGE_RECEIPT_DIR):
+        payload = _try_load_json(path)
+        relative_path = path.relative_to(repo_root).as_posix() if path.is_relative_to(repo_root) else path.as_posix()
+        schema_pass = payload.get("schema_version") == LARGE_RECEIPT_SCHEMA_VERSION
+        case_id = str(payload.get("case_id") or path.stem)
+        blockers = [str(blocker) for blocker in _safe_list(payload.get("blockers")) if str(blocker)]
+        contract_pass = bool(payload.get("contract_pass") is True)
+        validation_pass = bool(payload.get("validation_contract_pass") is True)
+        crashed = bool(payload.get("crashed") is True)
+        oom = bool(payload.get("oom") is True)
+        exit_code = payload.get("exit_code")
+        source_sha256 = str(payload.get("source_sha256") or "")
+        source_sha256_match = bool(payload.get("source_sha256_match") is True)
+        scorecard_or_review_path = str(payload.get("scorecard_or_review_path") or "")
+        execution_pass = bool(
+            schema_pass
+            and contract_pass
+            and validation_pass
+            and not crashed
+            and not oom
+            and exit_code == 0
+        )
+        crash_oom_free_pass = bool(execution_pass and not crashed and not oom)
+        scorecard_or_review_pass = bool(execution_pass and scorecard_or_review_path)
+        checksum_pass = bool(
+            schema_pass
+            and source_sha256.startswith("sha256:")
+            and source_sha256_match
+        )
+        if execution_pass:
+            execution_case_ids.add(case_id)
+        if crash_oom_free_pass:
+            crash_oom_free_case_ids.add(case_id)
+        if scorecard_or_review_pass:
+            scorecard_or_review_case_ids.add(case_id)
+        if checksum_pass:
+            checksum_case_ids.add(case_id)
+        receipt_rows.append(
+            {
+                "path": relative_path,
+                "schema_pass": schema_pass,
+                "case_id": case_id,
+                "contract_pass": contract_pass,
+                "validation_contract_pass": validation_pass,
+                "exit_code": exit_code,
+                "crashed": crashed,
+                "oom": oom,
+                "source_sha256": source_sha256,
+                "source_sha256_match": source_sha256_match,
+                "scorecard_or_review_path": scorecard_or_review_path,
+                "execution_pass": execution_pass,
+                "crash_oom_free": crash_oom_free_pass,
+                "scorecard_or_review": scorecard_or_review_pass,
+                "checksum_pass": checksum_pass,
+                "blockers": blockers,
+            }
+        )
+    return {
+        "schema_version": "phase3-large-model-execution-receipt-inventory.v1",
+        "receipt_directory": LARGE_RECEIPT_DIR.as_posix(),
+        "receipt_file_count": len(receipt_rows),
+        "valid_execution_case_count": len(execution_case_ids),
+        "crash_oom_free_execution_count": len(crash_oom_free_case_ids),
+        "scorecard_or_review_count": len(scorecard_or_review_case_ids),
+        "source_checksum_count": len(checksum_case_ids),
+        "receipts": receipt_rows,
+        "claim_boundary": (
+            "Only operator-attached large execution receipts with the expected schema, "
+            "contract_pass=true, validation_contract_pass=true, exit_code=0, and no "
+            "crash/OOM are counted as large executions. This inventory does not create "
+            "source authority, license, reference-output, or normalization evidence."
+        ),
+    }
+
+
+def _counted_evidence_row(
+    row: dict[str, Any],
+    *,
+    current: int,
+    required: int,
+    current_key: str,
+    required_key: str,
+) -> dict[str, Any]:
+    enriched = dict(row)
+    ready = current >= required
+    enriched.update(
+        {
+            "status": "ready" if ready else ("partial" if current else "missing"),
+            "contract_pass": ready,
+            "blocker": "" if ready else row["blocker"],
+            current_key: current,
+            required_key: required,
+        }
+    )
+    return enriched
+
+
 def build_phase3_large_model_runner_readiness_receipt(
     *,
     repo_root: Path = ROOT,
     source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
+    receipt_inventory = _large_model_execution_receipt_inventory(repo_root)
+    required_large_model_count = 2
+    execution_count = int(receipt_inventory["valid_execution_case_count"])
+    crash_oom_free_count = int(receipt_inventory["crash_oom_free_execution_count"])
+    scorecard_or_review_count = int(receipt_inventory["scorecard_or_review_count"])
+    source_checksum_count = int(receipt_inventory["source_checksum_count"])
     runner_script = repo_root / RUNNER_SCRIPT
     runner_command_ready = runner_script.exists()
-    evidence_rows = [dict(row, contract_pass=False) for row in REQUIRED_EVIDENCE]
+    evidence_rows: list[dict[str, Any]] = []
+    for row in REQUIRED_EVIDENCE:
+        if row["id"] == "source_checksum":
+            evidence_rows.append(
+                _counted_evidence_row(
+                    row,
+                    current=source_checksum_count,
+                    required=required_large_model_count,
+                    current_key="current_source_checksum_count",
+                    required_key="required_source_checksum_count",
+                )
+            )
+        elif row["id"] == "execution_receipt":
+            evidence_rows.append(
+                _counted_evidence_row(
+                    row,
+                    current=execution_count,
+                    required=required_large_model_count,
+                    current_key="current_large_model_execution_receipt_count",
+                    required_key="required_large_model_execution_receipt_count",
+                )
+            )
+        elif row["id"] == "scorecard_or_review":
+            evidence_rows.append(
+                _counted_evidence_row(
+                    row,
+                    current=scorecard_or_review_count,
+                    required=required_large_model_count,
+                    current_key="current_scorecard_or_review_count",
+                    required_key="required_scorecard_or_review_count",
+                )
+            )
+        else:
+            evidence_rows.append(dict(row, contract_pass=False))
     evidence_rows.extend(
         [
             {
@@ -177,10 +340,12 @@ def build_phase3_large_model_runner_readiness_receipt(
         "phase3_closure_claim": False,
         "developer_preview_release_candidate_claim": False,
         "large_model_execution_claim": False,
-        "required_large_model_count": 2,
-        "current_large_model_execution_receipt_count": 0,
-        "crash_oom_free_execution_count": 0,
-        "scorecard_or_review_count": 0,
+        "required_large_model_count": required_large_model_count,
+        "current_large_model_execution_receipt_count": execution_count,
+        "crash_oom_free_execution_count": crash_oom_free_count,
+        "scorecard_or_review_count": scorecard_or_review_count,
+        "source_checksum_count": source_checksum_count,
+        "execution_receipt_inventory": receipt_inventory,
         "required_evidence_count": len(evidence_rows),
         "required_evidence_pass_count": required_evidence_pass_count,
         "required_evidence": evidence_rows,

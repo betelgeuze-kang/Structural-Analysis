@@ -23,9 +23,12 @@ from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_medium_model_scorecard_readiness_receipt.json"
+MEDIUM_RECEIPT_DIR = PRODUCTIZATION / "medium_model_scorecard_receipts"
+MEDIUM_RECEIPT_SCHEMA_VERSION = "phase3-medium-model-scorecard-receipt.v1"
 MEDIUM_MODEL_INPUTS = [
     Path("implementation/phase1/opensees_topology_report.json"),
     Path("implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"),
+    MEDIUM_RECEIPT_DIR,
     Path("scripts/build_phase3_opensees_source_license_receipt.py"),
     Path("scripts/build_phase3_medium_model_scorecard_readiness_receipt.py"),
     Path("scripts/run_phase3_medium_model_scorecard_receipt.py"),
@@ -129,12 +132,114 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _try_load_json(path: Path) -> dict[str, Any]:
+    try:
+        return _load_json(path)
+    except Exception:
+        return {}
+
+
+def _receipt_files(repo_root: Path, receipt_dir: Path) -> list[Path]:
+    resolved = receipt_dir if receipt_dir.is_absolute() else repo_root / receipt_dir
+    if not resolved.exists():
+        return []
+    return sorted(path for path in resolved.glob("*.json") if path.is_file())
+
+
 def _safe_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
 def _safe_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
+    receipt_rows: list[dict[str, Any]] = []
+    valid_scorecard_case_ids: set[str] = set()
+    pass_or_review_case_ids: set[str] = set()
+    for path in _receipt_files(repo_root, MEDIUM_RECEIPT_DIR):
+        payload = _try_load_json(path)
+        relative_path = path.relative_to(repo_root).as_posix() if path.is_relative_to(repo_root) else path.as_posix()
+        schema_pass = payload.get("schema_version") == MEDIUM_RECEIPT_SCHEMA_VERSION
+        case_id = str(payload.get("case_id") or path.stem)
+        blockers = [str(blocker) for blocker in _safe_list(payload.get("blockers")) if str(blocker)]
+        contract_pass = bool(payload.get("contract_pass") is True)
+        validation_pass = bool(payload.get("validation_contract_pass") is True)
+        crashed = bool(payload.get("crashed") is True)
+        oom = bool(payload.get("oom") is True)
+        scorecard_or_review_path = str(payload.get("scorecard_or_review_path") or "")
+        scorecard_execution_pass = bool(
+            schema_pass
+            and contract_pass
+            and validation_pass
+            and not crashed
+            and not oom
+        )
+        pass_or_review_pass = bool(scorecard_execution_pass and scorecard_or_review_path)
+        if scorecard_execution_pass:
+            valid_scorecard_case_ids.add(case_id)
+        if pass_or_review_pass:
+            pass_or_review_case_ids.add(case_id)
+        receipt_rows.append(
+            {
+                "path": relative_path,
+                "schema_pass": schema_pass,
+                "case_id": case_id,
+                "contract_pass": contract_pass,
+                "validation_contract_pass": validation_pass,
+                "crashed": crashed,
+                "oom": oom,
+                "scorecard_or_review_path": scorecard_or_review_path,
+                "scorecard_execution_pass": scorecard_execution_pass,
+                "pass_or_approved_review": pass_or_review_pass,
+                "blockers": blockers,
+            }
+        )
+    return {
+        "schema_version": "phase3-medium-model-scorecard-receipt-inventory.v1",
+        "receipt_directory": MEDIUM_RECEIPT_DIR.as_posix(),
+        "receipt_file_count": len(receipt_rows),
+        "valid_scorecard_case_count": len(valid_scorecard_case_ids),
+        "pass_or_approved_review_count": len(pass_or_review_case_ids),
+        "receipts": receipt_rows,
+        "claim_boundary": (
+            "Only operator-attached medium scorecard receipts with the expected schema, "
+            "contract_pass=true, validation_contract_pass=true, and no crash/OOM are "
+            "counted. This inventory does not create source, license, reference-output, "
+            "or normalization evidence."
+        ),
+    }
+
+
+def _scorecard_evidence_row(row: dict[str, Any], *, current: int, required: int) -> dict[str, Any]:
+    enriched = dict(row)
+    ready = current >= required
+    enriched.update(
+        {
+            "status": "ready" if ready else ("partial" if current else "missing"),
+            "contract_pass": ready,
+            "blocker": "" if ready else row["blocker"],
+            "current_scorecard_receipt_count": current,
+            "required_scorecard_receipt_count": required,
+        }
+    )
+    return enriched
+
+
+def _pass_review_evidence_row(row: dict[str, Any], *, current: int, required: int) -> dict[str, Any]:
+    enriched = dict(row)
+    ready = current >= required
+    enriched.update(
+        {
+            "status": "ready" if ready else ("partial" if current else "missing"),
+            "contract_pass": ready,
+            "blocker": "" if ready else row["blocker"],
+            "current_pass_or_approved_review_count": current,
+            "required_pass_or_approved_review_count": required,
+        }
+    )
+    return enriched
 
 
 def build_phase3_medium_model_scorecard_readiness_receipt(
@@ -154,9 +259,32 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         for row in _safe_list(canonical_report.get("rows"))
         if isinstance(row, dict) and row.get("case_id") in {"SCBF16B", "SCBF16B_shell_beam_mix"}
     ]
+    receipt_inventory = _medium_scorecard_receipt_inventory(repo_root)
+    required_medium_model_count = 5
+    current_scorecard_count = int(receipt_inventory["valid_scorecard_case_count"])
+    pass_or_approved_review_count = int(receipt_inventory["pass_or_approved_review_count"])
     runner_script = repo_root / RUNNER_SCRIPT
     runner_command_ready = runner_script.exists()
-    evidence_rows = [dict(row) for row in REQUIRED_EVIDENCE]
+    evidence_rows: list[dict[str, Any]] = []
+    for row in REQUIRED_EVIDENCE:
+        if row["id"] == "scorecard_execution":
+            evidence_rows.append(
+                _scorecard_evidence_row(
+                    row,
+                    current=current_scorecard_count,
+                    required=required_medium_model_count,
+                )
+            )
+        elif row["id"] == "pass_or_approved_review":
+            evidence_rows.append(
+                _pass_review_evidence_row(
+                    row,
+                    current=pass_or_approved_review_count,
+                    required=required_medium_model_count,
+                )
+            )
+        else:
+            evidence_rows.append(dict(row))
     evidence_rows.extend(
         [
             {
@@ -200,9 +328,10 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "phase3_closure_claim": False,
         "developer_preview_release_candidate_claim": False,
         "medium_model_benchmark_pass_claim": False,
-        "required_medium_model_count": 5,
-        "current_medium_model_scorecard_count": 0,
-        "pass_or_approved_review_count": 0,
+        "required_medium_model_count": required_medium_model_count,
+        "current_medium_model_scorecard_count": current_scorecard_count,
+        "pass_or_approved_review_count": pass_or_approved_review_count,
+        "scorecard_receipt_inventory": receipt_inventory,
         "local_candidate_artifact_count": len(canonical_rows),
         "local_topology_contract_pass": bool(topology_report.get("contract_pass")),
         "required_evidence_count": len(evidence_rows),
