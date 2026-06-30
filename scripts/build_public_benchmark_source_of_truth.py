@@ -841,6 +841,21 @@ def _phase2_slice_progress(
     vina_gnina_case_count = int(
         vina_gnina_comparison_adapter["real_comparison_case_count"]
     )
+    receipt_coverage = (
+        external_receipts_validation.get("receipt_coverage")
+        if isinstance(external_receipts_validation.get("receipt_coverage"), dict)
+        else {}
+    )
+    receipt_complete_artifact_role_count = int(
+        receipt_coverage.get("receipt_complete_artifact_role_count") or 0
+    )
+    receipt_missing_artifact_role_count = int(
+        receipt_coverage.get("missing_expected_artifact_role_count") or 0
+    )
+    missing_receipt_artifact_roles = [
+        str(role)
+        for role in receipt_coverage.get("missing_expected_artifact_roles", [])
+    ]
     pose_coordinate_blockers = []
     if pose_real_case_count < target_subset_case_count:
         pose_coordinate_blockers.append("public_benchmark_real_pose_predictions_missing")
@@ -948,6 +963,36 @@ def _phase2_slice_progress(
                 "blockers": list(vina_gnina_comparison_adapter["blockers"]),
             }
         )
+    if not bool(
+        external_receipts_validation["public_benchmark_external_receipts_ready"]
+    ):
+        blocked_slices.append(
+            {
+                "slice_id": "public_benchmark_external_receipts_validation",
+                "status": "operator_receipts_required",
+                "current": {
+                    "materialized_row_count": int(
+                        external_receipts_validation["materialized_row_count"]
+                    ),
+                    "receipt_complete_row_count": int(
+                        external_receipts_validation["receipt_complete_row_count"]
+                    ),
+                    "receipt_complete_artifact_role_count": (
+                        receipt_complete_artifact_role_count
+                    ),
+                },
+                "required": {
+                    "receipt_complete_artifact_role_count": int(
+                        receipt_coverage.get("expected_artifact_role_count") or 0
+                    ),
+                    "artifact_roles": list(
+                        receipt_coverage.get("expected_artifact_roles", [])
+                    ),
+                },
+                "missing_artifact_roles": missing_receipt_artifact_roles,
+                "blockers": list(external_receipts_validation["blockers"]),
+            }
+        )
     return {
         "completed_slices": completed_slices,
         "blocked_slices": blocked_slices,
@@ -960,6 +1005,15 @@ def _phase2_slice_progress(
             "real_rmsd_case_count": rmsd_real_case_count,
             "real_enrichment_target_count": enrichment_target_count,
             "real_vina_gnina_comparison_case_count": vina_gnina_case_count,
+            "external_receipt_complete_row_count": int(
+                external_receipts_validation["receipt_complete_row_count"]
+            ),
+            "external_receipt_complete_artifact_role_count": (
+                receipt_complete_artifact_role_count
+            ),
+            "external_receipt_missing_artifact_role_count": (
+                receipt_missing_artifact_role_count
+            ),
             "tier_beta_failed_criterion_count": int(
                 tier_beta_gate["failed_criterion_count"]
             ),

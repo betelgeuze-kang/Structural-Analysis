@@ -91,7 +91,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     ]
     assert source["summary_line"] == (
         "Public benchmark source-of-truth: BLOCKED | completed_slices=6 | "
-        "blocked_slices=4 | first_blocker=casf_pdbbind_source_material_not_attached"
+        "blocked_slices=5 | first_blocker=casf_pdbbind_source_material_not_attached"
     )
     assert source["source_tracking"]["mode"] == "direct_builder_source_tracking"
     assert source["source_tracking"]["missing_source_artifact_count"] == 0
@@ -120,16 +120,20 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "real_pose_coordinate_materialization": "operator_pose_coordinates_required",
         "dud_e_lit_pcba_enrichment_materialization": "operator_enrichment_rows_required",
         "vina_gnina_comparison_materialization": "operator_engine_comparison_rows_required",
+        "public_benchmark_external_receipts_validation": "operator_receipts_required",
     }
     assert source["materialization_progress"] == {
         "completed_slice_count": 6,
-        "blocked_slice_count": 4,
+        "blocked_slice_count": 5,
         "target_subset_case_count": 12,
         "materialized_subset_case_count": 0,
         "real_pose_case_count": 0,
         "real_rmsd_case_count": 0,
         "real_enrichment_target_count": 0,
         "real_vina_gnina_comparison_case_count": 0,
+        "external_receipt_complete_row_count": 0,
+        "external_receipt_complete_artifact_role_count": 0,
+        "external_receipt_missing_artifact_role_count": 3,
         "tier_beta_failed_criterion_count": 7,
         "next_unblock_slice_id": "casf_pdbbind_subset_materialization",
         "claim_boundary": (
@@ -145,6 +149,17 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "real_pose_case_count": 0,
         "real_rmsd_case_count": 0,
     }
+    receipt_blocked_slice = {
+        row["slice_id"]: row for row in source["blocked_slices"]
+    }["public_benchmark_external_receipts_validation"]
+    assert receipt_blocked_slice["missing_artifact_roles"] == [
+        "casf_pdbbind_subset_manifest",
+        "dud_e_lit_pcba_enrichment_scorecard",
+        "vina_gnina_comparison_adapter",
+    ]
+    assert receipt_blocked_slice["current"][
+        "receipt_complete_artifact_role_count"
+    ] == 0
     assert pose_blocked_slice["blockers"] == [
         "public_benchmark_real_pose_predictions_missing",
         "public_benchmark_real_pose_validity_rows_missing",
@@ -917,6 +932,19 @@ def test_public_benchmark_source_of_truth_ready_is_derived_from_gate() -> None:
             "materialized_row_count": 3,
             "receipt_complete_row_count": 3,
             "receipt_blocked_row_count": 0,
+            "receipt_coverage": {
+                "expected_artifact_roles": [
+                    "casf_pdbbind_subset_manifest",
+                    "dud_e_lit_pcba_enrichment_scorecard",
+                    "vina_gnina_comparison_adapter",
+                ],
+                "expected_artifact_role_count": 3,
+                "materialized_artifact_role_count": 3,
+                "receipt_complete_artifact_role_count": 3,
+                "missing_expected_artifact_role_count": 0,
+                "missing_expected_artifact_roles": [],
+                "role_summaries": [],
+            },
             "receipt_rows": [],
             "blockers": [],
         }
