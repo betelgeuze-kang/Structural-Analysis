@@ -1430,10 +1430,11 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T12:56:19.966219+00:00",
+  "generated_at": "2026-06-30T13:18:22.839023+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       "scripts/build_product_capabilities_surface.py",
+      "tests/test_build_goal_bottleneck_roadmap_surface.py",
       "tests/test_build_product_capabilities_surface.py"
     ],
     "consistent_residual_jacobian_newton_gate_passed": false,
@@ -1486,6 +1487,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "0030f691d269f9b1a97d702da6299575e691447a",
+  "source_commit_sha": "5df6a18c65d0fd928bd2eae7b290ab97951fb95b",
   "status": "blocked"
 }
