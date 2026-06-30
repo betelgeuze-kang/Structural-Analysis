@@ -713,11 +713,11 @@
           "vina_gnina_comparison_intake": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json"
         },
         "pose_validity_packet_summary": {
-          "check_count": 6,
+          "check_count": 7,
           "dry_run_pose_validity_ready": true,
           "materializer_schema_version": "public-benchmark-posebusters-style-validity-packet-materialization.v1",
           "real_benchmark_case_count": 0,
-          "required_check_count": 6,
+          "required_check_count": 7,
           "status": "ready_for_dry_run",
           "validator_schema_version": "public-benchmark-pose-validity-validation.v1"
         },
@@ -1301,7 +1301,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-06-30T06:08:22.221501+00:00",
+  "generated_at": "2026-06-30T06:18:39.541020+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:d5f27e19224137df501234c6ddc5bcf894d3a97442329db6d361baca7168f8d5",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:beb648a879262dbf52294fb7a9df05ffe59f20aa9c5d32d2a4ae0d06511dc496",
@@ -1314,9 +1314,9 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:ef50c77b0801fe9fcfd65e36994db0ae0130b3a32edc7ef336297402a16f070e",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:85ecd355c2bf43127493de692827b84d325dea3d2535ad7a23a4988abe5424ce",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:5613044e907cde8c6a6f614bf5d7f08dcf19c526321208b1bb17898b0bf4e27d",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:86f3400f5b15d2dc5af03e7ec5884f52c5d8b04f87c64fb395c0f175b3430b69",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:0b45dac47d44e559b74dcc7eaa5fb95f43dd58ac6cd340ecabfdeff65338b3ef",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md": "sha256:40a6b7980527fd62daa075b2672b83fb839804c8f6c5e757c62ede460d55bff5",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:873d422596a4df6311d6cc2f433ffa244361a5943f23d6a0266e5371fcf5948f",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:eb504133e2b4a4f755487cf8555c5cbf3740fe74b1bd324890c9a53c1ff3eefc",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
@@ -1349,7 +1349,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "635d9f2d9592fe25d8041dfadcb9ce801c62ce9a",
+  "source_commit_sha": "49eab978e6354fd6211199f86cc43e1da4edb3e0",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",

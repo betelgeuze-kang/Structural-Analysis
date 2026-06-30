@@ -1,6 +1,16 @@
 {
+  "all_blockers": [
+    "dataset_repository_url_missing",
+    "gui_task_runner_not_implemented",
+    "per_file_license_review_pending",
+    "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+    "phase3_ifc_import_case_quantity_credit_missing",
+    "product_legal_license_review_pending",
+    "query_expected_answers_missing",
+    "query_task_file_checksums_missing"
+  ],
   "blocker_grouping_metadata": {
-    "claim_boundary": "Query/GUI spillover blockers are carried through for visibility from the Phase 3 source-license receipt, but they are not direct silent-import-loss closure blockers. The RC gate remains blocked until the direct source, checksum, license, quantity-credit, import execution, and silent-loss gate groups are clear.",
+    "claim_boundary": "Query/GUI spillover blockers are carried through for visibility from the Phase 3 source-license receipt, but they are not direct silent-import-loss closure blockers and are excluded from the direct RC gate blocker list. The RC gate remains blocked until the direct source, checksum, license, quantity-credit, import execution, and silent-loss gate groups are clear.",
     "groups": {
       "checksum": {
         "blocked": false,
@@ -60,19 +70,21 @@
     "unassigned_blockers": []
   },
   "blockers": [
-    "dataset_repository_url_missing",
-    "gui_task_runner_not_implemented",
     "per_file_license_review_pending",
     "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
     "phase3_ifc_import_case_quantity_credit_missing",
-    "product_legal_license_review_pending",
-    "query_expected_answers_missing",
-    "query_task_file_checksums_missing"
+    "product_legal_license_review_pending"
   ],
-  "claim_boundary": "This receipt aggregates the current Phase 3 IFC source/license and import-health receipts for the RC silent-import-loss final gate. It does not download or bundle IFC files, approve product redistribution, prove import execution, or prove zero silent import loss until acquired/checksummed sources, license review, import-health execution, and silent-data-loss negative gates all pass.",
+  "claim_boundary": "This receipt aggregates the current Phase 3 IFC source/license and import-health receipts for the RC silent-import-loss final gate. It does not download or bundle IFC files, approve product redistribution, prove import execution, or prove zero silent import loss until acquired/checksummed sources, license review, import-health execution, and silent-data-loss negative gates all pass. Query/GUI corpus readiness is reported separately as spillover evidence and does not by itself block the direct silent-import-loss final gate.",
   "clean_selected_file_count": 2,
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
+  "direct_blockers": [
+    "per_file_license_review_pending",
+    "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+    "phase3_ifc_import_case_quantity_credit_missing",
+    "product_legal_license_review_pending"
+  ],
   "dirty_selected_file_count": 8,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirements": {
@@ -87,7 +99,7 @@
     "silent_data_loss_negative_gate_executed": true,
     "source_files_acquired": true
   },
-  "generated_at": "2026-06-30T04:00:08.160191+00:00",
+  "generated_at": "2026-06-30T06:18:34.987379+00:00",
   "import_health_contract_pass_count": 10,
   "import_health_execution_count": 10,
   "input_checksums": {
@@ -95,7 +107,7 @@
     "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:a2fa090ab455b2eee8027f0348a8ce7ddc36fdcedac072527b3d5929336df623",
     "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:94b2a9e406817dca5e4021a224949d5e65325a1b2c2f72e22a804be0a9b39e02",
     "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:2ffcbf48b88f67053b8c0255a02411ada1b916d231f811c60d27a96b1913fc87",
-    "scripts/build_phase6_silent_import_loss_status.py": "sha256:30f674fe9b45727f4f7481d499f853ea4be730a80c2da89b8b8939f37429eaa4"
+    "scripts/build_phase6_silent_import_loss_status.py": "sha256:4a4126a5f52201b70b946317ba084a2c2a24782c81b2efed969103184c7426fe"
   },
   "owner_action": "complete product/legal and per-file license review for quantity credit; close or explicitly defer the ifc-bench query/GUI spillover blockers; then refresh the RC final gate.",
   "quantity_credit_ready_count": 0,
@@ -113,8 +125,14 @@
   "silent_import_loss_gate_pass_count": 10,
   "silent_import_loss_zero": false,
   "source_checksum_attached_count": 10,
-  "source_commit_sha": "339dafaba7f4472c83ba74dad30cb1237879e77b",
+  "source_commit_sha": "49eab978e6354fd6211199f86cc43e1da4edb3e0",
   "source_file_acquired_count": 10,
+  "spillover_blockers": [
+    "dataset_repository_url_missing",
+    "gui_task_runner_not_implemented",
+    "query_expected_answers_missing",
+    "query_task_file_checksums_missing"
+  ],
   "status": "blocked",
   "summary_line": "Phase 6 silent import loss: BLOCKED | selected=10/10 | executed=10/10",
   "visible_entity_accounting_case_count": 10
