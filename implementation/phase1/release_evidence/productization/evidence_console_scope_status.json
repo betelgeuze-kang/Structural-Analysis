@@ -137,16 +137,16 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-30T02:10:44.307152+00:00",
+  "generated_at": "2026-06-30T02:24:51.844197+00:00",
   "input_checksums": {
-    "README.md": "sha256:b8de01f2e06d752c72d37f23e421ef442811886db16a8447fd97c74e9c88000e",
-    "docs/commercialization-gap-current-state.md": "sha256:f5965bf047ba0b13615a46b57d5b2c3c1da263da1c6f37465f8ee88eb7d4bf14",
+    "README.md": "sha256:6adda30c659b35dccd3d873ee47a60afadc81c7ce48545ef5ea13e7251fd2d7d",
+    "docs/commercialization-gap-current-state.md": "sha256:a5fb7d53dfbbfd07bf20013e8ecf7020bad59ee8d093ed37197758f8aaf05811",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:f4d38fbf7ac4b6055a8f5db427d7f3111d9538ee3497afb4faabb7d2d1abc5a1",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:55615b6ccf3173230a36a4d9e23da903855792fd07b49415830cd9d2bab8a4e1",
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
-    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:928a06def989a23ccc56a9a4198976d713ec541cf34a6b0881f61238944fc875",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:ee33f288082357881a020db353bcd550d58216b1b3aed402ffd516d79f4c58bc",
-    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:429e4f7f682c9415b08592ce64909accb674d64efc020a49de58a0d3693f10c8"
+    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:4a983d74c2b5155fc40eb4e8015214c3261c33b57541e54bb7db0718b0f9bdf7",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:9a61de5a528fc5b98eec9e89fce26868b33373ffed18e19ac0d289ea0f480790",
+    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:5dc48fb61b59574f06565b9823aee8eb7d33677047c0d3607c0f8df52c93e8c4"
   },
   "launch_ready": false,
   "prerequisite_rows": [
@@ -228,7 +228,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "1c939c899382aca133c2c9bc640a6e0ef94560c0",
+  "source_commit_sha": "17b1e4b7863a7d05e8ab58ca1981c4720c9e7acb",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [
