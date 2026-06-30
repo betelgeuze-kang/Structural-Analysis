@@ -82,6 +82,7 @@ def test_materializes_operator_template_from_flat_csv_rows(tmp_path: Path) -> No
         rows_path=rows,
         repo_root=REPO_ROOT,
         source_id="fixture",
+        source_url="https://example.test/gpcr-fixture.csv",
         source_license="fixture-license",
     )
 
@@ -128,6 +129,9 @@ def test_materializes_operator_template_from_jsonl_rows(tmp_path: Path) -> None:
     payload = module.build_gpcr_hard_decoy_operator_template_from_rows(
         rows_path=rows,
         repo_root=REPO_ROOT,
+        source_id="fixture-jsonl",
+        source_url="https://example.test/gpcr-fixture.jsonl",
+        source_license="fixture-license",
     )
 
     assert payload["operator_input_source"]["supported_source_formats"] == [

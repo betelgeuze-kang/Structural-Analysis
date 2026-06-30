@@ -57,8 +57,25 @@ def _passing_target_from_rows(target_id: str) -> dict[str, object]:
     }
 
 
-def test_gpcr_hard_decoy_suite_passes_required_targets() -> None:
-    report = module.materialize_gpcr_hard_decoy_suite_report(
+def _with_source_receipt(intake: dict[str, object], tmp_path: Path) -> dict[str, object]:
+    source = tmp_path / "gpcr_fixture_hard_decoy_rows.json"
+    source.write_text(json.dumps(intake, sort_keys=True), encoding="utf-8")
+    return {
+        **intake,
+        "operator_input_source": {
+            "mode": "raw_hard_decoy_rows",
+            "source_artifact": str(source),
+            "source_artifact_sha256": module.file_sha256(source),
+            "source_id": "fixture_gpcr_hard_decoy_rows",
+            "source_url": "https://example.test/gpcr-hard-decoy-fixture",
+            "source_license": "fixture-only",
+            "source_version": "test-v1",
+        },
+    }
+
+
+def _passing_intake(tmp_path: Path) -> dict[str, object]:
+    return _with_source_receipt(
         {
             "targets": [
                 _passing_target_from_rows("DRD2"),
@@ -66,6 +83,13 @@ def test_gpcr_hard_decoy_suite_passes_required_targets() -> None:
                 _passing_target_from_rows("OPRM1"),
             ]
         },
+        tmp_path,
+    )
+
+
+def test_gpcr_hard_decoy_suite_passes_required_targets(tmp_path: Path) -> None:
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        _passing_intake(tmp_path),
         repo_root=REPO_ROOT,
     )
 
@@ -80,6 +104,7 @@ def test_gpcr_hard_decoy_suite_passes_required_targets() -> None:
     assert report["first_operator_evidence_gap"] == {}
     assert report["operator_handoff_summary"]["first_blocker"] == ""
     assert report["operator_handoff_summary"]["blocked_operator_slot_count"] == 0
+    assert report["operator_input_source_receipt"]["status"] == "pass"
     assert report["phase3_exit_gate"]["status"] == "ready"
     assert report["phase3_exit_gate"]["failed_criterion_count"] == 0
     assert report["phase3_exit_gate"]["failed_criteria"] == []
@@ -124,7 +149,7 @@ def test_gpcr_hard_decoy_suite_blocks_summary_metrics_without_raw_rows() -> None
     ]
 
 
-def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows() -> None:
+def test_gpcr_hard_decoy_suite_blocks_raw_rows_without_source_receipt() -> None:
     report = module.materialize_gpcr_hard_decoy_suite_report(
         {
             "targets": [
@@ -133,6 +158,31 @@ def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows() -> Non
                 _passing_target_from_rows("OPRM1"),
             ]
         },
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["broad_gpcr_family_claim_safe"] is False
+    assert report["target_pass_count"] == 0
+    assert report["first_blocked_target"] == "DRD2"
+    assert report["operator_input_source_receipt"]["status"] == "blocked"
+    assert report["operator_input_source_receipt"]["blockers"] == [
+        "operator_input_source_receipt_required"
+    ]
+    assert "DRD2:operator_input_source_receipt_required" in report["blockers"]
+    assert report["target_rows"][0]["computed_hard_decoy_metrics"]["calculation_status"] == (
+        "computed_without_source_receipt"
+    )
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "raw_hard_decoy_rows_actual_closure"
+    ]
+
+
+def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows(
+    tmp_path: Path,
+) -> None:
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        _passing_intake(tmp_path),
         repo_root=REPO_ROOT,
     )
 
@@ -151,19 +201,24 @@ def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows() -> Non
     assert first_row["computed_hard_decoy_metrics"]["calculation_status"] == "computed"
 
 
-def test_gpcr_hard_decoy_suite_blocks_metrics_that_conflict_with_raw_rows() -> None:
+def test_gpcr_hard_decoy_suite_blocks_metrics_that_conflict_with_raw_rows(
+    tmp_path: Path,
+) -> None:
     conflicting_drd2 = {
         **_passing_target("DRD2"),
         "hard_decoy_rows": _decoy_first_hard_decoy_rows(),
     }
     report = module.materialize_gpcr_hard_decoy_suite_report(
-        {
-            "targets": [
-                conflicting_drd2,
-                _passing_target("HTR2A"),
-                _passing_target("OPRM1"),
-            ]
-        },
+        _with_source_receipt(
+            {
+                "targets": [
+                    conflicting_drd2,
+                    _passing_target("HTR2A"),
+                    _passing_target("OPRM1"),
+                ]
+            },
+            tmp_path,
+        ),
         repo_root=REPO_ROOT,
     )
 
@@ -229,21 +284,24 @@ def test_gpcr_hard_decoy_suite_blocks_missing_operator_values() -> None:
     assert ranking_gate["required"] == ">=0.45"
 
 
-def test_gpcr_hard_decoy_suite_reports_threshold_root_causes() -> None:
+def test_gpcr_hard_decoy_suite_reports_threshold_root_causes(tmp_path: Path) -> None:
     report = module.materialize_gpcr_hard_decoy_suite_report(
-        {
-            "targets": [
-                {
-                    "target_id": "DRD2",
-                    "ranking_pr_auc_ci_low": 0.44,
-                    "top20_hit_rate": 0.19,
-                    "decoys_above_positive_count": 1,
-                    "positive_out_anchored_by_top_decoys": True,
-                },
-                _passing_target_from_rows("HTR2A"),
-                _passing_target_from_rows("OPRM1"),
-            ]
-        },
+        _with_source_receipt(
+            {
+                "targets": [
+                    {
+                        "target_id": "DRD2",
+                        "ranking_pr_auc_ci_low": 0.44,
+                        "top20_hit_rate": 0.19,
+                        "decoys_above_positive_count": 1,
+                        "positive_out_anchored_by_top_decoys": True,
+                    },
+                    _passing_target_from_rows("HTR2A"),
+                    _passing_target_from_rows("OPRM1"),
+                ]
+            },
+            tmp_path,
+        ),
         repo_root=REPO_ROOT,
     )
 

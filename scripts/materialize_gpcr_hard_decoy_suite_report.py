@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+from release_evidence_metadata import file_sha256, release_evidence_metadata  # noqa: E402
 
 
 SCHEMA_VERSION = "gpcr-hard-decoy-suite-report.v1"
@@ -145,13 +145,13 @@ def _operator_evidence_gap_register(report: dict[str, Any]) -> list[dict[str, An
             (row for row in target_rows if str(row.get("target_id") or "") == target_id),
             {},
         )
-        if target_row and target_row.get("status") == "pass":
-            continue
         blocked_criteria = [
             str(row.get("criterion_id") or "")
             for row in criteria
             if target_id in [str(item) for item in _as_list(row.get("failed_targets"))]
         ]
+        if target_row and target_row.get("status") == "pass" and not blocked_criteria:
+            continue
         if not blocked_criteria:
             blocked_criteria = [
                 "ranking_pr_auc_ci_low_min",
@@ -251,6 +251,66 @@ def _integer(value: Any) -> int | None:
 
 def _boolean(value: Any) -> bool | None:
     return value if isinstance(value, bool) else None
+
+
+def _operator_input_source_receipt(
+    intake: dict[str, Any],
+    *,
+    repo_root: Path,
+) -> dict[str, Any]:
+    source = _as_dict(intake.get("operator_input_source"))
+    blockers: list[str] = []
+    if not source:
+        blockers.append("operator_input_source_receipt_required")
+    elif str(source.get("mode") or "") != "raw_hard_decoy_rows":
+        blockers.append("operator_input_source_mode_not_raw_hard_decoy_rows")
+
+    source_artifact = str(source.get("source_artifact") or "").strip()
+    source_artifact_sha256 = str(source.get("source_artifact_sha256") or "").strip()
+    if source:
+        for field_name in ("source_id", "source_url", "source_license"):
+            if not str(source.get(field_name) or "").strip():
+                blockers.append(f"operator_input_source_{field_name}_required")
+        if not source_artifact:
+            blockers.append("operator_input_source_source_artifact_required")
+        if not source_artifact_sha256:
+            blockers.append("operator_input_source_source_artifact_sha256_required")
+        elif not source_artifact_sha256.startswith("sha256:"):
+            blockers.append("operator_input_source_source_artifact_sha256_invalid")
+
+    source_artifact_exists = False
+    source_artifact_sha256_matches = False
+    if source_artifact:
+        source_path = Path(source_artifact)
+        resolved_source = source_path if source_path.is_absolute() else repo_root / source_path
+        source_artifact_exists = resolved_source.exists()
+        if not source_artifact_exists:
+            blockers.append("operator_input_source_source_artifact_missing")
+        elif source_artifact_sha256.startswith("sha256:"):
+            actual_sha256 = file_sha256(resolved_source)
+            source_artifact_sha256_matches = actual_sha256 == source_artifact_sha256
+            if not source_artifact_sha256_matches:
+                blockers.append("operator_input_source_source_artifact_sha256_mismatch")
+
+    blockers = sorted(dict.fromkeys(blockers))
+    return {
+        "status": "pass" if not blockers else "blocked",
+        "contract_pass": not blockers,
+        "mode": str(source.get("mode") or ""),
+        "source_artifact": source_artifact,
+        "source_artifact_present": source_artifact_exists,
+        "source_artifact_sha256_present": bool(source_artifact_sha256),
+        "source_artifact_sha256_matches": source_artifact_sha256_matches,
+        "source_id_present": bool(str(source.get("source_id") or "").strip()),
+        "source_url_present": bool(str(source.get("source_url") or "").strip()),
+        "source_license_present": bool(str(source.get("source_license") or "").strip()),
+        "blockers": blockers,
+        "claim_boundary": (
+            "Actual GPCR Phase 3 closure requires raw hard-decoy rows plus a "
+            "verifiable operator input source receipt. In-memory or fixture-like rows "
+            "without source artifact metadata remain non-promoting."
+        ),
+    }
 
 
 def _score_direction(value: Any) -> str:
@@ -750,6 +810,7 @@ def _actual_hard_decoy_rows_gate(*, target_rows: list[dict[str, Any]]) -> dict[s
                 if "hard_decoy_rows" in str(blocker)
                 or "positive_rows_missing" in str(blocker)
                 or "decoy_rows_missing" in str(blocker)
+                or "operator_input_source" in str(blocker)
             )
     return {
         "criterion_id": ACTUAL_CLOSURE_CRITERION_ID,
@@ -823,6 +884,28 @@ def materialize_gpcr_hard_decoy_suite_report(
         else _missing_target_row(target_id)
         for target_id in REQUIRED_TARGETS
     ]
+    operator_input_source_receipt = _operator_input_source_receipt(
+        intake,
+        repo_root=repo_root,
+    )
+    if not operator_input_source_receipt["contract_pass"]:
+        for row in target_rows:
+            computed_metrics = _as_dict(row.get("computed_hard_decoy_metrics"))
+            if computed_metrics.get("calculation_status") != "computed":
+                continue
+            computed_metrics["calculation_status"] = "computed_without_source_receipt"
+            row["computed_hard_decoy_metrics"] = computed_metrics
+            target_id = str(row.get("target_id") or "")
+            row["blockers"].extend(
+                f"{target_id}:{blocker}"
+                for blocker in _as_list(operator_input_source_receipt.get("blockers"))
+            )
+            row["root_cause_tags"] = list(
+                dict.fromkeys([*_as_list(row.get("root_cause_tags")), "operator_receipts_required"])
+            )
+            row["status"] = "blocked"
+            row["contract_pass"] = False
+
     blockers = [blocker for row in target_rows for blocker in row["blockers"]]
     root_cause_tags = list(
         dict.fromkeys(tag for row in target_rows for tag in row["root_cause_tags"])
@@ -868,6 +951,7 @@ def materialize_gpcr_hard_decoy_suite_report(
         "first_blocker": blockers[0] if blockers else "",
         "root_cause_tags": root_cause_tags,
         "exit_criteria": EXIT_CRITERIA,
+        "operator_input_source_receipt": operator_input_source_receipt,
         "phase3_exit_gate": phase3_exit_gate,
         "target_rows": target_rows,
         "blockers": blockers,
@@ -954,6 +1038,9 @@ def build_gpcr_evidence_surface(
         "target_families": list(REQUIRED_TARGETS),
         "exit_criteria": EXIT_CRITERIA,
         "phase3_exit_gate": _as_dict(report.get("phase3_exit_gate")),
+        "operator_input_source_receipt": _as_dict(
+            report.get("operator_input_source_receipt")
+        ),
         "first_blocked_target": str(report.get("first_blocked_target") or ""),
         "first_blocker": first_blocker,
         "root_cause_tags": _as_list(report.get("root_cause_tags")),
