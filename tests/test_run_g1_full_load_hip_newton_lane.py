@@ -423,6 +423,60 @@ def test_cpu_diagnostic_hip_consistency_proof_blocks_lane_promotion(
     assert not child.exists()
 
 
+def test_missing_hip_worker_contract_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        raise AssertionError("child probe must not run without worker contract")
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    proof.write_text(
+        json.dumps(
+            {
+                "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
+                "source_commit_sha": run_g1_full_load_hip_newton_lane._git_head(),
+                "reused_evidence": False,
+                "rocm_hip_required": True,
+                "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
+                "cpu_diagnostic_assembler_used": False,
+                "production_hip_residual_jacobian_path": True,
+                "consistent_residual_jacobian_newton_gate_passed": True,
+                "blockers": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert "hip_consistency_proof_worker_contract_missing" in payload["blockers"]
+    assert payload["hip_consistency_proof"]["production_rocm_hip_residual_jvp_worker"] == {
+        "present": False,
+        "ready": False,
+        "status": None,
+        "worker_id": None,
+        "blockers": [],
+    }
+    assert payload["child_exit_code"] is None
+    assert not child.exists()
+
+
 def test_hip_runtime_blockers_propagate_to_lane_blockers_and_summary(
     tmp_path: Path,
     monkeypatch: Any,
@@ -684,6 +738,14 @@ def _write_hip_consistency_proof(
     blockers: list[str] | None = None,
     runtime_blockers: list[str] | None = None,
 ) -> None:
+    worker_ready = bool(
+        gate_passed
+        and production_hip_residual_jacobian_path
+        and not cpu_diagnostic_assembler_used
+        and not blockers
+        and not runtime_blockers
+    )
+    worker_blockers = [] if worker_ready else ["fixture_worker_not_ready"]
     payload: dict[str, Any] = {
         "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
         "source_commit_sha": source_commit_sha,
@@ -697,6 +759,16 @@ def _write_hip_consistency_proof(
         "cpu_diagnostic_assembler_used": cpu_diagnostic_assembler_used,
         "production_hip_residual_jacobian_path": production_hip_residual_jacobian_path,
         "consistent_residual_jacobian_newton_gate_passed": gate_passed,
+        "production_rocm_hip_residual_jvp_worker": {
+            "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
+            "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
+            "ready": worker_ready,
+            "status": "ready" if worker_ready else "blocked",
+            "blockers": worker_blockers,
+            "required_for_g1_closure": True,
+            "promotes_g1_closure": False,
+            "cpu_fallback_allowed": False,
+        },
         "blockers": blockers or [],
     }
     if runtime_blockers is not None:

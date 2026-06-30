@@ -293,6 +293,195 @@ def _assess_hip_required_direct_probe_payload(
     }
 
 
+def _hip_runtime_blocker_names(hip_preflight: dict[str, Any]) -> list[str]:
+    runtime_blockers = hip_preflight.get("runtime_blockers")
+    if not isinstance(runtime_blockers, list):
+        return []
+    return [item for item in runtime_blockers if isinstance(item, str) and item]
+
+
+def _production_rocm_hip_residual_jvp_worker_contract(
+    *,
+    source_commit_sha: str,
+    hip_preflight: dict[str, Any],
+    child_kwargs: dict[str, Any],
+    hip_proof: dict[str, Any] | None = None,
+    child_executed: bool = False,
+    child_error: str | None = None,
+    preflight_only: bool = False,
+) -> dict[str, Any]:
+    proof = hip_proof if isinstance(hip_proof, dict) else {}
+    global_krylov = proof.get("matrix_free_global_krylov")
+    global_krylov = global_krylov if isinstance(global_krylov, dict) else {}
+    row_correction = proof.get("current_tangent_residual_row_correction")
+    row_correction = row_correction if isinstance(row_correction, dict) else {}
+    runtime_blockers = _hip_runtime_blocker_names(hip_preflight)
+
+    global_plan = {
+        "enabled": bool(child_kwargs.get("enable_matrix_free_global_krylov")),
+        "batch_replay_backend": str(
+            child_kwargs.get("matrix_free_global_krylov_batch_replay_backend", "")
+            or ""
+        ),
+        "require_hip_batch_replay": bool(
+            child_kwargs.get("matrix_free_global_krylov_require_hip_batch_replay")
+        ),
+        "linear_solver_backend": str(
+            child_kwargs.get("matrix_free_global_krylov_linear_solver_backend", "")
+            or ""
+        ),
+        "max_iterations": int(
+            child_kwargs.get("matrix_free_global_krylov_max_iterations", 0) or 0
+        ),
+        "jvp_rows_required": True,
+    }
+    row_plan = {
+        "enabled": bool(
+            child_kwargs.get("enable_current_tangent_residual_row_correction")
+        ),
+        "batch_replay_backend": str(
+            child_kwargs.get("current_tangent_residual_row_batch_replay_backend", "")
+            or ""
+        ),
+        "require_hip_batch_replay": bool(
+            child_kwargs.get("current_tangent_residual_row_require_hip_batch_replay")
+        ),
+        "jacobian_mode": str(
+            child_kwargs.get("current_tangent_residual_row_jacobian_mode", "") or ""
+        ),
+        "residual_only_assembly": bool(
+            child_kwargs.get("current_tangent_residual_row_use_residual_only_assembly")
+        ),
+    }
+
+    global_tangent_refresh_hip_proven = bool(
+        global_krylov.get("accepted_state_tangent_refresh_hip_used")
+        or (
+            global_krylov.get("accepted_state_tangent_refresh_deferred_satisfied")
+            and str(
+                global_krylov.get(
+                    "accepted_state_tangent_refresh_deferred_backend", ""
+                )
+                or ""
+            ).startswith("hip")
+        )
+    )
+    blockers: list[str] = []
+    if not bool(hip_preflight.get("hip_available")):
+        blockers.append("rocm_hip_runtime_unavailable")
+    for runtime_blocker in runtime_blockers:
+        blockers.append(f"runtime::{runtime_blocker}")
+    if preflight_only:
+        blockers.append("direct_probe_not_executed_preflight_only")
+    elif not child_executed:
+        blockers.append("direct_probe_not_executed")
+    if child_error:
+        blockers.append("direct_probe_execution_failed")
+    if proof.get("production_hip_residual_jacobian_path") is not True:
+        blockers.append("production_hip_residual_jacobian_path_not_proven")
+    if global_plan["enabled"] is not True:
+        blockers.append("global_krylov_plan_not_enabled")
+    if global_plan["batch_replay_backend"] != "hip_full_residual_resident":
+        blockers.append("global_krylov_resident_hip_backend_not_planned")
+    if global_plan["require_hip_batch_replay"] is not True:
+        blockers.append("global_krylov_hip_batch_replay_not_required")
+    if global_plan["linear_solver_backend"] != "torch_hip_gmres":
+        blockers.append("global_krylov_hip_solver_not_planned")
+    if global_krylov.get("jvp_rows_retained") is not True:
+        blockers.append("global_krylov_jvp_rows_not_retained")
+    if global_krylov.get("hip_krylov_solver_used") is not True:
+        blockers.append("global_krylov_hip_solver_not_proven")
+    if global_tangent_refresh_hip_proven is not True:
+        blockers.append("global_krylov_accepted_state_tangent_refresh_hip_not_proven")
+    if global_krylov.get("accepted_state_tangent_refresh_cpu_used") is True:
+        blockers.append("global_krylov_accepted_state_tangent_refresh_cpu_used")
+    if row_plan["enabled"] is not True:
+        blockers.append("current_tangent_residual_row_plan_not_enabled")
+    if row_plan["batch_replay_backend"] != "hip_full_residual":
+        blockers.append("current_tangent_residual_row_hip_backend_not_planned")
+    if row_plan["require_hip_batch_replay"] is not True:
+        blockers.append("current_tangent_residual_row_hip_replay_not_required")
+    if row_correction.get("require_hip_batch_replay") is not True:
+        blockers.append("current_tangent_residual_row_hip_replay_not_proven")
+    if row_correction.get("accepted_state_tangent_refresh_cpu_used") is True:
+        blockers.append("current_tangent_residual_row_tangent_refresh_cpu_used")
+    if proof.get("consistent_residual_jacobian_newton_gate_passed") is not True:
+        blockers.append("consistent_residual_jacobian_newton_gate_not_passed")
+
+    blockers = sorted(dict.fromkeys(blockers))
+    return {
+        "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
+        "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
+        "source_commit_sha": source_commit_sha,
+        "ready": not blockers,
+        "status": "ready" if not blockers else "blocked",
+        "blockers": blockers,
+        "required_for_g1_closure": True,
+        "promotes_g1_closure": False,
+        "cpu_fallback_allowed": False,
+        "runtime": {
+            "hip_available": bool(hip_preflight.get("hip_available")),
+            "runtime_blockers": runtime_blockers,
+        },
+        "execution": {
+            "child_direct_probe_executed": bool(child_executed),
+            "preflight_only": bool(preflight_only),
+            "child_error": child_error,
+        },
+        "matrix_free_global_krylov": {
+            "plan": global_plan,
+            "proof": {
+                "enabled": bool(global_krylov.get("enabled")),
+                "attempted": bool(global_krylov.get("attempted")),
+                "jvp_row_count": int(global_krylov.get("jvp_row_count", 0) or 0),
+                "jvp_rows_retained": bool(
+                    global_krylov.get("jvp_rows_retained")
+                ),
+                "hip_krylov_solver_used": bool(
+                    global_krylov.get("hip_krylov_solver_used")
+                ),
+                "accepted_state_tangent_refresh_hip_used": bool(
+                    global_krylov.get("accepted_state_tangent_refresh_hip_used")
+                ),
+                "accepted_state_tangent_refresh_cpu_used": bool(
+                    global_krylov.get("accepted_state_tangent_refresh_cpu_used")
+                ),
+                "accepted_state_tangent_refresh_deferred_satisfied": bool(
+                    global_krylov.get(
+                        "accepted_state_tangent_refresh_deferred_satisfied"
+                    )
+                ),
+                "accepted_state_tangent_refresh_deferred_backend": str(
+                    global_krylov.get(
+                        "accepted_state_tangent_refresh_deferred_backend", ""
+                    )
+                    or ""
+                ),
+            },
+        },
+        "current_tangent_residual_row_correction": {
+            "plan": row_plan,
+            "proof": {
+                "enabled": bool(row_correction.get("enabled")),
+                "attempted": bool(row_correction.get("attempted")),
+                "require_hip_batch_replay": bool(
+                    row_correction.get("require_hip_batch_replay")
+                ),
+                "accepted_state_tangent_refresh_cpu_used": bool(
+                    row_correction.get("accepted_state_tangent_refresh_cpu_used")
+                ),
+            },
+        },
+        "claim_boundary": (
+            "This is a production-worker readiness contract for the HIP-required "
+            "residual/JVP lane. It records required device-resident residual/JVP "
+            "behavior and blocks G1 promotion unless the child proof retains "
+            "global JVP rows, uses HIP for the accepted-state tangent refresh, "
+            "and avoids CPU fallback."
+        ),
+    }
+
+
 def _component_breakdown(
     *,
     component_forces: dict[str, np.ndarray],
@@ -1836,6 +2025,19 @@ def run_mgt_residual_jacobian_consistency_probe(
             if isinstance(runtime_blockers, list)
             else []
         )
+        child_kwargs = _hip_required_direct_probe_kwargs(
+            mgt_path=mgt_path,
+            checkpoint_npz=checkpoint_npz,
+            shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+        )
+        worker_contract = _production_rocm_hip_residual_jvp_worker_contract(
+            source_commit_sha=source_commit_sha,
+            hip_preflight=hip_preflight,
+            child_kwargs=child_kwargs,
+            child_executed=False,
+            child_error=None,
+            preflight_only=True,
+        )
         blockers = [
             *(
                 []
@@ -1861,6 +2063,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             "cpu_diagnostic_assembler_used": False,
             "production_hip_residual_jacobian_path": False,
             "rocm_hip_runtime_preflight": hip_preflight,
+            "production_rocm_hip_residual_jvp_worker": worker_contract,
             "component_only": bool(component_only),
             "checkpoint": {"path": str(checkpoint_npz)},
             "load_scale": None,
@@ -1904,6 +2107,19 @@ def run_mgt_residual_jacobian_consistency_probe(
             if isinstance(runtime_blockers, list)
             else []
         )
+        child_kwargs = _hip_required_direct_probe_kwargs(
+            mgt_path=mgt_path,
+            checkpoint_npz=checkpoint_npz,
+            shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+        )
+        worker_contract = _production_rocm_hip_residual_jvp_worker_contract(
+            source_commit_sha=source_commit_sha,
+            hip_preflight=hip_preflight,
+            child_kwargs=child_kwargs,
+            child_executed=False,
+            child_error=None,
+            preflight_only=False,
+        )
         payload = {
             "schema_version": SCHEMA_VERSION,
             "generated_at": generated_at,
@@ -1919,6 +2135,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             "cpu_diagnostic_assembler_used": False,
             "production_hip_residual_jacobian_path": False,
             "rocm_hip_runtime_preflight": hip_preflight,
+            "production_rocm_hip_residual_jvp_worker": worker_contract,
             "component_only": bool(component_only),
             "checkpoint": {"path": str(checkpoint_npz)},
             "load_scale": None,
@@ -1945,19 +2162,27 @@ def run_mgt_residual_jacobian_consistency_probe(
         return payload
     if require_hip_residual_engine:
         child_started = time.perf_counter()
+        child_kwargs = _hip_required_direct_probe_kwargs(
+            mgt_path=mgt_path,
+            checkpoint_npz=checkpoint_npz,
+            shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+        )
         try:
-            child_payload = run_mgt_direct_residual_newton_probe(
-                **_hip_required_direct_probe_kwargs(
-                    mgt_path=mgt_path,
-                    checkpoint_npz=checkpoint_npz,
-                    shell_pressure_load_path_policy=shell_pressure_load_path_policy,
-                )
-            )
+            child_payload = run_mgt_direct_residual_newton_probe(**child_kwargs)
             child_error: str | None = None
         except Exception as exc:
             child_payload = {}
             child_error = f"{exc.__class__.__name__}: {exc}"
         hip_proof = _assess_hip_required_direct_probe_payload(child_payload)
+        worker_contract = _production_rocm_hip_residual_jvp_worker_contract(
+            source_commit_sha=source_commit_sha,
+            hip_preflight=hip_preflight,
+            child_kwargs=child_kwargs,
+            hip_proof=hip_proof,
+            child_executed=child_error is None,
+            child_error=child_error,
+            preflight_only=False,
+        )
         child_blockers = (
             child_payload.get("blockers") if isinstance(child_payload, dict) else []
         )
@@ -1965,6 +2190,10 @@ def run_mgt_residual_jacobian_consistency_probe(
         blockers = [
             *hip_proof["blockers"],
             *[f"hip_direct_probe::{item}" for item in child_blockers if isinstance(item, str)],
+            *[
+                f"production_rocm_hip_residual_jvp_worker::{item}"
+                for item in worker_contract["blockers"]
+            ],
         ]
         if child_error is not None:
             blockers.append("hip_direct_probe_execution_failed")
@@ -1973,6 +2202,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             hip_proof["production_hip_residual_jacobian_path"]
             and hip_proof["hip_residual_engine_contract_passed"]
             and hip_proof["consistent_residual_jacobian_newton_gate_passed"]
+            and worker_contract["ready"]
             and not blockers
         )
         payload = {
@@ -1992,6 +2222,7 @@ def run_mgt_residual_jacobian_consistency_probe(
                 hip_proof["production_hip_residual_jacobian_path"]
             ),
             "rocm_hip_runtime_preflight": hip_preflight,
+            "production_rocm_hip_residual_jvp_worker": worker_contract,
             "component_only": bool(component_only),
             "checkpoint": {"path": str(checkpoint_npz)},
             "load_scale": (

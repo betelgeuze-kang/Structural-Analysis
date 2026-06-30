@@ -796,6 +796,19 @@ def _hip_consistency_proof_assessment(
         blockers.append("hip_consistency_proof_production_hip_path_not_proven")
     if payload.get("consistent_residual_jacobian_newton_gate_passed") is not True:
         blockers.append("hip_consistency_proof_gate_not_passed")
+    worker_contract = payload.get("production_rocm_hip_residual_jvp_worker")
+    worker_contract = worker_contract if isinstance(worker_contract, dict) else {}
+    if not worker_contract:
+        blockers.append("hip_consistency_proof_worker_contract_missing")
+    elif worker_contract.get("ready") is not True:
+        blockers.append(
+            "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready"
+        )
+        worker_blockers = worker_contract.get("blockers")
+        if isinstance(worker_blockers, list):
+            for blocker in worker_blockers:
+                if isinstance(blocker, str) and blocker:
+                    blockers.append(f"hip_consistency_proof_worker::{blocker}")
     proof_blockers = payload.get("blockers")
     if isinstance(proof_blockers, list) and proof_blockers:
         blockers.append("hip_consistency_proof_has_blockers")
@@ -827,6 +840,17 @@ def _hip_consistency_proof_assessment(
         "consistent_residual_jacobian_newton_gate_passed": payload.get(
             "consistent_residual_jacobian_newton_gate_passed"
         ),
+        "production_rocm_hip_residual_jvp_worker": {
+            "present": bool(worker_contract),
+            "ready": worker_contract.get("ready") is True,
+            "status": worker_contract.get("status"),
+            "worker_id": worker_contract.get("worker_id"),
+            "blockers": (
+                worker_contract.get("blockers")
+                if isinstance(worker_contract.get("blockers"), list)
+                else []
+            ),
+        },
         "receipt_blockers": proof_blockers if isinstance(proof_blockers, list) else [],
         "runtime_blockers": runtime_blockers_list,
     }, blockers
