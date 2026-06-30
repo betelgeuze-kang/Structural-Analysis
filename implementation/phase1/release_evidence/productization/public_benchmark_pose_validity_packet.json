@@ -94,20 +94,20 @@
     "status": "pass"
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T04:34:02.318087+00:00",
+  "generated_at": "2026-06-30T05:44:43.723315+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9de55f1e3621373dea693bfa0d1db255a0d630e649080731b1642dfaf6907b10",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:8c8fa11bd8dc8bd893d96d96b8e388a36929cbc33b5e79788ef2c645d12dc58f",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:27e57b8f87894a510a90f2e01124a9f2ceb84294a57024e4f7cfb322d4322ed7",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:04d634cf34efc93cff87a39f6d4f2faf3394b23ba44d2d272b98d373f56391f2",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
-    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:23fea724f226ca37be7e326f9aeaa2e26c3dcbfc5c71ce21f2934821d8da68a8",
+    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:417e27de7f26dd9b87cbe1017630694c9a3c513eb03ce475853f1cde8fd23640",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c21641e971fd7675a2a3d24cb6a11a1c2a7bee7f3322cfbd5b931803f4884ba",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:82159c99cd1512beeb1789b4549606c8a6063c12e1b1b18124f8ef8f0eaac0ca"
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:428761a935484839474dfcec1a692cb419eb176a2be3b33242748df93faeea88"
   },
   "materializer": {
     "claim_boundary": "The materializer turns validated pose-coordinate input into per-case PoseBusters-style sanity rows for real benchmark ligands. It does not vendor PoseBusters, infer chemistry, or close Tier beta.",
@@ -120,7 +120,7 @@
   "reuse_policy": "pose_validity_packet_generated_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-pose-validity-packet.v1",
-  "source_commit_sha": "26fbd982efdfb54155d6b54939660fc3510caa68",
+  "source_commit_sha": "76f6a9f5eb4212f48dc37f8b527cd2436cbb1928",
   "status": "ready_for_dry_run",
   "validator": {
     "materialization_command": "python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked",
