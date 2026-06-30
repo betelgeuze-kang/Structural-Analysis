@@ -1,0 +1,26 @@
+{
+  "blocker_count": 1,
+  "blockers": [
+    "public_benchmark_external_receipts_missing"
+  ],
+  "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+  "contract_pass": true,
+  "materialized_row_count": 0,
+  "public_benchmark_external_receipts_ready": false,
+  "receipt_blocked_row_count": 0,
+  "receipt_complete_row_count": 0,
+  "receipt_rows": [],
+  "required_receipt_fields": [
+    "source_license_or_accession",
+    "source_checksum",
+    "provenance_ref"
+  ],
+  "required_subset_receipt_fields": [
+    "source_license_or_accession",
+    "source_checksum",
+    "provenance_ref",
+    "source_file_checksums"
+  ],
+  "schema_version": "public-benchmark-external-receipt-validation.v1",
+  "status": "operator_receipts_required"
+}

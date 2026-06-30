@@ -1,10 +1,11 @@
 {
-  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit.",
+  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit. Local workflow trigger metadata is parsed from the current checkout and does not refresh or replace GitHub Actions run-history evidence.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "generated_at": "2026-06-30T03:34:27.707792+00:00",
   "input_checksums": {
-    ".github/workflows": "dir-sha256:8acb8a126ead40b2ce6a7ce24dbb8569bfdb9d927ed74296b6bc740c056936e3"
+    ".github/workflows": "dir-sha256:8acb8a126ead40b2ce6a7ce24dbb8569bfdb9d927ed74296b6bc740c056936e3",
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:f821c22fa5743de73c2a0206255b941094690280c05cfe215811b34d2834a04a"
   },
   "lanes": {
     "nightly": {
@@ -1193,9 +1194,9 @@
   "limit": 500,
   "reason_code": "ERR_CI_STREAK_INCOMPLETE",
   "repo": "betelgeuze-kang/Structural-Analysis",
-  "reused_evidence": false,
+  "reused_evidence": true,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "a16984b493353624afdef9b2556b146a686b6e76",
+  "source_commit_sha": "b6f09a720fa2780ab5604037c784997b6366cc6c",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 0,
@@ -1213,6 +1214,7 @@
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 8,
+    "local_workflow_metadata_generated_at": "2026-06-30T04:31:36.933034+00:00",
     "local_workflows": [
       {
         "exists": true,

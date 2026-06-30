@@ -4,18 +4,19 @@
   "contract_pass": true,
   "depends_on": [],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T04:06:59.129867+00:00",
+  "generated_at": "2026-06-30T04:31:33.382981+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:8c0da69cb53047cc808cf0085dc47b7872fef3f5bd7f1b9ad2d44f1a12a43760",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:4bdd70f42a9171857713ca310d4e547eed1fab19fc95290cde2b312cd69fc68a",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:c52e4b00573350c470ec92a45a80b469a757504b19e6db42f193a2c38e10ee7b",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9de55f1e3621373dea693bfa0d1db255a0d630e649080731b1642dfaf6907b10",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
-    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:5ab4892003b73ef194edd139e77f49e69b7bacbe5124bad55eab0153879babdd",
+    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:23fea724f226ca37be7e326f9aeaa2e26c3dcbfc5c71ce21f2934821d8da68a8",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c21641e971fd7675a2a3d24cb6a11a1c2a7bee7f3322cfbd5b931803f4884ba",
+    "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:364d355cd4e6d67500b02dd47a32582df7486ea125045b2f38be7be3bf5b5161"
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:82159c99cd1512beeb1789b4549606c8a6063c12e1b1b18124f8ef8f0eaac0ca"
   },
   "intake_artifact": "<operator-casf-pdbbind-intake.json>",
   "local_source_file_fields": [
@@ -41,7 +42,8 @@
     ],
     "receipt_fields": [
       "source_license_or_accession",
-      "source_checksum"
+      "source_checksum",
+      "provenance_ref"
     ],
     "source_family": "CASF/PDBBind",
     "symmetry_permutation_contract_fields": [
@@ -61,6 +63,7 @@
     "symmetry_permutation_contract",
     "source_license_or_accession",
     "source_checksum",
+    "provenance_ref",
     "ligand_atom_order_contract.atom_count",
     "ligand_atom_order_contract.atom_ids",
     "symmetry_permutation_contract.permutations"
@@ -69,7 +72,7 @@
   "reused_evidence": true,
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "casf_pdbbind_subset_intake",
-  "source_commit_sha": "ab0d7381b9078b22257ddce496c7eaf792c3d55f",
+  "source_commit_sha": "b6f09a720fa2780ab5604037c784997b6366cc6c",
   "status": "operator_template_seed",
   "template": {
     "cases": [
@@ -83,6 +86,7 @@
         },
         "predicted_ligand_path_or_docking_run_id": "operator_attached/casf_pdbbind/SOURCE_COMPLEX_ID/predicted_pose.sdf",
         "protein_structure_path": "operator_attached/casf_pdbbind/SOURCE_COMPLEX_ID/protein.pdb",
+        "provenance_ref": "operator_supplied_subset_preparation_receipt",
         "reference_ligand_path": "operator_attached/casf_pdbbind/SOURCE_COMPLEX_ID/reference_ligand.sdf",
         "source_checksum": "sha256:operator_supplied_source_bundle_checksum",
         "source_family": "CASF/PDBBind",

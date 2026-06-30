@@ -92,7 +92,8 @@
     "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
     "receipt_fields": [
       "source_license_or_accession",
-      "source_checksum"
+      "source_checksum",
+      "provenance_ref"
     ],
     "required_case_fields": [
       "case_id",
@@ -104,7 +105,8 @@
       "ligand_atom_order_contract",
       "symmetry_permutation_contract",
       "source_license_or_accession",
-      "source_checksum"
+      "source_checksum",
+      "provenance_ref"
     ],
     "required_local_source_file_fields": [
       "protein_structure_path",
@@ -159,6 +161,24 @@
       "required_slot_count": 4,
       "slice_id": "operator_intake_handoff_packet",
       "status": "ready_for_operator_input"
+    },
+    {
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+      "materialized_row_count": 0,
+      "receipt_complete_row_count": 0,
+      "required_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "required_subset_receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "source_file_checksums"
+      ],
+      "slice_id": "public_benchmark_external_receipt_contract",
+      "status": "contract_ready"
     }
   ],
   "contract_pass": true,
@@ -178,6 +198,59 @@
     "public_benchmark_enrichment_ready": false,
     "real_enrichment_target_count": 0,
     "status": "operator_evidence_required"
+  },
+  "external_receipts_summary": {
+    "blockers": [
+      "public_benchmark_external_receipts_missing"
+    ],
+    "materialized_row_count": 0,
+    "public_benchmark_external_receipts_ready": false,
+    "receipt_blocked_row_count": 0,
+    "receipt_complete_row_count": 0,
+    "status": "operator_receipts_required"
+  },
+  "external_receipts_validation": {
+    "blocker_count": 1,
+    "blockers": [
+      "public_benchmark_external_receipts_missing"
+    ],
+    "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+    "contract_pass": true,
+    "materialized_row_count": 0,
+    "public_benchmark_external_receipts_ready": false,
+    "receipt_blocked_row_count": 0,
+    "receipt_complete_row_count": 0,
+    "receipt_rows": [],
+    "required_receipt_fields": [
+      "source_license_or_accession",
+      "source_checksum",
+      "provenance_ref"
+    ],
+    "required_subset_receipt_fields": [
+      "source_license_or_accession",
+      "source_checksum",
+      "provenance_ref",
+      "source_file_checksums"
+    ],
+    "schema_version": "public-benchmark-external-receipt-validation.v1",
+    "status": "operator_receipts_required"
+  },
+  "external_receipts_validator": {
+    "claim_boundary": "This validator checks operator-attached license/accession, checksum, and provenance receipt fields already present in materialized benchmark rows. It does not fetch public data, approve licenses, or claim Tier beta without materialized benchmark evidence.",
+    "required_receipt_fields": [
+      "source_license_or_accession",
+      "source_checksum",
+      "provenance_ref"
+    ],
+    "required_subset_receipt_fields": [
+      "source_license_or_accession",
+      "source_checksum",
+      "provenance_ref",
+      "source_file_checksums"
+    ],
+    "schema_version": "public-benchmark-external-receipt-validation.v1",
+    "status": "ready_for_materialized_rows",
+    "validation_command": "python3 scripts/validate_public_benchmark_external_receipts.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --enrichment-scorecard implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json --vina-gnina-comparison-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json --fail-blocked"
   },
   "first_blocked_target": "casf_pdbbind_subset_intake",
   "first_blocker": "casf_pdbbind_source_material_not_attached",
@@ -221,7 +294,8 @@
     "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
     "receipt_fields": [
       "source_license_or_accession",
-      "source_checksum"
+      "source_checksum",
+      "provenance_ref"
     ],
     "required_case_fields": [
       "case_id",
@@ -233,7 +307,8 @@
       "ligand_atom_order_contract",
       "symmetry_permutation_contract",
       "source_license_or_accession",
-      "source_checksum"
+      "source_checksum",
+      "provenance_ref"
     ],
     "required_local_source_file_fields": [
       "protein_structure_path",
@@ -319,7 +394,8 @@
       "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
       "receipt_fields": [
         "source_license_or_accession",
-        "source_checksum"
+        "source_checksum",
+        "provenance_ref"
       ],
       "required_case_fields": [
         "case_id",
@@ -331,7 +407,8 @@
         "ligand_atom_order_contract",
         "symmetry_permutation_contract",
         "source_license_or_accession",
-        "source_checksum"
+        "source_checksum",
+        "provenance_ref"
       ],
       "required_local_source_file_fields": [
         "protein_structure_path",
@@ -368,7 +445,8 @@
       ],
       "receipt_fields": [
         "source_license_or_accession",
-        "source_checksum"
+        "source_checksum",
+        "provenance_ref"
       ],
       "source_family": "CASF/PDBBind",
       "symmetry_permutation_contract_fields": [
@@ -417,7 +495,8 @@
       ],
       "receipt_fields": [
         "source_license_or_accession",
-        "source_checksum"
+        "source_checksum",
+        "provenance_ref"
       ],
       "source_family": "CASF/PDBBind",
       "symmetry_permutation_contract_fields": [
@@ -434,24 +513,25 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-06-30T04:06:59.124618+00:00",
+  "generated_at": "2026-06-30T04:31:33.377484+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:4bdd70f42a9171857713ca310d4e547eed1fab19fc95290cde2b312cd69fc68a",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:4f40955950b8383a87dd7b07d017055a5cd334f8b27ef0ec487420636f0b9ea8",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9de55f1e3621373dea693bfa0d1db255a0d630e649080731b1642dfaf6907b10",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:8c8fa11bd8dc8bd893d96d96b8e388a36929cbc33b5e79788ef2c645d12dc58f",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
-    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:5ab4892003b73ef194edd139e77f49e69b7bacbe5124bad55eab0153879babdd",
+    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:23fea724f226ca37be7e326f9aeaa2e26c3dcbfc5c71ce21f2934821d8da68a8",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c21641e971fd7675a2a3d24cb6a11a1c2a7bee7f3322cfbd5b931803f4884ba",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
+    "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:364d355cd4e6d67500b02dd47a32582df7486ea125045b2f38be7be3bf5b5161"
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:82159c99cd1512beeb1789b4549606c8a6063c12e1b1b18124f8ef8f0eaac0ca"
   },
   "materialization_progress": {
     "blocked_slice_count": 4,
     "claim_boundary": "Completed slices are repo-local contracts or synthetic dry-runs. Blocked slices require operator-attached public benchmark rows and external receipts before Tier beta can be claimed.",
-    "completed_slice_count": 5,
+    "completed_slice_count": 6,
     "materialized_subset_case_count": 0,
     "next_unblock_slice_id": "casf_pdbbind_subset_materialization",
     "real_enrichment_target_count": 0,
@@ -547,7 +627,8 @@
         "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "receipt_fields": [
           "source_license_or_accession",
-          "source_checksum"
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_case_fields": [
           "case_id",
@@ -559,7 +640,8 @@
           "ligand_atom_order_contract",
           "symmetry_permutation_contract",
           "source_license_or_accession",
-          "source_checksum"
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_local_source_file_fields": [
           "protein_structure_path",
@@ -596,7 +678,8 @@
         ],
         "receipt_fields": [
           "source_license_or_accession",
-          "source_checksum"
+          "source_checksum",
+          "provenance_ref"
         ],
         "source_family": "CASF/PDBBind",
         "symmetry_permutation_contract_fields": [
@@ -842,7 +925,8 @@
         ],
         "receipt_fields": [
           "source_license_or_accession",
-          "source_checksum"
+          "source_checksum",
+          "provenance_ref"
         ],
         "source_family": "CASF/PDBBind",
         "symmetry_permutation_contract_fields": [
@@ -976,7 +1060,8 @@
         ],
         "receipt_fields": [
           "source_license_or_accession",
-          "source_checksum"
+          "source_checksum",
+          "provenance_ref"
         ],
         "source_family": "CASF/PDBBind",
         "symmetry_permutation_contract_fields": [
@@ -1132,7 +1217,8 @@
       ],
       "receipt_fields": [
         "source_license_or_accession",
-        "source_checksum"
+        "source_checksum",
+        "provenance_ref"
       ],
       "source_family": "CASF/PDBBind",
       "symmetry_permutation_contract_fields": [
@@ -1161,6 +1247,7 @@
       "public_benchmark_symmetry_rmsd_scorecard.real_benchmark_case_count >= 12",
       "public_benchmark_enrichment_scorecard.public_benchmark_enrichment_ready == true",
       "public_benchmark_vina_gnina_comparison_adapter.public_benchmark_engine_comparison_ready == true",
+      "public_benchmark_external_receipts_validation.public_benchmark_external_receipts_ready == true",
       "public_benchmark_source_of_truth.public_benchmark_ready == true"
     ],
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
@@ -1206,7 +1293,8 @@
       "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
       "receipt_fields": [
         "source_license_or_accession",
-        "source_checksum"
+        "source_checksum",
+        "provenance_ref"
       ],
       "required_case_fields": [
         "case_id",
@@ -1218,7 +1306,8 @@
         "ligand_atom_order_contract",
         "symmetry_permutation_contract",
         "source_license_or_accession",
-        "source_checksum"
+        "source_checksum",
+        "provenance_ref"
       ],
       "required_local_source_file_fields": [
         "protein_structure_path",
@@ -1263,7 +1352,8 @@
         ],
         "receipt_fields": [
           "source_license_or_accession",
-          "source_checksum"
+          "source_checksum",
+          "provenance_ref"
         ],
         "source_family": "CASF/PDBBind",
         "symmetry_permutation_contract_fields": [
@@ -1299,7 +1389,8 @@
           ],
           "receipt_fields": [
             "source_license_or_accession",
-            "source_checksum"
+            "source_checksum",
+            "provenance_ref"
           ],
           "source_family": "CASF/PDBBind",
           "symmetry_permutation_contract_fields": [
@@ -1453,7 +1544,8 @@
         "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "receipt_fields": [
           "source_license_or_accession",
-          "source_checksum"
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_case_fields": [
           "case_id",
@@ -1465,7 +1557,8 @@
           "ligand_atom_order_contract",
           "symmetry_permutation_contract",
           "source_license_or_accession",
-          "source_checksum"
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_local_source_file_fields": [
           "protein_structure_path",
@@ -1513,6 +1606,11 @@
         "produces": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
         "schema_version": "public-benchmark-vina-gnina-comparison-materialization.v1",
         "step_id": "materialize_vina_gnina_comparison_adapter"
+      },
+      {
+        "produces": "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+        "schema_version": "public-benchmark-external-receipt-validation.v1",
+        "step_id": "validate_external_receipts"
       },
       {
         "produces": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
@@ -1614,7 +1712,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "ab0d7381b9078b22257ddce496c7eaf792c3d55f",
+  "source_commit_sha": "b6f09a720fa2780ab5604037c784997b6366cc6c",
   "source_families": [
     {
       "family_id": "casf_pdbbind",
@@ -1639,11 +1737,11 @@
   ],
   "source_tracking": {
     "claim_boundary": "This source-of-truth seed is generated from local builder and validator code only. Checksums cover those direct source artifacts, not external CASF/PDBBind, DUD-E, LIT-PCBA, Vina, or GNINA benchmark data.",
-    "input_checksum_count": 11,
+    "input_checksum_count": 12,
     "missing_source_artifact_count": 0,
     "missing_source_artifacts": [],
     "mode": "direct_builder_source_tracking",
-    "source_artifact_count": 11,
+    "source_artifact_count": 12,
     "source_artifacts": [
       "scripts/build_public_benchmark_source_of_truth.py",
       "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
@@ -1654,6 +1752,7 @@
       "scripts/materialize_public_benchmark_subset_manifest.py",
       "scripts/build_public_benchmark_operator_intake_packet.py",
       "scripts/score_symmetry_aware_ligand_rmsd.py",
+      "scripts/validate_public_benchmark_external_receipts.py",
       "scripts/validate_public_benchmark_pose_validity.py",
       "scripts/validate_public_benchmark_subset_manifest.py"
     ]
@@ -1687,7 +1786,8 @@
       "ligand_atom_order_contract",
       "symmetry_permutation_contract",
       "source_license_or_accession",
-      "source_checksum"
+      "source_checksum",
+      "provenance_ref"
     ],
     "schema_version": "public-benchmark-subset-manifest-validation.v1",
     "status": "source_material_required",
@@ -1712,12 +1812,13 @@
       "ligand_atom_order_contract",
       "symmetry_permutation_contract",
       "source_license_or_accession",
-      "source_checksum"
+      "source_checksum",
+      "provenance_ref"
     ],
     "schema_version": "public-benchmark-subset-materialization.v1",
     "status": "ready_for_operator_intake"
   },
-  "summary_line": "Public benchmark source-of-truth: BLOCKED | completed_slices=5 | blocked_slices=4 | first_blocker=casf_pdbbind_source_material_not_attached",
+  "summary_line": "Public benchmark source-of-truth: BLOCKED | completed_slices=6 | blocked_slices=4 | first_blocker=casf_pdbbind_source_material_not_attached",
   "symmetry_rmsd_scorecard_summary": {
     "dry_run_case_count": 1,
     "dry_run_pose_success": true,
