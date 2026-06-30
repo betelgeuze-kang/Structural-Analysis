@@ -472,6 +472,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
             "scripts/materialize_gpcr_hard_decoy_suite_report.py",
             "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+            "scripts/materialize_pocketmd_lite_topk_survival_report.py",
             "scripts/materialize_public_benchmark_pose_success_harness.py",
             "scripts/report_release_evidence_freshness.py",
             "src/structural_analysis/benchmark/acquisition.py",
