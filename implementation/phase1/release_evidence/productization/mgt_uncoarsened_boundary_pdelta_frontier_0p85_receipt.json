@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-uncoarsened-boundary-pdelta-frontier-0p85-receipt.v1",
-  "generated_at": "2026-06-23T14:58:24.581758+00:00",
+  "generated_at": "2026-06-30T18:08:36.881437+00:00",
   "status": "partial",
   "frontier_0p85_reached": false,
   "target_load_scale": 0.85,
