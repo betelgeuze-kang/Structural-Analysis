@@ -537,13 +537,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T02:44:05.892391+00:00",
+  "generated_at": "2026-06-30T02:47:46.435922+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:2adfdafb37a370c1ef02e1284f5f838b2ccc20aae7a1b76cca9f5f6e3887c4bd",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:14caf83c2377d2e0e3b284660ea6e5f64ca3888793fe0aa7a4b042ef14d9c910",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:c6ed1c5676c3cb5195126432e622edefab4baf848e3ebcb5f3fbe5ced4d9092d",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:adc9a65f5f085a3aba3ed888d561c906a1eb80129661a97fd092348a46d4f671",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:20ae935444add72b9a225168e044b86383f94004e8b33d089ad27db6a18d9670",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:de69a14f64cd1c27c27e46f7d4f539968c19e9cfdb2c61df6d9432220a8ddd43",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:7e657631c0576079509bc3c0cd0d5274cf91967cf5608c18aa5059100ff74033",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:aaa0125d7ad91acccb67f0bc42ced4031ee18b692fbfeaef83403789ac82f14b",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:46ef82c27a866ca9143c0e0be09b3ded9c9795e9c1cb6451852d0780d8479dd5",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -556,14 +556,14 @@
     "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:40b81f70d380a18935ecbabf350248f293149231d99e0e6b735cb999f1829719",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:ea8d838223aeac09c1379cec1cc2fbd7eb4e9c2eb25eaa4051d0eccabf9c48cd",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
-    "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:38d1f5e06b8d808ce8af5d4fbd189ac134de972c9b0565834e8cc9a3bb89b5a8",
+    "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:f274a33a1d8149a559da635d1c71f107bc5916f85936c689ee1aae3413ed597d",
     "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:65dbe88321949aa98153ef9d54cf5752020f24255a6d5f31604c528c31fe2ed2",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:650baf0ab3cc97b83af694043704442c15bf6fea9f629af84c2c91549303e5f5",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:09666d378c3a47e05f950efa6fa54c539c8298be0ef711d03a58a2de4da6dbb6",
-    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:d134942ef79fbadd747d9a7b0754e3932d93526f2db5181056218d8ca369260f",
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:108376bdb54137462373680c38d9b34e5fcdf3d408d94b88b4ef5979dafb05ce",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:d3753786b625c64cff6e6d9306f5e428cff3e71bbab6b62cf76e6242df6b4069",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8c554b637e93bc909236dee30dbfce2d0f1d42659602f5efe6163b78641db725",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
   },
@@ -1113,14 +1113,13 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 6,
+    "developer_preview_blocker_count": 5,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "human_ux::observation_file_missing",
-      "stale_or_inconsistent:worktree_dirty"
+      "human_ux::observation_file_missing"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -2122,7 +2121,7 @@
               "build"
             ],
             "exit_code": 0,
-            "output_excerpt": "\n> structural-optimization-workbench@1.0.0 build\n> tsc --noEmit && vite build\n\nvite v8.0.16 building client environment for production...\n\u001b[2K\ntransforming...✓ 53 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/developerPreviewWorkflow.worker-DYkMGago.js    0.43 kB\ndist/index.html                                            1.00 kB │ gzip:  0.57 kB\ndist/assets/index-BoRvJG_V.css                            52.33 kB │ gzip:  9.46 kB\ndist/assets/index-BR69z-hp.js                            372.41 kB │ gzip: 97.12 kB\n\n✓ built in 116ms\n"
+            "output_excerpt": "\n> structural-optimization-workbench@1.0.0 build\n> tsc --noEmit && vite build\n\nvite v8.0.16 building client environment for production...\n\u001b[2K\ntransforming...✓ 53 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/developerPreviewWorkflow.worker-DYkMGago.js    0.43 kB\ndist/index.html                                            1.00 kB │ gzip:  0.57 kB\ndist/assets/index-BoRvJG_V.css                            52.33 kB │ gzip:  9.46 kB\ndist/assets/index-BR69z-hp.js                            372.41 kB │ gzip: 97.12 kB\n\n✓ built in 122ms\n"
           },
           "playwright": {
             "argv": [
@@ -2132,7 +2131,7 @@
               "tests/frontend/developer-preview-workflow.spec.ts"
             ],
             "exit_code": 0,
-            "output_excerpt": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/frontend/developer-preview-workflow.spec.ts:13:1 › Developer Preview workflow shell exposes five task steps without readiness promotion (2.7s)\n\n  1 passed (6.3s)\n"
+            "output_excerpt": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/frontend/developer-preview-workflow.spec.ts:13:1 › Developer Preview workflow shell exposes five task steps without readiness promotion (2.7s)\n\n  1 passed (6.1s)\n"
           },
           "preview": {
             "argv": [
@@ -2146,7 +2145,7 @@
               "4173"
             ],
             "base_url": "http://127.0.0.1:4173",
-            "elapsed_seconds": 0.507,
+            "elapsed_seconds": 0.508,
             "exit_code": null,
             "http_status": 200,
             "last_error": "",
@@ -2163,7 +2162,7 @@
           "compare_report"
         ],
         "failed_phase": null,
-        "generated_at": "2026-06-30T02:43:48.099058+00:00",
+        "generated_at": "2026-06-30T02:45:57.125981+00:00",
         "input_checksums": {
           "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
           "scripts/run_phase5_task_based_ux_browser_smoke.py": "sha256:7e2caac1211c3d8c17e18694d3132a9d24bbca3b431b64e7ce06ba3f6975f301",
@@ -2182,7 +2181,7 @@
           "compare_report"
         ],
         "schema_version": "phase5-task-based-ux-browser-execution.v1",
-        "source_commit_sha": "bf31c6ff743063995a958ecff3e6db72b6190b85",
+        "source_commit_sha": "f03a1ebc7bf3a3802cc9f73b20c2c7b26d3d09ec",
         "status": "ready",
         "summary_line": "Phase 5 task-based UX browser execution: READY | executed=5/5",
         "test_path": "tests/frontend/developer-preview-workflow.spec.ts"
@@ -2457,6 +2456,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "bf31c6ff743063995a958ecff3e6db72b6190b85",
+  "source_commit_sha": "76d436ea19cd0094de56929b51e0e2d013af884f",
   "status": "blocked"
 }

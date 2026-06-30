@@ -267,7 +267,7 @@
   },
   "execution_receipt_count": 1,
   "execution_workflow_step_pass_count": 5,
-  "generated_at": "2026-06-30T02:44:05.619780+00:00",
+  "generated_at": "2026-06-30T02:45:57.300895+00:00",
   "handoff_surface": {
     "intake_missing_required_workflow_steps": [],
     "intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
@@ -281,7 +281,7 @@
   "input_checksums": {
     "docs/templates/ux_new_user_observation.template.json": "sha256:a60d0f0904265603b48d903dd6503cff21eeb72b3a55910c958106d5ce9d7ae8",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:14caf83c2377d2e0e3b284660ea6e5f64ca3888793fe0aa7a4b042ef14d9c910",
-    "implementation/phase1/release_evidence/productization/phase5_task_based_ux_browser_execution_receipt.json": "sha256:14ad9bde4f72ca248fb687db6eefbe8b8c84575e6dd0254a9dbcb6ae7ee05a02",
+    "implementation/phase1/release_evidence/productization/phase5_task_based_ux_browser_execution_receipt.json": "sha256:19864fed6a4274e083c90cb9692655072820111b24f0852b4e8bb8ab42fe2fdc",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:d3753786b625c64cff6e6d9306f5e428cff3e71bbab6b62cf76e6242df6b4069",
     "scripts/build_phase5_gui_workflow_readiness_receipt.py": "sha256:5f3e9a00f69c7bb9f56f27516a34efe9bf0116497caf8570bb96b6434affcf72",
@@ -349,7 +349,7 @@
     "status": "ready"
   },
   "schema_version": "phase5-gui-workflow-readiness-receipt.v1",
-  "source_commit_sha": "bf31c6ff743063995a958ecff3e6db72b6190b85",
+  "source_commit_sha": "f03a1ebc7bf3a3802cc9f73b20c2c7b26d3d09ec",
   "status": "blocked",
   "status_vocabulary_contract": {
     "allowed_statuses": [
@@ -397,7 +397,7 @@
           "build"
         ],
         "exit_code": 0,
-        "output_excerpt": "\n> structural-optimization-workbench@1.0.0 build\n> tsc --noEmit && vite build\n\nvite v8.0.16 building client environment for production...\n\u001b[2K\ntransforming...✓ 53 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/developerPreviewWorkflow.worker-DYkMGago.js    0.43 kB\ndist/index.html                                            1.00 kB │ gzip:  0.57 kB\ndist/assets/index-BoRvJG_V.css                            52.33 kB │ gzip:  9.46 kB\ndist/assets/index-BR69z-hp.js                            372.41 kB │ gzip: 97.12 kB\n\n✓ built in 116ms\n"
+        "output_excerpt": "\n> structural-optimization-workbench@1.0.0 build\n> tsc --noEmit && vite build\n\nvite v8.0.16 building client environment for production...\n\u001b[2K\ntransforming...✓ 53 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/developerPreviewWorkflow.worker-DYkMGago.js    0.43 kB\ndist/index.html                                            1.00 kB │ gzip:  0.57 kB\ndist/assets/index-BoRvJG_V.css                            52.33 kB │ gzip:  9.46 kB\ndist/assets/index-BR69z-hp.js                            372.41 kB │ gzip: 97.12 kB\n\n✓ built in 122ms\n"
       },
       "playwright": {
         "argv": [
@@ -407,7 +407,7 @@
           "tests/frontend/developer-preview-workflow.spec.ts"
         ],
         "exit_code": 0,
-        "output_excerpt": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/frontend/developer-preview-workflow.spec.ts:13:1 › Developer Preview workflow shell exposes five task steps without readiness promotion (2.7s)\n\n  1 passed (6.3s)\n"
+        "output_excerpt": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/frontend/developer-preview-workflow.spec.ts:13:1 › Developer Preview workflow shell exposes five task steps without readiness promotion (2.7s)\n\n  1 passed (6.1s)\n"
       },
       "preview": {
         "argv": [
@@ -421,7 +421,7 @@
           "4173"
         ],
         "base_url": "http://127.0.0.1:4173",
-        "elapsed_seconds": 0.507,
+        "elapsed_seconds": 0.508,
         "exit_code": null,
         "http_status": 200,
         "last_error": "",
@@ -438,7 +438,7 @@
       "compare_report"
     ],
     "failed_phase": null,
-    "generated_at": "2026-06-30T02:43:48.099058+00:00",
+    "generated_at": "2026-06-30T02:45:57.125981+00:00",
     "input_checksums": {
       "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
       "scripts/run_phase5_task_based_ux_browser_smoke.py": "sha256:7e2caac1211c3d8c17e18694d3132a9d24bbca3b431b64e7ce06ba3f6975f301",
@@ -457,7 +457,7 @@
       "compare_report"
     ],
     "schema_version": "phase5-task-based-ux-browser-execution.v1",
-    "source_commit_sha": "bf31c6ff743063995a958ecff3e6db72b6190b85",
+    "source_commit_sha": "f03a1ebc7bf3a3802cc9f73b20c2c7b26d3d09ec",
     "status": "ready",
     "summary_line": "Phase 5 task-based UX browser execution: READY | executed=5/5",
     "test_path": "tests/frontend/developer-preview-workflow.spec.ts"

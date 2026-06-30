@@ -161,12 +161,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T02:44:06.910396+00:00",
+  "generated_at": "2026-06-30T02:47:47.470124+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:d5f27e19224137df501234c6ddc5bcf894d3a97442329db6d361baca7168f8d5",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:dbe8a09a77f11d85a148751721fc71d0c8ac0e087ca3038f575c8f5f9a63855d",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:f09df3fd912a541ed59d19b2d80e60a123c8b5f7f84e09a6f532402b861d55b7",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:7bb3c73a91876bfeff739b08780c0afcecfe80ec2a63d76abbcd6c978d0528f1",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:3e0c5868ad6e37a7bb7128a0ae7c10434e4941c84d823b2d05dce792e8636b91",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e0c6f8f70f3be2ebbfe69f1d32a11db502dc639750ae7e9ca8609af6dd9572bc",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:9a1d84d98ea81064ea717384b0dee1305a66b40a0420e9ce439fb8d1c70f63ab",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:8a2996d09d851bbd3187205b68ec03c5c164a80ec4606f167f6f23f5a777a581",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:ef50c77b0801fe9fcfd65e36994db0ae0130b3a32edc7ef336297402a16f070e",
@@ -174,9 +174,9 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:c45c11a16a447cb9bcc7be0d91f1d81b35f2c6478ee219c35b74f4e94526d456",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:4459ec6444d57d718d6ceb183c13fb7681c1631218af23d18b2f8da3a40cb4fc",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:62a5c4f1277a81dbaee1afe08c9762c206c1f4343f603d248fb34f81ee80a84d",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:f78d1ce7e6b25eda32cff5185c911d8ac66115354bd5f3d0ba51b7b895d1e1a8",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:5bd1c180fb7a7926fbf967b01cfb07104695c43e70a6a674ab86038ea1e2f339",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:d3753786b625c64cff6e6d9306f5e428cff3e71bbab6b62cf76e6242df6b4069",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8c554b637e93bc909236dee30dbfce2d0f1d42659602f5efe6163b78641db725",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:4c3d3574a1792ba95ba7bb78a14c73a166d167339b246ea472dd12e915824718",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:460a1f6a8ec38766b9b03c18d81dde4495bf203136a97d8f387413a8377e43df",
@@ -3285,7 +3285,7 @@
       ]
     }
   },
-  "source_commit_sha": "bf31c6ff743063995a958ecff3e6db72b6190b85",
+  "source_commit_sha": "76d436ea19cd0094de56929b51e0e2d013af884f",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
