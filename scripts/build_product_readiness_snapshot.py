@@ -343,6 +343,11 @@ def _source_state_freshness(
 
 
 def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
+    snapshot_only_paths = {
+        "scripts/build_product_readiness_snapshot.py",
+    }
+    if path in snapshot_only_paths:
+        return False
     artifact_specific_paths = {
         "g1_full_load_hip_newton_lane_report": {
             "scripts/run_g1_full_load_hip_newton_lane.py",
