@@ -97,6 +97,7 @@ def _target_slot(target_id: str) -> dict[str, Any]:
         "target_id": target_id,
         "status": "operator_input_required",
         "required": True,
+        "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE),
         "required_fields": list(REQUIRED_OPERATOR_FIELDS),
         "exit_criteria": EXIT_CRITERIA,
         "template": _target_template(target_id),
@@ -116,6 +117,7 @@ def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
             "slot_id": f"{target_id.lower()}_hard_decoy_metrics",
             "target_id": target_id,
             "status": "operator_input_required",
+            "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE),
             "unblocks_phase3_criteria": list(PHASE3_EXIT_CRITERIA_BY_FIELD.values()),
             "minimum_evidence": {
                 "target_id": target_id,

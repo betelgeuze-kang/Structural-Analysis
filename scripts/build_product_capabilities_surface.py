@@ -588,6 +588,7 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
             "target_id": str(row.get("target_id") or ""),
             "status": str(row.get("status") or ""),
             "required": bool(row.get("required")),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "required_field_count": len(_as_list(row.get("required_fields"))),
         }
         for row in _as_list(operator_intake.get("target_slots"))
@@ -600,6 +601,7 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
             "unblocks_phase3_criteria": [
                 str(item) for item in _as_list(row.get("unblocks_phase3_criteria"))
             ],
+            "template_artifact": str(row.get("template_artifact") or ""),
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
