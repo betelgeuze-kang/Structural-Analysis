@@ -55,7 +55,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert final_gates["large_models_crash_oom_free"]["contract_pass"] is False
     medium_blockers = final_gates["selected_medium_models_pass_or_approved_review"]["blockers"]
     assert "medium_structural_models_current_below_required:0/5" in medium_blockers
-    assert "opensees_medium_runner_command_missing" in medium_blockers
+    assert "opensees_medium_runner_command_missing" not in medium_blockers
     assert "opensees_medium_scorecard_execution_missing" in medium_blockers
     assert "medium_model_pass_or_review_missing" in medium_blockers
     assert "reference_outputs_missing" in medium_blockers
@@ -413,8 +413,13 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert medium_scorecard_handoff["pass_or_approved_review_count"] == 0
     assert medium_scorecard_handoff["local_candidate_artifact_count"] == 2
     assert medium_scorecard_handoff["local_topology_contract_pass"] is True
-    assert medium_scorecard_handoff["required_evidence_pass_count"] == 1
+    assert medium_scorecard_handoff["required_evidence_pass_count"] == 3
     assert "opensees_medium_scorecard_execution_missing" in medium_scorecard_handoff["blockers"]
+    assert "opensees_medium_runner_command_missing" not in medium_scorecard_handoff["blockers"]
+    assert medium_scorecard_handoff["runner_command_ready"] is True
+    assert "run_phase3_medium_model_scorecard_receipt.py" in medium_scorecard_handoff[
+        "runner_command_template"
+    ]
     assert medium_scorecard_handoff["local_parser_boundary"]["topology_contract_pass"] is True
     assert medium_scorecard_handoff["scorecard_receipt_template"]["schema_version"] == (
         "phase3-medium-model-scorecard-receipt.v1"

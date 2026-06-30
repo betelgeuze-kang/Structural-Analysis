@@ -989,6 +989,17 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "required_evidence_pass_count": int(
                 medium_model_scorecard.get("required_evidence_pass_count", 0) or 0
             ),
+            "runner_command_ready": bool(
+                medium_model_scorecard.get("runner_command_ready") is True
+            ),
+            "runner_command_template": str(
+                medium_model_scorecard.get("runner_command_template") or ""
+            ),
+            "resource_envelope": (
+                medium_model_scorecard.get("resource_envelope")
+                if isinstance(medium_model_scorecard.get("resource_envelope"), dict)
+                else {}
+            ),
             "blockers": medium_scorecard_blockers,
             "local_parser_boundary": (
                 medium_model_scorecard.get("local_parser_boundary")

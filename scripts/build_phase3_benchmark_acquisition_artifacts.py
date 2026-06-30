@@ -72,6 +72,7 @@ def build_phase3_benchmark_acquisition_artifact(
                     Path("scripts/build_phase3_ifc_source_license_receipt.py"),
                     Path("scripts/build_phase3_opensees_source_license_receipt.py"),
                     Path("scripts/build_phase3_medium_model_scorecard_readiness_receipt.py"),
+                    Path("scripts/run_phase3_medium_model_scorecard_receipt.py"),
                     Path("scripts/build_phase3_large_model_runner_readiness_receipt.py"),
                     Path("scripts/build_phase4_commercial_comparison_import_template.py"),
                     Path("scripts/build_phase4_commercial_cross_solver_readiness_receipt.py"),

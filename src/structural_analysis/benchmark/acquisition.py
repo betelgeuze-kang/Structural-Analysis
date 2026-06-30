@@ -63,7 +63,6 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                 "license_review_pending",
                 "reference_outputs_missing",
                 "normalization_not_implemented",
-                "opensees_medium_runner_command_missing",
                 "opensees_medium_scorecard_execution_missing",
                 "medium_model_pass_or_review_missing",
             ),
@@ -127,11 +126,12 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                     "current_medium_model_scorecard_count": 0,
                     "pass_or_approved_review_count": 0,
                     "local_candidate_artifact_count": 2,
+                    "runner_command_ready": True,
                     "claim_boundary": (
-                        "OpenSees medium scorecard readiness contract only; local "
-                        "checksum/topology evidence remains parser-only and is not "
-                        "reference-output ingest, normalization, scorecard execution, "
-                        "or PASS/REVIEW benchmark evidence."
+                        "OpenSees medium scorecard readiness contract only; runner "
+                        "command exists, but local checksum/topology evidence remains "
+                        "parser-only and is not reference-output ingest, normalization, "
+                        "scorecard execution, or PASS/REVIEW benchmark evidence."
                     ),
                 },
             ),

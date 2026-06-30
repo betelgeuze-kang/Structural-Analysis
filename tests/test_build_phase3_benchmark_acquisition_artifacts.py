@@ -74,7 +74,7 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert "commercial_cross_solver_execution_missing" in payload["blockers"]
     assert "cross_solver_mapping_expectations_missing" not in payload["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in payload["blockers"]
-    assert "opensees_medium_runner_command_missing" in payload["blockers"]
+    assert "opensees_medium_runner_command_missing" not in payload["blockers"]
     assert "medium_model_pass_or_review_missing" in payload["blockers"]
     assert "large_model_runner_not_implemented" not in payload["blockers"]
     assert "large_model_execution_receipt_missing" in payload["blockers"]
@@ -227,7 +227,8 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
         assert row["commercial_use_allowed"] is False
         if row["source_id"] == "opensees_scbf16b_medium_candidate":
             assert row["checksum_status"] == "local_candidate_checksum_attached_source_url_unverified"
-            assert "opensees_medium_runner_command_missing" in row["blockers"]
+            assert "opensees_medium_runner_command_missing" not in row["blockers"]
+            assert "opensees_medium_scorecard_execution_missing" in row["blockers"]
             assert "medium_model_pass_or_review_missing" in row["blockers"]
         else:
             assert row["checksum_status"].startswith("missing")
