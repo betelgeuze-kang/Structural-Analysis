@@ -2,7 +2,6 @@
   "blockers": [
     "checkpoint_load_scale_below_required_full_load",
     "checkpoint_resolution_no_full_load_candidate",
-    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready",
     "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -1430,7 +1429,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T13:58:09.433108+00:00",
+  "generated_at": "2026-06-30T14:07:57.852364+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       "scripts/build_developer_preview_readiness.py",
@@ -1440,6 +1439,7 @@
       "scripts/build_product_capabilities_surface.py",
       "scripts/build_ux_new_user_observation_intake_packet.py",
       "scripts/build_ux_new_user_observation_report.py",
+      "scripts/run_g1_full_load_hip_newton_lane.py",
       "tests/test_build_developer_preview_rc_status.py",
       "tests/test_build_developer_preview_readiness.py",
       "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -1449,7 +1449,8 @@
       "tests/test_build_phase6_ux_observation_status.py",
       "tests/test_build_product_capabilities_surface.py",
       "tests/test_build_ux_new_user_observation_intake_packet.py",
-      "tests/test_build_ux_new_user_observation_report.py"
+      "tests/test_build_ux_new_user_observation_report.py",
+      "tests/test_run_g1_full_load_hip_newton_lane.py"
     ],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -1480,8 +1481,8 @@
     "rocm_hip_required": true,
     "runtime_blockers": [],
     "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
-    "source_state_fresh": false,
-    "source_state_kind": "non_receipt_paths_changed",
+    "source_state_fresh": true,
+    "source_state_kind": "non_g1_hip_paths_changed",
     "status": "partial"
   },
   "input_checksums": {
@@ -1501,6 +1502,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "cde7573e4c67f5e33dce7d06c76a823bae7b6d3e",
+  "source_commit_sha": "01e42301edfd3ca43600b3af2f4c57e317ab4c8b",
   "status": "blocked"
 }
