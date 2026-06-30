@@ -17,7 +17,7 @@
 - `release_allowed`: `False`
 - `blocked_release_count`: `8`
 - `first_blocker`: `M5::pm_blocker_closure_board_count_mismatch`
-- `operator_action_count`: `17`
+- `operator_action_count`: `16`
 - `approval_token_count`: `4`
 - `stale_artifact_count`: `0`
 - `evidence_surface_count`: `12`

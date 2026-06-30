@@ -128,7 +128,7 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-06-30T01:52:08.370187+00:00",
+  "generated_at": "2026-06-30T01:55:02.809418+00:00",
   "independent_commercial_product_ready": false,
   "input_checksums": {
     "README.md": "sha256:74967d9819b03195ab15b636e7b6a72c96d6855ed9c59f52bf483a44215b19c3",
@@ -144,15 +144,15 @@
     "implementation/phase1/production_runtime_packaging_manifest.json": "sha256:9b76649f947ec13ab53e248f181735ddede6d900c60ac0573a030534c2f2d958",
     "implementation/phase1/project_ops_api_service.py": "sha256:a8b316fa8a7f7c28ab51752137d11891cf3b3c69978febddc3d1a50d7a8ea80b",
     "implementation/phase1/project_ops_deployment_drill_manifest.json": "sha256:9de92a86a0a414b222d4b6724a9ce54da33e31ea9fd5859f66194e289d0fa1c5",
-    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:5d277e6bbd1e3a052eccb7d7f8b1427c180d0a6654951b27cc9378de27405520",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:8482dd46105d73525e3bf277dfc3ae60bf34c2449c1a4eef14489a3d7e681588",
-    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:3c83f90d90e1d331bd5e163c6247bc3b73344c837c53535676325f49d81c5847",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:075dd297f901f7d0d0cdb23141ea3cd5e7832092bc423d3873725dc9a6dfc8c6",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:7c6dfa13d993d2dee30e8022a9a0bc8147cf8382fd3bbd73e12b9d217ff48479",
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:f34401a108090d5e84fc5e9db063b19f03487968457b5ff9e4a15e2df9365632",
     "implementation/phase1/source_boundary_allowlist.json": "sha256:3fe8d06bc0118b4ceb92498b3250657d964cc60ce00f420569938f860e18a507",
     "implementation/phase1/structure_viewer_browser_performance_probe.json": "sha256:bf7c000487aee9b46112110b3b8a3f65e43806babd3e96b44bc4e3ffafba64d4",
     "implementation/phase1/structure_viewer_performance_budget_manifest.json": "sha256:812cb97ff4be17e3fefe7c6c5aec9ada413974a91f3bd3df5e4c61351f939996",
     "implementation/phase1/structure_viewer_visual_regression_baseline.json": "sha256:70908d83636063c26f0fb0136f928365e0fca2dc826dcefa44efffe8dc1b6503",
     "implementation/phase1/support_bundle_manifest.json": "sha256:0a53bd4c4882b58b48e5b6974e9996891efd653140b4e18c1d66ace714233451",
-    "implementation/phase1/workstation_delivery_readiness.json": "sha256:7dc5be435be9bd299d09ef99db016427df67aa75013ffb4c766c89fd7974c66f",
+    "implementation/phase1/workstation_delivery_readiness.json": "sha256:2fb4331474c42e4bd03685f5bc1a798f0f87fa5c2431e2d3fe290263402ce7bd",
     "implementation/phase1/zero_copy_real_probe_report_strict.json": "sha256:00befd00a5c44e17d02b5f89dd94d59983ac71208fa976e13326ce0170463884"
   },
   "next_actions": [
@@ -163,7 +163,7 @@
   "recommended_claim": "Commercial engineer-in-loop acceleration for 95-99% repeated workflows; not a full autonomous commercial replacement.",
   "reused_evidence": false,
   "schema_version": "independent-commercial-product-readiness.v1",
-  "source_commit_sha": "59740a00ef53e9cc0c25dc3fb03153efd87e11c8",
+  "source_commit_sha": "fa8bdf0015d001879ddc89005da10496efb96713",
   "status": "blocked",
   "summary_line": "Independent commercial product readiness: BLOCKED | score=80.0/100 | full_autonomous_replacement_ready=False",
   "workstation_delivery_service": {
