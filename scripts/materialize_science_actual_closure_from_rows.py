@@ -58,6 +58,103 @@ def _load_optional_json(repo_root: Path, path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _gpcr_row_intake_contract(
+    *,
+    template_out: Path,
+    report_out: Path,
+    surface_out: Path,
+) -> dict[str, Any]:
+    return {
+        "component_id": "gpcr_hard_decoy_actual_closure",
+        "row_input_id": "gpcr_rows",
+        "accepted_formats": list(gpcr_rows.SUPPORTED_ROW_FORMATS),
+        "required_targets": list(gpcr_suite.REQUIRED_TARGETS),
+        "required_flat_row_fields": [
+            "target_id",
+            *gpcr_suite.RAW_RANKING_ROW_FIELDS,
+        ],
+        "optional_flat_row_fields": ["score_direction"],
+        "accepted_score_direction_values": [
+            "higher_is_better",
+            "lower_is_better",
+        ],
+        "default_score_direction": gpcr_rows.DEFAULT_SCORE_DIRECTION,
+        "source_receipt_required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact_sha256",
+        ],
+        "phase3_exit_criteria": dict(gpcr_suite.EXIT_CRITERIA),
+        "actual_closure_criterion_id": gpcr_suite.ACTUAL_CLOSURE_CRITERION_ID,
+        "expected_outputs": {
+            "operator_template": str(template_out),
+            "suite_report": str(report_out),
+            "evidence_surface": str(surface_out),
+        },
+        "materialization_command": (
+            "python3 scripts/materialize_science_actual_closure_from_rows.py "
+            "--gpcr-rows <gpcr-hard-decoy-rows.csv|tsv|json|jsonl|ndjson> "
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license> --fail-blocked"
+        ),
+        "claim_boundary": (
+            "GPCR Phase 3 actual closure requires operator-attached raw hard-decoy "
+            "ranking rows for every required target plus a verifiable source receipt. "
+            "Summary metrics or fixture rows do not satisfy actual closure."
+        ),
+    }
+
+
+def _pocketmd_row_intake_contract(
+    *,
+    intake_out: Path,
+    report_out: Path,
+    surface_out: Path,
+    contract_path: Path,
+    max_top_k: int,
+) -> dict[str, Any]:
+    return {
+        "component_id": "pocketmd_lite_topk_actual_closure",
+        "row_input_id": "pocketmd_rows",
+        "accepted_formats": list(pocketmd_rows.SUPPORTED_ROW_FORMATS),
+        "max_top_k": max_top_k,
+        "required_case_fields": list(pocketmd_survival.REQUIRED_CASE_FIELDS),
+        "uncertainty_field_modes": [
+            "uncertainty_interval:{low,high,unit}",
+            "uncertainty_low+uncertainty_high+uncertainty_unit",
+        ],
+        "required_summary_metrics": list(pocketmd_survival.REQUIRED_SUMMARY_METRICS),
+        "required_component_metrics": list(pocketmd_survival.REQUIRED_METRICS),
+        "source_receipt_required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact_sha256",
+            "per_row_source_checksum",
+        ],
+        "blocked_claims_that_remain_locked": list(pocketmd_survival.BLOCKED_CLAIMS),
+        "expected_outputs": {
+            "operator_intake": str(intake_out),
+            "topk_survival_report": str(report_out),
+            "science_surface": str(surface_out),
+        },
+        "contract_path": str(contract_path),
+        "materialization_command": (
+            "python3 scripts/materialize_science_actual_closure_from_rows.py "
+            "--pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> "
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license> --fail-blocked"
+        ),
+        "claim_boundary": (
+            "PocketMD Lite closure is limited to top-k local refinement rows with "
+            "local-min survival, contact persistence, H-bond persistence, clash "
+            "relief, and uncertainty summaries. It does not unlock broad all-atom "
+            "MD, FEP, long-timescale dynamics, or de novo binding claims."
+        ),
+    }
+
+
 def _missing_component(component_id: str, blocker: str, expected_mode: str) -> dict[str, Any]:
     return {
         "component_id": component_id,
@@ -255,6 +352,20 @@ def build_science_actual_closure_audit(
     source_version: str = "",
     pocketmd_max_top_k: int = pocketmd_rows.DEFAULT_MAX_TOP_K,
 ) -> dict[str, Any]:
+    row_intake_contracts = {
+        "gpcr_rows": _gpcr_row_intake_contract(
+            template_out=gpcr_template_out,
+            report_out=gpcr_report_out,
+            surface_out=gpcr_surface_out,
+        ),
+        "pocketmd_rows": _pocketmd_row_intake_contract(
+            intake_out=pocketmd_intake_out,
+            report_out=pocketmd_report_out,
+            surface_out=pocketmd_surface_out,
+            contract_path=pocketmd_contract_path,
+            max_top_k=pocketmd_max_top_k,
+        ),
+    }
     gpcr = _materialize_gpcr(
         rows_path=gpcr_rows_path,
         repo_root=repo_root,
@@ -311,6 +422,15 @@ def build_science_actual_closure_audit(
         "component_count": len(components),
         "component_ready_count": sum(1 for component in components if component.get("contract_pass")),
         "components": components,
+        "missing_row_inputs": [
+            row_input_id
+            for row_input_id, rows_path in (
+                ("gpcr_rows", gpcr_rows_path),
+                ("pocketmd_rows", pocketmd_rows_path),
+            )
+            if rows_path is None
+        ],
+        "row_intake_contracts": row_intake_contracts,
         "required_actual_closures": [
             "gpcr_hard_decoy_actual_closure",
             "pocketmd_lite_topk_actual_closure",

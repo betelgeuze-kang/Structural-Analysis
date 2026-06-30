@@ -138,6 +138,30 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "gpcr_hard_decoy_actual_closure::gpcr_hard_decoy_rows_not_provided",
         "pocketmd_lite_topk_actual_closure::pocketmd_lite_topk_rows_not_provided",
     ]
+    assert audit["missing_row_inputs"] == ["gpcr_rows", "pocketmd_rows"]
+    gpcr_contract = audit["row_intake_contracts"]["gpcr_rows"]
+    assert gpcr_contract["required_targets"] == ["DRD2", "HTR2A", "OPRM1"]
+    assert gpcr_contract["phase3_exit_criteria"] == {
+        "decoys_above_positive_count_max": 0,
+        "positive_out_anchored_by_top_decoys_allowed": False,
+        "ranking_pr_auc_ci_low_min": 0.45,
+        "top20_hit_rate_min": 0.2,
+    }
+    assert gpcr_contract["required_flat_row_fields"] == [
+        "target_id",
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
+    ]
+    pocketmd_contract = audit["row_intake_contracts"]["pocketmd_rows"]
+    assert "h_bond_persistence_rate" in pocketmd_contract["required_case_fields"]
+    assert "uncertainty_width_median" in (
+        pocketmd_contract["required_component_metrics"]
+    )
+    assert "broad_all_atom_md_claim" in (
+        pocketmd_contract["blocked_claims_that_remain_locked"]
+    )
     assert not (tmp_path / "gpcr_report.json").exists()
     assert not (tmp_path / "pocketmd_report.json").exists()
 
@@ -175,6 +199,8 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     assert audit["contract_pass"] is True
     assert audit["component_ready_count"] == 2
     assert audit["blockers"] == []
+    assert audit["missing_row_inputs"] == []
+    assert audit["row_intake_contracts"]["pocketmd_rows"]["max_top_k"] == 20
 
     gpcr = audit["components"][0]
     pocketmd = audit["components"][1]
