@@ -8,10 +8,10 @@
   "claim_boundary": "PocketMD Lite is a bounded top-k refinement surface. It reports local-min survival, contact persistence, H-bond persistence, clash relief, and uncertainty for already-ranked candidates only. It does not claim broad all-atom MD, FEP, long-timescale dynamics, or autonomous docking accuracy.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T03:16:17.844896+00:00",
+  "generated_at": "2026-06-30T06:43:48.570795+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:03fb8ce9a43a88d1f0470b49d02e144a873ab646a358fcadf968f533b907c234",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:8b1110f6c577187dcc08b3fba9cf426c53807c8108d9796ef1aebc55aeb39ff4",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:1a65430ba11b2c5c42ffd1ec80b41ab0671b3e50387b6e42e743ffda4de44ad4"
   },
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -44,6 +44,10 @@
       "provenance_ref",
       "source_checksum"
     ],
+    "source_checksum_policy": {
+      "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+      "required_receipt_field": "source_checksum"
+    },
     "template": {
       "candidate_id": "",
       "case_id": "pocketmd_lite_case_001",
@@ -104,7 +108,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-contract.v1",
   "scope": "top_k_lite_refinement_only",
-  "source_commit_sha": "683a9d38d99f1a59b29db5eba87afa515cff1224",
+  "source_commit_sha": "f01278bb8a90f32a06d2648b31e9d64a524384a6",
   "status": "contract_ready_operator_evidence_required",
   "top_k_policy": {
     "candidate_scope": "top_k_candidates_only",

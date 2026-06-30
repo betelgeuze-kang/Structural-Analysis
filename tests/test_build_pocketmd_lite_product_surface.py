@@ -51,6 +51,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     } == {row["metric_id"] for row in contract["reported_metrics"]}
     assert "free_energy_perturbation_claim" in contract["blocked_claims"]
     assert "broad_all_atom_md_claim" in contract["blocked_claims"]
+    assert contract["operator_intake_schema"]["source_checksum_policy"] == {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum",
+    }
     assert contract["materializer"] == {
         "schema_version": "pocketmd-lite-topk-survival-materialization.v1",
         "script": "scripts/materialize_pocketmd_lite_topk_survival_report.py",
@@ -279,6 +283,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     ]
     assert gate_plan["minimum_evidence"]["real_refinement_case_count"] == 1
     assert gate_plan["minimum_evidence"]["top_k_candidate_count"] == 1
+    assert gate_plan["minimum_evidence"]["source_checksum_policy"] == {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum",
+    }
     assert gate_plan["materialization_steps"] == [
         "materialize_pocketmd_lite_topk_survival_report",
         "refresh_product_capabilities_surface",
@@ -360,6 +368,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "source_checksum",
             ],
             "receipt_fields": ["provenance_ref", "source_checksum"],
+            "source_checksum_policy": {
+                "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+                "required_receipt_field": "source_checksum",
+            },
         },
         "materialization_steps": [
             "materialize_pocketmd_lite_topk_survival_report",

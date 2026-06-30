@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any
 
@@ -66,6 +67,7 @@ BLOCKED_CLAIMS = (
     "long_timescale_md_claim",
     "de_novo_binding_mode_claim",
 )
+SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -100,6 +102,10 @@ def _integer(value: Any) -> int | None:
 
 def _boolean(value: Any) -> bool | None:
     return value if isinstance(value, bool) else None
+
+
+def _is_sha256_ref(value: str) -> bool:
+    return bool(SOURCE_CHECKSUM_PATTERN.fullmatch(value))
 
 
 def _rate(value: Any) -> float | None:
@@ -180,6 +186,13 @@ def _normalize_candidate_row(row: dict[str, Any], index: int) -> dict[str, Any]:
         if field in row and not value:
             blockers.append(f"{row_key}:{field}_blank")
             root_cause_tags.append("operator_values_required")
+    if (
+        "source_checksum" in row
+        and source_checksum
+        and not _is_sha256_ref(source_checksum)
+    ):
+        blockers.append(f"{row_key}:source_checksum_invalid")
+        root_cause_tags.append("operator_receipts_required")
 
     if "top_k_rank" in row and (top_k_rank is None or top_k_rank < 1):
         blockers.append(f"{row_key}:top_k_rank_invalid")

@@ -25,10 +25,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:39:49.377993+00:00",
+  "generated_at": "2026-06-30T06:43:48.960621+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:18ce84eb50445ba100698772894ee9341583c5127732b5dc606f476c8563b104",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0139c7843f04fa247197779d591c38b9941fab7f8f24538a00df4ce68486a8f3",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:0e3f0f11239790331bd5f7fad554b3eb975967ebc4ef5d57b46d853a452a1519",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:14c6b1db65b96a6605fe01ec3ff0d12aff87be9fbd8151aab1e4c7d2e5fe7e35",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:c1d51c93e91a69095fab5303dfe3d4331003c783b636386a2b9f26fa03b1d8e0"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -373,7 +373,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "72e9b1f415eb0ab0c21cbcd64dabd46a2cc699af",
+  "source_commit_sha": "f01278bb8a90f32a06d2648b31e9d64a524384a6",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,

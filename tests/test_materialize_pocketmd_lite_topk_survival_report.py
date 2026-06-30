@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -20,6 +21,10 @@ module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+
+
+def _checksum(seed: str) -> str:
+    return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
 def _valid_case(
@@ -53,7 +58,7 @@ def _valid_case(
             "unit": "energy_proxy_delta",
         },
         "provenance_ref": f"operator://{case_id}/{candidate_id}",
-        "source_checksum": f"sha256:{case_id}-{candidate_id}",
+        "source_checksum": _checksum(f"{case_id}:{candidate_id}"),
     }
 
 
@@ -162,6 +167,27 @@ def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim() -> None
     assert surface["goal_roadmap_linkage"]["bottleneck"] == (
         "pocketmd_lite_science_product_surface_ready"
     )
+
+
+def test_pocketmd_lite_materializer_blocks_invalid_checksum() -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    first_case["source_checksum"] = "sha256:not-a-real-digest"
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["product_surface_ready"] is False
+    assert report["first_blocked_target"] == "case_a"
+    assert "case_a:source_checksum_invalid" in report["blockers"]
+    assert "operator_receipts_required" in report["root_cause_tags"]
 
 
 def test_pocketmd_lite_materializer_blocks_empty_intake() -> None:

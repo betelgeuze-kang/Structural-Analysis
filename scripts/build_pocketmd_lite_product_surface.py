@@ -44,6 +44,10 @@ POCKETMD_LITE_HANDOFF_ROUTE = "/product/pocketmd-lite/handoff"
 POCKETMD_LITE_OPERATOR_INTAKE_ROUTE = "/product/pocketmd-lite/operator-intake"
 POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT = 1
 POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT = 1
+SOURCE_CHECKSUM_POLICY = {
+    "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+    "required_receipt_field": "source_checksum",
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -148,6 +152,7 @@ def _operator_intake_schema() -> dict[str, Any]:
             "included. Broad all-atom rescoring, long MD, FEP, and de novo docking claims "
             "remain out of scope."
         ),
+        "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
         "template": {
             "case_id": "pocketmd_lite_case_001",
             "source_family": "CASF/PDBBind or GPCR operator intake",
@@ -193,6 +198,7 @@ def _operator_gate_unblock_plan(
                 "candidate_scope": "upstream_ranked_top_k_candidates_only",
                 "required_case_fields": required_case_fields,
                 "receipt_fields": ["provenance_ref", "source_checksum"],
+                "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             },
             "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
             "materialization_steps": [
