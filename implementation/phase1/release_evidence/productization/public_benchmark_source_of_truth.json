@@ -49,9 +49,11 @@
       "status": "operator_engine_comparison_rows_required"
     }
   ],
-  "blocker_count": 7,
+  "blocker_count": 9,
   "blockers": [
     "casf_pdbbind_source_material_not_attached",
+    "casf_pdbbind_case_checksums_missing",
+    "casf_pdbbind_ligand_symmetry_contracts_missing",
     "public_benchmark_real_pose_predictions_missing",
     "public_benchmark_real_pose_validity_rows_missing",
     "public_benchmark_real_rmsd_rows_missing",
@@ -527,10 +529,10 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-06-30T07:39:31.576899+00:00",
+  "generated_at": "2026-06-30T08:14:02.374442+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:8826a9d99b7355d6333ca1863ef65460303c22baff3357d367a312a66c3e9dcb",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:4fd54d98d9431684f04a72dccc48c8209d801c9b08804850742283a2ac32aac4",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:2c82e08c88213afa7b7bbf2a21092a0227ec7b5ed7cc32d5e72677bef75e382a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:147b3fd1bbd0a5edce98ab1657763b0bf79cddbd362da968a591c1a25d107a55",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:031c17195862f073c2d17cdc71bf99e9d6c06517092ae8255dc26f8767d05d2e",
@@ -1767,7 +1769,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "22bb98753ef94638893ba1c10b4f96cf93af5ada",
+  "source_commit_sha": "f6f16b2db8a8bb8900b4f24d5c3b032f3ce3bb64",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

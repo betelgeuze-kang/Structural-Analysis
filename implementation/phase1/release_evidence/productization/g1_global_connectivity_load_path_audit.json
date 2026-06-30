@@ -2,6 +2,27 @@
   "blockers": [],
   "claim_boundary": "This receipt audits full structural element connectivity and load-path reachability from existing F2g dominant rows. It does not close G1, prove nonlinear tangent consistency, promote full-load 1.0, or prove ROCm/HIP production residency.",
   "contract_pass": true,
+  "decision_record": {
+    "claim_boundary": "This decision record only routes the next G1 diagnostic slice. It does not prove full-load 1.0 equilibrium, material Newton breadth, or production ROCm/HIP residency.",
+    "classification": "element_graph_connects_dominant_modes_to_supports",
+    "dominant_node_count": 8,
+    "dominant_nodes_element_reachable_to_support_count": 8,
+    "dominant_nodes_without_element_path_to_support_count": 0,
+    "element_graph_closes_dominant_packet": true,
+    "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+    "rationale": [
+      "8/8 dominant near-null nodes reach authored supports through structural elements.",
+      "A direct support-row or elastic-link-row absence is no longer the leading G1 explanation.",
+      "Further G1 progress requires consistent residual/Jacobian Newton evidence and a production ROCm/HIP residual/JVP lane."
+    ],
+    "required_next_receipts": [
+      "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+      "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
+    ],
+    "row_only_correction_loop_stopped": true,
+    "row_only_support_or_elastic_link_correction_decision": "stop",
+    "schema_version": "g1-global-connectivity-decision-record.v1"
+  },
   "disallowed_promotions": [
     "no_G1_closure_claim",
     "no_full_load_1p0_claim",
@@ -1206,13 +1227,14 @@
     }
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T07:39:30.035174+00:00",
+  "generated_at": "2026-06-30T08:14:02.506835+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:cb672e5a3ac1b0d0aa6e95d74e9ef52b25cc33ed13cdc8a4b37c94f7f146f34a",
-    "scripts/build_g1_global_connectivity_load_path_audit.py": "sha256:aa0a9a845c8ae508525436ee768ddb93b290626762cc9f2e3c212fb6b7515680"
+    "scripts/build_g1_global_connectivity_load_path_audit.py": "sha256:24a015d4073a70c329954910f88794e414551c3f891e3be84f6f197c6878f3f5"
   },
   "next_actions": [
+    "stop_row_only_support_or_elastic_link_correction_loop",
     "if_element_graph_connects_dominant_nodes_shift_to_consistent_residual_jacobian_newton",
     "if_element_graph_gap_detected_inspect_disconnected_structural_components_and_load_path_mapping",
     "keep_G1_full_load_and_rocm_hip_promotions_blocked_until_terminal_receipts_pass"
@@ -1238,7 +1260,7 @@
   "reuse_policy": "non_promoting_full_structural_graph_audit_from_existing_f2g_dominant_rows",
   "reused_evidence": true,
   "schema_version": "g1-global-connectivity-load-path-audit.v1",
-  "source_commit_sha": "22bb98753ef94638893ba1c10b4f96cf93af5ada",
+  "source_commit_sha": "f6f16b2db8a8bb8900b4f24d5c3b032f3ce3bb64",
   "status": "ready",
   "summary": {
     "dominant_dof_row_count": 64,
