@@ -203,7 +203,7 @@
       "template_value": "derived from closure report"
     }
   ],
-  "generated_at": "2026-06-30T13:33:36.911762+00:00",
+  "generated_at": "2026-06-30T13:43:20.399606+00:00",
   "license_status_path": "implementation/phase1/release/support_bundle/license_status.json",
   "reason_code": "ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED",
   "schema_version": "license-status-intake-packet.v1",
