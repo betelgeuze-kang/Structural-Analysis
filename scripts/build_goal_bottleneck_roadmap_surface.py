@@ -611,6 +611,7 @@ def _gpcr_row(
             "target_id": str(row.get("target_id") or ""),
             "status": str(row.get("status") or ""),
             "required": _as_bool(row.get("required")),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "required_field_count": len(_as_list(row.get("required_fields"))),
         }
         for row in _as_list(gpcr_operator_intake.get("target_slots"))
@@ -626,6 +627,7 @@ def _gpcr_row(
                 str(item) for item in _as_list(row.get("unblocks_phase3_criteria"))
             ],
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
@@ -663,6 +665,7 @@ def _gpcr_row(
                 if row.get("target_id")
                 else "fill GPCR hard-decoy metrics in the operator intake packet"
             ),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))

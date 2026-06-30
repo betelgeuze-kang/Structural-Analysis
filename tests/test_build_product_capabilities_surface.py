@@ -330,6 +330,23 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "HTR2A": "operator_input_required",
         "OPRM1": "operator_input_required",
     }
+    assert {
+        row["target_id"]: row["template_artifact"]
+        for row in gpcr["summary"]["operator_target_slots"]
+    } == {
+        "DRD2": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_template.json"
+        ),
+        "HTR2A": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_template.json"
+        ),
+        "OPRM1": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_template.json"
+        ),
+    }
     gate_plan = {row["target_id"]: row for row in gpcr["summary"]["gate_unblock_plan"]}
     assert gate_plan["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
     assert gate_plan["DRD2"]["unblocks_phase3_criteria"] == [
@@ -341,6 +358,10 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"][
         "top20_hit_rate"
     ] == ">=0.2"
+    assert gate_plan["DRD2"]["template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_operator_template.json"
+    )
     assert gate_plan["DRD2"]["materialization_steps"] == [
         "materialize_gpcr_hard_decoy_suite_report",
         "refresh_gpcr_hard_decoy_product_report",

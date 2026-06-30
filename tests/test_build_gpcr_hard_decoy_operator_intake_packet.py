@@ -126,6 +126,14 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "implementation/phase1/release_evidence/productization/"
         "gpcr_hard_decoy_operator_template.json"
     )
+    assert packet["target_slots"][0]["template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_operator_template.json"
+    )
+    assert packet["gate_unblock_plan"][0]["template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_operator_template.json"
+    )
 
 
 def test_gpcr_hard_decoy_operator_intake_packet_cli_writes_json_and_markdown(
