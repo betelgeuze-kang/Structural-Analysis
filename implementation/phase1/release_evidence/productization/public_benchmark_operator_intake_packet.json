@@ -36,14 +36,14 @@
           "casf_pdbbind_ligand_symmetry_contracts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-06-30T19:36:46.595991+00:00",
+        "generated_at": "2026-06-30T19:43:28.883808+00:00",
         "ready_values": {
           "materialized_case_count": 0,
           "public_benchmark_ready": false,
           "target_subset_case_count": 12
         },
         "schema_version": "public-benchmark-subset-manifest.v1",
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "5dc8946b58050ac6c5c33b3c04f51c614aa0cf24",
         "status": "source_material_required"
       },
       "current_ready": false,
@@ -113,12 +113,12 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-06-30T19:36:46.599038+00:00",
+        "generated_at": "2026-06-30T19:43:28.887056+00:00",
         "ready_values": {
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-pose-validity-packet.v1",
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "5dc8946b58050ac6c5c33b3c04f51c614aa0cf24",
         "status": "ready_for_dry_run"
       },
       "current_ready": false,
@@ -155,13 +155,13 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-06-30T19:36:46.601458+00:00",
+        "generated_at": "2026-06-30T19:43:28.889750+00:00",
         "ready_values": {
           "dry_run_case_count": 1,
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "5dc8946b58050ac6c5c33b3c04f51c614aa0cf24",
         "status": "ready"
       },
       "current_ready": false,
@@ -202,14 +202,14 @@
           "public_benchmark_pose_success_harness_rows_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-06-30T19:36:46.603619+00:00",
+        "generated_at": "2026-06-30T19:43:28.892090+00:00",
         "ready_values": {
           "pose_success_count": 1,
           "pose_success_harness_ready": false,
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-pose-success-harness.v1",
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "5dc8946b58050ac6c5c33b3c04f51c614aa0cf24",
         "status": "ready_for_real_benchmark_rows"
       },
       "current_ready": false,
@@ -259,13 +259,13 @@
           "dud_e_lit_pcba_active_decoy_labels_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-06-30T19:36:46.605729+00:00",
+        "generated_at": "2026-06-30T19:43:28.894373+00:00",
         "ready_values": {
           "public_benchmark_enrichment_ready": false,
           "real_enrichment_target_count": 0
         },
         "schema_version": "public-benchmark-enrichment-scorecard.v1",
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "5dc8946b58050ac6c5c33b3c04f51c614aa0cf24",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -303,13 +303,13 @@
           "vina_gnina_external_receipts_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-06-30T19:36:46.608215+00:00",
+        "generated_at": "2026-06-30T19:43:28.896698+00:00",
         "ready_values": {
           "public_benchmark_engine_comparison_ready": false,
           "real_comparison_case_count": 0
         },
         "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "5dc8946b58050ac6c5c33b3c04f51c614aa0cf24",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -426,14 +426,14 @@
           "public_benchmark_external_receipts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-06-30T19:36:46.614767+00:00",
+        "generated_at": "2026-06-30T19:43:28.902901+00:00",
         "ready_values": {
           "blocker_count": 10,
           "public_benchmark_ready": false,
           "tier_beta_ready": false
         },
         "schema_version": "public-benchmark-source-of-truth.v1",
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "5dc8946b58050ac6c5c33b3c04f51c614aa0cf24",
         "status": "seed_ready_materialization_blocked"
       },
       "current_ready": false,
@@ -506,14 +506,14 @@
         "casf_pdbbind_ligand_symmetry_contracts_missing"
       ],
       "contract_pass": true,
-      "generated_at": "2026-06-30T19:36:46.595991+00:00",
+      "generated_at": "2026-06-30T19:43:28.883808+00:00",
       "ready_values": {
         "materialized_case_count": 0,
         "public_benchmark_ready": false,
         "target_subset_case_count": 12
       },
       "schema_version": "public-benchmark-subset-manifest.v1",
-      "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+      "source_commit_sha": "5dc8946b58050ac6c5c33b3c04f51c614aa0cf24",
       "status": "source_material_required"
     },
     "current_ready": false,
@@ -839,9 +839,9 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-06-30T19:43:28.900689+00:00",
+  "generated_at": "2026-06-30T19:44:44.307293+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:02e99a097888a5757c6aa85b2902a00ac458bfad52113e85a34d420b17d5f06e",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:93f52355833e25d3b67e6495e62a31ffa3339e478016609b3306875f5a0293c9",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:987c65882b572a415c1dcd4941fc8adfc055b2e673d114bbe90caa5b02f777d8",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:edd2e1f2c560695f83e4f6dc30489379d16fe7a798541e82179cb5b933a6bf72",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:76211b24aecd3975d2ce64329d585d53fd7f2294e21bfa6dd80c5b5a58292684",
@@ -1822,7 +1822,7 @@
   ],
   "route": "/product/public-benchmark/operator-intake",
   "schema_version": "public-benchmark-operator-intake-packet.v1",
-  "source_commit_sha": "5dc8946b58050ac6c5c33b3c04f51c614aa0cf24",
+  "source_commit_sha": "02d02c110ff0f34afe54e4a699658796a86dbda2",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {
