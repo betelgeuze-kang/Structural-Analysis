@@ -223,6 +223,29 @@ def test_sync_preflight_blocks_dirty_or_non_fast_forward_state() -> None:
     assert "main_remote_not_ancestor_of_head" in payload["blockers"]
 
 
+def test_sync_preflight_ignores_productization_evidence_dirty_for_sync_gate() -> None:
+    payload = sync_preflight.build_report(
+        _state(
+            remote_feature_sha="abc1234",
+            feature_ahead_count=0,
+            worktree_status_short=(
+                " M implementation/phase1/release_evidence/productization/"
+                "pm_release_gate_report.json\n"
+                " M implementation/phase1/release_evidence/productization/"
+                "structural_product_development_roadmap.json"
+            ),
+        )
+    )
+
+    assert payload["status"] == "approval_required"
+    assert payload["preflight_pass"] is True
+    assert "worktree_not_clean" not in payload["blockers"]
+    assert payload["checks"]["worktree_clean"] is True
+    assert payload["checks"]["worktree_only_ignored_evidence_dirty"] is True
+    assert payload["state"]["effective_worktree_status_short"] == ""
+    assert "pm_release_gate_report.json" in payload["state"]["ignored_worktree_status_short"]
+
+
 def test_sync_preflight_blocks_wrong_remote_even_with_approval() -> None:
     payload = sync_preflight.build_report(
         _state(

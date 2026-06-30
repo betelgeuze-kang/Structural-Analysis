@@ -22,6 +22,9 @@ import check_git_remote_safety  # noqa: E402
 DEFAULT_FEATURE_REF = "origin/codex/create-architecture-definition-document-for-hybrid-ai"
 DEFAULT_MAIN_REF = "origin/main"
 DEFAULT_FETCH_REMOTE = "origin"
+IGNORED_WORKTREE_STATUS_PREFIXES = (
+    "implementation/phase1/release_evidence/productization/",
+)
 
 
 def _git_output(args: list[str], *, cwd: Path = Path(".")) -> str:
@@ -70,6 +73,31 @@ def _remote_branch_name(remote_ref: str, *, remote: str = DEFAULT_FETCH_REMOTE) 
     return remote_ref
 
 
+def _status_path(line: str) -> str:
+    text = line[3:].strip() if len(line) > 3 else ""
+    if " -> " in text:
+        text = text.rsplit(" -> ", 1)[-1].strip()
+    return text.strip('"')
+
+
+def _ignored_worktree_status_line(line: str) -> bool:
+    path = _status_path(line)
+    return any(path.startswith(prefix) for prefix in IGNORED_WORKTREE_STATUS_PREFIXES)
+
+
+def split_worktree_status(status_short: str) -> tuple[str, str]:
+    ignored: list[str] = []
+    effective: list[str] = []
+    for line in str(status_short or "").splitlines():
+        if not line.strip():
+            continue
+        if _ignored_worktree_status_line(line):
+            ignored.append(line)
+        else:
+            effective.append(line)
+    return "\n".join(effective), "\n".join(ignored)
+
+
 def collect_git_state(
     *,
     cwd: Path = Path("."),
@@ -106,7 +134,10 @@ def build_report(
     remote_fetch_attempted: bool = False,
     remote_fetch_ok: bool | None = None,
 ) -> dict[str, Any]:
-    worktree_clean = not bool(str(state.get("worktree_status_short", "")).strip())
+    effective_worktree_status, ignored_worktree_status = split_worktree_status(
+        str(state.get("worktree_status_short", "") or "")
+    )
+    worktree_clean = not bool(effective_worktree_status.strip())
     feature_ahead_count = int(state.get("feature_ahead_count", 0) or 0)
     main_ahead_count = int(state.get("main_ahead_count", 0) or 0)
     feature_ff = bool(state.get("feature_fast_forward_possible", False))
@@ -197,10 +228,17 @@ def build_report(
         "remote_sync_needed": remote_sync_needed,
         "reason_code": "PASS" if remote_sync_authorized and not blockers else "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "blockers": blockers,
-        "state": state,
+        "state": {
+            **state,
+            "effective_worktree_status_short": effective_worktree_status,
+            "ignored_worktree_status_short": ignored_worktree_status,
+        },
         "pending_remote_updates": pending_remote_updates,
         "checks": {
             "worktree_clean": worktree_clean,
+            "worktree_only_ignored_evidence_dirty": bool(
+                ignored_worktree_status and not effective_worktree_status
+            ),
             "remote_safety_ok": remote_safety_ok,
             "remote_fetch_ok": remote_fetch_ok,
             "feature_fast_forward_possible": feature_ff,
