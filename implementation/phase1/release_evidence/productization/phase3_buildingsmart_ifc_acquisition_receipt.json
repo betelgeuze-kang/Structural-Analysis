@@ -3,22 +3,20 @@
     "import_health_execution_missing",
     "phase3_ifc_import_case_count_below_minimum",
     "product_legal_license_review_pending",
-    "silent_import_loss_gate_not_executed",
-    "source_file_not_acquired",
-    "source_sha256_missing"
+    "silent_import_loss_gate_not_executed"
   ],
-  "claim_boundary": "This receipt narrows the buildingSMART clean IFC lane from source identity to selected-file acquisition and import-health expectation contracts. It does not download or bundle IFC files, compute selected-file checksums, approve redistribution, execute import-health checks, or close Phase 3.",
+  "claim_boundary": "This receipt narrows the buildingSMART clean IFC lane from source identity to selected-file acquisition and import-health expectation contracts. It records local private-corpus acquisition/checksums when present, but it does not bundle IFC files, approve redistribution, execute import-health checks, or close Phase 3.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "commercial_use_allowed_source_count": 0,
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
   "expected_import_health_contract_count": 2,
-  "generated_at": "2026-06-30T00:19:32.232351+00:00",
+  "generated_at": "2026-06-30T03:59:24.292302+00:00",
   "import_health_execution_count": 0,
   "input_checksums": {
-    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:26dd5f0c966de200428b095d64882890a7597706b038cea473170b458f0eb48a",
-    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:1194ff0fd1f968978fc9540a18c2b92435ab401df93c50c483a797e888df8a59",
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:54555de9e2e83f8ab8bda0757338207e44a86935684fec668d7ba4f72df68684",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
     "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
   },
   "phase3_closure_claim": false,
@@ -48,8 +46,6 @@
         "private_corpus/phase3/buildingsmart/pcert/Building-Structural.ifc"
       ],
       "blockers": [
-        "source_file_not_acquired",
-        "source_sha256_missing",
         "product_legal_license_review_pending",
         "import_health_execution_missing",
         "silent_import_loss_gate_not_executed"
@@ -95,8 +91,10 @@
       "selected_benchmark_lanes": [
         "buildingsmart-clean-ifc"
       ],
-      "source_checksum_status": "pending_until_operator_acquisition",
-      "source_sha256": "",
+      "source_checksum_status": "attached_from_local_private_corpus",
+      "source_file_acquired": true,
+      "source_file_is_git_lfs_pointer": false,
+      "source_sha256": "sha256:0343d5222d38e6be8ac7c31045c692e62c6018c80ea60d2f6023e73b846247ab",
       "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
       "structural_family": "building_structural_ifc",
       "truth_class": "geometry_and_import_truth",
@@ -122,8 +120,6 @@
         "private_corpus/phase3/buildingsmart/pcert/Infra-Bridge.ifc"
       ],
       "blockers": [
-        "source_file_not_acquired",
-        "source_sha256_missing",
         "product_legal_license_review_pending",
         "import_health_execution_missing",
         "silent_import_loss_gate_not_executed"
@@ -168,8 +164,10 @@
       "selected_benchmark_lanes": [
         "buildingsmart-clean-ifc"
       ],
-      "source_checksum_status": "pending_until_operator_acquisition",
-      "source_sha256": "",
+      "source_checksum_status": "attached_from_local_private_corpus",
+      "source_file_acquired": true,
+      "source_file_is_git_lfs_pointer": false,
+      "source_sha256": "sha256:241e6576a3a554086d3d2ae87415c5ba98a0123d329245810e7d42ecc504c183",
       "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
       "structural_family": "bridge_ifc",
       "truth_class": "geometry_and_import_truth",
@@ -187,8 +185,8 @@
       ]
     }
   ],
-  "source_checksum_attached_count": 0,
-  "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
-  "source_file_acquired_count": 0,
+  "source_checksum_attached_count": 2,
+  "source_commit_sha": "339dafaba7f4472c83ba74dad30cb1237879e77b",
+  "source_file_acquired_count": 2,
   "status": "blocked"
 }

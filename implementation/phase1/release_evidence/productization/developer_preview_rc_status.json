@@ -280,21 +280,13 @@
     {
       "blockers": [
         "dataset_repository_url_missing",
-        "dirty_import_execution_missing",
         "gui_task_runner_not_implemented",
-        "ifc_import_health_execution_count_below_required:0/10",
-        "import_health_execution_missing",
         "per_file_license_review_pending",
-        "phase3_ifc_import_case_count_below_minimum",
+        "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
         "phase3_ifc_import_case_quantity_credit_missing",
         "product_legal_license_review_pending",
         "query_expected_answers_missing",
-        "query_task_file_checksums_missing",
-        "selected_file_checksums_missing",
-        "silent_data_loss_negative_gate_not_executed",
-        "silent_import_loss_gate_not_executed",
-        "source_file_not_acquired",
-        "source_sha256_missing"
+        "query_task_file_checksums_missing"
       ],
       "contract_pass": false,
       "evidence": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json; implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json; implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json; implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json; implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
@@ -537,7 +529,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T03:35:01.798757+00:00",
+  "generated_at": "2026-06-30T04:02:19.082543+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:4f71702bcbc235e30b2fbed52905d8f9a1c4497e205ca97aff11d81931f9f7ce",
@@ -550,17 +542,17 @@
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": "sha256:fb612e88bc196e0c323190da8a0d29f409286ff1c8748257e47ef5eceee0cf65",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:60b59a12228241029f9ff1ad43d27baa1b379372aa69ba859948a3ebae29b3bd",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:db867ee9cd66943b082fc91a03b3abd0eb681d8e5e9f78520a690ede52a3227c",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:f751d99e9f57600250ff2e00293ec33003b34136a9639fc08ba079f6d28eb3f0",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:4df92b656667ebbb1d840ebf35b323d32d4e18259488445d4468218ca1b77cb3",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:40b81f70d380a18935ecbabf350248f293149231d99e0e6b735cb999f1829719",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:3049c3ab2bdc510fd71c873efebfcfa54ab9ebcbaf65c6d4c3c34c89f0a2a946",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:a2fa090ab455b2eee8027f0348a8ce7ddc36fdcedac072527b3d5929336df623",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:94b2a9e406817dca5e4021a224949d5e65325a1b2c2f72e22a804be0a9b39e02",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:2ffcbf48b88f67053b8c0255a02411ada1b916d231f811c60d27a96b1913fc87",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:f274a33a1d8149a559da635d1c71f107bc5916f85936c689ee1aae3413ed597d",
     "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:65dbe88321949aa98153ef9d54cf5752020f24255a6d5f31604c528c31fe2ed2",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:650baf0ab3cc97b83af694043704442c15bf6fea9f629af84c2c91549303e5f5",
-    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:09666d378c3a47e05f950efa6fa54c539c8298be0ef711d03a58a2de4da6dbb6",
+    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:823060d2baad3b2f87de3e5d358a5e727857e67876c0e6478b088d4efec0cecb",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:108376bdb54137462373680c38d9b34e5fcdf3d408d94b88b4ef5979dafb05ce",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:3ae7698be5b34d6c66d60350922ddb1a6a3ca89e371d2942cb5765eefa7a30e7",
@@ -1223,9 +1215,7 @@
         "import_health_execution_missing",
         "phase3_ifc_import_case_count_below_minimum",
         "product_legal_license_review_pending",
-        "silent_import_loss_gate_not_executed",
-        "source_file_not_acquired",
-        "source_sha256_missing"
+        "silent_import_loss_gate_not_executed"
       ],
       "clean_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
       "clean_execution_count": 0,
@@ -1234,9 +1224,7 @@
       "dirty_acquisition_blockers": [
         "dirty_import_execution_missing",
         "per_file_license_review_pending",
-        "silent_data_loss_negative_gate_not_executed",
-        "source_file_not_acquired",
-        "source_sha256_missing"
+        "silent_data_loss_negative_gate_not_executed"
       ],
       "dirty_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
       "dirty_execution_count": 0,
@@ -1248,42 +1236,33 @@
           "current": 10,
           "required": 10
         },
-        "import_health_execution_ready": false,
+        "import_health_execution_ready": true,
         "product_license_review_ready": false,
-        "selected_file_checksums_ready": false,
-        "silent_data_loss_negative_gate_executed": false,
-        "source_files_acquired": false
+        "selected_file_checksums_ready": true,
+        "silent_data_loss_negative_gate_executed": true,
+        "source_files_acquired": true
       },
       "import_health_blockers": [
-        "import_health_execution_missing",
-        "source_file_not_acquired",
-        "source_sha256_missing"
+        "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review"
       ],
-      "import_health_contract_pass_count": 0,
-      "import_health_execution_count": 0,
+      "import_health_contract_pass_count": 10,
+      "import_health_execution_count": 10,
       "import_health_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-      "owner_action": "Acquire the selected clean/dirty IFC files and record source/checksum evidence; complete product/legal and per-file license review; regenerate the Phase 3 import-health execution receipt by running import-health and silent-data-loss negative gates for every selected case; regenerate and check this Phase 6 silent-import-loss status; then refresh the RC final gate.",
+      "owner_action": "complete product/legal and per-file license review for quantity credit; close or explicitly defer the ifc-bench query/GUI spillover blockers; then refresh the RC final gate.",
       "required_ifc_import_case_count": 10,
       "selected_import_case_count": 10,
       "silent_import_loss_blocker_grouping": {
-        "claim_boundary": "Query/GUI spillover blockers are carried through for visibility from the Phase 3 source-license receipt, but they are not direct silent-import-loss closure blockers. The RC gate remains blocked until the direct source, checksum, license, import execution, and silent-loss gate groups are clear.",
+        "claim_boundary": "Query/GUI spillover blockers are carried through for visibility from the Phase 3 source-license receipt, but they are not direct silent-import-loss closure blockers. The RC gate remains blocked until the direct source, checksum, license, quantity-credit, import execution, and silent-loss gate groups are clear.",
         "groups": {
           "checksum": {
-            "blocked": true,
-            "blockers": [
-              "selected_file_checksums_missing",
-              "source_sha256_missing"
-            ],
+            "blocked": false,
+            "blockers": [],
             "display_name": "checksum",
             "scope": "direct_silent_import_loss"
           },
           "import_execution": {
-            "blocked": true,
-            "blockers": [
-              "dirty_import_execution_missing",
-              "ifc_import_health_execution_count_below_required:0/10",
-              "import_health_execution_missing"
-            ],
+            "blocked": false,
+            "blockers": [],
             "display_name": "import execution",
             "scope": "direct_silent_import_loss"
           },
@@ -1294,6 +1273,15 @@
               "product_legal_license_review_pending"
             ],
             "display_name": "license/legal",
+            "scope": "direct_silent_import_loss"
+          },
+          "quantity_credit": {
+            "blocked": true,
+            "blockers": [
+              "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+              "phase3_ifc_import_case_quantity_credit_missing"
+            ],
+            "display_name": "quantity credit",
             "scope": "direct_silent_import_loss"
           },
           "query_gui_spillover": {
@@ -1308,21 +1296,14 @@
             "scope": "spillover_not_direct_silent_import_loss"
           },
           "silent_loss_gate": {
-            "blocked": true,
-            "blockers": [
-              "silent_data_loss_negative_gate_not_executed",
-              "silent_import_loss_gate_not_executed"
-            ],
+            "blocked": false,
+            "blockers": [],
             "display_name": "silent-loss gate",
             "scope": "direct_silent_import_loss"
           },
           "source_acquisition": {
-            "blocked": true,
-            "blockers": [
-              "phase3_ifc_import_case_count_below_minimum",
-              "phase3_ifc_import_case_quantity_credit_missing",
-              "source_file_not_acquired"
-            ],
+            "blocked": false,
+            "blockers": [],
             "display_name": "source/acquisition",
             "scope": "direct_silent_import_loss"
           }
@@ -1332,38 +1313,25 @@
       },
       "silent_import_loss_blockers": [
         "dataset_repository_url_missing",
-        "dirty_import_execution_missing",
         "gui_task_runner_not_implemented",
-        "ifc_import_health_execution_count_below_required:0/10",
-        "import_health_execution_missing",
         "per_file_license_review_pending",
-        "phase3_ifc_import_case_count_below_minimum",
+        "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
         "phase3_ifc_import_case_quantity_credit_missing",
         "product_legal_license_review_pending",
         "query_expected_answers_missing",
-        "query_task_file_checksums_missing",
-        "selected_file_checksums_missing",
-        "silent_data_loss_negative_gate_not_executed",
-        "silent_import_loss_gate_not_executed",
-        "source_file_not_acquired",
-        "source_sha256_missing"
+        "query_task_file_checksums_missing"
       ],
       "silent_import_loss_contract_pass": false,
       "silent_import_loss_status": "blocked",
       "silent_import_loss_status_receipt": "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
       "source_license_blockers": [
         "dataset_repository_url_missing",
-        "dirty_import_execution_missing",
         "gui_task_runner_not_implemented",
-        "import_health_execution_missing",
         "per_file_license_review_pending",
         "phase3_ifc_import_case_quantity_credit_missing",
         "product_legal_license_review_pending",
         "query_expected_answers_missing",
-        "query_task_file_checksums_missing",
-        "selected_file_checksums_missing",
-        "silent_data_loss_negative_gate_not_executed",
-        "silent_import_loss_gate_not_executed"
+        "query_task_file_checksums_missing"
       ],
       "source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json"
     },
@@ -2471,6 +2439,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "a16984b493353624afdef9b2556b146a686b6e76",
+  "source_commit_sha": "339dafaba7f4472c83ba74dad30cb1237879e77b",
   "status": "blocked"
 }

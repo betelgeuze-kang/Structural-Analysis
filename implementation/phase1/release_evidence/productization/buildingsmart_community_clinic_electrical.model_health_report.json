@@ -1,0 +1,23 @@
+{
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "comparisons": [],
+  "contract_pass": false,
+  "convergence_history": [],
+  "developer_preview": true,
+  "developer_preview_blocked_fields": [
+    "ifc_structural_entities_missing",
+    "ifc_load_model_missing"
+  ],
+  "engine_version": "1.0.0",
+  "input_checksum": "sha256:70c436de1f1e8a860acfba61b68da1c9243d18dcbbddb98b88b550a642d95d32",
+  "passed_fields": [],
+  "status": "blocked",
+  "tolerance": 1e-08,
+  "unsupported_fields": [
+    "ifc_structural_entities_missing",
+    "ifc_load_model_missing"
+  ],
+  "warnings": [
+    "IFC adapter is STEP text scan only; exact placements, representation geometry, materials, sections, and loads require later adapter receipts."
+  ]
+}
