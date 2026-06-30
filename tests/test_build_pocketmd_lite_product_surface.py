@@ -152,6 +152,12 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "uncertainty_summary_materialized",
         "report_blockers_resolved",
     ]
+    assert survival["operator_input_source_receipt"]["status"] == "blocked"
+    assert survival["operator_input_source_receipt"]["contract_pass"] is False
+    assert survival["operator_input_source_receipt"]["blockers"] == [
+        "operator_input_source_receipt_required"
+    ]
+    assert "operator_input_source_receipt_required" not in survival["blockers"]
     assert survival["operator_intake_route"] == "/product/pocketmd-lite/operator-intake"
     assert survival["operator_intake_packet"] == {
         "route": "/product/pocketmd-lite/operator-intake",
@@ -500,8 +506,18 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "uncertainty_summary_materialized",
         "report_blockers_resolved",
     ]
+    assert surface["operator_input_source_receipt"] == survival[
+        "operator_input_source_receipt"
+    ]
     assert surface["readiness_summary"]["phase4_exit_gate_status"] == "blocked"
     assert surface["readiness_summary"]["phase4_failed_criterion_count"] == 7
+    assert surface["readiness_summary"]["operator_input_source_receipt_status"] == (
+        "blocked"
+    )
+    assert (
+        surface["readiness_summary"]["operator_input_source_receipt_contract_pass"]
+        is False
+    )
     assert surface["goal_roadmap_linkage"] == {
         "phase": "Phase 4",
         "roadmap_item": "PocketMD Lite science product surface",
@@ -578,6 +594,14 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     assert "# PocketMD Lite Operator Intake Packet" in operator_md_out.read_text(
         encoding="utf-8"
     )
+    survival_payload = json.loads(survival_out.read_text(encoding="utf-8"))
+    surface_payload = json.loads(surface_out.read_text(encoding="utf-8"))
+    assert survival_payload["operator_input_source_receipt"]["blockers"] == [
+        "operator_input_source_receipt_required"
+    ]
+    assert surface_payload["operator_input_source_receipt"] == survival_payload[
+        "operator_input_source_receipt"
+    ]
 
     rows = pm_report._evidence_surface_rows(surface_out.parent)
     assert rows == [

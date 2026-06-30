@@ -15,7 +15,10 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
-from materialize_pocketmd_lite_topk_survival_report import build_phase4_exit_gate  # noqa: E402
+from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
+    build_operator_input_source_receipt,
+    build_phase4_exit_gate,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -417,6 +420,10 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         product_surface_ready=False,
         first_blocked_target=first_blocked_target,
     )
+    operator_input_source_receipt = build_operator_input_source_receipt(
+        {"cases": []},
+        repo_root=repo_root,
+    )
     return {
         "schema_version": SURVIVAL_REPORT_SCHEMA_VERSION,
         **_metadata(
@@ -443,6 +450,7 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "required_metrics": [row["metric_id"] for row in _metric_contracts()],
         "required_case_fields": required_case_fields,
         "phase4_exit_gate": phase4_exit_gate,
+        "operator_input_source_receipt": operator_input_source_receipt,
         "operator_intake_route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
         "operator_intake_packet": handoff_context["operator_intake_packet"],
         "first_operator_evidence_gap": handoff_context["first_operator_evidence_gap"],
@@ -887,6 +895,14 @@ def build_surface(
     gate_unblock_plan = handoff_context["gate_unblock_plan"]
     first_operator_evidence_gap = handoff_context["first_operator_evidence_gap"]
     operator_handoff_summary = handoff_context["operator_handoff_summary"]
+    operator_input_source_receipt = topk_survival_report.get(
+        "operator_input_source_receipt"
+    )
+    if not isinstance(operator_input_source_receipt, dict):
+        operator_input_source_receipt = build_operator_input_source_receipt(
+            {"cases": []},
+            repo_root=repo_root,
+        )
     return {
         "schema_version": SURFACE_SCHEMA_VERSION,
         **_metadata(
@@ -910,6 +926,7 @@ def build_surface(
         "root_cause_tags": ["operator_refinement_rows_required"],
         "blockers": blockers,
         "phase4_exit_gate": phase4_exit_gate,
+        "operator_input_source_receipt": operator_input_source_receipt,
         "operator_intake_route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
         "operator_intake_required_slot_count": 1,
         "operator_evidence_gap_count": 1,
@@ -951,6 +968,12 @@ def build_surface(
             "phase4_failed_criteria": [
                 str(row) for row in phase4_exit_gate.get("failed_criteria", [])
             ],
+            "operator_input_source_receipt_status": str(
+                operator_input_source_receipt.get("status") or ""
+            ),
+            "operator_input_source_receipt_contract_pass": bool(
+                operator_input_source_receipt.get("contract_pass")
+            ),
         },
         "goal_roadmap_linkage": {
             "phase": "Phase 4",

@@ -404,6 +404,14 @@ def _operator_input_source_receipt(
     }
 
 
+def build_operator_input_source_receipt(
+    intake: Any,
+    *,
+    repo_root: Path = ROOT,
+) -> dict[str, Any]:
+    return _operator_input_source_receipt(intake, repo_root=repo_root)
+
+
 def _matching_blockers(blockers: list[str], *needles: str) -> list[str]:
     return [
         blocker
