@@ -642,6 +642,12 @@ def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
                 "require_hip_krylov_solver": True,
                 "hip_krylov_solver_used": True,
                 "accepted_state_refresh_cpu_used": True,
+                "accepted_state_tangent_refresh_backend": "cpu_full_assembly",
+                "accepted_state_tangent_refresh_cpu_used": True,
+                "accepted_state_tangent_refresh_closure_blocked": True,
+                "accepted_state_tangent_refresh_closure_blocker": (
+                    "rocm_hip_acceptance_tangent_refresh_required_for_closure"
+                ),
             },
             "current_tangent_residual_row_correction": {
                 "enabled": True,
@@ -713,6 +719,30 @@ def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
         == 0
     )
     assert (
+        payload["hip_direct_probe"]["matrix_free_global_krylov"][
+            "accepted_state_tangent_refresh_backend"
+        ]
+        == "cpu_full_assembly"
+    )
+    assert (
+        payload["hip_direct_probe"]["matrix_free_global_krylov"][
+            "accepted_state_tangent_refresh_cpu_used"
+        ]
+        is True
+    )
+    assert (
+        payload["hip_direct_probe"]["matrix_free_global_krylov"][
+            "accepted_state_tangent_refresh_closure_blocked"
+        ]
+        is True
+    )
+    assert (
+        payload["hip_direct_probe"]["matrix_free_global_krylov"][
+            "accepted_state_tangent_refresh_closure_blocker"
+        ]
+        == "rocm_hip_acceptance_tangent_refresh_required_for_closure"
+    )
+    assert (
         "hip_direct_probe_global_krylov_jvp_rows_missing"
         in payload["blockers"]
     )
@@ -782,6 +812,9 @@ def test_hip_required_probe_can_pass_only_with_strict_child_hip_contract(
                 "require_hip_krylov_solver": True,
                 "hip_krylov_solver_used": True,
                 "accepted_state_refresh_cpu_used": False,
+                "accepted_state_tangent_refresh_backend": "hip_tangent_refresh",
+                "accepted_state_tangent_refresh_cpu_used": False,
+                "accepted_state_tangent_refresh_hip_used": True,
                 "jvp_rows": [
                     {
                         "direction": "fixture_global_jvp",
@@ -821,6 +854,18 @@ def test_hip_required_probe_can_pass_only_with_strict_child_hip_contract(
     assert (
         payload["hip_direct_probe"]["matrix_free_global_krylov"][
             "jvp_rows_retained"
+        ]
+        is True
+    )
+    assert (
+        payload["hip_direct_probe"]["matrix_free_global_krylov"][
+            "accepted_state_tangent_refresh_cpu_used"
+        ]
+        is False
+    )
+    assert (
+        payload["hip_direct_probe"]["matrix_free_global_krylov"][
+            "accepted_state_tangent_refresh_hip_used"
         ]
         is True
     )

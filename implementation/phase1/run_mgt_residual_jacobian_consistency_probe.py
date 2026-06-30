@@ -232,6 +232,22 @@ def _assess_hip_required_direct_probe_payload(
             "accepted_state_refresh_cpu_used": bool(
                 global_krylov.get("accepted_state_refresh_cpu_used")
             ),
+            "accepted_state_tangent_refresh_backend": str(
+                global_krylov.get("accepted_state_tangent_refresh_backend", "") or ""
+            ),
+            "accepted_state_tangent_refresh_cpu_used": bool(
+                global_krylov.get("accepted_state_tangent_refresh_cpu_used")
+            ),
+            "accepted_state_tangent_refresh_hip_used": bool(
+                global_krylov.get("accepted_state_tangent_refresh_hip_used")
+            ),
+            "accepted_state_tangent_refresh_closure_blocked": bool(
+                global_krylov.get("accepted_state_tangent_refresh_closure_blocked")
+            ),
+            "accepted_state_tangent_refresh_closure_blocker": str(
+                global_krylov.get("accepted_state_tangent_refresh_closure_blocker", "")
+                or ""
+            ),
             "jvp_row_count": len(global_jvp_rows),
             "jvp_rows_retained": global_jvp_rows_retained,
         },
