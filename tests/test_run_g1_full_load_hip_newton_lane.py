@@ -845,10 +845,50 @@ def test_hip_proof_non_receipt_source_commit_still_blocks(
 
     assert "hip_consistency_proof_source_commit_sha_mismatch" in blockers
     assert summary["source_state_fresh"] is False
-    assert summary["source_state_kind"] == "non_receipt_paths_changed"
+    assert summary["source_state_kind"] == "g1_hip_paths_changed"
     assert summary["changed_paths_since_source_commit"] == [
         "scripts/run_g1_full_load_hip_newton_lane.py",
     ]
+
+
+def test_hip_proof_unrelated_release_helpers_do_not_stale_g1_lane(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha="proof-commit",
+        gate_passed=False,
+        blockers=["consistent_residual_jacobian_newton_not_proven"],
+    )
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_rev_parse",
+        lambda ref: {"proof-commit": "proof-sha", "lane-commit": "lane-sha"}.get(ref, ""),
+    )
+    changed_paths = [
+        "scripts/build_ux_new_user_observation_report.py",
+        "scripts/build_license_status_intake_packet.py",
+        "tests/test_build_phase6_ux_observation_status.py",
+    ]
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_diff_name_only",
+        lambda base, head: changed_paths,
+    )
+
+    summary, blockers = run_g1_full_load_hip_newton_lane._hip_consistency_proof_assessment(
+        proof_json=proof,
+        lane_source_commit_sha="lane-commit",
+    )
+
+    assert "hip_consistency_proof_source_commit_sha_mismatch" not in blockers
+    assert "hip_consistency_proof_gate_not_passed" in blockers
+    assert "hip_consistency_proof_has_blockers" in blockers
+    assert summary["source_state_fresh"] is True
+    assert summary["source_state_kind"] == "non_g1_hip_paths_changed"
+    assert summary["changed_paths_since_source_commit"] == changed_paths
 
 
 def test_child_reused_evidence_blocks_lane_promotion(

@@ -138,6 +138,27 @@ def _receipt_commit_allowed_path(path: str) -> bool:
     return False
 
 
+def _g1_hip_freshness_relevant_path(path: str) -> bool:
+    relevant_exact_paths = {
+        "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+        "scripts/run_g1_full_load_hip_newton_lane.py",
+    }
+    if path in relevant_exact_paths:
+        return True
+    relevant_prefixes = (
+        "implementation/phase1/src/",
+        "src/structural_analysis/",
+        "scripts/build_g1_",
+        "scripts/build_mgt_",
+        "scripts/run_mgt_",
+        "tests/test_g1_",
+        "tests/test_mgt_",
+        "tests/test_run_g1_full_load_hip_newton_lane.py",
+        "tests/test_solver_hip_",
+    )
+    return path.startswith(relevant_prefixes)
+
+
 def _source_state_freshness(
     *, proof_source_commit: str, lane_source_commit_sha: str
 ) -> tuple[bool, str, list[str]]:
@@ -154,7 +175,12 @@ def _source_state_freshness(
         path for path in changed_paths if not _receipt_commit_allowed_path(path)
     ]
     if non_receipt_paths:
-        return False, "non_receipt_paths_changed", non_receipt_paths
+        relevant_paths = [
+            path for path in non_receipt_paths if _g1_hip_freshness_relevant_path(path)
+        ]
+        if relevant_paths:
+            return False, "g1_hip_paths_changed", relevant_paths
+        return True, "non_g1_hip_paths_changed", non_receipt_paths
     return True, "receipt_only_commit", changed_paths
 
 
