@@ -126,25 +126,23 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 7,
+      "blocker_count": 6,
       "blockers": [
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
         "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
         "human_ux::observation_file_missing",
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-        "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-        "stale_or_inconsistent:open_blocker_count_conflict"
+        "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
       ],
       "description": "Developer Preview productization evidence: release freshness/sync, CI/runner streaks, generated artifact consistency, and human UX workflow observation.",
       "root_streams": [
         "CI runner/streak",
-        "human UX",
-        "release freshness/sync"
+        "human UX"
       ]
     }
   },
-  "blocker_count": 35,
+  "blocker_count": 34,
   "blockers": [
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
     "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -179,8 +177,7 @@
     "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "pm_release::security::license_status_not_configured",
-    "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-    "stale_or_inconsistent:open_blocker_count_conflict"
+    "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
   ],
   "claim_boundary": {
     "assisted_service_pilot": "assisted_service_pilot_ready is the engineer-review workstation service track. It requires workstation delivery 8/8, supported-scope guard, full quality, clean GitHub sync, real human UX observation, product/legal license approval, acceptance package, and explicit proxy/fallback/engineer-review boundaries. It does not relax solver_product gates.",
@@ -199,9 +196,8 @@
   "components": {
     "assisted_service_pilot": {
       "acceptance_package_ready": true,
-      "blocker_count": 4,
+      "blocker_count": 3,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "full_quality_not_ready",
         "human_ux_observation_not_ready",
         "license_approval_not_ready"
@@ -222,7 +218,7 @@
       "human_ux_observation_ready": false,
       "license_approval_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false,
+      "snapshot_source_state_consistent": true,
       "supported_scope_guard_ready": true,
       "workstation_delivery_8_of_8": true
     },
@@ -2403,7 +2399,7 @@
         "h_bond_evidence_surface_present": true,
         "locked_evidence_surface_count": 3,
         "missing_evidence_surface_count": 1,
-        "operator_action_count": 17,
+        "operator_action_count": 14,
         "operator_actions": [
           {
             "action_id": "attach_missing_evidence_surfaces",
@@ -2764,9 +2760,8 @@
       "remote_github_sync_clean": true
     },
     "solver_product": {
-      "blocker_count": 6,
+      "blocker_count": 5,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "independent_product_not_ready",
         "g1_full_mesh_full_load_not_ready",
         "g1_full_load_hip_newton_lane_not_ready",
@@ -2780,13 +2775,13 @@
       "g1_full_mesh_full_load_ready": false,
       "independent_product_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false
+      "snapshot_source_state_consistent": true
     }
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_fresh": false,
+  "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-30T08:21:48.148857+00:00",
+  "generated_at": "2026-06-30T08:25:44.455938+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
@@ -2810,8 +2805,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:8fe961201b2bb568847b985c1f820274767399fc2e2a485d3e6eddc9adb903f2",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:cd4ccedbb8a8736d861d06cb0c915d8a140c224d7ecf4715e76990843f9a6de0",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:cca5e9491a7f6aace9211fcb41c11806dab618fab5444ff5b223de4c90efae93",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:16e0c4bff6abdca6de0c1ed89c70ea72a045e42ad067a61a9c39589e6c5b6d39",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:a1acb46b30b0c6e77180a82c1f78e2db025f2cdd24af3d823a886b2fe96f5636",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1dbe8777c385b00518efbab80bcbc03b43140bfeea4f6cfee5eea126ac42d44e",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:6d5911930a5bf87e7632c561c399e174e6fc1463a43eb87e6560772f8cac56e0",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:922263bce572392fc94cd1c18cb944c7d6645b9b8bce4135eea9cdc452df266f",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2820,7 +2815,7 @@
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
-  "reason_code": "STALE_OR_INCONSISTENT",
+  "reason_code": "BLOCKED",
   "release_decision": {
     "approval_token_count": 4,
     "blocked_release_count": 5,
@@ -3035,7 +3030,7 @@
     "h_bond_evidence_surface_present": true,
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 1,
-    "operator_action_count": 17,
+    "operator_action_count": 14,
     "operator_actions": [
       {
         "action_id": "attach_missing_evidence_surfaces",
@@ -3430,19 +3425,17 @@
       ]
     },
     "release freshness/sync": {
-      "blocked": true,
-      "blocker_count": 1,
-      "blockers": [
-        "stale_or_inconsistent:open_blocker_count_conflict"
-      ]
+      "blocked": false,
+      "blocker_count": 0,
+      "blockers": []
     }
   },
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "snapshot_source_state_consistent": false,
+  "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "213becea7b1844db4fd0b712e0aea6e34c21e062",
-  "stale_or_inconsistent": true,
+  "source_commit_sha": "303db26398fafe337b560ca0e9ad53c50a16a7cc",
+  "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -3530,15 +3523,24 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T08:21:34.250490+00:00",
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
+        ],
+        "generated_at": "2026-06-30T08:23:47.408591+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
-        "source_commit_sha": "213becea7b1844db4fd0b712e0aea6e34c21e062",
+        "source_commit_matches_head": false,
+        "source_commit_sha": "7fe01e00d6291b265c74b40ef8b0d70c42f2c5d7",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "gap_closure_status",
@@ -3563,7 +3565,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -3583,7 +3584,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3620,7 +3620,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -3640,7 +3639,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3677,7 +3675,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -3697,7 +3694,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3734,7 +3730,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -3754,7 +3749,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3791,7 +3785,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -3811,7 +3804,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3848,7 +3840,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -3868,7 +3859,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3905,7 +3895,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -3925,7 +3914,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -3962,7 +3950,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -3982,7 +3969,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4019,7 +4005,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4039,7 +4024,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4076,7 +4060,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4096,7 +4079,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4133,7 +4115,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4153,7 +4134,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4190,7 +4170,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4210,7 +4189,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4247,7 +4225,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4267,7 +4244,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4304,7 +4280,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4324,7 +4299,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4361,7 +4335,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4381,7 +4354,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4418,7 +4390,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4438,7 +4409,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4475,7 +4445,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4495,7 +4464,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4532,7 +4500,6 @@
           "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
           "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
           "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -4552,7 +4519,6 @@
           "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
           "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
           "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
           "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
           "implementation/phase1/workstation_delivery_readiness.json"
@@ -4570,7 +4536,7 @@
     "open_blocker_counts": {
       "README.md": 9,
       "docs/commercialization-gap-current-state.md": 9,
-      "pm_release_blocker_action_register": 12
+      "pm_release_blocker_action_register": 9
     },
     "release_area_counts": {
       "README.md": [
@@ -4589,18 +4555,7 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        "implementation/phase1/release_evidence/productization/non_expert_release_briefing_report.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness.json",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness.md"
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4625,21 +4580,10 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        " M implementation/phase1/release_evidence/productization/non_expert_release_briefing_report.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "?? implementation/phase1/release_evidence/productization/release_evidence_freshness.json",
-        "?? implementation/phase1/release_evidence/productization/release_evidence_freshness.md"
+        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
   },
-  "status": "stale_or_inconsistent",
+  "status": "blocked",
   "workstation_delivery_ready": true
 }
