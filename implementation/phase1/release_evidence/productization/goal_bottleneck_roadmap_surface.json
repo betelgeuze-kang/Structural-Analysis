@@ -164,7 +164,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T10:28:25.082150+00:00",
+  "generated_at": "2026-06-30T10:30:50.715506+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:ef5a5621a926c01e41f2e17feb4dcce40fc0a4ad73caff73e1d21fcdc0585729",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:88b54817f7571acf01d3610f4193e5e13b1c33cd7beed45940994d5ae2e0b66d",
@@ -182,7 +182,7 @@
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:bdf0691082b39d0f34f318030929ec62b459f618c02acbd32c54f6ef1e0e8288",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:856c8f6f594f19ceb28cb24fd8fd87c4c008ccf11e9ac9dd87aca35c209f1adc",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:7dcac42c974dc42a0f92b3a014b18a6683ff548aea39541ec1c8ba73420ef3fd",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:580babd893f72bee3dc25d9e487dd2de95bb15d8efb700bb759136b574021a3d",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:171f1363050e44da219835e46b4a8c6c6d8f925778e086babfd84addd426226b",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2820e22baf6e519047b9d670b3c3bd9ec86ef2e08ece066f64b71acc640cd5cc"
   },
@@ -3461,7 +3461,7 @@
       ]
     }
   },
-  "source_commit_sha": "09767241b73712a55237037fc8b12022d03d0944",
+  "source_commit_sha": "da29f4e742fba9f0c14ab5ee02b5d6079786699f",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

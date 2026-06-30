@@ -15,7 +15,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_gap_ledger_ready": false,
-  "generated_at": "2026-06-30T10:28:20.127190+00:00",
+  "generated_at": "2026-06-30T10:30:20.619400+00:00",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
@@ -418,7 +418,7 @@
     }
   ],
   "schema_version": "gap-ledger-evidence-audit.v1",
-  "source_commit_sha": "09767241b73712a55237037fc8b12022d03d0944",
+  "source_commit_sha": "da29f4e742fba9f0c14ab5ee02b5d6079786699f",
   "source_receipt_path_coverage": {
     "claim_boundary": "This checks only explicit source_receipts and *_source_receipts paths that the ledger status advertises as evidence or guard inputs. It does not require terminal closure-evidence paths that are intentionally absent for partial or external-blocked rows.",
     "source_receipt_absent_row_count": 0,
