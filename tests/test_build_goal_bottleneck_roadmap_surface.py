@@ -97,7 +97,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
             "pocketmd_lite_product_surface_ready",
         )
     }
-    assert kpis["blocked_release_count"] == 5
+    assert kpis["blocked_release_count"] == 9
     assert kpis["first_blocker"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     assert kpis["evidence_surface_count"] == 12
     assert kpis["locked_evidence_surface_count"] == 3
@@ -116,8 +116,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
-    assert briefing["release_area_blocker_count"] == 5
-    assert briefing["release_area_owner_handoff_count"] == 5
+    assert briefing["release_area_blocker_count"] == 9
+    assert briefing["release_area_owner_handoff_count"] == 9
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
