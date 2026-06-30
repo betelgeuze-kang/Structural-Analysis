@@ -136,7 +136,19 @@ def _pocketmd_row_intake_contract(
             "source_license",
             "source_artifact_sha256",
             "per_row_source_checksum",
+            "per_row_provenance_ref",
         ],
+        "per_row_source_actuality_policy": {
+            "placeholder_provenance_prefixes_rejected": list(
+                pocketmd_survival.PLACEHOLDER_PROVENANCE_PREFIXES
+            ),
+            "placeholder_markers_rejected": list(
+                pocketmd_survival.PLACEHOLDER_SOURCE_TEXT_MARKERS
+            ),
+            "source_checksum_policy": (
+                "sha256:<64 hex> and not a repeated placeholder digest"
+            ),
+        },
         "blocked_claims_that_remain_locked": list(pocketmd_survival.BLOCKED_CLAIMS),
         "expected_outputs": {
             "operator_intake": str(intake_out),

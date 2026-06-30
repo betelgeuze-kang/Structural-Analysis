@@ -351,6 +351,77 @@ def build_status(
         "required_next_receipt_count": len(required_next_receipts),
         "promotes_g1_closure": False,
     }
+    next_actions = [
+        "stop_row_only_support_or_elastic_link_correction_loop"
+        if decision_record["stop_row_only_support_or_elastic_link_correction_loop"]
+        else "audit_full_structural_graph_connectivity_and_load_path_transfer",
+        "execute_consistent_residual_jacobian_newton_rocm_worker_lane"
+        if primary_next_lane == "consistent_residual_jacobian_newton_rocm_worker"
+        else "audit_full_structural_graph_connectivity_and_load_path_transfer",
+        "compare_load_dependent_near_null_and_geometric_stiffness_at_0p2_0p4",
+        "continue_consistent_residual_jacobian_newton_path",
+        "build_production_rocm_hip_residual_jvp_worker_when_runtime_available",
+    ]
+    recommended_next_actions = [
+        {
+            "action_id": "stop_row_only_support_or_elastic_link_corrections",
+            "priority": 1,
+            "status": (
+                "ready"
+                if decision_record["stop_row_only_support_or_elastic_link_correction_loop"]
+                else "audit_required"
+            ),
+            "rationale": (
+                "Dominant near-null rows are not direct support/elastic-link rows, and the "
+                "full structural element graph connects the dominant nodes to authored supports."
+            ),
+            "acceptance_evidence": [
+                "g1_f2g_f2h_cause_narrowing_status.summary.support_or_link_row_gap_disfavored == true",
+                "g1_global_connectivity_load_path_audit.summary.dominant_nodes_without_element_path_to_support_count == 0",
+            ],
+        },
+        {
+            "action_id": "execute_consistent_residual_jacobian_newton_rocm_worker_lane",
+            "priority": 2,
+            "status": "required_for_g1_closure",
+            "rationale": (
+                "F2h reaches 0.4 in the lightweight continuation, but G1 full-load closure is "
+                "still blocked by consistent residual/Jacobian Newton and HIP proof gates."
+            ),
+            "required_receipts": required_next_receipts,
+            "acceptance_evidence": [
+                "mgt_residual_jacobian_consistency_hip_required_probe.status == ready",
+                "g1_full_load_hip_newton_lane_report.contract_pass == true",
+                "g1_full_load_hip_newton_lane_report.summary.max_accepted_load_scale >= 1.0",
+            ],
+        },
+        {
+            "action_id": "compare_load_dependent_near_null_and_geometric_stiffness",
+            "priority": 3,
+            "status": "secondary_diagnostic",
+            "rationale": (
+                "Residuals are nondecreasing over 0.1->0.2->0.4, so weak-restraint/geometric "
+                "softening remains an active secondary diagnostic instead of a closure claim."
+            ),
+            "acceptance_evidence": [
+                "load-scale 0.2 and 0.4 near-null packet comparison",
+                "geometric-stiffness contribution audit with stop reasons",
+            ],
+        },
+        {
+            "action_id": "build_production_rocm_hip_residual_jvp_worker",
+            "priority": 4,
+            "status": "required_for_production_residency",
+            "rationale": (
+                "The current receipts are non-promoting diagnostics; production ROCm/HIP "
+                "residual/JVP residency still needs a dedicated worker proof."
+            ),
+            "acceptance_evidence": [
+                "production ROCm/HIP residual worker receipt with no CPU fallback",
+                "JVP/residual residency proof and parity against CPU reference",
+            ],
+        },
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -386,17 +457,9 @@ def build_status(
         "signals": evidence_signals,
         "decision_record": decision_record,
         "hypothesis_rank": hypotheses,
-        "next_actions": [
-            "stop_row_only_support_or_elastic_link_correction_loop"
-            if decision_record["stop_row_only_support_or_elastic_link_correction_loop"]
-            else "audit_full_structural_graph_connectivity_and_load_path_transfer",
-            "execute_consistent_residual_jacobian_newton_rocm_worker_lane"
-            if primary_next_lane == "consistent_residual_jacobian_newton_rocm_worker"
-            else "audit_full_structural_graph_connectivity_and_load_path_transfer",
-            "compare_load_dependent_near_null_and_geometric_stiffness_at_0p2_0p4",
-            "continue_consistent_residual_jacobian_newton_path",
-            "build_production_rocm_hip_residual_jvp_worker_when_runtime_available",
-        ],
+        "cause_ranking": hypotheses,
+        "next_actions": next_actions,
+        "recommended_next_actions": recommended_next_actions,
         "blockers": _first(blockers),
         "disallowed_promotions": [
             "no_G1_closure_claim",

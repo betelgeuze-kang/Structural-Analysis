@@ -83,15 +83,18 @@ TOPK_ROW_QUALITY_CRITERIA = {
 }
 SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 PLACEHOLDER_SOURCE_TEXT_MARKERS = (
+    "<operator",
     "fixture",
     "synthetic",
     "mock",
     "placeholder",
     "dummy",
     "example",
+    "operator_supplied",
     "unit-test",
     "test-only",
 )
+PLACEHOLDER_PROVENANCE_PREFIXES = ("operator://",)
 PLACEHOLDER_SOURCE_URL_MARKERS = (
     "://example.",
     ".example/",
@@ -143,6 +146,18 @@ def _boolean(value: Any) -> bool | None:
 
 def _is_sha256_ref(value: str) -> bool:
     return bool(SOURCE_CHECKSUM_PATTERN.fullmatch(value))
+
+
+def _is_repeated_placeholder_checksum(value: str) -> bool:
+    if not _is_sha256_ref(value):
+        return False
+    digest = value.split(":", 1)[1].lower()
+    return len(set(digest)) == 1
+
+
+def _has_placeholder_provenance_prefix(value: str) -> bool:
+    lowered = value.lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_PROVENANCE_PREFIXES)
 
 
 def _rate(value: Any) -> float | None:
@@ -229,6 +244,23 @@ def _normalize_candidate_row(row: dict[str, Any], index: int) -> dict[str, Any]:
         and not _is_sha256_ref(source_checksum)
     ):
         blockers.append(f"{row_key}:source_checksum_invalid")
+        root_cause_tags.append("operator_receipts_required")
+    elif (
+        "source_checksum" in row
+        and source_checksum
+        and _is_repeated_placeholder_checksum(source_checksum)
+    ):
+        blockers.append(f"{row_key}:source_checksum_placeholder_digest")
+        root_cause_tags.append("operator_receipts_required")
+    if (
+        "provenance_ref" in row
+        and provenance_ref
+        and (
+            _has_placeholder_provenance_prefix(provenance_ref)
+            or _contains_marker(provenance_ref, PLACEHOLDER_SOURCE_TEXT_MARKERS)
+        )
+    ):
+        blockers.append(f"{row_key}:provenance_ref_placeholder")
         root_cause_tags.append("operator_receipts_required")
 
     if "top_k_rank" in row and (top_k_rank is None or top_k_rank < 1):

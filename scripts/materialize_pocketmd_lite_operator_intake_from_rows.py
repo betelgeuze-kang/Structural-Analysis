@@ -16,6 +16,8 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
+    PLACEHOLDER_PROVENANCE_PREFIXES,
+    PLACEHOLDER_SOURCE_TEXT_MARKERS,
     REQUIRED_CASE_FIELDS,
     SOURCE_CHECKSUM_PATTERN,
     TOPK_ROW_QUALITY_CRITERIA,
@@ -80,6 +82,23 @@ def _rate(value: Any) -> float | None:
     if parsed is None or parsed < 0.0 or parsed > 1.0:
         return None
     return parsed
+
+
+def _contains_marker(value: str, markers: tuple[str, ...]) -> bool:
+    lowered = value.lower()
+    return any(marker in lowered for marker in markers)
+
+
+def _has_placeholder_provenance_prefix(value: str) -> bool:
+    lowered = value.lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_PROVENANCE_PREFIXES)
+
+
+def _is_repeated_placeholder_checksum(value: str) -> bool:
+    if not SOURCE_CHECKSUM_PATTERN.fullmatch(value):
+        return False
+    digest = value.split(":", 1)[1].lower()
+    return len(set(digest)) == 1
 
 
 def _read_delimited_rows(path: Path, *, delimiter: str) -> list[dict[str, Any]]:
@@ -243,6 +262,13 @@ def _normalize_row(
     source_checksum = _required_string(raw_row, field="source_checksum", row_index=row_index)
     if not SOURCE_CHECKSUM_PATTERN.fullmatch(source_checksum):
         raise ValueError(f"row_{row_index}:{case_id}:source_checksum_invalid")
+    if _is_repeated_placeholder_checksum(source_checksum):
+        raise ValueError(f"row_{row_index}:{case_id}:source_checksum_placeholder_digest")
+    if (
+        _has_placeholder_provenance_prefix(provenance_ref)
+        or _contains_marker(provenance_ref, PLACEHOLDER_SOURCE_TEXT_MARKERS)
+    ):
+        raise ValueError(f"row_{row_index}:{case_id}:provenance_ref_placeholder")
 
     top_k_rank = _required_integer(
         raw_row,

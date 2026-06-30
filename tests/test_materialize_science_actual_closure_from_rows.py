@@ -90,7 +90,7 @@ def _pocketmd_row(
         "uncertainty_low": -0.2 + rank / 10,
         "uncertainty_high": 0.2 + rank / 10,
         "uncertainty_unit": "energy_proxy_delta",
-        "provenance_ref": f"operator://{case_id}/{candidate_id}",
+        "provenance_ref": f"local-evidence://pocketmd-lite/{case_id}/{candidate_id}",
         "source_checksum": _sha(f"{case_id}:{candidate_id}"),
     }
 
@@ -213,6 +213,17 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "min_top_k_rank_coverage_per_case": 2,
         "min_total_top_k_candidate_count": 6,
     }
+    assert pocketmd_contract["source_receipt_required_fields"] == [
+        "source_id",
+        "source_url",
+        "source_license",
+        "source_artifact_sha256",
+        "per_row_source_checksum",
+        "per_row_provenance_ref",
+    ]
+    assert pocketmd_contract["per_row_source_actuality_policy"][
+        "placeholder_provenance_prefixes_rejected"
+    ] == ["operator://"]
     assert "broad_all_atom_md_claim" in (
         pocketmd_contract["blocked_claims_that_remain_locked"]
     )

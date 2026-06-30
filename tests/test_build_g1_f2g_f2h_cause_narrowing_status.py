@@ -141,12 +141,26 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
     )
     assert payload["hypothesis_rank"][0]["hypothesis"] == "direct_support_or_elastic_link_row_missing"
     assert payload["hypothesis_rank"][0]["classification"] == "deprioritized"
+    assert payload["cause_ranking"] == payload["hypothesis_rank"]
     assert payload["hypothesis_rank"][1]["classification"] == "load_path_transfer_or_tangent_gap"
     assert "stop_row_only_support_or_elastic_link_correction_loop" in payload["next_actions"]
     assert (
         "execute_consistent_residual_jacobian_newton_rocm_worker_lane"
         in payload["next_actions"]
     )
+    assert payload["recommended_next_actions"][0]["action_id"] == (
+        "stop_row_only_support_or_elastic_link_corrections"
+    )
+    assert payload["recommended_next_actions"][0]["priority"] == 1
+    assert payload["recommended_next_actions"][0]["status"] == "ready"
+    assert payload["recommended_next_actions"][1]["action_id"] == (
+        "execute_consistent_residual_jacobian_newton_rocm_worker_lane"
+    )
+    assert payload["recommended_next_actions"][1]["status"] == "required_for_g1_closure"
+    assert payload["recommended_next_actions"][1]["required_receipts"] == [
+        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+    ]
 
 
 def test_cause_narrowing_blocks_when_f2h_is_not_ready(tmp_path: Path) -> None:

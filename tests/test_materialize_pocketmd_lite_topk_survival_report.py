@@ -61,7 +61,7 @@ def _valid_case(
             "high": uncertainty_high,
             "unit": "energy_proxy_delta",
         },
-        "provenance_ref": f"operator://{case_id}/{candidate_id}",
+        "provenance_ref": f"local-evidence://pocketmd-lite/{case_id}/{candidate_id}",
         "source_checksum": _checksum(f"{case_id}:{candidate_id}"),
     }
 
@@ -318,6 +318,31 @@ def test_pocketmd_lite_materializer_blocks_invalid_checksum(tmp_path: Path) -> N
     assert report["product_surface_ready"] is False
     assert report["first_blocked_target"] == "case_a"
     assert "case_a:source_checksum_invalid" in report["blockers"]
+    assert "operator_receipts_required" in report["root_cause_tags"]
+
+
+def test_pocketmd_lite_materializer_blocks_placeholder_row_receipts(
+    tmp_path: Path,
+) -> None:
+    intake = _with_source_receipt(_valid_intake(), tmp_path)
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    first_case["provenance_ref"] = "operator://case_a/pose_1"
+    first_case["source_checksum"] = "sha256:" + "a" * 64
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["product_surface_ready"] is False
+    assert report["first_blocked_target"] == "case_a"
+    assert "case_a:provenance_ref_placeholder" in report["blockers"]
+    assert "case_a:source_checksum_placeholder_digest" in report["blockers"]
     assert "operator_receipts_required" in report["root_cause_tags"]
 
 

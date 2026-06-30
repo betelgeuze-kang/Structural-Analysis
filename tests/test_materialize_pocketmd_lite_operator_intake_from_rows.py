@@ -66,7 +66,7 @@ def _row(
             "high": 0.3,
             "unit": "energy_proxy_delta",
         },
-        "provenance_ref": f"operator://{case_id}/{candidate_id}",
+        "provenance_ref": f"local-evidence://pocketmd-lite/{case_id}/{candidate_id}",
         "source_checksum": _checksum(f"{case_id}:{candidate_id}"),
     }
 
@@ -106,7 +106,7 @@ def _write_csv(path: Path) -> None:
             "-0.2",
             "0.2",
             "energy_proxy_delta",
-            "operator://case_a/pose_1",
+            "local-evidence://pocketmd-lite/case_a/pose_1",
             _checksum("case_a:pose_1"),
         ],
         [
@@ -124,7 +124,7 @@ def _write_csv(path: Path) -> None:
             "0.1",
             "0.3",
             "energy_proxy_delta",
-            "operator://case_a/pose_2",
+            "local-evidence://pocketmd-lite/case_a/pose_2",
             _checksum("case_a:pose_2"),
         ],
         [
@@ -142,7 +142,7 @@ def _write_csv(path: Path) -> None:
             "-0.1",
             "0.7",
             "energy_proxy_delta",
-            "operator://case_b/pose_1",
+            "local-evidence://pocketmd-lite/case_b/pose_1",
             _checksum("case_b:pose_1"),
         ],
         [
@@ -160,7 +160,7 @@ def _write_csv(path: Path) -> None:
             "0.1",
             "0.3",
             "energy_proxy_delta",
-            "operator://case_b/pose_2",
+            "local-evidence://pocketmd-lite/case_b/pose_2",
             _checksum("case_b:pose_2"),
         ],
         [
@@ -178,7 +178,7 @@ def _write_csv(path: Path) -> None:
             "-0.2",
             "0.2",
             "energy_proxy_delta",
-            "operator://case_c/pose_1",
+            "local-evidence://pocketmd-lite/case_c/pose_1",
             _checksum("case_c:pose_1"),
         ],
         [
@@ -196,7 +196,7 @@ def _write_csv(path: Path) -> None:
             "0.1",
             "0.3",
             "energy_proxy_delta",
-            "operator://case_c/pose_2",
+            "local-evidence://pocketmd-lite/case_c/pose_2",
             _checksum("case_c:pose_2"),
         ],
     ]
@@ -434,6 +434,45 @@ def test_blocks_invalid_checksum_and_non_topk_rank(tmp_path: Path) -> None:
         assert str(exc) == "row_1:case_bad:top_k_rank_exceeds_max:20"
     else:
         raise AssertionError("expected max top-k error")
+
+
+def test_blocks_placeholder_row_receipts(tmp_path: Path) -> None:
+    rows = tmp_path / "pocketmd_lite_rows.json"
+    bad_row = _row(
+        case_id="case_bad",
+        candidate_id="pose_bad",
+        top_k_rank=1,
+        local_min_survived=True,
+        contact_rate=0.9,
+        h_bond_rate=0.5,
+        clash_before=3,
+        clash_after=1,
+    )
+    bad_row["provenance_ref"] = "operator://case_bad/pose_bad"
+    rows.write_text(json.dumps([bad_row]), encoding="utf-8")
+
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "row_1:case_bad:provenance_ref_placeholder"
+    else:
+        raise AssertionError("expected placeholder provenance error")
+
+    bad_row["provenance_ref"] = "local-evidence://pocketmd-lite/case_bad/pose_bad"
+    bad_row["source_checksum"] = "sha256:" + "a" * 64
+    rows.write_text(json.dumps([bad_row]), encoding="utf-8")
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "row_1:case_bad:source_checksum_placeholder_digest"
+    else:
+        raise AssertionError("expected placeholder checksum error")
 
 
 def test_cli_writes_operator_intake(tmp_path: Path) -> None:

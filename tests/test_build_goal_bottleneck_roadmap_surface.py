@@ -97,7 +97,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
             "pocketmd_lite_product_surface_ready",
         )
     }
-    assert kpis["blocked_release_count"] in {8, 9}
+    assert kpis["blocked_release_count"] == 5
     assert kpis["first_blocker"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     assert kpis["evidence_surface_count"] == 12
     assert kpis["locked_evidence_surface_count"] == 3
@@ -116,8 +116,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
-    assert briefing["release_area_blocker_count"] in {8, 9}
-    assert briefing["release_area_owner_handoff_count"] in {8, 9}
+    assert briefing["release_area_blocker_count"] == 5
+    assert briefing["release_area_owner_handoff_count"] == 5
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
@@ -128,18 +128,9 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::remote_mutation_approval_required",
-        "github_sync::github_sync_remote_sync_pending",
-        "github_sync::github_sync_preflight_not_synced",
-    }
-    optional_release_area_handoffs = {
-        "github_sync::github_sync_preflight::local_head_mismatch",
-        "github_sync::github_sync_preflight::worktree_not_clean",
     }
     assert required_release_area_handoffs.issubset(release_area_handoffs)
-    assert set(release_area_handoffs).issubset(
-        required_release_area_handoffs | optional_release_area_handoffs
-    )
+    assert set(release_area_handoffs).issubset(required_release_area_handoffs)
     assert kpis["blocked_release_count"] == len(release_area_handoffs)
     assert briefing["release_area_blocker_count"] == len(release_area_handoffs)
     assert briefing["release_area_owner_handoff_count"] == len(release_area_handoffs)
@@ -762,7 +753,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "handoff_ready_operator_evidence_required"
     )
     assert phase_4["summary"]["handoff_route"] == "/product/pocketmd-lite/handoff"
-    assert phase_4["summary"]["handoff_acceptance_criteria_count"] == 6
+    assert phase_4["summary"]["handoff_acceptance_criteria_count"] == 8
     assert phase_4["summary"]["handoff_phase4_exit_gate_required_status"] == "ready"
     assert phase_4["summary"]["operator_intake_packet_status"] == (
         "ready_for_operator_input"
@@ -775,8 +766,8 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     )
     assert phase_4["summary"]["operator_intake_required_slot_count"] == 1
     assert phase_4["summary"]["gate_unblock_plan_count"] == 1
-    assert phase_4["summary"]["minimum_refinement_case_count"] == 1
-    assert phase_4["summary"]["minimum_top_k_candidate_count"] == 1
+    assert phase_4["summary"]["minimum_refinement_case_count"] == 3
+    assert phase_4["summary"]["minimum_top_k_candidate_count"] == 6
     assert phase_4["summary"]["operator_intake_slots"] == [
         {
             "required": True,
@@ -797,6 +788,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "blocked_phase4_criteria"
     ] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
@@ -808,9 +800,10 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "first_next_action"
     ] == "attach top-k candidate refinement rows"
     assert phase_4["summary"]["phase4_exit_gate_status"] == "blocked"
-    assert phase_4["summary"]["phase4_failed_criterion_count"] == 7
+    assert phase_4["summary"]["phase4_failed_criterion_count"] == 8
     assert phase_4["summary"]["phase4_failed_criteria"] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
@@ -818,7 +811,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "uncertainty_summary_materialized",
         "report_blockers_resolved",
     ]
-    assert phase_4["blocked_criteria_count"] == 7
+    assert phase_4["blocked_criteria_count"] == 8
     assert phase_4["blocked_criteria"] == phase_4["summary"][
         "phase4_failed_criteria"
     ]
@@ -830,6 +823,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     )
     assert gate_plan["unblocks_phase4_criteria"] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
