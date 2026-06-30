@@ -308,17 +308,17 @@
       ]
     }
   ],
-  "generated_at": "2026-06-30T06:45:44.906681+00:00",
+  "generated_at": "2026-06-30T06:54:59.832142+00:00",
   "input_checksums": {
     "README.md": "sha256:ce47417faa96ba0510be43d37755dfa2f310cae7c5ce6c638cf8165997fc93a7",
     "docs/commercialization-gap-current-state.md": "sha256:4409d303ee27713220c4c047d54467085e03f5f698ca4fb95fc6d4eb0c17ea95",
     "docs/pm-release-gate-milestones.md": "sha256:fdb22304c1e4c8047a2bebdf107007ac654869d06d603ace91a32fb128773092",
-    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:1ad2704556cdb3483767eeabe7f677b80c9b370b5ed3cc817193c8e0111b7fac",
+    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:5770b6ce3657ec8213351f8acc67c6760674b75d1d9c93a3125019c142fd4c40",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:e4b554d70eb56f31f6c2ef936ac19900174215cb659c6aa9b3b009ccf59d44de",
     "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json": "sha256:5095725f112304b5c21d0f67f2e3df7a86254cf9975b3944d9d19e114d893106",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:55f105cf36b49e2d5de76c1d6925438b0b38ec0517e2b8b1fc4de6221b91f649",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:852b8ab3e33b29fb6630e1d33f4dd7b245448e7bce9af09e6bb7e61d1820a167",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:e07bfeb9c7ea6f088ebb11c053d18ef2506365db6e5777af935ee390fa9093b1",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5d00c197b5b96cb45f3e1f5b4ba0072ff730f7f7d8d62aa74a07224a61e446a5",
     "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json": "sha256:6951bf97670b21dff654de5446a5714906a7f87a623f0815b555924863d1d932",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:4ac129270a848082cb91311a59366e4ee56048b80d34a8026d67107372850cb7",
     "implementation/phase1/support_bundle_manifest.json": "sha256:c633fe46a2482f973473fa471cbdf7a0a22c067e3ea024e780a7c59576f8bfa0"
@@ -373,7 +373,7 @@
       "pass": true
     }
   ],
-  "source_commit_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
+  "source_commit_sha": "810d694d34e650f9f8a0180781cadcb22898c00b",
   "summary": {
     "claim_boundary_docs": [
       "README.md",

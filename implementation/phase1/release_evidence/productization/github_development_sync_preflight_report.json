@@ -1,45 +1,64 @@
 {
-  "blockers": [],
+  "blockers": [
+    "worktree_not_clean",
+    "remote_mutation_approval_required"
+  ],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
-    "feature_synced_to_head": true,
+    "feature_synced_to_head": false,
     "main_fast_forward_possible": true,
-    "main_synced_to_head": true,
+    "main_synced_to_head": false,
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
-    "worktree_clean": true
+    "worktree_clean": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
-    "feature_push": "git push origin HEAD:codex/create-architecture-definition-document-for-hybrid-ai",
+    "feature_push": "git push origin main:codex/create-architecture-definition-document-for-hybrid-ai",
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
   },
-  "contract_pass": true,
-  "generated_at": "2026-06-30T06:45:04.151304+00:00",
-  "pending_remote_updates": [],
-  "preflight_pass": true,
+  "contract_pass": false,
+  "generated_at": "2026-06-30T06:54:59.506286+00:00",
+  "pending_remote_updates": [
+    {
+      "action": "push current HEAD to feature",
+      "command": "git push origin main:codex/create-architecture-definition-document-for-hybrid-ai",
+      "rollback": "restore feature to previous remote SHA 6cb09c034d3a92c0be4b83bbeeb1d787214e3572 with an approved restore action",
+      "target": "origin/codex/create-architecture-definition-document-for-hybrid-ai"
+    },
+    {
+      "action": "fast-forward push current HEAD to main",
+      "command": "git push origin HEAD:main",
+      "rollback": "restore main to previous remote SHA 6cb09c034d3a92c0be4b83bbeeb1d787214e3572 with an approved revert/restore action",
+      "target": "origin/main"
+    }
+  ],
+  "preflight_pass": false,
   "r4_disclosure": {
-    "action": "no remote mutation required",
-    "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
-    "risk": "No remote mutation remains.",
-    "rollback": "no rollback needed",
-    "target": [],
+    "action": "push current HEAD to feature; fast-forward push current HEAD to main",
+    "impact": "GitHub pending refs become externally visible at the local development state.",
+    "risk": "Main CI and external reviewers immediately see the current commits.",
+    "rollback": "restore feature to previous remote SHA 6cb09c034d3a92c0be4b83bbeeb1d787214e3572 with an approved restore action; restore main to previous remote SHA 6cb09c034d3a92c0be4b83bbeeb1d787214e3572 with an approved revert/restore action",
+    "target": [
+      "origin/codex/create-architecture-definition-document-for-hybrid-ai",
+      "origin/main"
+    ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
-  "reason_code": "PASS",
+  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
   "remote_fetch_attempted": true,
   "remote_fetch_ok": true,
   "remote_mutation_approved": false,
-  "remote_sync_needed": false,
+  "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
-    "branch": "HEAD",
-    "feature_ahead_count": 0,
+    "branch": "main",
+    "feature_ahead_count": 1,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
-    "main_ahead_count": 0,
+    "local_head_sha": "810d694d34e650f9f8a0180781cadcb22898c00b",
+    "main_ahead_count": 1,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
     "remote_feature_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
@@ -58,7 +77,7 @@
         ]
       }
     },
-    "worktree_status_short": ""
+    "worktree_status_short": "M implementation/phase1/customer_shadow_evidence_status.json\n M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json\n M implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json\n M implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json\n M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json\n M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json\n M implementation/phase1/release_evidence/productization/gap_closure_status.json\n M implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json\n M implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/license_status_closure_report.json\n M implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json\n M implementation/phase1/release_evidence/productization/non_expert_release_briefing_report.json\n M implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json\n M implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json\n M implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json\n M implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json\n M implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json\n M implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json\n M implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json\n M implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json\n M implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json\n M implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json\n M implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json\n M implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json\n M implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json\n M implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json\n M implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json\n M implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json\n M implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json\n M implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json\n M implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json\n M implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json\n M implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json\n M implementation/phase1/release_evidence/surface/product_capabilities_surface.json\n M implementation/phase1/workstation_delivery_readiness.json\n?? implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json"
   },
-  "status": "synced"
+  "status": "blocked"
 }

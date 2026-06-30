@@ -4,9 +4,9 @@
   "contract_pass": true,
   "depends_on": [],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:45:45.412139+00:00",
+  "generated_at": "2026-06-30T06:54:56.714892+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:63f3e8298936f8d3d1d3475830aeafe462ba40081142b77349b05558c82da2f1",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:3285af493ebadc47cc1e5e431116f65a4dc5d1d36075fe54e7aba835a4551e19",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:8826a9d99b7355d6333ca1863ef65460303c22baff3357d367a312a66c3e9dcb",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:147b3fd1bbd0a5edce98ab1657763b0bf79cddbd362da968a591c1a25d107a55",
@@ -74,7 +74,7 @@
   "reused_evidence": true,
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "casf_pdbbind_subset_intake",
-  "source_commit_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
+  "source_commit_sha": "810d694d34e650f9f8a0180781cadcb22898c00b",
   "status": "operator_template_seed",
   "template": {
     "cases": [

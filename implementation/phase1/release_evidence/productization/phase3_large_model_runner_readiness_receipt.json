@@ -24,7 +24,7 @@
   "current_large_model_execution_receipt_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T06:45:45.263956+00:00",
+  "generated_at": "2026-06-30T06:54:54.012226+00:00",
   "input_checksums": {
     "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:a7a6f6f415f00b6cd49f68a13f888e29ba32c40f18191340716d7fba367924e4",
     "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
@@ -141,7 +141,7 @@
   },
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
-  "source_commit_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
+  "source_commit_sha": "810d694d34e650f9f8a0180781cadcb22898c00b",
   "source_id": "opensees_megatall_model_2_large",
   "status": "blocked",
   "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | evidence=2/9"
