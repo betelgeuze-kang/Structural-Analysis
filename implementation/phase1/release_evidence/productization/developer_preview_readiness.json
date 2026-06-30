@@ -188,7 +188,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T11:04:15.495278+00:00",
+  "generated_at": "2026-06-30T11:09:31.814207+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -199,11 +199,11 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:16da728152036ca856f9716a194cd92e978d5048d7c3f838d0e1966ef76d7828",
+      "input_checksum": "sha256:ebdb5bc445c83379f8dc8bea73be0d28f551b9a0ead85bfb817d1b5406d62957",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "5a965b2bb90cdde0e8871331fb69eb1af5bb2fa7",
+      "source_commit_sha": "2e90557986790c1022a3ef0ad6ce97d1ed49c2d2",
       "status": "ready"
     },
     "product_readiness_snapshot": {
@@ -218,7 +218,7 @@
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:16da728152036ca856f9716a194cd92e978d5048d7c3f838d0e1966ef76d7828",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:ebdb5bc445c83379f8dc8bea73be0d28f551b9a0ead85bfb817d1b5406d62957",
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:00570235c279a3fe34575f22a9e097fa2dce875173ceab0128a6a128f3fa7f66"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
@@ -2030,6 +2030,6 @@
       }
     }
   },
-  "source_commit_sha": "2a99712658942eb944839194678f919a1cd0fdc6",
+  "source_commit_sha": "2e90557986790c1022a3ef0ad6ce97d1ed49c2d2",
   "status": "blocked"
 }
