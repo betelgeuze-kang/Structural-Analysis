@@ -25,7 +25,7 @@
     }
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T12:35:09.318651+00:00",
+  "generated_at": "2026-06-30T14:45:56.246353+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:e2ba8c2a4175e981717602a51b9eaafa03da82aaf18e7b88e8ca3f70e614ff03",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:35d53af25d4d3d303f71ea6137a3f941b18610e2633fb2bb6487fa6a68b75782",
@@ -34,7 +34,7 @@
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:d965fae24ace310a8dac00208f8c4d8ff2b2ea356a21254da7b03966ced9678e",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:d18e8cc8f99d1c8f565340e6a622cd99667b2a837d7c584edfec69a30c9d9037",
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:84a2321c26221def7d4fca2ce98dc42832053c40bd464a3a32e2e49e3f44fee0",
-    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:048376d4f1268e82ca66dce13a826096f949ebdea24e8c1290cbb40980f51b4d",
+    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:39f2c71e97ac0579ad9504429a63c5478378b939a11675d937eba475e2222bd4",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:282daac16328284d858b1b76830d6cd9666a9b01d67cf9e8259fbac8dc1f571f",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:51c107c5d5c56aaa3fdb63b91f76c515109b86d664effe8fb65922e5c628a3d1",
@@ -120,7 +120,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_comparison_adapter_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-  "source_commit_sha": "6804623fb0050c1781b57afa2c556fdbb82f6081",
+  "source_commit_sha": "14427b8e519b30ee97f713d8dede29cea66a34d6",
   "status": "operator_evidence_required",
   "summary": {
     "benchmark_split_counts": {},
