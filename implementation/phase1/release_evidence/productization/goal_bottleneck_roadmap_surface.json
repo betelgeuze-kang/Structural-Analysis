@@ -163,12 +163,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T09:03:10.705376+00:00",
+  "generated_at": "2026-06-30T09:04:21.808661+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:ef5a5621a926c01e41f2e17feb4dcce40fc0a4ad73caff73e1d21fcdc0585729",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:88b54817f7571acf01d3610f4193e5e13b1c33cd7beed45940994d5ae2e0b66d",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:62eaeafefb86fdbdb0de9429e4a35913722d44286f3cee5e08dbb1d61fa657d9",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9647cba440c09a809e9dacb2cab300890d3ac7e435848530a2e6bcca3d92a4e1",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:45b346b6fa37590454e6f1e01aac245b30b7bb02b75cdc9a12fdaf1a6227a916",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:ddee8ead4601642d8df7b2dad1510c2b6d58e643a3a21c5b99cbd82b771bee41",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:d51a08f52e1989afdf2d6b60df519de2ab5feb58a88df1fb7085e6f676d3850d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:9f01ffac2b830b98d093ef64cc96d57fb7fd2bcb16f1f3754016b17408edc357",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:71e56180890908312bae669ab2a20fd817f978b64dc3e5e04b8c4b9287f41f89",
@@ -176,12 +176,12 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:3c1b19ffe7a83fdb757a9248e777ce7ff21f8582545f72f1a4160ffb3a702e49",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:f28070eefb601fb53e9827eee5e83009687b3d1ccb207e2c7fdc9b8a8a809887",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:3c597113d59e0bdf5f71638b319c8393f820e130f42d286feb83f12ccfd96797",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:e360197fc8164b5790e23ddd224b58f74735b4168dee4d44b650eb7a358181c0",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:0536c231b0fb5da49cc39518c2d6a412b3c49665596b376f80f422329dd943f9",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:a189b1684a0ad040239752094954ac79b6906564963412302fb4d42627228de0",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:97a709e4075b549ccc0fbd8a7090a0bd594c644072e5db7ed471f06daa61890c",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:856c8f6f594f19ceb28cb24fd8fd87c4c008ccf11e9ac9dd87aca35c209f1adc",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:eed8576fd22b4ed05a546c9bdf3136223a543f8d39ce186980ae57191cb970d3",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:802b90f003023a088563c8b447f179cc10d80aa413b8f8afd05d202e39b38511",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:9249e60dfde918d8d47d35ba797ec1fea14a46fc275daa69f7aa341cd50841c9",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2820e22baf6e519047b9d670b3c3bd9ec86ef2e08ece066f64b71acc640cd5cc"
   },
@@ -3448,7 +3448,7 @@
       ]
     }
   },
-  "source_commit_sha": "dfd6a81df264e1dd4c42f95721ebf0d9094a917a",
+  "source_commit_sha": "b38d45af0b5d7354f8a59b775146262d80a0a3d6",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
