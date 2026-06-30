@@ -161,6 +161,57 @@ def _parity_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
     }
 
 
+def _missing_platform_receipt_handoff(
+    *,
+    missing_platforms: list[str],
+    receipt_paths: dict[str, str],
+    platform_receipt_template: dict[str, Any],
+    comparison_requirements: list[str],
+) -> list[dict[str, Any]]:
+    handoff: list[dict[str, Any]] = []
+    for platform in missing_platforms:
+        handoff.append(
+            {
+                "platform": platform,
+                "receipt_path": receipt_paths[platform],
+                "schema_version": PLATFORM_RECEIPT_SCHEMA,
+                "status": "operator_receipt_required",
+                "contract_pass": False,
+                "required_source_commit_sha": platform_receipt_template.get(
+                    "source_commit_sha"
+                ),
+                "required_replay_commands": platform_receipt_template.get(
+                    "commands", []
+                ),
+                "required_receipt_fields": sorted(platform_receipt_template),
+                "expected_scorecard": platform_receipt_template.get(
+                    "expected_scorecard", {}
+                ),
+                "stable_artifact_checksums": platform_receipt_template.get(
+                    "stable_artifact_checksums", {}
+                ),
+                "comparison_requirements": comparison_requirements,
+                "validation_commands_after_attachment": [
+                    "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                    "python3 scripts/build_developer_preview_rc_status.py --check",
+                ],
+                "forbidden_shortcuts": [
+                    "do_not_copy_linux_receipt_as_windows_receipt",
+                    "do_not_set_contract_pass_true_without_command_return_code_zero",
+                    "do_not_omit_stable_artifact_checksums",
+                    "do_not_attach_dirty_worktree_receipt",
+                ],
+                "claim_boundary": (
+                    "This handoff is an operator checklist for the missing platform "
+                    "receipt. It is not a platform replay receipt and cannot close "
+                    "Linux/Windows parity until the receipt exists and passes the "
+                    "parity status check."
+                ),
+            }
+        )
+    return handoff
+
+
 def build_phase6_linux_platform_replay_receipt(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     repro_bundle = _load_json(repo_root, PHASE3_REPRO_BUNDLE)
@@ -339,6 +390,21 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         "expected_scorecard": expected_scorecard,
         "contract_pass": False,
     }
+    comparison_requirements = [
+        "same source_commit_sha or explicit commit mapping",
+        "same expected_scorecard.case_count",
+        "same expected_scorecard.pass_count",
+        "same expected_scorecard.lane_case_counts",
+        "same residual_formula",
+        "stable manifest and scorecard SHA256 values",
+        "working_tree_clean=true and local_dirty_inputs=[]",
+    ]
+    missing_platform_handoff = _missing_platform_receipt_handoff(
+        missing_platforms=missing_platforms,
+        receipt_paths=receipt_paths,
+        platform_receipt_template=platform_receipt_template,
+        comparison_requirements=comparison_requirements,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -379,6 +445,7 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
             ),
         },
         "platform_receipt_template": platform_receipt_template,
+        "missing_platform_receipt_handoff": missing_platform_handoff,
         "parity_comparison_contract": parity_comparison_contract,
         "blocked_by": blockers,
         "blocker_grouping_metadata": _parity_blocker_grouping_metadata(blockers),
@@ -389,15 +456,7 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
             "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py",
             "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
         ],
-        "comparison_requirements": [
-            "same source_commit_sha or explicit commit mapping",
-            "same expected_scorecard.case_count",
-            "same expected_scorecard.pass_count",
-            "same expected_scorecard.lane_case_counts",
-            "same residual_formula",
-            "stable manifest and scorecard SHA256 values",
-            "working_tree_clean=true and local_dirty_inputs=[]",
-        ],
+        "comparison_requirements": comparison_requirements,
         "owner_action": (
             "Attach passing Linux and Windows platform replay receipts from the same "
             "tracked source state, then rerun this parity status receipt before "

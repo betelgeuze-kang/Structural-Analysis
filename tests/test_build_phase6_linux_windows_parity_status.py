@@ -96,6 +96,37 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
     assert template["contract_pass"] is False
     assert template["stable_artifact_checksums"] == payload["expected_stable_artifact_checksums"]
     assert template["expected_scorecard"] == payload["expected_scorecard"]
+    handoff = payload["missing_platform_receipt_handoff"]
+    assert len(handoff) == 1
+    windows_handoff = handoff[0]
+    assert windows_handoff["platform"] == "windows"
+    assert windows_handoff["receipt_path"].endswith(
+        "phase6_windows_platform_replay_receipt.json"
+    )
+    assert (
+        windows_handoff["schema_version"]
+        == "phase6-linux-windows-platform-replay-receipt.v1"
+    )
+    assert windows_handoff["contract_pass"] is False
+    assert windows_handoff["expected_scorecard"] == payload["expected_scorecard"]
+    assert (
+        windows_handoff["stable_artifact_checksums"]
+        == payload["expected_stable_artifact_checksums"]
+    )
+    assert "platform" in windows_handoff["required_receipt_fields"]
+    assert "working_tree_clean" in windows_handoff["required_receipt_fields"]
+    assert any(
+        "structural_analysis.benchmark.cli" in row["command"]
+        for row in windows_handoff["required_replay_commands"]
+    )
+    assert (
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check"
+        in windows_handoff["validation_commands_after_attachment"]
+    )
+    assert (
+        "do_not_copy_linux_receipt_as_windows_receipt"
+        in windows_handoff["forbidden_shortcuts"]
+    )
     comparison = payload["parity_comparison_contract"]
     assert comparison["required_platform_receipt_count"] == 2
     assert comparison["current_platform_receipt_count"] == 1

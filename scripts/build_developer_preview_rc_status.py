@@ -1321,6 +1321,9 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                     else {}
                 )
             },
+            "missing_platform_receipt_handoff": list(
+                linux_windows_parity.get("missing_platform_receipt_handoff", [])
+            ),
             "required_commands": list(linux_windows_parity.get("required_commands", [])),
             "comparison_requirements": list(
                 linux_windows_parity.get("comparison_requirements", [])

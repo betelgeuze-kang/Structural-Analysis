@@ -672,6 +672,20 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "expected_stable_artifact_checksums"
     ]
     assert receipt_template["expected_scorecard"] == parity_handoff["expected_scorecard"]
+    missing_platform_handoff = parity_handoff["missing_platform_receipt_handoff"]
+    assert len(missing_platform_handoff) == 1
+    assert missing_platform_handoff[0]["platform"] == "windows"
+    assert missing_platform_handoff[0]["receipt_path"].endswith(
+        "phase6_windows_platform_replay_receipt.json"
+    )
+    assert (
+        "do_not_copy_linux_receipt_as_windows_receipt"
+        in missing_platform_handoff[0]["forbidden_shortcuts"]
+    )
+    assert (
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+        in missing_platform_handoff[0]["validation_commands_after_attachment"]
+    )
     parity_contract = parity_handoff["parity_comparison_contract"]
     assert parity_contract["required_platform_receipt_count"] == 2
     assert parity_contract["current_platform_receipt_count"] == 1
