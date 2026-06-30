@@ -28,6 +28,7 @@ def _pose_case(case_id: str = "case_a", source_family: str = "CASF/PDBBind") -> 
         "case_id": case_id,
         "source_family": source_family,
         "protein_structure_path": "benchmarks/case_a/protein.pdb",
+        "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "receptor_context": {"binding_site_frame": "operator_attached_frame"},
         "reference_atoms": [
             {"element": "C", "x": 0.0, "y": 0.0, "z": 0.0},
@@ -68,11 +69,13 @@ def test_posebusters_packet_materializer_builds_ready_real_case() -> None:
     assert packet["blockers"] == []
     row = packet["case_rows"][0]
     assert row["case_id"] == "case_a"
+    assert row["pose_success_metric"] == "symmetry_aware_ligand_rmsd_angstrom"
     assert row["pose_success"] is True
     assert {check["status"] for check in row["check_results"]} == {"pass"}
     assert {
         "coordinate_finiteness",
         "atom_count_and_order_contract",
+        "pose_success_metric_contract",
         "symmetry_permutation_contract",
         "minimum_interatomic_distance_guard",
         "receptor_ligand_context_present",

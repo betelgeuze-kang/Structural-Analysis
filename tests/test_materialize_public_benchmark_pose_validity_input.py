@@ -41,6 +41,8 @@ def _subset_manifest() -> dict[str, object]:
                 },
                 "source_license_or_accession": "operator-attached-accession",
                 "source_checksum": "sha256:case-a",
+                "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+                "rmsd_threshold_angstrom": 2.0,
             }
         ],
     }
@@ -81,6 +83,8 @@ def test_pose_validity_input_materializer_builds_ready_real_case() -> None:
     case = payload["cases"][0]
     assert case["source_family"] == "CASF/PDBBind"
     assert case["protein_structure_path"] == "benchmarks/case_a/protein.pdb"
+    assert case["pose_success_metric"] == "symmetry_aware_ligand_rmsd_angstrom"
+    assert case["rmsd_threshold_angstrom"] == 2.0
     assert case["ligand_atom_order_contract"]["atom_count"] == 4
     assert case["subset_manifest_case_checksum"] == "sha256:case-a"
     assert payload["validation"]["pose_validity_ready"] is True

@@ -24,8 +24,10 @@ from score_symmetry_aware_ligand_rmsd import (  # noqa: E402
 
 SCHEMA_VERSION = "public-benchmark-pose-validity-validation.v1"
 DEFAULT_MIN_INTERATOMIC_DISTANCE_ANGSTROM = 0.35
+REQUIRED_POSE_SUCCESS_METRIC = "symmetry_aware_ligand_rmsd_angstrom"
 REQUIRED_POSE_FIELDS = (
     "case_id",
+    "pose_success_metric",
     "reference_atoms",
     "predicted_atoms",
     "ligand_atom_order_contract",
@@ -101,6 +103,8 @@ def validate_pose_case(
     for field in REQUIRED_POSE_FIELDS:
         if row.get(field) in (None, "", [], {}):
             blockers.append(f"{case_id}:{field}_missing")
+    if str(row.get("pose_success_metric") or "").strip() != REQUIRED_POSE_SUCCESS_METRIC:
+        blockers.append(f"{case_id}:pose_success_metric_invalid")
     try:
         reference = coordinates_array(row.get("reference_atoms", []))
         predicted = coordinates_array(row.get("predicted_atoms", []))

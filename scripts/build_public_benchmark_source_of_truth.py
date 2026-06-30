@@ -266,6 +266,7 @@ def _dry_run_pose_case() -> dict[str, Any]:
         "case_id": "dry_run_symmetry_swap_pose",
         "source_family": "synthetic",
         "protein_structure_path": "synthetic://public_benchmark/dry_run/protein.pdb",
+        "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "receptor_context": {
             "binding_site_frame": "synthetic_identity_frame",
             "context_boundary": "synthetic receptor context for validator dry-run only",
@@ -409,6 +410,11 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "check_id": "atom_count_and_order_contract",
                 "required": True,
                 "description": "reference/predicted ligand atoms share a declared atom-order contract",
+            },
+            {
+                "check_id": "pose_success_metric_contract",
+                "required": True,
+                "description": "pose success metric is explicitly symmetry-aware ligand RMSD",
             },
             {
                 "check_id": "symmetry_permutation_contract",

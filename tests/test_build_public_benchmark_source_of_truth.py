@@ -297,8 +297,8 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     }
     assert source["pose_validity_packet_summary"] == {
         "status": "ready_for_dry_run",
-        "check_count": 6,
-        "required_check_count": 6,
+        "check_count": 7,
+        "required_check_count": 7,
         "validator_schema_version": "public-benchmark-pose-validity-validation.v1",
         "materializer_schema_version": (
             "public-benchmark-posebusters-style-validity-packet-materialization.v1"
@@ -347,6 +347,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "status": "ready_for_operator_intake",
         "required_pose_fields": [
             "case_id",
+            "pose_success_metric",
             "reference_atoms",
             "predicted_atoms",
             "ligand_atom_order_contract",
@@ -611,6 +612,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert {
         "coordinate_finiteness",
         "atom_count_and_order_contract",
+        "pose_success_metric_contract",
         "symmetry_permutation_contract",
         "symmetry_aware_ligand_rmsd_angstrom",
         "minimum_interatomic_distance_guard",
@@ -619,6 +621,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert pose_packet["real_benchmark_case_count"] == 0
     assert pose_packet["validator"]["required_pose_fields"] == [
         "case_id",
+        "pose_success_metric",
         "reference_atoms",
         "predicted_atoms",
         "ligand_atom_order_contract",

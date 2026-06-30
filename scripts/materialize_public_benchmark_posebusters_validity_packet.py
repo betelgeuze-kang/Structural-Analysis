@@ -36,6 +36,11 @@ CHECK_DEFINITIONS = [
         "description": "reference/predicted ligand atoms share a declared atom-order contract",
     },
     {
+        "check_id": "pose_success_metric_contract",
+        "required": True,
+        "description": "pose success metric is explicitly symmetry-aware ligand RMSD",
+    },
+    {
         "check_id": "symmetry_permutation_contract",
         "required": True,
         "description": "allowed symmetry permutations are explicit zero-based atom-index maps",
@@ -79,6 +84,8 @@ def _blocker_check_id(blocker: str) -> str:
         return "coordinate_finiteness"
     if "ligand_atom_order" in token or "atom_count" in token:
         return "atom_count_and_order_contract"
+    if "pose_success_metric" in token:
+        return "pose_success_metric_contract"
     if "symmetry_permutation" in token:
         return "symmetry_permutation_contract"
     if "minimum_interatomic_distance" in token:
@@ -141,6 +148,7 @@ def _case_packet_row(
     return {
         "case_id": str(validation_row.get("case_id") or pose_case.get("case_id") or ""),
         "source_family": str(pose_case.get("source_family") or ""),
+        "pose_success_metric": str(pose_case.get("pose_success_metric") or ""),
         "subset_manifest_case_checksum": str(pose_case.get("subset_manifest_case_checksum") or ""),
         "status": str(validation_row.get("status") or "blocked"),
         "pass": bool(validation_row.get("pass")),

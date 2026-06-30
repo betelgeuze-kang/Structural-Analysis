@@ -25,6 +25,7 @@ def _valid_pose_case(case_id: str = "dry_run_pose") -> dict[str, object]:
         "case_id": case_id,
         "source_family": "synthetic",
         "protein_structure_path": "synthetic://protein.pdb",
+        "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "receptor_context": {"binding_site_frame": "synthetic_identity_frame"},
         "reference_atoms": [
             {"element": "C", "x": 0.0, "y": 0.0, "z": 0.0},
@@ -76,6 +77,17 @@ def test_pose_validity_validator_blocks_self_clash() -> None:
     assert result["status"] == "blocked"
     assert result["pose_validity_ready"] is False
     assert "self_clash_pose:minimum_interatomic_distance_guard_failed" in result["blockers"]
+
+
+def test_pose_validity_validator_blocks_invalid_pose_success_metric() -> None:
+    case = _valid_pose_case("wrong_metric_pose")
+    case["pose_success_metric"] = "plain_ligand_rmsd_angstrom"
+
+    result = module.validate_pose_validity_payload({"cases": [case]})
+
+    assert result["status"] == "blocked"
+    assert result["pose_validity_ready"] is False
+    assert "wrong_metric_pose:pose_success_metric_invalid" in result["blockers"]
 
 
 def test_pose_validity_validator_cli_writes_result(tmp_path: Path) -> None:

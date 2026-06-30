@@ -66,6 +66,11 @@ def _materialize_pose_case(
             or pose_row.get("protein_structure_path")
             or ""
         ),
+        "pose_success_metric": (
+            subset_row.get("pose_success_metric")
+            or pose_row.get("pose_success_metric")
+            or ""
+        ),
         "receptor_context": _as_dict(pose_row.get("receptor_context")),
         "reference_atoms": _as_list(pose_row.get("reference_atoms")),
         "predicted_atoms": _as_list(pose_row.get("predicted_atoms")),
@@ -77,7 +82,10 @@ def _materialize_pose_case(
             _as_dict(subset_row.get("symmetry_permutation_contract"))
             or _as_dict(pose_row.get("symmetry_permutation_contract"))
         ),
-        "rmsd_threshold_angstrom": pose_row.get("rmsd_threshold_angstrom", 2.0),
+        "rmsd_threshold_angstrom": pose_row.get(
+            "rmsd_threshold_angstrom",
+            subset_row.get("rmsd_threshold_angstrom", 2.0),
+        ),
         "subset_manifest_case_checksum": str(subset_row.get("source_checksum") or ""),
     }
     case["materialization_blockers"] = blockers
