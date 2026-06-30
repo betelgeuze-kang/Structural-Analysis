@@ -301,7 +301,7 @@
     "finite_difference"
   ],
   "contract_pass": false,
-  "dry_run": false,
+  "dry_run": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "frontier_non_promoting_evidence": {
     "claim_boundary": "Frontier and launch-only receipts are attached as non-promoting diagnostic context. They may explain why the lane is blocked, but they do not close full-load, material Newton, consistent residual/Jacobian Newton, production ROCm/HIP residency, or full G1.",
@@ -1431,7 +1431,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T06:00:14.185600+00:00",
+  "generated_at": "2026-06-30T06:08:20.382475+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -1471,6 +1471,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "ef729a761231bd194e7e975db95702b8d8687310",
+  "source_commit_sha": "635d9f2d9592fe25d8041dfadcb9ce801c62ce9a",
   "status": "blocked"
 }

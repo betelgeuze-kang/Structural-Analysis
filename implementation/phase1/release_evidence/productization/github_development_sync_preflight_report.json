@@ -1,7 +1,5 @@
 {
-  "blockers": [
-    "worktree_not_clean"
-  ],
+  "blockers": [],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
@@ -10,18 +8,18 @@
     "main_synced_to_head": true,
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
-    "worktree_clean": false
+    "worktree_clean": true
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
-    "feature_push": "git push origin main:codex/create-architecture-definition-document-for-hybrid-ai",
+    "feature_push": "git push origin HEAD:codex/create-architecture-definition-document-for-hybrid-ai",
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
   },
-  "contract_pass": false,
-  "generated_at": "2026-06-30T06:03:32.979594+00:00",
+  "contract_pass": true,
+  "generated_at": "2026-06-30T06:07:08.564043+00:00",
   "pending_remote_updates": [],
-  "preflight_pass": false,
+  "preflight_pass": true,
   "r4_disclosure": {
     "action": "no remote mutation required",
     "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
@@ -30,23 +28,23 @@
     "target": [],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
-  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
+  "reason_code": "PASS",
   "remote_fetch_attempted": true,
   "remote_fetch_ok": true,
   "remote_mutation_approved": false,
   "remote_sync_needed": false,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
-    "branch": "main",
+    "branch": "HEAD",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "0ef8f5d6181f1fff98e21724e8172923dabc0325",
+    "local_head_sha": "635d9f2d9592fe25d8041dfadcb9ce801c62ce9a",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
-    "remote_feature_sha": "0ef8f5d6181f1fff98e21724e8172923dabc0325",
+    "remote_feature_sha": "635d9f2d9592fe25d8041dfadcb9ce801c62ce9a",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "0ef8f5d6181f1fff98e21724e8172923dabc0325",
+    "remote_main_sha": "635d9f2d9592fe25d8041dfadcb9ce801c62ce9a",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -60,7 +58,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight_report.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/non_expert_release_briefing_report.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md\n M implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+    "worktree_status_short": ""
   },
-  "status": "blocked"
+  "status": "synced"
 }
