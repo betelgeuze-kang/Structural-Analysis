@@ -1,0 +1,52 @@
+{
+  "blockers": [
+    "gpcr_hard_decoy_actual_closure::gpcr_hard_decoy_rows_not_provided",
+    "pocketmd_lite_topk_actual_closure::pocketmd_lite_topk_rows_not_provided"
+  ],
+  "claim_boundary": "This runner only materializes operator-attached raw rows through the existing GPCR and PocketMD Lite materializers. It does not generate docking scores, run MD, infer missing metrics, or treat fixture/proxy rows as actual science closure evidence.",
+  "component_count": 2,
+  "component_ready_count": 0,
+  "components": [
+    {
+      "blockers": [
+        "gpcr_hard_decoy_rows_not_provided"
+      ],
+      "component_id": "gpcr_hard_decoy_actual_closure",
+      "contract_pass": false,
+      "expected_rows_mode": "raw_hard_decoy_rows",
+      "materialized": false,
+      "outputs": {},
+      "status": "operator_evidence_required"
+    },
+    {
+      "blockers": [
+        "pocketmd_lite_topk_rows_not_provided"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "contract_pass": false,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "outputs": {},
+      "status": "operator_evidence_required"
+    }
+  ],
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-30T20:20:32.401953+00:00",
+  "input_checksums": {
+    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:c1df25fb0f85f5640fe6ab5362ec14a05563a3db20ab4c08192910325a6d17ca",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:287e04a7fd9210843ed9fbe376ce6f5d5eb1b6763d14fce5f91767935eacb4dc",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:cbe3da9485435cbe6101dc5c28409fc5b55aa823df1be37937ffaff7f30ac637",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:e44ad3df474509d811cd699751acca1b0217c3a8483cdd8a6a14292870030399",
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:924c2f7e390ddace4d637a9ced818e4bc2bf5d4be25b20842ceed23ac1f0990d"
+  },
+  "required_actual_closures": [
+    "gpcr_hard_decoy_actual_closure",
+    "pocketmd_lite_topk_actual_closure"
+  ],
+  "reuse_policy": "science_actual_closure_audit_from_operator_rows",
+  "reused_evidence": false,
+  "schema_version": "science-actual-closure-row-audit.v1",
+  "source_commit_sha": "3bde0eda23c9d4b834f37d0dd997ae29e6665f16",
+  "status": "operator_evidence_required"
+}
