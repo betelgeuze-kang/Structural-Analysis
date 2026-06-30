@@ -175,6 +175,15 @@ def _assess_hip_required_direct_probe_payload(
             or row_correction.get("require_hip_batch_replay")
         )
     )
+    global_jvp_rows = global_krylov.get("jvp_rows")
+    global_jvp_rows = global_jvp_rows if isinstance(global_jvp_rows, list) else []
+    global_jvp_rows_retained = bool(global_jvp_rows)
+    global_jvp_required = bool(
+        global_krylov.get("enabled")
+        or global_krylov.get("attempted")
+        or global_krylov.get("promoted_to_final_state")
+        or global_krylov.get("require_hip_krylov_solver")
+    )
     blockers: list[str] = []
     if child_payload.get("reused_evidence") is not False:
         blockers.append("hip_direct_probe_reused_evidence_not_false")
@@ -182,6 +191,8 @@ def _assess_hip_required_direct_probe_payload(
         blockers.append("hip_direct_probe_source_commit_sha_missing")
     if not production_hip_path:
         blockers.append("hip_direct_probe_production_hip_path_not_required")
+    if production_hip_path and global_jvp_required and not global_jvp_rows_retained:
+        blockers.append("hip_direct_probe_global_krylov_jvp_rows_missing")
     if not hip_contract_passed:
         blockers.append("hip_direct_probe_hip_residual_engine_contract_not_closed")
         for blocker in residual_contract.get("hip_residual_engine_blockers") or []:
@@ -221,6 +232,8 @@ def _assess_hip_required_direct_probe_payload(
             "accepted_state_refresh_cpu_used": bool(
                 global_krylov.get("accepted_state_refresh_cpu_used")
             ),
+            "jvp_row_count": len(global_jvp_rows),
+            "jvp_rows_retained": global_jvp_rows_retained,
         },
         "current_tangent_residual_row_correction": {
             "enabled": bool(row_correction.get("enabled")),

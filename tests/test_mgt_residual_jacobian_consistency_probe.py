@@ -650,6 +650,14 @@ def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
         == "hip_full_residual_resident"
     )
     assert (
+        payload["hip_direct_probe"]["matrix_free_global_krylov"]["jvp_row_count"]
+        == 0
+    )
+    assert (
+        "hip_direct_probe_global_krylov_jvp_rows_missing"
+        in payload["blockers"]
+    )
+    assert (
         "hip_direct_probe_hip_residual_engine_contract_not_closed"
         in payload["blockers"]
     )
@@ -715,6 +723,13 @@ def test_hip_required_probe_can_pass_only_with_strict_child_hip_contract(
                 "require_hip_krylov_solver": True,
                 "hip_krylov_solver_used": True,
                 "accepted_state_refresh_cpu_used": False,
+                "jvp_rows": [
+                    {
+                        "direction": "fixture_global_jvp",
+                        "hip_full_residual_batch_replay": True,
+                        "jacobian_action_inf_n": 1.0,
+                    }
+                ],
             },
             "current_tangent_residual_row_correction": {
                 "enabled": True,
@@ -740,6 +755,16 @@ def test_hip_required_probe_can_pass_only_with_strict_child_hip_contract(
     assert payload["cpu_diagnostic_assembler_used"] is False
     assert payload["blockers"] == []
     assert payload["hip_direct_probe"]["direct_residual_newton_ready"] is False
+    assert (
+        payload["hip_direct_probe"]["matrix_free_global_krylov"]["jvp_row_count"]
+        == 1
+    )
+    assert (
+        payload["hip_direct_probe"]["matrix_free_global_krylov"][
+            "jvp_rows_retained"
+        ]
+        is True
+    )
 
 
 def test_hip_required_cli_does_not_pass_component_only_without_hip(
