@@ -2134,6 +2134,111 @@ def test_snapshot_blocks_non_receipt_changes_after_source_commit(tmp_path: Path)
     ]
 
 
+def test_snapshot_accepts_generated_open_data_timestamp_only_commit(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    generated_open_data = (
+        tmp_path
+        / "implementation/phase1/open_data/midas/generated_roundtrip_receipt.json"
+    )
+    _write_json(
+        generated_open_data,
+        {
+            "schema_version": "generated-open-data.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "case_count": 3,
+        },
+    )
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_json(
+        generated_open_data,
+        {
+            "schema_version": "generated-open-data.v1",
+            "generated_at": "2026-06-21T00:00:01+00:00",
+            "case_count": 3,
+        },
+    )
+    _commit_all(tmp_path, "open-data generated timestamp")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["status"] == "ready"
+    assert payload["evidence_fresh"] is True
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "generated_open_data_timestamp_only_commit"
+    )
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
+def test_snapshot_blocks_generated_open_data_semantic_commit(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    generated_open_data = (
+        tmp_path
+        / "implementation/phase1/open_data/midas/generated_roundtrip_receipt.json"
+    )
+    _write_json(
+        generated_open_data,
+        {
+            "schema_version": "generated-open-data.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "case_count": 3,
+        },
+    )
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_json(
+        generated_open_data,
+        {
+            "schema_version": "generated-open-data.v1",
+            "generated_at": "2026-06-21T00:00:01+00:00",
+            "case_count": 4,
+        },
+    )
+    _commit_all(tmp_path, "open-data generated semantic change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["status"] == "stale_or_inconsistent"
+    assert payload["evidence_fresh"] is False
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is False
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "non_receipt_paths_changed"
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
+        in payload["blockers"]
+    )
+
+
 def test_snapshot_scoped_builder_change_only_stales_matching_artifact(
     tmp_path: Path,
 ) -> None:

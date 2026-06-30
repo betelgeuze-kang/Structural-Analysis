@@ -160,6 +160,20 @@ def _git_diff_name_only(repo_root: Path, source_commit: str, current_commit: str
     return [line.strip() for line in output.splitlines() if line.strip()]
 
 
+def _git_show_text(repo_root: Path, commit: str, path: str) -> str | None:
+    if not commit or not path:
+        return None
+    try:
+        return subprocess.check_output(
+            ["git", "show", f"{commit}:{path}"],
+            cwd=repo_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return None
+
+
 def _git_status_short(repo_root: Path) -> list[str]:
     try:
         output = subprocess.check_output(
@@ -339,7 +353,54 @@ def _source_state_freshness(
     ]
     if not relevant_paths:
         return True, "non_artifact_source_paths_changed", non_receipt_paths
-    return False, "non_receipt_paths_changed", relevant_paths
+    semantic_relevant_paths = [
+        path
+        for path in relevant_paths
+        if not _open_data_generated_timestamp_only_change(
+            repo_root=repo_root,
+            source_commit=source,
+            current_commit=current,
+            path=path,
+        )
+    ]
+    if not semantic_relevant_paths:
+        return True, "generated_open_data_timestamp_only_commit", relevant_paths
+    return False, "non_receipt_paths_changed", semantic_relevant_paths
+
+
+def _open_data_generated_timestamp_only_change(
+    *,
+    repo_root: Path,
+    source_commit: str,
+    current_commit: str,
+    path: str,
+) -> bool:
+    if not path.startswith("implementation/phase1/open_data/") or not path.endswith(".json"):
+        return False
+    source_text = _git_show_text(repo_root, source_commit, path)
+    current_text = _git_show_text(repo_root, current_commit, path)
+    if source_text is None or current_text is None:
+        return False
+    try:
+        source_payload = json.loads(source_text)
+        current_payload = json.loads(current_text)
+    except Exception:
+        return False
+    return _strip_open_data_volatile_fields(source_payload) == _strip_open_data_volatile_fields(
+        current_payload
+    )
+
+
+def _strip_open_data_volatile_fields(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: _strip_open_data_volatile_fields(item)
+            for key, item in value.items()
+            if key not in {"generated_at", "generated_at_utc"}
+        }
+    if isinstance(value, list):
+        return [_strip_open_data_volatile_fields(item) for item in value]
+    return value
 
 
 def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
