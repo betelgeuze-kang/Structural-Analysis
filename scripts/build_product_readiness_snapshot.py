@@ -405,6 +405,7 @@ def _strip_open_data_volatile_fields(value: Any) -> Any:
 
 def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
     snapshot_only_paths = {
+        "docs/source-of-truth-gap-classification.md",
         "scripts/build_product_readiness_snapshot.py",
     }
     if path in snapshot_only_paths:
