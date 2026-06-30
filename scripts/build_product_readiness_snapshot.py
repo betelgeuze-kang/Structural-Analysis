@@ -472,6 +472,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/build_phase6_linux_windows_parity_status.py",
             "scripts/build_pocketmd_lite_product_surface.py",
             "scripts/build_product_capabilities_surface.py",
+            "scripts/build_structural_product_development_roadmap.py",
             "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
             "scripts/materialize_gpcr_hard_decoy_suite_report.py",
             "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
