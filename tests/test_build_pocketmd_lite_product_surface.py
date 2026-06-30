@@ -88,10 +88,18 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
 
     assert survival["schema_version"] == "pocketmd-lite-topk-survival-report.v1"
     assert survival["contract_pass"] is False
+    assert survival["summary_line"] == (
+        "PocketMD Lite top-k survival report: LOCKED | "
+        "first_blocked_target=top_k_refinement_operator_intake | blockers=4"
+    )
+    assert survival["first_blocker"] == "pocketmd_lite_topk_candidate_rows_missing"
+    assert survival["first_blocked_target"] == "top_k_refinement_operator_intake"
+    assert survival["root_cause_tags"] == ["operator_refinement_rows_required"]
     assert survival["real_refinement_case_count"] == 0
     assert survival["summary"]["local_min_survival_rate"] is None
     assert "pocketmd_lite_topk_candidate_rows_missing" in survival["blockers"]
     assert "uncertainty_width_median" in survival["required_metrics"]
+    assert "source_checksum" in survival["required_case_fields"]
     assert survival["materializer"]["status"] == "ready_for_operator_intake"
     assert survival["phase4_exit_gate"]["status"] == "blocked"
     assert survival["phase4_exit_gate"]["failed_criterion_count"] == 7
@@ -104,6 +112,44 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "uncertainty_summary_materialized",
         "report_blockers_resolved",
     ]
+    assert survival["operator_intake_route"] == "/product/pocketmd-lite/operator-intake"
+    assert survival["operator_intake_packet"] == {
+        "route": "/product/pocketmd-lite/operator-intake",
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_operator_intake_packet.json"
+        ),
+        "markdown_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_operator_intake_packet.md"
+        ),
+        "template_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_operator_template.json"
+        ),
+        "status": "ready_for_operator_input",
+        "required_slot_count": 1,
+        "gate_unblock_plan_count": 1,
+        "minimum_refinement_case_count": 1,
+        "minimum_top_k_candidate_count": 1,
+        "first_blocker": "pocketmd_lite_topk_candidate_rows_missing",
+        "first_blocked_target": "top_k_refinement_operator_intake",
+        "root_cause_tags": ["operator_refinement_rows_required"],
+        "first_operator_evidence_gap": survival["first_operator_evidence_gap"],
+    }
+    assert survival["operator_gate_unblock_plan"][0]["slot_id"] == (
+        "top_k_refinement_rows"
+    )
+    assert survival["operator_gate_unblock_plan"][0]["minimum_evidence"][
+        "required_case_fields"
+    ] == survival["required_case_fields"]
+    assert survival["operator_handoff_summary"]["first_blocker"] == (
+        "pocketmd_lite_topk_candidate_rows_missing"
+    )
+    assert survival["operator_handoff_summary"]["materialization_command"] == survival[
+        "materializer"
+    ]["command"]
+    assert survival["next_actions"][0] == "fill_pocketmd_lite_operator_intake_packet"
 
     assert api["schema_version"] == "pocketmd-lite-readonly-api.v1"
     assert api["contract_pass"] is True

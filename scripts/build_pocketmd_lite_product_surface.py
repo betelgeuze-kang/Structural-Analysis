@@ -206,6 +206,78 @@ def _operator_gate_unblock_plan(
     ]
 
 
+def _operator_handoff_context(
+    *,
+    required_case_fields: list[str],
+    first_blocker: str,
+    first_blocked_target: str,
+) -> dict[str, Any]:
+    gate_unblock_plan = _operator_gate_unblock_plan(
+        required_case_fields=required_case_fields,
+        materializer_command=_materializer_contract()["command"],
+    )
+    first_gate = gate_unblock_plan[0] if gate_unblock_plan else {}
+    first_operator_evidence_gap = {
+        "slot_priority": 1,
+        "slot_id": str(first_gate.get("slot_id") or "top_k_refinement_rows"),
+        "status": str(first_gate.get("status") or "operator_input_required"),
+        "phase4_blocked": True,
+        "blocked_phase4_criteria": [
+            str(row) for row in first_gate.get("unblocks_phase4_criteria", [])
+        ],
+        "preserves_phase4_criteria": [
+            str(row) for row in first_gate.get("preserves_phase4_criteria", [])
+        ],
+        "first_next_action": "attach top-k candidate refinement rows",
+        "template_artifact": str(first_gate.get("template_artifact") or ""),
+        "minimum_evidence": dict(first_gate.get("minimum_evidence") or {}),
+        "materialization_steps": [
+            str(row) for row in first_gate.get("materialization_steps", [])
+        ],
+        "materialization_command": str(first_gate.get("materialization_command") or ""),
+        "validation_command": str(first_gate.get("validation_command") or ""),
+    }
+    operator_handoff_summary = {
+        "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
+        "artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
+        "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+        "first_blocker": first_blocker,
+        "first_blocked_target": first_blocked_target,
+        "first_next_action": first_operator_evidence_gap["first_next_action"],
+        "required_slot_count": 1,
+        "blocked_operator_slot_count": 1,
+        "minimum_evidence": dict(first_operator_evidence_gap["minimum_evidence"]),
+        "materialization_steps": list(
+            first_operator_evidence_gap["materialization_steps"]
+        ),
+        "materialization_command": first_operator_evidence_gap[
+            "materialization_command"
+        ],
+        "validation_command": first_operator_evidence_gap["validation_command"],
+    }
+    operator_intake_packet = {
+        "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
+        "artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
+        "markdown_artifact": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
+        "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
+        "status": "ready_for_operator_input",
+        "required_slot_count": 1,
+        "gate_unblock_plan_count": len(gate_unblock_plan),
+        "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
+        "minimum_top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
+        "first_blocker": first_blocker,
+        "first_blocked_target": first_blocked_target,
+        "root_cause_tags": ["operator_refinement_rows_required"],
+        "first_operator_evidence_gap": first_operator_evidence_gap,
+    }
+    return {
+        "gate_unblock_plan": gate_unblock_plan,
+        "first_operator_evidence_gap": first_operator_evidence_gap,
+        "operator_handoff_summary": operator_handoff_summary,
+        "operator_intake_packet": operator_intake_packet,
+    }
+
+
 def build_contract(*, repo_root: Path = ROOT) -> dict[str, Any]:
     return {
         "schema_version": CONTRACT_SCHEMA_VERSION,
@@ -250,6 +322,15 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "pocketmd_lite_contact_hbond_persistence_rows_missing",
         "pocketmd_lite_uncertainty_rows_missing",
     ]
+    first_blocker = blockers[0]
+    first_blocked_target = "top_k_refinement_operator_intake"
+    root_cause_tags = ["operator_refinement_rows_required"]
+    required_case_fields = list(_operator_intake_schema()["required_case_fields"])
+    handoff_context = _operator_handoff_context(
+        required_case_fields=required_case_fields,
+        first_blocker=first_blocker,
+        first_blocked_target=first_blocked_target,
+    )
     summary = {
         "local_min_survival_rate": None,
         "contact_persistence_rate_median": None,
@@ -264,7 +345,7 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         summary=summary,
         blockers=blockers,
         product_surface_ready=False,
-        first_blocked_target="top_k_refinement_operator_intake",
+        first_blocked_target=first_blocked_target,
     )
     return {
         "schema_version": SURVIVAL_REPORT_SCHEMA_VERSION,
@@ -276,15 +357,30 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "status": "operator_evidence_required",
         "contract_pass": False,
         "product_surface_ready": False,
+        "summary_line": (
+            "PocketMD Lite top-k survival report: LOCKED | "
+            f"first_blocked_target={first_blocked_target} | "
+            f"blockers={len(blockers)}"
+        ),
+        "first_blocker": first_blocker,
+        "first_blocked_target": first_blocked_target,
+        "root_cause_tags": root_cause_tags,
         "real_refinement_case_count": 0,
         "top_k_candidate_count": 0,
         "rows": [],
         "summary": summary,
         "materializer": _materializer_contract(),
         "required_metrics": [row["metric_id"] for row in _metric_contracts()],
+        "required_case_fields": required_case_fields,
         "phase4_exit_gate": phase4_exit_gate,
+        "operator_intake_route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
+        "operator_intake_packet": handoff_context["operator_intake_packet"],
+        "first_operator_evidence_gap": handoff_context["first_operator_evidence_gap"],
+        "operator_gate_unblock_plan": handoff_context["gate_unblock_plan"],
+        "operator_handoff_summary": handoff_context["operator_handoff_summary"],
         "blockers": blockers,
         "next_actions": [
+            "fill_pocketmd_lite_operator_intake_packet",
             "attach_top_k_candidate_refinement_rows",
             "run_pocketmd_lite_topk_survival_materializer",
             "compute_contact_and_h_bond_persistence",
@@ -696,49 +792,14 @@ def build_surface(
         )
     operator_schema = contract.get("operator_intake_schema", {})
     required_case_fields = list(operator_schema.get("required_case_fields", []))
-    gate_unblock_plan = _operator_gate_unblock_plan(
+    handoff_context = _operator_handoff_context(
         required_case_fields=required_case_fields,
-        materializer_command=_materializer_contract()["command"],
+        first_blocker="pocketmd_lite_topk_candidate_rows_missing",
+        first_blocked_target="top_k_refinement_operator_intake",
     )
-    first_gate = gate_unblock_plan[0] if gate_unblock_plan else {}
-    first_operator_evidence_gap = {
-        "slot_priority": 1,
-        "slot_id": str(first_gate.get("slot_id") or "top_k_refinement_rows"),
-        "status": str(first_gate.get("status") or "operator_input_required"),
-        "phase4_blocked": True,
-        "blocked_phase4_criteria": [
-            str(row) for row in first_gate.get("unblocks_phase4_criteria", [])
-        ],
-        "preserves_phase4_criteria": [
-            str(row) for row in first_gate.get("preserves_phase4_criteria", [])
-        ],
-        "first_next_action": "attach top-k candidate refinement rows",
-        "template_artifact": str(first_gate.get("template_artifact") or ""),
-        "minimum_evidence": dict(first_gate.get("minimum_evidence") or {}),
-        "materialization_steps": [
-            str(row) for row in first_gate.get("materialization_steps", [])
-        ],
-        "materialization_command": str(first_gate.get("materialization_command") or ""),
-        "validation_command": str(first_gate.get("validation_command") or ""),
-    }
-    operator_handoff_summary = {
-        "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
-        "artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
-        "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
-        "first_blocker": "pocketmd_lite_topk_candidate_rows_missing",
-        "first_blocked_target": "top_k_refinement_operator_intake",
-        "first_next_action": first_operator_evidence_gap["first_next_action"],
-        "required_slot_count": 1,
-        "blocked_operator_slot_count": 1,
-        "minimum_evidence": dict(first_operator_evidence_gap["minimum_evidence"]),
-        "materialization_steps": list(
-            first_operator_evidence_gap["materialization_steps"]
-        ),
-        "materialization_command": first_operator_evidence_gap[
-            "materialization_command"
-        ],
-        "validation_command": first_operator_evidence_gap["validation_command"],
-    }
+    gate_unblock_plan = handoff_context["gate_unblock_plan"]
+    first_operator_evidence_gap = handoff_context["first_operator_evidence_gap"]
+    operator_handoff_summary = handoff_context["operator_handoff_summary"]
     return {
         "schema_version": SURFACE_SCHEMA_VERSION,
         **_metadata(
