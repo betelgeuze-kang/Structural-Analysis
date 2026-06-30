@@ -1,6 +1,6 @@
 # Structural Product Development Roadmap
 
-Structural product roadmap: BLOCKED | evidence_progress=56.2% | stage_average=39.5% | ready_stages=0/7 | primary_blocker=freshness_or_snapshot_integrity_not_closed
+Structural product roadmap: BLOCKED | evidence_progress=62.5% | stage_average=53.8% | ready_stages=1/7 | primary_blocker=basic_ci::pr_ci_30_consecutive_pass_evidence_missing
 
 ## Current Position
 
@@ -13,13 +13,12 @@ Structural product roadmap: BLOCKED | evidence_progress=56.2% | stage_average=39
 - `pm_release_areas`: `12/16`
 - `release_ready`: `False`
 - `snapshot_blocker_count`: `38`
-- `snapshot_status`: `stale_or_inconsistent`
+- `snapshot_status`: `blocked`
 - `workstation_delivery_ready`: `True`
 
 ## Roadmap Stages
 
-- `evidence_freshness_and_snapshot_integrity`: blocked (0/3, 0.0%)
-  - first blocker: `freshness_or_snapshot_integrity_not_closed`
+- `evidence_freshness_and_snapshot_integrity`: ready (3/3, 100.0%)
   - next action: `keep_release_evidence_freshness_report_green`
 - `pm_release_gate`: partial (17/21, 81.0%)
   - first blocker: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
@@ -34,7 +33,7 @@ Structural product roadmap: BLOCKED | evidence_progress=56.2% | stage_average=39
   - first blocker: `customer_shadow_below_required:0/3`
   - next action: `complete_3_customer_shadow_cases`
 - `commercial_solver_claim_upgrade`: partial (2/5, 40.0%)
-  - first blocker: `snapshot_source_state_not_consistent`
+  - first blocker: `independent_product_not_ready`
   - next action: `close_external_benchmark_receipts`
 - `enterprise_productization`: partial (1/4, 25.0%)
   - first blocker: `independent_product_ready_false`

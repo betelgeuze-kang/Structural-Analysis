@@ -10,13 +10,14 @@
   },
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 8,
+    "release_area_blocker_count": 9,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
+      "github_sync::github_sync_preflight::worktree_not_clean",
       "github_sync::github_sync_preflight::remote_mutation_approval_required",
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
@@ -28,10 +29,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T21:37:23.011003+00:00",
+  "generated_at": "2026-06-30T22:08:45.116297+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:c57704e8627960e6a37a40acce358531056ee107ae08b89d931ff1415cbc7004",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e4d4eb9957a0f1b15bf653257d0e3e76f46045b7a26ed66761fec39332f51779",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:58997fcc0be383874eff59e9b17b0e8d4dafb56a6c5ee8660bbdb02b9376be61",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:192d5748a6629b821daec8d3d67e05308dfb19af155692fb09321d3bef124473",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:c1d51c93e91a69095fab5303dfe3d4331003c783b636386a2b9f26fa03b1d8e0"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -243,10 +244,44 @@
         "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
         "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
       ],
+      "blocker_id": "github_sync::github_sync_preflight::worktree_not_clean",
+      "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+      "closure_state": "external_owner_input_ready",
+      "evidence_state": "blocked",
+      "external_input_required": true,
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner": "release_owner",
+      "owner_input_required": true,
+      "primary_evidence_artifacts": {
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "reproduction_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "r4_remote_mutation_approval_required",
+      "scope": "release_area",
+      "verification_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+        "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+        "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
+      ],
       "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
-      "evidence_state": "approval_required",
+      "evidence_state": "blocked",
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
@@ -280,7 +315,7 @@
       "blocker_id": "github_sync::github_sync_remote_sync_pending",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
-      "evidence_state": "approval_required",
+      "evidence_state": "blocked",
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
@@ -314,7 +349,7 @@
       "blocker_id": "github_sync::github_sync_preflight_not_synced",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
-      "evidence_state": "approval_required",
+      "evidence_state": "blocked",
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
@@ -478,38 +513,38 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "752fadd00ddc18d74d272c84f7f3c6cb1b80eaf4",
+  "source_commit_sha": "ff2a3bfdb47f73cc5fff7ab51531e635c7df1f3a",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
     "all_open_blockers_have_handoff": true,
     "closure_state_counts": {
-      "external_owner_input_ready": 12
+      "external_owner_input_ready": 13
     },
-    "external_input_required_count": 12,
-    "external_owner_input_ready_count": 12,
+    "external_input_required_count": 13,
+    "external_owner_input_ready_count": 13,
     "full_release_gate_ready": false,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 12,
+    "handoff_ready_count": 13,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "local_remediation_ready_count": 0,
     "missing_from_action_register": [],
     "missing_from_action_register_count": 0,
-    "open_blocker_count": 12,
-    "owner_input_required_count": 12,
+    "open_blocker_count": 13,
+    "owner_input_required_count": 13,
     "paid_pilot_candidate": true,
-    "pm_report_blocker_count": 12,
+    "pm_report_blocker_count": 13,
     "pm_report_loaded": true,
-    "register_blocker_count": 12,
-    "register_open_blocker_count": 12,
-    "release_area_blocker_count": 8,
+    "register_blocker_count": 13,
+    "register_open_blocker_count": 13,
+    "release_area_blocker_count": 9,
     "release_area_gate_ready": false,
     "release_area_green_count": 12,
     "release_area_total_count": 16,
     "stale_action_register_blocker_count": 0,
     "stale_action_register_blockers": []
   },
-  "summary_line": "PM release blocker closure board: BLOCKED | open=12 | external_owner_ready=12 | handoff_not_ready=0"
+  "summary_line": "PM release blocker closure board: BLOCKED | open=13 | external_owner_ready=13 | handoff_not_ready=0"
 }
