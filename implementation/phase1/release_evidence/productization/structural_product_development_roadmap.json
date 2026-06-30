@@ -17,19 +17,19 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 62.5,
-  "generated_at": "2026-06-30T22:48:02.294504+00:00",
+  "generated_at": "2026-06-30T23:01:28.448061+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:df33465a8d9b139151d145729b1510530833fd1007f3547bcabe8b195eac2631",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:a81a3c57f68d2b2aa98cc739193dd94af4d569abb9cd3a8fd7d11200c2f592c9",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:b70c6cf0e21524f9c420fbb0542a4a598806b40e94c31e9a6642eaf586e0b301",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:f385e7d442e86bf1442520dcf303e997e288a99750dcd22d5716d6b1c89aca82",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:33aca4fb07f9edf4ca438c549fe941fc341edd4729710cee500e88c13986ff76",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f49a20f448a18147a5c67fd16f8bef19756a90f62bfe5d4c669e72d00aeb78cb",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e5a6dc32e9c56d96099e5df09092b228aca08670e4a4cd76610ea55aef4f1204",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:e0cf83ccf2eab27e6a0b9bf4a5514865098ad30f04bff6624b89819bb96912ca",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:3d53079db50c7802ae41ad71647bbc4ae34cf5cbb261165c82b5c9948aa3bca3",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:c56e70294886ec8a0bc4a8e7cfb3ba34e96917c2d9871ad09023b8efad0996b3",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:7e5570eb8de695f0d709357940fe9acc57c87e8ec601dbe15f5572ae399bd5f4",
-    "scripts/build_structural_product_development_roadmap.py": "sha256:708ef2e220fe1d3f362d2a37c5d1a46ba9a9c35f74bf4f16ca3379d3896e7582"
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:38f478ac610cd7689cdffe5d38a38a368713393ae1e470586a96bd137192e707",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:250f6f781aa20efbe24066b5cce03aa11a2013dca43a78c24e5622815cd7f840",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9060e9e8ed210259b845fe34c33752348650c4feffc9865ba8f474e61115978e",
+    "scripts/build_structural_product_development_roadmap.py": "sha256:7fefa7570e85ee2d5a4c130fcd9bd12577146739ced51a2da9a15b6d115a302a"
   },
   "passed_evidence_requirement_count": 30,
   "primary_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -90,10 +90,12 @@
     },
     {
       "current_position": {
+        "active_terminal_requirement": "full_load_checkpoint_1p0",
         "direct_residual_terminal_gate_ready": true,
         "full_load_hip_newton_lane_ready": false,
         "recommended_g1_next_direction": "consistent_residual_jacobian_newton_rocm_worker",
-        "row_only_correction_loop_stopped": true
+        "row_only_correction_loop_stopped": true,
+        "terminal_requirements": "0/4"
       },
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
@@ -272,7 +274,9 @@
         "dominant_nodes_without_element_path_to_support_count": 0,
         "f2g_f2h_cause_narrowing_status": "ready",
         "f2h_lightweight_0p1_0p2_0p4_ready": true,
+        "full_load_hip_newton_active_terminal_requirement": "full_load_checkpoint_1p0",
         "full_load_hip_newton_lane_ready": false,
+        "full_load_hip_newton_terminal_ready_requirements": "0/4",
         "full_load_hip_observed_load_scale": 0.656,
         "global_connectivity_classification": "element_graph_connects_dominant_modes_to_supports",
         "global_connectivity_load_path_audit_status": "ready",
@@ -376,7 +380,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "2d535f1d7414741901af1c7701eb73b23996dcb8",
+  "source_commit_sha": "3346d4ecbbf5c8b3eebbb0e4313f825f77741dd3",
   "stage_average_progress_percent": 53.8,
   "stage_count": 7,
   "status": "blocked",

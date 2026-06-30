@@ -49,7 +49,7 @@ Structural product roadmap: BLOCKED | evidence_progress=62.5% | stage_average=53
   - current `developer_preview_final_gates`: `5/9`
 - `continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path`
   - exit condition: full-load 1.0 checkpoint passes residual and increment gates
-  - current `direct_residual_terminal_gate_ready`: `True`
+  - current `active_terminal_requirement`: `full_load_checkpoint_1p0`
 - `collect_customer_shadow_and_external_benchmark_terminal_receipts`
   - exit condition: three customer shadow cases have reviewed terminal rows
   - current `completed_shadow_case_count`: `0`

@@ -1493,7 +1493,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T22:31:28.303781+00:00",
+  "generated_at": "2026-06-30T22:58:49.980314+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       "docs/source-of-truth-gap-classification.md",
@@ -1678,8 +1678,154 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "aeb6f5b7f3be2212765001cfe8e4b0605699b07b",
+  "source_commit_sha": "e6ec15ad07ad57c4a146ed43affda966aebfd5f9",
   "status": "blocked",
+  "terminal_requirement_breakdown": {
+    "active_terminal_requirement_id": "full_load_checkpoint_1p0",
+    "blocked_requirement_count": 4,
+    "blocked_requirement_ids": [
+      "full_load_checkpoint_1p0",
+      "hip_consistent_residual_jacobian_newton_proof",
+      "production_rocm_hip_residual_jvp_worker",
+      "full_load_child_direct_probe"
+    ],
+    "claim_boundary": "This breakdown is an operator handoff, not a promotion. It names the terminal G1 full-load HIP/Newton receipts that must all pass before the lane can claim readiness.",
+    "deferred_requirement_count": 1,
+    "lane_ready_when_all_requirements_ready": false,
+    "ready_requirement_count": 0,
+    "requirement_count": 4,
+    "requirements": [
+      {
+        "acceptance_evidence": "A loadable mgt-direct-residual-newton-state.v1 checkpoint with load_scale >= required_load_scale and no load-path provenance contradiction.",
+        "blockers": [
+          "checkpoint_resolution_no_full_load_candidate"
+        ],
+        "id": "full_load_checkpoint_1p0",
+        "label": "Full-load 1.0 checkpoint candidate",
+        "next_action_ids": [
+          "generate_full_load_1p0_checkpoint_candidate"
+        ],
+        "observed": {
+          "full_load_candidate_count": 0,
+          "highest_observed_gap_to_required_load_scale": 0.344,
+          "highest_observed_load_scale": 0.656,
+          "load_path_provenance_passed": true,
+          "provenance_below_required_full_load": {},
+          "required_load_scale": 1.0
+        },
+        "ready": false,
+        "rerun_command": "python3 scripts/run_g1_full_load_hip_newton_lane.py --checkpoint-npz <full-load-checkpoint.npz> --fail-blocked",
+        "status": "blocked"
+      },
+      {
+        "acceptance_evidence": "mgt_residual_jacobian_consistency_hip_required_probe.json passes the consistent residual/Jacobian Newton gate on the production ROCm/HIP path with no CPU diagnostic assembler or receipt blockers.",
+        "blockers": [
+          "hip_consistency_proof_gate_not_passed",
+          "hip_consistency_proof_has_blockers"
+        ],
+        "id": "hip_consistent_residual_jacobian_newton_proof",
+        "label": "HIP-required consistent residual/Jacobian Newton proof",
+        "next_action_ids": [
+          "close_consistent_residual_jacobian_newton_gate"
+        ],
+        "observed": {
+          "consistent_residual_jacobian_newton_gate_passed": false,
+          "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+          "present": true,
+          "receipt_blocker_count": 8,
+          "runtime_blocker_count": 0,
+          "source_state_fresh": true,
+          "source_state_kind": "non_g1_hip_paths_changed"
+        },
+        "ready": false,
+        "rerun_command": "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py --require-hip-residual-engine --checkpoint-npz <full-load-checkpoint.npz> --output-json implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "status": "blocked"
+      },
+      {
+        "acceptance_evidence": "The production_rocm_hip_residual_jvp_worker contract is ready, its residual/JVP path is ready, and its G1 closure gate is ready.",
+        "blockers": [
+          "hip_consistency_proof_worker_g1_closure_gate_not_ready",
+          "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
+          "consistent_residual_jacobian_newton_gate_not_passed"
+        ],
+        "id": "production_rocm_hip_residual_jvp_worker",
+        "label": "Production ROCm/HIP residual/JVP worker",
+        "next_action_ids": [
+          "close_consistent_residual_jacobian_newton_gate"
+        ],
+        "observed": {
+          "g1_closure_gate_ready": false,
+          "ready": false,
+          "residual_jvp_worker_path_ready": true,
+          "status": "blocked",
+          "worker_id": "consistent_residual_jacobian_newton_rocm_worker"
+        },
+        "ready": false,
+        "status": "blocked"
+      },
+      {
+        "acceptance_evidence": "The child direct residual Newton probe passes full-load closure, direct residual, relative increment, fallback-zero, material Newton breadth, consistent residual/Jacobian Newton, and HIP accepted-state residual refresh gates.",
+        "blockers": [
+          "child_consistent_residual_jacobian_newton_not_proven",
+          "child_direct_residual_gate_not_proven",
+          "child_direct_residual_newton_ready_not_proven",
+          "child_fallback_zero_not_proven",
+          "child_full_load_closure_not_proven",
+          "child_material_newton_breadth_not_proven",
+          "child_observed_load_scale_below_required_full_load",
+          "child_relative_increment_gate_not_proven",
+          "child_global_krylov_component_missing",
+          "child_current_tangent_residual_row_component_missing"
+        ],
+        "id": "full_load_child_direct_probe",
+        "label": "Full-load child direct residual Newton probe",
+        "next_action_ids": [
+          "run_full_load_child_direct_probe_with_hip_refresh"
+        ],
+        "observed": {
+          "child_gate_ready": false,
+          "command": [
+            "/usr/bin/python3",
+            "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+            "--checkpoint-npz",
+            "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
+            "--output-json",
+            "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
+            "--apply-shell-material-tangent",
+            "--allow-state-dependent-shell-material-tangent-hip-replay",
+            "--enable-matrix-free-global-krylov",
+            "--matrix-free-global-krylov-batch-replay-backend",
+            "hip_full_residual_resident",
+            "--matrix-free-global-krylov-require-hip-batch-replay",
+            "--matrix-free-global-krylov-linear-solver-backend",
+            "torch_hip_gmres",
+            "--matrix-free-global-krylov-scaling-mode",
+            "residual_diagonal_displacement",
+            "--matrix-free-global-krylov-preconditioner-mode",
+            "current_tangent",
+            "--matrix-free-global-krylov-full-assembly-trial-replay",
+            "--enable-current-tangent-residual-row-correction",
+            "--current-tangent-residual-row-use-residual-only-assembly",
+            "--current-tangent-residual-row-per-state-batch-replay",
+            "--current-tangent-residual-row-batch-replay-backend",
+            "hip_full_residual",
+            "--current-tangent-residual-row-require-hip-batch-replay",
+            "--current-tangent-residual-row-jacobian-mode",
+            "finite_difference"
+          ],
+          "hip_residual_refresh_ready": false
+        },
+        "ready": false,
+        "status": "deferred_upstream_blocked",
+        "upstream_blocking_requirement_ids": [
+          "full_load_checkpoint_1p0",
+          "hip_consistent_residual_jacobian_newton_proof",
+          "production_rocm_hip_residual_jvp_worker"
+        ]
+      }
+    ],
+    "schema_version": "g1-full-load-hip-newton-terminal-requirement-breakdown.v1"
+  },
   "workspace_checkpoint_inventory": {
     "candidate_count": 357,
     "claim_boundary": "This inventory scans local productization NPZ checkpoints for load-scale metadata. It can prove that no local full-load candidate is visible in the scanned workspace, but it does not prove residual, increment, material Newton, HIP residency, or G1 closure.",
