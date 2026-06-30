@@ -99,9 +99,9 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T00:59:47.916391+00:00",
+  "generated_at": "2026-06-30T01:08:22.047736+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:cd9721b5f888cdaf6b8a21d4eebc61236491bf73b2347ab7c3ae667b52fc88b9",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:03263ff74a34ca748e2844febb563039b011dce3ae8a42fe74193960dc101219",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:dbe8a09a77f11d85a148751721fc71d0c8ac0e087ca3038f575c8f5f9a63855d",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:10f67ec0b4a4a663b775d837f1bec695523d33b6f7925bed3b5794404ee2e88b",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:ec505370b9ba09a72a73e95334b8537299320de5edd20b574e64eb6d651aad0a",
@@ -117,8 +117,8 @@
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:5c1a9ed5f6f1ab22a2be2979c78748b598e9bbf8ae220969e905db80e1f2f7cb",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:02e6131c7b0a15199594c6c8d66618098cc5aa928eb4ecea34ab76ffbef377f3",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:8b2165956764e2e3f40889313ec20e86be84424f4e90a23ec330aabe549315f8",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:1709ab421c55a964e3c7f1ea1db94dee9d7d11213b54b559249b0d0003ac1dea",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:3c83f5db0161fb9b08e8bd05c17e44a45628413c30cab7a55c6c7fb3169c34ae",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:4c0ee7249dc1a4351209520d3c8a95178321d22ac5e53dc48ce3b64340b787ad",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "mutation_allowed": false,
@@ -641,7 +641,7 @@
       "slot_id": "drd2_hard_decoy_metrics",
       "status": "operator_input_required",
       "target_id": "DRD2",
-      "template_artifact": "",
+      "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
       "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
     },
     {
@@ -1773,6 +1773,7 @@
           "slot_priority": 1,
           "status": "operator_input_required",
           "target_id": "DRD2",
+          "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
           "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
         },
         "gate_unblock_plan": [
@@ -1809,6 +1810,7 @@
             "slot_id": "drd2_hard_decoy_metrics",
             "status": "operator_input_required",
             "target_id": "DRD2",
+            "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
             "unblocks_phase3_criteria": [
               "ranking_pr_auc_ci_low_min",
               "top20_hit_rate_min",
@@ -1850,6 +1852,7 @@
             "slot_id": "htr2a_hard_decoy_metrics",
             "status": "operator_input_required",
             "target_id": "HTR2A",
+            "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
             "unblocks_phase3_criteria": [
               "ranking_pr_auc_ci_low_min",
               "top20_hit_rate_min",
@@ -1891,6 +1894,7 @@
             "slot_id": "oprm1_hard_decoy_metrics",
             "status": "operator_input_required",
             "target_id": "OPRM1",
+            "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
             "unblocks_phase3_criteria": [
               "ranking_pr_auc_ci_low_min",
               "top20_hit_rate_min",
@@ -1947,6 +1951,7 @@
             "slot_priority": 1,
             "status": "operator_input_required",
             "target_id": "DRD2",
+            "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
             "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
           },
           {
@@ -1991,6 +1996,7 @@
             "slot_priority": 2,
             "status": "operator_input_required",
             "target_id": "HTR2A",
+            "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
             "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
           },
           {
@@ -2035,6 +2041,7 @@
             "slot_priority": 3,
             "status": "operator_input_required",
             "target_id": "OPRM1",
+            "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
             "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
           }
         ],
@@ -2047,21 +2054,24 @@
             "required_field_count": 5,
             "slot_id": "drd2_hard_decoy_metrics",
             "status": "operator_input_required",
-            "target_id": "DRD2"
+            "target_id": "DRD2",
+            "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json"
           },
           {
             "required": true,
             "required_field_count": 5,
             "slot_id": "htr2a_hard_decoy_metrics",
             "status": "operator_input_required",
-            "target_id": "HTR2A"
+            "target_id": "HTR2A",
+            "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json"
           },
           {
             "required": true,
             "required_field_count": 5,
             "slot_id": "oprm1_hard_decoy_metrics",
             "status": "operator_input_required",
-            "target_id": "OPRM1"
+            "target_id": "OPRM1",
+            "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json"
           }
         ],
         "phase3_exit_gate_criteria": [
@@ -2487,7 +2497,7 @@
       ]
     }
   },
-  "source_commit_sha": "3680cec3a60abde19bf227a7ace48fe794e46026",
+  "source_commit_sha": "330ac5d7bac1d3fc15af6564f2c37c7ef46bed38",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

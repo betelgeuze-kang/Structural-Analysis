@@ -62,6 +62,7 @@
       "slot_id": "drd2_hard_decoy_metrics",
       "status": "operator_input_required",
       "target_id": "DRD2",
+      "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
       "unblocks_phase3_criteria": [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
@@ -103,6 +104,7 @@
       "slot_id": "htr2a_hard_decoy_metrics",
       "status": "operator_input_required",
       "target_id": "HTR2A",
+      "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
       "unblocks_phase3_criteria": [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
@@ -144,6 +146,7 @@
       "slot_id": "oprm1_hard_decoy_metrics",
       "status": "operator_input_required",
       "target_id": "OPRM1",
+      "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
       "unblocks_phase3_criteria": [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
@@ -154,12 +157,12 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-06-30T00:28:33.274482+00:00",
+  "generated_at": "2026-06-30T01:08:21.958496+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1d1cf9fbbeac7a55ea0ab43180eef1291cc254a2c9ffbca44bb3dc08a4e48144",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:a076379fc363426d995c31c9919b4b3d6b694cf4da547f7b19547f4de1ff5984",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:961db053ffc6413d3736b49675b978b5c012d2280d02a262002a035d809d3cb1",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:abaff6768125fe389cf0ba7ce261f3b9ec4c408affe5d4ca832566c6ebf8a725",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:84fa19ec0e035aa50ea4266fcc59cad4257953c08a3526bc47fb3f936d080f47"
   },
   "linked_artifacts": {
@@ -251,7 +254,7 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "330ac5d7bac1d3fc15af6564f2c37c7ef46bed38",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
@@ -295,7 +298,8 @@
         "ranking_pr_auc_ci_low": null,
         "target_id": "DRD2",
         "top20_hit_rate": null
-      }
+      },
+      "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json"
     },
     {
       "exit_criteria": {
@@ -328,7 +332,8 @@
         "ranking_pr_auc_ci_low": null,
         "target_id": "HTR2A",
         "top20_hit_rate": null
-      }
+      },
+      "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json"
     },
     {
       "exit_criteria": {
@@ -361,7 +366,8 @@
         "ranking_pr_auc_ci_low": null,
         "target_id": "OPRM1",
         "top20_hit_rate": null
-      }
+      },
+      "template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json"
     }
   ]
 }
