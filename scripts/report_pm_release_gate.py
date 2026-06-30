@@ -1251,6 +1251,8 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
     remote_safety_ok = bool(checks.get("remote_safety_ok", False))
     feature_ff = bool(checks.get("feature_fast_forward_possible", False))
     main_ff = bool(checks.get("main_fast_forward_possible", False))
+    feature_synced = bool(checks.get("feature_synced_to_head", False))
+    main_synced = bool(checks.get("main_synced_to_head", False))
     remote_sync_needed = bool(payload.get("remote_sync_needed", False)) if artifact_present else False
     preflight_clean = bool(
         artifact_present
@@ -1270,6 +1272,8 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
         "github_sync_remote_safety_ok": remote_safety_ok,
         "github_sync_feature_fast_forward_possible": feature_ff,
         "github_sync_main_fast_forward_possible": main_ff,
+        "github_sync_feature_synced_to_head": feature_synced,
+        "github_sync_main_synced_to_head": main_synced,
         "github_sync_remote_mutation_approval_pending": remote_mutation_approval_required,
         "github_sync_remote_sync_needed": remote_sync_needed,
         "github_sync_preflight_head_matches_current": preflight_source_state_kind == "exact",
@@ -1282,6 +1286,16 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
         *(["github_sync_preflight_not_synced"] if artifact_present and status and status != "synced" else []),
     ]
     pending_remote_updates = _as_list(payload.get("pending_remote_updates"))
+    pending_remote_targets = [
+        str(item.get("target", ""))
+        for item in pending_remote_updates
+        if isinstance(item, dict) and str(item.get("target", ""))
+    ]
+    pending_remote_actions = [
+        str(item.get("action", ""))
+        for item in pending_remote_updates
+        if isinstance(item, dict) and str(item.get("action", ""))
+    ]
     return _area(
         "github_sync",
         "GitHub Development Sync",
@@ -1295,6 +1309,8 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
             "remote_mutation_approved": bool(payload.get("remote_mutation_approved", False)) if artifact_present else False,
             "remote_feature_ref": str(state.get("remote_feature_ref", "") or ""),
             "remote_main_ref": str(state.get("remote_main_ref", "") or ""),
+            "feature_synced_to_head": feature_synced,
+            "main_synced_to_head": main_synced,
             "preflight_local_head_sha": preflight_head,
             "current_head_sha": current_head,
             "preflight_source_state_kind": preflight_source_state_kind,
@@ -1302,6 +1318,8 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
             "feature_ahead_count": _as_int(state.get("feature_ahead_count"), 0),
             "main_ahead_count": _as_int(state.get("main_ahead_count"), 0),
             "pending_remote_update_count": len(pending_remote_updates),
+            "pending_remote_update_targets": pending_remote_targets,
+            "pending_remote_update_actions": pending_remote_actions,
             "reason_code": str(payload.get("reason_code", "")),
             "r4_risk": str(
                 _as_dict(payload.get("r4_disclosure")).get("risk", "")

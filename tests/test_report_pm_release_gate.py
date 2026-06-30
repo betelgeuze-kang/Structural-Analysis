@@ -2073,7 +2073,13 @@ def test_pm_release_gate_github_sync_area_passes_when_preflight_is_synced(
     assert synced_area["checks"]["github_sync_preflight_artifact_present"] is True
     assert synced_area["checks"]["github_sync_preflight_clean"] is True
     assert synced_area["checks"]["github_sync_preflight_status"] == "synced"
+    assert synced_area["checks"]["github_sync_feature_synced_to_head"] is True
+    assert synced_area["checks"]["github_sync_main_synced_to_head"] is True
     assert synced_area["summary"]["pending_remote_update_count"] == 0
+    assert synced_area["summary"]["pending_remote_update_targets"] == []
+    assert synced_area["summary"]["pending_remote_update_actions"] == []
+    assert synced_area["summary"]["feature_synced_to_head"] is True
+    assert synced_area["summary"]["main_synced_to_head"] is True
     assert synced_area["summary"]["status"] == "synced"
     assert "read-only" in synced_area["claim_boundary"]
     assert synced_area["artifacts"]["github_development_sync_preflight"].endswith(
@@ -2132,8 +2138,16 @@ def test_pm_release_gate_github_sync_area_passes_when_preflight_is_synced(
     assert approval_area["status"] == "blocked"
     assert approval_area["checks"]["github_sync_preflight_clean"] is False
     assert approval_area["checks"]["github_sync_remote_mutation_approval_pending"] is True
+    assert approval_area["checks"]["github_sync_feature_synced_to_head"] is False
+    assert approval_area["checks"]["github_sync_main_synced_to_head"] is False
     assert approval_area["summary"]["remote_mutation_approval_pending"] is True
     assert approval_area["summary"]["pending_remote_update_count"] == 1
+    assert approval_area["summary"]["pending_remote_update_targets"] == ["origin/main"]
+    assert approval_area["summary"]["pending_remote_update_actions"] == [
+        "fast-forward push current HEAD to main"
+    ]
+    assert approval_area["summary"]["feature_synced_to_head"] is False
+    assert approval_area["summary"]["main_synced_to_head"] is False
     assert approval_area["summary"]["main_ahead_count"] == 4
     assert approval_area["artifacts"]["github_development_sync_preflight"].endswith(
         "approval_required_preflight.json"

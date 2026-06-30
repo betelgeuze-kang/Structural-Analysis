@@ -425,6 +425,8 @@ def test_build_register_guides_github_sync_r4_blocker(tmp_path: Path) -> None:
                     "checks": {
                         "github_sync_feature_fast_forward_possible": True,
                         "github_sync_main_fast_forward_possible": True,
+                        "github_sync_feature_synced_to_head": True,
+                        "github_sync_main_synced_to_head": False,
                         "github_sync_remote_safety_ok": True,
                     },
                     "summary": {
@@ -435,9 +437,15 @@ def test_build_register_guides_github_sync_r4_blocker(tmp_path: Path) -> None:
                         "remote_mutation_approved": False,
                         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
                         "remote_main_ref": "origin/main",
-                        "feature_ahead_count": 11,
+                        "feature_synced_to_head": True,
+                        "main_synced_to_head": False,
+                        "feature_ahead_count": 0,
                         "main_ahead_count": 59,
-                        "pending_remote_update_count": 2,
+                        "pending_remote_update_count": 1,
+                        "pending_remote_update_targets": ["origin/main"],
+                        "pending_remote_update_actions": [
+                            "fast-forward push current HEAD to main"
+                        ],
                     },
                     "artifacts": {
                         "github_development_sync_preflight": "<live-git-state>",
@@ -459,7 +467,8 @@ def test_build_register_guides_github_sync_r4_blocker(tmp_path: Path) -> None:
     assert row["external_input_required"] is True
     assert row["resolution_type"] == "r4_remote_mutation_approval_required"
     assert row["handoff_state"] == "external_owner_input_ready"
-    assert "feature push + main fast-forward 승인" in row["owner_action"]
+    assert "Feature branch is synced" in row["owner_action"]
+    assert "main fast-forward" in row["owner_action"]
     assert any("check_github_development_sync_preflight.py --fetch --json" in command for command in row["reproduction_commands"])
     assert any("remote_sync_needed == false" in item for item in row["acceptance_criteria"])
     assert any(
@@ -468,11 +477,14 @@ def test_build_register_guides_github_sync_r4_blocker(tmp_path: Path) -> None:
     )
     assert row["claim_boundary"] == "The GitHub development sync preflight is read-only."
     assert row["evidence_status"]["state"] == "approval_required"
+    assert row["evidence_status"]["feature_synced_to_head"] is True
+    assert row["evidence_status"]["main_synced_to_head"] is False
+    assert row["evidence_status"]["pending_remote_update_targets"] == ["origin/main"]
     assert row["evidence_status"]["remote_sync_needed"] is True
     assert row["evidence_status"]["remote_mutation_approval_pending"] is True
     assert row["evidence_status"]["remote_feature_ref"] == "origin/codex/seed-pr-ci-source-evidence"
     assert row["evidence_status"]["remote_main_ref"] == "origin/main"
-    assert row["evidence_status"]["feature_ahead_count"] == 11
+    assert row["evidence_status"]["feature_ahead_count"] == 0
     assert row["evidence_status"]["main_ahead_count"] == 59
     assert row["evidence_status"]["approval_phrase"] == "feature push + main fast-forward 승인"
 

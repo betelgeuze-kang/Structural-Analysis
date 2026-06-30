@@ -216,6 +216,15 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
             "input checksum, and reuse marker metadata, then rerun the freshness and PM release reports."
         )
     if namespace == "github_sync":
+        feature_synced = bool(summary.get("feature_synced_to_head", False))
+        main_synced = bool(summary.get("main_synced_to_head", False))
+        if feature_synced and not main_synced:
+            return (
+                "Feature branch is synced to the release HEAD. Obtain explicit R4 "
+                f"approval phrase `{GITHUB_SYNC_APPROVAL_PHRASE}` for the remaining "
+                "main fast-forward, then run the pending main remote-update command "
+                "from `check_github_development_sync_preflight.py --fetch --json`."
+            )
         return (
             f"Obtain explicit R4 approval phrase `{GITHUB_SYNC_APPROVAL_PHRASE}`, then run the pending "
             "remote-update commands from `check_github_development_sync_preflight.py --fetch --json`."
@@ -781,9 +790,17 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "remote_mutation_approved": bool(summary.get("remote_mutation_approved", False)),
             "remote_feature_ref": str(summary.get("remote_feature_ref", "") or ""),
             "remote_main_ref": str(summary.get("remote_main_ref", "") or ""),
+            "feature_synced_to_head": bool(summary.get("feature_synced_to_head", False)),
+            "main_synced_to_head": bool(summary.get("main_synced_to_head", False)),
             "feature_ahead_count": summary.get("feature_ahead_count"),
             "main_ahead_count": summary.get("main_ahead_count"),
             "pending_remote_update_count": summary.get("pending_remote_update_count"),
+            "pending_remote_update_targets": _as_list(
+                summary.get("pending_remote_update_targets")
+            ),
+            "pending_remote_update_actions": _as_list(
+                summary.get("pending_remote_update_actions")
+            ),
             "feature_fast_forward_possible": checks.get("github_sync_feature_fast_forward_possible"),
             "main_fast_forward_possible": checks.get("github_sync_main_fast_forward_possible"),
             "remote_safety_ok": checks.get("github_sync_remote_safety_ok"),
