@@ -2357,7 +2357,7 @@ def test_snapshot_public_benchmark_phase2_runner_change_does_not_stale_snapshot_
     ]
 
 
-def test_snapshot_phase6_parity_builder_change_does_not_stale_snapshot_leaf_receipts(
+def test_snapshot_phase6_parity_builder_change_only_stales_developer_preview_rc(
     tmp_path: Path,
 ) -> None:
     _init_git_repo(tmp_path)
@@ -2386,10 +2386,19 @@ def test_snapshot_phase6_parity_builder_change_does_not_stale_snapshot_leaf_rece
         == "non_artifact_source_paths_changed"
     )
     assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
-    assert not [
+    assert (
+        metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
+    )
+    assert (
+        metadata_rows["developer_preview_rc_status"]["source_state_kind"]
+        == "non_receipt_paths_changed"
+    )
+    assert [
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ] == [
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
     ]
 
 
