@@ -19,7 +19,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-06-30T14:32:12.640423+00:00",
+  "generated_at": "2026-06-30T18:28:13.922226+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -1841,7 +1841,7 @@
         "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
         "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
         "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-        "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
       ],
       "blocked_release_tiers": [
         "release_tier.limited_commercial_full_gate_ready",
@@ -1881,7 +1881,7 @@
             "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
             "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
             "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-            "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+            "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
           ],
           "blocked_release_tiers": [
             "release_tier.limited_commercial_full_gate_ready",
@@ -1920,7 +1920,7 @@
             "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
             "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
             "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-            "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+            "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
           ],
           "blocked_release_tiers": [
             "release_tier.limited_commercial_full_gate_ready",
@@ -1959,7 +1959,7 @@
             "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
             "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
             "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-            "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+            "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
           ],
           "blocked_release_tiers": [
             "release_tier.limited_commercial_full_gate_ready",

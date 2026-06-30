@@ -178,21 +178,21 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T17:46:38.351198+00:00",
+  "generated_at": "2026-06-30T18:28:13.968210+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:1299c786ce3d9a8086ffb6ef54a9b71727cc3d59b419491f2b7afb82a43ee376",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:87313bdf5cac81f41fc9739e76e751ac95cfad3152f3d964370f2f73f1f25eec",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:83feae88bbc9328f3b882ab5df37b55e4dc1fb1b0995211550305bcccad2e232",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:3b1621dae9f50582fd1bd3f5133833c463b1a2c2dcc273f392f2532f631a1f6c",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:dd233cd6a20f8a3e443f3a2951048126a2aa0aab0978cf8e62dbf065dde7750b",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5ed3447a40e3bc51905d991b9f8f54f456307ed129b1549f6271f194653eaf68",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:e5939e8e53b298321c36a32fa6751e0b01968b508f0d7abe5d601aac11941a6d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:1edb01035083f82389d3cff7ea27bb03a5b47e43b819250fe987ea3288b0cca6",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:5b9a691a11468a2aec5214202e86b47c59fda0b3254f9a42ade70ec650b7288f",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:f1c6612462662c6ef1fed38aa1b45c1779e0a93f7072133c3ab46a8c9c9c4a3f",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:70b78ff6ddb6ec4441e85b6d2f4a5d563da2a4be6ab3eb90297c70a113efbd18",
-    "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:d231a8d2a2eb84af814b34b15d0248f8f7772d3060706febbca30601df25e3a2",
+    "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:84ce2865bc2cb5a51bd54952c739e4b29f5a3a4b63ca798cc36e57ffe373cdb5",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:d51dc0896c0fe555433f4e3d56fb53a95f17322e3df03095a802f0bd318c2378",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:69ee4d96e5be9708fd2059c511aa4f8f07bd117223396d5edae071849fb75b06",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9befd62f7fdac97a978fb4a174c0f63ade11d06e9846c1905e64b3197666d778",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:8f5a9f5317cdfeae48a1324c5604b4d1abd658686738003fe0ea1eed0413114a",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:30a83ea2f7d883ca8db99b6c7191a2270da8148b95c822d2a91a15b68d02b592",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:c610de914991d4ed7b39302c32dd62b1a822011772574efd293a4df5d58e0bbc",
@@ -204,6 +204,7 @@
   "mutation_allowed": false,
   "next_actions": [
     "fill_public_benchmark_operator_intake_packet",
+    "materialize_public_benchmark_operator_bundle_from_rows",
     "attach_checked_casf_pdbbind_subset_source_files",
     "run_public_benchmark_subset_materializer",
     "fill_ligand_atom_order_and_symmetry_permutation_contracts",
@@ -212,12 +213,11 @@
     "run_symmetry_aware_rmsd_on_real_subset",
     "run_public_benchmark_rmsd_scorecard_materializer",
     "materialize_posebusters_style_validity_packet_for_real_ligands",
+    "materialize_casf_pdbbind_pose_success_harness",
     "attach_dud_e_lit_pcba_enrichment_intake",
     "run_public_benchmark_enrichment_materializer",
     "attach_vina_gnina_comparison_intake",
     "run_public_benchmark_vina_gnina_comparison_materializer",
-    "materialize_public_benchmark_operator_bundle_from_rows",
-    "materialize_casf_pdbbind_pose_success_harness",
     "run_public_benchmark_harness_bundle_materializer",
     "materialize_public_benchmark_pose_success_harness",
     "validate_public_benchmark_external_receipts",
@@ -492,8 +492,8 @@
     "refresh_required_operator_action_count": 0,
     "refresh_required_operator_actions": [],
     "release_allowed": false,
-    "release_area_blocker_count": 9,
-    "release_area_owner_handoff_count": 9,
+    "release_area_blocker_count": 8,
+    "release_area_owner_handoff_count": 8,
     "release_area_owner_handoffs": [
       {
         "acceptance_criteria": [
@@ -620,19 +620,6 @@
         "owner": "product_legal_owner",
         "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
         "title": "Security"
-      },
-      {
-        "acceptance_criteria": [],
-        "acceptance_criteria_count": 0,
-        "blocker_id": "github_sync::github_sync_preflight::worktree_not_clean",
-        "evidence_artifact_keys": [],
-        "evidence_state": "",
-        "external_input_required": false,
-        "handoff_state": "action_register_row_missing",
-        "namespace": "github_sync",
-        "owner": "",
-        "owner_action": "",
-        "title": ""
       },
       {
         "acceptance_criteria": [
@@ -1519,6 +1506,7 @@
   "operator_evidence_handoff_slot_scope": "all_blocked_operator_slots_per_blocked_phase",
   "primary_next_actions": [
     "fill_public_benchmark_operator_intake_packet",
+    "materialize_public_benchmark_operator_bundle_from_rows",
     "attach_checked_casf_pdbbind_subset_source_files",
     "run_public_benchmark_subset_materializer",
     "fill_ligand_atom_order_and_symmetry_permutation_contracts",
@@ -1527,12 +1515,11 @@
     "run_symmetry_aware_rmsd_on_real_subset",
     "run_public_benchmark_rmsd_scorecard_materializer",
     "materialize_posebusters_style_validity_packet_for_real_ligands",
+    "materialize_casf_pdbbind_pose_success_harness",
     "attach_dud_e_lit_pcba_enrichment_intake",
     "run_public_benchmark_enrichment_materializer",
     "attach_vina_gnina_comparison_intake",
     "run_public_benchmark_vina_gnina_comparison_materializer",
-    "materialize_public_benchmark_operator_bundle_from_rows",
-    "materialize_casf_pdbbind_pose_success_harness",
     "run_public_benchmark_harness_bundle_materializer",
     "materialize_public_benchmark_pose_success_harness",
     "validate_public_benchmark_external_receipts",
@@ -1552,14 +1539,14 @@
   "read_model_ready": true,
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
-    "approval_token_count": 7,
-    "blocked_release_count": 9,
+    "approval_token_count": 5,
+    "blocked_release_count": 8,
     "broad_gpcr_family_claim_safe": false,
     "evidence_surface_count": 12,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 1,
-    "operator_action_count": 17,
+    "operator_action_count": 14,
     "pocketmd_lite_product_surface_ready": false,
     "public_benchmark_ready": false,
     "release_allowed": false,
@@ -1773,6 +1760,7 @@
       },
       "next_actions": [
         "fill_public_benchmark_operator_intake_packet",
+        "materialize_public_benchmark_operator_bundle_from_rows",
         "attach_checked_casf_pdbbind_subset_source_files",
         "run_public_benchmark_subset_materializer",
         "fill_ligand_atom_order_and_symmetry_permutation_contracts",
@@ -1892,9 +1880,9 @@
       "state": "ready",
       "summary": {
         "action_register_contract_pass": false,
-        "approval_token_count": 7,
+        "approval_token_count": 5,
         "blocked_capability_count": 4,
-        "blocked_release_count": 9,
+        "blocked_release_count": 8,
         "first_locked_science_evidence_surface": {
           "bottleneck": "h_bond_evidence_surface_locked",
           "capability_blocker_count": 2,
@@ -1919,7 +1907,7 @@
             "h_bond_backmap_evidence_surface"
           ]
         },
-        "operator_action_count": 17,
+        "operator_action_count": 14,
         "product_capability_count": 5,
         "release_allowed": false,
         "science_evidence_surface_bottlenecks": [
@@ -2029,6 +2017,7 @@
       ],
       "next_actions": [
         "fill_public_benchmark_operator_intake_packet",
+        "materialize_public_benchmark_operator_bundle_from_rows",
         "attach_checked_casf_pdbbind_subset_source_files",
         "run_public_benchmark_subset_materializer",
         "fill_ligand_atom_order_and_symmetry_permutation_contracts",
@@ -2037,12 +2026,11 @@
         "run_symmetry_aware_rmsd_on_real_subset",
         "run_public_benchmark_rmsd_scorecard_materializer",
         "materialize_posebusters_style_validity_packet_for_real_ligands",
+        "materialize_casf_pdbbind_pose_success_harness",
         "attach_dud_e_lit_pcba_enrichment_intake",
         "run_public_benchmark_enrichment_materializer",
         "attach_vina_gnina_comparison_intake",
         "run_public_benchmark_vina_gnina_comparison_materializer",
-        "materialize_public_benchmark_operator_bundle_from_rows",
-        "materialize_casf_pdbbind_pose_success_harness",
         "run_public_benchmark_harness_bundle_materializer",
         "materialize_public_benchmark_pose_success_harness",
         "validate_public_benchmark_external_receipts",
@@ -3995,7 +3983,7 @@
       ]
     }
   },
-  "source_commit_sha": "05c615f37803fea1982b84e257a3f297fa962349",
+  "source_commit_sha": "53948cbb8be420c52ff15ee6d1a3664c686c873b",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
