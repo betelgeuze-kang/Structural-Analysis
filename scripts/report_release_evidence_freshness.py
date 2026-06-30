@@ -128,7 +128,7 @@ DEFAULT_ARTIFACTS = (
 SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
     {
         "candidate": "accuracy_parity_scorecard",
-        "classification": "fixed",
+        "classification": "fix",
         "freshness_policy": "direct_leaf_row",
         "freshness_label": "accuracy_parity_scorecard",
         "current_repo_match": "implementation/phase1/real_accuracy_validation_report.json",
@@ -136,7 +136,7 @@ SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
     },
     {
         "candidate": "product_production_ai_checkpoint_readiness",
-        "classification": "fixed",
+        "classification": "fix",
         "freshness_policy": "direct_leaf_row",
         "freshness_label": "product_production_ai_checkpoint_readiness",
         "current_repo_match": (
@@ -598,7 +598,9 @@ def build_report(
             "source_of_truth_gap_candidate_count": len(
                 SOURCE_OF_TRUTH_GAP_CLASSIFICATION
             ),
-            "source_of_truth_gap_fixed_count": _classification_count("fixed"),
+            "source_of_truth_gap_fix_count": _classification_count("fix"),
+            "source_of_truth_gap_fixed_count": _classification_count("fix"),
+            "source_of_truth_gap_no_op_count": _classification_count("no-op"),
             "source_of_truth_gap_aggregator_review_count": _classification_count(
                 "aggregator-review"
             ),

@@ -265,10 +265,20 @@ def _source_of_truth_row(freshness: dict[str, Any]) -> dict[str, Any]:
         if isinstance(row, dict)
     ]
     candidate_count = _as_int(summary.get("source_of_truth_gap_candidate_count"))
-    fixed_count = _as_int(summary.get("source_of_truth_gap_fixed_count"))
+    fix_count = _as_int(
+        summary.get(
+            "source_of_truth_gap_fix_count",
+            summary.get("source_of_truth_gap_fixed_count"),
+        )
+    )
+    no_op_count = _as_int(summary.get("source_of_truth_gap_no_op_count"))
     aggregator_count = _as_int(summary.get("source_of_truth_gap_aggregator_review_count"))
     blocker_count = _as_int(summary.get("blocker_count"))
-    ready = bool(candidate_count and fixed_count + aggregator_count == candidate_count and blocker_count == 0)
+    ready = bool(
+        candidate_count
+        and fix_count + no_op_count + aggregator_count == candidate_count
+        and blocker_count == 0
+    )
     return _roadmap_row(
         phase_id="phase_0_source_of_truth_hardening",
         phase_label="Phase 0",
@@ -287,7 +297,9 @@ def _source_of_truth_row(freshness: dict[str, Any]) -> dict[str, Any]:
         ),
         summary={
             "candidate_count": candidate_count,
-            "fixed_count": fixed_count,
+            "fix_count": fix_count,
+            "fixed_count": fix_count,
+            "no_op_count": no_op_count,
             "aggregator_review_count": aggregator_count,
             "freshness_blocker_count": blocker_count,
             "classification_rows": [
@@ -612,18 +624,7 @@ def _public_benchmark_row(
             ),
             "first_operator_handoff": first_operator_handoff,
             "operator_handoff_queue": operator_handoff_queue,
-            "first_operator_evidence_gap": _as_dict(
-                first_operator_evidence_gap
-            ),
-            "operator_handoff_queue_count": _as_int(
-                public_benchmark.get("operator_handoff_queue_count")
-                or len(operator_handoff_queue)
-            ),
-            "first_operator_handoff": _as_dict(
-                public_benchmark.get("first_operator_handoff")
-                or (operator_handoff_queue[0] if operator_handoff_queue else {})
-            ),
-            "operator_handoff_queue": operator_handoff_queue,
+            "first_operator_evidence_gap": _as_dict(first_operator_evidence_gap),
             "minimum_subset_case_count": _as_int(
                 public_benchmark_operator_intake.get("minimum_subset_case_count")
                 or source_operator_summary.get("minimum_subset_case_count")
@@ -1631,17 +1632,28 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         for row in _as_list(freshness.get("source_of_truth_gap_classification"))
         if isinstance(row, dict)
     ]
+    freshness_summary = _as_dict(freshness.get("summary"))
     source_of_truth_gap_summary = {
         "candidate_count": _as_int(
-            _as_dict(freshness.get("summary")).get("source_of_truth_gap_candidate_count")
+            freshness_summary.get("source_of_truth_gap_candidate_count")
+        ),
+        "fix_count": _as_int(
+            freshness_summary.get(
+                "source_of_truth_gap_fix_count",
+                freshness_summary.get("source_of_truth_gap_fixed_count"),
+            )
+        ),
+        "no_op_count": _as_int(
+            freshness_summary.get("source_of_truth_gap_no_op_count")
         ),
         "fixed_count": _as_int(
-            _as_dict(freshness.get("summary")).get("source_of_truth_gap_fixed_count")
+            freshness_summary.get(
+                "source_of_truth_gap_fix_count",
+                freshness_summary.get("source_of_truth_gap_fixed_count"),
+            )
         ),
         "aggregator_review_count": _as_int(
-            _as_dict(freshness.get("summary")).get(
-                "source_of_truth_gap_aggregator_review_count"
-            )
+            freshness_summary.get("source_of_truth_gap_aggregator_review_count")
         ),
     }
     operator_evidence_handoff_queue = _operator_evidence_handoff_queue(roadmap_rows)

@@ -234,7 +234,7 @@ def test_source_of_truth_gap_classification_keeps_rollups_out_of_leaf_freshness(
         "product_production_ai_checkpoint_readiness",
     ):
         row = rows[candidate]
-        assert row["classification"] == "fixed"
+        assert row["classification"] == "fix"
         assert row["freshness_policy"] == "direct_leaf_row"
         assert row["freshness_label"] in labels
 
@@ -275,7 +275,9 @@ def test_release_evidence_freshness_report_exposes_gap_classification_summary(
     )
 
     assert payload["summary"]["source_of_truth_gap_candidate_count"] == 5
+    assert payload["summary"]["source_of_truth_gap_fix_count"] == 2
     assert payload["summary"]["source_of_truth_gap_fixed_count"] == 2
+    assert payload["summary"]["source_of_truth_gap_no_op_count"] == 0
     assert payload["summary"]["source_of_truth_gap_aggregator_review_count"] == 3
     candidates = {
         row["candidate"] for row in payload["source_of_truth_gap_classification"]

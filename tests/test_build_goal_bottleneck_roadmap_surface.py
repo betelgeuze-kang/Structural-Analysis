@@ -46,7 +46,9 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     }
     assert surface["source_of_truth_gap_summary"] == {
         "candidate_count": 5,
+        "fix_count": 2,
         "fixed_count": 2,
+        "no_op_count": 0,
         "aggregator_review_count": 3,
     }
     classification = {
@@ -60,7 +62,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "product_goal_completion_audit",
         "goal_operator_action_board",
     }
-    assert classification["accuracy_parity_scorecard"]["classification"] == "fixed"
+    assert classification["accuracy_parity_scorecard"]["classification"] == "fix"
     assert classification["accuracy_parity_scorecard"]["freshness_label"] == (
         "accuracy_parity_scorecard"
     )
@@ -95,7 +97,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
             "pocketmd_lite_product_surface_ready",
         )
     }
-    assert kpis["blocked_release_count"] == 8
+    assert kpis["blocked_release_count"] == 9
     assert kpis["first_blocker"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     assert kpis["evidence_surface_count"] == 12
     assert kpis["locked_evidence_surface_count"] == 3
@@ -114,8 +116,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
-    assert briefing["release_area_blocker_count"] == 8
-    assert briefing["release_area_owner_handoff_count"] == 8
+    assert briefing["release_area_blocker_count"] == 9
+    assert briefing["release_area_owner_handoff_count"] == 9
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
@@ -126,6 +128,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
+        "github_sync::github_sync_preflight::worktree_not_clean",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced",
@@ -371,7 +374,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "classification_rows"
     ][0] == {
         "candidate": "accuracy_parity_scorecard",
-        "classification": "fixed",
+        "classification": "fix",
         "freshness_policy": "direct_leaf_row",
         "freshness_label": "accuracy_parity_scorecard",
     }
@@ -463,17 +466,18 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     ].startswith("python3 scripts/materialize_public_benchmark_subset_manifest.py")
     assert phase_2["summary"]["minimum_subset_case_count"] == 12
     assert phase_2["summary"]["tier_beta_gate_status"] == "blocked"
-    assert phase_2["summary"]["tier_beta_failed_criterion_count"] == 7
+    assert phase_2["summary"]["tier_beta_failed_criterion_count"] == 8
     assert phase_2["summary"]["tier_beta_failed_criteria"] == [
         "casf_pdbbind_subset_materialized",
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
         "dud_e_lit_pcba_enrichment_ready",
         "vina_gnina_comparison_ready",
         "external_receipts_attached",
     ]
-    assert phase_2["blocked_criteria_count"] == 7
+    assert phase_2["blocked_criteria_count"] == 8
     assert phase_2["blocked_criteria"] == phase_2["summary"][
         "tier_beta_failed_criteria"
     ]
@@ -484,6 +488,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
         "dud_e_lit_pcba_enrichment_ready",
         "vina_gnina_comparison_ready",
         "external_receipts_attached",
@@ -514,6 +519,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "materialize_pose_validity_input",
         "materialize_posebusters_validity_packet",
         "materialize_symmetry_rmsd_scorecard",
+        "materialize_pose_success_harness",
     ]
     assert gate_plan["pose_coordinate_intake"]["template_artifact"].endswith(
         "public_benchmark_pose_coordinate_operator_template.json"
@@ -526,6 +532,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
     ]
     assert gap_register["casf_pdbbind_subset_intake"]["first_next_action"] == (
         "attach at least 12 local CASF/PDBBind case descriptors"
