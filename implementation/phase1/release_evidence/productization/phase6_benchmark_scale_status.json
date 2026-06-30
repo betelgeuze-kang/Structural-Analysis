@@ -1,7 +1,7 @@
 {
   "acquisition_plan": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
   "blocker_grouping_metadata": {
-    "blocker_count": 17,
+    "blocker_count": 16,
     "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
     "groups": {
       "large_quantity_shortfall": {
@@ -35,10 +35,9 @@
         "scope": "medium_model_quantity_gate"
       },
       "medium_scorecard_execution": {
-        "blocker_count": 3,
+        "blocker_count": 2,
         "blockers": [
           "medium_model_pass_or_review_missing",
-          "opensees_medium_runner_command_missing",
           "opensees_medium_scorecard_execution_missing"
         ],
         "description": "OpenSees medium runner and PASS/REVIEW scorecard evidence gaps.",
@@ -82,7 +81,6 @@
     "medium_structural_models_current_below_required:0/5",
     "nightly_lane_not_configured",
     "normalization_not_implemented",
-    "opensees_medium_runner_command_missing",
     "opensees_medium_scorecard_execution_missing",
     "reference_outputs_missing",
     "source_url_verification_pending"
@@ -91,12 +89,12 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:56:11.595975+00:00",
+  "generated_at": "2026-06-30T07:14:19.233974+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:6b67009b9213e2b5543d5e2de30b17fe04394ce4af1f6854bd54d9b11269383e",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:5f260906e9a375cebce8270295073d6558703ed6b586ccd92ca4aa8bd0b5b3f5",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:60b59a12228241029f9ff1ad43d27baa1b379372aa69ba859948a3ebae29b3bd",
-    "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:4885abf83a68cec90edda8fffda3db685742855bd27be1befea1263a8f1f3817",
-    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:e4614cd5d5b6077082bae8985a8604e4fe33dbbd75d4b63d79355af402bc92fa",
+    "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:d9e606f18c307c24c1fb53e54c32359718db1689fe61962bb2c8d09366072a4e",
+    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:f442eafeba2c6050f0976f080e775ad3258b028588209a5a5e802efa288c5e59",
     "scripts/build_phase6_benchmark_scale_status.py": "sha256:4015447f6274d9e94bc597733b11a986fc36dafe1bdddbc82d75ab2a0bfd09b5"
   },
   "large_gate": {
@@ -187,7 +185,7 @@
   },
   "medium_gate": {
     "blocker_grouping_metadata": {
-      "blocker_count": 9,
+      "blocker_count": 8,
       "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
       "groups": {
         "large_quantity_shortfall": {
@@ -212,10 +210,9 @@
           "scope": "medium_model_quantity_gate"
         },
         "medium_scorecard_execution": {
-          "blocker_count": 3,
+          "blocker_count": 2,
           "blockers": [
             "medium_model_pass_or_review_missing",
-            "opensees_medium_runner_command_missing",
             "opensees_medium_scorecard_execution_missing"
           ],
           "description": "OpenSees medium runner and PASS/REVIEW scorecard evidence gaps.",
@@ -250,19 +247,18 @@
       "medium_model_pass_or_review_missing",
       "medium_structural_models_current_below_required:0/5",
       "normalization_not_implemented",
-      "opensees_medium_runner_command_missing",
       "opensees_medium_scorecard_execution_missing",
       "reference_outputs_missing",
       "source_url_verification_pending"
     ],
-    "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only and does not prove source authority, license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
+    "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only and implements the operator scorecard runner command, but it does not prove source authority, license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
     "contract_pass": false,
     "current_medium_model_scorecard_count": 0,
     "local_candidate_artifact_count": 2,
     "local_topology_contract_pass": true,
     "pass_or_approved_review_count": 0,
     "receipt": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
-    "required_evidence_pass_count": 1,
+    "required_evidence_pass_count": 3,
     "required_medium_model_count": 5,
     "status": "blocked"
   },
@@ -277,7 +273,7 @@
   "reused_evidence": true,
   "schema_version": "phase6-benchmark-scale-status.v1",
   "seed_benchmark_status": "ready",
-  "source_commit_sha": "f269f5db33493b3773b7d6965423d855f38715fe",
+  "source_commit_sha": "4fd8b834a24ec3ef5fa5b19d80245c9e28cbd3e7",
   "status": "blocked",
   "summary_line": "Phase 6 benchmark scale: BLOCKED | medium=0/5 | large_exec=0/2"
 }

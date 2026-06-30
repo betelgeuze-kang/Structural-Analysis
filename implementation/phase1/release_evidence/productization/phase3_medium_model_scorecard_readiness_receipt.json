@@ -3,7 +3,6 @@
     "license_review_pending",
     "medium_model_pass_or_review_missing",
     "normalization_not_implemented",
-    "opensees_medium_runner_command_missing",
     "opensees_medium_scorecard_execution_missing",
     "reference_outputs_missing",
     "source_url_verification_pending"
@@ -12,24 +11,24 @@
     "license_review_pending",
     "medium_model_pass_or_review_missing",
     "normalization_not_implemented",
-    "opensees_medium_runner_command_missing",
     "opensees_medium_scorecard_execution_missing",
     "reference_outputs_missing",
     "source_url_verification_pending"
   ],
-  "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only and does not prove source authority, license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
+  "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only and implements the operator scorecard runner command, but it does not prove source authority, license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": false,
   "current_medium_model_scorecard_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-22T18:31:51.930541+00:00",
+  "generated_at": "2026-06-30T07:14:15.198005+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
-    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:e4ae1d205217a7eab994d1cfbf00579b55a386fbf7e2bec8cf6a1b7bdf608eda",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:46a9fd3ae7fd9904b988c56fa79021e1ed57f8de26316c4501e563e8fa9809b2",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:1f7e307b69037e4587b9cdf776762e4d4d2cafc6e97e41c795ba74e34c5014e1",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:bde370b0efc49e87e704be4c190879c62b932c1416c93a6fe75095a1be185944"
+    "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:d1c74f0c76e85c7e7b75e77e86b12f81dc5434f0a4a485a91143ca0245c298b5"
   },
   "lanes": [
     "opensees-medium"
@@ -91,13 +90,6 @@
       "status": "missing"
     },
     {
-      "blocker": "opensees_medium_runner_command_missing",
-      "contract_pass": false,
-      "id": "runner_command",
-      "required": "Repeatable medium-model scorecard runner command with selected model inputs and outputs.",
-      "status": "missing"
-    },
-    {
       "blocker": "opensees_medium_scorecard_execution_missing",
       "contract_pass": false,
       "id": "scorecard_execution",
@@ -110,15 +102,46 @@
       "id": "pass_or_approved_review",
       "required": "Per-case PASS or explicit pre-approved REVIEW decision for selected medium models.",
       "status": "missing"
+    },
+    {
+      "blocker": "",
+      "contract_pass": true,
+      "id": "runner_command",
+      "required": "Repeatable medium-model scorecard runner command with selected model inputs and output paths.",
+      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "runner_script": "scripts/run_phase3_medium_model_scorecard_receipt.py",
+      "status": "ready"
+    },
+    {
+      "blocker": "",
+      "contract_pass": true,
+      "id": "resource_envelope",
+      "required": "Declared workstation/nightly CPU, memory, timeout, and artifact retention limits for medium scorecard runs.",
+      "resource_envelope": {
+        "artifact_retention_policy": "operator_attached_scorecard_receipt_result_and_validation_report",
+        "default_memory_limit_gb": 32.0,
+        "default_timeout_seconds": 3600,
+        "execution_scope": "operator_workstation_or_scheduled_self_hosted_runner"
+      },
+      "status": "ready"
     }
   ],
-  "required_evidence_count": 8,
-  "required_evidence_pass_count": 1,
+  "required_evidence_count": 9,
+  "required_evidence_pass_count": 3,
   "required_medium_model_count": 5,
+  "resource_envelope": {
+    "artifact_retention_policy": "operator_attached_scorecard_receipt_result_and_validation_report",
+    "default_memory_limit_gb": 32.0,
+    "default_timeout_seconds": 3600,
+    "execution_scope": "operator_workstation_or_scheduled_self_hosted_runner"
+  },
+  "runner_command_ready": true,
+  "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
   "schema_version": "phase3-medium-model-scorecard-readiness-receipt.v1",
   "scorecard_receipt_template": {
     "case_id": "OPERATOR_ATTACHED_CASE_ID",
     "contract_pass": false,
+    "crashed": false,
     "decision": "PASS|APPROVED_REVIEW",
     "metrics": {
       "convergence_history_retained": true,
@@ -126,14 +149,17 @@
       "residual_formula": "F_internal_minus_F_external"
     },
     "normalization_receipt": "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT",
+    "oom": false,
+    "peak_memory_gb": "OPERATOR_RECORDED_PEAK_MEMORY",
     "reference_output_sha256": "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256",
-    "runner_command": "OPERATOR_RECORDED_COMMAND",
+    "runner_command": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+    "runtime_seconds": "OPERATOR_RECORDED_RUNTIME",
     "schema_version": "phase3-medium-model-scorecard-receipt.v1",
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "4fd8b834a24ec3ef5fa5b19d80245c9e28cbd3e7",
   "source_id": "opensees_scbf16b_medium_candidate",
   "status": "blocked",
-  "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=1/8"
+  "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=3/9"
 }
