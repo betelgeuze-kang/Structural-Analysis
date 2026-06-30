@@ -308,10 +308,10 @@
       ]
     }
   ],
-  "generated_at": "2026-06-30T00:59:47.825974+00:00",
+  "generated_at": "2026-06-30T01:30:31.670953+00:00",
   "input_checksums": {
-    "README.md": "sha256:68c68777ef0c591309d54524d26555109528ec43b23a2a0151852d353cfecedf",
-    "docs/commercialization-gap-current-state.md": "sha256:ad6747e5910eae3a1e4a2e7b3458d627e06edce772df4bd592f0e1ca74263ca1",
+    "README.md": "sha256:74967d9819b03195ab15b636e7b6a72c96d6855ed9c59f52bf483a44215b19c3",
+    "docs/commercialization-gap-current-state.md": "sha256:41037a9de2b97fb58b7c9c2d6f8f50b484974fc170a4caee274c53c2607d9354",
     "docs/pm-release-gate-milestones.md": "sha256:fdb22304c1e4c8047a2bebdf107007ac654869d06d603ace91a32fb128773092",
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:e5e5fe6e6fb02cdf2f369e745ba232a87f066a726e0969286a41e6e9ac6ccc83",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
@@ -373,7 +373,7 @@
       "pass": true
     }
   ],
-  "source_commit_sha": "3680cec3a60abde19bf227a7ace48fe794e46026",
+  "source_commit_sha": "9eb7edaf52a38ce1d287fba839cc167c9d8afe83",
   "summary": {
     "claim_boundary_docs": [
       "README.md",

@@ -74,7 +74,7 @@
     }
   ],
   "gate_unblock_plan_count": 1,
-  "generated_at": "2026-06-30T00:56:23.212274+00:00",
+  "generated_at": "2026-06-30T01:30:28.712974+00:00",
   "input_checksums": {
     "scripts/build_pocketmd_lite_product_surface.py": "sha256:90d26cbbd440886bc14e60e57a778f77e32c4f3c4954f704c5f73016e7b4d2bc",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
@@ -221,7 +221,7 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/operator-intake",
   "schema_version": "pocketmd-lite-operator-intake-packet.v1",
-  "source_commit_sha": "5a3c8481a9b74f7699820c1e6b595666a5c3fdd4",
+  "source_commit_sha": "9eb7edaf52a38ce1d287fba839cc167c9d8afe83",
   "status": "ready_for_operator_input",
   "summary": {
     "current_blocker_count": 4,

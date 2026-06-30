@@ -413,6 +413,9 @@ def _public_benchmark_row(
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(row.get("validation_command") or ""),
+            "depends_on": [str(item) for item in _as_list(row.get("depends_on"))],
         }
         for row in _as_list(public_benchmark.get("operator_evidence_gap_register"))
         if isinstance(row, dict)
@@ -467,9 +470,9 @@ def _public_benchmark_row(
                 "materialization_steps": [
                     str(item) for item in _as_list(row.get("materialization_steps"))
                 ],
-                "materialization_command": "",
-                "validation_command": "",
-                "depends_on": [],
+                "materialization_command": str(row.get("materialization_command") or ""),
+                "validation_command": str(row.get("validation_command") or ""),
+                "depends_on": [str(item) for item in _as_list(row.get("depends_on"))],
             }
             for row in operator_evidence_gap_register
             if _as_bool(row.get("tier_beta_blocked"))
@@ -500,7 +503,7 @@ def _public_benchmark_row(
             ),
             {},
         )
-    operator_handoff_queue = [
+    source_operator_handoff_queue = [
         _as_dict(row)
         for row in _as_list(
             public_benchmark.get("operator_handoff_queue")
@@ -508,6 +511,8 @@ def _public_benchmark_row(
         )
         if isinstance(row, dict)
     ]
+    if source_operator_handoff_queue:
+        operator_handoff_queue = source_operator_handoff_queue
     first_operator_handoff = _as_dict(
         public_benchmark.get("first_operator_handoff")
         or capability_summary.get("first_operator_handoff")
