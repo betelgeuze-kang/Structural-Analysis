@@ -1,6 +1,6 @@
 {
   "blocker_grouping_metadata": {
-    "blocker_count": 17,
+    "blocker_count": 18,
     "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
     "groups": {
       "duplicate_source_detail": {
@@ -18,12 +18,13 @@
         "scope": "local_environment_blocker"
       },
       "human_observation_report_detail": {
-        "blocker_count": 11,
+        "blocker_count": 12,
         "blockers": [
           "observation_report:approval_decision_not_accepted",
           "observation_report:blocking_usability_issue_present",
           "observation_report:completion_minutes_missing",
           "observation_report:contract_signal_not_pass",
+          "observation_report:evidence_ref_missing",
           "observation_report:new_to_product_not_confirmed",
           "observation_report:observation_file_missing",
           "observation_report:participant_not_new_user",
@@ -80,6 +81,7 @@
     "observation_report:blocking_usability_issue_present",
     "observation_report:completion_minutes_missing",
     "observation_report:contract_signal_not_pass",
+    "observation_report:evidence_ref_missing",
     "observation_report:new_to_product_not_confirmed",
     "observation_report:observation_file_missing",
     "observation_report:participant_not_new_user",
@@ -95,7 +97,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T08:00:46.008283+00:00",
+  "generated_at": "2026-06-30T13:35:56.337440+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -108,6 +110,7 @@
       "required_workflow_steps_missing",
       "required_workflow_step_not_passed",
       "blocking_usability_issue_present",
+      "evidence_ref_missing",
       "approval_decision_not_accepted"
     ],
     "contract_pass": false,
@@ -127,8 +130,8 @@
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:aefda0dde2c494753c0c38a8ecc9f0fbd66c6cfaf811e9dfd3f392be14d79852",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:d4cb737228d14cfec2a9b967bfe48b545ddc5cc5020604481ef7edcbdd33e902",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:ec9928c39d653e54fe1affaf38af08841c6585c32343d221664a691ee03e7a9e",
     "scripts/build_phase6_ux_observation_status.py": "sha256:c3561740aed6a486b4cf666675e23e98d9da6b2cdfdacab97136190ebdd0816f"
   },
   "intake_packet_gate": {
@@ -143,10 +146,11 @@
       "required_workflow_steps_missing",
       "required_workflow_step_not_passed",
       "blocking_usability_issue_present",
+      "evidence_ref_missing",
       "approval_decision_not_accepted"
     ],
     "contract_pass": false,
-    "field_count": 18,
+    "field_count": 21,
     "field_pass_count": 0,
     "receipt": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
     "status": "blocked",
@@ -179,7 +183,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "9f5d7c32bb8514776570ed2d11eda3640ac08787",
+  "source_commit_sha": "fcccc881f3e2306f20291c96a884721ab88213b4",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=5/5 | browser=True"
 }

@@ -343,7 +343,7 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 17,
+        "blocker_count": 18,
         "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
         "groups": {
           "duplicate_source_detail": {
@@ -361,12 +361,13 @@
             "scope": "local_environment_blocker"
           },
           "human_observation_report_detail": {
-            "blocker_count": 11,
+            "blocker_count": 12,
             "blockers": [
               "observation_report:approval_decision_not_accepted",
               "observation_report:blocking_usability_issue_present",
               "observation_report:completion_minutes_missing",
               "observation_report:contract_signal_not_pass",
+              "observation_report:evidence_ref_missing",
               "observation_report:new_to_product_not_confirmed",
               "observation_report:observation_file_missing",
               "observation_report:participant_not_new_user",
@@ -423,6 +424,7 @@
         "observation_report:blocking_usability_issue_present",
         "observation_report:completion_minutes_missing",
         "observation_report:contract_signal_not_pass",
+        "observation_report:evidence_ref_missing",
         "observation_report:new_to_product_not_confirmed",
         "observation_report:observation_file_missing",
         "observation_report:participant_not_new_user",
@@ -513,7 +515,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T13:33:39.334736+00:00",
+  "generated_at": "2026-06-30T13:35:56.463387+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:03ff0c33528672d66c708df70f63d388e63b1075125d0b180bb78e9f67cf720c",
@@ -537,9 +539,9 @@
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:eded2c5c163d83b1ca7ebfae1adb282f069e5bcd80636526c2d69994b7c86adf",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:cc5edab07c763d44c75f7005eca66f235afb0d81ef4bc21115f60bfea8459790",
-    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:c454ac47cd4bd2141cb7517e0fa79a26decfaf90db4459bb5d5d400fb4c28333",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:77c554687e2199dce3915a8fbca0061d519f9e333147a593c39216805b4d2196",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:7138001b63e186662dea7ad2c05646dd8ffcba6b2be705b04186caad4ab19df4",
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:4dd09cab3a379bd68681fddd99dc1049f33a3eb6b567dd88fb4f24e1c87a0a0b",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:d4cb737228d14cfec2a9b967bfe48b545ddc5cc5020604481ef7edcbdd33e902",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:ec9928c39d653e54fe1affaf38af08841c6585c32343d221664a691ee03e7a9e",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
   },
@@ -2217,6 +2219,7 @@
           "required_workflow_steps_missing",
           "required_workflow_step_not_passed",
           "blocking_usability_issue_present",
+          "evidence_ref_missing",
           "approval_decision_not_accepted"
         ],
         "contract_pass": false,
@@ -2249,10 +2252,11 @@
           "required_workflow_steps_missing",
           "required_workflow_step_not_passed",
           "blocking_usability_issue_present",
+          "evidence_ref_missing",
           "approval_decision_not_accepted"
         ],
         "contract_pass": false,
-        "field_count": 18,
+        "field_count": 21,
         "field_pass_count": 0,
         "receipt": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "status": "blocked",
@@ -2287,7 +2291,7 @@
         "workflow_shell_step_pass_count": 5
       },
       "phase6_ux_blocker_grouping": {
-        "blocker_count": 17,
+        "blocker_count": 18,
         "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
         "groups": {
           "duplicate_source_detail": {
@@ -2305,12 +2309,13 @@
             "scope": "local_environment_blocker"
           },
           "human_observation_report_detail": {
-            "blocker_count": 11,
+            "blocker_count": 12,
             "blockers": [
               "observation_report:approval_decision_not_accepted",
               "observation_report:blocking_usability_issue_present",
               "observation_report:completion_minutes_missing",
               "observation_report:contract_signal_not_pass",
+              "observation_report:evidence_ref_missing",
               "observation_report:new_to_product_not_confirmed",
               "observation_report:observation_file_missing",
               "observation_report:participant_not_new_user",
@@ -2367,6 +2372,7 @@
         "observation_report:blocking_usability_issue_present",
         "observation_report:completion_minutes_missing",
         "observation_report:contract_signal_not_pass",
+        "observation_report:evidence_ref_missing",
         "observation_report:new_to_product_not_confirmed",
         "observation_report:observation_file_missing",
         "observation_report:participant_not_new_user",
@@ -2430,6 +2436,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "f2ba73ab2a4e5d5222b09ae1cd1e3080c8b37ba4",
+  "source_commit_sha": "fcccc881f3e2306f20291c96a884721ab88213b4",
   "status": "blocked"
 }

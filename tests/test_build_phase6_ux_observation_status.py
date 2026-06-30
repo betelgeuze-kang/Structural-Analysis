@@ -53,6 +53,7 @@ def test_phase6_ux_observation_status_blocks_without_human_and_execution_evidenc
         for blocker in payload["blockers"]
     )
     assert "observation_report:observation_file_missing" in payload["blockers"]
+    assert "observation_report:evidence_ref_missing" in payload["blockers"]
     grouping = payload["blocker_grouping_metadata"]
     assert grouping["schema_version"] == "phase6-ux-observation-blocker-groups.v1"
     assert grouping["blocker_count"] == len(payload["blockers"])
@@ -68,6 +69,9 @@ def test_phase6_ux_observation_status_blocks_without_human_and_execution_evidenc
         "intake_packet_handoff"
     ]["blockers"]
     assert "observation_report:observation_file_missing" in grouping["groups"][
+        "human_observation_report_detail"
+    ]["blockers"]
+    assert "observation_report:evidence_ref_missing" in grouping["groups"][
         "human_observation_report_detail"
     ]["blockers"]
     assert grouping["groups"]["phase5_execution_detail"]["blockers"] == []

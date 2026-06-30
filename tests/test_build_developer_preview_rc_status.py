@@ -299,7 +299,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "environment_spillover"
     ]["scope"] == "local_environment_blocker"
     assert ux_handoff["intake_field_pass_count"] == 0
-    assert ux_handoff["intake_field_count"] == 18
+    assert ux_handoff["intake_field_count"] == 21
     assert ux_handoff["report_blockers"] == [
         "observation_file_missing",
         "contract_signal_not_pass",
@@ -311,6 +311,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "required_workflow_steps_missing",
         "required_workflow_step_not_passed",
         "blocking_usability_issue_present",
+        "evidence_ref_missing",
         "approval_decision_not_accepted",
     ]
     assert ux_handoff["workflow_step_pass_count"] == 0
