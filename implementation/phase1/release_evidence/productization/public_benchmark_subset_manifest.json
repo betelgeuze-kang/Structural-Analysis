@@ -57,7 +57,7 @@
   "claim_boundary": "This manifest is a Tier beta source-of-truth seed. It defines the minimum CASF/PDBBind subset contract, operator slots, case-row schema, and validation command, but it does not attach or redistribute public benchmark source files and does not claim benchmark results.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T21:27:25.189500+00:00",
+  "generated_at": "2026-06-30T21:33:35.548630+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:987c65882b572a415c1dcd4941fc8adfc055b2e673d114bbe90caa5b02f777d8",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:b8ffd0d2b46dcd1803b3ed07aae28dd038706ab0ffce26dd7d8d7e7a786347c6",
@@ -138,7 +138,7 @@
       "status": "source_material_required"
     }
   ],
-  "source_commit_sha": "8d2b3b058ff63c5ba01729a419be2f69ae1ecc5b",
+  "source_commit_sha": "8bfbc2412544072b1e153893d60a4aab8db94456",
   "source_families": [
     "CASF/PDBBind"
   ],
