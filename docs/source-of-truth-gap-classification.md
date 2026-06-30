@@ -4,7 +4,7 @@ Date: 2026-06-29
 
 Scope: read-only classification of the five remaining `/goal` source-of-truth candidates, followed by direct builder source-tracking fixes where the current repo has a clear producer/artifact pair and aggregator freshness policy where the candidate is a rollup.
 
-Current outcome: the two direct leaf candidates are now included in `report_release_evidence_freshness.py` and emit source-tracking metadata. The three rollup/operator candidates remain aggregator-review items, not leaf freshness rows; their current artifacts expose source tracking through their direct upstream inputs. The public benchmark source-of-truth and science actual-closure row audit are also audited as release-decision dependencies, separate from the five historical gap candidates. The classification is emitted in machine-readable form by the freshness report as `source_of_truth_gap_classification`.
+Current outcome: the two direct leaf candidates are now included in `report_release_evidence_freshness.py` and emit source-tracking metadata. The three rollup/operator candidates remain aggregator-review items, not leaf freshness rows; their current artifacts expose source tracking through their direct upstream inputs. The public benchmark source-of-truth, Public Benchmark Phase 2 row audit, and science actual-closure row audit are also audited as release-decision dependencies, separate from the five historical gap candidates. The classification is emitted in machine-readable form by the freshness report as `source_of_truth_gap_classification`.
 
 | Candidate | Current repo match | Classification | Decision |
 |---|---|---|---|
