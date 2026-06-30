@@ -97,7 +97,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T13:35:56.337440+00:00",
+  "generated_at": "2026-06-30T13:37:43.093320+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -183,7 +183,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "fcccc881f3e2306f20291c96a884721ab88213b4",
+  "source_commit_sha": "d81c420c7b5f5611ccb49fd325a49a76c705a793",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=5/5 | browser=True"
 }
