@@ -7,7 +7,7 @@
   "claim_boundary": "This seed defines the DUD-E/LIT-PCBA enrichment scorecard shape and materializer command. With zero operator-attached target rows it is intentionally blocked and cannot support an enrichment claim.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T08:52:18.312456+00:00",
+  "generated_at": "2026-06-30T09:59:32.540708+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:0799eac22f73b7676f73bea67a3b36cecd3c4b2f9bc67a0d85f85de6a8159d71",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:6bb5843980faeeb051b99e4491c5fea6ee98ceb6d3c8e133a11b0f36924dbf9f",
@@ -20,7 +20,7 @@
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:eab5faa0e1f3acf11e7779bcd25ccdaa9066092e1fb3754b8e38d1bedb33098d",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:428761a935484839474dfcec1a692cb419eb176a2be3b33242748df93faeea88"
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:4d416674af098164a1e10e3137303a7b14719ae9c5518cea7b79fac0a3791c22"
   },
   "materializer": {
     "claim_boundary": "The materializer consumes operator-attached DUD-E/LIT-PCBA scored molecule rows and computes EF@1%, EF@5%, and ROC-AUC. It does not fetch public benchmark files, infer ligand chemistry, or close Tier beta.",
@@ -52,7 +52,7 @@
   "reuse_policy": "public_benchmark_enrichment_scorecard_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-enrichment-scorecard.v1",
-  "source_commit_sha": "c5cd25bc8f9039c9e9c59e1c3a9f39ab0ddb1184",
+  "source_commit_sha": "609b290db428bc4b1ca79a346dddb4529e5ef77d",
   "status": "operator_evidence_required",
   "summary": {
     "active_count": 0,

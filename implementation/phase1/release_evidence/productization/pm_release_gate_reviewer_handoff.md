@@ -1,10 +1,10 @@
 # PM Release Gate Reviewer Handoff
 
 - `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=9 | incomplete=0 | release_tiers=2/4`
-- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
+- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
 - `contract_pass`: `True`
-- `release_area_summary`: `13/16`
-- `release_area_blocker_count`: `5`
+- `release_area_summary`: `12/16`
+- `release_area_blocker_count`: `9`
 
 | Blocker | Owner | Closure | Verdict Change Conditions |
 |---|---|---|---|
@@ -24,8 +24,8 @@
 |---|---|---|---|---|
 | `release_tier.technical_paid_pilot_candidate` Technical Paid Pilot Candidate | `pass` | none | none | Technical paid pilot candidate status depends on local milestone evidence and still requires the paid-pilot scope guard before customer use. |
 | `release_tier.paid_pilot_scope_guard_pass` Paid Pilot Scope Guard | `pass` | none | none | Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness. |
-| `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
-| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `customer_shadow::completed_shadow_case_count_below_minimum`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
+| `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured`, `github_sync::github_sync_preflight::worktree_not_clean`, `github_sync::github_sync_preflight::remote_mutation_approval_required`, `github_sync::github_sync_remote_sync_pending`, `github_sync::github_sync_preflight_not_synced` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
+| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `customer_shadow::completed_shadow_case_count_below_minimum`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured`, `github_sync::github_sync_preflight::worktree_not_clean`, `github_sync::github_sync_preflight::remote_mutation_approval_required`, `github_sync::github_sync_remote_sync_pending`, `github_sync::github_sync_preflight_not_synced` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
 
 ## Blocker Details
 
