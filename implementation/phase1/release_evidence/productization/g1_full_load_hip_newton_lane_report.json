@@ -1430,12 +1430,20 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T13:18:22.839023+00:00",
+  "generated_at": "2026-06-30T13:33:36.638946+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
+      "scripts/build_license_status_closure_report.py",
+      "scripts/build_license_status_intake_packet.py",
       "scripts/build_product_capabilities_surface.py",
+      "scripts/build_ux_new_user_observation_intake_packet.py",
+      "scripts/build_ux_new_user_observation_report.py",
       "tests/test_build_goal_bottleneck_roadmap_surface.py",
-      "tests/test_build_product_capabilities_surface.py"
+      "tests/test_build_license_status_closure_report.py",
+      "tests/test_build_license_status_intake_packet.py",
+      "tests/test_build_product_capabilities_surface.py",
+      "tests/test_build_ux_new_user_observation_intake_packet.py",
+      "tests/test_build_ux_new_user_observation_report.py"
     ],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -1487,6 +1495,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "5df6a18c65d0fd928bd2eae7b290ab97951fb95b",
+  "source_commit_sha": "f2ba73ab2a4e5d5222b09ae1cd1e3080c8b37ba4",
   "status": "blocked"
 }

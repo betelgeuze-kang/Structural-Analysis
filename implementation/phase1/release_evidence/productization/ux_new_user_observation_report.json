@@ -10,6 +10,7 @@
     "required_workflow_steps_missing",
     "required_workflow_step_not_passed",
     "blocking_usability_issue_present",
+    "evidence_ref_missing",
     "approval_decision_not_accepted"
   ],
   "checks": {
@@ -24,6 +25,10 @@
     "contract_signal_pass": false,
     "elapsed_30min_pass": false,
     "elapsed_minutes_present": false,
+    "evidence_ref_not_self_reference_pass": false,
+    "evidence_ref_not_template_reference_pass": false,
+    "evidence_ref_present_pass": false,
+    "evidence_ref_resolvable_pass": false,
     "new_to_product_pass": false,
     "observation_file_present": false,
     "participant_role_new_user_pass": false,
@@ -39,7 +44,7 @@
   "claim_boundary": "This report validates a human new-user observation record. Automated browser rehearsal evidence does not satisfy the PM UX release-area gate by itself.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T13:18:23.009653+00:00",
+  "generated_at": "2026-06-30T13:33:36.819826+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ux_new_user_observation.json": "missing"
   },
@@ -84,7 +89,7 @@
   ],
   "reused_evidence": false,
   "schema_version": "ux-new-user-observation-report.v1",
-  "source_commit_sha": "5df6a18c65d0fd928bd2eae7b290ab97951fb95b",
+  "source_commit_sha": "f2ba73ab2a4e5d5222b09ae1cd1e3080c8b37ba4",
   "summary": {
     "approval_decision": "",
     "blocker_count": 1,
@@ -92,6 +97,9 @@
     "completion_minutes": null,
     "declared_completion_minutes": null,
     "elapsed_minutes": null,
+    "evidence_ref": "",
+    "evidence_ref_kind": "missing",
+    "evidence_ref_resolved_path": "",
     "max_completion_minutes": 30.0,
     "missing_fields": [
       "contract_pass",
@@ -121,7 +129,7 @@
     "participant_role": "",
     "placeholder_fields": [],
     "placeholder_workflow_steps": [],
-    "release_blocker_count": 11,
+    "release_blocker_count": 12,
     "reported_blocker_count": 1,
     "required_workflow_step_count": 5,
     "required_workflow_steps": [
@@ -154,7 +162,7 @@
     "workflow_step_pass_count": 0,
     "workflow_steps": []
   },
-  "summary_line": "UX new-user observation: BLOCKED | completion=missing/30.0 min | elapsed=missing/30.0 min | workflow=0/5 | blockers=11",
+  "summary_line": "UX new-user observation: BLOCKED | completion=missing/30.0 min | elapsed=missing/30.0 min | workflow=0/5 | blockers=12",
   "validation_commands": [
     "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
     "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",

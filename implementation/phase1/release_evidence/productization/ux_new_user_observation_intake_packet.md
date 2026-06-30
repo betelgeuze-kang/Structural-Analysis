@@ -1,6 +1,6 @@
 # UX New-User Observation Intake Packet
 
-- `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/18 | blockers=11`
+- `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/21 | blockers=12`
 - `contract_pass`: `False`
 - `observation_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
 - `template_path`: `docs/templates/ux_new_user_observation.template.json`
@@ -26,6 +26,9 @@
 | `completion_minutes_elapsed_match` | `declared=None; elapsed=None; tolerance=1.0` | `derived from observation timestamps` | completion_minutes equals elapsed_minutes within tolerance | `completion_minutes_elapsed_match_pass` = `False` |
 | `workflow_step_coverage` | `pass=0/5; missing=['import', 'model_health', 'analysis_setup', 'run_monitor', 'compare_report']` | `derived from observation timestamps` | required workflow observed count == 5/5 | `all_required_workflow_steps_observed` = `False` |
 | `workflow_step_placeholders` | `[]` | `derived from observation timestamps` | no placeholder workflow step labels or outcomes | `workflow_step_placeholders_absent` = `False` |
+| `evidence_ref_resolvable` | `ref=; kind=missing; resolved=` | `derived from observation timestamps` | https URL, ticket/jira/ux/user-study reference, or existing local evidence path | `evidence_ref_resolvable_pass` = `False` |
+| `evidence_ref_not_self_reference` | `` | `derived from observation timestamps` | evidence_ref must not point back to the observation JSON itself | `evidence_ref_not_self_reference_pass` = `False` |
+| `evidence_ref_not_template_reference` | `` | `derived from observation timestamps` | evidence_ref must not point to the UX observation template | `evidence_ref_not_template_reference_pass` = `False` |
 
 ## Validation Commands
 

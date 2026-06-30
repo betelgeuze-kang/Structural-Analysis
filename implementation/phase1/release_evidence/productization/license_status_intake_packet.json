@@ -181,16 +181,36 @@
       "owner_note": "Derived check for complete legal/product approval provenance.",
       "required_value": "approver role, approval time, evidence ref, and distinct approval ref all pass",
       "template_value": "derived from closure report"
+    },
+    {
+      "accepted_keys": [],
+      "closure_check": "evidence_ref_not_self_reference_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "evidence_ref_not_self_reference",
+      "owner_note": "The license status record cannot serve as its own approval evidence artifact.",
+      "required_value": "evidence_ref must not point back to license_status.json",
+      "template_value": "derived from closure report"
+    },
+    {
+      "accepted_keys": [],
+      "closure_check": "evidence_ref_not_template_reference_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "evidence_ref_not_template_reference",
+      "owner_note": "Templates are owner input aids, not product/legal approval evidence.",
+      "required_value": "evidence_ref must not point to the license status template",
+      "template_value": "derived from closure report"
     }
   ],
-  "generated_at": "2026-06-16T21:37:07.128735+00:00",
+  "generated_at": "2026-06-30T13:33:36.911762+00:00",
   "license_status_path": "implementation/phase1/release/support_bundle/license_status.json",
   "reason_code": "ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED",
   "schema_version": "license-status-intake-packet.v1",
   "summary": {
     "closure_blocker_count": 10,
     "closure_contract_pass": false,
-    "field_count": 13,
+    "field_count": 15,
     "field_pass_count": 0,
     "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
     "placeholder_values_absent_pass": true,

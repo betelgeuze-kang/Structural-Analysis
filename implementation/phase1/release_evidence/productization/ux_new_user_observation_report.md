@@ -1,6 +1,6 @@
 # UX New-User Observation Report
 
-- `summary_line`: `UX new-user observation: BLOCKED | completion=missing/30.0 min | elapsed=missing/30.0 min | workflow=0/5 | blockers=11`
+- `summary_line`: `UX new-user observation: BLOCKED | completion=missing/30.0 min | elapsed=missing/30.0 min | workflow=0/5 | blockers=12`
 - `contract_pass`: `False`
 - `observation_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
 

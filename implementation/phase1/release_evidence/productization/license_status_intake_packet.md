@@ -21,6 +21,8 @@
 | `approval_timeline` | `approved_at=; expires_at=` | approved_at_utc <= now and approved_at_utc <= expiry when not perpetual | `approval_timeline_pass` = `False` |
 | `approval_ref_distinct` | `license_id=; approval_ref=` | approval_ref differs from license_id | `approval_ref_distinct_pass` = `False` |
 | `provenance_complete` | `role=; evidence_ref=; evidence_kind=missing` | approver role, approval time, evidence ref, and distinct approval ref all pass | `provenance_complete_pass` = `False` |
+| `evidence_ref_not_self_reference` | `` | evidence_ref must not point back to license_status.json | `evidence_ref_not_self_reference_pass` = `False` |
+| `evidence_ref_not_template_reference` | `` | evidence_ref must not point to the license status template | `evidence_ref_not_template_reference_pass` = `False` |
 
 ## Validation Commands
 

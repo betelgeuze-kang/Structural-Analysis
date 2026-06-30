@@ -11,24 +11,24 @@
     "pm_milestones": "5/5",
     "pm_release_areas": "13/16",
     "release_ready": false,
-    "snapshot_blocker_count": 35,
+    "snapshot_blocker_count": 34,
     "snapshot_status": "blocked",
     "workstation_delivery_ready": true
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 64.6,
-  "generated_at": "2026-06-30T13:18:59.331625+00:00",
+  "generated_at": "2026-06-30T13:33:39.836317+00:00",
   "input_checksums": {
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:eac84d6f14062da6a53864ed8f8ba164bb55adfbf7a6706aae5fd7ca3c705125",
-    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:2b9515bc14de9448521b6ae95af6a54e303c9a744531076f1a665bb1ada9b678",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:dfa79f4f17e9016f076a2295bdeee3bc60727ed9955e2d476e722727e221311e",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:94b71a8af560d06ae964b346f89f91636e0ee576d960379b249e147aff371d74",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:1b316e4c3ee384e84f7847aa01a240be5a0460d1ceab8796f5504b328dc4e3da",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:bc7ca05a55795b4657fbde2d71b9291c625385465bff27d9b15ae1473f01bc9e",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:8454af8d1cce460f304eb7c9ee9aa6bec8e8263b3002bcd3610cea77a5388964",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:ff03e02e33656c8b1b88ef7354bce580ebefd724a094c4df7a4a608fe0771d37",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:59fbdb495c26e98507cd3d32e1900636ffc4852b30237324193b4d8802683fd4",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
-    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:2bbb9d72662f43580d921e5460cc90810273db64c8d4e991b6a19e5492f3649d",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:02bd714461118ea7111f3f024dc1462501a56ed2581ba785d7a59c9a5ffbadd6",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:56eddc613b0082b0103bedb0af25fc41d44503acda63bea157797c827b00ad93",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:5c1fd5af687e3ebddc3ec1d9efa44d6cc8b8704275e2c9c13d831087cf8fd3b2",
+    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:1e5b9c3a842a1f973ec19f4d1bc7bbb0eb3441e5cde81fc6f7fd9f8eba4ed421",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2b8ea269af51c051ed921a5b09c0cca2324ab9fdd25acb5332efb6fe6105b521",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:e3882538e1b84e398042737f82e52687a888281f2362e4802604d25d00ec0773",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d99119fabf3be83b3b70050959349289b4dc20c99feea6c6d5da955ee0f2f118",
     "scripts/build_structural_product_development_roadmap.py": "sha256:4a630e5a886be91cac2096bf7254f53a1381d1470588b8535c0322a25e556c86"
   },
   "passed_evidence_requirement_count": 31,
@@ -64,7 +64,7 @@
       "summary": {
         "fresh_artifact_count": 15,
         "fresh_artifact_pass_count": 15,
-        "snapshot_blocker_count": 35,
+        "snapshot_blocker_count": 34,
         "stale_or_inconsistent": false
       }
     },
@@ -271,7 +271,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "5df6a18c65d0fd928bd2eae7b290ab97951fb95b",
+  "source_commit_sha": "f2ba73ab2a4e5d5222b09ae1cd1e3080c8b37ba4",
   "stage_average_progress_percent": 54.5,
   "stage_count": 7,
   "status": "blocked",

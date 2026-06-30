@@ -12,6 +12,7 @@
     "required_workflow_steps_missing",
     "required_workflow_step_not_passed",
     "blocking_usability_issue_present",
+    "evidence_ref_missing",
     "approval_decision_not_accepted"
   ],
   "field_rows": [
@@ -212,9 +213,42 @@
       "report_check_pass": false,
       "required_value": "no placeholder workflow step labels or outcomes",
       "template_value": "derived from observation timestamps"
+    },
+    {
+      "current_value": "ref=; kind=missing; resolved=",
+      "field": "evidence_ref_resolvable",
+      "missing": false,
+      "owner_note": "The 30-minute sample must point to a retrievable note, ticket, recording, or signed bundle.",
+      "placeholder": false,
+      "report_check": "evidence_ref_resolvable_pass",
+      "report_check_pass": false,
+      "required_value": "https URL, ticket/jira/ux/user-study reference, or existing local evidence path",
+      "template_value": "derived from observation timestamps"
+    },
+    {
+      "current_value": "",
+      "field": "evidence_ref_not_self_reference",
+      "missing": false,
+      "owner_note": "Self-references do not prove that separate human-observation evidence exists.",
+      "placeholder": false,
+      "report_check": "evidence_ref_not_self_reference_pass",
+      "report_check_pass": false,
+      "required_value": "evidence_ref must not point back to the observation JSON itself",
+      "template_value": "derived from observation timestamps"
+    },
+    {
+      "current_value": "",
+      "field": "evidence_ref_not_template_reference",
+      "missing": false,
+      "owner_note": "Templates are owner input aids, not human observation evidence.",
+      "placeholder": false,
+      "report_check": "evidence_ref_not_template_reference_pass",
+      "report_check_pass": false,
+      "required_value": "evidence_ref must not point to the UX observation template",
+      "template_value": "derived from observation timestamps"
     }
   ],
-  "generated_at": "2026-06-30T09:46:29.938517+00:00",
+  "generated_at": "2026-06-30T13:33:36.850158+00:00",
   "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
   "observation_report_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
   "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
@@ -223,7 +257,10 @@
     "completion_minutes": null,
     "declared_completion_minutes": null,
     "elapsed_minutes": null,
-    "field_count": 18,
+    "evidence_ref": "",
+    "evidence_ref_kind": "missing",
+    "evidence_ref_resolved_path": "",
+    "field_count": 21,
     "field_pass_count": 0,
     "max_completion_minutes": 30.0,
     "missing_workflow_steps": [
@@ -234,7 +271,7 @@
       "compare_report"
     ],
     "not_passed_workflow_steps": [],
-    "observation_blocker_count": 11,
+    "observation_blocker_count": 12,
     "observation_contract_pass": false,
     "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "placeholder_workflow_steps": [],
@@ -265,7 +302,7 @@
     "workflow_step_count": 0,
     "workflow_step_pass_count": 0
   },
-  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/18 | blockers=11",
+  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/21 | blockers=12",
   "template_path": "docs/templates/ux_new_user_observation.template.json",
   "validation_commands": [
     "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
