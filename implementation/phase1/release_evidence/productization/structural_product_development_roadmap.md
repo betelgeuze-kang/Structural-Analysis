@@ -1,6 +1,6 @@
 # Structural Product Development Roadmap
 
-Structural product roadmap: BLOCKED | evidence_progress=62.5% | stage_average=53.8% | ready_stages=1/7 | primary_blocker=basic_ci::pr_ci_30_consecutive_pass_evidence_missing
+Structural product roadmap: BLOCKED | evidence_progress=60.4% | stage_average=49.0% | ready_stages=0/7 | primary_blocker=freshness_or_snapshot_integrity_not_closed
 
 ## Current Position
 
@@ -18,7 +18,8 @@ Structural product roadmap: BLOCKED | evidence_progress=62.5% | stage_average=53
 
 ## Roadmap Stages
 
-- `evidence_freshness_and_snapshot_integrity`: ready (3/3, 100.0%)
+- `evidence_freshness_and_snapshot_integrity`: partial (2/3, 66.7%)
+  - first blocker: `freshness_or_snapshot_integrity_not_closed`
   - next action: `keep_release_evidence_freshness_report_green`
 - `pm_release_gate`: partial (17/21, 81.0%)
   - first blocker: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`

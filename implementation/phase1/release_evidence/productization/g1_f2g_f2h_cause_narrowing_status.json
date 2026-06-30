@@ -50,7 +50,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-06-30T18:47:59.028203+00:00",
+  "generated_at": "2026-06-30T18:54:45.742109+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -161,7 +161,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "76e24283dfa56e9776eae11273d4c3486e7a4fc1",
+  "source_commit_sha": "4410103274d956d61df2c1b02f3c6914054f844b",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
