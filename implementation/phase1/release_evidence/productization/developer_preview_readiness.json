@@ -4,16 +4,13 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 8,
+  "blocker_count": 5,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
-    "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
-    "human_ux::observation_file_missing",
-    "stale_or_inconsistent:open_blocker_count_conflict",
-    "stale_or_inconsistent:release_area_count_conflict"
+    "human_ux::observation_file_missing"
   ],
   "categories": {
     "benchmark": {
@@ -58,22 +55,19 @@
     },
     "numerical": {
       "blocked": true,
-      "blocker_count": 5,
+      "blocker_count": 4,
       "blockers": [
         "g1::full_load_gate_not_closed",
         "g1::full_mesh_nonlinear_equilibrium_not_closed",
         "g1::material_newton_breadth_not_closed",
-        "g1::production_rocm_hip_residency_not_closed",
-        "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact"
+        "g1::production_rocm_hip_residency_not_closed"
       ]
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 3,
+      "blocker_count": 1,
       "blockers": [
-        "human_ux::observation_file_missing",
-        "stale_or_inconsistent:open_blocker_count_conflict",
-        "stale_or_inconsistent:release_area_count_conflict"
+        "human_ux::observation_file_missing"
       ]
     }
   },
@@ -194,7 +188,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T11:21:50.100344+00:00",
+  "generated_at": "2026-06-30T11:29:55.074816+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -205,30 +199,30 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:755343bc3fff7ac93f599a350a12dbdbe41c21f1ac51a6ad6f293c2b5bac3cfb",
+      "input_checksum": "sha256:8f855e56f404d19efe25c7b2cca05d4c2ccd9c791118d3820c3efb935173c016",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "5258208942f4def3e68c18ad138ba14f4fb78d6d",
+      "source_commit_sha": "de0bb86574e6f517aade568d259aa48d61497906",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:08894ce674def39f286f94fdeaaf3e63eb8073e79bdc86a272bfafdc1b9f4b20",
+      "input_checksum": "sha256:c0cae7379a94c9f2541a7fb62afacd7116066a5fac1a0be07e683f3f8aa36098",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
       "source_commit_sha": "5258208942f4def3e68c18ad138ba14f4fb78d6d",
-      "status": "stale_or_inconsistent"
+      "status": "blocked"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:755343bc3fff7ac93f599a350a12dbdbe41c21f1ac51a6ad6f293c2b5bac3cfb",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:08894ce674def39f286f94fdeaaf3e63eb8073e79bdc86a272bfafdc1b9f4b20"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:8f855e56f404d19efe25c7b2cca05d4c2ccd9c791118d3820c3efb935173c016",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:c0cae7379a94c9f2541a7fb62afacd7116066a5fac1a0be07e683f3f8aa36098"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
-  "product_snapshot_status": "stale_or_inconsistent",
+  "product_snapshot_status": "blocked",
   "reason_code": "ERR_DEVELOPER_PREVIEW_BLOCKED",
   "reuse_policy": "derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence",
   "reused_evidence": false,
@@ -1785,13 +1779,12 @@
       },
       "G1 solver": {
         "blocked": true,
-        "blocker_count": 5,
+        "blocker_count": 4,
         "blockers": [
           "g1::full_load_gate_not_closed",
           "g1::full_mesh_nonlinear_equilibrium_not_closed",
           "g1::material_newton_breadth_not_closed",
-          "g1::production_rocm_hip_residency_not_closed",
-          "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact"
+          "g1::production_rocm_hip_residency_not_closed"
         ]
       },
       "customer shadow": {
@@ -1849,12 +1842,9 @@
         ]
       },
       "release freshness/sync": {
-        "blocked": true,
-        "blocker_count": 2,
-        "blockers": [
-          "stale_or_inconsistent:open_blocker_count_conflict",
-          "stale_or_inconsistent:release_area_count_conflict"
-        ]
+        "blocked": false,
+        "blocker_count": 0,
+        "blockers": []
       }
     }
   },
@@ -2050,6 +2040,6 @@
       }
     }
   },
-  "source_commit_sha": "5258208942f4def3e68c18ad138ba14f4fb78d6d",
+  "source_commit_sha": "de0bb86574e6f517aade568d259aa48d61497906",
   "status": "blocked"
 }
