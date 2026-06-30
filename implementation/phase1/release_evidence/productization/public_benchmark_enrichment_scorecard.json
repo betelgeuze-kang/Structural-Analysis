@@ -7,7 +7,7 @@
   "claim_boundary": "This seed defines the DUD-E/LIT-PCBA enrichment scorecard shape and materializer command. With zero operator-attached target rows it is intentionally blocked and cannot support an enrichment claim.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:18:39.472492+00:00",
+  "generated_at": "2026-06-30T06:20:23.086833+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d48996cec4da85078de2954832d4ec0a7973f0c6a01bedcfc783fc3faf5825cb",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:a4397c9b155ad296d665465af64b9b0054a5e286b411ea652c0a85266de016a4",
@@ -48,7 +48,7 @@
   "reuse_policy": "public_benchmark_enrichment_scorecard_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-enrichment-scorecard.v1",
-  "source_commit_sha": "49eab978e6354fd6211199f86cc43e1da4edb3e0",
+  "source_commit_sha": "02c3eff5dea431e6d927a69b2fd191aaebf0059e",
   "status": "operator_evidence_required",
   "summary": {
     "active_count": 0,

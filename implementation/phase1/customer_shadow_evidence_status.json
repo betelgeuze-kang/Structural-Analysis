@@ -16,7 +16,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_dir": "implementation/phase1/customer_shadow_evidence",
   "evidence_rows": [],
-  "generated_at": "2026-06-30T06:06:21.736069+00:00",
+  "generated_at": "2026-06-30T06:21:36.848159+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence": "dir-sha256:7b1448a062479f7a246558dae718700d2beea6b4a611566c96bb63c5ae409dc2",
     "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:db530761321ba8a1bd3e16ba81c5ea4579aeecea296ea0bda34ee070f530e802",
@@ -27,7 +27,7 @@
   "reused_evidence": true,
   "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
   "schema_version": "customer-shadow-evidence-status.v1",
-  "source_commit_sha": "635d9f2d9592fe25d8041dfadcb9ce801c62ce9a",
+  "source_commit_sha": "02c3eff5dea431e6d927a69b2fd191aaebf0059e",
   "summary": {
     "completed_shadow_case_count": 0,
     "completed_shadow_case_ids": [],
