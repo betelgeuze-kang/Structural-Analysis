@@ -21,6 +21,53 @@ def _write_json(path: Path, payload: dict) -> Path:
     return path
 
 
+def test_developer_preview_readiness_strip_ignores_product_snapshot_checksum_cycle() -> None:
+    base = {
+        "schema_version": "developer-preview-readiness.v1",
+        "generated_at": "2026-06-30T00:00:00+00:00",
+        "source_commit_sha": "old-head",
+        "input_checksums": {
+            "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": (
+                "sha256:old"
+            ),
+            "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": (
+                "sha256:stable"
+            ),
+        },
+        "input_artifacts": {
+            "product_readiness_snapshot": {
+                "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+                "input_checksum": "sha256:old",
+                "source_commit_sha": "old-head",
+                "status": "blocked",
+            }
+        },
+        "blockers": ["g1::full_load_gate_not_closed"],
+    }
+    receipt_only_refresh = json.loads(json.dumps(base))
+    receipt_only_refresh["generated_at"] = "2026-06-30T00:01:00+00:00"
+    receipt_only_refresh["source_commit_sha"] = "new-head"
+    receipt_only_refresh["input_checksums"][
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+    ] = "sha256:new"
+    receipt_only_refresh["input_artifacts"]["product_readiness_snapshot"][
+        "input_checksum"
+    ] = "sha256:new"
+    receipt_only_refresh["input_artifacts"]["product_readiness_snapshot"][
+        "source_commit_sha"
+    ] = "new-head"
+
+    assert build_developer_preview_readiness._strip_volatile(
+        base
+    ) == build_developer_preview_readiness._strip_volatile(receipt_only_refresh)
+
+    changed_blocker = json.loads(json.dumps(receipt_only_refresh))
+    changed_blocker["blockers"] = []
+    assert build_developer_preview_readiness._strip_volatile(
+        base
+    ) != build_developer_preview_readiness._strip_volatile(changed_blocker)
+
+
 def test_developer_preview_excludes_future_commercial_blockers(tmp_path: Path) -> None:
     product_snapshot = _write_json(
         tmp_path / "product_readiness_snapshot.json",
