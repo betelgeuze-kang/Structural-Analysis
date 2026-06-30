@@ -518,6 +518,19 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     evidence_gap_register = {
         row["slot_id"]: row for row in source["operator_evidence_gap_register"]
     }
+    blocker_detail_register = {
+        row["slot_id"]: row for row in source["operator_blocker_detail_register"]
+    }
+    assert source["operator_blocker_detail_count"] == 4
+    assert source["first_operator_blocker_detail"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert source["operator_intake_packet"][
+        "source_of_truth_blocker_detail_count"
+    ] == 4
+    assert source["operator_intake_packet"][
+        "source_of_truth_first_blocker_detail"
+    ]["slot_id"] == "casf_pdbbind_subset_intake"
     assert (
         evidence_gap_register["casf_pdbbind_subset_intake"]["manifest_contract"][
             "nested_contracts"
@@ -534,6 +547,17 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert evidence_gap_register["dud_e_lit_pcba_enrichment_intake"][
         "minimum_evidence"
     ]["supported_families"] == ["DUD-E", "LIT-PCBA"]
+    assert blocker_detail_register["dud_e_lit_pcba_enrichment_intake"][
+        "blockers"
+    ] == [
+        "dud_e_lit_pcba_enrichment_targets_missing",
+        "dud_e_lit_pcba_scored_molecules_missing",
+        "dud_e_lit_pcba_active_decoy_labels_missing",
+        "public_benchmark_external_receipts_missing",
+    ]
+    assert blocker_detail_register["dud_e_lit_pcba_enrichment_intake"][
+        "first_next_action"
+    ] == "attach at least one DUD-E or LIT-PCBA target with active and decoy labels"
     assert (
         "materialize_public_benchmark_enrichment_scorecard.py"
         in evidence_gap_register["dud_e_lit_pcba_enrichment_intake"][
@@ -543,6 +567,15 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert evidence_gap_register["vina_gnina_comparison_intake"][
         "materialization_steps"
     ] == ["materialize_vina_gnina_comparison_adapter"]
+    assert blocker_detail_register["vina_gnina_comparison_intake"]["blockers"] == [
+        "vina_gnina_comparison_cases_missing",
+        "vina_gnina_engine_runs_missing",
+        "vina_gnina_external_receipts_missing",
+        "public_benchmark_external_receipts_missing",
+    ]
+    assert blocker_detail_register["vina_gnina_comparison_intake"][
+        "minimum_evidence"
+    ]["required_engines"] == ["vina", "gnina"]
     assert (
         "materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         in evidence_gap_register["vina_gnina_comparison_intake"][

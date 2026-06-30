@@ -702,6 +702,65 @@ def _operator_evidence_gap_register(
     return rows
 
 
+def _operator_blocker_detail_register(
+    *,
+    tier_beta_gate: dict[str, Any],
+    operator_evidence_gap_register: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    criteria_by_id = {
+        str(row.get("criterion_id") or ""): row
+        for row in tier_beta_gate.get("criteria", [])
+        if isinstance(row, dict)
+    }
+    rows: list[dict[str, Any]] = []
+    for gap in operator_evidence_gap_register:
+        if not gap.get("tier_beta_blocked"):
+            continue
+        criteria: list[dict[str, Any]] = []
+        blockers: list[str] = []
+        for criterion_id in gap.get("blocked_tier_beta_criteria", []):
+            criterion = criteria_by_id.get(str(criterion_id), {})
+            criterion_blockers = [
+                str(blocker) for blocker in criterion.get("blockers", []) if str(blocker)
+            ]
+            blockers.extend(criterion_blockers)
+            criteria.append(
+                {
+                    "criterion_id": str(criterion_id),
+                    "current": criterion.get("current"),
+                    "required": criterion.get("required"),
+                    "blockers": criterion_blockers,
+                }
+            )
+        unique_blockers = list(dict.fromkeys(blockers))
+        rows.append(
+            {
+                "slot_priority": int(gap.get("slot_priority") or 0),
+                "slot_id": str(gap.get("slot_id") or ""),
+                "status": str(gap.get("status") or ""),
+                "blocked_tier_beta_criteria": [
+                    str(item) for item in gap.get("blocked_tier_beta_criteria", [])
+                ],
+                "criterion_details": criteria,
+                "blocker_count": len(unique_blockers),
+                "blockers": unique_blockers,
+                "first_blocker": unique_blockers[0] if unique_blockers else "",
+                "first_next_action": str(gap.get("first_next_action") or ""),
+                "minimum_evidence": dict(gap.get("minimum_evidence") or {}),
+                "template_artifact": str(gap.get("template_artifact") or ""),
+                "depends_on": [
+                    str(path) for path in gap.get("depends_on", []) if str(path)
+                ],
+                "materialization_steps": [
+                    str(step) for step in gap.get("materialization_steps", []) if str(step)
+                ],
+                "materialization_command": str(gap.get("materialization_command") or ""),
+                "validation_command": str(gap.get("validation_command") or ""),
+            }
+        )
+    return rows
+
+
 def _source_tracking_contract(
     *, metadata: dict[str, Any], source_paths: list[Path]
 ) -> dict[str, Any]:
@@ -989,6 +1048,10 @@ def build_source_of_truth(
         tier_beta_gate=tier_beta_gate,
         operator_intake_packet=operator_intake_packet,
     )
+    operator_blocker_detail_register = _operator_blocker_detail_register(
+        tier_beta_gate=tier_beta_gate,
+        operator_evidence_gap_register=operator_evidence_gap_register,
+    )
     first_operator_evidence_gap = next(
         (row for row in operator_evidence_gap_register if row["tier_beta_blocked"]),
         {},
@@ -1164,6 +1227,13 @@ def build_source_of_truth(
             operator_handoff_queue[0] if operator_handoff_queue else {}
         ),
         "operator_handoff_queue": operator_handoff_queue,
+        "operator_blocker_detail_count": len(operator_blocker_detail_register),
+        "first_operator_blocker_detail": (
+            operator_blocker_detail_register[0]
+            if operator_blocker_detail_register
+            else {}
+        ),
+        "operator_blocker_detail_register": operator_blocker_detail_register,
         "tier_beta_gate": tier_beta_gate,
         "source_families": [
             {
@@ -1335,6 +1405,12 @@ def build_source_of_truth(
                 operator_intake_packet.get("first_operator_evidence_gap")
                 or first_operator_evidence_gap
             ),
+            "source_of_truth_blocker_detail_count": len(operator_blocker_detail_register),
+            "source_of_truth_first_blocker_detail": (
+                operator_blocker_detail_register[0]
+                if operator_blocker_detail_register
+                else {}
+            ),
             "gate_unblock_plan": operator_intake_packet["gate_unblock_plan"],
             "acceptance_criteria": operator_intake_packet["acceptance_criteria"],
             "materialization_sequence": [
@@ -1488,6 +1564,25 @@ def build_public_benchmark_artifacts(
         operator_intake_packet=operator_intake_packet,
         repo_root=repo_root,
     )
+    source_blocker_detail_register = [
+        row
+        for row in source_of_truth.get("operator_blocker_detail_register", [])
+        if isinstance(row, dict)
+    ]
+    operator_intake_packet = {
+        **operator_intake_packet,
+        "source_of_truth_blocker_detail_count": len(source_blocker_detail_register),
+        "source_of_truth_first_blocker_detail": (
+            source_blocker_detail_register[0]
+            if source_blocker_detail_register
+            else {}
+        ),
+        "source_of_truth_blocker_detail_register": source_blocker_detail_register,
+        "summary": {
+            **dict(operator_intake_packet.get("summary") or {}),
+            "source_of_truth_blocker_detail_count": len(source_blocker_detail_register),
+        },
+    }
     return {
         "source_of_truth": source_of_truth,
         "subset_manifest": subset_manifest,

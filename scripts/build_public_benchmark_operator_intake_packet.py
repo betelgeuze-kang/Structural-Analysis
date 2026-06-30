@@ -427,6 +427,11 @@ def build_public_benchmark_operator_intake_packet(
     source_next_actions = [
         str(row) for row in _as_list(source_of_truth.get("next_actions"))
     ]
+    source_blocker_detail_register = [
+        row
+        for row in _as_list(source_of_truth.get("operator_blocker_detail_register"))
+        if isinstance(row, dict)
+    ]
 
     subset_materialization = (
         "python3 scripts/materialize_public_benchmark_subset_manifest.py "
@@ -694,6 +699,13 @@ def build_public_benchmark_operator_intake_packet(
         "owner_input_required": True,
         "source_of_truth_status": str(source_of_truth.get("status") or ""),
         "source_of_truth_blockers": source_blockers,
+        "source_of_truth_blocker_detail_count": len(source_blocker_detail_register),
+        "source_of_truth_first_blocker_detail": (
+            source_blocker_detail_register[0]
+            if source_blocker_detail_register
+            else {}
+        ),
+        "source_of_truth_blocker_detail_register": source_blocker_detail_register,
         "source_of_truth_next_actions": source_next_actions,
         "input_slots": slots,
         "required_slot_count": len([slot for slot in slots if slot["required"]]),
@@ -817,6 +829,7 @@ def build_public_benchmark_operator_intake_packet(
             "first_manifest_contract_id": casf_pdbbind_manifest_contract["contract_id"],
             "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
             "source_of_truth_blocker_count": len(source_blockers),
+            "source_of_truth_blocker_detail_count": len(source_blocker_detail_register),
             "source_of_truth_status": str(source_of_truth.get("status") or ""),
             "public_benchmark_ready": False,
         },

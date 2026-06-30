@@ -74,6 +74,26 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "vina_gnina_comparison_rows_missing",
         "public_benchmark_external_receipts_missing",
     ]
+    detail_register = {
+        row["slot_id"]: row for row in packet["source_of_truth_blocker_detail_register"]
+    }
+    assert packet["source_of_truth_blocker_detail_count"] == 4
+    assert packet["source_of_truth_first_blocker_detail"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert packet["summary"]["source_of_truth_blocker_detail_count"] == 4
+    assert detail_register["dud_e_lit_pcba_enrichment_intake"]["blockers"] == [
+        "dud_e_lit_pcba_enrichment_targets_missing",
+        "dud_e_lit_pcba_scored_molecules_missing",
+        "dud_e_lit_pcba_active_decoy_labels_missing",
+        "public_benchmark_external_receipts_missing",
+    ]
+    assert detail_register["vina_gnina_comparison_intake"]["blockers"] == [
+        "vina_gnina_comparison_cases_missing",
+        "vina_gnina_engine_runs_missing",
+        "vina_gnina_external_receipts_missing",
+        "public_benchmark_external_receipts_missing",
+    ]
     assert packet["manifest_contract_count"] == 1
     assert packet["first_manifest_contract_id"] == (
         "casf_pdbbind_subset_manifest_contract"
