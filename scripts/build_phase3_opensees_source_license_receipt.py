@@ -38,6 +38,27 @@ LOCAL_SHA256_CHECK_SNIPPET = (
     "actual = hashlib.sha256(Path(sys.argv[1]).read_bytes()).hexdigest(); "
     "raise SystemExit(0 if actual == sys.argv[2] else 1)"
 )
+UPSTREAM_REPO_FULL_NAME = "amaelkady/OpenSEES_Models_CBF"
+UPSTREAM_REPO_URL = "https://github.com/amaelkady/OpenSEES_Models_CBF"
+UPSTREAM_DEFAULT_BRANCH = "main"
+UPSTREAM_SCBF16B_PATH = "Models and Tcl Files/SCBF16B.tcl"
+UPSTREAM_SCBF16B_HTML_URL = (
+    "https://github.com/amaelkady/OpenSEES_Models_CBF/blob/main/"
+    "Models%20and%20Tcl%20Files/SCBF16B.tcl"
+)
+UPSTREAM_SCBF16B_RAW_URL = (
+    "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/"
+    "Models%20and%20Tcl%20Files/SCBF16B.tcl"
+)
+UPSTREAM_SCBF16B_GIT_BLOB_SHA = "7a2ce28a73147c6bd6c3d18e5dbc32a5a0c0fd63"
+UPSTREAM_SCBF16B_SIZE_BYTES = 118066
+UPSTREAM_SCBF16B_RAW_SHA256 = "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80"
+UPSTREAM_LICENSE_HTML_URL = "https://github.com/amaelkady/OpenSEES_Models_CBF/blob/main/LICENSE"
+UPSTREAM_LICENSE_RAW_URL = "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/LICENSE"
+UPSTREAM_LICENSE_GIT_BLOB_SHA = "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7"
+UPSTREAM_LICENSE_SIZE_BYTES = 35149
+UPSTREAM_LICENSE_SPDX = "GPL-3.0"
+UPSTREAM_LICENSE_NAME = "GNU General Public License v3.0"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -109,6 +130,48 @@ def _local_candidate_verification_rows(rows: list[dict[str, Any]]) -> list[dict[
     return verification_rows
 
 
+def _upstream_scbf16b_candidate(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    local_row = next((row for row in rows if row.get("case_id") == "SCBF16B"), {})
+    local_sha256 = str(local_row.get("sha256", ""))
+    return {
+        "case_id": "SCBF16B",
+        "repository": UPSTREAM_REPO_FULL_NAME,
+        "repository_url": UPSTREAM_REPO_URL,
+        "default_branch": UPSTREAM_DEFAULT_BRANCH,
+        "path": UPSTREAM_SCBF16B_PATH,
+        "html_url": UPSTREAM_SCBF16B_HTML_URL,
+        "raw_url": UPSTREAM_SCBF16B_RAW_URL,
+        "github_api_contents_url": (
+            "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/"
+            "contents/Models%20and%20Tcl%20Files/SCBF16B.tcl"
+        ),
+        "github_git_blob_sha": UPSTREAM_SCBF16B_GIT_BLOB_SHA,
+        "upstream_size_bytes": UPSTREAM_SCBF16B_SIZE_BYTES,
+        "upstream_raw_sha256": UPSTREAM_SCBF16B_RAW_SHA256,
+        "local_candidate_path": local_row.get("path"),
+        "local_candidate_sha256": local_sha256,
+        "local_matches_upstream_raw_sha256": local_sha256 == UPSTREAM_SCBF16B_RAW_SHA256,
+        "verification_command": [
+            "gh",
+            "api",
+            "repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files/SCBF16B.tcl",
+            "--jq",
+            ".content",
+            "|",
+            "base64",
+            "-d",
+            "|",
+            "sha256sum",
+        ],
+        "claim_boundary": (
+            "GitHub repository identity, file URL, GPL license metadata, and raw content "
+            "checksum identify the upstream SCBF16B source. This does not approve product "
+            "redistribution, commercial use, derived shell-mix provenance, reference "
+            "outputs, normalization, or scorecard execution."
+        ),
+    }
+
+
 def build_phase3_opensees_source_license_receipt(
     *,
     repo_root: Path = ROOT,
@@ -126,12 +189,16 @@ def build_phase3_opensees_source_license_receipt(
     topology_metrics = topology_metrics if isinstance(topology_metrics, dict) else {}
     topology_checks = topology_report.get("checks")
     topology_checks = topology_checks if isinstance(topology_checks, dict) else {}
+    source_url_candidates = [_upstream_scbf16b_candidate(local_candidate_artifacts)]
+    source_url_verified = bool(
+        source_url_candidates
+        and source_url_candidates[0].get("local_matches_upstream_raw_sha256") is True
+    )
     blockers = [
-        "authoritative_source_url_missing",
-        "upstream_license_text_missing",
+        "license_review_pending",
+        "product_legal_license_review_pending",
         "redistribution_rights_unverified",
         "commercial_use_rights_unverified",
-        "authoritative_download_or_acquisition_script_blocked_source_url_missing",
         "reference_outputs_missing",
         "normalization_not_implemented",
         "opensees_medium_scorecard_execution_missing",
@@ -154,24 +221,40 @@ def build_phase3_opensees_source_license_receipt(
         "contract_pass": False,
         "phase3_closure_claim": False,
         "developer_preview_release_candidate_claim": False,
-        "source_url_verified": False,
-        "license_review_status": "blocked_no_authoritative_license_source_attached",
+        "source_url_verified": source_url_verified,
+        "license_review_status": "identified_gpl_3_0_product_legal_review_required",
         "redistribution_allowed": False,
         "commercial_use_allowed": False,
         "local_candidate_checksum_attached": local_checksum_attached,
         "local_candidate_artifacts": local_candidate_artifacts,
         "authoritative_acquisition": {
-            "status": "blocked_source_url_and_license_missing",
-            "source_url_verified": False,
-            "download_command": [],
+            "status": "source_url_and_license_identified_product_review_required",
+            "source_url_verified": source_url_verified,
+            "source_url": UPSTREAM_SCBF16B_HTML_URL,
+            "raw_url": UPSTREAM_SCBF16B_RAW_URL,
+            "download_command": [
+                "curl",
+                "-L",
+                UPSTREAM_SCBF16B_RAW_URL,
+                "-o",
+                "operator_downloads/opensees/SCBF16B.tcl",
+            ],
+            "verification_command": [
+                "python3",
+                "-c",
+                LOCAL_SHA256_CHECK_SNIPPET,
+                "operator_downloads/opensees/SCBF16B.tcl",
+                UPSTREAM_SCBF16B_RAW_SHA256,
+            ],
             "blockers": [
-                "authoritative_source_url_missing",
-                "upstream_license_text_missing",
-                "authoritative_download_or_acquisition_script_blocked_source_url_missing",
+                "product_legal_license_review_pending",
+                "redistribution_rights_unverified",
+                "commercial_use_rights_unverified",
             ],
             "claim_boundary": (
-                "No authoritative upstream source URL or license text is attached, so this "
-                "receipt deliberately does not author a download command for OpenSees medium."
+                "The command identifies and verifies the upstream SCBF16B source only. "
+                "It does not grant product redistribution or commercial-use approval, "
+                "and it does not cover the derived shell/beam mix or any benchmark result."
             ),
         },
         "local_candidate_verification": {
@@ -206,24 +289,31 @@ def build_phase3_opensees_source_license_receipt(
                 "solver accuracy, or Phase 3 quantity credit."
             ),
         },
-        "source_url_candidates": [],
+        "source_url_candidates": source_url_candidates,
         "license_evidence": {
-            "license_text_path": "",
-            "spdx": "",
-            "review_owner": "",
-            "review_status": "missing",
+            "repository": UPSTREAM_REPO_FULL_NAME,
+            "license_text_path": UPSTREAM_LICENSE_HTML_URL,
+            "license_text_raw_url": UPSTREAM_LICENSE_RAW_URL,
+            "license_git_blob_sha": UPSTREAM_LICENSE_GIT_BLOB_SHA,
+            "license_size_bytes": UPSTREAM_LICENSE_SIZE_BYTES,
+            "spdx": UPSTREAM_LICENSE_SPDX,
+            "license_name": UPSTREAM_LICENSE_NAME,
+            "review_owner": "product_legal_required",
+            "review_status": "identified_product_legal_review_required",
             "claim_boundary": (
-                "No authoritative upstream license text is attached to this receipt. "
-                "Local files and checksums cannot be treated as redistribution approval."
+                "The upstream repository declares GPL-3.0. This receipt identifies the "
+                "license text but does not approve redistribution, commercial use, "
+                "bundling, or customer delivery for product purposes."
             ),
         },
         "blockers": blockers,
         "claim_boundary": (
             "This receipt separates local OpenSees medium candidate checksum/topology evidence "
-            "from source and license approval. It keeps source URL verification, license review, "
-            "redistribution, commercial use, reference outputs, normalization, and scorecard "
-            "execution for OpenSees medium blocked. It does not close OpenSees medium, "
-            "Developer Preview RC, or Phase 3."
+            "from product license approval. It identifies the upstream SCBF16B source URL "
+            "and GPL-3.0 license text, but keeps product legal review, redistribution, "
+            "commercial use, reference outputs, normalization, and scorecard execution "
+            "for OpenSees medium blocked. It does not close OpenSees medium, Developer "
+            "Preview RC, or Phase 3."
         ),
     }
 

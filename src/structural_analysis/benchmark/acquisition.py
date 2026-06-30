@@ -47,19 +47,21 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
         BenchmarkAcquisitionSource(
             source_id="opensees_scbf16b_medium_candidate",
             lanes=("opensees-medium",),
-            source_kind="local_opensees_candidate_source_url_unverified",
+            source_kind="public_github_opensees_candidate_license_review_pending",
             truth_class="independent_reference",
-            acquisition_mode="local_candidate_present_authoritative_source_and_license_pending",
-            source_url_or_doi="local_candidate_source_url_unverified:SCBF16B",
-            license_status="blocked_no_authoritative_license_source_attached",
+            acquisition_mode="authoritative_source_identified_license_review_pending",
+            source_url_or_doi=(
+                "https://github.com/amaelkady/OpenSEES_Models_CBF/blob/main/"
+                "Models%20and%20Tcl%20Files/SCBF16B.tcl"
+            ),
+            license_status="identified_gpl_3_0_product_legal_review_pending",
             redistribution_allowed=False,
             commercial_use_allowed=False,
-            checksum_status="local_candidate_checksum_attached_source_url_unverified",
+            checksum_status="local_candidate_checksum_attached_upstream_sha256_verified",
             expected_output_status="missing_until_reference_outputs_ingested",
             normalization_status="not_started",
             reference_result_status="not_ingested",
             blockers=(
-                "source_url_verification_pending",
                 "license_review_pending",
                 "reference_outputs_missing",
                 "normalization_not_implemented",
@@ -68,9 +70,10 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
             ),
             claim_boundary=(
                 "OpenSees medium lane has local SCBF16B candidate artifacts and topology "
-                "parser evidence, but authoritative source URL, upstream license text, "
-                "redistribution rights, commercial use rights, reference output ingest, "
-                "normalization, and OpenSees medium scorecard execution are still not closed."
+                "parser evidence. The upstream GitHub source URL, raw checksum, and GPL-3.0 "
+                "license identity are identified, but product legal review, redistribution "
+                "rights, commercial use rights, reference output ingest, normalization, and "
+                "OpenSees medium scorecard execution are still not closed."
             ),
             local_candidate_artifacts=(
                 {

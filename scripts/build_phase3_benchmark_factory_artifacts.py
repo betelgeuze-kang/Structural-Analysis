@@ -103,7 +103,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key not in {"generated_at"}
+            if key not in {"elapsed_seconds", "generated_at", "stderr_excerpt", "stdout_excerpt"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(item) for item in payload]

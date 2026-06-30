@@ -176,27 +176,27 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T14:32:12.600281+00:00",
+  "generated_at": "2026-06-30T15:09:51.146255+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:ef5a5621a926c01e41f2e17feb4dcce40fc0a4ad73caff73e1d21fcdc0585729",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:e09effbd4df32a91862108ac1dee091d931a0232f4435c1266850a1dfba9bd2e",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:080ce889538443cf3853e2dd3817039dea1136196913ed8c25298d5cb9262f13",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:7782654fffaafb8810f32b85cc9e6d62a31dcaa3437de458ad9d6415f1e56628",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:d51a08f52e1989afdf2d6b60df519de2ab5feb58a88df1fb7085e6f676d3850d",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:9f01ffac2b830b98d093ef64cc96d57fb7fd2bcb16f1f3754016b17408edc357",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:2fa4b6c77eb98bfff61fb589094141d1b468aaa7d46d113992109c2600b461b9",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:2265320e52127033eb4b9a375074a0a62c16207446ce56da401245bfd914e70b",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7f39549f949d731e55fe69f1de9363c2c7b63e83e350023af6f31906ba761359",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:3e129649c5a06b21cad3ee8e39f0543fd4cb54f8bf3121aa4704688bcf430a66",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:f16ae56a7222abb8f692c0e817e85421a3e1d4a2c9a97453071ce87fd10f7f0a",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:3d338261477aa1618c428a4b9cf57f396387cf9e00ca7bdc89fac3b4fa172886",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:71e56180890908312bae669ab2a20fd817f978b64dc3e5e04b8c4b9287f41f89",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:4b82c09fc8bd4c4cb040a0c683254efa76331b9a13fb38c3cf5f8151318db8fe",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:3c1b19ffe7a83fdb757a9248e777ce7ff21f8582545f72f1a4160ffb3a702e49",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:2d6a8ccc76312b40376baecfdf42d7f669ca4e48e0460be507873cec6b3488a7",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:587d764bd8b76be68f15f81f9c7f7f4fb64a838933220a21b4bec0c2d5f91a45",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:e5a33c638b945fcf7b547ab40d8069e1dcb05987dce6e2e85cb868ef538a3edf",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:ee483556cec4a3f316100cff1216cc2b89a682c5acf4cba803e3e71bce12501a",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:724c2eba3b5298b023a5e30c11eb0d0a30dd64bc9383f063cdefb82c58a55067",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:86366e785bbe9028725b244a46525beae596e38ddc5ef6479cc123059cbf7d87",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:1f7892e97cf48463be34d701bef93ddc0ffb046aa03824b5401d9231dd62083a",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:765c4f5aa1c8f141a38171aa225d5e93eec3fc9ac0713a411d9863d26987e8c9",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:afb7718a7a1105aacc633802eed88464838da8d71f9ddc6d1040925d3180c7a9",
-    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:856c8f6f594f19ceb28cb24fd8fd87c4c008ccf11e9ac9dd87aca35c209f1adc",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:8fdf54e376b7c991c1cf233764edda02ddab62e6517b7dd90be40508324b0fd4",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:b87844fbe6607f6e496d604e81807cee075e9ebd00f3b313da55d428f0c9ba17",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:f69fe30fa0292003252d79624536f0692d4ebb11ed801f859cff7ba898d2979c",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:678c6c521330f773b9baf45bbb24689c5e9bd413cb7e323b0e64460bdf888735",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:73d4d5e06a6747eb0e621c56c1e9204f9b6b76afacbf12efd117ea2a4e07097b",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:171f1363050e44da219835e46b4a8c6c6d8f925778e086babfd84addd426226b",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2820e22baf6e519047b9d670b3c3bd9ec86ef2e08ece066f64b71acc640cd5cc"
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:f3d768ed86985931216b91e8298f60c4b6528deb324c08ae0cc3067da6395b25"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -617,7 +617,7 @@
           "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
           "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
           "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-          "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+          "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
         ],
         "acceptance_criteria_count": 4,
         "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
@@ -638,7 +638,7 @@
           "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
           "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
           "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-          "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+          "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
         ],
         "acceptance_criteria_count": 4,
         "blocker_id": "github_sync::github_sync_remote_sync_pending",
@@ -659,7 +659,7 @@
           "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
           "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
           "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-          "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+          "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
         ],
         "acceptance_criteria_count": 4,
         "blocker_id": "github_sync::github_sync_preflight_not_synced",
@@ -3700,7 +3700,7 @@
       ]
     }
   },
-  "source_commit_sha": "12affe4358e6a34bc809528c9a8a1685c73ab80e",
+  "source_commit_sha": "cb1de521ab97b5df2bdd8551d48b50b22a697412",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

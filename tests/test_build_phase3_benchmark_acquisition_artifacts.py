@@ -103,12 +103,18 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     rows_by_source = {row["source_id"]: row for row in payload["rows"]}
     opensees_medium = rows_by_source["opensees_scbf16b_medium_candidate"]
     assert opensees_medium["lanes"] == ["opensees-medium"]
-    assert opensees_medium["source_kind"] == "local_opensees_candidate_source_url_unverified"
-    assert opensees_medium["source_url_or_doi"] == "local_candidate_source_url_unverified:SCBF16B"
-    assert opensees_medium["license_status"] == "blocked_no_authoritative_license_source_attached"
-    assert opensees_medium["checksum_status"] == "local_candidate_checksum_attached_source_url_unverified"
+    assert opensees_medium["source_kind"] == "public_github_opensees_candidate_license_review_pending"
+    assert opensees_medium["source_url_or_doi"] == (
+        "https://github.com/amaelkady/OpenSEES_Models_CBF/blob/main/"
+        "Models%20and%20Tcl%20Files/SCBF16B.tcl"
+    )
+    assert opensees_medium["license_status"] == "identified_gpl_3_0_product_legal_review_pending"
+    assert opensees_medium["checksum_status"] == "local_candidate_checksum_attached_upstream_sha256_verified"
+    assert "source_url_verification_pending" not in opensees_medium["blockers"]
+    assert "license_review_pending" in opensees_medium["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in opensees_medium["blockers"]
-    assert "authoritative source URL" in opensees_medium["claim_boundary"]
+    assert "upstream GitHub source URL" in opensees_medium["claim_boundary"]
+    assert "GPL-3.0" in opensees_medium["claim_boundary"]
     assert "redistribution rights" in opensees_medium["claim_boundary"]
     assert "OpenSees medium scorecard execution" in opensees_medium["claim_boundary"]
     assert len(opensees_medium["local_candidate_artifacts"]) == 2
@@ -226,7 +232,8 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
         assert row["redistribution_allowed"] is False
         assert row["commercial_use_allowed"] is False
         if row["source_id"] == "opensees_scbf16b_medium_candidate":
-            assert row["checksum_status"] == "local_candidate_checksum_attached_source_url_unverified"
+            assert row["checksum_status"] == "local_candidate_checksum_attached_upstream_sha256_verified"
+            assert "source_url_verification_pending" not in row["blockers"]
             assert "opensees_medium_runner_command_missing" not in row["blockers"]
             assert "opensees_medium_scorecard_execution_missing" in row["blockers"]
             assert "medium_model_pass_or_review_missing" in row["blockers"]

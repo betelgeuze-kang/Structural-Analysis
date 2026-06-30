@@ -220,13 +220,13 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-06-30T09:02:41.455682+00:00",
+  "generated_at": "2026-06-30T15:09:40.572652+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1d1cf9fbbeac7a55ea0ab43180eef1291cc254a2c9ffbca44bb3dc08a4e48144",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:a076379fc363426d995c31c9919b4b3d6b694cf4da547f7b19547f4de1ff5984",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:78cbc442178fdaa4957d754095a7ac465833f004aa3a0d4dd993eff90c5a373d",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:684fd393da74bd39a7727cff70ee4c698910626b12e59603a6996249904c636d",
     "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:ffff585c3520c2aa2044ea092422c9d18a714814e9fc19d7d7d5b359b4cc7e97",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:84fa19ec0e035aa50ea4266fcc59cad4257953c08a3526bc47fb3f936d080f47"
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:1dcea6e32ec68fe342d6285bc380f584553133e151a007d1cd650691f0233109"
   },
   "linked_artifacts": {
     "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -317,7 +317,7 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "dfd6a81df264e1dd4c42f95721ebf0d9094a917a",
+  "source_commit_sha": "cb1de521ab97b5df2bdd8551d48b50b22a697412",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,

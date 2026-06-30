@@ -71,8 +71,12 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["scorecard_receipt_inventory"]["receipt_file_count"] == 0
     assert payload["local_candidate_artifact_count"] == 2
     assert payload["local_topology_contract_pass"] is True
-    assert payload["required_evidence_pass_count"] == 3
+    assert payload["source_url_verified"] is True
+    assert payload["license_review_status"] == "identified_gpl_3_0_product_legal_review_required"
+    assert payload["required_evidence_pass_count"] == 4
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
+    assert "source_url_verification_pending" not in payload["blockers"]
+    assert "license_review_pending" in payload["blockers"]
     assert "reference_outputs_missing" in payload["blockers"]
     assert "normalization_not_implemented" in payload["blockers"]
     assert "opensees_medium_runner_command_missing" not in payload["blockers"]

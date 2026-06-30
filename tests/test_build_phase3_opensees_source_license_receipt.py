@@ -21,7 +21,7 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def test_phase3_opensees_source_license_receipt_keeps_license_blocked() -> None:
+def test_phase3_opensees_source_license_receipt_identifies_source_but_keeps_license_blocked() -> None:
     payload = module.build_phase3_opensees_source_license_receipt(repo_root=REPO_ROOT)
 
     assert payload["status"] == "blocked"
@@ -30,8 +30,8 @@ def test_phase3_opensees_source_license_receipt_keeps_license_blocked() -> None:
     assert payload["developer_preview_release_candidate_claim"] is False
     assert payload["source_id"] == "opensees_scbf16b_medium_candidate"
     assert payload["lanes"] == ["opensees-medium"]
-    assert payload["source_url_verified"] is False
-    assert payload["license_review_status"] == "blocked_no_authoritative_license_source_attached"
+    assert payload["source_url_verified"] is True
+    assert payload["license_review_status"] == "identified_gpl_3_0_product_legal_review_required"
     assert payload["redistribution_allowed"] is False
     assert payload["commercial_use_allowed"] is False
     assert payload["local_candidate_checksum_attached"] is True
@@ -42,17 +42,32 @@ def test_phase3_opensees_source_license_receipt_keeps_license_blocked() -> None:
     assert payload["topology_receipt"]["contract_pass"] is True
     assert payload["topology_receipt"]["source_is_opensees_text"] is True
     assert payload["topology_receipt"]["real_topology_pass"] is True
-    assert "authoritative_source_url_missing" in payload["blockers"]
-    assert "upstream_license_text_missing" in payload["blockers"]
-    assert "authoritative_download_or_acquisition_script_blocked_source_url_missing" in payload["blockers"]
+    assert "authoritative_source_url_missing" not in payload["blockers"]
+    assert "upstream_license_text_missing" not in payload["blockers"]
+    assert "authoritative_download_or_acquisition_script_blocked_source_url_missing" not in payload["blockers"]
+    assert "license_review_pending" in payload["blockers"]
+    assert "product_legal_license_review_pending" in payload["blockers"]
+    assert "redistribution_rights_unverified" in payload["blockers"]
+    assert "commercial_use_rights_unverified" in payload["blockers"]
     assert "download_or_acquisition_script_not_attached" not in payload["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in payload["blockers"]
     assert "phase3_scorecard_runner_not_implemented" not in payload["blockers"]
     acquisition = payload["authoritative_acquisition"]
-    assert acquisition["status"] == "blocked_source_url_and_license_missing"
-    assert acquisition["download_command"] == []
-    assert "authoritative_download_or_acquisition_script_blocked_source_url_missing" in acquisition["blockers"]
-    assert "deliberately does not author a download command" in acquisition["claim_boundary"]
+    assert acquisition["status"] == "source_url_and_license_identified_product_review_required"
+    assert acquisition["source_url_verified"] is True
+    assert acquisition["download_command"][:2] == ["curl", "-L"]
+    assert "authoritative_download_or_acquisition_script_blocked_source_url_missing" not in acquisition["blockers"]
+    assert "product_legal_license_review_pending" in acquisition["blockers"]
+    assert "upstream SCBF16B source only" in acquisition["claim_boundary"]
+    source_candidate = payload["source_url_candidates"][0]
+    assert source_candidate["repository"] == "amaelkady/OpenSEES_Models_CBF"
+    assert source_candidate["path"] == "Models and Tcl Files/SCBF16B.tcl"
+    assert source_candidate["local_matches_upstream_raw_sha256"] is True
+    assert source_candidate["upstream_raw_sha256"] == "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80"
+    assert source_candidate["local_candidate_sha256"] == source_candidate["upstream_raw_sha256"]
+    license_evidence = payload["license_evidence"]
+    assert license_evidence["spdx"] == "GPL-3.0"
+    assert license_evidence["review_status"] == "identified_product_legal_review_required"
     verification = payload["local_candidate_verification"]
     assert verification["status"] == "ready_for_local_parser_work_only"
     assert verification["contract_pass"] is True
@@ -72,6 +87,7 @@ def test_phase3_opensees_source_license_receipt_keeps_license_blocked() -> None:
         assert row["verification_command"][4] == row["expected_sha256"]
     assert "committed/local candidate checksums" in verification["claim_boundary"]
     assert "local OpenSees medium candidate checksum/topology evidence" in payload["claim_boundary"]
+    assert "GPL-3.0 license text" in payload["claim_boundary"]
     assert "scorecard execution for OpenSees medium blocked" in payload["claim_boundary"]
 
 
@@ -89,7 +105,7 @@ def test_phase3_opensees_source_license_check_detects_drift(tmp_path: Path) -> N
     out = tmp_path / "receipt.json"
     module.write_phase3_opensees_source_license_receipt(repo_root=REPO_ROOT, out_path=out)
     payload = json.loads(out.read_text(encoding="utf-8"))
-    payload["source_url_verified"] = True
+    payload["source_url_verified"] = False
     out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     ok, message = module.check_phase3_opensees_source_license_receipt(

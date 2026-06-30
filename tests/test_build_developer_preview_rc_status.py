@@ -414,7 +414,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert medium_scorecard_handoff["pass_or_approved_review_count"] == 0
     assert medium_scorecard_handoff["local_candidate_artifact_count"] == 2
     assert medium_scorecard_handoff["local_topology_contract_pass"] is True
-    assert medium_scorecard_handoff["required_evidence_pass_count"] == 3
+    assert medium_scorecard_handoff["required_evidence_pass_count"] == 4
+    assert "source_url_verification_pending" not in medium_scorecard_handoff["blockers"]
+    assert "license_review_pending" in medium_scorecard_handoff["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in medium_scorecard_handoff["blockers"]
     assert "opensees_medium_runner_command_missing" not in medium_scorecard_handoff["blockers"]
     assert medium_scorecard_handoff["runner_command_ready"] is True
@@ -425,7 +427,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert medium_scorecard_handoff["scorecard_receipt_template"]["schema_version"] == (
         "phase3-medium-model-scorecard-receipt.v1"
     )
-    assert "Attach authoritative OpenSees medium" in medium_scorecard_handoff["owner_action"]
+    assert "Attach product legal license approval" in medium_scorecard_handoff["owner_action"]
     assert "parser-only" in medium_scorecard_handoff["claim_boundary"]
     large_runner_handoff = payload["known_limitations"]["large_model_runner_handoff"]
     assert large_runner_handoff["runner_readiness_receipt"].endswith(

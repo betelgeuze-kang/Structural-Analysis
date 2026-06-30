@@ -23,11 +23,13 @@ from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_medium_model_scorecard_readiness_receipt.json"
+SOURCE_LICENSE_RECEIPT = PRODUCTIZATION / "phase3_opensees_medium_source_license_receipt.json"
 MEDIUM_RECEIPT_DIR = PRODUCTIZATION / "medium_model_scorecard_receipts"
 MEDIUM_RECEIPT_SCHEMA_VERSION = "phase3-medium-model-scorecard-receipt.v1"
 MEDIUM_MODEL_INPUTS = [
     Path("implementation/phase1/opensees_topology_report.json"),
     Path("implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"),
+    SOURCE_LICENSE_RECEIPT,
     MEDIUM_RECEIPT_DIR,
     Path("scripts/build_phase3_opensees_source_license_receipt.py"),
     Path("scripts/build_phase3_medium_model_scorecard_readiness_receipt.py"),
@@ -242,6 +244,74 @@ def _pass_review_evidence_row(row: dict[str, Any], *, current: int, required: in
     return enriched
 
 
+def _authoritative_source_evidence_row(
+    row: dict[str, Any],
+    *,
+    source_license_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    candidates = [
+        candidate
+        for candidate in _safe_list(source_license_receipt.get("source_url_candidates"))
+        if isinstance(candidate, dict)
+    ]
+    source_verified = bool(source_license_receipt.get("source_url_verified") is True)
+    upstream_hash_match = any(
+        candidate.get("case_id") == "SCBF16B"
+        and candidate.get("local_matches_upstream_raw_sha256") is True
+        for candidate in candidates
+    )
+    ready = source_verified and upstream_hash_match
+    enriched = dict(row)
+    enriched.update(
+        {
+            "status": "ready" if ready else "missing",
+            "contract_pass": ready,
+            "blocker": "" if ready else row["blocker"],
+            "source_license_receipt_path": SOURCE_LICENSE_RECEIPT.as_posix(),
+            "source_url_verified": source_verified,
+            "source_url_candidate_count": len(candidates),
+            "local_matches_upstream_raw_sha256": upstream_hash_match,
+            "claim_boundary": (
+                "Authoritative source evidence requires a verified upstream source URL "
+                "and matching local/upstream raw checksum. It is separate from license "
+                "approval, reference outputs, normalization, and scorecard execution."
+            ),
+        }
+    )
+    return enriched
+
+
+def _license_approval_evidence_row(
+    row: dict[str, Any],
+    *,
+    source_license_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    license_evidence = _safe_dict(source_license_receipt.get("license_evidence"))
+    redistribution_allowed = bool(source_license_receipt.get("redistribution_allowed") is True)
+    commercial_use_allowed = bool(source_license_receipt.get("commercial_use_allowed") is True)
+    review_status = str(source_license_receipt.get("license_review_status") or "")
+    approved = redistribution_allowed and commercial_use_allowed and review_status.startswith("approved")
+    identified = bool(license_evidence.get("spdx") or review_status)
+    enriched = dict(row)
+    enriched.update(
+        {
+            "status": "ready" if approved else ("identified_review_required" if identified else "missing"),
+            "contract_pass": approved,
+            "blocker": "" if approved else row["blocker"],
+            "source_license_receipt_path": SOURCE_LICENSE_RECEIPT.as_posix(),
+            "license_review_status": review_status,
+            "spdx": license_evidence.get("spdx", ""),
+            "redistribution_allowed": redistribution_allowed,
+            "commercial_use_allowed": commercial_use_allowed,
+            "claim_boundary": (
+                "License identity alone is not product approval. This row passes only when "
+                "the receipt records approved redistribution and commercial-use boundaries."
+            ),
+        }
+    )
+    return enriched
+
+
 def build_phase3_medium_model_scorecard_readiness_receipt(
     *,
     repo_root: Path = ROOT,
@@ -259,6 +329,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         for row in _safe_list(canonical_report.get("rows"))
         if isinstance(row, dict) and row.get("case_id") in {"SCBF16B", "SCBF16B_shell_beam_mix"}
     ]
+    source_license_receipt = _try_load_json(repo_root / SOURCE_LICENSE_RECEIPT)
     receipt_inventory = _medium_scorecard_receipt_inventory(repo_root)
     required_medium_model_count = 5
     current_scorecard_count = int(receipt_inventory["valid_scorecard_case_count"])
@@ -267,7 +338,21 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
     runner_command_ready = runner_script.exists()
     evidence_rows: list[dict[str, Any]] = []
     for row in REQUIRED_EVIDENCE:
-        if row["id"] == "scorecard_execution":
+        if row["id"] == "authoritative_source":
+            evidence_rows.append(
+                _authoritative_source_evidence_row(
+                    row,
+                    source_license_receipt=source_license_receipt,
+                )
+            )
+        elif row["id"] == "license_approval":
+            evidence_rows.append(
+                _license_approval_evidence_row(
+                    row,
+                    source_license_receipt=source_license_receipt,
+                )
+            )
+        elif row["id"] == "scorecard_execution":
             evidence_rows.append(
                 _scorecard_evidence_row(
                     row,
@@ -334,6 +419,9 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "scorecard_receipt_inventory": receipt_inventory,
         "local_candidate_artifact_count": len(canonical_rows),
         "local_topology_contract_pass": bool(topology_report.get("contract_pass")),
+        "source_license_receipt_path": SOURCE_LICENSE_RECEIPT.as_posix(),
+        "source_url_verified": bool(source_license_receipt.get("source_url_verified") is True),
+        "license_review_status": str(source_license_receipt.get("license_review_status") or ""),
         "required_evidence_count": len(evidence_rows),
         "required_evidence_pass_count": evidence_pass_count,
         "required_evidence": evidence_rows,
@@ -378,9 +466,9 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "blocked_by": blockers,
         "blockers": blockers,
         "owner_action": (
-            "Attach authoritative OpenSees medium source/license evidence, ingest reference "
-            "outputs, normalize five selected medium models, run the medium scorecard, and "
-            "record PASS or pre-approved REVIEW rows before promoting this RC gate."
+            "Attach product legal license approval, ingest reference outputs, normalize five "
+            "selected medium models, run the medium scorecard, and record PASS or pre-approved "
+            "REVIEW rows before promoting this RC gate."
         ),
         "summary_line": (
             "Phase 3 OpenSees medium scorecard readiness: BLOCKED | "
@@ -388,10 +476,11 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         ),
         "claim_boundary": (
             "This receipt records the evidence contract for OpenSees medium scorecards. "
-            "It preserves local topology/parser evidence as parser-only and implements the "
-            "operator scorecard runner command, but it does not prove source authority, "
-            "license approval, reference outputs, normalization, scorecard execution, "
-            "PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness."
+            "It preserves local topology/parser evidence as parser-only, reads the source "
+            "license receipt for upstream source identity, and implements the operator "
+            "scorecard runner command, but it does not prove product license approval, "
+            "reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, "
+            "Phase 3 closure, or DP RC readiness."
         ),
     }
 

@@ -4,36 +4,36 @@
     "medium_model_pass_or_review_missing",
     "normalization_not_implemented",
     "opensees_medium_scorecard_execution_missing",
-    "reference_outputs_missing",
-    "source_url_verification_pending"
+    "reference_outputs_missing"
   ],
   "blockers": [
     "license_review_pending",
     "medium_model_pass_or_review_missing",
     "normalization_not_implemented",
     "opensees_medium_scorecard_execution_missing",
-    "reference_outputs_missing",
-    "source_url_verification_pending"
+    "reference_outputs_missing"
   ],
-  "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only and implements the operator scorecard runner command, but it does not prove source authority, license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
+  "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command, but it does not prove product license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": false,
   "current_medium_model_scorecard_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T13:58:09.728873+00:00",
+  "generated_at": "2026-06-30T15:12:10.516629+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
-    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:89fcdf02dde84b34d83f7f6027f713ae02be37c47fbab6791232ccb217326345",
-    "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:1f7e307b69037e4587b9cdf776762e4d4d2cafc6e97e41c795ba74e34c5014e1",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:7bfd18f36aeac9514e79a2f3fc8bf3e6ab6598dd7cf70171c0a0761abf07a70b",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:cc8564b22b2721f405f37fd08b6073bbdb506c57c216a36d5d84658a2c89ab69",
+    "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
     "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:cce4195b4798fc23ca1c0ee683c9564e2656fdd1f6c3d4ef3f6c4cbd032c6ccd"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:275b61ecbc71a9827552451982caa0317a7a1d55412d135577d0a128b873e712"
   },
   "lanes": [
     "opensees-medium"
   ],
+  "license_review_status": "identified_gpl_3_0_product_legal_review_required",
   "local_candidate_artifact_count": 2,
   "local_parser_boundary": {
     "beam_element_count": 166,
@@ -51,23 +51,34 @@
   },
   "local_topology_contract_pass": true,
   "medium_model_benchmark_pass_claim": false,
-  "owner_action": "Attach authoritative OpenSees medium source/license evidence, ingest reference outputs, normalize five selected medium models, run the medium scorecard, and record PASS or pre-approved REVIEW rows before promoting this RC gate.",
+  "owner_action": "Attach product legal license approval, ingest reference outputs, normalize five selected medium models, run the medium scorecard, and record PASS or pre-approved REVIEW rows before promoting this RC gate.",
   "pass_or_approved_review_count": 0,
   "phase3_closure_claim": false,
   "required_evidence": [
     {
-      "blocker": "source_url_verification_pending",
-      "contract_pass": false,
+      "blocker": "",
+      "claim_boundary": "Authoritative source evidence requires a verified upstream source URL and matching local/upstream raw checksum. It is separate from license approval, reference outputs, normalization, and scorecard execution.",
+      "contract_pass": true,
       "id": "authoritative_source",
+      "local_matches_upstream_raw_sha256": true,
       "required": "Verified upstream source URL or DOI for each selected medium model.",
-      "status": "missing"
+      "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+      "source_url_candidate_count": 1,
+      "source_url_verified": true,
+      "status": "ready"
     },
     {
       "blocker": "license_review_pending",
+      "claim_boundary": "License identity alone is not product approval. This row passes only when the receipt records approved redistribution and commercial-use boundaries.",
+      "commercial_use_allowed": false,
       "contract_pass": false,
       "id": "license_approval",
+      "license_review_status": "identified_gpl_3_0_product_legal_review_required",
+      "redistribution_allowed": false,
       "required": "License review for local execution, redistribution boundary, and commercial-use boundary.",
-      "status": "missing"
+      "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+      "spdx": "GPL-3.0",
+      "status": "identified_review_required"
     },
     {
       "blocker": "",
@@ -132,7 +143,7 @@
     }
   ],
   "required_evidence_count": 9,
-  "required_evidence_pass_count": 3,
+  "required_evidence_pass_count": 4,
   "required_medium_model_count": 5,
   "resource_envelope": {
     "artifact_retention_policy": "operator_attached_scorecard_receipt_result_and_validation_report",
@@ -172,8 +183,10 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "cde7573e4c67f5e33dce7d06c76a823bae7b6d3e",
+  "source_commit_sha": "cb1de521ab97b5df2bdd8551d48b50b22a697412",
   "source_id": "opensees_scbf16b_medium_candidate",
+  "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+  "source_url_verified": true,
   "status": "blocked",
-  "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=3/9"
+  "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=4/9"
 }
