@@ -513,13 +513,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T11:40:07.359349+00:00",
+  "generated_at": "2026-06-30T11:53:03.425997+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:7c4d4d3f8cdec52ea947b7662c895ceb79c88fa88634d5532384984c918f2784",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:bfe14c2ad25998080e9182fe8ff61d1b2b0944d8906b9625450966dc0c4c1d68",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:e6759270c6a76cb81de1687e60bfd2f7da99d73d38155c21b4dde6cb961b72f1",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:64259b9bfdb0ae1b305b2cab1ce3eae8eda51ca579d8c07b605054c7b85ee0c1",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:ba16b776fd1996fb86b0ffadec5da695cc3ce81f89724aa7e85b7e75de0f9937",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:e96bf56b509d4013d688ccf6117d054dbe3d08636f7403861c8ca6ea195759a7",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:4ffd0433a3e841d33fa9eb71701b973a86c6e2561bdc4400c592e4c0c1231295",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:355f5ec66e853efa6ebeea92e60ace8c4100dae4c4f0ca9bcbf4fd9ba872ae27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:b4702b9194bbf4426c7cf7c856213bdd5d0312b67ce4a1ff6b17fee86580f3d8",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -539,7 +539,7 @@
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:cc5edab07c763d44c75f7005eca66f235afb0d81ef4bc21115f60bfea8459790",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:c454ac47cd4bd2141cb7517e0fa79a26decfaf90db4459bb5d5d400fb4c28333",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:40d547c3d708c0df3746c318f1fafb31d9de3ebe4cd7aab7ee529aa50b3d4973",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:05db62afa8a91771ff7b2b635729969dff5c7413dc2edf58631e87a9e7e0ce33",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:5cb993cf6c4d665ef47cf948ea4b6b0b87afadb47f98627431ada278d8d1812f",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
   },
@@ -1074,16 +1074,13 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 8,
+    "developer_preview_blocker_count": 5,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
-      "human_ux::observation_file_missing",
-      "stale_or_inconsistent:open_blocker_count_conflict",
-      "stale_or_inconsistent:release_area_count_conflict"
+      "human_ux::observation_file_missing"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -2432,6 +2429,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "731305db945c74f9ebc3c5c67b700902c50a62a2",
+  "source_commit_sha": "ee89bc8fffd891d558711eca54fc7d2c0cc4e350",
   "status": "blocked"
 }
