@@ -11,7 +11,7 @@
     "nightly:github_actions_lane_streak_below_threshold",
     "nightly:github_actions_filtered_run_count_below_threshold"
   ],
-  "generated_at": "2026-06-30T05:12:19.083719+00:00",
+  "generated_at": "2026-06-30T05:19:32.292267+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -21,7 +21,7 @@
         "github_actions_lane_streak_below_threshold"
       ],
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
-      "consecutive_pass_count": 0,
+      "consecutive_pass_count": 12,
       "github_actions_consecutive_pass_count": 12,
       "github_actions_filtered_run_count": 70,
       "github_actions_ignored_event_names": [
@@ -47,7 +47,7 @@
       ],
       "manifest_consecutive_pass_count": 12,
       "manifest_threshold_pass": false,
-      "missing_consecutive_pass_count": 30,
+      "missing_consecutive_pass_count": 18,
       "owner_action": "Collect 18 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "pull_request_run_source_present": true,
       "source_evidence_blockers": [
@@ -55,6 +55,7 @@
         "github_actions_lane_streak_below_threshold"
       ],
       "source_evidence_release_credit_pass": false,
+      "source_observation_usable": true,
       "streak_source": "github_actions",
       "threshold": 30,
       "threshold_pass": false
@@ -99,6 +100,7 @@
         "github_actions_filtered_run_count_below_threshold"
       ],
       "source_evidence_release_credit_pass": false,
+      "source_observation_usable": true,
       "streak_source": "missing_tracked_ci_evidence",
       "threshold": 30,
       "threshold_pass": false
@@ -107,7 +109,7 @@
   "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 0.004,
+    "age_hours": 0.016,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -117,7 +119,7 @@
     ],
     "contract_pass": false,
     "freshness_pass": true,
-    "generated_at": "2026-06-30T05:12:05.506230+00:00",
+    "generated_at": "2026-06-30T05:18:35.942350+00:00",
     "lanes": {
       "nightly": {
         "blockers": [
@@ -212,12 +214,12 @@
     "pr_github_actions_workflow_registered": true,
     "pr_github_actions_workflow_state": "active",
     "pr_local_required_trigger_present": true,
-    "pr_missing_consecutive_pass_count": 30,
+    "pr_missing_consecutive_pass_count": 18,
     "pr_pull_request_run_source_present": true,
     "pr_source_threshold_pass": false,
-    "source_evidence_age_hours": 0.004,
+    "source_evidence_age_hours": 0.016,
     "source_evidence_freshness_pass": true,
-    "source_evidence_generated_at": "2026-06-30T05:12:05.506230+00:00",
+    "source_evidence_generated_at": "2026-06-30T05:18:35.942350+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
     "threshold": 30

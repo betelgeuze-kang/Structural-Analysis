@@ -5,9 +5,9 @@
 - `ci_consecutive_pass_manifest`: `implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json`
 - `github_actions_ci_streak_evidence`: `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json`
 
-| Lane | Streak | Missing | Source | Workflow Registered | Pass | Owner Action |
+| Lane | Observed Streak | Missing | Source | Workflow Registered | Pass | Owner Action |
 |---|---:|---:|---|---|---|---|
-| `pr` | `0/30` | `30` | `github_actions` | `True` | `False` | Collect 18 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff. |
+| `pr` | `12/30` | `18` | `github_actions` | `True` | `False` | Collect 18 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff. |
 | `nightly` | `0/30` | `30` | `missing_tracked_ci_evidence` | `True` | `False` | Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff. |
 
 ## Validation Commands
@@ -22,4 +22,4 @@
 
 | Path | Schema | Fresh | Age Hours | Pass |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `0.004` | `False` |
+| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `0.016` | `False` |
