@@ -513,13 +513,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T08:17:31.044301+00:00",
+  "generated_at": "2026-06-30T08:44:45.200734+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:abbe1df2cc8cadc11f67770e5672933f37caae0603dc67c43be8b2e420b92b65",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:1f31d812c9d8190d99fd6c0b95106316c0b9822de018e082c5d21597c623dfe7",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:a375d5c540b36598db35bc30e4aacebe5442d372762f8b17ba5f14cb788d5cf1",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:cd4ccedbb8a8736d861d06cb0c915d8a140c224d7ecf4715e76990843f9a6de0",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:78e8e1aeab0177f46d4d4b418f064d060b15b6820df416d2c3b94134e2cb7bc1",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:9b19a0e12cdbbbc6570952af151af76328b571291995b2d2c8e650e4394b2b5e",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:cab8cb5b9fe64a92ecf5e4a998362fe9ff5a28730c3191ba60059eb4161503d7",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:3a8ac59e6b4ccae489d092a43372127af9a4bca0e5e663b56c717e32d8179643",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:b4702b9194bbf4426c7cf7c856213bdd5d0312b67ce4a1ff6b17fee86580f3d8",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -539,7 +539,7 @@
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:cc5edab07c763d44c75f7005eca66f235afb0d81ef4bc21115f60bfea8459790",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:c454ac47cd4bd2141cb7517e0fa79a26decfaf90db4459bb5d5d400fb4c28333",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:6d5911930a5bf87e7632c561c399e174e6fc1463a43eb87e6560772f8cac56e0",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f722b501b25d588c4ac5cb5227102ea5b98f8383b8f2c45ad76c46c7066ff55f",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
   },
@@ -1074,24 +1074,13 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 16,
+    "developer_preview_blocker_count": 5,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-      "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-      "human_ux::observation_file_missing",
-      "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-      "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
-      "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-      "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-      "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-      "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-      "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-      "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-      "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+      "human_ux::observation_file_missing"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -2440,6 +2429,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "f6f16b2db8a8bb8900b4f24d5c3b032f3ce3bb64",
+  "source_commit_sha": "bf26c5ab90a19d63344ba8612e26894dd744ba62",
   "status": "blocked"
 }
