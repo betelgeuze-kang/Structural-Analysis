@@ -3,11 +3,11 @@
   "claim_boundary": "This is a fillable operator template seed for bounded PocketMD Lite top-k refinement rows. It is not refinement evidence and does not unlock broad all-atom MD, FEP, long-timescale dynamics, or de novo binding claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T19:06:48.747256+00:00",
+  "generated_at": "2026-06-30T19:12:14.775308+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:4b7604bd89e190e97f3b61cf685ad1875070ab2342db19431b287f9ecfac71f5",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:742ed3e9f951a490ca3846203285b1f8f45aa292e96b385f1343e0029f9b6b6c",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:cbe3da9485435cbe6101dc5c28409fc5b55aa823df1be37937ffaff7f30ac637",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:22e3aef19f522947dfc40842f3729fcfe1ecaab59cb119acb1f23cf2294cc869"
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:e44ad3df474509d811cd699751acca1b0217c3a8483cdd8a6a14292870030399"
   },
   "intake_artifact": "<operator-pocketmd-lite-intake.json>",
   "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -61,7 +61,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-operator-template.v1",
   "slot_id": "top_k_refinement_rows",
-  "source_commit_sha": "ca4328b19ba462898929f3d284416bf2e9dccfd2",
+  "source_commit_sha": "2b398cf001f44b0ccc847263957c087371540236",
   "status": "operator_template_seed",
   "template": {
     "cases": [
