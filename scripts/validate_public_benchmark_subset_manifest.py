@@ -46,6 +46,10 @@ def _is_sha256_ref(value: Any) -> bool:
     return bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", str(value or "").strip()))
 
 
+def _path_key(value: Any) -> str:
+    return str(value or "").strip().replace("\\", "/").lstrip("./")
+
+
 def _validate_case_row(row: dict[str, Any], *, index: int) -> list[str]:
     blockers: list[str] = []
     for field in REQUIRED_CASE_FIELDS:
@@ -70,6 +74,13 @@ def _validate_case_row(row: dict[str, Any], *, index: int) -> list[str]:
     else:
         if len(source_file_checksums) < len(LOCAL_SOURCE_FILE_FIELDS):
             blockers.append(f"case_row_{index}:source_file_checksums_incomplete")
+        checksum_path_keys = {_path_key(path_key) for path_key in source_file_checksums}
+        for field in LOCAL_SOURCE_FILE_FIELDS:
+            declared_path = _path_key(row.get(field))
+            if declared_path and declared_path not in checksum_path_keys:
+                blockers.append(
+                    f"case_row_{index}:source_file_checksum_for_{field}_missing"
+                )
         for checksum_index, (path_key, checksum) in enumerate(source_file_checksums.items()):
             if not str(path_key).strip():
                 blockers.append(

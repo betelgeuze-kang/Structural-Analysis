@@ -92,6 +92,7 @@ def test_materializer_blocks_missing_local_pose_prediction(tmp_path: Path) -> No
     assert manifest["materialization_report"]["source_file_missing_count"] == 1
     assert manifest["blockers"] == [
         "case_row_0:source_file_checksums_incomplete",
+        "case_row_0:source_file_checksum_for_predicted_ligand_path_or_docking_run_id_missing",
         "case_row_0:predicted_ligand_path_or_docking_run_id_local_file_missing"
     ]
     assert manifest["case_rows"][0]["materialization_blockers"] == [

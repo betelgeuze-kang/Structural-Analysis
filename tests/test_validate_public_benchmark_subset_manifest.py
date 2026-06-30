@@ -172,6 +172,27 @@ def test_validate_manifest_requires_source_file_checksums() -> None:
     assert result["blockers"] == ["case_row_0:source_file_checksums_missing"]
 
 
+def test_validate_manifest_requires_checksum_for_each_declared_source_file() -> None:
+    row = _complete_row("case_a")
+    row["source_file_checksums"] = {
+        "benchmarks/case_a/protein.pdb": "sha256:" + "b" * 64,
+        "benchmarks/case_a/unrelated_pose.sdf": "sha256:" + "d" * 64,
+        "benchmarks/case_a/ligand_ref.sdf": "sha256:" + "c" * 64,
+    }
+
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "case_rows": [row],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert result["blockers"] == [
+        "case_row_0:source_file_checksum_for_predicted_ligand_path_or_docking_run_id_missing"
+    ]
+
+
 def test_validate_manifest_cli_writes_result(tmp_path: Path) -> None:
     manifest = tmp_path / "manifest.json"
     manifest.write_text(
