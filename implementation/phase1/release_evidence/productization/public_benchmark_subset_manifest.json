@@ -57,10 +57,10 @@
   "claim_boundary": "This manifest is a Tier beta source-of-truth seed. It defines the minimum CASF/PDBBind subset contract, operator slots, case-row schema, and validation command, but it does not attach or redistribute public benchmark source files and does not claim benchmark results.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T11:29:55.580165+00:00",
+  "generated_at": "2026-06-30T11:40:07.446933+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:e2ba8c2a4175e981717602a51b9eaafa03da82aaf18e7b88e8ca3f70e614ff03",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:8290f0551804eaacdf76730b7a016d54fc51f08c4b5f3908cb45490277e3e2aa",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:443ca9317ca1173d7360b92490706328e2b993eae84f308077a76e51505145ce",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:edd2e1f2c560695f83e4f6dc30489379d16fe7a798541e82179cb5b933a6bf72",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d0105e3fca20c9072fca8571a0d3ba417302b35c3c8196d2c5c9d36f32ac19a0",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:d965fae24ace310a8dac00208f8c4d8ff2b2ea356a21254da7b03966ced9678e",
@@ -68,7 +68,7 @@
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:84a2321c26221def7d4fca2ce98dc42832053c40bd464a3a32e2e49e3f44fee0",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:048376d4f1268e82ca66dce13a826096f949ebdea24e8c1290cbb40980f51b4d",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
-    "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
+    "scripts/validate_public_benchmark_external_receipts.py": "sha256:282daac16328284d858b1b76830d6cd9666a9b01d67cf9e8259fbac8dc1f571f",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:51c107c5d5c56aaa3fdb63b91f76c515109b86d664effe8fb65922e5c628a3d1",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:92c904fe51679ae70fa88471c611c53f98559b8e2894592cb96f75dbfa15003e"
   },
@@ -135,7 +135,7 @@
       "status": "source_material_required"
     }
   ],
-  "source_commit_sha": "de0bb86574e6f517aade568d259aa48d61497906",
+  "source_commit_sha": "731305db945c74f9ebc3c5c67b700902c50a62a2",
   "source_families": [
     "CASF/PDBBind"
   ],

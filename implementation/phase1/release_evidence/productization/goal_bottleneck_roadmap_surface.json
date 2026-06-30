@@ -176,25 +176,25 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T11:29:55.984614+00:00",
+  "generated_at": "2026-06-30T11:40:07.848160+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:ef5a5621a926c01e41f2e17feb4dcce40fc0a4ad73caff73e1d21fcdc0585729",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:88b54817f7571acf01d3610f4193e5e13b1c33cd7beed45940994d5ae2e0b66d",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:e1637150d29c09463dbf50d16054a7c0217b163b6cfb7711a16caac59dd4d7af",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d1585b8cf57b26c00c5498e31c2573cf7f955189140da7905eda01a1b2d98825",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:f85f89c5c26c7baa2e21732a0f1049ff1d961a273d0733cb2d00f7def6d34001",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f5ae0af0d4842d4f95e1cb7a3e7d4d2e460cd0ec1c16c3d66b689cab018b080a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:d51a08f52e1989afdf2d6b60df519de2ab5feb58a88df1fb7085e6f676d3850d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:9f01ffac2b830b98d093ef64cc96d57fb7fd2bcb16f1f3754016b17408edc357",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:71e56180890908312bae669ab2a20fd817f978b64dc3e5e04b8c4b9287f41f89",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:4b82c09fc8bd4c4cb040a0c683254efa76331b9a13fb38c3cf5f8151318db8fe",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:3c1b19ffe7a83fdb757a9248e777ce7ff21f8582545f72f1a4160ffb3a702e49",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:cf615120d4ffbcd29b176cf123044bbddda682e3dce037da4bef15fae8404e23",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:67a7b88690833fceac02f4eff083d4bcde3c4b1e3aecb1a25183e326278c8932",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:beaae26ca5efeace4fff237f8725f5baad29ebadf69d8e0e17c4608adfd7d709",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:868731cd0f29a4f3c2353a4170c2c5abc776974a206658dda70e852b7e8ab79e",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:26f51aa8c214856e080482a73755666a3253a21801d4fd246749c5460b2d519a",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:33775744a025ad501e6fb27f71d7829410b5341830bd775865be2cda98068653",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:40d547c3d708c0df3746c318f1fafb31d9de3ebe4cd7aab7ee529aa50b3d4973",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:a2cde662ccfab6e78f79d31b8800fd98c85c500dd2776432a4116e5c2bff5a5c",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:05db62afa8a91771ff7b2b635729969dff5c7413dc2edf58631e87a9e7e0ce33",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:856c8f6f594f19ceb28cb24fd8fd87c4c008ccf11e9ac9dd87aca35c209f1adc",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:48c497354c9819f5d29e7d44949a2d5dc74701ef846bef075925a9892387da55",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:afa5afdd1b8e7f79f8b3d38e9c23e716d8a78c32cdb923e5db18f3ab302acfc4",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:171f1363050e44da219835e46b4a8c6c6d8f925778e086babfd84addd426226b",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2820e22baf6e519047b9d670b3c3bd9ec86ef2e08ece066f64b71acc640cd5cc"
   },
@@ -1401,7 +1401,7 @@
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 1,
-    "operator_action_count": 14,
+    "operator_action_count": 15,
     "pocketmd_lite_product_surface_ready": false,
     "public_benchmark_ready": false,
     "release_allowed": false,
@@ -1754,7 +1754,7 @@
             "h_bond_backmap_evidence_surface"
           ]
         },
-        "operator_action_count": 14,
+        "operator_action_count": 15,
         "product_capability_count": 5,
         "release_allowed": false,
         "science_evidence_surface_bottlenecks": [
@@ -3635,7 +3635,7 @@
       ]
     }
   },
-  "source_commit_sha": "de0bb86574e6f517aade568d259aa48d61497906",
+  "source_commit_sha": "731305db945c74f9ebc3c5c67b700902c50a62a2",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

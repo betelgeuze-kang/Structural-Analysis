@@ -9,6 +9,65 @@
   "public_benchmark_external_receipts_ready": false,
   "receipt_blocked_row_count": 0,
   "receipt_complete_row_count": 0,
+  "receipt_coverage": {
+    "claim_boundary": "Receipt coverage is grouped by benchmark artifact role. A role is covered only when at least one materialized row exists and every required receipt field for that role validates locally; this does not approve licenses or fetch external benchmark data.",
+    "expected_artifact_role_count": 3,
+    "expected_artifact_roles": [
+      "casf_pdbbind_subset_manifest",
+      "dud_e_lit_pcba_enrichment_scorecard",
+      "vina_gnina_comparison_adapter"
+    ],
+    "materialized_artifact_role_count": 0,
+    "missing_expected_artifact_role_count": 3,
+    "missing_expected_artifact_roles": [
+      "casf_pdbbind_subset_manifest",
+      "dud_e_lit_pcba_enrichment_scorecard",
+      "vina_gnina_comparison_adapter"
+    ],
+    "receipt_complete_artifact_role_count": 0,
+    "role_summaries": [
+      {
+        "artifact_role": "casf_pdbbind_subset_manifest",
+        "blocker_count": 0,
+        "blockers": [],
+        "materialized_row_count": 0,
+        "receipt_blocked_row_count": 0,
+        "receipt_complete_row_count": 0,
+        "required_receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref",
+          "source_file_checksums"
+        ]
+      },
+      {
+        "artifact_role": "dud_e_lit_pcba_enrichment_scorecard",
+        "blocker_count": 0,
+        "blockers": [],
+        "materialized_row_count": 0,
+        "receipt_blocked_row_count": 0,
+        "receipt_complete_row_count": 0,
+        "required_receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ]
+      },
+      {
+        "artifact_role": "vina_gnina_comparison_adapter",
+        "blocker_count": 0,
+        "blockers": [],
+        "materialized_row_count": 0,
+        "receipt_blocked_row_count": 0,
+        "receipt_complete_row_count": 0,
+        "required_receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ]
+      }
+    ]
+  },
   "receipt_rows": [],
   "required_receipt_fields": [
     "source_license_or_accession",

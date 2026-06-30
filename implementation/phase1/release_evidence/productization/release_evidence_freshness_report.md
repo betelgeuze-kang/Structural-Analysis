@@ -2,7 +2,7 @@
 
 - `contract_pass`: `True`
 - `reason_code`: `PASS`
-- `current_source_commit_sha`: `de0bb86574e6f517aade568d259aa48d61497906`
+- `current_source_commit_sha`: `731305db945c74f9ebc3c5c67b700902c50a62a2`
 - `blockers`: `none`
 
 | Artifact | Status | Blockers | Newer Dependencies |
