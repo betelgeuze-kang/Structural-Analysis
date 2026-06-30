@@ -2216,6 +2216,41 @@ def test_snapshot_builder_change_does_not_stale_source_artifacts(
     ]
 
 
+def test_snapshot_dp_rc_builder_change_only_stales_dp_rc_artifact(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/build_developer_preview_rc_status.py",
+        "print('developer preview rc aggregation changed')\n",
+    )
+    _commit_all(tmp_path, "dp rc builder change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
+        not in payload["blockers"]
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
+        in payload["blockers"]
+    )
+
+
 def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_only(
     tmp_path: Path,
 ) -> None:

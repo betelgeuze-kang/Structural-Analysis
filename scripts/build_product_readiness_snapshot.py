@@ -356,6 +356,9 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/check_github_development_sync_preflight.py",
             "scripts/report_pm_release_gate.py",
         },
+        "developer_preview_rc_status": {
+            "scripts/build_developer_preview_rc_status.py",
+        },
     }
     ignored_test_prefixes = ("tests/",)
     if path.startswith(ignored_test_prefixes):
