@@ -57,6 +57,133 @@ def _path_key(value: Any) -> str:
     return str(value or "").strip().replace("\\", "/").lstrip("./")
 
 
+def _counts(values: list[str]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for value in values:
+        if not value:
+            continue
+        counts[value] = counts.get(value, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def _complete_source_file_checksums(row: dict[str, Any]) -> bool:
+    source_file_checksums = row.get("source_file_checksums")
+    if not isinstance(source_file_checksums, dict) or not source_file_checksums:
+        return False
+    checksum_path_keys = {_path_key(path_key) for path_key in source_file_checksums}
+    for field in LOCAL_SOURCE_FILE_FIELDS:
+        declared_path = _path_key(row.get(field))
+        if not declared_path or declared_path not in checksum_path_keys:
+            return False
+        checksum = source_file_checksums.get(declared_path)
+        if checksum is None:
+            checksum = next(
+                (
+                    value
+                    for path_key, value in source_file_checksums.items()
+                    if _path_key(path_key) == declared_path
+                ),
+                "",
+            )
+        if not _is_sha256_ref(checksum):
+            return False
+    return True
+
+
+def _complete_ligand_atom_order_contract(row: dict[str, Any]) -> bool:
+    atom_order = row.get("ligand_atom_order_contract")
+    if not isinstance(atom_order, dict):
+        return False
+    atom_count = int(atom_order.get("atom_count") or 0)
+    atom_ids = _as_list(atom_order.get("atom_ids"))
+    return bool(
+        atom_count > 0
+        and atom_ids
+        and len(atom_ids) == atom_count
+        and len({str(atom_id) for atom_id in atom_ids}) == len(atom_ids)
+    )
+
+
+def _complete_symmetry_permutation_contract(row: dict[str, Any]) -> bool:
+    if not _complete_ligand_atom_order_contract(row):
+        return False
+    atom_order = row["ligand_atom_order_contract"]
+    atom_count = int(atom_order.get("atom_count") or 0)
+    expected = list(range(atom_count))
+    symmetry = row.get("symmetry_permutation_contract")
+    if not isinstance(symmetry, dict):
+        return False
+    permutations = _as_list(symmetry.get("permutations"))
+    if not permutations or expected not in permutations:
+        return False
+    return all(
+        isinstance(permutation, list) and sorted(permutation) == expected
+        for permutation in permutations
+    )
+
+
+def _complete_receipt_fields(row: dict[str, Any]) -> bool:
+    return bool(
+        str(row.get("source_license_or_accession") or "").strip()
+        and _is_sha256_ref(row.get("source_checksum"))
+        and str(row.get("provenance_ref") or "").strip()
+    )
+
+
+def source_material_coverage_summary(
+    case_rows: list[dict[str, Any]],
+    *,
+    target_subset_case_count: int,
+) -> dict[str, Any]:
+    materialized_count = len(case_rows)
+    source_file_checksum_entry_count = sum(
+        len(row.get("source_file_checksums"))
+        for row in case_rows
+        if isinstance(row.get("source_file_checksums"), dict)
+    )
+    valid_source_file_checksum_entry_count = sum(
+        1
+        for row in case_rows
+        if isinstance(row.get("source_file_checksums"), dict)
+        for checksum in row["source_file_checksums"].values()
+        if _is_sha256_ref(checksum)
+    )
+    return {
+        "target_subset_case_count": int(target_subset_case_count),
+        "materialized_case_count": materialized_count,
+        "missing_case_count": max(int(target_subset_case_count) - materialized_count, 0),
+        "required_local_source_file_fields": list(LOCAL_SOURCE_FILE_FIELDS),
+        "required_local_source_file_field_count": len(LOCAL_SOURCE_FILE_FIELDS),
+        "expected_source_file_checksum_count": (
+            materialized_count * len(LOCAL_SOURCE_FILE_FIELDS)
+        ),
+        "source_file_checksum_entry_count": source_file_checksum_entry_count,
+        "valid_source_file_checksum_entry_count": (
+            valid_source_file_checksum_entry_count
+        ),
+        "source_file_checksum_case_count": sum(
+            1 for row in case_rows if _complete_source_file_checksums(row)
+        ),
+        "ligand_atom_order_contract_case_count": sum(
+            1 for row in case_rows if _complete_ligand_atom_order_contract(row)
+        ),
+        "symmetry_permutation_contract_case_count": sum(
+            1 for row in case_rows if _complete_symmetry_permutation_contract(row)
+        ),
+        "receipt_complete_case_count": sum(
+            1 for row in case_rows if _complete_receipt_fields(row)
+        ),
+        "benchmark_split_counts": _counts(
+            [str(row.get("benchmark_split") or "").strip() for row in case_rows]
+        ),
+        "claim_boundary": (
+            "Coverage counts summarize local operator-attached CASF/PDBBind case rows. "
+            "They prove manifest completeness only for declared rows and do not fetch, "
+            "license, redistribute, or benchmark external source material."
+        ),
+    }
+
+
 def _validate_case_row(row: dict[str, Any], *, index: int) -> list[str]:
     blockers: list[str] = []
     for field in REQUIRED_CASE_FIELDS:
@@ -150,6 +277,10 @@ def validate_subset_manifest(payload: dict[str, Any]) -> dict[str, Any]:
         count_blockers.append("case_id_not_unique")
     blockers = [*count_blockers, *row_blockers]
     ready = not blockers
+    coverage = source_material_coverage_summary(
+        case_rows,
+        target_subset_case_count=target_count,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "ready" if ready else "source_material_required",
@@ -158,6 +289,7 @@ def validate_subset_manifest(payload: dict[str, Any]) -> dict[str, Any]:
         "target_subset_case_count": target_count,
         "materialized_case_count": materialized_count,
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
+        "source_material_coverage": coverage,
         "blocker_count": len(blockers),
         "blockers": blockers,
         "claim_boundary": (

@@ -22,6 +22,7 @@ from score_symmetry_aware_ligand_rmsd import (  # noqa: E402
 from validate_public_benchmark_subset_manifest import (  # noqa: E402
     REQUIRED_CASE_FIELDS,
     SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS,
+    source_material_coverage_summary,
     validate_subset_manifest,
 )
 from validate_public_benchmark_external_receipts import (  # noqa: E402
@@ -188,6 +189,10 @@ def _operator_slot(
 
 
 def build_subset_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
+    source_material_coverage = source_material_coverage_summary(
+        [],
+        target_subset_case_count=12,
+    )
     return {
         "schema_version": SUBSET_SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -202,6 +207,7 @@ def build_subset_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "target_subset_case_count": 12,
         "materialized_case_count": 0,
         "source_families": ["CASF/PDBBind"],
+        "source_material_coverage": source_material_coverage,
         "case_row_schema": {
             "required_fields": list(REQUIRED_CASE_FIELDS),
             "template": _case_row_template(),
@@ -982,6 +988,13 @@ def build_source_of_truth(
 ) -> dict[str, Any]:
     target_subset_case_count = int(subset_manifest["target_subset_case_count"])
     subset_materialized_count = int(subset_manifest["materialized_case_count"])
+    subset_case_rows = [
+        row for row in subset_manifest.get("case_rows", []) if isinstance(row, dict)
+    ]
+    subset_source_material_coverage = source_material_coverage_summary(
+        subset_case_rows,
+        target_subset_case_count=target_subset_case_count,
+    )
     pose_real_case_count = int(
         pose_validity_packet["dry_run_validation"]["real_benchmark_case_count"]
     )
@@ -1288,6 +1301,7 @@ def build_source_of_truth(
         "subset_manifest_summary": {
             "target_subset_case_count": subset_manifest["target_subset_case_count"],
             "materialized_case_count": subset_manifest["materialized_case_count"],
+            "source_material_coverage": subset_source_material_coverage,
             "blockers": subset_manifest["blockers"],
         },
         "pose_validity_packet_summary": {

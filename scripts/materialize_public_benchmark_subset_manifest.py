@@ -21,6 +21,7 @@ from validate_public_benchmark_subset_manifest import (  # noqa: E402
     REQUIRED_POSE_SUCCESS_METRIC,
     REQUIRED_CASE_FIELDS,
     SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS,
+    source_material_coverage_summary,
     validate_subset_manifest,
 )
 
@@ -167,6 +168,10 @@ def materialize_subset_manifest(
             "case_rows": rows,
         }
     )
+    source_material_coverage = source_material_coverage_summary(
+        rows,
+        target_subset_case_count=target_count,
+    )
     blockers = [*validation["blockers"], *materialization_blockers]
     ready = not blockers
     intake_paths = [
@@ -190,6 +195,7 @@ def materialize_subset_manifest(
         "target_subset_case_count": target_count,
         "materialized_case_count": len(rows),
         "source_families": ["CASF/PDBBind"],
+        "source_material_coverage": source_material_coverage,
         "case_row_schema": {
             "required_fields": list(REQUIRED_CASE_FIELDS),
             "template": _case_row_template(),
@@ -206,10 +212,26 @@ def materialize_subset_manifest(
             "intake_case_count": len(raw_cases),
             "materialized_case_count": len(rows),
             "source_file_checksum_count": len(checksum_map),
+            "source_file_checksum_case_count": source_material_coverage[
+                "source_file_checksum_case_count"
+            ],
+            "ligand_atom_order_contract_case_count": source_material_coverage[
+                "ligand_atom_order_contract_case_count"
+            ],
+            "symmetry_permutation_contract_case_count": source_material_coverage[
+                "symmetry_permutation_contract_case_count"
+            ],
+            "receipt_complete_case_count": source_material_coverage[
+                "receipt_complete_case_count"
+            ],
+            "benchmark_split_counts": source_material_coverage[
+                "benchmark_split_counts"
+            ],
             "source_file_missing_count": len(materialization_blockers),
             "validation_blocker_count": int(validation["blocker_count"]),
             "materialization_blocker_count": len(materialization_blockers),
             "public_benchmark_ready": ready,
+            "source_material_coverage": source_material_coverage,
             "source_file_checksums": dict(sorted(checksum_map.items())),
         },
         "claim_boundary": (

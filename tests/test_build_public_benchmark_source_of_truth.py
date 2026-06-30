@@ -288,15 +288,21 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "vina_gnina_comparison_ready": False,
         "external_receipts_attached": False,
     }
-    assert source["subset_manifest_summary"] == {
-        "target_subset_case_count": 12,
-        "materialized_case_count": 0,
-        "blockers": [
-            "casf_pdbbind_source_material_not_attached",
-            "casf_pdbbind_case_checksums_missing",
-            "casf_pdbbind_ligand_symmetry_contracts_missing",
-        ],
-    }
+    subset_summary = source["subset_manifest_summary"]
+    assert subset_summary["target_subset_case_count"] == 12
+    assert subset_summary["materialized_case_count"] == 0
+    assert subset_summary["blockers"] == [
+        "casf_pdbbind_source_material_not_attached",
+        "casf_pdbbind_case_checksums_missing",
+        "casf_pdbbind_ligand_symmetry_contracts_missing",
+    ]
+    subset_coverage = subset_summary["source_material_coverage"]
+    assert subset_coverage["missing_case_count"] == 12
+    assert subset_coverage["source_file_checksum_case_count"] == 0
+    assert subset_coverage["ligand_atom_order_contract_case_count"] == 0
+    assert subset_coverage["symmetry_permutation_contract_case_count"] == 0
+    assert subset_coverage["receipt_complete_case_count"] == 0
+    assert subset_coverage["benchmark_split_counts"] == {}
     assert source["symmetry_rmsd_summary"] == {
         "status": "ready",
         "dry_run_case_count": 1,
@@ -341,6 +347,9 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["subset_manifest_validation"]["blockers"] == [
         "materialized_case_count_below_target",
     ]
+    assert source["subset_manifest_validation"]["source_material_coverage"][
+        "missing_case_count"
+    ] == 12
     assert source["subset_materializer"] == {
         "schema_version": "public-benchmark-subset-materialization.v1",
         "status": "ready_for_operator_intake",
@@ -642,6 +651,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert subset["source_families"] == ["CASF/PDBBind"]
     assert subset["target_subset_case_count"] == 12
     assert subset["materialized_case_count"] == 0
+    assert subset["source_material_coverage"]["missing_case_count"] == 12
+    assert subset["source_material_coverage"]["required_local_source_file_fields"] == [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id",
+    ]
     assert subset["case_rows"] == []
     assert subset["case_row_schema"]["required_fields"] == [
         "case_id",
@@ -922,6 +937,9 @@ def test_public_benchmark_source_of_truth_ready_is_derived_from_gate() -> None:
     assert source["materialization_progress"]["blocked_slice_count"] == 0
     assert source["materialization_progress"]["next_unblock_slice_id"] == ""
     assert source["subset_manifest_validation"]["public_benchmark_ready"] is True
+    assert source["subset_manifest_summary"]["source_material_coverage"][
+        "source_file_checksum_case_count"
+    ] == 1
     assert "READY" in source["summary_line"]
 
 

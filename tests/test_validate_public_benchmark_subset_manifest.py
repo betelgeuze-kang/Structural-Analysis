@@ -61,6 +61,13 @@ def test_validate_empty_seed_manifest_stays_structurally_valid_but_not_ready() -
     assert result["public_benchmark_ready"] is False
     assert result["blockers"] == ["materialized_case_count_below_target"]
     assert result["materialized_case_count"] == 0
+    coverage = result["source_material_coverage"]
+    assert coverage["missing_case_count"] == 12
+    assert coverage["source_file_checksum_case_count"] == 0
+    assert coverage["ligand_atom_order_contract_case_count"] == 0
+    assert coverage["symmetry_permutation_contract_case_count"] == 0
+    assert coverage["receipt_complete_case_count"] == 0
+    assert coverage["benchmark_split_counts"] == {}
 
 
 def test_validate_complete_manifest_ready() -> None:
@@ -75,6 +82,16 @@ def test_validate_complete_manifest_ready() -> None:
     assert result["public_benchmark_ready"] is True
     assert result["blockers"] == []
     assert result["materialized_case_count"] == 2
+    coverage = result["source_material_coverage"]
+    assert coverage["missing_case_count"] == 0
+    assert coverage["expected_source_file_checksum_count"] == 6
+    assert coverage["source_file_checksum_entry_count"] == 6
+    assert coverage["valid_source_file_checksum_entry_count"] == 6
+    assert coverage["source_file_checksum_case_count"] == 2
+    assert coverage["ligand_atom_order_contract_case_count"] == 2
+    assert coverage["symmetry_permutation_contract_case_count"] == 2
+    assert coverage["receipt_complete_case_count"] == 2
+    assert coverage["benchmark_split_counts"] == {"CASF-core": 2}
 
 
 def test_validate_manifest_requires_explicit_ligand_atom_ids() -> None:

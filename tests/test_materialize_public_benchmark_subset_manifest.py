@@ -76,8 +76,17 @@ def test_materializer_builds_ready_subset_manifest_from_local_intake(tmp_path: P
     assert row["rmsd_threshold_angstrom"] == 2.0
     assert len(row["source_file_checksums"]) == 3
     assert all(value.startswith("sha256:") for value in row["source_file_checksums"].values())
+    coverage = manifest["source_material_coverage"]
+    assert coverage["source_file_checksum_case_count"] == 1
+    assert coverage["ligand_atom_order_contract_case_count"] == 1
+    assert coverage["symmetry_permutation_contract_case_count"] == 1
+    assert coverage["receipt_complete_case_count"] == 1
+    assert coverage["benchmark_split_counts"] == {"CASF-core": 1}
     report = manifest["materialization_report"]
     assert report["source_file_checksum_count"] == 3
+    assert report["source_file_checksum_case_count"] == 1
+    assert report["symmetry_permutation_contract_case_count"] == 1
+    assert report["source_material_coverage"] == coverage
     assert report["materialization_blocker_count"] == 0
 
 
@@ -92,13 +101,14 @@ def test_materializer_blocks_missing_local_pose_prediction(tmp_path: Path) -> No
 
     assert manifest["public_benchmark_ready"] is False
     assert manifest["materialization_report"]["source_file_missing_count"] == 1
+    assert manifest["source_material_coverage"]["source_file_checksum_case_count"] == 0
     assert manifest["blockers"] == [
         "case_row_0:source_file_checksums_incomplete",
         "case_row_0:source_file_checksum_for_predicted_ligand_path_or_docking_run_id_missing",
-        "case_row_0:predicted_ligand_path_or_docking_run_id_local_file_missing"
+        "case_row_0:predicted_ligand_path_or_docking_run_id_local_file_missing",
     ]
     assert manifest["case_rows"][0]["materialization_blockers"] == [
-        "case_row_0:predicted_ligand_path_or_docking_run_id_local_file_missing"
+        "case_row_0:predicted_ligand_path_or_docking_run_id_local_file_missing",
     ]
 
 
