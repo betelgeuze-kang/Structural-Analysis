@@ -513,13 +513,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T14:32:12.174407+00:00",
+  "generated_at": "2026-06-30T14:56:43.010351+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f3ecb8704c08819375c08e3ba94f717c8be17174c73585d7c9fb55ac1a71b1d3",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:8ac122ead4fa45ea7f9047b215f95ab6c65f9daa6916fedd96dec69f6bd73cec",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:b181b54239eebfcf62710cc3ba97bbaa512f17ef9adbc2101cce9bfd5c558ddc",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:ffd25ec49df8503675c4aedc7ad5c22c309d486f60b9a00f7db384f8e5798d6d",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:808b9226693fb5b99d84fd4414f78f0d2727d650307c0fb49916025ada48f361",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:a61800d5015c025d255fbbb9a5f73ac78bf9be62f1405e3c4ee2ca9d0bd816f4",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:b4702b9194bbf4426c7cf7c856213bdd5d0312b67ce4a1ff6b17fee86580f3d8",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -539,7 +539,7 @@
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:cc5edab07c763d44c75f7005eca66f235afb0d81ef4bc21115f60bfea8459790",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:29a089f90646c75733a4eb5900ae0d1129ebedc13b6990c894915c2958c30be1",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:765c4f5aa1c8f141a38171aa225d5e93eec3fc9ac0713a411d9863d26987e8c9",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:b87844fbe6607f6e496d604e81807cee075e9ebd00f3b313da55d428f0c9ba17",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
   },
@@ -2431,6 +2431,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "12affe4358e6a34bc809528c9a8a1685c73ab80e",
+  "source_commit_sha": "f775668ad48308bab9e6dc328fc1deeffd6e521e",
   "status": "blocked"
 }
