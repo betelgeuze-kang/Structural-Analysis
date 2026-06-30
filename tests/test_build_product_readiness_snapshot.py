@@ -2134,6 +2134,52 @@ def test_snapshot_blocks_non_receipt_changes_after_source_commit(tmp_path: Path)
     ]
 
 
+def test_snapshot_scoped_builder_change_only_stales_matching_artifact(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/run_g1_full_load_hip_newton_lane.py",
+        "print('g1 lane wrapper policy changed')\n",
+    )
+    _commit_all(tmp_path, "g1 lane wrapper change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "non_artifact_source_paths_changed"
+    )
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is False
+    )
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_kind"]
+        == "non_receipt_paths_changed"
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
+        not in payload["blockers"]
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report"
+        in payload["blockers"]
+    )
+
+
 def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_only(
     tmp_path: Path,
 ) -> None:

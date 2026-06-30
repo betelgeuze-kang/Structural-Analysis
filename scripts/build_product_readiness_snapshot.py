@@ -309,6 +309,7 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
 
 def _source_state_freshness(
     *,
+    artifact_name: str,
     repo_root: Path,
     source_commit: Any,
     current_commit: str,
@@ -331,7 +332,34 @@ def _source_state_freshness(
     ]
     if not non_receipt_paths:
         return True, "receipt_only_commit", changed_paths
-    return False, "non_receipt_paths_changed", non_receipt_paths
+    relevant_paths = [
+        path
+        for path in non_receipt_paths
+        if _artifact_relevant_source_path(artifact_name, path)
+    ]
+    if not relevant_paths:
+        return True, "non_artifact_source_paths_changed", non_receipt_paths
+    return False, "non_receipt_paths_changed", relevant_paths
+
+
+def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
+    artifact_specific_paths = {
+        "g1_full_load_hip_newton_lane_report": {
+            "scripts/run_g1_full_load_hip_newton_lane.py",
+        },
+        "pm_release_gate_report": {
+            "scripts/check_github_development_sync_preflight.py",
+            "scripts/report_pm_release_gate.py",
+        },
+    }
+    ignored_test_prefixes = ("tests/",)
+    if path.startswith(ignored_test_prefixes):
+        return False
+    scoped_paths = artifact_specific_paths.get(artifact_name)
+    globally_scoped_paths = set().union(*artifact_specific_paths.values())
+    if path in globally_scoped_paths:
+        return bool(scoped_paths is not None and path in scoped_paths)
+    return True
 
 
 def _as_bool(value: Any) -> bool:
@@ -436,6 +464,7 @@ def _metadata_rows(
             ),
         )
         source_state_fresh, source_state_kind, changed_paths = _source_state_freshness(
+            artifact_name=name,
             repo_root=repo_root,
             source_commit=source_commit,
             current_commit=current_commit,
