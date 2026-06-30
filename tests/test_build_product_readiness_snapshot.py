@@ -3809,6 +3809,67 @@ def test_snapshot_blocks_ready_g1_lane_with_stale_hip_consistency_proof_source(
     assert payload["paid_pilot_ready"] is False
 
 
+def test_snapshot_accepts_g1_hip_proof_receipt_only_source_state(
+    tmp_path: Path,
+) -> None:
+    commit = "lane-source"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    g1_lane = json.loads(
+        (tmp_path / "g1_full_load_hip_newton_lane_report.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    g1_lane["hip_consistency_proof"] = {
+        **_g1_hip_consistency_proof(ready=False),
+        "source_commit_sha": "proof-source",
+        "source_state_fresh": True,
+        "source_state_kind": "receipt_only_commit",
+        "changed_paths_since_source_commit": [
+            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+            "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+        ],
+        "production_hip_residual_jacobian_path": True,
+        "consistent_residual_jacobian_newton_gate_passed": False,
+        "receipt_blockers": ["consistent_residual_jacobian_not_closed"],
+        "runtime_blockers": [],
+    }
+    g1_lane["blockers"] = [
+        "hip_consistency_proof_gate_not_passed",
+        "hip_consistency_proof_has_blockers",
+    ]
+    g1_lane["contract_pass"] = False
+    g1_lane["status"] = "blocked"
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", g1_lane)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    proof = payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof"]
+    assert proof["ready"] is False
+    assert proof["source_commit_sha"] == "proof-source"
+    assert proof["source_state_fresh"] is True
+    assert proof["source_state_kind"] == "receipt_only_commit"
+    assert proof["changed_paths_since_source_commit"] == [
+        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+    ]
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch"
+        not in _g1_detail_blockers(payload)
+    )
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_gate_not_passed"
+        in _g1_detail_blockers(payload)
+    )
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_has_blockers"
+        in _g1_detail_blockers(payload)
+    )
+
+
 def test_snapshot_blocks_ready_g1_lane_with_invalid_child_hip_refresh_schema(
     tmp_path: Path,
 ) -> None:

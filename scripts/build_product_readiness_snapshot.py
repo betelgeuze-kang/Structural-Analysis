@@ -631,6 +631,11 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
     proof = _as_dict(lane_payload.get("hip_consistency_proof"))
     lane_source_commit = str(lane_payload.get("source_commit_sha", "") or "")
     proof_source_commit = str(proof.get("source_commit_sha", "") or "")
+    proof_source_state_fresh = proof.get("source_state_fresh")
+    proof_source_state_kind = str(proof.get("source_state_kind") or "")
+    proof_changed_paths = [
+        str(item) for item in _as_list(proof.get("changed_paths_since_source_commit"))
+    ]
     receipt_blockers = [str(item) for item in _as_list(proof.get("receipt_blockers"))]
     runtime_blockers = [str(item) for item in _as_list(proof.get("runtime_blockers"))]
     blockers = [str(item) for item in _as_list(lane_payload.get("blockers"))]
@@ -641,7 +646,11 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
         proof_blockers.append("hip_consistency_proof_missing")
     if not proof_source_commit:
         proof_blockers.append("hip_consistency_proof_source_commit_sha_missing")
-    elif lane_source_commit and proof_source_commit != lane_source_commit:
+    elif (
+        lane_source_commit
+        and proof_source_commit != lane_source_commit
+        and proof_source_state_fresh is not True
+    ):
         proof_blockers.append("hip_consistency_proof_source_commit_sha_mismatch")
     if proof.get("reused_evidence") is not False:
         proof_blockers.append("hip_consistency_proof_reused_evidence_not_false")
@@ -677,6 +686,9 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
         "present": bool(proof.get("present")),
         "status": str(proof.get("status", "")),
         "source_commit_sha": proof_source_commit,
+        "source_state_fresh": proof_source_state_fresh,
+        "source_state_kind": proof_source_state_kind,
+        "changed_paths_since_source_commit": proof_changed_paths,
         "reused_evidence": proof.get("reused_evidence"),
         "rocm_hip_required": proof.get("rocm_hip_required"),
         "execution_mode": proof.get("execution_mode"),
