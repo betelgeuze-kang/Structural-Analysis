@@ -24,10 +24,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T10:10:20.994770+00:00",
+  "generated_at": "2026-06-30T10:14:23.108904+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:67123383ac41df37bfeda274bea1fd4049c24a2a750535c381bffb978b5c344c",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:c87ec9b12297786ab6a3327d4f225cc2e5eb6c54da5b276b477748fc70dcc0ca",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:02f86e3df8703fc6ad0e84e571b747fc06dee3ce464aeaadde30d61671e86cb5",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:2f913035128cbb4898204bcdc004399d7834b9a834dc0a81add6d0941bb99967",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -970,7 +970,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "4e21e33a7db60ec6ac8b38394c0b3ec02393e40a",
+  "source_commit_sha": "99e856d321a740e3420a505a941156a7f0abc5e9",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
