@@ -27,6 +27,10 @@ def _checksum(seed: str) -> str:
     return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
+def _file_sha256(path: Path) -> str:
+    return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
+
+
 def _valid_case(
     *,
     case_id: str,
@@ -106,9 +110,33 @@ def _valid_intake() -> dict[str, object]:
     }
 
 
-def test_pocketmd_lite_materializer_computes_topk_survival_summary() -> None:
+def _with_source_receipt(
+    intake: dict[str, object],
+    tmp_path: Path,
+) -> dict[str, object]:
+    source_artifact = tmp_path / "pocketmd_lite_topk_rows.json"
+    cases = intake.get("cases")
+    source_artifact.write_text(
+        json.dumps({"top_k_refinement_rows": cases}, sort_keys=True),
+        encoding="utf-8",
+    )
+    payload = json.loads(json.dumps(intake))
+    payload["operator_input_source"] = {
+        "mode": "raw_top_k_refinement_rows",
+        "source_artifact": str(source_artifact),
+        "source_artifact_sha256": _file_sha256(source_artifact),
+        "source_id": "unit-test-pocketmd-lite-topk-rows",
+        "source_url": "https://example.invalid/pocketmd-lite-topk-rows",
+        "source_license": "fixture-only",
+    }
+    return payload
+
+
+def test_pocketmd_lite_materializer_computes_topk_survival_summary(
+    tmp_path: Path,
+) -> None:
     report = module.materialize_pocketmd_lite_topk_survival_report(
-        _valid_intake(),
+        _with_source_receipt(_valid_intake(), tmp_path),
         repo_root=REPO_ROOT,
     )
 
@@ -119,6 +147,7 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary() -> None:
     assert report["status"] == "ready"
     assert report["contract_pass"] is True
     assert report["product_surface_ready"] is True
+    assert report["operator_input_source_receipt"]["contract_pass"] is True
     assert report["real_refinement_case_count"] == 2
     assert report["top_k_candidate_count"] == 3
     assert report["blockers"] == []
@@ -138,9 +167,11 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary() -> None:
     assert "free_energy_perturbation_claim" in report["blocked_claims"]
 
 
-def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim() -> None:
+def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim(
+    tmp_path: Path,
+) -> None:
     report = module.materialize_pocketmd_lite_topk_survival_report(
-        _valid_intake(),
+        _with_source_receipt(_valid_intake(), tmp_path),
         contract={"schema_version": "pocketmd-lite-contract.v1", "contract_pass": True},
         repo_root=REPO_ROOT,
     )
@@ -160,6 +191,7 @@ def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim() -> None
     assert surface["locked"] is False
     assert surface["claim_locked"] is False
     assert surface["blockers"] == []
+    assert surface["operator_input_source_receipt"]["contract_pass"] is True
     assert "broad_all_atom_md_claim" in surface["blocked_claims"]
     assert surface["phase4_exit_gate"]["status"] == "ready"
     assert surface["readiness_summary"]["phase4_exit_gate_status"] == "ready"
@@ -169,8 +201,8 @@ def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim() -> None
     )
 
 
-def test_pocketmd_lite_materializer_blocks_invalid_checksum() -> None:
-    intake = _valid_intake()
+def test_pocketmd_lite_materializer_blocks_invalid_checksum(tmp_path: Path) -> None:
+    intake = _with_source_receipt(_valid_intake(), tmp_path)
     cases = intake["cases"]
     assert isinstance(cases, list)
     first_case = cases[0]
@@ -190,8 +222,29 @@ def test_pocketmd_lite_materializer_blocks_invalid_checksum() -> None:
     assert "operator_receipts_required" in report["root_cause_tags"]
 
 
-def test_pocketmd_lite_materializer_blocks_duplicate_topk_rank() -> None:
-    intake = _valid_intake()
+def test_pocketmd_lite_materializer_blocks_rows_without_source_receipt() -> None:
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        _valid_intake(),
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["product_surface_ready"] is False
+    assert report["first_blocked_target"] == "operator_input_source_receipt_required"
+    assert report["operator_input_source_receipt"]["contract_pass"] is False
+    assert report["operator_input_source_receipt"]["status"] == "blocked"
+    assert report["operator_input_source_receipt"]["blockers"] == [
+        "operator_input_source_receipt_required"
+    ]
+    assert report["blockers"] == ["operator_input_source_receipt_required"]
+    assert "operator_input_source_receipt_required" in report["blockers"]
+    assert "operator_receipts_required" in report["root_cause_tags"]
+    assert report["phase4_exit_gate"]["failed_criteria"] == ["report_blockers_resolved"]
+
+
+def test_pocketmd_lite_materializer_blocks_duplicate_topk_rank(tmp_path: Path) -> None:
+    intake = _with_source_receipt(_valid_intake(), tmp_path)
     cases = intake["cases"]
     assert isinstance(cases, list)
     cases.append(
@@ -259,7 +312,10 @@ def test_pocketmd_lite_materializer_blocks_empty_intake() -> None:
 
 def test_pocketmd_lite_materializer_cli_writes_report_and_surface(tmp_path: Path) -> None:
     intake = tmp_path / "pocketmd_lite_intake.json"
-    intake.write_text(json.dumps(_valid_intake()), encoding="utf-8")
+    intake.write_text(
+        json.dumps(_with_source_receipt(_valid_intake(), tmp_path)),
+        encoding="utf-8",
+    )
     out_report = tmp_path / "pocketmd_lite_topk_survival_report.json"
     out_surface = tmp_path / "pocketmd_lite_science_product_surface.json"
 

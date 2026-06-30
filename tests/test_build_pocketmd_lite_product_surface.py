@@ -80,14 +80,30 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "raw_row_importer": {
             "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
             "status": "ready_for_raw_operator_rows",
-            "supported_source_formats": ["csv", "tsv", "json"],
+            "supported_source_formats": ["csv", "tsv", "json", "jsonl", "ndjson"],
             "required_output_key": "cases",
             "output_intake": "<operator-pocketmd-lite-intake.json>",
+            "emits_operator_input_source_receipt": True,
+            "operator_input_source_receipt_policy": {
+                "required_mode": "raw_top_k_refinement_rows",
+                "source_artifact_sha256_policy": (
+                    "sha256:<64 lowercase or uppercase hex characters>"
+                ),
+                "required_operator_input_source_fields": [
+                    "mode",
+                    "source_artifact",
+                    "source_artifact_sha256",
+                    "source_id",
+                    "source_url",
+                    "source_license",
+                ],
+            },
             "command": (
                 "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
-                "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> "
+                "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> "
                 "--out <operator-pocketmd-lite-intake.json> "
-                "--source-id <source-id> --source-license <license>"
+                "--source-id <source-id> --source-url <source-url> "
+                "--source-license <license>"
             ),
         },
         "command": (
@@ -409,12 +425,34 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "provenance_ref",
                 "source_checksum",
             ],
-            "receipt_fields": ["provenance_ref", "source_checksum"],
+            "receipt_fields": [
+                "provenance_ref",
+                "source_checksum",
+                "operator_input_source.source_artifact",
+                "operator_input_source.source_artifact_sha256",
+                "operator_input_source.source_id",
+                "operator_input_source.source_url",
+                "operator_input_source.source_license",
+            ],
             "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum",
             },
-            "raw_row_supported_formats": ["csv", "tsv", "json"],
+            "operator_input_source_receipt_policy": {
+                "required_mode": "raw_top_k_refinement_rows",
+                "source_artifact_sha256_policy": (
+                    "sha256:<64 lowercase or uppercase hex characters>"
+                ),
+                "required_operator_input_source_fields": [
+                    "mode",
+                    "source_artifact",
+                    "source_artifact_sha256",
+                    "source_id",
+                    "source_url",
+                    "source_license",
+                ],
+            },
+            "raw_row_supported_formats": ["csv", "tsv", "json", "jsonl", "ndjson"],
         },
         "materialization_steps": [
             "materialize_pocketmd_lite_operator_intake_from_rows",
@@ -424,9 +462,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         ],
         "raw_row_import_command": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
-            "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> "
+            "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> "
             "--out <operator-pocketmd-lite-intake.json> "
-            "--source-id <source-id> --source-license <license>"
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license>"
         ),
         "materialization_command": (
             "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "

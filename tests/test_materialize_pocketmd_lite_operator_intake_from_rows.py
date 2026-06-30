@@ -165,11 +165,16 @@ def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None
         rows_path=rows,
         repo_root=REPO_ROOT,
         source_id="fixture",
+        source_url="https://example.invalid/pocketmd-lite-rows.csv",
         source_license="fixture-license",
     )
 
     assert payload["schema_version"] == "pocketmd-lite-operator-intake.v1"
     assert payload["operator_input_source"]["mode"] == "raw_top_k_refinement_rows"
+    assert payload["operator_input_source"]["source_url"] == (
+        "https://example.invalid/pocketmd-lite-rows.csv"
+    )
+    assert payload["operator_input_source"]["source_license"] == "fixture-license"
     assert payload["operator_input_source"]["row_count"] == 3
     assert payload["operator_input_source"]["case_count"] == 2
     assert payload["operator_input_source"]["top_k_candidate_count"] == 3
@@ -267,6 +272,9 @@ def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:
     payload = module.build_pocketmd_lite_operator_intake_from_rows(
         rows_path=rows,
         repo_root=REPO_ROOT,
+        source_id="fixture-ndjson",
+        source_url="https://example.invalid/pocketmd-lite-rows.ndjson",
+        source_license="fixture-license",
     )
 
     assert payload["operator_input_source"]["supported_source_formats"] == [
@@ -284,6 +292,7 @@ def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:
         repo_root=REPO_ROOT,
     )
     assert report["status"] == "ready"
+    assert report["operator_input_source_receipt"]["contract_pass"] is True
     assert report["product_surface_ready"] is True
     assert report["phase4_exit_gate"]["failed_criteria"] == []
 

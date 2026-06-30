@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+from release_evidence_metadata import file_sha256, release_evidence_metadata  # noqa: E402
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -84,6 +84,10 @@ def _json_text(payload: dict[str, Any]) -> str:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
 
 
 def _string(value: Any) -> str:
@@ -340,6 +344,66 @@ def _topk_integrity_blockers(rows: list[dict[str, Any]]) -> tuple[list[str], lis
     return blockers, list(dict.fromkeys(root_cause_tags))
 
 
+def _operator_input_source_receipt(
+    intake: Any,
+    *,
+    repo_root: Path,
+) -> dict[str, Any]:
+    source = _as_dict(intake.get("operator_input_source")) if isinstance(intake, dict) else {}
+    blockers: list[str] = []
+    if not source:
+        blockers.append("operator_input_source_receipt_required")
+    elif _string(source.get("mode")) != "raw_top_k_refinement_rows":
+        blockers.append("operator_input_source_mode_not_raw_top_k_refinement_rows")
+
+    source_artifact = _string(source.get("source_artifact"))
+    source_artifact_sha256 = _string(source.get("source_artifact_sha256"))
+    if source:
+        for field_name in ("source_id", "source_url", "source_license"):
+            if not _string(source.get(field_name)):
+                blockers.append(f"operator_input_source_{field_name}_required")
+        if not source_artifact:
+            blockers.append("operator_input_source_source_artifact_required")
+        if not source_artifact_sha256:
+            blockers.append("operator_input_source_source_artifact_sha256_required")
+        elif not source_artifact_sha256.startswith("sha256:"):
+            blockers.append("operator_input_source_source_artifact_sha256_invalid")
+
+    source_artifact_exists = False
+    source_artifact_sha256_matches = False
+    if source_artifact:
+        source_path = Path(source_artifact)
+        resolved_source = source_path if source_path.is_absolute() else repo_root / source_path
+        source_artifact_exists = resolved_source.exists()
+        if not source_artifact_exists:
+            blockers.append("operator_input_source_source_artifact_missing")
+        elif source_artifact_sha256.startswith("sha256:"):
+            actual_sha256 = file_sha256(resolved_source)
+            source_artifact_sha256_matches = actual_sha256 == source_artifact_sha256
+            if not source_artifact_sha256_matches:
+                blockers.append("operator_input_source_source_artifact_sha256_mismatch")
+
+    blockers = sorted(dict.fromkeys(blockers))
+    return {
+        "status": "pass" if not blockers else "blocked",
+        "contract_pass": not blockers,
+        "mode": _string(source.get("mode")),
+        "source_artifact": source_artifact,
+        "source_artifact_present": source_artifact_exists,
+        "source_artifact_sha256_present": bool(source_artifact_sha256),
+        "source_artifact_sha256_matches": source_artifact_sha256_matches,
+        "source_id_present": bool(_string(source.get("source_id"))),
+        "source_url_present": bool(_string(source.get("source_url"))),
+        "source_license_present": bool(_string(source.get("source_license"))),
+        "blockers": blockers,
+        "claim_boundary": (
+            "Actual PocketMD Lite top-k refinement closure requires operator rows "
+            "plus a verifiable source artifact receipt. In-memory or fixture-like "
+            "rows without source metadata remain non-promoting."
+        ),
+    }
+
+
 def _matching_blockers(blockers: list[str], *needles: str) -> list[str]:
     return [
         blocker
@@ -512,6 +576,13 @@ def materialize_pocketmd_lite_topk_survival_report(
     integrity_blockers, integrity_root_causes = _topk_integrity_blockers(rows)
     blockers.extend(integrity_blockers)
     root_cause_tags.extend(integrity_root_causes)
+    operator_input_source_receipt = _operator_input_source_receipt(
+        intake,
+        repo_root=repo_root,
+    )
+    if rows and not operator_input_source_receipt["contract_pass"]:
+        blockers.extend(_as_list(operator_input_source_receipt.get("blockers")))
+        root_cause_tags.append("operator_receipts_required")
     if not rows:
         blockers.extend(EMPTY_INTAKE_BLOCKERS)
         root_cause_tags.append("operator_refinement_rows_required")
@@ -559,6 +630,7 @@ def materialize_pocketmd_lite_topk_survival_report(
         "first_blocked_target": first_blocked_target,
         "root_cause_tags": list(dict.fromkeys(root_cause_tags)),
         "blockers": blockers,
+        "operator_input_source_receipt": operator_input_source_receipt,
         "blocked_claims": list(BLOCKED_CLAIMS),
         "phase4_exit_gate": phase4_exit_gate,
         "next_actions": (
@@ -655,6 +727,9 @@ def build_pocketmd_lite_science_product_surface(
         "blockers": [] if product_surface_ready else blockers,
         "blocked_claims": list(BLOCKED_CLAIMS),
         "phase4_exit_gate": phase4_exit_gate,
+        "operator_input_source_receipt": _as_dict(
+            report.get("operator_input_source_receipt")
+        ),
         "required_receipts": [
             "top_k_candidate_refinement_rows",
             "local_min_survival_report",

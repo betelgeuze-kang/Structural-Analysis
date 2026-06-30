@@ -49,6 +49,18 @@ SOURCE_CHECKSUM_POLICY = {
     "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
     "required_receipt_field": "source_checksum",
 }
+OPERATOR_INPUT_SOURCE_RECEIPT_POLICY = {
+    "required_mode": "raw_top_k_refinement_rows",
+    "source_artifact_sha256_policy": "sha256:<64 lowercase or uppercase hex characters>",
+    "required_operator_input_source_fields": [
+        "mode",
+        "source_artifact",
+        "source_artifact_sha256",
+        "source_id",
+        "source_url",
+        "source_license",
+    ],
+}
 POCKETMD_LITE_OPERATOR_EVIDENCE_BLOCKERS = [
     "pocketmd_lite_topk_candidate_rows_missing",
     "pocketmd_lite_local_min_survival_rows_missing",
@@ -147,14 +159,17 @@ def _raw_row_importer_contract() -> dict[str, Any]:
     return {
         "script": str(RAW_ROW_IMPORTER_SCRIPT),
         "status": "ready_for_raw_operator_rows",
-        "supported_source_formats": ["csv", "tsv", "json"],
+        "supported_source_formats": ["csv", "tsv", "json", "jsonl", "ndjson"],
         "required_output_key": "cases",
         "output_intake": "<operator-pocketmd-lite-intake.json>",
+        "emits_operator_input_source_receipt": True,
+        "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
         "command": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
-            "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> "
+            "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> "
             "--out <operator-pocketmd-lite-intake.json> "
-            "--source-id <source-id> --source-license <license>"
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license>"
         ),
     }
 
@@ -184,6 +199,7 @@ def _operator_intake_schema() -> dict[str, Any]:
             "remain out of scope."
         ),
         "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+        "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
         "raw_row_importer": _raw_row_importer_contract(),
         "template": {
             "case_id": "pocketmd_lite_case_001",
@@ -230,8 +246,19 @@ def _operator_gate_unblock_plan(
                 "top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
                 "candidate_scope": "upstream_ranked_top_k_candidates_only",
                 "required_case_fields": required_case_fields,
-                "receipt_fields": ["provenance_ref", "source_checksum"],
+                "receipt_fields": [
+                    "provenance_ref",
+                    "source_checksum",
+                    "operator_input_source.source_artifact",
+                    "operator_input_source.source_artifact_sha256",
+                    "operator_input_source.source_id",
+                    "operator_input_source.source_url",
+                    "operator_input_source.source_license",
+                ],
                 "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+                "operator_input_source_receipt_policy": (
+                    OPERATOR_INPUT_SOURCE_RECEIPT_POLICY
+                ),
                 "raw_row_supported_formats": raw_row_importer["supported_source_formats"],
             },
             "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
@@ -717,6 +744,7 @@ def build_operator_intake_packet(
                     "fill clash_count_before and clash_count_after as non-negative integers",
                     "fill uncertainty_interval with low, high, and unit",
                     "keep source_checksum and provenance_ref tied to local operator evidence",
+                    "keep operator_input_source source_artifact/source_artifact_sha256/source_id/source_url/source_license populated",
                 ],
             }
         ],
