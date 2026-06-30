@@ -621,6 +621,10 @@ def _gpcr_row(
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(
+                row.get("validation_command") or row.get("materialization_command") or ""
+            ),
         }
         for row in _as_list(
             gpcr_operator_intake.get("gate_unblock_plan")
@@ -655,6 +659,10 @@ def _gpcr_row(
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(
+                row.get("validation_command") or row.get("materialization_command") or ""
+            ),
         }
         for index, row in enumerate(gate_unblock_plan, start=1)
     ]
@@ -801,6 +809,10 @@ def _pocketmd_row(
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(
+                row.get("validation_command") or row.get("materialization_command") or ""
+            ),
         }
         for row in _as_list(pocketmd_operator_intake.get("gate_unblock_plan"))
         if isinstance(row, dict)
@@ -827,6 +839,10 @@ def _pocketmd_row(
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(
+                row.get("validation_command") or row.get("materialization_command") or ""
+            ),
             "preserves_phase4_criteria": [
                 str(item) for item in _as_list(row.get("preserves_phase4_criteria"))
             ],

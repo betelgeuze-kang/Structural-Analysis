@@ -26,6 +26,18 @@ DEFAULT_OPERATOR_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/"
     "gpcr_hard_decoy_operator_intake_packet.json"
 )
+DEFAULT_OPERATOR_TEMPLATE = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "gpcr_hard_decoy_operator_template.json"
+)
+DEFAULT_SUITE_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "gpcr_hard_decoy_suite_report.json"
+)
+DEFAULT_EVIDENCE_SURFACE = Path(
+    "implementation/phase1/release_evidence/surface/"
+    "gpcr_hard_decoy_evidence_surface.json"
+)
 EXIT_CRITERIA = {
     "ranking_pr_auc_ci_low_min": 0.45,
     "top20_hit_rate_min": 0.20,
@@ -71,6 +83,15 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
     }
 
 
+def _materialization_command() -> str:
+    return (
+        "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py "
+        f"--intake {DEFAULT_OPERATOR_TEMPLATE} "
+        f"--out-report {DEFAULT_SUITE_REPORT} "
+        f"--out-surface {DEFAULT_EVIDENCE_SURFACE} --fail-blocked"
+    )
+
+
 def _operator_evidence_gap_register(report: dict[str, Any]) -> list[dict[str, Any]]:
     criteria = [
         row
@@ -114,6 +135,8 @@ def _operator_evidence_gap_register(report: dict[str, Any]) -> list[dict[str, An
                 ),
                 "minimum_evidence": _phase3_minimum_evidence(target_id),
                 "materialization_steps": list(PHASE3_MATERIALIZATION_STEPS),
+                "materialization_command": _materialization_command(),
+                "validation_command": _materialization_command(),
             }
         )
     return rows
@@ -495,6 +518,12 @@ def build_gpcr_evidence_surface(
             str(row)
             for row in _as_list(first_operator_evidence_gap.get("materialization_steps"))
         ],
+        "materialization_command": str(
+            first_operator_evidence_gap.get("materialization_command") or ""
+        ),
+        "validation_command": str(
+            first_operator_evidence_gap.get("validation_command") or ""
+        ),
     }
     input_paths = [
         Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),

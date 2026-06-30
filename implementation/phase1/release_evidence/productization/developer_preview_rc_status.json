@@ -4,8 +4,7 @@
     "final_gate_blocked:large_models_crash_oom_free",
     "final_gate_blocked:silent_import_loss_zero",
     "final_gate_blocked:linux_windows_reproducibility_confirmed",
-    "final_gate_blocked:new_user_core_workflow_observation_passed",
-    "final_gate_blocked:benchmark_results_clean_checkout_regenerated"
+    "final_gate_blocked:new_user_core_workflow_observation_passed"
   ],
   "claim_boundary": "This receipt aggregates Developer Preview RC deliverables and final gates from existing evidence only. It does not close Commercial Release, full Phase 3 corpus, G1 full nonlinear full-mesh/material Newton, Linux/Windows parity, external benchmark, customer shadow, license, SLA, or external approval gates. Remote GitHub sync/push approval remains a release-publication handoff, while clean-checkout reproducibility is tracked separately.",
   "contract_pass": false,
@@ -104,7 +103,7 @@
   "developer_preview_release_candidate_ready": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "final_gate_count": 9,
-  "final_gate_pass_count": 3,
+  "final_gate_pass_count": 4,
   "final_gates": [
     {
       "blockers": [],
@@ -325,7 +324,7 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 2,
+        "blocker_count": 3,
         "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
         "groups": {
           "git_clean_clone_spillover": {
@@ -335,8 +334,10 @@
             "scope": "tracked_elsewhere_clean_checkout_gate"
           },
           "platform_receipt_contract": {
-            "blocker_count": 0,
-            "blockers": [],
+            "blocker_count": 1,
+            "blockers": [
+              "platform_replay_receipt_not_passed:linux"
+            ],
             "description": "Present platform replay receipts that do not satisfy the contract.",
             "scope": "direct_linux_windows_parity_gate"
           },
@@ -356,7 +357,8 @@
       },
       "blockers": [
         "linux_windows_parity_receipts_missing",
-        "platform_replay_receipt_missing:windows"
+        "platform_replay_receipt_missing:windows",
+        "platform_replay_receipt_not_passed:linux"
       ],
       "contract_pass": false,
       "evidence": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json; implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json; implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
@@ -491,34 +493,18 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 17,
+        "blocker_count": 0,
         "grouping_policy": "Preserve every blocker while separating local replay, git clean-clone replay inputs, and owner Git handoff actions. This grouping does not run or imply git add, commit, push, reset, checkout, or cleanup.",
         "groups": {
           "dirty_tracked_required_inputs": {
-            "blocker_count": 13,
-            "blockers": [
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Tracked required replay inputs that have uncommitted local changes.",
             "scope": "human_git_review_required"
           },
           "git_clean_clone_root": {
-            "blocker_count": 1,
-            "blockers": [
-              "git_clean_clone_reproduction_not_passed"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Aggregate blocker for replay from a real git clean clone.",
             "scope": "git_clean_clone_replay_gate"
           },
@@ -535,26 +521,20 @@
             "scope": "local_replay_gate"
           },
           "release_control_commit_set": {
-            "blocker_count": 1,
-            "blockers": [
-              "release_control_commit_set_pending:14"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Pending release-control commit-set size from the cleanup plan.",
             "scope": "owner_git_action_handoff"
           },
           "release_control_human_handoff": {
-            "blocker_count": 1,
-            "blockers": [
-              "human_git_action_required_for_release_control_inputs"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Owner Git review/action required before clean-clone replay can be promoted.",
             "scope": "owner_git_action_handoff"
           },
           "untracked_required_inputs": {
-            "blocker_count": 1,
-            "blockers": [
-              "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Required replay inputs that are not tracked in Git.",
             "scope": "human_git_review_required"
           }
@@ -563,32 +543,14 @@
         "unassigned_blocker_count": 0,
         "unassigned_blockers": []
       },
-      "blockers": [
-        "git_clean_clone_reproduction_not_passed",
-        "human_git_action_required_for_release_control_inputs",
-        "release_control_commit_set_pending:14",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
-        "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
-      ],
-      "contract_pass": false,
+      "blockers": [],
+      "contract_pass": true,
       "evidence": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json; implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json; implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json; implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json",
       "item": "benchmark_results_clean_checkout_regenerated",
       "notes": [
         "Local isolated worktree-copy replay and git clean-clone replay are separate evidence. This gate requires both to pass and cannot be closed until every required git-clean-clone input is tracked and committed in the replayed source state. The Phase 6 status receipt keeps local replay, real git clone replay, and cleanup handoff separate."
       ],
-      "status": "blocked"
+      "status": "ready"
     }
   ],
   "future_commercial_gates": [
@@ -600,29 +562,29 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T00:17:58.029579+00:00",
+  "generated_at": "2026-06-30T00:28:54.582875+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:57c9c896dc72c55d500c5b7d4beadb04ddb81b6ec54ad9a4712ec6d562425176",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:5766e5cccd3d52cd5ff497cdfa82b255b2a754586a702ae001b3717f87cc1105",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:76915d86f3c0663c9930bb5a4130c044ee08332f6d294832e7aa9252f470bb60",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:be8d8cfa05885d432b63ecd23c7959e913c1bad1664d453ad2b11e0cbb8503d4",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:a810fc034a8bf6a6a1295b94cb2eac08e67678d47dcb11dde274c07375534541",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:46ef82c27a866ca9143c0e0be09b3ded9c9795e9c1cb6451852d0780d8479dd5",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:006e42f030fe61e4f9878b2417413c68dbebe4a9388d899e90669b7d60a44813",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:776a1f3e08c92208689d997926c1675aa8ff9393a12ab56074287b89ec52df83",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:6a5e6ddce8ff4e178e7981a04bef9081fa56d4e4eb24d0aa32779d6cd27e6649",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:ad8bec02ff46a356d4370c3aa1fd7a7d82551b84cfb370e613108357a7df9c24",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": "sha256:fb612e88bc196e0c323190da8a0d29f409286ff1c8748257e47ef5eceee0cf65",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:d09f06b578c345217d22aad3cd67353232a8593e7274718c268c75c55b4c0abb",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:d34b05b062697ee8a8529a27e1db79c3b234d2e9c438759ea21f33a78114e6cb",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:05222a749b7b1b4029edbe9bfd0ba021b64a8d1c97d392d727048a8b4525438d",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:a4bb2e0547e7813186fdbe89f4b5f200914c04bfeacbcf3e9585839ce3351029",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:2042c6975db855fa770542168484a6b8abd4f3a779f92de94354a820d2ea16a1",
-    "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:638aa8f628d76d3edfdfc08357046b7388ef7b304de129a5e9a00a08b71ca162",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:b615ff5c2576f25eea588d00218ea87f62076ec14b7924783b66c4626ed5597a",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:60b59a12228241029f9ff1ad43d27baa1b379372aa69ba859948a3ebae29b3bd",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:db867ee9cd66943b082fc91a03b3abd0eb681d8e5e9f78520a690ede52a3227c",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:f751d99e9f57600250ff2e00293ec33003b34136a9639fc08ba079f6d28eb3f0",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:4df92b656667ebbb1d840ebf35b323d32d4e18259488445d4468218ca1b77cb3",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:40b81f70d380a18935ecbabf350248f293149231d99e0e6b735cb999f1829719",
+    "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:7fb52ccb7904e3d049b3e0770101823142b2c5f0166a306b1491266a663a6fa2",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:17e35a1dd5fdbe4adf308dc21f3bef47a7a7903d6a3f203e64ebbb805ca24016",
     "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:65dbe88321949aa98153ef9d54cf5752020f24255a6d5f31604c528c31fe2ed2",
-    "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:cd664978cda951f9842474a77e531ff9e763a4cfe7c099471a502c98bc40b2f9",
-    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:b0eb33ccbd1a2685518501ffb19b74385b2031dee9b45eb372bb349854ba8865",
+    "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:2ebd3c6489f7b5d953a5542e186b00cd2ea1d210a6691bfb60b910d413808557",
+    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:40e8676e510d56f77bc37e3049a059812ac3d86949dd26c0fe5a0083a8256f12",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:09666d378c3a47e05f950efa6fa54c539c8298be0ef711d03a58a2de4da6dbb6",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:5084026e9afead2793d133534b2809b75f2a940d34ab02f626b6ace37430a3ba",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
@@ -948,51 +910,29 @@
     "clean_checkout_reproduction_handoff": {
       "claim_boundary": "This handoff records why clean-checkout RC promotion is blocked. It does not commit changes, prove Linux/Windows parity, or close full Phase 3.",
       "clean_checkout_receipt": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-      "clean_checkout_status": "blocked",
-      "clean_checkout_status_contract_pass": false,
+      "clean_checkout_status": "ready",
+      "clean_checkout_status_contract_pass": true,
       "clean_checkout_status_receipt": "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json",
       "git_clean_clone": {
-        "blocker_count": 1,
-        "blocker_counts": {
-          "stable_artifact_checksum_mismatch": 1
-        },
-        "blockers": [
-          "stable_artifact_checksum_mismatch"
-        ],
+        "blocker_count": 0,
+        "blocker_counts": {},
+        "blockers": [],
         "claim_boundary": "This receipt is the authoritative Phase 3 seed git-clean-clone reproduction gate. When blocked, it proves the exact tracked/dirty-input reason a real clone cannot yet replay the seed benchmark artifacts from Git HEAD. When passing, it proves only a local git clone replay of generated analytic-small and element-patch seed artifacts. It is not Linux/Windows parity and does not prove Developer Preview Release Candidate closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, and is not full Phase 3 closure.",
-        "contract_pass": false,
+        "contract_pass": true,
         "executed": true,
         "required_input_count": 63,
-        "status": "blocked"
+        "status": "pass"
       },
       "git_clean_clone_gate": {
-        "blocker_count": 14,
-        "blocker_counts": {
-          "required_path_has_uncommitted_changes": 13,
-          "required_path_not_tracked": 1
-        },
-        "blockers": [
-          "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-        ],
+        "blocker_count": 0,
+        "blocker_counts": {},
+        "blockers": [],
         "claim_boundary": "This receipt is the authoritative Phase 3 seed git-clean-clone reproduction gate. When blocked, it proves the exact tracked/dirty-input reason a real clone cannot yet replay the seed benchmark artifacts from Git HEAD. When passing, it proves only a local git clone replay of generated analytic-small and element-patch seed artifacts. It is not Linux/Windows parity and does not prove Developer Preview Release Candidate closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, and is not full Phase 3 closure.",
-        "contract_pass": false,
-        "git_clean_clone_executed": false,
+        "contract_pass": true,
+        "git_clean_clone_executed": true,
         "receipt": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
         "required_input_count": 63,
-        "status": "blocked"
+        "status": "ready"
       },
       "git_clean_clone_receipt": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
       "local_clean_checkout": {
@@ -1011,34 +951,18 @@
       },
       "owner_action": "Review and commit or intentionally remove every required git-clean-clone input change, ensure the missing required path is tracked or removed from the contract, then rerun the git clean-clone reproduction receipt.",
       "phase6_clean_checkout_blocker_grouping": {
-        "blocker_count": 17,
+        "blocker_count": 0,
         "grouping_policy": "Preserve every blocker while separating local replay, git clean-clone replay inputs, and owner Git handoff actions. This grouping does not run or imply git add, commit, push, reset, checkout, or cleanup.",
         "groups": {
           "dirty_tracked_required_inputs": {
-            "blocker_count": 13,
-            "blockers": [
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-              "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Tracked required replay inputs that have uncommitted local changes.",
             "scope": "human_git_review_required"
           },
           "git_clean_clone_root": {
-            "blocker_count": 1,
-            "blockers": [
-              "git_clean_clone_reproduction_not_passed"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Aggregate blocker for replay from a real git clean clone.",
             "scope": "git_clean_clone_replay_gate"
           },
@@ -1055,26 +979,20 @@
             "scope": "local_replay_gate"
           },
           "release_control_commit_set": {
-            "blocker_count": 1,
-            "blockers": [
-              "release_control_commit_set_pending:14"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Pending release-control commit-set size from the cleanup plan.",
             "scope": "owner_git_action_handoff"
           },
           "release_control_human_handoff": {
-            "blocker_count": 1,
-            "blockers": [
-              "human_git_action_required_for_release_control_inputs"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Owner Git review/action required before clean-clone replay can be promoted.",
             "scope": "owner_git_action_handoff"
           },
           "untracked_required_inputs": {
-            "blocker_count": 1,
-            "blockers": [
-              "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Required replay inputs that are not tracked in Git.",
             "scope": "human_git_review_required"
           }
@@ -1083,65 +1001,38 @@
         "unassigned_blocker_count": 0,
         "unassigned_blockers": []
       },
-      "phase6_clean_checkout_blockers": [
-        "git_clean_clone_reproduction_not_passed",
-        "human_git_action_required_for_release_control_inputs",
-        "release_control_commit_set_pending:14",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-        "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
-        "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
-      ],
+      "phase6_clean_checkout_blockers": [],
       "release_control_cleanup": {
-        "candidate_release_control_commit_set_count": 14,
+        "candidate_release_control_commit_set_count": 0,
         "claim_boundary": "This receipt organizes local Git cleanup needed for Phase 3 seed git-clean-clone replay. Its candidate set is not an exhaustive current-worktree dirty-path inventory; the product readiness snapshot carries the current-worktree diagnostic separately. It does not commit, push, release, promote Developer Preview readiness, or close Phase 3. Dirty tracked paths require owner review before they are bundled with the release-control evidence set.",
-        "contract_pass": false,
-        "human_git_action_required": true,
-        "human_handoff_next_action": "owner_review_then_track_or_commit_required_inputs",
+        "contract_pass": true,
+        "human_git_action_required": false,
+        "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
         "next_verification_commands": [
           "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
           "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py --check",
           "python3 scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py --check"
         ],
-        "recommended_action_counts": {
-          "resolve_or_commit_dirty_tracked_input": 13,
-          "track_source_input_or_report": 1
-        },
-        "status": "blocked"
+        "recommended_action_counts": {},
+        "status": "ready"
       },
       "release_control_cleanup_gate": {
-        "candidate_release_control_commit_set_count": 14,
+        "candidate_release_control_commit_set_count": 0,
         "claim_boundary": "This receipt organizes local Git cleanup needed for Phase 3 seed git-clean-clone replay. Its candidate set is not an exhaustive current-worktree dirty-path inventory; the product readiness snapshot carries the current-worktree diagnostic separately. It does not commit, push, release, promote Developer Preview readiness, or close Phase 3. Dirty tracked paths require owner review before they are bundled with the release-control evidence set.",
         "codex_commit_or_push_performed": false,
-        "contract_pass": false,
-        "human_git_action_required": true,
-        "human_handoff_next_action": "owner_review_then_track_or_commit_required_inputs",
-        "human_handoff_status": "blocked_until_human_git_action",
+        "contract_pass": true,
+        "human_git_action_required": false,
+        "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
+        "human_handoff_status": "ready",
         "next_verification_commands": [
           "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
           "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py --check",
           "python3 scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py --check"
         ],
-        "path_role_counts": {
-          "generated_productization_evidence": 13,
-          "source_input_report": 1
-        },
+        "path_role_counts": {},
         "receipt": "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json",
-        "recommended_action_counts": {
-          "resolve_or_commit_dirty_tracked_input": 13,
-          "track_source_input_or_report": 1
-        },
-        "status": "blocked"
+        "recommended_action_counts": {},
+        "status": "ready"
       },
       "release_control_cleanup_plan": "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json",
       "reproducibility_bundle": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
@@ -1260,8 +1151,7 @@
       "final_gate_blocked:large_models_crash_oom_free",
       "final_gate_blocked:silent_import_loss_zero",
       "final_gate_blocked:linux_windows_reproducibility_confirmed",
-      "final_gate_blocked:new_user_core_workflow_observation_passed",
-      "final_gate_blocked:benchmark_results_clean_checkout_regenerated"
+      "final_gate_blocked:new_user_core_workflow_observation_passed"
     ],
     "gap_ledger_closure_requirement_visibility": {
       "ai_engine_guardrail_rows_ready": true,
@@ -1750,14 +1640,12 @@
     },
     "linux_windows_reproducibility_handoff": {
       "blocked_by": [
-        "git_clean_clone_reproduction_not_passed",
         "linux_windows_parity_receipts_missing",
-        "platform_replay_receipt_missing:windows"
+        "platform_replay_receipt_missing:windows",
+        "platform_replay_receipt_not_passed:linux"
       ],
       "claim_boundary": "This receipt defines and checks the Linux/Windows platform replay evidence required for the Developer Preview RC parity gate. It does not prove parity until independent passing Linux and Windows receipts are attached, and it does not replace the separate git clean-clone reproduction gate.",
-      "clean_clone_blockers_tracked_elsewhere": [
-        "stable_artifact_checksum_mismatch"
-      ],
+      "clean_clone_blockers_tracked_elsewhere": [],
       "comparison_requirements": [
         "same source_commit_sha or explicit commit mapping",
         "same expected_scorecard.case_count",
@@ -1792,19 +1680,19 @@
         "status": "pass"
       },
       "expected_stable_artifact_checksums": {
-        "acquisition_plan": "sha256:bfd6abc56d0a33d4b2e0e4298e2e3bd9f5a032ff3b58c6d0f096ffb453cf25fe",
-        "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:2cd3af295039d08f27b6f0ee9e39c606219b15b9fe12b05581ce2208dbfdc620",
-        "buildingsmart_ifc_acquisition_receipt": "sha256:d5337d970d5676ae27fa726664f5a950e1e9504523ab5f5b004f0f483d965705",
-        "commercial_comparison_import_template": "sha256:ba291e7caf10e35a0984e071f347b3338a635f23909eed1df91b60bf55ac19de",
-        "commercial_operator_reference_contract": "sha256:d4b61ec4d9dfd02dad87e30f20c1d91ec1835d37ff61b6bcd14eba7e836b1bb9",
-        "commercial_operator_reference_ingest_validator": "sha256:a722879f5b1a04f83927752bae59bae0d3365c9c10bdd51b364a89c8746fb3df",
-        "ifc_import_health_execution_receipt": "sha256:719d381a33e90aaa9be7cdf2b3b15112963d0fc054463b8883089a2ee50de79d",
-        "ifc_source_license_receipt": "sha256:d3aeba53123ff49ee65459671a4d9ebb2b921f1444f10df063bbdd90dbc1f560",
+        "acquisition_plan": "sha256:2c982cafb73081f84d1919c4fbef14d14a751d3db05537cea73080a9366c7605",
+        "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:dd8ad8cc5bade75c330325f2d29e321d92740689276801a590457b6c5cd19e78",
+        "buildingsmart_ifc_acquisition_receipt": "sha256:910cfd845f209a4c0c03b3c6dd1565d21380b7df8789a0a330ec84e88853d23c",
+        "commercial_comparison_import_template": "sha256:98a365cc85d8470885b63542126f787b60c4dd3dd227d943d6422dc8a1c81545",
+        "commercial_operator_reference_contract": "sha256:f27071cf289f79af09a03f36f53352cad7b54aabfe8ee612a6056020d371be0f",
+        "commercial_operator_reference_ingest_validator": "sha256:efca0f0ebf5fa8b12c9f17965811d1033f88f208ad93b9737aa8fbc4d127cf61",
+        "ifc_import_health_execution_receipt": "sha256:ebf219b0177c66942bfcec2322b9fe96e2cdceb421b9230ae829b19e4dd0efe5",
+        "ifc_source_license_receipt": "sha256:bf2042aa8e5713e7c8f9d08813e6cd96b761d8c092577639d483432807838d3a",
         "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-        "opensees_source_license_receipt": "sha256:1b44b4cbc5527c3b0b89c6befc4483b58681beb1f56d30645ec4b0499715d89f",
-        "phase4_analytic_physical_fallback_scorecard": "sha256:2ab12f6306ea4675b7e9e1399240941d9639077d265e37fb1d982dbc37f89acf",
+        "opensees_source_license_receipt": "sha256:926605c8f6cfc93ee2b5efa0a5df1fc37fb3a6b0a002696e7d276cf74773bc51",
+        "phase4_analytic_physical_fallback_scorecard": "sha256:573aa7d043f5fe297fead2d6f016d03a58a690d5e1e4817e33bdb80f84e5ee57",
         "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
-        "summary": "sha256:fa35f887fb92dc26f2569a8a87d26505f56b0bfcda01171c73e0b9a86d38dacf"
+        "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
       },
       "git_clean_clone_receipt": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
       "missing_platform_receipts": [
@@ -1816,16 +1704,16 @@
         "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
         "groups": {
           "git_clean_clone_spillover": {
-            "blocker_count": 1,
-            "blockers": [
-              "git_clean_clone_reproduction_not_passed"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Git clean-clone replay blocker tracked by the separate clean-checkout RC final gate.",
             "scope": "tracked_elsewhere_clean_checkout_gate"
           },
           "platform_receipt_contract": {
-            "blocker_count": 0,
-            "blockers": [],
+            "blocker_count": 1,
+            "blockers": [
+              "platform_replay_receipt_not_passed:linux"
+            ],
             "description": "Present platform replay receipts that do not satisfy the contract.",
             "scope": "direct_linux_windows_parity_gate"
           },
@@ -1844,7 +1732,9 @@
         "unassigned_blockers": []
       },
       "parity_comparison_contract": {
-        "blocked_platforms": [],
+        "blocked_platforms": [
+          "linux"
+        ],
         "checksum_keys": [
           "acquisition_plan",
           "buildingsmart_dirty_ifc_acquisition_receipt",
@@ -1881,7 +1771,7 @@
       },
       "parity_contract_pass": false,
       "parity_gate_blocker_grouping": {
-        "blocker_count": 2,
+        "blocker_count": 3,
         "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
         "groups": {
           "git_clean_clone_spillover": {
@@ -1891,8 +1781,10 @@
             "scope": "tracked_elsewhere_clean_checkout_gate"
           },
           "platform_receipt_contract": {
-            "blocker_count": 0,
-            "blockers": [],
+            "blocker_count": 1,
+            "blockers": [
+              "platform_replay_receipt_not_passed:linux"
+            ],
             "description": "Present platform replay receipts that do not satisfy the contract.",
             "scope": "direct_linux_windows_parity_gate"
           },
@@ -1953,21 +1845,21 @@
         "platform": "linux|windows",
         "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
         "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
-        "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+        "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
         "stable_artifact_checksums": {
-          "acquisition_plan": "sha256:bfd6abc56d0a33d4b2e0e4298e2e3bd9f5a032ff3b58c6d0f096ffb453cf25fe",
-          "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:2cd3af295039d08f27b6f0ee9e39c606219b15b9fe12b05581ce2208dbfdc620",
-          "buildingsmart_ifc_acquisition_receipt": "sha256:d5337d970d5676ae27fa726664f5a950e1e9504523ab5f5b004f0f483d965705",
-          "commercial_comparison_import_template": "sha256:ba291e7caf10e35a0984e071f347b3338a635f23909eed1df91b60bf55ac19de",
-          "commercial_operator_reference_contract": "sha256:d4b61ec4d9dfd02dad87e30f20c1d91ec1835d37ff61b6bcd14eba7e836b1bb9",
-          "commercial_operator_reference_ingest_validator": "sha256:a722879f5b1a04f83927752bae59bae0d3365c9c10bdd51b364a89c8746fb3df",
-          "ifc_import_health_execution_receipt": "sha256:719d381a33e90aaa9be7cdf2b3b15112963d0fc054463b8883089a2ee50de79d",
-          "ifc_source_license_receipt": "sha256:d3aeba53123ff49ee65459671a4d9ebb2b921f1444f10df063bbdd90dbc1f560",
+          "acquisition_plan": "sha256:2c982cafb73081f84d1919c4fbef14d14a751d3db05537cea73080a9366c7605",
+          "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:dd8ad8cc5bade75c330325f2d29e321d92740689276801a590457b6c5cd19e78",
+          "buildingsmart_ifc_acquisition_receipt": "sha256:910cfd845f209a4c0c03b3c6dd1565d21380b7df8789a0a330ec84e88853d23c",
+          "commercial_comparison_import_template": "sha256:98a365cc85d8470885b63542126f787b60c4dd3dd227d943d6422dc8a1c81545",
+          "commercial_operator_reference_contract": "sha256:f27071cf289f79af09a03f36f53352cad7b54aabfe8ee612a6056020d371be0f",
+          "commercial_operator_reference_ingest_validator": "sha256:efca0f0ebf5fa8b12c9f17965811d1033f88f208ad93b9737aa8fbc4d127cf61",
+          "ifc_import_health_execution_receipt": "sha256:ebf219b0177c66942bfcec2322b9fe96e2cdceb421b9230ae829b19e4dd0efe5",
+          "ifc_source_license_receipt": "sha256:bf2042aa8e5713e7c8f9d08813e6cd96b761d8c092577639d483432807838d3a",
           "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-          "opensees_source_license_receipt": "sha256:1b44b4cbc5527c3b0b89c6befc4483b58681beb1f56d30645ec4b0499715d89f",
-          "phase4_analytic_physical_fallback_scorecard": "sha256:2ab12f6306ea4675b7e9e1399240941d9639077d265e37fb1d982dbc37f89acf",
+          "opensees_source_license_receipt": "sha256:926605c8f6cfc93ee2b5efa0a5df1fc37fb3a6b0a002696e7d276cf74773bc51",
+          "phase4_analytic_physical_fallback_scorecard": "sha256:573aa7d043f5fe297fead2d6f016d03a58a690d5e1e4817e33bdb80f84e5ee57",
           "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
-          "summary": "sha256:fa35f887fb92dc26f2569a8a87d26505f56b0bfcda01171c73e0b9a86d38dacf"
+          "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
         },
         "working_tree_clean": true
       },
@@ -2644,6 +2536,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
+  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
   "status": "blocked"
 }

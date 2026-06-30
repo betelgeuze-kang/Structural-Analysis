@@ -93,6 +93,13 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface",
     ]
+    assert (
+        "materialize_gpcr_hard_decoy_suite_report.py"
+        in gate_plan["DRD2"]["materialization_command"]
+    )
+    assert gate_plan["DRD2"]["validation_command"] == gate_plan["DRD2"][
+        "materialization_command"
+    ]
     assert packet["current_suite_status"]["first_blocked_target"] == "DRD2"
     assert packet["current_suite_status"]["blocker_count"] == 12
 

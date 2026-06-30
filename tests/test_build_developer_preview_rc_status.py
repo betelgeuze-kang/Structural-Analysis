@@ -32,7 +32,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert payload["deliverable_count"] == 10
     assert payload["final_gate_count"] == 9
     assert payload["deliverable_pass_count"] == 10
-    assert payload["final_gate_pass_count"] == 3
+    assert payload["final_gate_pass_count"] == 4
 
     deliverables = {row["item"]: row for row in payload["deliverables"]}
     assert deliverables["installable_python_package"]["contract_pass"] is True
@@ -167,7 +167,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "phase5_gui_workflow:workflow_execution_step_not_proven:import"
         in ux_gate_grouping["groups"]["phase5_execution_detail"]["blockers"]
     )
-    assert final_gates["benchmark_results_clean_checkout_regenerated"]["contract_pass"] is False
+    assert final_gates["benchmark_results_clean_checkout_regenerated"]["contract_pass"] is True
+    assert final_gates["benchmark_results_clean_checkout_regenerated"]["status"] == "ready"
     assert final_gates["benchmark_results_clean_checkout_regenerated"]["evidence"] == (
         "implementation/phase1/release_evidence/productization/"
         "phase3_benchmark_factory_seed_clean_checkout_reproduction.json; "
@@ -182,6 +183,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert final_gates["linux_windows_reproducibility_confirmed"]["blockers"] == [
         "linux_windows_parity_receipts_missing",
         "platform_replay_receipt_missing:windows",
+        "platform_replay_receipt_not_passed:linux",
     ]
     parity_gate_grouping = final_gates["linux_windows_reproducibility_confirmed"][
         "blocker_grouping_metadata"
@@ -210,30 +212,16 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     clean_checkout_blockers = final_gates[
         "benchmark_results_clean_checkout_regenerated"
     ]["blockers"]
-    assert "git_clean_clone_reproduction_not_passed" in clean_checkout_blockers
-    assert "human_git_action_required_for_release_control_inputs" in clean_checkout_blockers
-    assert any(
-        blocker.startswith("release_control_commit_set_pending:")
-        for blocker in clean_checkout_blockers
-    )
-    assert any(
-        blocker.startswith("required_path_not_tracked:")
-        for blocker in clean_checkout_blockers
-    )
-    assert any(
-        blocker.startswith("required_path_has_uncommitted_changes:")
-        for blocker in clean_checkout_blockers
-    )
+    assert clean_checkout_blockers == []
     clean_gate_grouping = final_gates["benchmark_results_clean_checkout_regenerated"][
         "blocker_grouping_metadata"
     ]
     assert clean_gate_grouping["schema_version"] == "phase6-clean-checkout-blocker-groups.v1"
     assert clean_gate_grouping["unassigned_blockers"] == []
-    assert clean_gate_grouping["groups"]["dirty_tracked_required_inputs"]["blocker_count"] > 0
-    assert clean_gate_grouping["groups"]["untracked_required_inputs"]["blocker_count"] == 1
-    assert "human_git_action_required_for_release_control_inputs" in clean_gate_grouping[
-        "groups"
-    ]["release_control_human_handoff"]["blockers"]
+    assert clean_gate_grouping["blocker_count"] == 0
+    assert clean_gate_grouping["groups"]["dirty_tracked_required_inputs"]["blocker_count"] == 0
+    assert clean_gate_grouping["groups"]["untracked_required_inputs"]["blocker_count"] == 0
+    assert clean_gate_grouping["groups"]["release_control_human_handoff"]["blockers"] == []
     assert "tracked and committed" in " ".join(
         final_gates["benchmark_results_clean_checkout_regenerated"]["notes"]
     )
@@ -650,10 +638,10 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert parity_handoff["parity_blocker_grouping"]["schema_version"] == (
         "phase6-linux-windows-parity-blocker-groups.v1"
     )
-    assert "git_clean_clone_reproduction_not_passed" in parity_handoff[
-        "parity_blocker_grouping"
-    ]["groups"]["git_clean_clone_spillover"]["blockers"]
-    assert parity_handoff["parity_gate_blocker_grouping"]["blocker_count"] == 2
+    assert parity_handoff["parity_blocker_grouping"]["groups"][
+        "git_clean_clone_spillover"
+    ]["blockers"] == []
+    assert parity_handoff["parity_gate_blocker_grouping"]["blocker_count"] == 3
     assert parity_handoff["parity_gate_blocker_grouping"]["groups"][
         "git_clean_clone_spillover"
     ]["blockers"] == []
@@ -671,26 +659,22 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "working_tree_clean=true and local_dirty_inputs=[]" in parity_handoff[
         "comparison_requirements"
     ]
-    assert "stable_artifact_checksum_mismatch" in parity_handoff[
-        "clean_clone_blockers_tracked_elsewhere"
-    ]
+    assert parity_handoff["clean_clone_blockers_tracked_elsewhere"] == []
     assert "does not prove parity" in parity_handoff["claim_boundary"]
     clean_handoff = payload["known_limitations"]["clean_checkout_reproduction_handoff"]
     assert clean_handoff["clean_checkout_status_receipt"].endswith(
         "phase6_clean_checkout_status.json"
     )
-    assert clean_handoff["clean_checkout_status"] == "blocked"
-    assert clean_handoff["clean_checkout_status_contract_pass"] is False
+    assert clean_handoff["clean_checkout_status"] == "ready"
+    assert clean_handoff["clean_checkout_status_contract_pass"] is True
     assert clean_handoff["local_clean_checkout_gate"]["status"] == "ready"
     assert clean_handoff["local_clean_checkout_gate"]["contract_pass"] is True
-    assert clean_handoff["git_clean_clone_gate"]["status"] == "blocked"
-    assert clean_handoff["git_clean_clone_gate"]["contract_pass"] is False
-    assert clean_handoff["git_clean_clone_gate"]["git_clean_clone_executed"] is False
-    assert clean_handoff["release_control_cleanup_gate"]["status"] == "blocked"
-    assert clean_handoff["release_control_cleanup_gate"]["human_git_action_required"] is True
-    assert "git_clean_clone_reproduction_not_passed" in clean_handoff[
-        "phase6_clean_checkout_blockers"
-    ]
+    assert clean_handoff["git_clean_clone_gate"]["status"] == "ready"
+    assert clean_handoff["git_clean_clone_gate"]["contract_pass"] is True
+    assert clean_handoff["git_clean_clone_gate"]["git_clean_clone_executed"] is True
+    assert clean_handoff["release_control_cleanup_gate"]["status"] == "ready"
+    assert clean_handoff["release_control_cleanup_gate"]["human_git_action_required"] is False
+    assert clean_handoff["phase6_clean_checkout_blockers"] == []
     assert clean_handoff["phase6_clean_checkout_blocker_grouping"]["schema_version"] == (
         "phase6-clean-checkout-blocker-groups.v1"
     )
@@ -712,32 +696,27 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert clean_handoff["local_clean_checkout"]["status"] == "pass"
     assert clean_handoff["local_clean_checkout"]["contract_pass"] is True
     assert clean_handoff["local_clean_checkout"]["executed"] is True
-    assert clean_handoff["git_clean_clone"]["status"] == "blocked"
-    assert clean_handoff["git_clean_clone"]["contract_pass"] is False
+    assert clean_handoff["git_clean_clone"]["status"] == "pass"
+    assert clean_handoff["git_clean_clone"]["contract_pass"] is True
     assert clean_handoff["git_clean_clone"]["executed"] is True
     git_clean_clone = clean_handoff["git_clean_clone"]
     assert git_clean_clone["required_input_count"] >= git_clean_clone["blocker_count"]
     assert sum(git_clean_clone["blocker_counts"].values()) == git_clean_clone["blocker_count"]
-    assert git_clean_clone["blocker_counts"] == {
-        "stable_artifact_checksum_mismatch": 1
-    }
+    assert git_clean_clone["blocker_counts"] == {}
     cleanup = clean_handoff["release_control_cleanup"]
-    assert cleanup["status"] == "blocked"
-    assert cleanup["contract_pass"] is False
-    assert cleanup["human_git_action_required"] is True
-    assert cleanup["candidate_release_control_commit_set_count"] >= git_clean_clone["blocker_count"]
-    assert cleanup["recommended_action_counts"]["resolve_or_commit_dirty_tracked_input"] > 0
-    assert cleanup["human_handoff_next_action"] == (
-        "owner_review_then_track_or_commit_required_inputs"
-    )
+    assert cleanup["status"] == "ready"
+    assert cleanup["contract_pass"] is True
+    assert cleanup["human_git_action_required"] is False
+    assert cleanup["candidate_release_control_commit_set_count"] == 0
+    assert cleanup["recommended_action_counts"] == {}
+    assert cleanup["human_handoff_next_action"] == "rerun_git_clean_clone_reproduction"
     assert any(
         "run_phase3_benchmark_factory_git_clean_clone_reproduction.py" in command
         for command in cleanup["next_verification_commands"]
     )
     assert "does not commit" in cleanup["claim_boundary"]
-    assert git_clean_clone["blocker_count"] == 1
-    assert git_clean_clone["blocker_counts"]["stable_artifact_checksum_mismatch"] == 1
-    assert "stable_artifact_checksum_mismatch" in git_clean_clone["blockers"]
+    assert git_clean_clone["blocker_count"] == 0
+    assert git_clean_clone["blockers"] == []
     assert any(
         "run_phase3_benchmark_factory_git_clean_clone_reproduction.py" in command
         for command in clean_handoff["required_commands"]

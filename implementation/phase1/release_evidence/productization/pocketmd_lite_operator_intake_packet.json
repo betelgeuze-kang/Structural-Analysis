@@ -68,13 +68,14 @@
         "clash_relief_materialized",
         "uncertainty_summary_materialized",
         "report_blockers_resolved"
-      ]
+      ],
+      "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
     }
   ],
   "gate_unblock_plan_count": 1,
-  "generated_at": "2026-06-29T21:21:23.755145+00:00",
+  "generated_at": "2026-06-30T00:28:33.366860+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:4a28ed5956644216c18072c2cd0a15ba186760586d5addc4ed0c8fa946adb318",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:7ccd1fc1b0fa7746e7bb8a3667affb48b575478b87bc82e589722b53ffeffbf9",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "input_slots": [
@@ -216,7 +217,7 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/operator-intake",
   "schema_version": "pocketmd-lite-operator-intake-packet.v1",
-  "source_commit_sha": "c5329b7c2214312cf9048addfbb1f3cf8cae9a43",
+  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
   "status": "ready_for_operator_input",
   "summary": {
     "current_blocker_count": 4,

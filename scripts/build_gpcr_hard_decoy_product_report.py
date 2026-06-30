@@ -115,6 +115,10 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(
+                row.get("validation_command") or row.get("materialization_command") or ""
+            ),
         }
         for row in _as_list(operator_intake.get("gate_unblock_plan"))
         if isinstance(row, dict)
@@ -152,6 +156,12 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
         "materialization_steps": [
             str(row) for row in _as_list(first_gate.get("materialization_steps"))
         ],
+        "materialization_command": str(first_gate.get("materialization_command") or ""),
+        "validation_command": str(
+            first_gate.get("validation_command")
+            or first_gate.get("materialization_command")
+            or ""
+        ),
     }
 
     return {

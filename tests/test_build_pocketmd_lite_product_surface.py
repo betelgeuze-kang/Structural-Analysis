@@ -307,6 +307,17 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
             "pocketmd_lite_science_product_surface.json "
             "--fail-blocked"
         ),
+        "validation_command": (
+            "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
+            "--intake <operator-pocketmd-lite-intake.json> "
+            "--contract implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_contract.json "
+            "--out-report implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_survival_report.json "
+            "--out-surface implementation/phase1/release_evidence/surface/"
+            "pocketmd_lite_science_product_surface.json "
+            "--fail-blocked"
+        ),
     }
     assert surface["phase4_exit_gate"]["status"] == "blocked"
     assert surface["phase4_exit_gate"]["failed_criteria"] == [
@@ -400,5 +411,14 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
             ),
             "first_blocked_target": "top_k_refinement_operator_intake",
             "root_cause_tags": ["operator_refinement_rows_required"],
+            "blocked_criteria": [
+                "top_k_refinement_rows_present",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved",
+            ],
         }
     ]

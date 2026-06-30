@@ -555,6 +555,17 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface",
     ]
+    assert (
+        "materialize_gpcr_hard_decoy_suite_report.py"
+        in gate_plan["DRD2"]["materialization_command"]
+    )
+    assert gate_plan["DRD2"]["validation_command"] == gate_plan["DRD2"][
+        "materialization_command"
+    ]
+    assert (
+        phase_3["summary"]["first_operator_evidence_gap"]["validation_command"]
+        == gate_plan["DRD2"]["validation_command"]
+    )
     assert "fill_gpcr_hard_decoy_operator_intake_packet" in phase_3["next_actions"]
 
     phase_4 = rows["phase_4_pocketmd_lite"]
@@ -660,6 +671,15 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface",
     ]
+    assert (
+        "materialize_pocketmd_lite_topk_survival_report.py"
+        in gate_plan["materialization_command"]
+    )
+    assert gate_plan["validation_command"] == gate_plan["materialization_command"]
+    assert (
+        phase_4["summary"]["first_operator_evidence_gap"]["validation_command"]
+        == gate_plan["validation_command"]
+    )
     assert "fill_pocketmd_lite_operator_intake_packet" in phase_4["next_actions"]
     assert "regenerate_goal_bottleneck_action_board" in phase_4["next_actions"]
 

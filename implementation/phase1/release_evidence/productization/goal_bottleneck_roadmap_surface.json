@@ -98,26 +98,26 @@
     "target_id": "",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T00:18:10.376010+00:00",
+  "generated_at": "2026-06-30T00:29:17.103112+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:6b7cd2c11db33687827b0cbef22e48c051f7edf552c45e433648ac11f1a2513e",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:d5942eb227dd2a51d1c112ed214e97fe8a77b717b275b5334e88737656e0fd93",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:cd9721b5f888cdaf6b8a21d4eebc61236491bf73b2347ab7c3ae667b52fc88b9",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:dbe8a09a77f11d85a148751721fc71d0c8ac0e087ca3038f575c8f5f9a63855d",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:91e5e244f9f1b964cbc0cfa9413e82c5e559e1cfb4a7517bff7ad013bbce96ce",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:44c02da01a13c5bffa0f0a163be31970cd58c35cfa5520c939b279f94c72ae89",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:d42d0e5b98bb61711a8c24a6704a917411e0721b06cf6d83e77bb8091d1d621c",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:0ca6210093648d9b44686d021580272a51eb20fb3b01438dc6bab1aee09e5b91",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:b219f075a210fc47af028ace1880cb96b4994a16ed0b2641ed6809bd3a651709",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:e8f4a62d217fe042eaae61f2320c3685c268ca578ee4f31563cdc6464171bd63",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:25f75a49815c659034acf5f932fe42aa270123240059feced3ecb4a33e5ee221",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:0cf91f85f705b7ee3c3a6bc12c9cf31ec71a75c53b836eee6d9e0d599886825d",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:9ccdea722130644ee172e09f0de9377d782554e13ba43c3b587ac996af6754af",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:b04a28a51e38bbcba7889146d7f2c52350e65edc16e2b1595e84b502e3b00dec",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:1016ecaaecf54490cd1fa02e020ce50a480a6afcaf4c06ec93e073a4d17e285f",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:6b97a6ede819d717ed45ad47577d692ef0df31ba4a97f3b67b2c73456015ba14",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:c5ffd29ffd99d874dd0dafdc3644d3ac82f713cdc6cd8d4bbb407bf6c5423929",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:997ade56a62b12f655f8b6c3e18f0ce4d55c42c2012366a461349826989d6d2e",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:803c98f959ddd323a16a2ac48a1b203297d2880eb4716a330b7ffc6e3ef40218",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:adfd1ffe5742a14a17c2b2e9a675770b8f88e4ffcdda43e22219396d95071172",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:386c9f6fe15b6a7976b080694e5733b12a4841097a08f4bf2e93ea59ca86e5cc",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:fefc928492cbd6e3b6e62194e8936af9678f959101ad810400202887f6a1690c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:5c1a9ed5f6f1ab22a2be2979c78748b598e9bbf8ae220969e905db80e1f2f7cb",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
-    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:3eaf5b6c9c478b51b50c82f772301872c3f103e9413c7983081c1f7c68d39d79",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:12aae4f9edf68131e48f60c12966f3ba276c7e534c2dc88889ad761fc9f9b267",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:6a4c78543c41663b8532dfcd01b4faff9a24bbf7cd2aa5454381955bdbebf033",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:8ccb005debdc5420f13cf3ab1db162caa723965f31df31cb1152983a8cef501d",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:bd6d790c08f8ee340957407b4794fcad82a2d7b2e1ef9e479ed2e531c1699e68",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:816e482c6b3ee28a7fd8f81847af38a1beda83cc2a983b588076336e0a45cdc2",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "mutation_allowed": false,
@@ -536,7 +536,7 @@
         "/product/gpcr-hard-decoy-suite-report/operator-intake",
         "/product/capabilities"
       ],
-      "materialization_command": "",
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
       "materialization_steps": [
         "materialize_gpcr_hard_decoy_suite_report",
         "refresh_gpcr_hard_decoy_product_report",
@@ -575,7 +575,7 @@
       "slot_id": "drd2_hard_decoy_metrics",
       "status": "operator_input_required",
       "target_id": "DRD2",
-      "validation_command": ""
+      "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
     },
     {
       "blocked_criteria": [
@@ -606,7 +606,7 @@
         "/product/pocketmd-lite/handoff",
         "/product/capabilities"
       ],
-      "materialization_command": "",
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
       "materialization_steps": [
         "materialize_pocketmd_lite_topk_survival_report",
         "refresh_product_capabilities_surface",
@@ -647,7 +647,7 @@
       "slot_id": "top_k_refinement_rows",
       "status": "operator_input_required",
       "target_id": "",
-      "validation_command": ""
+      "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
     }
   ],
   "operator_evidence_handoff_scope": "first_blocked_operator_gap_per_blocked_phase",
@@ -1651,6 +1651,7 @@
             "no_positive_out_anchored_by_top_decoys"
           ],
           "first_next_action": "fill DRD2 hard-decoy metrics in the GPCR operator intake packet",
+          "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
           "materialization_steps": [
             "materialize_gpcr_hard_decoy_suite_report",
             "refresh_gpcr_hard_decoy_product_report",
@@ -1683,10 +1684,12 @@
           "slot_id": "drd2_hard_decoy_metrics",
           "slot_priority": 1,
           "status": "operator_input_required",
-          "target_id": "DRD2"
+          "target_id": "DRD2",
+          "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
         },
         "gate_unblock_plan": [
           {
+            "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
             "materialization_steps": [
               "materialize_gpcr_hard_decoy_suite_report",
               "refresh_gpcr_hard_decoy_product_report",
@@ -1723,9 +1726,11 @@
               "top20_hit_rate_min",
               "decoys_above_positive_count_max",
               "no_positive_out_anchored_by_top_decoys"
-            ]
+            ],
+            "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
           },
           {
+            "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
             "materialization_steps": [
               "materialize_gpcr_hard_decoy_suite_report",
               "refresh_gpcr_hard_decoy_product_report",
@@ -1762,9 +1767,11 @@
               "top20_hit_rate_min",
               "decoys_above_positive_count_max",
               "no_positive_out_anchored_by_top_decoys"
-            ]
+            ],
+            "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
           },
           {
+            "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
             "materialization_steps": [
               "materialize_gpcr_hard_decoy_suite_report",
               "refresh_gpcr_hard_decoy_product_report",
@@ -1801,7 +1808,8 @@
               "top20_hit_rate_min",
               "decoys_above_positive_count_max",
               "no_positive_out_anchored_by_top_decoys"
-            ]
+            ],
+            "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
           }
         ],
         "gate_unblock_plan_count": 3,
@@ -1817,6 +1825,7 @@
               "no_positive_out_anchored_by_top_decoys"
             ],
             "first_next_action": "fill DRD2 hard-decoy metrics in the GPCR operator intake packet",
+            "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
             "materialization_steps": [
               "materialize_gpcr_hard_decoy_suite_report",
               "refresh_gpcr_hard_decoy_product_report",
@@ -1849,7 +1858,8 @@
             "slot_id": "drd2_hard_decoy_metrics",
             "slot_priority": 1,
             "status": "operator_input_required",
-            "target_id": "DRD2"
+            "target_id": "DRD2",
+            "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
           },
           {
             "blocked_phase3_criteria": [
@@ -1859,6 +1869,7 @@
               "no_positive_out_anchored_by_top_decoys"
             ],
             "first_next_action": "fill HTR2A hard-decoy metrics in the GPCR operator intake packet",
+            "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
             "materialization_steps": [
               "materialize_gpcr_hard_decoy_suite_report",
               "refresh_gpcr_hard_decoy_product_report",
@@ -1891,7 +1902,8 @@
             "slot_id": "htr2a_hard_decoy_metrics",
             "slot_priority": 2,
             "status": "operator_input_required",
-            "target_id": "HTR2A"
+            "target_id": "HTR2A",
+            "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
           },
           {
             "blocked_phase3_criteria": [
@@ -1901,6 +1913,7 @@
               "no_positive_out_anchored_by_top_decoys"
             ],
             "first_next_action": "fill OPRM1 hard-decoy metrics in the GPCR operator intake packet",
+            "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
             "materialization_steps": [
               "materialize_gpcr_hard_decoy_suite_report",
               "refresh_gpcr_hard_decoy_product_report",
@@ -1933,7 +1946,8 @@
             "slot_id": "oprm1_hard_decoy_metrics",
             "slot_priority": 3,
             "status": "operator_input_required",
-            "target_id": "OPRM1"
+            "target_id": "OPRM1",
+            "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
           }
         ],
         "operator_intake_packet_status": "ready_for_operator_input",
@@ -2103,6 +2117,7 @@
             "report_blockers_resolved"
           ],
           "first_next_action": "attach top-k candidate refinement rows",
+          "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
           "materialization_steps": [
             "materialize_pocketmd_lite_topk_survival_report",
             "refresh_product_capabilities_surface",
@@ -2139,10 +2154,12 @@
           ],
           "slot_id": "top_k_refinement_rows",
           "slot_priority": 1,
-          "status": "operator_input_required"
+          "status": "operator_input_required",
+          "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
         },
         "gate_unblock_plan": [
           {
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
             "materialization_steps": [
               "materialize_pocketmd_lite_topk_survival_report",
               "refresh_product_capabilities_surface",
@@ -2186,7 +2203,8 @@
               "clash_relief_materialized",
               "uncertainty_summary_materialized",
               "report_blockers_resolved"
-            ]
+            ],
+            "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
           }
         ],
         "gate_unblock_plan_count": 1,
@@ -2209,6 +2227,7 @@
               "report_blockers_resolved"
             ],
             "first_next_action": "attach top-k candidate refinement rows",
+            "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
             "materialization_steps": [
               "materialize_pocketmd_lite_topk_survival_report",
               "refresh_product_capabilities_surface",
@@ -2245,7 +2264,8 @@
             ],
             "slot_id": "top_k_refinement_rows",
             "slot_priority": 1,
-            "status": "operator_input_required"
+            "status": "operator_input_required",
+            "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
           }
         ],
         "operator_intake_packet_status": "ready_for_operator_input",
@@ -2373,7 +2393,7 @@
       ]
     }
   },
-  "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
+  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

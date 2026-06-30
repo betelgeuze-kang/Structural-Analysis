@@ -21,17 +21,17 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def test_phase3_release_control_cleanup_plan_keeps_git_gate_blocked() -> None:
+def test_phase3_release_control_cleanup_plan_accepts_clean_git_clone_gate() -> None:
     payload = module.build_phase3_release_control_cleanup_plan(repo_root=REPO_ROOT)
 
-    assert payload["status"] == "blocked"
-    assert payload["contract_pass"] is False
+    assert payload["status"] == "ready"
+    assert payload["contract_pass"] is True
     assert payload["phase3_closure_claim"] is False
     assert payload["developer_preview_release_candidate_claim"] is False
     assert payload["codex_commit_or_push_performed"] is False
-    assert payload["human_git_action_required"] is True
-    assert payload["git_clean_clone_status"] == "blocked"
-    assert payload["git_clean_clone_contract_pass"] is False
+    assert payload["human_git_action_required"] is False
+    assert payload["git_clean_clone_status"] == "pass"
+    assert payload["git_clean_clone_contract_pass"] is True
     assert (
         payload["candidate_set_source"]
         == "phase3_benchmark_factory_seed_git_clean_clone_reproduction.release_control_cleanup_plan"
@@ -45,6 +45,9 @@ def test_phase3_release_control_cleanup_plan_keeps_git_gate_blocked() -> None:
     candidate_paths = payload["candidate_release_control_commit_set"]
     track_or_add = payload["track_or_add_required_paths"]
     resolve_or_commit = payload["resolve_or_commit_dirty_tracked_paths"]
+    assert candidate_paths == []
+    assert track_or_add == []
+    assert resolve_or_commit == []
     assert payload["candidate_release_control_commit_set_count"] == len(candidate_paths)
     assert candidate_paths == sorted({*track_or_add, *resolve_or_commit})
     assert payload["candidate_release_control_commit_set_count"] == len(track_or_add) + len(
@@ -81,7 +84,7 @@ def test_phase3_release_control_cleanup_plan_keeps_git_gate_blocked() -> None:
         for path in dirty:
             assert any(row["path"] == path and row["role"] == role for row in payload["path_rows"])
     handoff = payload["human_handoff"]
-    assert handoff["status"] == "blocked_until_human_git_action"
+    assert handoff["status"] == "ready"
     assert handoff["codex_executed_commands"] is False
     assert handoff["remote_mutation_required"] is False
     assert handoff["push_or_release_command_included"] is False
@@ -101,7 +104,7 @@ def test_phase3_release_control_cleanup_plan_keeps_git_gate_blocked() -> None:
         assert ["git", "add", "--", *resolve_or_commit] in add_commands
     assert not any(command[:2] == ["git", "push"] for command in handoff["suggested_local_command_args"])
     assert not any(command[:2] == ["gh", "release"] for command in handoff["suggested_local_command_args"])
-    assert handoff["next_action"] == "owner_review_then_track_or_commit_required_inputs"
+    assert handoff["next_action"] == "rerun_git_clean_clone_reproduction"
     assert "does not commit" in payload["claim_boundary"]
     assert "not an exhaustive current-worktree dirty-path inventory" in payload["claim_boundary"]
     assert "Dirty tracked paths require owner review" in payload["claim_boundary"]

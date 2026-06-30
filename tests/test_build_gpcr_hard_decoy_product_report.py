@@ -71,6 +71,13 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface",
     ]
+    assert (
+        "materialize_gpcr_hard_decoy_suite_report.py"
+        in report["operator_handoff_summary"]["materialization_command"]
+    )
+    assert report["operator_handoff_summary"]["validation_command"] == report[
+        "operator_handoff_summary"
+    ]["materialization_command"]
     assert report["phase3_exit_gate"]["status"] == "blocked"
     assert report["phase3_exit_gate"]["failed_criterion_count"] == 4
     assert report["phase3_exit_gate"]["failed_criteria"] == [
@@ -158,6 +165,13 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         "refresh_gpcr_hard_decoy_product_report",
         "refresh_product_capabilities_surface",
         "refresh_goal_bottleneck_roadmap_surface",
+    ]
+    assert (
+        "materialize_gpcr_hard_decoy_suite_report.py"
+        in gate_plan["DRD2"]["materialization_command"]
+    )
+    assert gate_plan["DRD2"]["validation_command"] == gate_plan["DRD2"][
+        "materialization_command"
     ]
     assert {row["method"] for row in report["endpoints"]} == {"GET"}
     assert {

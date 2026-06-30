@@ -137,6 +137,7 @@ def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
                 "refresh_goal_bottleneck_roadmap_surface",
             ],
             "materialization_command": materialize_command,
+            "validation_command": materialize_command,
         }
         for target_id in REQUIRED_TARGETS
     ]

@@ -209,6 +209,24 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
             "refresh_product_capabilities_surface",
             "refresh_goal_bottleneck_roadmap_surface",
         ],
+        "materialization_command": (
+            "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py "
+            "--intake implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_template.json "
+            "--out-report implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_suite_report.json "
+            "--out-surface implementation/phase1/release_evidence/surface/"
+            "gpcr_hard_decoy_evidence_surface.json --fail-blocked"
+        ),
+        "validation_command": (
+            "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py "
+            "--intake implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_template.json "
+            "--out-report implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_suite_report.json "
+            "--out-surface implementation/phase1/release_evidence/surface/"
+            "gpcr_hard_decoy_evidence_surface.json --fail-blocked"
+        ),
     }
     assert surface["next_actions"] == [
         "fill_gpcr_hard_decoy_operator_intake_packet",

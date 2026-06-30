@@ -3,7 +3,7 @@
 - `status`: `blocked`
 - `developer_preview_release_candidate_ready`: `False`
 - `deliverables`: `10/10`
-- `final_gates`: `3/9`
+- `final_gates`: `4/9`
 
 ## Deliverables
 
@@ -32,7 +32,7 @@
 | `unsupported_features_explicitly_blocked` | `ready` | `True` |
 | `linux_windows_reproducibility_confirmed` | `blocked` | `False` |
 | `new_user_core_workflow_observation_passed` | `blocked` | `False` |
-| `benchmark_results_clean_checkout_regenerated` | `blocked` | `False` |
+| `benchmark_results_clean_checkout_regenerated` | `ready` | `True` |
 
 ## Known Limitation Closure Requirements
 
@@ -69,7 +69,6 @@ This is a visibility summary for existing gap-ledger closure requirements. It do
 - `final_gate_blocked:silent_import_loss_zero`
 - `final_gate_blocked:linux_windows_reproducibility_confirmed`
 - `final_gate_blocked:new_user_core_workflow_observation_passed`
-- `final_gate_blocked:benchmark_results_clean_checkout_regenerated`
 
 ## Claim Boundary
 

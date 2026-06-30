@@ -6,22 +6,8 @@
       "untracked_or_missing_paths": []
     },
     "generated_productization_evidence": {
-      "blocker_count": 13,
-      "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-        "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-        "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-        "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-      ],
+      "blocker_count": 0,
+      "dirty_paths": [],
       "untracked_or_missing_paths": []
     },
     "package_config_core_package": {
@@ -35,11 +21,9 @@
       "untracked_or_missing_paths": []
     },
     "source_input_report": {
-      "blocker_count": 1,
+      "blocker_count": 0,
       "dirty_paths": [],
-      "untracked_or_missing_paths": [
-        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
-      ]
+      "untracked_or_missing_paths": []
     },
     "viewer_gui_traceability_contract": {
       "blocker_count": 0,
@@ -47,121 +31,33 @@
       "untracked_or_missing_paths": []
     }
   },
-  "candidate_release_control_commit_set": [
-    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-  ],
-  "candidate_release_control_commit_set_count": 14,
+  "candidate_release_control_commit_set": [],
+  "candidate_release_control_commit_set_count": 0,
   "candidate_set_scope": "Phase 3 seed git-clean-clone reproduction required-input set only; it is not an exhaustive current-worktree dirty-path inventory.",
   "candidate_set_source": "phase3_benchmark_factory_seed_git_clean_clone_reproduction.release_control_cleanup_plan",
   "claim_boundary": "This receipt organizes local Git cleanup needed for Phase 3 seed git-clean-clone replay. Its candidate set is not an exhaustive current-worktree dirty-path inventory; the product readiness snapshot carries the current-worktree diagnostic separately. It does not commit, push, release, promote Developer Preview readiness, or close Phase 3. Dirty tracked paths require owner review before they are bundled with the release-control evidence set.",
   "codex_commit_or_push_performed": false,
-  "contract_pass": false,
+  "contract_pass": true,
   "current_worktree_diagnostic_source": "product_readiness_snapshot.state_consistency.worktree",
   "current_worktree_diagnostics_included": false,
   "developer_preview_release_candidate_claim": false,
-  "generated_at": "2026-06-23T15:39:39.697481+00:00",
-  "git_clean_clone_contract_pass": false,
+  "generated_at": "2026-06-30T00:25:31.202247+00:00",
+  "git_clean_clone_contract_pass": true,
   "git_clean_clone_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
-  "git_clean_clone_status": "blocked",
-  "human_git_action_required": true,
+  "git_clean_clone_status": "pass",
+  "human_git_action_required": false,
   "human_handoff": {
-    "candidate_release_control_commit_set": [
-      "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-      "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-      "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-    ],
-    "candidate_release_control_commit_set_count": 14,
+    "candidate_release_control_commit_set": [],
+    "candidate_release_control_commit_set_count": 0,
     "claim_boundary": "These command argv arrays are a human handoff only. Codex did not run git add, commit, push, release, or mutate remote state. The owner must review dirty tracked inputs before staging them.",
     "codex_executed_commands": false,
-    "next_action": "owner_review_then_track_or_commit_required_inputs",
+    "next_action": "rerun_git_clean_clone_reproduction",
     "push_or_release_command_included": false,
     "remote_mutation_required": false,
-    "resolve_or_commit_dirty_tracked_paths": [
-      "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-      "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-      "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-    ],
-    "status": "blocked_until_human_git_action",
-    "suggested_commit_message": "Track Phase 3 benchmark factory release-control evidence",
+    "resolve_or_commit_dirty_tracked_paths": [],
+    "status": "ready",
+    "suggested_commit_message": "",
     "suggested_local_command_args": [
-      [
-        "git",
-        "add",
-        "--",
-        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
-      ],
-      [
-        "git",
-        "add",
-        "--",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-        "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-        "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-        "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-      ],
-      [
-        "git",
-        "status",
-        "--short",
-        "--",
-        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-        "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-        "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-        "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-        "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-      ],
       [
         "bash",
         "-lc",
@@ -178,12 +74,10 @@
         "python3 scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py --check"
       ]
     ],
-    "track_or_add_required_paths": [
-      "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
-    ]
+    "track_or_add_required_paths": []
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:75e42cbb9caa2e9541284f8308755ea7109dfd029097251170730ce52d0adbc1",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:ad8bec02ff46a356d4370c3aa1fd7a7d82551b84cfb370e613108357a7df9c24",
     "scripts/build_phase3_release_control_cleanup_plan.py": "sha256:6d808673996cceebc1412a21b3b41516e01fe4f14798d01cbe3fd8248efb6ad5"
   },
   "next_verification_commands": [
@@ -191,120 +85,13 @@
     "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py --check",
     "python3 scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py --check"
   ],
-  "path_role_counts": {
-    "generated_productization_evidence": 13,
-    "source_input_report": 1
-  },
-  "path_rows": [
-    {
-      "git_state": "untracked_or_missing_required",
-      "path": "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-      "recommended_action": "track_source_input_or_report",
-      "role": "source_input_report"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    },
-    {
-      "git_state": "dirty_tracked",
-      "path": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
-      "recommended_action": "resolve_or_commit_dirty_tracked_input",
-      "role": "generated_productization_evidence"
-    }
-  ],
+  "path_role_counts": {},
+  "path_rows": [],
   "phase3_closure_claim": false,
-  "recommended_action_counts": {
-    "resolve_or_commit_dirty_tracked_input": 13,
-    "track_source_input_or_report": 1
-  },
-  "resolve_or_commit_dirty_tracked_paths": [
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
-  ],
+  "recommended_action_counts": {},
+  "resolve_or_commit_dirty_tracked_paths": [],
   "schema_version": "phase3-release-control-cleanup-plan.v1",
-  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
-  "status": "blocked",
-  "track_or_add_required_paths": [
-    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
-  ]
+  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "status": "ready",
+  "track_or_add_required_paths": []
 }

@@ -197,6 +197,7 @@ def _operator_gate_unblock_plan(
                 "refresh_goal_bottleneck_roadmap_surface",
             ],
             "materialization_command": materializer_command,
+            "validation_command": materializer_command,
         }
     ]
 
@@ -657,6 +658,7 @@ def build_surface(
             str(row) for row in first_gate.get("materialization_steps", [])
         ],
         "materialization_command": str(first_gate.get("materialization_command") or ""),
+        "validation_command": str(first_gate.get("validation_command") or ""),
     }
     operator_handoff_summary = {
         "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
@@ -673,6 +675,7 @@ def build_surface(
         "materialization_command": first_operator_evidence_gap[
             "materialization_command"
         ],
+        "validation_command": first_operator_evidence_gap["validation_command"],
     }
     return {
         "schema_version": SURFACE_SCHEMA_VERSION,

@@ -1,235 +1,233 @@
 {
-  "blockers": [
-    "stable_artifact_checksum_mismatch"
-  ],
+  "blockers": [],
   "bundle_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
   "bundle_status": "present",
   "claim_boundary": "This receipt is the authoritative Phase 3 seed git-clean-clone reproduction gate. When blocked, it proves the exact tracked/dirty-input reason a real clone cannot yet replay the seed benchmark artifacts from Git HEAD. When passing, it proves only a local git clone replay of generated analytic-small and element-patch seed artifacts. It is not Linux/Windows parity and does not prove Developer Preview Release Candidate closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, and is not full Phase 3 closure.",
   "clone_checkout_path": "",
   "command_results": [
     {
-      "command": "git clone --no-local --quiet /home/betelgeuze/건축구조분석 /tmp/phase3-benchmark-git-clean-clone-tn2_q3rc/checkout",
-      "elapsed_seconds": 78.362,
+      "command": "git clone --no-local --quiet /home/betelgeuze/건축구조분석 /tmp/phase3-benchmark-git-clean-clone-hzc6gved/checkout",
+      "elapsed_seconds": 76.746,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": ""
     },
     {
-      "command": "python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.177,
+      "command": "python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.183,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 buildingSMART IFC acquisition receipt: blocked | selected_files=2 | executed=0\n"
     },
     {
-      "command": "python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.166,
+      "command": "python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.16,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 buildingSMART IFC acquisition check: phase3_buildingsmart_ifc_acquisition_receipt_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.162,
+      "command": "python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.167,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 buildingSMART dirty IFC acquisition receipt: blocked | selected_files=8 | executed=0\n"
     },
     {
-      "command": "python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.16,
+      "command": "python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.163,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 buildingSMART dirty IFC acquisition check: phase3_buildingsmart_dirty_ifc_acquisition_receipt_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase3_ifc_source_license_receipt.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.163,
+      "command": "python3 scripts/build_phase3_ifc_source_license_receipt.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.164,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 IFC source/license receipt: blocked | sources=3 | ready_sources=0\n"
     },
     {
-      "command": "python3 scripts/build_phase3_ifc_source_license_receipt.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
+      "command": "python3 scripts/build_phase3_ifc_source_license_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
       "elapsed_seconds": 0.163,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 IFC source/license check: phase3_ifc_source_license_receipt_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.169,
+      "command": "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.166,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 IFC import-health execution receipt: blocked | candidates=10 | executed=0 | credit_ready=0\n"
     },
     {
-      "command": "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.167,
+      "command": "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.169,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 IFC import-health execution check: phase3_ifc_import_health_execution_receipt_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase3_opensees_source_license_receipt.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.161,
+      "command": "python3 scripts/build_phase3_opensees_source_license_receipt.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.16,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 OpenSees source/license receipt: blocked | source_url_verified=False | local_checksum=True\n"
     },
     {
-      "command": "python3 scripts/build_phase3_opensees_source_license_receipt.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.169,
+      "command": "python3 scripts/build_phase3_opensees_source_license_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.16,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 OpenSees source/license check: phase3_opensees_source_license_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase4_commercial_comparison_import_template.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.168,
+      "command": "python3 scripts/build_phase4_commercial_comparison_import_template.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.159,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial comparison import template: ready | fields=17\n"
     },
     {
-      "command": "python3 scripts/build_phase4_commercial_comparison_import_template.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.161,
+      "command": "python3 scripts/build_phase4_commercial_comparison_import_template.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.166,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial comparison import template check: phase4_commercial_comparison_import_template_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase4_analytic_physical_fallback_scorecard.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.196,
+      "command": "python3 scripts/build_phase4_analytic_physical_fallback_scorecard.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.201,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 analytic physical fallback scorecard: ready | cases=30 | pass=30 | phase4_closure=False\n"
     },
     {
-      "command": "python3 scripts/build_phase4_analytic_physical_fallback_scorecard.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
+      "command": "python3 scripts/build_phase4_analytic_physical_fallback_scorecard.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
       "elapsed_seconds": 0.195,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 analytic physical fallback scorecard check: phase4_analytic_physical_fallback_scorecard_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase4_commercial_operator_reference_contract.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.161,
+      "command": "python3 scripts/build_phase4_commercial_operator_reference_contract.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.164,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial operator reference contract: blocked | blockers=7\n"
     },
     {
-      "command": "python3 scripts/build_phase4_commercial_operator_reference_contract.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.162,
+      "command": "python3 scripts/build_phase4_commercial_operator_reference_contract.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.164,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial operator reference contract check: phase4_commercial_operator_reference_contract_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase4_commercial_operator_reference_ingest_validator.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.166,
+      "command": "python3 scripts/build_phase4_commercial_operator_reference_ingest_validator.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.163,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial operator reference ingest validator: blocked | blockers=1\n"
     },
     {
-      "command": "python3 scripts/build_phase4_commercial_operator_reference_ingest_validator.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.163,
+      "command": "python3 scripts/build_phase4_commercial_operator_reference_ingest_validator.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.165,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial operator reference ingest validator check: phase4_commercial_operator_reference_ingest_validator_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.172,
+      "command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.168,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark acquisition plan: blocked | lanes=7 | ready_sources=0\n"
     },
     {
-      "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.466,
+      "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.456,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark factory seed: ready | cases=30 | pass=30 | phase3_closure=False\n"
     },
     {
-      "command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.171,
+      "command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.169,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark acquisition check: phase3_benchmark_acquisition_consistent\n"
     },
     {
-      "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.455,
+      "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.445,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark factory check: phase3_benchmark_factory_consistent\n"
     },
     {
-      "command": "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 7.386,
+      "command": "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 7.271,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 clean checkout reproduction: pass | executed=True | checksum_match=True\n"
     },
     {
       "command": "python3 -m pytest -q tests/test_build_phase3_benchmark_acquisition_artifacts.py tests/test_build_phase3_benchmark_factory_artifacts.py tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py tests/test_build_phase3_ifc_source_license_receipt.py tests/test_build_phase3_ifc_import_health_execution_receipt.py tests/test_build_phase3_opensees_source_license_receipt.py tests/test_build_phase4_commercial_comparison_import_template.py tests/test_build_phase4_analytic_physical_fallback_scorecard.py tests/test_build_phase4_commercial_operator_reference_contract.py tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
-      "elapsed_seconds": 3.407,
+      "elapsed_seconds": 3.401,
       "return_code": 0,
       "stderr_excerpt": "",
-      "stdout_excerpt": "....................................                                     [100%]\n36 passed in 3.12s\n"
+      "stdout_excerpt": "....................................                                     [100%]\n36 passed in 3.15s\n"
     },
     {
       "command": "python3 -m ruff check src/structural_analysis/benchmark/acquisition.py src/structural_analysis/benchmark/factory.py scripts/build_phase3_benchmark_acquisition_artifacts.py scripts/build_phase3_benchmark_factory_artifacts.py scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py scripts/build_phase3_ifc_source_license_receipt.py scripts/build_phase3_ifc_import_health_execution_receipt.py scripts/build_phase3_ifc_query_gui_readiness_receipt.py scripts/build_phase3_medium_model_scorecard_readiness_receipt.py scripts/build_phase3_large_model_runner_readiness_receipt.py scripts/build_phase3_opensees_source_license_receipt.py scripts/build_phase4_commercial_comparison_import_template.py scripts/build_phase4_commercial_cross_solver_readiness_receipt.py scripts/build_phase4_analytic_physical_fallback_scorecard.py scripts/build_phase4_commercial_operator_reference_contract.py scripts/build_phase4_commercial_operator_reference_ingest_validator.py scripts/phase3_benchmark_reproduction_contract.py scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py tests/test_build_phase3_benchmark_acquisition_artifacts.py tests/test_build_phase3_benchmark_factory_artifacts.py tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py tests/test_build_phase3_ifc_source_license_receipt.py tests/test_build_phase3_ifc_import_health_execution_receipt.py tests/test_build_phase3_opensees_source_license_receipt.py tests/test_build_phase4_commercial_comparison_import_template.py tests/test_build_phase4_analytic_physical_fallback_scorecard.py tests/test_build_phase4_commercial_operator_reference_contract.py tests/test_build_phase4_commercial_operator_reference_ingest_validator.py tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py",
-      "elapsed_seconds": 0.029,
+      "elapsed_seconds": 0.028,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "All checks passed!\n"
     },
     {
-      "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check --source-commit-sha 2469407690370e54afa5b0d92fc028f3ac56f542",
-      "elapsed_seconds": 0.438,
+      "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
+      "elapsed_seconds": 0.445,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark factory check: phase3_benchmark_factory_consistent\n"
     }
   ],
-  "contract_pass": false,
+  "contract_pass": true,
   "developer_preview_release_candidate_claim": false,
   "dirty_required_inputs": [],
   "expected_stable_artifact_checksums": {
-    "acquisition_plan": "sha256:bfd6abc56d0a33d4b2e0e4298e2e3bd9f5a032ff3b58c6d0f096ffb453cf25fe",
-    "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:2cd3af295039d08f27b6f0ee9e39c606219b15b9fe12b05581ce2208dbfdc620",
-    "buildingsmart_ifc_acquisition_receipt": "sha256:d5337d970d5676ae27fa726664f5a950e1e9504523ab5f5b004f0f483d965705",
-    "commercial_comparison_import_template": "sha256:ba291e7caf10e35a0984e071f347b3338a635f23909eed1df91b60bf55ac19de",
-    "commercial_operator_reference_contract": "sha256:d4b61ec4d9dfd02dad87e30f20c1d91ec1835d37ff61b6bcd14eba7e836b1bb9",
-    "commercial_operator_reference_ingest_validator": "sha256:a722879f5b1a04f83927752bae59bae0d3365c9c10bdd51b364a89c8746fb3df",
-    "ifc_import_health_execution_receipt": "sha256:719d381a33e90aaa9be7cdf2b3b15112963d0fc054463b8883089a2ee50de79d",
-    "ifc_source_license_receipt": "sha256:d3aeba53123ff49ee65459671a4d9ebb2b921f1444f10df063bbdd90dbc1f560",
+    "acquisition_plan": "sha256:2c982cafb73081f84d1919c4fbef14d14a751d3db05537cea73080a9366c7605",
+    "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:dd8ad8cc5bade75c330325f2d29e321d92740689276801a590457b6c5cd19e78",
+    "buildingsmart_ifc_acquisition_receipt": "sha256:910cfd845f209a4c0c03b3c6dd1565d21380b7df8789a0a330ec84e88853d23c",
+    "commercial_comparison_import_template": "sha256:98a365cc85d8470885b63542126f787b60c4dd3dd227d943d6422dc8a1c81545",
+    "commercial_operator_reference_contract": "sha256:f27071cf289f79af09a03f36f53352cad7b54aabfe8ee612a6056020d371be0f",
+    "commercial_operator_reference_ingest_validator": "sha256:efca0f0ebf5fa8b12c9f17965811d1033f88f208ad93b9737aa8fbc4d127cf61",
+    "ifc_import_health_execution_receipt": "sha256:ebf219b0177c66942bfcec2322b9fe96e2cdceb421b9230ae829b19e4dd0efe5",
+    "ifc_source_license_receipt": "sha256:bf2042aa8e5713e7c8f9d08813e6cd96b761d8c092577639d483432807838d3a",
     "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-    "opensees_source_license_receipt": "sha256:1b44b4cbc5527c3b0b89c6befc4483b58681beb1f56d30645ec4b0499715d89f",
-    "phase4_analytic_physical_fallback_scorecard": "sha256:2ab12f6306ea4675b7e9e1399240941d9639077d265e37fb1d982dbc37f89acf",
+    "opensees_source_license_receipt": "sha256:926605c8f6cfc93ee2b5efa0a5df1fc37fb3a6b0a002696e7d276cf74773bc51",
+    "phase4_analytic_physical_fallback_scorecard": "sha256:573aa7d043f5fe297fead2d6f016d03a58a690d5e1e4817e33bdb80f84e5ee57",
     "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
-    "summary": "sha256:fa35f887fb92dc26f2569a8a87d26505f56b0bfcda01171c73e0b9a86d38dacf"
+    "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
   },
-  "generated_at": "2026-06-30T00:16:39.929664+00:00",
+  "generated_at": "2026-06-30T00:25:22.535542+00:00",
   "generated_stable_artifact_checksums": {
-    "acquisition_plan": "sha256:bfd6abc56d0a33d4b2e0e4298e2e3bd9f5a032ff3b58c6d0f096ffb453cf25fe",
-    "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:2cd3af295039d08f27b6f0ee9e39c606219b15b9fe12b05581ce2208dbfdc620",
-    "buildingsmart_ifc_acquisition_receipt": "sha256:d5337d970d5676ae27fa726664f5a950e1e9504523ab5f5b004f0f483d965705",
-    "commercial_comparison_import_template": "sha256:4c4fca5ca2a3ccd7f618e1f59623fbe2bdd9d755f56cd674eb108b282598fe91",
-    "commercial_operator_reference_contract": "sha256:fc58dec678d428393c65e93dab4657dbe2d31a29925422f1b12e855cdf45aeed",
-    "commercial_operator_reference_ingest_validator": "sha256:a722879f5b1a04f83927752bae59bae0d3365c9c10bdd51b364a89c8746fb3df",
-    "ifc_import_health_execution_receipt": "sha256:719d381a33e90aaa9be7cdf2b3b15112963d0fc054463b8883089a2ee50de79d",
-    "ifc_source_license_receipt": "sha256:d3aeba53123ff49ee65459671a4d9ebb2b921f1444f10df063bbdd90dbc1f560",
+    "acquisition_plan": "sha256:2c982cafb73081f84d1919c4fbef14d14a751d3db05537cea73080a9366c7605",
+    "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:dd8ad8cc5bade75c330325f2d29e321d92740689276801a590457b6c5cd19e78",
+    "buildingsmart_ifc_acquisition_receipt": "sha256:910cfd845f209a4c0c03b3c6dd1565d21380b7df8789a0a330ec84e88853d23c",
+    "commercial_comparison_import_template": "sha256:98a365cc85d8470885b63542126f787b60c4dd3dd227d943d6422dc8a1c81545",
+    "commercial_operator_reference_contract": "sha256:f27071cf289f79af09a03f36f53352cad7b54aabfe8ee612a6056020d371be0f",
+    "commercial_operator_reference_ingest_validator": "sha256:efca0f0ebf5fa8b12c9f17965811d1033f88f208ad93b9737aa8fbc4d127cf61",
+    "ifc_import_health_execution_receipt": "sha256:ebf219b0177c66942bfcec2322b9fe96e2cdceb421b9230ae829b19e4dd0efe5",
+    "ifc_source_license_receipt": "sha256:bf2042aa8e5713e7c8f9d08813e6cd96b761d8c092577639d483432807838d3a",
     "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-    "opensees_source_license_receipt": "sha256:1b44b4cbc5527c3b0b89c6befc4483b58681beb1f56d30645ec4b0499715d89f",
-    "phase4_analytic_physical_fallback_scorecard": "sha256:2ab12f6306ea4675b7e9e1399240941d9639077d265e37fb1d982dbc37f89acf",
+    "opensees_source_license_receipt": "sha256:926605c8f6cfc93ee2b5efa0a5df1fc37fb3a6b0a002696e7d276cf74773bc51",
+    "phase4_analytic_physical_fallback_scorecard": "sha256:573aa7d043f5fe297fead2d6f016d03a58a690d5e1e4817e33bdb80f84e5ee57",
     "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
-    "summary": "sha256:fa35f887fb92dc26f2569a8a87d26505f56b0bfcda01171c73e0b9a86d38dacf"
+    "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
   },
   "git_clean_clone_executed": true,
   "git_clean_clone_execution_mode": "local_git_clone_no_local",
@@ -241,21 +239,21 @@
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:a810fc034a8bf6a6a1295b94cb2eac08e67678d47dcb11dde274c07375534541",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:46ef82c27a866ca9143c0e0be09b3ded9c9795e9c1cb6451852d0780d8479dd5",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:006e42f030fe61e4f9878b2417413c68dbebe4a9388d899e90669b7d60a44813",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json": "sha256:180923190287fb7bb1fd768bbdbf3c6059566389eb36b04df03dafbbf38e1eec",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:6a5e6ddce8ff4e178e7981a04bef9081fa56d4e4eb24d0aa32779d6cd27e6649",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": "sha256:fb612e88bc196e0c323190da8a0d29f409286ff1c8748257e47ef5eceee0cf65",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:d09f06b578c345217d22aad3cd67353232a8593e7274718c268c75c55b4c0abb",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:d34b05b062697ee8a8529a27e1db79c3b234d2e9c438759ea21f33a78114e6cb",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:05222a749b7b1b4029edbe9bfd0ba021b64a8d1c97d392d727048a8b4525438d",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:a4bb2e0547e7813186fdbe89f4b5f200914c04bfeacbcf3e9585839ce3351029",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:2042c6975db855fa770542168484a6b8abd4f3a779f92de94354a820d2ea16a1",
-    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:71ae0a0687deff8b825c33c4acb21f061392d7d7817a524b9b42da1937a484f7",
-    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json": "sha256:688922eb29f842148f23a7c57800b1f19a7b41df058c0df8a028d1acfd631c7e",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:b615ff5c2576f25eea588d00218ea87f62076ec14b7924783b66c4626ed5597a",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json": "sha256:3aabd77906ae0e6454d1ed1d60e055f0b6b2365032a88f171afb38a2e5ddd61c",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json": "sha256:5ba3329e4fc2caec2f75029358d65030b60816a31785396beb398bd80cf432d1",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:60b59a12228241029f9ff1ad43d27baa1b379372aa69ba859948a3ebae29b3bd",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:db867ee9cd66943b082fc91a03b3abd0eb681d8e5e9f78520a690ede52a3227c",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:f751d99e9f57600250ff2e00293ec33003b34136a9639fc08ba079f6d28eb3f0",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:4df92b656667ebbb1d840ebf35b323d32d4e18259488445d4468218ca1b77cb3",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:40b81f70d380a18935ecbabf350248f293149231d99e0e6b735cb999f1829719",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:3b5342b9de1241dbded8a1ae9118cbb375d191d36cc55cad6af4ab7e6bedd327",
+    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json": "sha256:0e9c2d8ba373565da80b9967f9e4179184e5a9d098fed70ac53067f54821fca3",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json": "sha256:7666aed922f9bd3b6c367c4798daf260ada2e758e71727fdb4d26ba9701451c7",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json": "sha256:413b9a6437905922e0d34176347e2a4807063dcfea0a79cd80b1a6b4e1dd5495",
     "implementation/phase1/report_commercial_solver_cross_validation.py": "sha256:057f528757bd848099c66b603515bca8e0a3507087f4b82f07e7ad02a8f13a9b",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
@@ -361,7 +359,7 @@
     "status": "ready",
     "track_or_add_required_paths": []
   },
-  "replay_source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "replay_source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
   "required_git_clean_clone_inputs": [
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
@@ -842,10 +840,10 @@
     }
   },
   "schema_version": "phase3-benchmark-factory-git-clean-clone-reproduction.v1",
-  "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
+  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
   "source_repo_path": "/home/betelgeuze/건축구조분석",
-  "stable_artifact_checksums_match": false,
-  "status": "blocked",
+  "stable_artifact_checksums_match": true,
+  "status": "pass",
   "tracked_required_inputs": [
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
