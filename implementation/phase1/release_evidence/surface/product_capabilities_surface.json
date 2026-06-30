@@ -187,6 +187,7 @@
       "handoff_slot": {
         "blocked_criteria": [
           "top_k_refinement_rows_present",
+          "top_k_refinement_case_coverage",
           "local_min_survival_materialized",
           "contact_persistence_materialized",
           "h_bond_persistence_materialized",
@@ -204,6 +205,7 @@
           "refresh_goal_bottleneck_roadmap_surface"
         ],
         "minimum_evidence": {
+          "candidate_count_per_case": 2,
           "candidate_scope": "upstream_ranked_top_k_candidates_only",
           "operator_input_source_receipt_policy": {
             "required_mode": "raw_top_k_refinement_rows",
@@ -224,7 +226,7 @@
             "jsonl",
             "ndjson"
           ],
-          "real_refinement_case_count": 1,
+          "real_refinement_case_count": 3,
           "receipt_fields": [
             "provenance_ref",
             "source_checksum",
@@ -250,11 +252,22 @@
             "provenance_ref",
             "source_checksum"
           ],
+          "required_rank_span_per_case": [
+            1,
+            2
+          ],
           "source_checksum_policy": {
             "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
             "required_receipt_field": "source_checksum"
           },
-          "top_k_candidate_count": 1
+          "top_k_candidate_count": 6,
+          "top_k_rank_coverage_per_case": 2,
+          "top_k_row_quality_minimums": {
+            "min_candidate_count_per_case": 2,
+            "min_real_refinement_case_count": 3,
+            "min_top_k_rank_coverage_per_case": 2,
+            "min_total_top_k_candidate_count": 6
+          }
         },
         "slot_id": "top_k_refinement_rows",
         "status": "operator_input_required",
@@ -1686,6 +1699,7 @@
         "first_operator_evidence_gap": {
           "blocked_phase4_criteria": [
             "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
             "local_min_survival_materialized",
             "contact_persistence_materialized",
             "h_bond_persistence_materialized",
@@ -1702,6 +1716,7 @@
             "refresh_goal_bottleneck_roadmap_surface"
           ],
           "minimum_evidence": {
+            "candidate_count_per_case": 2,
             "candidate_scope": "upstream_ranked_top_k_candidates_only",
             "operator_input_source_receipt_policy": {
               "required_mode": "raw_top_k_refinement_rows",
@@ -1722,7 +1737,7 @@
               "jsonl",
               "ndjson"
             ],
-            "real_refinement_case_count": 1,
+            "real_refinement_case_count": 3,
             "receipt_fields": [
               "provenance_ref",
               "source_checksum",
@@ -1748,11 +1763,22 @@
               "provenance_ref",
               "source_checksum"
             ],
+            "required_rank_span_per_case": [
+              1,
+              2
+            ],
             "source_checksum_policy": {
               "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
               "required_receipt_field": "source_checksum"
             },
-            "top_k_candidate_count": 1
+            "top_k_candidate_count": 6,
+            "top_k_rank_coverage_per_case": 2,
+            "top_k_row_quality_minimums": {
+              "min_candidate_count_per_case": 2,
+              "min_real_refinement_case_count": 3,
+              "min_top_k_rank_coverage_per_case": 2,
+              "min_total_top_k_candidate_count": 6
+            }
           },
           "phase4_blocked": true,
           "preserves_phase4_criteria": [
@@ -1784,7 +1810,13 @@
               "json",
               "jsonl",
               "ndjson"
-            ]
+            ],
+            "top_k_row_quality_minimums": {
+              "min_candidate_count_per_case": 2,
+              "min_real_refinement_case_count": 3,
+              "min_top_k_rank_coverage_per_case": 2,
+              "min_total_top_k_candidate_count": 6
+            }
           },
           "slot_id": "top_k_refinement_rows",
           "slot_priority": 1,
@@ -1802,6 +1834,7 @@
               "refresh_goal_bottleneck_roadmap_surface"
             ],
             "minimum_evidence": {
+              "candidate_count_per_case": 2,
               "candidate_scope": "upstream_ranked_top_k_candidates_only",
               "operator_input_source_receipt_policy": {
                 "required_mode": "raw_top_k_refinement_rows",
@@ -1822,7 +1855,7 @@
                 "jsonl",
                 "ndjson"
               ],
-              "real_refinement_case_count": 1,
+              "real_refinement_case_count": 3,
               "receipt_fields": [
                 "provenance_ref",
                 "source_checksum",
@@ -1848,11 +1881,22 @@
                 "provenance_ref",
                 "source_checksum"
               ],
+              "required_rank_span_per_case": [
+                1,
+                2
+              ],
               "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum"
               },
-              "top_k_candidate_count": 1
+              "top_k_candidate_count": 6,
+              "top_k_rank_coverage_per_case": 2,
+              "top_k_row_quality_minimums": {
+                "min_candidate_count_per_case": 2,
+                "min_real_refinement_case_count": 3,
+                "min_top_k_rank_coverage_per_case": 2,
+                "min_total_top_k_candidate_count": 6
+              }
             },
             "preserves_phase4_criteria": [
               "broad_all_atom_fep_claims_locked"
@@ -1862,6 +1906,7 @@
             "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
             "unblocks_phase4_criteria": [
               "top_k_refinement_rows_present",
+              "top_k_refinement_case_coverage",
               "local_min_survival_materialized",
               "contact_persistence_materialized",
               "h_bond_persistence_materialized",
@@ -1873,12 +1918,12 @@
           }
         ],
         "gate_unblock_plan_count": 1,
-        "handoff_acceptance_criteria_count": 6,
+        "handoff_acceptance_criteria_count": 8,
         "handoff_phase4_exit_gate_required_status": "ready",
         "handoff_route": "/product/pocketmd-lite/handoff",
         "handoff_status": "handoff_ready_operator_evidence_required",
-        "minimum_refinement_case_count": 1,
-        "minimum_top_k_candidate_count": 1,
+        "minimum_refinement_case_count": 3,
+        "minimum_top_k_candidate_count": 6,
         "operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
         "operator_intake_markdown_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
         "operator_intake_packet_status": "ready_for_operator_input",
@@ -1900,7 +1945,14 @@
             "criterion_id": "top_k_refinement_rows_present",
             "current": 0,
             "pass": false,
-            "required": ">=1"
+            "required": ">=6"
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "top_k_refinement_case_coverage",
+            "current": false,
+            "pass": false,
+            "required": true
           },
           {
             "blocker_count": 1,
@@ -1955,6 +2007,7 @@
         "phase4_exit_gate_status": "blocked",
         "phase4_failed_criteria": [
           "top_k_refinement_rows_present",
+          "top_k_refinement_case_coverage",
           "local_min_survival_materialized",
           "contact_persistence_materialized",
           "h_bond_persistence_materialized",
@@ -1962,7 +2015,7 @@
           "uncertainty_summary_materialized",
           "report_blockers_resolved"
         ],
-        "phase4_failed_criterion_count": 7,
+        "phase4_failed_criterion_count": 8,
         "product_surface_ready": false,
         "readonly_api_endpoint_count": 7,
         "readonly_api_route": "/product/pocketmd-lite",
@@ -2054,19 +2107,19 @@
   "first_blocked_capability_id": "public_benchmark_harness",
   "first_blocked_capability_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
   "first_blocked_target": "",
-  "generated_at": "2026-06-30T21:37:22.668727+00:00",
+  "generated_at": "2026-06-30T21:46:43.079061+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:1b0953af454f73583229b6d8c711ff4274fab42ee88d4fdfc1310266b3ca38eb",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:838d4cdde0ce19f045dcbf379236ac8e99307f398a9275e81f66da42f20792ce",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:947a85f13ca082b840a169fec0d0ef16d63d79d7e576b82d41a9cce75b406f02",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json": "sha256:9621d05ff0cf781897321f8b5000cd4620c88972b98c7c852f795ab171abeb3b",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md": "sha256:4e8a44624068cda8110c2986014663a2bddb61333cc5e81d90e77d8477d0401e",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:f0a564999f4a853f50a7a70c79f0520377e3868d8b7adb25d29f66802703ee61",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:f29ec443e38711953d2273bdc435441c62324a72310b27215a9e63eb4e9740b3",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:8e20d96d59e5114d26a897a097ab25c2dd5282221edf805e765a2a92f4bcc4e9",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:3bef1443a9b8a47dded1f2f29f5331bc73b7e6ca4543b196d4e37ed31c7debd0",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:f39264ec8262b7143d6922e9a751f5710915ab2dd2394c17841ca3b5700368b6",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:5a7d859af45f92a61973057da3ea1ba98467e8e006836d2ea7915794fe544c3c",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:b8dfcaf54f278b47d7dbad99d2f9678712f893f1cd199d3ea5a254262eb44ef7",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:ec14148fefd0ae1ddb94f0d8a04d2fcc214f2aa5b63343df2ffb728950e624e8",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:4af285cf417de9672c2f2ff13c5424787e4ec89725dd02fea3aafdbdb2a238d8",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:c3d084be87b8af31707e078d055cee46d33e928380dc51e689a31d355b916935",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:4dfe619773daba6b07f0f4e1cb549f5f430b4536b34c66e206a02840ef382def",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:4dded0017ee7645346abb541b00bfa3bb557f1a048589f5f7c5570bebcb4e653",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:09f8c68b536498a5623df24e753e6cc923dfe8cf4196c5cb6dee676823deb3c9",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md": "sha256:efe343c12bbdcd5e93d33c0190e88a1846be1020183f977485977121092ff726",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:8b8fd90bd0a8caa734c249f788acf5e2524d78364a2814624a22920ca99b0726",
@@ -2075,14 +2128,14 @@
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:ec423227469ed6a77b04f770c78e44f95c3816c7b8735e5bb2ea6a3ada70ef1e",
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:0d57c89df5c33d8fba0557d7f8cf421c301ed4bfe754a95b892df3abecaca0ed",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
-    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:b78c60990e3976edbc714e25f95d040525f45586b99e99231d179e592fe2e8d4",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:41e6bfa16d3e277f3b41c251eb24498f0a1f0234968b99ab57628f8ea7c11e58",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
     "scripts/build_product_capabilities_surface.py": "sha256:b90cf66e5258ddd007b52cadcec524b6d20cbe441655fb5f9fe17ae8285df017",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:e44ad3df474509d811cd699751acca1b0217c3a8483cdd8a6a14292870030399"
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:44fedbf6387af0c3f96b972a5054b7cb4c06797c33141a02c611395d0e5aba62"
   },
   "locked": false,
   "next_actions": [
@@ -2102,7 +2155,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "752fadd00ddc18d74d272c84f7f3c6cb1b80eaf4",
+  "source_commit_sha": "cc6b2edd920087b292c601cc975443db8f6d5dcb",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",

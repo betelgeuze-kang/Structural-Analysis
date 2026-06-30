@@ -16,6 +16,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
+    TOPK_ROW_QUALITY_CRITERIA,
     build_operator_input_source_receipt,
     build_phase4_exit_gate,
 )
@@ -46,8 +47,18 @@ SURFACE_SCHEMA_VERSION = "pocketmd-lite-science-product-surface.v1"
 POCKETMD_LITE_ROUTE = "/product/pocketmd-lite"
 POCKETMD_LITE_HANDOFF_ROUTE = "/product/pocketmd-lite/handoff"
 POCKETMD_LITE_OPERATOR_INTAKE_ROUTE = "/product/pocketmd-lite/operator-intake"
-POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT = 1
-POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT = 1
+POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT = TOPK_ROW_QUALITY_CRITERIA[
+    "min_real_refinement_case_count"
+]
+POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT = TOPK_ROW_QUALITY_CRITERIA[
+    "min_total_top_k_candidate_count"
+]
+POCKETMD_LITE_MINIMUM_CANDIDATE_COUNT_PER_CASE = TOPK_ROW_QUALITY_CRITERIA[
+    "min_candidate_count_per_case"
+]
+POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE = TOPK_ROW_QUALITY_CRITERIA[
+    "min_top_k_rank_coverage_per_case"
+]
 SOURCE_CHECKSUM_POLICY = {
     "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
     "required_receipt_field": "source_checksum",
@@ -166,6 +177,7 @@ def _raw_row_importer_contract() -> dict[str, Any]:
         "required_output_key": "cases",
         "output_intake": "<operator-pocketmd-lite-intake.json>",
         "emits_operator_input_source_receipt": True,
+        "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
         "command": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
@@ -203,6 +215,7 @@ def _operator_intake_schema() -> dict[str, Any]:
         ),
         "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
         "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
+        "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         "raw_row_importer": _raw_row_importer_contract(),
         "template": {
             "case_id": "pocketmd_lite_case_001",
@@ -236,6 +249,7 @@ def _operator_gate_unblock_plan(
             "status": "operator_input_required",
             "unblocks_phase4_criteria": [
                 "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
                 "local_min_survival_materialized",
                 "contact_persistence_materialized",
                 "h_bond_persistence_materialized",
@@ -247,6 +261,16 @@ def _operator_gate_unblock_plan(
             "minimum_evidence": {
                 "real_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
                 "top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
+                "candidate_count_per_case": (
+                    POCKETMD_LITE_MINIMUM_CANDIDATE_COUNT_PER_CASE
+                ),
+                "top_k_rank_coverage_per_case": (
+                    POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE
+                ),
+                "required_rank_span_per_case": list(
+                    range(1, POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE + 1)
+                ),
+                "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
                 "candidate_scope": "upstream_ranked_top_k_candidates_only",
                 "required_case_fields": required_case_fields,
                 "receipt_fields": [
@@ -343,6 +367,13 @@ def _operator_handoff_context(
         "gate_unblock_plan_count": len(gate_unblock_plan),
         "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
         "minimum_top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
+        "minimum_candidate_count_per_case": (
+            POCKETMD_LITE_MINIMUM_CANDIDATE_COUNT_PER_CASE
+        ),
+        "minimum_top_k_rank_coverage_per_case": (
+            POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE
+        ),
+        "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         "first_blocker": first_blocker,
         "first_blocked_target": first_blocked_target,
         "root_cause_tags": ["operator_refinement_rows_required"],
@@ -413,6 +444,19 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "top_k_candidate_count": 0,
         "real_refinement_case_count": 0,
         "blocker_count": len(blockers),
+        "top_k_row_quality": {
+            "contract_pass": False,
+            "minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+            "required_rank_span_per_case": list(
+                range(1, POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE + 1)
+            ),
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0,
+            "case_candidate_counts": {},
+            "case_rank_coverage": {},
+            "blockers": [],
+            "root_cause_tags": [],
+        },
     }
     phase4_exit_gate = build_phase4_exit_gate(
         summary=summary,
@@ -588,6 +632,7 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "required_status": "ready",
             "required_criteria": [
                 "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
                 "local_min_survival_materialized",
                 "contact_persistence_materialized",
                 "h_bond_persistence_materialized",
@@ -615,7 +660,15 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "regenerate_pm_release_gate_report",
         ],
         "acceptance_criteria": [
-            "topk_survival_report.real_refinement_case_count > 0",
+            (
+                "topk_survival_report.real_refinement_case_count >= "
+                f"{POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT}"
+            ),
+            (
+                "topk_survival_report.top_k_candidate_count >= "
+                f"{POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT}"
+            ),
+            "topk_survival_report.top_k_row_quality.contract_pass == true",
             "topk_survival_report.blockers == []",
             "topk_survival_report.phase4_exit_gate.status == ready",
             "science_product_surface.contract_pass == true",
@@ -760,6 +813,13 @@ def build_operator_intake_packet(
         "gate_unblock_plan_count": len(gate_unblock_plan),
         "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
         "minimum_top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
+        "minimum_candidate_count_per_case": (
+            POCKETMD_LITE_MINIMUM_CANDIDATE_COUNT_PER_CASE
+        ),
+        "minimum_top_k_rank_coverage_per_case": (
+            POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE
+        ),
+        "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         "current_surface_status": {
             "artifact": str(DEFAULT_SURFACE_OUT),
             "status": str(surface.get("status") or ""),
@@ -817,7 +877,15 @@ def build_operator_intake_packet(
             },
         ],
         "acceptance_criteria": [
-            "pocketmd_lite_topk_survival_report.real_refinement_case_count > 0",
+            (
+                "pocketmd_lite_topk_survival_report.real_refinement_case_count >= "
+                f"{POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT}"
+            ),
+            (
+                "pocketmd_lite_topk_survival_report.top_k_candidate_count >= "
+                f"{POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT}"
+            ),
+            "pocketmd_lite_topk_survival_report.top_k_row_quality.contract_pass == true",
             "pocketmd_lite_topk_survival_report.blockers == []",
             "pocketmd_lite_topk_survival_report.phase4_exit_gate.status == ready",
             "pocketmd_lite_topk_survival_report.product_surface_ready == true",
@@ -851,6 +919,13 @@ def build_operator_intake_packet(
             "raw_row_importer_script": str(RAW_ROW_IMPORTER_SCRIPT),
             "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
             "minimum_top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
+            "minimum_candidate_count_per_case": (
+                POCKETMD_LITE_MINIMUM_CANDIDATE_COUNT_PER_CASE
+            ),
+            "minimum_top_k_rank_coverage_per_case": (
+                POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE
+            ),
+            "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
             "current_blocker_count": len(blockers),
             "first_blocked_target": first_blocked_target,
             "product_surface_ready": False,

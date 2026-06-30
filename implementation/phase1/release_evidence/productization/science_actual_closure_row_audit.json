@@ -32,13 +32,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T21:15:19.100638+00:00",
+  "generated_at": "2026-06-30T21:46:38.629760+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:c1df25fb0f85f5640fe6ab5362ec14a05563a3db20ab4c08192910325a6d17ca",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:0a3b4416ffaea6b9c394535a5c9b422183d5ec396c5e785b02a0149cc04db64a",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:cbe3da9485435cbe6101dc5c28409fc5b55aa823df1be37937ffaff7f30ac637",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:e44ad3df474509d811cd699751acca1b0217c3a8483cdd8a6a14292870030399",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:f2973d8c809422f33369299655339dc4572bf99d74c97fcead40957a10866fe6"
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:64178f42968f6c8d8629ca8cbb812228dcd2d26241de49752be044f2a4622b79",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:44fedbf6387af0c3f96b972a5054b7cb4c06797c33141a02c611395d0e5aba62",
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:9b65f960330d285840a80cb0240897ce91dc183f013f70fbb9d05aaedb60c70b"
   },
   "missing_row_inputs": [
     "gpcr_rows",
@@ -169,6 +169,12 @@
         "source_artifact_sha256",
         "per_row_source_checksum"
       ],
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      },
       "uncertainty_field_modes": [
         "uncertainty_interval:{low,high,unit}",
         "uncertainty_low+uncertainty_high+uncertainty_unit"
@@ -176,6 +182,6 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "303ddc0a54e8293100220b68378caf013a8bc0b0",
+  "source_commit_sha": "cc6b2edd920087b292c601cc975443db8f6d5dcb",
   "status": "operator_evidence_required"
 }

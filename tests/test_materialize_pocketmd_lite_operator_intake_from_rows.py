@@ -145,6 +145,60 @@ def _write_csv(path: Path) -> None:
             "operator://case_b/pose_1",
             _checksum("case_b:pose_1"),
         ],
+        [
+            "case_b",
+            "CASF/PDBBind operator intake",
+            "2",
+            "pose_2",
+            "-7.0",
+            "-7.5",
+            "false",
+            "0.7",
+            "0.4",
+            "2",
+            "2",
+            "0.1",
+            "0.3",
+            "energy_proxy_delta",
+            "operator://case_b/pose_2",
+            _checksum("case_b:pose_2"),
+        ],
+        [
+            "case_c",
+            "CASF/PDBBind operator intake",
+            "1",
+            "pose_1",
+            "-8.0",
+            "-8.5",
+            "true",
+            "0.8",
+            "0.6",
+            "4",
+            "1",
+            "-0.2",
+            "0.2",
+            "energy_proxy_delta",
+            "operator://case_c/pose_1",
+            _checksum("case_c:pose_1"),
+        ],
+        [
+            "case_c",
+            "CASF/PDBBind operator intake",
+            "2",
+            "pose_2",
+            "-7.0",
+            "-7.5",
+            "false",
+            "0.7",
+            "0.4",
+            "2",
+            "2",
+            "0.1",
+            "0.3",
+            "energy_proxy_delta",
+            "operator://case_c/pose_2",
+            _checksum("case_c:pose_2"),
+        ],
     ]
     lines = [",".join(header), *[",".join(row) for row in rows]]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -175,12 +229,19 @@ def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None
         "https://example.invalid/pocketmd-lite-rows.csv"
     )
     assert payload["operator_input_source"]["source_license"] == "fixture-license"
-    assert payload["operator_input_source"]["row_count"] == 3
-    assert payload["operator_input_source"]["case_count"] == 2
-    assert payload["operator_input_source"]["top_k_candidate_count"] == 3
+    assert payload["operator_input_source"]["row_count"] == 6
+    assert payload["operator_input_source"]["case_count"] == 3
+    assert payload["operator_input_source"]["top_k_candidate_count"] == 6
     assert payload["operator_input_source"]["case_row_counts"] == {
         "case_a": 2,
-        "case_b": 1,
+        "case_b": 2,
+        "case_c": 2,
+    }
+    assert payload["operator_input_source"]["top_k_row_quality_minimums"] == {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6,
     }
     assert payload["cases"][0]["top_k_rank"] == 1
     assert payload["cases"][0]["local_min_survived"] is True
@@ -247,7 +308,7 @@ def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:
         rows,
         [
             _row(
-                case_id="case_ndjson",
+                case_id="case_ndjson_a",
                 candidate_id="pose_1",
                 top_k_rank=1,
                 local_min_survived=True,
@@ -257,7 +318,47 @@ def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:
                 clash_after=1,
             ),
             _row(
-                case_id="case_ndjson",
+                case_id="case_ndjson_a",
+                candidate_id="pose_2",
+                top_k_rank=2,
+                local_min_survived=True,
+                contact_rate=0.7,
+                h_bond_rate=0.4,
+                clash_before=3,
+                clash_after=2,
+            ),
+            _row(
+                case_id="case_ndjson_b",
+                candidate_id="pose_1",
+                top_k_rank=1,
+                local_min_survived=True,
+                contact_rate=0.9,
+                h_bond_rate=0.8,
+                clash_before=4,
+                clash_after=1,
+            ),
+            _row(
+                case_id="case_ndjson_b",
+                candidate_id="pose_2",
+                top_k_rank=2,
+                local_min_survived=True,
+                contact_rate=0.7,
+                h_bond_rate=0.4,
+                clash_before=3,
+                clash_after=2,
+            ),
+            _row(
+                case_id="case_ndjson_c",
+                candidate_id="pose_1",
+                top_k_rank=1,
+                local_min_survived=True,
+                contact_rate=0.9,
+                h_bond_rate=0.8,
+                clash_before=4,
+                clash_after=1,
+            ),
+            _row(
+                case_id="case_ndjson_c",
                 candidate_id="pose_2",
                 top_k_rank=2,
                 local_min_survived=True,
@@ -284,8 +385,8 @@ def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:
         "jsonl",
         "ndjson",
     ]
-    assert payload["operator_input_source"]["row_count"] == 2
-    assert payload["operator_input_source"]["case_count"] == 1
+    assert payload["operator_input_source"]["row_count"] == 6
+    assert payload["operator_input_source"]["case_count"] == 3
 
     report = survival_module.materialize_pocketmd_lite_topk_survival_report(
         payload,
@@ -357,4 +458,4 @@ def test_cli_writes_operator_intake(tmp_path: Path) -> None:
     )
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["operator_input_source"]["source_id"] == "fixture"
-    assert len(payload["cases"]) == 3
+    assert len(payload["cases"]) == 6

@@ -84,6 +84,12 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
             "required_output_key": "cases",
             "output_intake": "<operator-pocketmd-lite-intake.json>",
             "emits_operator_input_source_receipt": True,
+            "top_k_row_quality_minimums": {
+                "min_candidate_count_per_case": 2,
+                "min_real_refinement_case_count": 3,
+                "min_top_k_rank_coverage_per_case": 2,
+                "min_total_top_k_candidate_count": 6,
+            },
             "operator_input_source_receipt_policy": {
                 "required_mode": "raw_top_k_refinement_rows",
                 "source_artifact_sha256_policy": (
@@ -142,9 +148,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert "source_checksum" in survival["required_case_fields"]
     assert survival["materializer"]["status"] == "ready_for_operator_intake"
     assert survival["phase4_exit_gate"]["status"] == "blocked"
-    assert survival["phase4_exit_gate"]["failed_criterion_count"] == 7
+    assert survival["phase4_exit_gate"]["failed_criterion_count"] == 8
     assert survival["phase4_exit_gate"]["failed_criteria"] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
@@ -176,8 +183,16 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "status": "ready_for_operator_input",
         "required_slot_count": 1,
         "gate_unblock_plan_count": 1,
-        "minimum_refinement_case_count": 1,
-        "minimum_top_k_candidate_count": 1,
+        "minimum_refinement_case_count": 3,
+        "minimum_top_k_candidate_count": 6,
+        "minimum_candidate_count_per_case": 2,
+        "minimum_top_k_rank_coverage_per_case": 2,
+        "top_k_row_quality_minimums": {
+            "min_candidate_count_per_case": 2,
+            "min_real_refinement_case_count": 3,
+            "min_top_k_rank_coverage_per_case": 2,
+            "min_total_top_k_candidate_count": 6,
+        },
         "first_blocker": "pocketmd_lite_topk_candidate_rows_missing",
         "first_blocked_target": "top_k_refinement_operator_intake",
         "root_cause_tags": ["operator_refinement_rows_required"],
@@ -256,6 +271,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "required_status": "ready",
         "required_criteria": [
             "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
             "local_min_survival_materialized",
             "contact_persistence_materialized",
             "h_bond_persistence_materialized",
@@ -274,7 +290,13 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert handoff["operator_intake_reference"]["template_artifact"].endswith(
         "pocketmd_lite_operator_template.json"
     )
-    assert "topk_survival_report.real_refinement_case_count > 0" in handoff[
+    assert "topk_survival_report.real_refinement_case_count >= 3" in handoff[
+        "acceptance_criteria"
+    ]
+    assert "topk_survival_report.top_k_candidate_count >= 6" in handoff[
+        "acceptance_criteria"
+    ]
+    assert "topk_survival_report.top_k_row_quality.contract_pass == true" in handoff[
         "acceptance_criteria"
     ]
     assert "topk_survival_report.phase4_exit_gate.status == ready" in handoff[
@@ -310,12 +332,21 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "pocketmd_lite_operator_template.json"
     )
     assert operator["gate_unblock_plan_count"] == 1
-    assert operator["minimum_refinement_case_count"] == 1
-    assert operator["minimum_top_k_candidate_count"] == 1
+    assert operator["minimum_refinement_case_count"] == 3
+    assert operator["minimum_top_k_candidate_count"] == 6
+    assert operator["minimum_candidate_count_per_case"] == 2
+    assert operator["minimum_top_k_rank_coverage_per_case"] == 2
+    assert operator["top_k_row_quality_minimums"] == {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6,
+    }
     gate_plan = operator["gate_unblock_plan"][0]
     assert gate_plan["slot_id"] == "top_k_refinement_rows"
     assert gate_plan["unblocks_phase4_criteria"] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
@@ -326,8 +357,17 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert gate_plan["preserves_phase4_criteria"] == [
         "broad_all_atom_fep_claims_locked"
     ]
-    assert gate_plan["minimum_evidence"]["real_refinement_case_count"] == 1
-    assert gate_plan["minimum_evidence"]["top_k_candidate_count"] == 1
+    assert gate_plan["minimum_evidence"]["real_refinement_case_count"] == 3
+    assert gate_plan["minimum_evidence"]["top_k_candidate_count"] == 6
+    assert gate_plan["minimum_evidence"]["candidate_count_per_case"] == 2
+    assert gate_plan["minimum_evidence"]["top_k_rank_coverage_per_case"] == 2
+    assert gate_plan["minimum_evidence"]["required_rank_span_per_case"] == [1, 2]
+    assert gate_plan["minimum_evidence"]["top_k_row_quality_minimums"] == {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6,
+    }
     assert gate_plan["minimum_evidence"]["source_checksum_policy"] == {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
         "required_receipt_field": "source_checksum",
@@ -386,6 +426,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     )
     assert surface["first_operator_evidence_gap"]["blocked_phase4_criteria"] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
@@ -412,8 +453,17 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "required_slot_count": 1,
         "blocked_operator_slot_count": 1,
         "minimum_evidence": {
-            "real_refinement_case_count": 1,
-            "top_k_candidate_count": 1,
+            "real_refinement_case_count": 3,
+            "top_k_candidate_count": 6,
+            "candidate_count_per_case": 2,
+            "top_k_rank_coverage_per_case": 2,
+            "required_rank_span_per_case": [1, 2],
+            "top_k_row_quality_minimums": {
+                "min_candidate_count_per_case": 2,
+                "min_real_refinement_case_count": 3,
+                "min_top_k_rank_coverage_per_case": 2,
+                "min_total_top_k_candidate_count": 6,
+            },
             "candidate_scope": "upstream_ranked_top_k_candidates_only",
             "required_case_fields": [
                 "case_id",
@@ -499,6 +549,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert surface["phase4_exit_gate"]["status"] == "blocked"
     assert surface["phase4_exit_gate"]["failed_criteria"] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
@@ -510,7 +561,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "operator_input_source_receipt"
     ]
     assert surface["readiness_summary"]["phase4_exit_gate_status"] == "blocked"
-    assert surface["readiness_summary"]["phase4_failed_criterion_count"] == 7
+    assert surface["readiness_summary"]["phase4_failed_criterion_count"] == 8
     assert surface["readiness_summary"]["operator_input_source_receipt_status"] == (
         "blocked"
     )
@@ -623,6 +674,7 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
             "root_cause_tags": ["operator_refinement_rows_required"],
             "blocked_criteria": [
                 "top_k_refinement_rows_present",
+                "top_k_refinement_case_coverage",
                 "local_min_survival_materialized",
                 "contact_persistence_materialized",
                 "h_bond_persistence_materialized",

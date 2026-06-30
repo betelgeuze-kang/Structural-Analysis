@@ -75,6 +75,12 @@ EMPTY_INTAKE_BLOCKERS = (
     "pocketmd_lite_clash_relief_rows_missing",
     "pocketmd_lite_uncertainty_rows_missing",
 )
+TOPK_ROW_QUALITY_CRITERIA = {
+    "min_real_refinement_case_count": 3,
+    "min_candidate_count_per_case": 2,
+    "min_top_k_rank_coverage_per_case": 2,
+    "min_total_top_k_candidate_count": 6,
+}
 SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 
 
@@ -270,7 +276,73 @@ def _normalize_candidate_row(row: dict[str, Any], index: int) -> dict[str, Any]:
     }
 
 
-def _summary(rows: list[dict[str, Any]], blockers: list[str]) -> dict[str, Any]:
+def _topk_row_quality(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    min_case_count = TOPK_ROW_QUALITY_CRITERIA["min_real_refinement_case_count"]
+    min_candidates_per_case = TOPK_ROW_QUALITY_CRITERIA[
+        "min_candidate_count_per_case"
+    ]
+    min_rank_coverage = TOPK_ROW_QUALITY_CRITERIA[
+        "min_top_k_rank_coverage_per_case"
+    ]
+    min_total_candidates = TOPK_ROW_QUALITY_CRITERIA[
+        "min_total_top_k_candidate_count"
+    ]
+    required_ranks = list(range(1, min_rank_coverage + 1))
+    rows_by_case: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        case_id = _string(row.get("case_id"))
+        if case_id:
+            rows_by_case.setdefault(case_id, []).append(row)
+
+    case_candidate_counts = {
+        case_id: len(case_rows) for case_id, case_rows in sorted(rows_by_case.items())
+    }
+    case_rank_coverage = {
+        case_id: sorted(
+            {
+                int(top_k_rank)
+                for top_k_rank in (row.get("top_k_rank") for row in case_rows)
+                if _integer(top_k_rank) is not None and int(top_k_rank) >= 1
+            }
+        )
+        for case_id, case_rows in sorted(rows_by_case.items())
+    }
+
+    blockers: list[str] = []
+    if rows:
+        if len(rows_by_case) < min_case_count:
+            blockers.append("pocketmd_lite_real_refinement_case_count_below_minimum")
+        if len(rows) < min_total_candidates:
+            blockers.append("pocketmd_lite_topk_candidate_count_below_minimum")
+        for case_id in sorted(rows_by_case):
+            if case_candidate_counts[case_id] < min_candidates_per_case:
+                blockers.append(f"{case_id}:top_k_candidate_count_below_minimum")
+            rank_set = set(case_rank_coverage[case_id])
+            if not set(required_ranks).issubset(rank_set):
+                blockers.append(f"{case_id}:top_k_rank_coverage_below_minimum")
+
+    blockers = list(dict.fromkeys(blockers))
+    return {
+        "contract_pass": bool(rows and not blockers),
+        "minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+        "required_rank_span_per_case": required_ranks,
+        "real_refinement_case_count": len(rows_by_case),
+        "top_k_candidate_count": len(rows),
+        "case_candidate_counts": case_candidate_counts,
+        "case_rank_coverage": case_rank_coverage,
+        "blockers": blockers,
+        "root_cause_tags": (
+            ["top_k_refinement_coverage_required"] if blockers else []
+        ),
+    }
+
+
+def _summary(
+    rows: list[dict[str, Any]],
+    blockers: list[str],
+    *,
+    topk_row_quality: dict[str, Any],
+) -> dict[str, Any]:
     local_min_rows = [
         bool(row["local_min_survived"])
         for row in rows
@@ -313,6 +385,7 @@ def _summary(rows: list[dict[str, Any]], blockers: list[str]) -> dict[str, Any]:
         "top_k_candidate_count": len(rows),
         "real_refinement_case_count": len(case_ids),
         "blocker_count": len(blockers),
+        "top_k_row_quality": topk_row_quality,
     }
 
 
@@ -490,8 +563,23 @@ def build_phase4_exit_gate(
         _count_min_gate(
             criterion_id="top_k_refinement_rows_present",
             current=int(summary.get("top_k_candidate_count") or 0),
-            required=1,
+            required=TOPK_ROW_QUALITY_CRITERIA["min_total_top_k_candidate_count"],
             blockers=_matching_blockers(blockers, "topk_candidate", "candidate_rows"),
+        ),
+        _boolean_gate(
+            criterion_id="top_k_refinement_case_coverage",
+            current=bool(
+                _as_dict(summary.get("top_k_row_quality")).get("contract_pass")
+            ),
+            required=True,
+            blockers=_matching_blockers(
+                blockers,
+                "real_refinement_case_count",
+                "top_k_candidate_count",
+                "top_k_rank_coverage",
+                "candidate_rows",
+                "topk_candidate",
+            ),
         ),
         _metric_present_gate(
             criterion_id="local_min_survival_materialized",
@@ -584,6 +672,10 @@ def materialize_pocketmd_lite_topk_survival_report(
     integrity_blockers, integrity_root_causes = _topk_integrity_blockers(rows)
     blockers.extend(integrity_blockers)
     root_cause_tags.extend(integrity_root_causes)
+    topk_row_quality = _topk_row_quality(rows)
+    if rows and not topk_row_quality["contract_pass"]:
+        blockers.extend(_as_list(topk_row_quality.get("blockers")))
+        root_cause_tags.extend(_as_list(topk_row_quality.get("root_cause_tags")))
     operator_input_source_receipt = _operator_input_source_receipt(
         intake,
         repo_root=repo_root,
@@ -595,9 +687,13 @@ def materialize_pocketmd_lite_topk_survival_report(
         blockers.extend(EMPTY_INTAKE_BLOCKERS)
         root_cause_tags.append("operator_refinement_rows_required")
 
-    summary = _summary(rows, blockers)
+    blockers = list(dict.fromkeys(blockers))
+    root_cause_tags = list(dict.fromkeys(root_cause_tags))
+    summary = _summary(rows, blockers, topk_row_quality=topk_row_quality)
     metrics_complete = all(summary[metric] is not None for metric in REQUIRED_SUMMARY_METRICS)
-    product_surface_ready = bool(rows and not blockers and metrics_complete)
+    product_surface_ready = bool(
+        rows and topk_row_quality["contract_pass"] and not blockers and metrics_complete
+    )
     first_blocked_target = next(
         (
             row.get("case_id") or row.get("candidate_id") or "operator_intake"
@@ -633,6 +729,7 @@ def materialize_pocketmd_lite_topk_survival_report(
         "top_k_candidate_count": summary["top_k_candidate_count"],
         "rows": rows,
         "summary": summary,
+        "top_k_row_quality": topk_row_quality,
         "required_metrics": list(REQUIRED_METRICS),
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
         "first_blocked_target": first_blocked_target,
@@ -660,6 +757,8 @@ def materialize_pocketmd_lite_topk_survival_report(
             "operator_intake_row_count": len(rows),
             "real_refinement_case_count": summary["real_refinement_case_count"],
             "top_k_candidate_count": summary["top_k_candidate_count"],
+            "top_k_row_quality_contract_pass": topk_row_quality["contract_pass"],
+            "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
             "metric_complete": metrics_complete,
             "blocker_count": len(blockers),
             "product_surface_ready": product_surface_ready,

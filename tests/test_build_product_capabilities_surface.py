@@ -333,12 +333,13 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     )
     assert pocketmd["summary"]["operator_intake_required_slot_count"] == 1
     assert pocketmd["summary"]["gate_unblock_plan_count"] == 1
-    assert pocketmd["summary"]["minimum_refinement_case_count"] == 1
-    assert pocketmd["summary"]["minimum_top_k_candidate_count"] == 1
+    assert pocketmd["summary"]["minimum_refinement_case_count"] == 3
+    assert pocketmd["summary"]["minimum_top_k_candidate_count"] == 6
     assert pocketmd["summary"]["phase4_exit_gate_status"] == "blocked"
-    assert pocketmd["summary"]["phase4_failed_criterion_count"] == 7
+    assert pocketmd["summary"]["phase4_failed_criterion_count"] == 8
     assert pocketmd["summary"]["phase4_failed_criteria"] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
@@ -350,6 +351,7 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         row["criterion_id"] for row in pocketmd["summary"]["phase4_exit_gate_criteria"]
     ] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
@@ -366,6 +368,7 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gate_plan["slot_id"] == "top_k_refinement_rows"
     assert gate_plan["unblocks_phase4_criteria"] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",
@@ -412,7 +415,7 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "handoff_ready_operator_evidence_required"
     )
     assert pocketmd["summary"]["handoff_route"] == "/product/pocketmd-lite/handoff"
-    assert pocketmd["summary"]["handoff_acceptance_criteria_count"] == 6
+    assert pocketmd["summary"]["handoff_acceptance_criteria_count"] == 8
     assert pocketmd["summary"]["handoff_phase4_exit_gate_required_status"] == "ready"
     assert "fill_pocketmd_lite_operator_intake_packet" in pocketmd["next_actions"]
     assert "run_pocketmd_lite_topk_survival_materializer" in pocketmd["next_actions"]

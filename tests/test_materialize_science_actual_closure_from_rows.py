@@ -128,6 +128,36 @@ def _write_pocketmd_rows(path: Path) -> None:
                 clash_before=5,
                 clash_after=3,
             ),
+            _pocketmd_row(
+                case_id="case_b",
+                candidate_id="pose_2",
+                rank=2,
+                local_min_survived=False,
+                contact_rate=0.7,
+                h_bond_rate=0.4,
+                clash_before=2,
+                clash_after=2,
+            ),
+            _pocketmd_row(
+                case_id="case_c",
+                candidate_id="pose_1",
+                rank=1,
+                local_min_survived=True,
+                contact_rate=0.8,
+                h_bond_rate=0.6,
+                clash_before=4,
+                clash_after=1,
+            ),
+            _pocketmd_row(
+                case_id="case_c",
+                candidate_id="pose_2",
+                rank=2,
+                local_min_survived=False,
+                contact_rate=0.7,
+                h_bond_rate=0.4,
+                clash_before=2,
+                clash_after=2,
+            ),
         ]
     }
     path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
@@ -177,6 +207,12 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert "uncertainty_width_median" in (
         pocketmd_contract["required_component_metrics"]
     )
+    assert pocketmd_contract["top_k_row_quality_minimums"] == {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6,
+    }
     assert "broad_all_atom_md_claim" in (
         pocketmd_contract["blocked_claims_that_remain_locked"]
     )
@@ -225,6 +261,6 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     assert gpcr["phase3_exit_gate_status"] == "ready"
     assert gpcr["target_pass_count"] == 3
     assert pocketmd["phase4_exit_gate_status"] == "ready"
-    assert pocketmd["real_refinement_case_count"] == 2
+    assert pocketmd["real_refinement_case_count"] == 3
     assert (tmp_path / "gpcr_surface.json").exists()
     assert (tmp_path / "pocketmd_surface.json").exists()

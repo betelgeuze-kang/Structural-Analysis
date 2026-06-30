@@ -18,6 +18,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
     REQUIRED_CASE_FIELDS,
     SOURCE_CHECKSUM_PATTERN,
+    TOPK_ROW_QUALITY_CRITERIA,
 )
 from release_evidence_metadata import file_sha256, release_evidence_metadata  # noqa: E402
 
@@ -378,6 +379,7 @@ def build_pocketmd_lite_operator_intake_from_rows(
             "top_k_candidate_count": len(cases),
             "max_top_k": max_top_k,
             "case_row_counts": case_row_counts,
+            "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         },
         "claim_boundary": (
             "Operator intake materialized from bounded top-k refinement rows. The "

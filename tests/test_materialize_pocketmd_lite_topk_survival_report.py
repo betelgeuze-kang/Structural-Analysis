@@ -67,6 +67,43 @@ def _valid_case(
 
 
 def _valid_intake() -> dict[str, object]:
+    cases = []
+    for case_id in ("case_a", "case_b", "case_c"):
+        cases.extend(
+            [
+                _valid_case(
+                    case_id=case_id,
+                    candidate_id="pose_1",
+                    top_k_rank=1,
+                    local_min_survived=True,
+                    contact_rate=0.8,
+                    h_bond_rate=0.6,
+                    clash_before=4,
+                    clash_after=1,
+                    uncertainty_low=-0.2,
+                    uncertainty_high=0.2,
+                ),
+                _valid_case(
+                    case_id=case_id,
+                    candidate_id="pose_2",
+                    top_k_rank=2,
+                    local_min_survived=False,
+                    contact_rate=0.7,
+                    h_bond_rate=0.4,
+                    clash_before=2,
+                    clash_after=2,
+                    uncertainty_low=0.1,
+                    uncertainty_high=0.3,
+                ),
+            ]
+        )
+    return {
+        "schema_version": "pocketmd-lite-operator-intake.v1",
+        "cases": cases,
+    }
+
+
+def _fixture_sized_intake() -> dict[str, object]:
     return {
         "schema_version": "pocketmd-lite-operator-intake.v1",
         "cases": [
@@ -148,23 +185,72 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary(
     assert report["contract_pass"] is True
     assert report["product_surface_ready"] is True
     assert report["operator_input_source_receipt"]["contract_pass"] is True
-    assert report["real_refinement_case_count"] == 2
-    assert report["top_k_candidate_count"] == 3
+    assert report["real_refinement_case_count"] == 3
+    assert report["top_k_candidate_count"] == 6
     assert report["blockers"] == []
     assert report["summary"] == {
         "blocker_count": 0,
-        "clash_relief_rate": 2 / 3,
-        "contact_persistence_rate_median": 0.8,
-        "h_bond_persistence_rate_median": 0.6,
-        "local_min_survival_rate": 2 / 3,
-        "real_refinement_case_count": 2,
-        "top_k_candidate_count": 3,
-        "uncertainty_width_median": 0.4,
+        "clash_relief_rate": 0.5,
+        "contact_persistence_rate_median": 0.75,
+        "h_bond_persistence_rate_median": 0.5,
+        "local_min_survival_rate": 0.5,
+        "real_refinement_case_count": 3,
+        "top_k_candidate_count": 6,
+        "top_k_row_quality": {
+            "blockers": [],
+            "case_candidate_counts": {"case_a": 2, "case_b": 2, "case_c": 2},
+            "case_rank_coverage": {
+                "case_a": [1, 2],
+                "case_b": [1, 2],
+                "case_c": [1, 2],
+            },
+            "contract_pass": True,
+            "minimums": {
+                "min_candidate_count_per_case": 2,
+                "min_real_refinement_case_count": 3,
+                "min_top_k_rank_coverage_per_case": 2,
+                "min_total_top_k_candidate_count": 6,
+            },
+            "real_refinement_case_count": 3,
+            "required_rank_span_per_case": [1, 2],
+            "root_cause_tags": [],
+            "top_k_candidate_count": 6,
+        },
+        "uncertainty_width_median": 0.3,
     }
     assert report["phase4_exit_gate"]["status"] == "ready"
     assert report["phase4_exit_gate"]["failed_criterion_count"] == 0
     assert report["phase4_exit_gate"]["failed_criteria"] == []
     assert "free_energy_perturbation_claim" in report["blocked_claims"]
+
+
+def test_pocketmd_lite_materializer_blocks_fixture_sized_rows_below_quality_minimum(
+    tmp_path: Path,
+) -> None:
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        _with_source_receipt(_fixture_sized_intake(), tmp_path),
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["product_surface_ready"] is False
+    assert report["real_refinement_case_count"] == 2
+    assert report["top_k_candidate_count"] == 3
+    assert report["top_k_row_quality"]["contract_pass"] is False
+    assert report["top_k_row_quality"]["blockers"] == [
+        "pocketmd_lite_real_refinement_case_count_below_minimum",
+        "pocketmd_lite_topk_candidate_count_below_minimum",
+        "case_b:top_k_candidate_count_below_minimum",
+        "case_b:top_k_rank_coverage_below_minimum",
+    ]
+    assert report["blockers"] == report["top_k_row_quality"]["blockers"]
+    assert "top_k_refinement_coverage_required" in report["root_cause_tags"]
+    assert report["phase4_exit_gate"]["failed_criteria"] == [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "report_blockers_resolved",
+    ]
 
 
 def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim(
@@ -295,12 +381,13 @@ def test_pocketmd_lite_materializer_blocks_empty_intake() -> None:
         "pocketmd_lite_uncertainty_rows_missing",
     ]
     assert report["phase4_exit_gate"]["status"] == "blocked"
-    assert report["phase4_exit_gate"]["failed_criterion_count"] == 7
+    assert report["phase4_exit_gate"]["failed_criterion_count"] == 8
     assert surface["status"] == "locked"
     assert surface["locked"] is True
     assert surface["first_blocked_target"] == "top_k_refinement_operator_intake"
     assert surface["phase4_exit_gate"]["failed_criteria"] == [
         "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
         "contact_persistence_materialized",
         "h_bond_persistence_materialized",

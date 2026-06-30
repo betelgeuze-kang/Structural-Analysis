@@ -127,6 +127,9 @@ def _pocketmd_row_intake_contract(
         ],
         "required_summary_metrics": list(pocketmd_survival.REQUIRED_SUMMARY_METRICS),
         "required_component_metrics": list(pocketmd_survival.REQUIRED_METRICS),
+        "top_k_row_quality_minimums": dict(
+            pocketmd_survival.TOPK_ROW_QUALITY_CRITERIA
+        ),
         "source_receipt_required_fields": [
             "source_id",
             "source_url",
