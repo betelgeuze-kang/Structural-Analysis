@@ -107,11 +107,11 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T20:49:34.368202+00:00",
+  "generated_at": "2026-06-30T21:06:11.486245+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:76211b24aecd3975d2ce64329d585d53fd7f2294e21bfa6dd80c5b5a58292684",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:90625fca52b30ddc76459bc9b7116b3a8d2b99ebc9f4ac0c023433700b1b8c93",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:8336e68c70d4b50879e8e83a970fe85fa2530d3ce2655d1c7d889156acc141cd"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:24d7f4e912bcbb64579c5c3ce1d1795642bc5fb37dffc5cae689b28ea2a2bdf8"
   },
   "missing_row_inputs": [
     "subset_rows",
@@ -176,7 +176,250 @@
     "subset_rows": "CASF/PDBBind subset rows",
     "vina_gnina_rows": "Vina/GNINA engine comparison rows"
   },
+  "row_intake_contracts": {
+    "claim_boundary": "These row contracts describe operator-attached Phase 2 benchmark inputs. They do not download public benchmark files, approve redistribution, run docking engines, infer chemistry, or convert fixture/proxy rows into external beta evidence.",
+    "enrichment_rows": {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "accepted_shapes": [
+        "targets_with_scored_molecules",
+        "flat_target_molecule_rows"
+      ],
+      "computed_metrics": [
+        "roc_auc",
+        "enrichment_factor_1pct",
+        "enrichment_factor_5pct"
+      ],
+      "description": "DUD-E/LIT-PCBA enrichment rows",
+      "feeds_components": [
+        "dud_e_or_lit_pcba_enrichment"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_enrichment_scorecard"
+      ],
+      "required_molecule_fields": [
+        "molecule_id",
+        "is_active",
+        "score"
+      ],
+      "required_target_fields": [
+        "benchmark_family",
+        "target_id",
+        "score_direction",
+        "scored_molecules",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "row_input_id": "enrichment_rows",
+      "source_checksum_policy": {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum"
+      },
+      "source_receipt_required_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "supported_benchmark_families": [
+        "DUD-E",
+        "LIT-PCBA"
+      ]
+    },
+    "phase2_outputs": {
+      "artifact_bundle": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
+      "harness_materialization_report": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle_materialization_report.json",
+      "operator_bundle": "implementation/phase1/release_evidence/productization/public_benchmark_operator_bundle.json",
+      "out_dir": "implementation/phase1/release_evidence/productization",
+      "required_artifact_roles": [
+        "subset_manifest",
+        "pose_validity_packet",
+        "rmsd_scorecard",
+        "pose_success_harness",
+        "enrichment_scorecard",
+        "vina_gnina_comparison_adapter",
+        "external_receipts_validation"
+      ]
+    },
+    "pose_rows": {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "coordinate_payload_fields": [
+        "reference_atoms",
+        "predicted_atoms"
+      ],
+      "default_rmsd_threshold_angstrom": 2.0,
+      "description": "CASF/PDBBind pose-coordinate rows",
+      "feeds_components": [
+        "symmetry_aware_ligand_rmsd",
+        "posebusters_style_pose_validity",
+        "casf_pdbbind_pose_success_harness"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_pose_validity_input",
+        "validate_public_benchmark_pose_validity",
+        "materialize_public_benchmark_posebusters_validity_packet",
+        "materialize_public_benchmark_rmsd_scorecard",
+        "materialize_public_benchmark_pose_success_harness"
+      ],
+      "paired_row_inputs_required": [
+        "subset_rows"
+      ],
+      "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+      "required_context_fields": [
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "receptor_context"
+      ],
+      "required_pose_fields": [
+        "case_id",
+        "pose_success_metric",
+        "benchmark_split",
+        "reference_atoms",
+        "predicted_atoms",
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "protein_structure_path",
+        "receptor_context"
+      ],
+      "row_input_id": "pose_rows"
+    },
+    "subset_rows": {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "default_target_subset_case_count": 12,
+      "description": "CASF/PDBBind subset rows",
+      "feeds_components": [
+        "casf_pdbbind_pose_success_harness"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_subset_manifest",
+        "validate_public_benchmark_subset_manifest",
+        "materialize_public_benchmark_pose_validity_input",
+        "materialize_public_benchmark_pose_success_harness"
+      ],
+      "required_case_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id",
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "pose_success_metric",
+        "rmsd_threshold_angstrom"
+      ],
+      "required_local_source_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id"
+      ],
+      "required_pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+      "row_input_id": "subset_rows",
+      "source_checksum_policy": {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum"
+      },
+      "source_receipt_required_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "supported_benchmark_splits": [
+        "CASF-core",
+        "PDBBind-core",
+        "PDBBind-refined",
+        "PDBBind-general"
+      ],
+      "supported_source_families": [
+        "CASF/PDBBind"
+      ]
+    },
+    "vina_gnina_rows": {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "accepted_shapes": [
+        "cases_with_engine_runs",
+        "flat_case_engine_run_rows"
+      ],
+      "computed_comparison_fields": [
+        "case_count",
+        "engine_case_counts",
+        "pose_success_rate",
+        "symmetry_aware_rmsd_median_angstrom"
+      ],
+      "default_pose_success_rmsd_threshold_angstrom": 2.0,
+      "description": "Vina/GNINA engine comparison rows",
+      "feeds_components": [
+        "vina_gnina_comparison_adapter"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "required_case_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "reference_pose_id",
+        "engine_runs",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "required_engine_run_fields": [
+        "engine_id",
+        "docking_run_id",
+        "predicted_ligand_path_or_pose_ref",
+        "symmetry_aware_rmsd_angstrom",
+        "pose_success",
+        "score",
+        "score_direction"
+      ],
+      "row_input_id": "vina_gnina_rows",
+      "source_checksum_policy": {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum"
+      },
+      "source_receipt_required_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "supported_benchmark_splits": [
+        "CASF-core",
+        "PDBBind-core",
+        "PDBBind-refined",
+        "PDBBind-general"
+      ],
+      "supported_engines": [
+        "vina",
+        "gnina"
+      ]
+    }
+  },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "720f798d7dec5c0c32dc1cb19a37f0c89d94c3f2",
+  "source_commit_sha": "5f0fa471983c8fe742123cde1de57b394feb0b28",
   "status": "operator_evidence_required"
 }
