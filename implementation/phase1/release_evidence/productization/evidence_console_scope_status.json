@@ -137,15 +137,15 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-30T03:23:41.901827+00:00",
+  "generated_at": "2026-06-30T03:28:51.208401+00:00",
   "input_checksums": {
     "README.md": "sha256:7483261c8121ce25f76c5668ebb5f1ea89327c5a0228b23baffca5a2cf20c8a5",
     "docs/commercialization-gap-current-state.md": "sha256:26cc57e8aedce7933aee34c26a406a3024b9ccc46f86673f83ba2948f25f57fd",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:d2dd48dfe7558fc8b3be11b4f07a3af5baf598d4615c6e02494cc9750f448e70",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:a132e363e76041df369bb36edae8fbacd20ff35fb93abd7bf24319af92fdd5be",
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
     "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:92b693d88117cf344c6f459ad91cf0cca661f49a59a56abbc502d406a5b92931",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:1a419273fb1855560f3c1fa4d2eb663b16184fc8c92ca05a01341e69b8e51eb1",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:ba34908c8cd7ab3572e2f1716ab2a7f567e70b2794e68f17bfc05a904fe7bc58",
     "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:d66b811a097d2dc3b563a852acd1f8b5a1c4eee9f9f06d5ee70fda1d2022d9a7"
   },
   "launch_ready": false,
@@ -228,7 +228,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "1418c53c212bc55978bd578bb854dadffe87202c",
+  "source_commit_sha": "f02ed131a8ec694e6002e37a4dcff296ed2a5689",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [
