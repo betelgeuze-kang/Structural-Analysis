@@ -32,15 +32,34 @@
       ],
       "minimum_evidence": {
         "candidate_scope": "upstream_ranked_top_k_candidates_only",
+        "operator_input_source_receipt_policy": {
+          "required_mode": "raw_top_k_refinement_rows",
+          "required_operator_input_source_fields": [
+            "mode",
+            "source_artifact",
+            "source_artifact_sha256",
+            "source_id",
+            "source_url",
+            "source_license"
+          ],
+          "source_artifact_sha256_policy": "sha256:<64 lowercase or uppercase hex characters>"
+        },
         "raw_row_supported_formats": [
           "csv",
           "tsv",
-          "json"
+          "json",
+          "jsonl",
+          "ndjson"
         ],
         "real_refinement_case_count": 1,
         "receipt_fields": [
           "provenance_ref",
-          "source_checksum"
+          "source_checksum",
+          "operator_input_source.source_artifact",
+          "operator_input_source.source_artifact_sha256",
+          "operator_input_source.source_id",
+          "operator_input_source.source_url",
+          "operator_input_source.source_license"
         ],
         "required_case_fields": [
           "case_id",
@@ -67,9 +86,22 @@
       "preserves_phase4_criteria": [
         "broad_all_atom_fep_claims_locked"
       ],
-      "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+      "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
       "raw_row_importer": {
-        "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+        "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
+        "emits_operator_input_source_receipt": true,
+        "operator_input_source_receipt_policy": {
+          "required_mode": "raw_top_k_refinement_rows",
+          "required_operator_input_source_fields": [
+            "mode",
+            "source_artifact",
+            "source_artifact_sha256",
+            "source_id",
+            "source_url",
+            "source_license"
+          ],
+          "source_artifact_sha256_policy": "sha256:<64 lowercase or uppercase hex characters>"
+        },
         "output_intake": "<operator-pocketmd-lite-intake.json>",
         "required_output_key": "cases",
         "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
@@ -77,7 +109,9 @@
         "supported_source_formats": [
           "csv",
           "tsv",
-          "json"
+          "json",
+          "jsonl",
+          "ndjson"
         ]
       },
       "slot_id": "top_k_refinement_rows",
@@ -97,11 +131,11 @@
     }
   ],
   "gate_unblock_plan_count": 1,
-  "generated_at": "2026-06-30T17:12:04.793885+00:00",
+  "generated_at": "2026-06-30T19:06:48.755475+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:94b4b814eb7dddaeac7d9056f99f2a75e5444d0c126cdcba93566af580de9495",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:eadda80242975025b7d2fab487229083a5f0701914319ab0eb8965e9a78643f7",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:f3d768ed86985931216b91e8298f60c4b6528deb324c08ae0cc3067da6395b25"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:4b7604bd89e190e97f3b61cf685ad1875070ab2342db19431b287f9ecfac71f5",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:cbe3da9485435cbe6101dc5c28409fc5b55aa823df1be37937ffaff7f30ac637",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:22e3aef19f522947dfc40842f3729fcfe1ecaab59cb119acb1f23cf2294cc869"
   },
   "input_slots": [
     {
@@ -114,10 +148,24 @@
         "fill contact_persistence_rate and h_bond_persistence_rate as fractions",
         "fill clash_count_before and clash_count_after as non-negative integers",
         "fill uncertainty_interval with low, high, and unit",
-        "keep source_checksum and provenance_ref tied to local operator evidence"
+        "keep source_checksum and provenance_ref tied to local operator evidence",
+        "keep operator_input_source source_artifact/source_artifact_sha256/source_id/source_url/source_license populated"
       ],
       "raw_row_importer": {
-        "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+        "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
+        "emits_operator_input_source_receipt": true,
+        "operator_input_source_receipt_policy": {
+          "required_mode": "raw_top_k_refinement_rows",
+          "required_operator_input_source_fields": [
+            "mode",
+            "source_artifact",
+            "source_artifact_sha256",
+            "source_id",
+            "source_url",
+            "source_license"
+          ],
+          "source_artifact_sha256_policy": "sha256:<64 lowercase or uppercase hex characters>"
+        },
         "output_intake": "<operator-pocketmd-lite-intake.json>",
         "required_output_key": "cases",
         "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
@@ -125,7 +173,9 @@
         "supported_source_formats": [
           "csv",
           "tsv",
-          "json"
+          "json",
+          "jsonl",
+          "ndjson"
         ]
       },
       "required": true,
@@ -183,7 +233,7 @@
   },
   "materialization_sequence": [
     {
-      "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+      "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
       "produces": "<operator-pocketmd-lite-intake.json>",
       "schema_version": "pocketmd-lite-operator-intake.v1",
       "step_id": "materialize_pocketmd_lite_operator_intake_from_rows"
@@ -228,7 +278,20 @@
   "packet_id": "pocketmd_lite_operator_intake_packet",
   "product_surface_ready": false,
   "raw_row_importer": {
-    "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-license <license>",
+    "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
+    "emits_operator_input_source_receipt": true,
+    "operator_input_source_receipt_policy": {
+      "required_mode": "raw_top_k_refinement_rows",
+      "required_operator_input_source_fields": [
+        "mode",
+        "source_artifact",
+        "source_artifact_sha256",
+        "source_id",
+        "source_url",
+        "source_license"
+      ],
+      "source_artifact_sha256_policy": "sha256:<64 lowercase or uppercase hex characters>"
+    },
     "output_intake": "<operator-pocketmd-lite-intake.json>",
     "required_output_key": "cases",
     "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
@@ -236,7 +299,9 @@
     "supported_source_formats": [
       "csv",
       "tsv",
-      "json"
+      "json",
+      "jsonl",
+      "ndjson"
     ]
   },
   "read_model": {
@@ -279,7 +344,7 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/operator-intake",
   "schema_version": "pocketmd-lite-operator-intake-packet.v1",
-  "source_commit_sha": "1470ba4b9ff0b702b516ec65920432aa587b31bc",
+  "source_commit_sha": "ca4328b19ba462898929f3d284416bf2e9dccfd2",
   "status": "ready_for_operator_input",
   "summary": {
     "current_blocker_count": 6,
