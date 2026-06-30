@@ -15,7 +15,12 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import materialize_public_benchmark_harness_bundle as harness_bundle  # noqa: E402
+import materialize_public_benchmark_enrichment_scorecard as enrichment_scorecard  # noqa: E402
 import materialize_public_benchmark_operator_bundle_from_rows as row_bundle  # noqa: E402
+import materialize_public_benchmark_pose_validity_input as pose_validity_input  # noqa: E402
+import materialize_public_benchmark_subset_manifest as subset_manifest  # noqa: E402
+import materialize_public_benchmark_vina_gnina_comparison_adapter as vina_gnina_adapter  # noqa: E402
+from score_symmetry_aware_ligand_rmsd import DEFAULT_THRESHOLD_ANGSTROM  # noqa: E402
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
@@ -36,6 +41,11 @@ ROW_INPUTS = {
     "pose_rows": "CASF/PDBBind pose-coordinate rows",
     "enrichment_rows": "DUD-E/LIT-PCBA enrichment rows",
     "vina_gnina_rows": "Vina/GNINA engine comparison rows",
+}
+ACCEPTED_ROW_FORMATS = ("json", "jsonl", "ndjson", "csv")
+SOURCE_CHECKSUM_POLICY = {
+    "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+    "required_receipt_field": "source_checksum",
 }
 
 COMPONENT_ROW_INPUTS = {
@@ -81,6 +91,152 @@ def _artifact_paths_for_out_dir(repo_root: Path, out_dir: Path) -> list[Path]:
         resolved_out_dir / harness_bundle.ARTIFACT_FILENAMES[role]
         for role in ARTIFACT_BUNDLE_ROLES
     ]
+
+
+def _row_intake_contracts(
+    *,
+    operator_bundle_out: Path,
+    out_dir: Path,
+    harness_report_out: Path,
+    artifact_bundle_out: Path,
+    target_subset_case_count: int | None,
+) -> dict[str, Any]:
+    target_case_count = int(
+        target_subset_case_count
+        or subset_manifest.DEFAULT_TARGET_SUBSET_CASE_COUNT
+    )
+    common_source_receipt_fields = [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+    ]
+    return {
+        "subset_rows": {
+            "row_input_id": "subset_rows",
+            "description": ROW_INPUTS["subset_rows"],
+            "accepted_formats": list(ACCEPTED_ROW_FORMATS),
+            "required_case_fields": list(subset_manifest.REQUIRED_CASE_FIELDS),
+            "required_local_source_file_fields": list(
+                subset_manifest.LOCAL_SOURCE_FILE_FIELDS
+            ),
+            "supported_source_families": ["CASF/PDBBind"],
+            "supported_benchmark_splits": list(
+                subset_manifest.SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS
+            ),
+            "required_pose_success_metric": (
+                subset_manifest.REQUIRED_POSE_SUCCESS_METRIC
+            ),
+            "default_target_subset_case_count": target_case_count,
+            "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+            "source_receipt_required_fields": common_source_receipt_fields,
+            "feeds_components": ["casf_pdbbind_pose_success_harness"],
+            "materialization_chain": [
+                "materialize_public_benchmark_subset_manifest",
+                "validate_public_benchmark_subset_manifest",
+                "materialize_public_benchmark_pose_validity_input",
+                "materialize_public_benchmark_pose_success_harness",
+            ],
+        },
+        "pose_rows": {
+            "row_input_id": "pose_rows",
+            "description": ROW_INPUTS["pose_rows"],
+            "accepted_formats": list(ACCEPTED_ROW_FORMATS),
+            "required_pose_fields": list(pose_validity_input.REQUIRED_POSE_FIELDS),
+            "paired_row_inputs_required": ["subset_rows"],
+            "coordinate_payload_fields": ["reference_atoms", "predicted_atoms"],
+            "required_context_fields": [
+                "ligand_atom_order_contract",
+                "symmetry_permutation_contract",
+                "receptor_context",
+            ],
+            "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+            "default_rmsd_threshold_angstrom": DEFAULT_THRESHOLD_ANGSTROM,
+            "feeds_components": [
+                "symmetry_aware_ligand_rmsd",
+                "posebusters_style_pose_validity",
+                "casf_pdbbind_pose_success_harness",
+            ],
+            "materialization_chain": [
+                "materialize_public_benchmark_pose_validity_input",
+                "validate_public_benchmark_pose_validity",
+                "materialize_public_benchmark_posebusters_validity_packet",
+                "materialize_public_benchmark_rmsd_scorecard",
+                "materialize_public_benchmark_pose_success_harness",
+            ],
+        },
+        "enrichment_rows": {
+            "row_input_id": "enrichment_rows",
+            "description": ROW_INPUTS["enrichment_rows"],
+            "accepted_formats": list(ACCEPTED_ROW_FORMATS),
+            "accepted_shapes": [
+                "targets_with_scored_molecules",
+                "flat_target_molecule_rows",
+            ],
+            "required_target_fields": list(enrichment_scorecard.REQUIRED_TARGET_FIELDS),
+            "required_molecule_fields": list(
+                enrichment_scorecard.REQUIRED_MOLECULE_FIELDS
+            ),
+            "supported_benchmark_families": list(
+                enrichment_scorecard.SUPPORTED_FAMILIES
+            ),
+            "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+            "source_receipt_required_fields": common_source_receipt_fields,
+            "computed_metrics": [
+                "roc_auc",
+                "enrichment_factor_1pct",
+                "enrichment_factor_5pct",
+            ],
+            "feeds_components": ["dud_e_or_lit_pcba_enrichment"],
+            "materialization_chain": [
+                "materialize_public_benchmark_enrichment_scorecard",
+            ],
+        },
+        "vina_gnina_rows": {
+            "row_input_id": "vina_gnina_rows",
+            "description": ROW_INPUTS["vina_gnina_rows"],
+            "accepted_formats": list(ACCEPTED_ROW_FORMATS),
+            "accepted_shapes": [
+                "cases_with_engine_runs",
+                "flat_case_engine_run_rows",
+            ],
+            "required_case_fields": list(vina_gnina_adapter.REQUIRED_CASE_FIELDS),
+            "required_engine_run_fields": list(
+                vina_gnina_adapter.REQUIRED_ENGINE_RUN_FIELDS
+            ),
+            "supported_engines": list(vina_gnina_adapter.SUPPORTED_ENGINES),
+            "supported_benchmark_splits": list(
+                vina_gnina_adapter.SUPPORTED_BENCHMARK_SPLITS
+            ),
+            "default_pose_success_rmsd_threshold_angstrom": (
+                vina_gnina_adapter.DEFAULT_POSE_SUCCESS_RMSD_THRESHOLD_ANGSTROM
+            ),
+            "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+            "source_receipt_required_fields": common_source_receipt_fields,
+            "computed_comparison_fields": [
+                "case_count",
+                "engine_case_counts",
+                "pose_success_rate",
+                "symmetry_aware_rmsd_median_angstrom",
+            ],
+            "feeds_components": ["vina_gnina_comparison_adapter"],
+            "materialization_chain": [
+                "materialize_public_benchmark_vina_gnina_comparison_adapter",
+            ],
+        },
+        "phase2_outputs": {
+            "operator_bundle": str(operator_bundle_out),
+            "harness_materialization_report": str(harness_report_out),
+            "artifact_bundle": str(artifact_bundle_out),
+            "out_dir": str(out_dir),
+            "required_artifact_roles": list(ARTIFACT_BUNDLE_ROLES),
+        },
+        "claim_boundary": (
+            "These row contracts describe operator-attached Phase 2 benchmark inputs. "
+            "They do not download public benchmark files, approve redistribution, run "
+            "docking engines, infer chemistry, or convert fixture/proxy rows into "
+            "external beta evidence."
+        ),
+    }
 
 
 def _row_inputs(
@@ -169,6 +325,13 @@ def build_public_benchmark_phase2_row_audit(
     harness_report_out: Path = DEFAULT_HARNESS_REPORT_OUT,
     artifact_bundle_out: Path = DEFAULT_ARTIFACT_BUNDLE_OUT,
 ) -> dict[str, Any]:
+    row_intake_contracts = _row_intake_contracts(
+        operator_bundle_out=operator_bundle_out,
+        out_dir=out_dir,
+        harness_report_out=harness_report_out,
+        artifact_bundle_out=artifact_bundle_out,
+        target_subset_case_count=target_subset_case_count,
+    )
     row_inputs = _row_inputs(
         subset_rows_path=subset_rows_path,
         pose_rows_path=pose_rows_path,
@@ -205,6 +368,7 @@ def build_public_benchmark_phase2_row_audit(
             "phase2_ready": False,
             "missing_row_inputs": missing_input_ids,
             "row_input_contract": ROW_INPUTS,
+            "row_intake_contracts": row_intake_contracts,
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
@@ -266,6 +430,7 @@ def build_public_benchmark_phase2_row_audit(
             "phase2_ready": False,
             "missing_row_inputs": [],
             "row_input_contract": ROW_INPUTS,
+            "row_intake_contracts": row_intake_contracts,
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
@@ -314,6 +479,7 @@ def build_public_benchmark_phase2_row_audit(
         "tier_beta_ready": bool(materialization_report.get("tier_beta_ready")),
         "missing_row_inputs": [],
         "row_input_contract": ROW_INPUTS,
+        "row_intake_contracts": row_intake_contracts,
         "operator_bundle_materialization_report": operator_bundle.get(
             "materialization_report", {}
         ),

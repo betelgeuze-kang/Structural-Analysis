@@ -192,6 +192,34 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         "enrichment_rows",
         "vina_gnina_rows",
     ]
+    contracts = audit["row_intake_contracts"]
+    subset_contract = contracts["subset_rows"]
+    assert subset_contract["supported_source_families"] == ["CASF/PDBBind"]
+    assert subset_contract["supported_benchmark_splits"] == [
+        "CASF-core",
+        "PDBBind-core",
+        "PDBBind-refined",
+        "PDBBind-general",
+    ]
+    assert "protein_structure_path" in (
+        subset_contract["required_local_source_file_fields"]
+    )
+    pose_contract = contracts["pose_rows"]
+    assert pose_contract["paired_row_inputs_required"] == ["subset_rows"]
+    assert pose_contract["coordinate_payload_fields"] == [
+        "reference_atoms",
+        "predicted_atoms",
+    ]
+    assert pose_contract["default_rmsd_threshold_angstrom"] == 2.0
+    enrichment_contract = contracts["enrichment_rows"]
+    assert enrichment_contract["supported_benchmark_families"] == [
+        "DUD-E",
+        "LIT-PCBA",
+    ]
+    assert "scored_molecules" in enrichment_contract["required_target_fields"]
+    vina_contract = contracts["vina_gnina_rows"]
+    assert vina_contract["supported_engines"] == ["vina", "gnina"]
+    assert "engine_runs" in vina_contract["required_case_fields"]
     assert "casf_pdbbind_pose_success_harness::subset_rows_not_provided" in audit["blockers"]
     assert "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided" in audit["blockers"]
     assert not (tmp_path / "operator_bundle.json").exists()
@@ -222,6 +250,9 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     assert audit["phase2_ready"] is True
     assert audit["component_ready_count"] == 5
     assert audit["blockers"] == []
+    assert audit["row_intake_contracts"]["phase2_outputs"]["operator_bundle"] == (
+        str(tmp_path / "operator_bundle.json")
+    )
     assert audit["phase2_exit_gate"]["status"] == "ready"
     assert audit["operator_bundle_materialization_report"]["phase2_harness_inputs"] == {
         "casf_pdbbind_pose_success_harness": True,
