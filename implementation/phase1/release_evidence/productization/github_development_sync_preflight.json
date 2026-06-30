@@ -1,6 +1,5 @@
 {
   "blockers": [
-    "worktree_not_clean",
     "remote_mutation_approval_required"
   ],
   "checks": {
@@ -9,10 +8,10 @@
     "feature_synced_to_head": false,
     "main_fast_forward_possible": true,
     "main_synced_to_head": false,
-    "remote_fetch_ok": null,
+    "remote_fetch_ok": true,
     "remote_safety_ok": true,
-    "worktree_clean": false,
-    "worktree_only_ignored_evidence_dirty": false
+    "worktree_clean": true,
+    "worktree_only_ignored_evidence_dirty": true
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -21,7 +20,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-30T22:39:02.806445+00:00",
+  "generated_at": "2026-06-30T22:45:53.580067+00:00",
   "pending_remote_updates": [
     {
       "action": "push current HEAD to feature",
@@ -36,7 +35,7 @@
       "target": "origin/main"
     }
   ],
-  "preflight_pass": false,
+  "preflight_pass": true,
   "r4_disclosure": {
     "action": "push current HEAD to feature; fast-forward push current HEAD to main",
     "impact": "GitHub pending refs become externally visible at the local development state.",
@@ -49,19 +48,19 @@
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
   "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
-  "remote_fetch_attempted": false,
-  "remote_fetch_ok": null,
+  "remote_fetch_attempted": true,
+  "remote_fetch_ok": true,
   "remote_mutation_approved": false,
   "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
-    "effective_worktree_status_short": "M implementation/phase1/customer_shadow_evidence_status.json\n M implementation/phase1/workstation_delivery_readiness.json",
-    "feature_ahead_count": 7,
+    "effective_worktree_status_short": "",
+    "feature_ahead_count": 10,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": " M implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json\n M implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json\n M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json\n M implementation/phase1/release_evidence/productization/gap_closure_status.json\n M implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json\n M implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/license_status_closure_report.json\n M implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json\n M implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json\n M implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
-    "local_head_sha": "86e121e0478d4b587f549204514249e7ebd990f5",
-    "main_ahead_count": 206,
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+    "local_head_sha": "7b88b07c61a432105868156606c2251eda3537ff",
+    "main_ahead_count": 209,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
     "remote_feature_sha": "abedaa9cbb5de07b1916fc9f409af8c22810ca15",
@@ -80,7 +79,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/customer_shadow_evidence_status.json\n M implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json\n M implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json\n M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json\n M implementation/phase1/release_evidence/productization/gap_closure_status.json\n M implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json\n M implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/license_status_closure_report.json\n M implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json\n M implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json\n M implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json\n M implementation/phase1/workstation_delivery_readiness.json"
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
   },
-  "status": "blocked"
+  "status": "approval_required"
 }
