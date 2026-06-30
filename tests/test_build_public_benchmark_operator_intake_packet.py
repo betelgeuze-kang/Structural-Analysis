@@ -66,6 +66,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["source_of_truth_blockers"] == [
         "casf_pdbbind_source_material_not_attached",
         "public_benchmark_real_pose_predictions_missing",
+        "public_benchmark_real_rmsd_rows_missing",
         "dud_e_lit_pcba_enrichment_rows_missing",
         "vina_gnina_comparison_rows_missing",
         "public_benchmark_external_receipts_missing",
