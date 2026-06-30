@@ -163,12 +163,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T06:56:55.799070+00:00",
+  "generated_at": "2026-06-30T07:02:34.372483+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:d5f27e19224137df501234c6ddc5bcf894d3a97442329db6d361baca7168f8d5",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:dbe8a09a77f11d85a148751721fc71d0c8ac0e087ca3038f575c8f5f9a63855d",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:133dde8aa77f21d67a3f5bb3f951e7d3424ee7e934498f9f1fc2e27664b0d992",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:aa5252e18114c5efaf1cfc8a93b75a41dc6c364ed59bfe4dc4488b1c64907be1",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:fd219d953fdf603bf33cf4bdbdad84402b82214b293986729835c0a6569c28a9",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:bcaa9678985c8ce2411d58006d946b590a8062c755e1d57547ee51cb9edd7ed0",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:2e4cec3ef6b7a766a670d8a41053ccf6456cff8f846c3ebe4018f2941c68d62a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:9e51f17d5a421319ecd0a6843d134646aacd0865c1ec5f6a24109d9a40ceda75",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:71e56180890908312bae669ab2a20fd817f978b64dc3e5e04b8c4b9287f41f89",
@@ -176,12 +176,12 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:af593f284bf046b37adfba421867f9716a7af1cddaa12f27707fdbf029ffc457",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:5787da7073bf823218ca91b1c9573a1f9bea6a682c3ccb5982e7eb14bcafdc53",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:5c5ffb7245c4fc91e42250b54eb303888bba111c7670909bb7b2185d6a6f2f3d",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:bd0fee7a6052943e129708024570157f71fe88727ade95da394192403060fd97",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:5ae644a507a63c60ef5c840b046cad95027c0871b15bbff7faa86ef90d399ce1",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:1de750e7b23f065a4806a646e5e198836d6e92d3ac5596102d8d6c5bdfa52459",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:f725b10f952da7fec186ac1e05bcf2bee83f3a3f854c1c8aecc72e1b79aad62b",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:5ec7664ead4fa495dac82d5ccd6cbade5136d61185bdba14b28f6684288de5df",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:ff77ca9d1d461ad979ff60b3a66ca05546a894d9de8c27b2cdf93f2859169437",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:9249e60dfde918d8d47d35ba797ec1fea14a46fc275daa69f7aa341cd50841c9",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:1a65430ba11b2c5c42ffd1ec80b41ab0671b3e50387b6e42e743ffda4de44ad4"
   },
@@ -455,8 +455,8 @@
     "refresh_required_operator_action_count": 0,
     "refresh_required_operator_actions": [],
     "release_allowed": false,
-    "release_area_blocker_count": 7,
-    "release_area_owner_handoff_count": 7,
+    "release_area_blocker_count": 5,
+    "release_area_owner_handoff_count": 5,
     "release_area_owner_handoffs": [
       {
         "acceptance_criteria": [
@@ -583,48 +583,6 @@
         "owner": "product_legal_owner",
         "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
         "title": "Security"
-      },
-      {
-        "acceptance_criteria": [
-          "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
-          "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
-          "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-          "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
-        ],
-        "acceptance_criteria_count": 4,
-        "blocker_id": "github_sync::github_sync_preflight::worktree_not_clean",
-        "evidence_artifact_keys": [
-          "github_development_sync_preflight",
-          "pm_release_gate_report"
-        ],
-        "evidence_state": "blocked",
-        "external_input_required": true,
-        "handoff_state": "external_owner_input_ready",
-        "namespace": "github_sync",
-        "owner": "release_owner",
-        "owner_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
-        "title": "GitHub Development Sync"
-      },
-      {
-        "acceptance_criteria": [
-          "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
-          "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
-          "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-          "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
-        ],
-        "acceptance_criteria_count": 4,
-        "blocker_id": "github_sync::github_sync_preflight_not_synced",
-        "evidence_artifact_keys": [
-          "github_development_sync_preflight",
-          "pm_release_gate_report"
-        ],
-        "evidence_state": "blocked",
-        "external_input_required": true,
-        "handoff_state": "external_owner_input_ready",
-        "namespace": "github_sync",
-        "owner": "release_owner",
-        "owner_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
-        "title": "GitHub Development Sync"
       }
     ]
   },
@@ -1382,14 +1340,14 @@
   "read_model_ready": true,
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
-    "approval_token_count": 8,
-    "blocked_release_count": 7,
+    "approval_token_count": 4,
+    "blocked_release_count": 5,
     "broad_gpcr_family_claim_safe": false,
     "evidence_surface_count": 12,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 17,
+    "operator_action_count": 13,
     "pocketmd_lite_product_surface_ready": false,
     "public_benchmark_ready": false,
     "release_allowed": false,
@@ -1693,9 +1651,9 @@
       "state": "ready",
       "summary": {
         "action_register_contract_pass": false,
-        "approval_token_count": 8,
+        "approval_token_count": 4,
         "blocked_capability_count": 4,
-        "blocked_release_count": 7,
+        "blocked_release_count": 5,
         "first_locked_science_evidence_surface": {
           "bottleneck": "h_bond_evidence_surface_locked",
           "capability_blocker_count": 2,
@@ -1720,7 +1678,7 @@
             "h_bond_backmap_evidence_surface"
           ]
         },
-        "operator_action_count": 17,
+        "operator_action_count": 13,
         "product_capability_count": 5,
         "release_allowed": false,
         "science_evidence_surface_bottlenecks": [
@@ -3476,7 +3434,7 @@
       ]
     }
   },
-  "source_commit_sha": "f269f5db33493b3773b7d6965423d855f38715fe",
+  "source_commit_sha": "d4eebd582aa45306a793948c69f74682e0426948",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
