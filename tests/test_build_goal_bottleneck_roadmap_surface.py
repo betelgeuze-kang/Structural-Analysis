@@ -71,8 +71,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
 
     kpis = surface["release_decision_kpis"]
     assert kpis == {
-        "approval_token_count": 4,
-        "blocked_release_count": 5,
+        "approval_token_count": 5,
+        "blocked_release_count": 8,
         "broad_gpcr_family_claim_safe": False,
         "evidence_surface_count": 12,
         "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -98,8 +98,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
-    assert briefing["release_area_blocker_count"] == 5
-    assert briefing["release_area_owner_handoff_count"] == 5
+    assert briefing["release_area_blocker_count"] == 8
+    assert briefing["release_area_owner_handoff_count"] == 8
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
@@ -110,6 +110,9 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
+        "github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "github_sync::github_sync_remote_sync_pending",
+        "github_sync::github_sync_preflight_not_synced",
     }
     ci_handoff = release_area_handoffs[
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
