@@ -551,10 +551,6 @@ def check_phase3_large_model_runner_readiness_receipt(
     out_path: Path = DEFAULT_OUT,
     source_commit_sha: str | None = None,
 ) -> tuple[bool, str]:
-    expected = build_phase3_large_model_runner_readiness_receipt(
-        repo_root=repo_root,
-        source_commit_sha=source_commit_sha,
-    )
     resolved = out_path if out_path.is_absolute() else repo_root / out_path
     if not resolved.exists():
         return False, f"phase3_large_model_runner_readiness_missing:{out_path.as_posix()}"
@@ -562,6 +558,14 @@ def check_phase3_large_model_runner_readiness_receipt(
         existing = _load_json(resolved)
     except Exception as exc:
         return False, f"phase3_large_model_runner_readiness_unreadable:{out_path.as_posix()}:{exc.__class__.__name__}"
+    effective_source_commit_sha = source_commit_sha
+    if effective_source_commit_sha is None:
+        recorded_source_commit_sha = str(existing.get("source_commit_sha") or "")
+        effective_source_commit_sha = recorded_source_commit_sha or None
+    expected = build_phase3_large_model_runner_readiness_receipt(
+        repo_root=repo_root,
+        source_commit_sha=effective_source_commit_sha,
+    )
     if _strip_volatile(existing) != _strip_volatile(expected):
         return False, "phase3_large_model_runner_readiness_mismatch"
     return True, "phase3_large_model_runner_readiness_consistent"

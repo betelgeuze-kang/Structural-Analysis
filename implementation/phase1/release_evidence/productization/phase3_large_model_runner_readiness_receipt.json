@@ -75,13 +75,13 @@
     "source_checksum_count": 2,
     "valid_execution_case_count": 0
   },
-  "generated_at": "2026-06-30T21:51:15.457725+00:00",
+  "generated_at": "2026-06-30T21:52:36.355352+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json": "sha256:efe4af8459fc34480a3e5bb6e62dc4022f1bf5bed51c49d428e8847e5c1556d8",
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl": "sha256:66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f",
     "implementation/phase1/release_evidence/productization/large_model_execution_receipts": "dir-sha256:24fc3e9d2147dbd1b7c72999c57798285e3babc6b43511ccbc31b85b6ef1a853",
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:dbe9ad8ad05bf3e939dd0f7000cb06e54d1fe9d208babf714c7b124659fc00df",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:395e9636b7023ef67f1ac196477e778393ead4a827d796d150011ff4c758a8db",
     "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
   },
@@ -205,7 +205,7 @@
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
   "source_checksum_count": 2,
-  "source_commit_sha": "063eefb41be5c72fb27f3ba295838db31f9089aa",
+  "source_commit_sha": "8fa366e78d74693f26fb171e75ff20c3881bf40b",
   "source_id": "opensees_megatall_model_2_large",
   "source_identity_inventory": {
     "claim_boundary": "This inventory records already-collected local large-model source files, their SHA256 values, and source URL metadata. It does not approve licenses, create reference outputs, normalize models, execute analyses, or count as large-model PASS/REVIEW evidence.",
