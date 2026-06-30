@@ -131,6 +131,14 @@ DEFAULT_ARTIFACTS = (
         ),
         Path("scripts/build_ai_engine_productization_contracts.py"),
     ),
+    (
+        "science_actual_closure_row_audit",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "science_actual_closure_row_audit.json"
+        ),
+        Path("scripts/materialize_science_actual_closure_from_rows.py"),
+    ),
 )
 
 SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (

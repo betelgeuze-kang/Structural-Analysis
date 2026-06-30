@@ -198,10 +198,11 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     assert "public_benchmark_harness_bundle" in labels
     assert "accuracy_parity_scorecard" in labels
     assert "product_production_ai_checkpoint_readiness" in labels
+    assert "science_actual_closure_row_audit" in labels
     assert "goal_readiness_rollup" not in labels
     assert "product_goal_completion_audit" not in labels
     assert "goal_operator_action_board" not in labels
-    assert len(artifacts) == 16
+    assert len(artifacts) == 17
 
     for label, artifact_path, producer_path in artifacts:
         assert isinstance(artifact_path, Path)
@@ -219,6 +220,15 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     assert str(harness_bundle[1]).endswith("public_benchmark_harness_bundle.json")
     assert str(harness_bundle[2]).endswith(
         "materialize_public_benchmark_harness_bundle.py"
+    )
+    science_actual_closure = next(
+        entry for entry in artifacts if entry[0] == "science_actual_closure_row_audit"
+    )
+    assert str(science_actual_closure[1]).endswith(
+        "science_actual_closure_row_audit.json"
+    )
+    assert str(science_actual_closure[2]).endswith(
+        "materialize_science_actual_closure_from_rows.py"
     )
 
 
