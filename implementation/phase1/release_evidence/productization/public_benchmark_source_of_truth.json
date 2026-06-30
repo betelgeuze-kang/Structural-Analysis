@@ -301,14 +301,15 @@
     "slot_id": "casf_pdbbind_subset_intake",
     "slot_priority": 1,
     "status": "operator_input_required",
+    "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "tier_beta_blocked": true,
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-06-30T00:26:58.094422+00:00",
+  "generated_at": "2026-06-30T00:43:41.059116+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:426fa745ae28b393f9f0fcc16c0ee9c14e6b18cbe02f16630b875ba0420de66c",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:77994bb128626449fbe5d87782ec12eab933e8d6e219e34c33f6ffb84aa60b57",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:4bdd70f42a9171857713ca310d4e547eed1fab19fc95290cde2b312cd69fc68a",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:cc2c69431b3f624851fb5c6e94e7acab9158440ceba1fd15eb1b9b527931a5fa",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -471,6 +472,7 @@
       "slot_id": "casf_pdbbind_subset_intake",
       "slot_priority": 1,
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
       "tier_beta_blocked": true,
       "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
     },
@@ -535,6 +537,7 @@
       "slot_id": "pose_coordinate_intake",
       "slot_priority": 2,
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
       "tier_beta_blocked": true,
       "validation_command": "python3 scripts/validate_public_benchmark_pose_validity.py --input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --fail-blocked"
     },
@@ -599,6 +602,7 @@
       "slot_id": "dud_e_lit_pcba_enrichment_intake",
       "slot_priority": 3,
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
       "tier_beta_blocked": true,
       "validation_command": "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py --intake <operator-dud-e-lit-pcba-enrichment-intake.json> --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_enrichment_materialization_report.json --fail-blocked"
     },
@@ -670,6 +674,7 @@
       "slot_id": "vina_gnina_comparison_intake",
       "slot_priority": 4,
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
       "tier_beta_blocked": true,
       "validation_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-comparison-intake.json> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked"
     }
@@ -705,6 +710,7 @@
       },
       "slot_id": "casf_pdbbind_subset_intake",
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
       "title": "CASF/PDBBind subset source files and case descriptors",
       "unblocks_tier_beta_criteria": [
         "casf_pdbbind_subset_materialized",
@@ -725,6 +731,7 @@
       },
       "slot_id": "pose_coordinate_intake",
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
       "title": "Pose coordinate intake for PoseBusters-style validity and RMSD",
       "unblocks_tier_beta_criteria": [
         "real_pose_validity_packet_materialized",
@@ -756,6 +763,7 @@
       },
       "slot_id": "dud_e_lit_pcba_enrichment_intake",
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
       "title": "DUD-E/LIT-PCBA scored molecule enrichment rows",
       "unblocks_tier_beta_criteria": [
         "dud_e_lit_pcba_enrichment_ready",
@@ -790,6 +798,7 @@
       },
       "slot_id": "vina_gnina_comparison_intake",
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
       "title": "Vina/GNINA docking engine comparison rows",
       "unblocks_tier_beta_criteria": [
         "vina_gnina_comparison_ready",
@@ -830,6 +839,7 @@
     },
     "required_slot_count": 4,
     "route": "/product/public-benchmark/operator-intake",
+    "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "operator_intake_packet": {
@@ -953,6 +963,7 @@
       "slot_id": "casf_pdbbind_subset_intake",
       "slot_priority": 1,
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
       "tier_beta_blocked": true,
       "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
     },
@@ -987,6 +998,7 @@
         },
         "slot_id": "casf_pdbbind_subset_intake",
         "status": "operator_input_required",
+        "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
         "title": "CASF/PDBBind subset source files and case descriptors",
         "unblocks_tier_beta_criteria": [
           "casf_pdbbind_subset_materialized",
@@ -1007,6 +1019,7 @@
         },
         "slot_id": "pose_coordinate_intake",
         "status": "operator_input_required",
+        "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
         "title": "Pose coordinate intake for PoseBusters-style validity and RMSD",
         "unblocks_tier_beta_criteria": [
           "real_pose_validity_packet_materialized",
@@ -1038,6 +1051,7 @@
         },
         "slot_id": "dud_e_lit_pcba_enrichment_intake",
         "status": "operator_input_required",
+        "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
         "title": "DUD-E/LIT-PCBA scored molecule enrichment rows",
         "unblocks_tier_beta_criteria": [
           "dud_e_lit_pcba_enrichment_ready",
@@ -1072,6 +1086,7 @@
         },
         "slot_id": "vina_gnina_comparison_intake",
         "status": "operator_input_required",
+        "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
         "title": "Vina/GNINA docking engine comparison rows",
         "unblocks_tier_beta_criteria": [
           "vina_gnina_comparison_ready",
@@ -1197,6 +1212,14 @@
     ],
     "minimum_subset_case_count": 12,
     "operator_evidence_gap_count": 4,
+    "operator_template_artifact_count": 4,
+    "operator_template_artifacts": {
+      "casf_pdbbind_subset_intake": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
+      "dud_e_lit_pcba_enrichment_intake": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
+      "pose_coordinate_intake": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
+      "vina_gnina_comparison_intake": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json"
+    },
+    "operator_template_schema_version": "public-benchmark-operator-template.v1",
     "read_model": {
       "alternate_routes": [
         "/product/public-benchmark",
@@ -1273,7 +1296,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

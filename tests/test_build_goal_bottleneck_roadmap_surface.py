@@ -596,7 +596,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     )
     assert phase_4["summary"]["readonly_api_status"] == "ready_for_seed_artifacts"
     assert phase_4["summary"]["readonly_api_route"] == "/product/pocketmd-lite"
-    assert phase_4["summary"]["readonly_api_endpoint_count"] == 6
+    assert phase_4["summary"]["readonly_api_endpoint_count"] == 7
     assert phase_4["summary"]["handoff_status"] == (
         "handoff_ready_operator_evidence_required"
     )
@@ -619,6 +619,10 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
             "required_case_field_count": 14,
             "slot_id": "top_k_refinement_rows",
             "status": "operator_input_required",
+            "template_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "pocketmd_lite_operator_template.json"
+            ),
         }
     ]
     assert phase_4["summary"]["operator_evidence_gap_count"] == 1

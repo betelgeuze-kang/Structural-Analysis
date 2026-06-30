@@ -18,7 +18,7 @@
 
 ## Materialization Sequence
 
-- `fill_pocketmd_lite_operator_intake_packet`: `create <operator-pocketmd-lite-intake.json> from packet template`
+- `fill_pocketmd_lite_operator_intake_packet`: `create <operator-pocketmd-lite-intake.json> from implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json`
 - `materialize_pocketmd_lite_topk_survival_report`: `python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked`
 - `refresh_product_capabilities_surface`: `python3 scripts/build_product_capabilities_surface.py --out implementation/phase1/release_evidence/surface/product_capabilities_surface.json`
 - `refresh_goal_bottleneck_roadmap_surface`: `python3 scripts/build_goal_bottleneck_roadmap_surface.py --out implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json`

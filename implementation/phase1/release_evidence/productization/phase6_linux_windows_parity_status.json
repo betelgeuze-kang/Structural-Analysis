@@ -1,11 +1,10 @@
 {
   "blocked_by": [
     "linux_windows_parity_receipts_missing",
-    "platform_replay_receipt_missing:windows",
-    "platform_replay_receipt_not_passed:linux"
+    "platform_replay_receipt_missing:windows"
   ],
   "blocker_grouping_metadata": {
-    "blocker_count": 3,
+    "blocker_count": 2,
     "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
     "groups": {
       "git_clean_clone_spillover": {
@@ -15,10 +14,8 @@
         "scope": "tracked_elsewhere_clean_checkout_gate"
       },
       "platform_receipt_contract": {
-        "blocker_count": 1,
-        "blockers": [
-          "platform_replay_receipt_not_passed:linux"
-        ],
+        "blocker_count": 0,
+        "blockers": [],
         "description": "Present platform replay receipts that do not satisfy the contract.",
         "scope": "direct_linux_windows_parity_gate"
       },
@@ -88,12 +85,12 @@
     "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
     "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
   },
-  "generated_at": "2026-06-30T00:28:45.073834+00:00",
+  "generated_at": "2026-06-30T00:38:58.686044+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:006e42f030fe61e4f9878b2417413c68dbebe4a9388d899e90669b7d60a44813",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:ad8bec02ff46a356d4370c3aa1fd7a7d82551b84cfb370e613108357a7df9c24",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
-    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:e495f0ca1e7269c30ac7dc7f345430520e6d381890733c2ed81c72b793960d80",
+    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:f21b1a134b17b4d7be202f8a0ef17a7b2882c32791167a7a7b36044e7a500ba6",
     "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json": "missing",
     "scripts/build_phase6_linux_windows_parity_status.py": "sha256:e31ed25c587d3b3fafa53474daec062817b95bf7b306b3fc5755f1ad73a7449c"
   },
@@ -109,9 +106,7 @@
   ],
   "owner_action": "Attach passing Linux and Windows platform replay receipts from the same tracked source state, then rerun this parity status receipt before promoting the RC parity gate.",
   "parity_comparison_contract": {
-    "blocked_platforms": [
-      "linux"
-    ],
+    "blocked_platforms": [],
     "checksum_keys": [
       "acquisition_plan",
       "buildingsmart_dirty_ifc_acquisition_receipt",
@@ -211,14 +206,12 @@
   },
   "platform_rows": [
     {
-      "blockers": [
-        "platform_replay_receipt_not_passed:linux"
-      ],
-      "contract_pass": false,
+      "blockers": [],
+      "contract_pass": true,
       "platform": "linux",
       "receipt_path": "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json",
       "receipt_present": true,
-      "status": "blocked"
+      "status": "ready"
     },
     {
       "blockers": [
@@ -245,7 +238,7 @@
   "reuse_policy": "phase6_parity_status_aggregates_phase3_seed_replay_expectations",
   "reused_evidence": true,
   "schema_version": "phase6-linux-windows-parity-status.v1",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
   "status": "blocked",
   "summary_line": "Phase 6 Linux/Windows parity: BLOCKED | receipts=1/2 | missing=windows"
 }

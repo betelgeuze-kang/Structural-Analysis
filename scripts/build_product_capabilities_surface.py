@@ -40,6 +40,7 @@ DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET = (
 DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD = (
     PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.md"
 )
+DEFAULT_POCKETMD_OPERATOR_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_operator_template.json"
 DEFAULT_H_BOND_SURFACE = SURFACE_DIR / "h_bond_backmap_evidence_surface.json"
 DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET = (
     PRODUCTIZATION / "h_bond_backmap_operator_intake_packet.json"
@@ -192,6 +193,7 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
             "status": str(row.get("status") or ""),
             "required": bool(row.get("required")),
             "depends_on_count": len(_as_list(row.get("depends_on"))),
+            "template_artifact": str(row.get("template_artifact") or ""),
         }
         for row in _as_list(operator_intake.get("input_slots"))
         if isinstance(row, dict)
@@ -203,6 +205,7 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
                 str(item) for item in _as_list(row.get("unblocks_tier_beta_criteria"))
             ],
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
@@ -223,6 +226,7 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
                 str(item) for item in _as_list(row.get("blocked_tier_beta_criteria"))
             ],
             "first_next_action": str(row.get("first_next_action") or ""),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
@@ -314,6 +318,10 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
             ),
             "operator_intake_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE),
             "operator_intake_markdown_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD),
+            "operator_template_artifacts": _as_dict(
+                operator_intake.get("operator_template_artifacts")
+                or source_operator_summary.get("operator_template_artifacts")
+            ),
             "tier_beta_gate_status": str(tier_beta_gate.get("status") or ""),
             "tier_beta_failed_criterion_count": int(
                 tier_beta_gate.get("failed_criterion_count") or 0
@@ -382,6 +390,7 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
             "status": str(row.get("status") or ""),
             "required": bool(row.get("required")),
             "required_field_count": len(_as_list(row.get("required_case_fields"))),
+            "template_artifact": str(row.get("template_artifact") or ""),
         }
         for row in _as_list(operator_intake.get("input_slots"))
         if isinstance(row, dict)
@@ -396,6 +405,7 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
                 str(item) for item in _as_list(row.get("preserves_phase4_criteria"))
             ],
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
@@ -416,6 +426,7 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
             DEFAULT_POCKETMD_DELIVERY_HANDOFF,
             DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
             DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
+            DEFAULT_POCKETMD_OPERATOR_TEMPLATE,
             DEFAULT_POCKETMD_SURFACE,
         ],
         contract_pass=bool(_truthy_contract(contract) and ready),
@@ -457,6 +468,10 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
             ),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
+            ),
+            "operator_template_artifact": str(
+                _as_dict(operator_intake.get("linked_artifacts")).get("operator_template")
+                or ""
             ),
             "gate_unblock_plan_count": int(
                 operator_intake.get("gate_unblock_plan_count") or len(gate_unblock_plan)

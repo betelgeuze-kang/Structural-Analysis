@@ -41,7 +41,7 @@
   "current_worktree_diagnostic_source": "product_readiness_snapshot.state_consistency.worktree",
   "current_worktree_diagnostics_included": false,
   "developer_preview_release_candidate_claim": false,
-  "generated_at": "2026-06-30T00:25:31.202247+00:00",
+  "generated_at": "2026-06-30T00:38:51.258397+00:00",
   "git_clean_clone_contract_pass": true,
   "git_clean_clone_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
   "git_clean_clone_status": "pass",
@@ -77,7 +77,7 @@
     "track_or_add_required_paths": []
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:ad8bec02ff46a356d4370c3aa1fd7a7d82551b84cfb370e613108357a7df9c24",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "scripts/build_phase3_release_control_cleanup_plan.py": "sha256:6d808673996cceebc1412a21b3b41516e01fe4f14798d01cbe3fd8248efb6ad5"
   },
   "next_verification_commands": [
@@ -91,7 +91,7 @@
   "recommended_action_counts": {},
   "resolve_or_commit_dirty_tracked_paths": [],
   "schema_version": "phase3-release-control-cleanup-plan.v1",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
   "status": "ready",
   "track_or_add_required_paths": []
 }

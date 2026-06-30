@@ -43,6 +43,7 @@ DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET = (
 DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD = (
     PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.md"
 )
+DEFAULT_POCKETMD_OPERATOR_TEMPLATE = PRODUCTIZATION / "pocketmd_lite_operator_template.json"
 DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
 DEFAULT_UX_OBSERVATION_REPORT = PRODUCTIZATION / "ux_new_user_observation_report.json"
 DEFAULT_UX_OBSERVATION_INTAKE_PACKET = (
@@ -373,6 +374,7 @@ def _public_benchmark_row(
             "status": str(row.get("status") or ""),
             "required": _as_bool(row.get("required")),
             "depends_on_count": len(_as_list(row.get("depends_on"))),
+            "template_artifact": str(row.get("template_artifact") or ""),
         }
         for row in _as_list(public_benchmark_operator_intake.get("input_slots"))
         if isinstance(row, dict)
@@ -385,6 +387,7 @@ def _public_benchmark_row(
                 str(item) for item in _as_list(row.get("unblocks_tier_beta_criteria"))
             ],
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
@@ -405,6 +408,7 @@ def _public_benchmark_row(
                 str(item) for item in _as_list(row.get("blocked_tier_beta_criteria"))
             ],
             "first_next_action": str(row.get("first_next_action") or ""),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
@@ -496,6 +500,10 @@ def _public_benchmark_row(
             "operator_intake_route": operator_route,
             "operator_intake_packet_status": str(
                 public_benchmark_operator_intake.get("status") or ""
+            ),
+            "operator_template_artifacts": _as_dict(
+                public_benchmark_operator_intake.get("operator_template_artifacts")
+                or source_operator_summary.get("operator_template_artifacts")
             ),
             "operator_intake_required_slot_count": _as_int(
                 public_benchmark_operator_intake.get("required_slot_count")
@@ -791,6 +799,7 @@ def _pocketmd_row(
             "status": str(row.get("status") or ""),
             "required": _as_bool(row.get("required")),
             "required_case_field_count": len(_as_list(row.get("required_case_fields"))),
+            "template_artifact": str(row.get("template_artifact") or ""),
         }
         for row in _as_list(pocketmd_operator_intake.get("input_slots"))
         if isinstance(row, dict)
@@ -806,6 +815,7 @@ def _pocketmd_row(
                 str(item) for item in _as_list(row.get("preserves_phase4_criteria"))
             ],
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "template_artifact": str(row.get("template_artifact") or ""),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
             ],
@@ -835,6 +845,7 @@ def _pocketmd_row(
             if not ready
             else [],
             "first_next_action": "attach top-k candidate refinement rows",
+            "template_artifact": str(row.get("template_artifact") or ""),
             "minimum_evidence": _as_dict(row.get("minimum_evidence")),
             "materialization_steps": [
                 str(item) for item in _as_list(row.get("materialization_steps"))
@@ -866,6 +877,7 @@ def _pocketmd_row(
             PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json",
             DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
             DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
+            DEFAULT_POCKETMD_OPERATOR_TEMPLATE,
             DEFAULT_POCKETMD_READONLY_API,
             DEFAULT_POCKETMD_DELIVERY_HANDOFF,
             DEFAULT_POCKETMD_SURFACE,
@@ -912,6 +924,12 @@ def _pocketmd_row(
             ),
             "operator_intake_packet_status": str(pocketmd_operator_intake.get("status") or ""),
             "operator_intake_route": operator_intake_route,
+            "operator_template_artifact": str(
+                _as_dict(pocketmd_operator_intake.get("linked_artifacts")).get(
+                    "operator_template"
+                )
+                or ""
+            ),
             "operator_intake_required_slot_count": _as_int(
                 pocketmd_operator_intake.get("required_slot_count")
             ),
@@ -995,6 +1013,7 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
                     first_gap.get("first_next_action")
                     or _first_str([str(action) for action in _as_list(row.get("next_actions"))])
                 ),
+                "template_artifact": str(first_gap.get("template_artifact") or ""),
                 "minimum_evidence": _as_dict(first_gap.get("minimum_evidence")),
                 "materialization_steps": [
                     str(step) for step in _as_list(first_gap.get("materialization_steps"))

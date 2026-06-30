@@ -6,36 +6,36 @@
   "clone_checkout_path": "",
   "command_results": [
     {
-      "command": "git clone --no-local --quiet /home/betelgeuze/건축구조분석 /tmp/phase3-benchmark-git-clean-clone-hzc6gved/checkout",
-      "elapsed_seconds": 76.746,
+      "command": "git clone --no-local --quiet /home/betelgeuze/건축구조분석 /tmp/phase3-benchmark-git-clean-clone-t_lrt1s2/checkout",
+      "elapsed_seconds": 73.112,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": ""
     },
     {
       "command": "python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.183,
+      "elapsed_seconds": 0.175,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 buildingSMART IFC acquisition receipt: blocked | selected_files=2 | executed=0\n"
     },
     {
       "command": "python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.16,
+      "elapsed_seconds": 0.163,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 buildingSMART IFC acquisition check: phase3_buildingsmart_ifc_acquisition_receipt_consistent\n"
     },
     {
       "command": "python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.167,
+      "elapsed_seconds": 0.163,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 buildingSMART dirty IFC acquisition receipt: blocked | selected_files=8 | executed=0\n"
     },
     {
       "command": "python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.163,
+      "elapsed_seconds": 0.164,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 buildingSMART dirty IFC acquisition check: phase3_buildingsmart_dirty_ifc_acquisition_receipt_consistent\n"
@@ -49,7 +49,7 @@
     },
     {
       "command": "python3 scripts/build_phase3_ifc_source_license_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.163,
+      "elapsed_seconds": 0.16,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 IFC source/license check: phase3_ifc_source_license_receipt_consistent\n"
@@ -63,133 +63,133 @@
     },
     {
       "command": "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.169,
+      "elapsed_seconds": 0.167,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 IFC import-health execution check: phase3_ifc_import_health_execution_receipt_consistent\n"
     },
     {
       "command": "python3 scripts/build_phase3_opensees_source_license_receipt.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.16,
+      "elapsed_seconds": 0.165,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 OpenSees source/license receipt: blocked | source_url_verified=False | local_checksum=True\n"
     },
     {
       "command": "python3 scripts/build_phase3_opensees_source_license_receipt.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.16,
+      "elapsed_seconds": 0.165,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 OpenSees source/license check: phase3_opensees_source_license_consistent\n"
     },
     {
       "command": "python3 scripts/build_phase4_commercial_comparison_import_template.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.159,
+      "elapsed_seconds": 0.165,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial comparison import template: ready | fields=17\n"
     },
     {
       "command": "python3 scripts/build_phase4_commercial_comparison_import_template.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.166,
+      "elapsed_seconds": 0.162,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial comparison import template check: phase4_commercial_comparison_import_template_consistent\n"
     },
     {
       "command": "python3 scripts/build_phase4_analytic_physical_fallback_scorecard.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.201,
+      "elapsed_seconds": 0.198,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 analytic physical fallback scorecard: ready | cases=30 | pass=30 | phase4_closure=False\n"
     },
     {
       "command": "python3 scripts/build_phase4_analytic_physical_fallback_scorecard.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.195,
+      "elapsed_seconds": 0.193,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 analytic physical fallback scorecard check: phase4_analytic_physical_fallback_scorecard_consistent\n"
     },
     {
       "command": "python3 scripts/build_phase4_commercial_operator_reference_contract.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.164,
+      "elapsed_seconds": 0.166,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial operator reference contract: blocked | blockers=7\n"
     },
     {
       "command": "python3 scripts/build_phase4_commercial_operator_reference_contract.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.164,
+      "elapsed_seconds": 0.165,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial operator reference contract check: phase4_commercial_operator_reference_contract_consistent\n"
     },
     {
       "command": "python3 scripts/build_phase4_commercial_operator_reference_ingest_validator.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.163,
+      "elapsed_seconds": 0.161,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial operator reference ingest validator: blocked | blockers=1\n"
     },
     {
       "command": "python3 scripts/build_phase4_commercial_operator_reference_ingest_validator.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.165,
+      "elapsed_seconds": 0.168,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 4 commercial operator reference ingest validator check: phase4_commercial_operator_reference_ingest_validator_consistent\n"
     },
     {
       "command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.168,
+      "elapsed_seconds": 0.163,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark acquisition plan: blocked | lanes=7 | ready_sources=0\n"
     },
     {
       "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.456,
+      "elapsed_seconds": 0.454,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark factory seed: ready | cases=30 | pass=30 | phase3_closure=False\n"
     },
     {
       "command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.169,
+      "elapsed_seconds": 0.17,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark acquisition check: phase3_benchmark_acquisition_consistent\n"
     },
     {
       "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.445,
+      "elapsed_seconds": 0.443,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark factory check: phase3_benchmark_factory_consistent\n"
     },
     {
       "command": "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 7.271,
+      "elapsed_seconds": 7.28,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 clean checkout reproduction: pass | executed=True | checksum_match=True\n"
     },
     {
       "command": "python3 -m pytest -q tests/test_build_phase3_benchmark_acquisition_artifacts.py tests/test_build_phase3_benchmark_factory_artifacts.py tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py tests/test_build_phase3_ifc_source_license_receipt.py tests/test_build_phase3_ifc_import_health_execution_receipt.py tests/test_build_phase3_opensees_source_license_receipt.py tests/test_build_phase4_commercial_comparison_import_template.py tests/test_build_phase4_analytic_physical_fallback_scorecard.py tests/test_build_phase4_commercial_operator_reference_contract.py tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
-      "elapsed_seconds": 3.401,
+      "elapsed_seconds": 3.323,
       "return_code": 0,
       "stderr_excerpt": "",
-      "stdout_excerpt": "....................................                                     [100%]\n36 passed in 3.15s\n"
+      "stdout_excerpt": "....................................                                     [100%]\n36 passed in 3.11s\n"
     },
     {
       "command": "python3 -m ruff check src/structural_analysis/benchmark/acquisition.py src/structural_analysis/benchmark/factory.py scripts/build_phase3_benchmark_acquisition_artifacts.py scripts/build_phase3_benchmark_factory_artifacts.py scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py scripts/build_phase3_ifc_source_license_receipt.py scripts/build_phase3_ifc_import_health_execution_receipt.py scripts/build_phase3_ifc_query_gui_readiness_receipt.py scripts/build_phase3_medium_model_scorecard_readiness_receipt.py scripts/build_phase3_large_model_runner_readiness_receipt.py scripts/build_phase3_opensees_source_license_receipt.py scripts/build_phase4_commercial_comparison_import_template.py scripts/build_phase4_commercial_cross_solver_readiness_receipt.py scripts/build_phase4_analytic_physical_fallback_scorecard.py scripts/build_phase4_commercial_operator_reference_contract.py scripts/build_phase4_commercial_operator_reference_ingest_validator.py scripts/phase3_benchmark_reproduction_contract.py scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py tests/test_build_phase3_benchmark_acquisition_artifacts.py tests/test_build_phase3_benchmark_factory_artifacts.py tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py tests/test_build_phase3_ifc_source_license_receipt.py tests/test_build_phase3_ifc_import_health_execution_receipt.py tests/test_build_phase3_opensees_source_license_receipt.py tests/test_build_phase4_commercial_comparison_import_template.py tests/test_build_phase4_analytic_physical_fallback_scorecard.py tests/test_build_phase4_commercial_operator_reference_contract.py tests/test_build_phase4_commercial_operator_reference_ingest_validator.py tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py",
-      "elapsed_seconds": 0.028,
+      "elapsed_seconds": 0.029,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "All checks passed!\n"
     },
     {
       "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check --source-commit-sha 8e10f054c9f53e5f01726928111be41a51952438",
-      "elapsed_seconds": 0.445,
+      "elapsed_seconds": 0.448,
       "return_code": 0,
       "stderr_excerpt": "",
       "stdout_excerpt": "Phase 3 benchmark factory check: phase3_benchmark_factory_consistent\n"
@@ -213,7 +213,7 @@
     "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
     "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
   },
-  "generated_at": "2026-06-30T00:25:22.535542+00:00",
+  "generated_at": "2026-06-30T00:38:36.893645+00:00",
   "generated_stable_artifact_checksums": {
     "acquisition_plan": "sha256:2c982cafb73081f84d1919c4fbef14d14a751d3db05537cea73080a9366c7605",
     "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:dd8ad8cc5bade75c330325f2d29e321d92740689276801a590457b6c5cd19e78",
@@ -240,7 +240,7 @@
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:46ef82c27a866ca9143c0e0be09b3ded9c9795e9c1cb6451852d0780d8479dd5",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:006e42f030fe61e4f9878b2417413c68dbebe4a9388d899e90669b7d60a44813",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json": "sha256:180923190287fb7bb1fd768bbdbf3c6059566389eb36b04df03dafbbf38e1eec",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": "sha256:fb612e88bc196e0c323190da8a0d29f409286ff1c8748257e47ef5eceee0cf65",
@@ -840,7 +840,7 @@
     }
   },
   "schema_version": "phase3-benchmark-factory-git-clean-clone-reproduction.v1",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
   "source_repo_path": "/home/betelgeuze/건축구조분석",
   "stable_artifact_checksums_match": true,
   "status": "pass",

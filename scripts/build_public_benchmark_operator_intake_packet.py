@@ -62,8 +62,22 @@ DEFAULT_ENRICHMENT_SCORECARD = (
 )
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_OPERATOR_TEMPLATE_DIR = PRODUCTIZATION
+DEFAULT_CASF_PDBBIND_OPERATOR_TEMPLATE = (
+    DEFAULT_OPERATOR_TEMPLATE_DIR / "public_benchmark_casf_pdbbind_operator_template.json"
+)
+DEFAULT_POSE_COORDINATE_OPERATOR_TEMPLATE = (
+    DEFAULT_OPERATOR_TEMPLATE_DIR / "public_benchmark_pose_coordinate_operator_template.json"
+)
+DEFAULT_ENRICHMENT_OPERATOR_TEMPLATE = (
+    DEFAULT_OPERATOR_TEMPLATE_DIR / "public_benchmark_enrichment_operator_template.json"
+)
+DEFAULT_VINA_GNINA_OPERATOR_TEMPLATE = (
+    DEFAULT_OPERATOR_TEMPLATE_DIR / "public_benchmark_vina_gnina_operator_template.json"
+)
 
 SCHEMA_VERSION = "public-benchmark-operator-intake-packet.v1"
+OPERATOR_TEMPLATE_SCHEMA_VERSION = "public-benchmark-operator-template.v1"
 PUBLIC_BENCHMARK_ROUTE = "/product/public-benchmark"
 PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE = "/product/public-benchmark/operator-intake"
 TIER_BETA_MINIMUM_SUBSET_CASE_COUNT = 12
@@ -105,6 +119,19 @@ def _input_paths(source_of_truth_path: Path) -> list[Path]:
         Path("scripts/validate_public_benchmark_pose_validity.py"),
         source_of_truth_path,
     ]
+
+
+def _default_operator_template_paths(template_dir: Path) -> dict[str, Path]:
+    return {
+        "casf_pdbbind_subset_intake": template_dir
+        / "public_benchmark_casf_pdbbind_operator_template.json",
+        "pose_coordinate_intake": template_dir
+        / "public_benchmark_pose_coordinate_operator_template.json",
+        "dud_e_lit_pcba_enrichment_intake": template_dir
+        / "public_benchmark_enrichment_operator_template.json",
+        "vina_gnina_comparison_intake": template_dir
+        / "public_benchmark_vina_gnina_operator_template.json",
+    }
 
 
 def _subset_case_template() -> dict[str, Any]:
@@ -279,6 +306,7 @@ def _slot(
     status: str,
     required: bool,
     intake_artifact: str,
+    template_artifact: str,
     required_fields: list[str],
     template: dict[str, Any],
     materialization_command: str,
@@ -297,6 +325,7 @@ def _slot(
         "status": status,
         "required": required,
         "intake_artifact": intake_artifact,
+        "template_artifact": template_artifact,
         "depends_on": depends_on or [],
         "required_fields": required_fields,
         "local_source_file_fields": local_source_file_fields or [],
@@ -324,6 +353,7 @@ def _gate_unblock_plan(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     slot["unblocks_tier_beta_criteria"]
                 ),
                 "minimum_evidence": dict(slot["minimum_evidence"]),
+                "template_artifact": str(slot.get("template_artifact") or ""),
                 "materialization_steps": list(slot["materialization_steps"]),
                 "manifest_contract_id": str(manifest_contract.get("contract_id") or ""),
             }
@@ -350,6 +380,7 @@ def _operator_evidence_gap_register(
                     for row in _as_list(slot.get("unblocks_tier_beta_criteria"))
                 ],
                 "first_next_action": owner_actions[0] if owner_actions else "",
+                "template_artifact": str(slot.get("template_artifact") or ""),
                 "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
                 "materialization_steps": [
                     str(row) for row in _as_list(slot.get("materialization_steps"))
@@ -370,6 +401,7 @@ def build_public_benchmark_operator_intake_packet(
     *,
     repo_root: Path = ROOT,
     source_of_truth_path: Path = DEFAULT_SOURCE_OF_TRUTH,
+    operator_template_dir: Path = DEFAULT_OPERATOR_TEMPLATE_DIR,
 ) -> dict[str, Any]:
     source_of_truth = _load_json(repo_root, source_of_truth_path)
     source_blockers = [str(row) for row in _as_list(source_of_truth.get("blockers"))]
@@ -437,6 +469,7 @@ def build_public_benchmark_operator_intake_packet(
         materialization_command=subset_materialization,
         validation_command=subset_validation,
     )
+    template_paths = _default_operator_template_paths(operator_template_dir)
 
     slots = [
         _slot(
@@ -445,6 +478,7 @@ def build_public_benchmark_operator_intake_packet(
             status="operator_input_required",
             required=True,
             intake_artifact="<operator-casf-pdbbind-intake.json>",
+            template_artifact=str(template_paths["casf_pdbbind_subset_intake"]),
             required_fields=[
                 *list(REQUIRED_CASE_FIELDS),
                 "ligand_atom_order_contract.atom_count",
@@ -489,6 +523,7 @@ def build_public_benchmark_operator_intake_packet(
             status="operator_input_required",
             required=True,
             intake_artifact="<operator-pose-coordinate-intake.json>",
+            template_artifact=str(template_paths["pose_coordinate_intake"]),
             depends_on=[str(DEFAULT_SUBSET_MANIFEST)],
             required_fields=list(REQUIRED_POSE_FIELDS),
             template={"cases": [_pose_case_template()]},
@@ -527,6 +562,7 @@ def build_public_benchmark_operator_intake_packet(
             status="operator_input_required",
             required=True,
             intake_artifact="<operator-dud-e-lit-pcba-enrichment-intake.json>",
+            template_artifact=str(template_paths["dud_e_lit_pcba_enrichment_intake"]),
             required_fields=list(REQUIRED_TARGET_FIELDS),
             template={"targets": [_enrichment_target_template()]},
             owner_actions=[
@@ -559,6 +595,7 @@ def build_public_benchmark_operator_intake_packet(
             status="operator_input_required",
             required=True,
             intake_artifact="<operator-vina-gnina-comparison-intake.json>",
+            template_artifact=str(template_paths["vina_gnina_comparison_intake"]),
             depends_on=[str(DEFAULT_SUBSET_MANIFEST), str(DEFAULT_RMSD_SCORECARD)],
             required_fields=list(VINA_GNINA_REQUIRED_CASE_FIELDS),
             template={"cases": [_vina_gnina_case_template()]},
@@ -593,6 +630,9 @@ def build_public_benchmark_operator_intake_packet(
     operator_evidence_gap_register = _operator_evidence_gap_register(slots)
     first_operator_evidence_gap = operator_evidence_gap_register[0]
     manifest_contracts = [casf_pdbbind_manifest_contract]
+    operator_template_artifacts = {
+        str(slot["slot_id"]): str(slot["template_artifact"]) for slot in slots
+    }
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -636,6 +676,9 @@ def build_public_benchmark_operator_intake_packet(
         "operator_evidence_gap_count": len(operator_evidence_gap_register),
         "first_operator_evidence_gap": first_operator_evidence_gap,
         "operator_evidence_gap_register": operator_evidence_gap_register,
+        "operator_template_schema_version": OPERATOR_TEMPLATE_SCHEMA_VERSION,
+        "operator_template_artifact_count": len(operator_template_artifacts),
+        "operator_template_artifacts": operator_template_artifacts,
         "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
         "materialization_sequence": [
             {
@@ -703,6 +746,7 @@ def build_public_benchmark_operator_intake_packet(
             "rmsd_scorecard": str(DEFAULT_RMSD_SCORECARD),
             "enrichment_scorecard": str(DEFAULT_ENRICHMENT_SCORECARD),
             "vina_gnina_comparison_adapter": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
+            "operator_templates": operator_template_artifacts,
         },
         "next_actions": [
             "fill_public_benchmark_operator_intake_packet",
@@ -724,6 +768,8 @@ def build_public_benchmark_operator_intake_packet(
             ],
             "operator_evidence_gap_count": len(operator_evidence_gap_register),
             "first_operator_evidence_gap": first_operator_evidence_gap,
+            "operator_template_artifact_count": len(operator_template_artifacts),
+            "operator_template_artifacts": operator_template_artifacts,
             "first_manifest_contract_id": casf_pdbbind_manifest_contract["contract_id"],
             "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
             "source_of_truth_blocker_count": len(source_blockers),
@@ -784,16 +830,103 @@ def _markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _operator_template_payload(
+    *,
+    slot: dict[str, Any],
+    repo_root: Path,
+    source_of_truth_path: Path,
+) -> dict[str, Any]:
+    slot_id = str(slot.get("slot_id") or "")
+    template = _as_dict(slot.get("template"))
+    case_key = next((key for key in ("cases", "targets") if key in template), "")
+    return {
+        "schema_version": OPERATOR_TEMPLATE_SCHEMA_VERSION,
+        **release_evidence_metadata(
+            input_paths=_input_paths(source_of_truth_path),
+            reused_evidence=True,
+            reuse_policy="public_benchmark_operator_template_seed_from_intake_packet",
+            repo_root=repo_root,
+        ),
+        "template_id": f"{slot_id}_operator_template",
+        "status": "operator_template_seed",
+        "contract_pass": True,
+        "owner_input_required": True,
+        "operator_values_filled": False,
+        "materialization_ready": False,
+        "slot_id": slot_id,
+        "title": str(slot.get("title") or ""),
+        "template_artifact": str(slot.get("template_artifact") or ""),
+        "intake_artifact": str(slot.get("intake_artifact") or ""),
+        "case_key": case_key,
+        "required_fields": [str(row) for row in _as_list(slot.get("required_fields"))],
+        "local_source_file_fields": [
+            str(row) for row in _as_list(slot.get("local_source_file_fields"))
+        ],
+        "depends_on": [str(row) for row in _as_list(slot.get("depends_on"))],
+        "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
+        "template": template,
+        "materialization_command": str(slot.get("materialization_command") or ""),
+        "validation_command": str(slot.get("validation_command") or ""),
+        "claim_boundary": (
+            "This is a fillable operator template seed. It is not benchmark evidence, "
+            "does not attach restricted public benchmark source data, and does not "
+            "close Tier beta until an operator supplies real rows and receipts."
+        ),
+    }
+
+
+def public_benchmark_operator_template_payloads(
+    *,
+    packet: dict[str, Any],
+    repo_root: Path = ROOT,
+    source_of_truth_path: Path = DEFAULT_SOURCE_OF_TRUTH,
+) -> dict[str, dict[str, Any]]:
+    return {
+        str(slot.get("slot_id") or ""): _operator_template_payload(
+            slot=slot,
+            repo_root=repo_root,
+            source_of_truth_path=source_of_truth_path,
+        )
+        for slot in _as_list(packet.get("input_slots"))
+        if isinstance(slot, dict)
+    }
+
+
+def write_public_benchmark_operator_template_payloads(
+    *,
+    packet: dict[str, Any],
+    repo_root: Path = ROOT,
+    source_of_truth_path: Path = DEFAULT_SOURCE_OF_TRUTH,
+) -> dict[str, Path]:
+    payloads = public_benchmark_operator_template_payloads(
+        packet=packet,
+        repo_root=repo_root,
+        source_of_truth_path=source_of_truth_path,
+    )
+    written: dict[str, Path] = {}
+    for slot_id, payload in payloads.items():
+        raw_path = Path(str(payload.get("template_artifact") or ""))
+        if not raw_path:
+            continue
+        path = raw_path if raw_path.is_absolute() else repo_root / raw_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(_json_text(payload), encoding="utf-8")
+        written[slot_id] = path
+    return written
+
+
 def write_public_benchmark_operator_intake_packet(
     *,
     repo_root: Path = ROOT,
     source_of_truth_path: Path = DEFAULT_SOURCE_OF_TRUTH,
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
+    operator_template_dir: Path = DEFAULT_OPERATOR_TEMPLATE_DIR,
 ) -> dict[str, Any]:
     payload = build_public_benchmark_operator_intake_packet(
         repo_root=repo_root,
         source_of_truth_path=source_of_truth_path,
+        operator_template_dir=operator_template_dir,
     )
     resolved_out = out if out.is_absolute() else repo_root / out
     resolved_out.parent.mkdir(parents=True, exist_ok=True)
@@ -801,6 +934,11 @@ def write_public_benchmark_operator_intake_packet(
     resolved_md = out_md if out_md.is_absolute() else repo_root / out_md
     resolved_md.parent.mkdir(parents=True, exist_ok=True)
     resolved_md.write_text(_markdown(payload), encoding="utf-8")
+    write_public_benchmark_operator_template_payloads(
+        packet=payload,
+        repo_root=repo_root,
+        source_of_truth_path=source_of_truth_path,
+    )
     return payload
 
 
@@ -810,6 +948,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source-of-truth", type=Path, default=DEFAULT_SOURCE_OF_TRUTH)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument(
+        "--operator-template-dir", type=Path, default=DEFAULT_OPERATOR_TEMPLATE_DIR
+    )
     parser.add_argument("--json", action="store_true")
     return parser
 
@@ -821,6 +962,7 @@ def main(argv: list[str] | None = None) -> int:
         source_of_truth_path=args.source_of_truth,
         out=args.out,
         out_md=args.out_md,
+        operator_template_dir=args.operator_template_dir,
     )
     print(_json_text(payload), end="") if args.json else print(payload["summary_line"])
     return 0

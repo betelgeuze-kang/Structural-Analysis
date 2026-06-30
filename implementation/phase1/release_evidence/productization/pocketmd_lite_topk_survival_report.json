@@ -8,14 +8,15 @@
   "claim_boundary": "This report is a seed shape for PocketMD Lite evidence. With zero real refinement rows it is intentionally blocked and cannot support a product claim.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T00:28:33.359758+00:00",
+  "generated_at": "2026-06-30T00:42:00.605218+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:7ccd1fc1b0fa7746e7bb8a3667affb48b575478b87bc82e589722b53ffeffbf9",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:90d26cbbd440886bc14e60e57a778f77e32c4f3c4954f704c5f73016e7b4d2bc",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
     "input_contract": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+    "operator_template": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "outputs": {
       "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
       "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
@@ -140,7 +141,7 @@
   "reused_evidence": false,
   "rows": [],
   "schema_version": "pocketmd-lite-topk-survival-report.v1",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
   "status": "operator_evidence_required",
   "summary": {
     "blocker_count": 4,

@@ -23,6 +23,11 @@
       "method": "GET"
     },
     {
+      "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
+      "endpoint_id": "get_pocketmd_lite_operator_template",
+      "method": "GET"
+    },
+    {
       "artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
       "endpoint_id": "get_pocketmd_lite_delivery_handoff",
       "method": "GET"
@@ -41,9 +46,9 @@
     "promote_all_atom_or_fep_claim",
     "write_operator_evidence"
   ],
-  "generated_at": "2026-06-30T00:28:33.361668+00:00",
+  "generated_at": "2026-06-30T00:42:00.606818+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:7ccd1fc1b0fa7746e7bb8a3667affb48b575478b87bc82e589722b53ffeffbf9",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:90d26cbbd440886bc14e60e57a778f77e32c4f3c4954f704c5f73016e7b4d2bc",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "mutation_allowed": false,
@@ -62,6 +67,6 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite",
   "schema_version": "pocketmd-lite-readonly-api.v1",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
   "status": "ready_for_seed_artifacts"
 }

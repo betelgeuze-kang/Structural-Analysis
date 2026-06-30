@@ -50,9 +50,11 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
     SUPPORTED_ENGINES as VINA_GNINA_SUPPORTED_ENGINES,
 )
 from build_public_benchmark_operator_intake_packet import (  # noqa: E402
+    DEFAULT_OPERATOR_TEMPLATE_DIR,
     DEFAULT_OUT as DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
     SCHEMA_VERSION as OPERATOR_INTAKE_PACKET_SCHEMA_VERSION,
     build_public_benchmark_operator_intake_packet,
+    write_public_benchmark_operator_template_payloads,
 )
 
 
@@ -655,6 +657,7 @@ def _operator_evidence_gap_register(
                 "criterion_gates": criterion_gates,
                 "first_next_action": owner_actions[0] if owner_actions else "",
                 "owner_actions": owner_actions,
+                "template_artifact": str(slot.get("template_artifact") or ""),
                 "depends_on": [
                     str(path) for path in slot.get("depends_on", []) if str(path)
                 ],
@@ -822,6 +825,9 @@ def build_source_of_truth(
         "validation_command": str(
             first_operator_evidence_gap.get("validation_command") or ""
         ),
+        "template_artifact": str(
+            first_operator_evidence_gap.get("template_artifact") or ""
+        ),
     }
     return {
         "schema_version": SCHEMA_VERSION,
@@ -963,6 +969,15 @@ def build_source_of_truth(
             "gate_unblock_plan_count": operator_intake_packet[
                 "gate_unblock_plan_count"
             ],
+            "operator_template_schema_version": str(
+                operator_intake_packet.get("operator_template_schema_version") or ""
+            ),
+            "operator_template_artifact_count": int(
+                operator_intake_packet.get("operator_template_artifact_count") or 0
+            ),
+            "operator_template_artifacts": dict(
+                operator_intake_packet.get("operator_template_artifacts") or {}
+            ),
             "minimum_subset_case_count": operator_intake_packet[
                 "minimum_subset_case_count"
             ],
@@ -1109,7 +1124,7 @@ def build_source_of_truth(
 
 
 def build_public_benchmark_artifacts(
-    *, repo_root: Path = ROOT
+    *, repo_root: Path = ROOT, operator_template_dir: Path = DEFAULT_OPERATOR_TEMPLATE_DIR
 ) -> dict[str, dict[str, Any]]:
     subset_manifest = build_subset_manifest(repo_root=repo_root)
     pose_validity_packet = build_pose_validity_packet(repo_root=repo_root)
@@ -1119,7 +1134,8 @@ def build_public_benchmark_artifacts(
         repo_root=repo_root
     )
     operator_intake_packet = build_public_benchmark_operator_intake_packet(
-        repo_root=repo_root
+        repo_root=repo_root,
+        operator_template_dir=operator_template_dir,
     )
     source_of_truth = build_source_of_truth(
         subset_manifest=subset_manifest,
@@ -1152,8 +1168,12 @@ def write_public_benchmark_artifacts(
     vina_gnina_comparison_adapter_out: Path = DEFAULT_VINA_GNINA_ADAPTER_OUT,
     operator_intake_packet_out: Path = DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
     operator_intake_packet_md_out: Path = DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT,
+    operator_template_dir: Path = DEFAULT_OPERATOR_TEMPLATE_DIR,
 ) -> dict[str, dict[str, Any]]:
-    artifacts = build_public_benchmark_artifacts(repo_root=repo_root)
+    artifacts = build_public_benchmark_artifacts(
+        repo_root=repo_root,
+        operator_template_dir=operator_template_dir,
+    )
     outputs = {
         "source_of_truth": source_of_truth_out,
         "subset_manifest": subset_manifest_out,
@@ -1190,6 +1210,10 @@ def write_public_benchmark_artifacts(
         )
     lines.append("")
     resolved_md.write_text("\n".join(lines), encoding="utf-8")
+    write_public_benchmark_operator_template_payloads(
+        packet=artifacts["operator_intake_packet"],
+        repo_root=repo_root,
+    )
     return artifacts
 
 
@@ -1229,6 +1253,9 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT,
     )
+    parser.add_argument(
+        "--operator-template-dir", type=Path, default=DEFAULT_OPERATOR_TEMPLATE_DIR
+    )
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
@@ -1241,6 +1268,7 @@ def main(argv: list[str] | None = None) -> int:
         vina_gnina_comparison_adapter_out=args.vina_gnina_comparison_adapter_out,
         operator_intake_packet_out=args.operator_intake_packet_out,
         operator_intake_packet_md_out=args.operator_intake_packet_md_out,
+        operator_template_dir=args.operator_template_dir,
     )
     summary = artifacts["source_of_truth"]
     if args.json:

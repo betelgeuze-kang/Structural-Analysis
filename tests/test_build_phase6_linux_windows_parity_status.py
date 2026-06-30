@@ -25,9 +25,9 @@ def test_phase6_linux_platform_replay_receipt_uses_local_clean_checkout_only() -
 
     assert receipt["schema_version"] == "phase6-linux-windows-platform-replay-receipt.v1"
     assert receipt["platform"] == "linux"
-    assert receipt["contract_pass"] is False
+    assert receipt["contract_pass"] is True
     assert receipt["developer_preview_release_candidate_claim"] is False
-    assert receipt["working_tree_clean"] is False
+    assert receipt["working_tree_clean"] is True
     assert receipt["working_tree_clean_scope"] == "isolated_minimal_worktree_copy"
     assert receipt["local_dirty_inputs"] == []
     assert receipt["source_clean_checkout_status"] == "pass"
@@ -38,11 +38,7 @@ def test_phase6_linux_platform_replay_receipt_uses_local_clean_checkout_only() -
     )
     assert receipt["stable_artifact_checksums"]
     assert receipt["expected_scorecard"]["case_count"] == 30
-    assert receipt["blockers"] == [
-        "phase3_clean_checkout_source_commit_mismatch",
-        "phase3_clean_checkout_expected_checksum_mismatch",
-        "phase3_clean_checkout_generated_checksum_mismatch",
-    ]
+    assert receipt["blockers"] == []
     assert "not a Windows receipt" in receipt["claim_boundary"]
     assert "not a git-clean-clone pass" in receipt["claim_boundary"]
 
@@ -69,15 +65,15 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
         ),
     }
     rows = {row["platform"]: row for row in payload["platform_rows"]}
-    assert rows["linux"]["status"] == "blocked"
+    assert rows["linux"]["status"] == "ready"
     assert rows["windows"]["status"] == "missing"
-    assert rows["linux"]["contract_pass"] is False
+    assert rows["linux"]["contract_pass"] is True
     assert rows["windows"]["contract_pass"] is False
-    assert rows["linux"]["blockers"] == ["platform_replay_receipt_not_passed:linux"]
+    assert rows["linux"]["blockers"] == []
     assert "platform_replay_receipt_missing:windows" in rows["windows"]["blockers"]
     assert "linux_windows_parity_receipts_missing" in payload["blocked_by"]
     assert "git_clean_clone_reproduction_not_passed" not in payload["blocked_by"]
-    assert "platform_replay_receipt_not_passed:linux" in payload["blocked_by"]
+    assert "platform_replay_receipt_not_passed:linux" not in payload["blocked_by"]
     assert "platform_replay_receipt_missing:linux" not in payload["blocked_by"]
     grouping = payload["blocker_grouping_metadata"]
     assert grouping["schema_version"] == "phase6-linux-windows-parity-blocker-groups.v1"
@@ -90,9 +86,7 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
         "platform_receipt_presence"
     ]["blockers"]
     assert grouping["groups"]["git_clean_clone_spillover"]["blockers"] == []
-    assert "platform_replay_receipt_not_passed:linux" in grouping["groups"][
-        "platform_receipt_contract"
-    ]["blockers"]
+    assert grouping["groups"]["platform_receipt_contract"]["blockers"] == []
     template = payload["platform_receipt_template"]
     assert template["schema_version"] == "phase6-linux-windows-platform-replay-receipt.v1"
     assert template["platform"] == "linux|windows"

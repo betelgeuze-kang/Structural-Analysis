@@ -59,9 +59,10 @@
     "slot_id": "top_k_refinement_rows",
     "slot_priority": 1,
     "status": "operator_input_required",
+    "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T00:28:33.365218+00:00",
+  "generated_at": "2026-06-30T00:42:00.609991+00:00",
   "goal_roadmap_linkage": {
     "bottleneck": "pocketmd_lite_science_product_surface_locked",
     "next_goal_actions": [
@@ -75,7 +76,7 @@
     "roadmap_item": "PocketMD Lite science product surface"
   },
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:7ccd1fc1b0fa7746e7bb8a3667affb48b575478b87bc82e589722b53ffeffbf9",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:90d26cbbd440886bc14e60e57a778f77e32c4f3c4954f704c5f73016e7b4d2bc",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "linked_artifacts": {
@@ -83,6 +84,7 @@
     "delivery_handoff": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
     "operator_intake_packet": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
     "operator_intake_packet_markdown": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
+    "operator_template": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "readonly_api": "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
     "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
   },
@@ -90,6 +92,7 @@
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
     "input_contract": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+    "operator_template": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "outputs": {
       "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
       "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
@@ -157,6 +160,7 @@
       "slot_id": "top_k_refinement_rows",
       "slot_priority": 1,
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
       "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
     }
   ],
@@ -198,6 +202,7 @@
       ],
       "slot_id": "top_k_refinement_rows",
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
       "title": "Top-k candidate local refinement rows",
       "unblocks_phase4_criteria": [
         "top_k_refinement_rows_present",
@@ -250,6 +255,7 @@
     },
     "required_slot_count": 1,
     "route": "/product/pocketmd-lite/operator-intake",
+    "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
   "operator_intake_required_slot_count": 1,
@@ -386,7 +392,7 @@
   ],
   "schema_version": "pocketmd-lite-science-product-surface.v1",
   "science_surface_family": "pocketmd_lite",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
   "status": "locked",
   "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
   "surface_id": "pocketmd_lite_science_product_surface",

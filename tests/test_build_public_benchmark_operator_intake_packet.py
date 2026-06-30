@@ -265,6 +265,13 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
     assert packet["linked_artifacts"]["source_of_truth"] == (
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json"
     )
+    assert packet["operator_template_schema_version"] == (
+        "public-benchmark-operator-template.v1"
+    )
+    assert packet["operator_template_artifact_count"] == 4
+    assert packet["operator_template_artifacts"][
+        "casf_pdbbind_subset_intake"
+    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
 
 
 def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
@@ -272,19 +279,34 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
 ) -> None:
     out = tmp_path / "public_benchmark_operator_intake_packet.json"
     out_md = tmp_path / "public_benchmark_operator_intake_packet.md"
+    template_dir = tmp_path / "templates"
 
     assert (
         module.main(
-            ["--repo-root", str(REPO_ROOT), "--out", str(out), "--out-md", str(out_md)]
+            [
+                "--repo-root",
+                str(REPO_ROOT),
+                "--out",
+                str(out),
+                "--out-md",
+                str(out_md),
+                "--operator-template-dir",
+                str(template_dir),
+            ]
         )
         == 0
     )
 
     payload = json.loads(out.read_text(encoding="utf-8"))
     markdown = out_md.read_text(encoding="utf-8")
+    template_path = template_dir / "public_benchmark_casf_pdbbind_operator_template.json"
+    template = json.loads(template_path.read_text(encoding="utf-8"))
     assert payload["input_checksums"][
         "scripts/build_public_benchmark_operator_intake_packet.py"
     ].startswith("sha256:")
     assert payload["packet_id"] == "public_benchmark_operator_intake_packet"
+    assert template["schema_version"] == "public-benchmark-operator-template.v1"
+    assert template["status"] == "operator_template_seed"
+    assert template["operator_values_filled"] is False
     assert "# Public Benchmark Operator Intake Packet" in markdown
     assert "materialize_subset_manifest" in markdown

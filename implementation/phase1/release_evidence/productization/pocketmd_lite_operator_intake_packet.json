@@ -59,6 +59,7 @@
       ],
       "slot_id": "top_k_refinement_rows",
       "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
       "title": "Top-k candidate local refinement rows",
       "unblocks_phase4_criteria": [
         "top_k_refinement_rows_present",
@@ -73,14 +74,15 @@
     }
   ],
   "gate_unblock_plan_count": 1,
-  "generated_at": "2026-06-30T00:28:33.366860+00:00",
+  "generated_at": "2026-06-30T00:42:00.611620+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:7ccd1fc1b0fa7746e7bb8a3667affb48b575478b87bc82e589722b53ffeffbf9",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:90d26cbbd440886bc14e60e57a778f77e32c4f3c4954f704c5f73016e7b4d2bc",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "input_slots": [
     {
       "case_key": "cases",
+      "intake_artifact": "<operator-pocketmd-lite-intake.json>",
       "owner_actions": [
         "attach already-ranked top-k candidate refinement rows",
         "fill local_min_survived as a boolean for every candidate",
@@ -127,7 +129,8 @@
           "low": null,
           "unit": "energy_proxy_delta"
         }
-      }
+      },
+      "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json"
     }
   ],
   "linked_artifacts": {
@@ -135,13 +138,14 @@
     "delivery_handoff": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
     "operator_intake_packet": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
     "operator_intake_packet_markdown": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
+    "operator_template": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "readonly_api": "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
     "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
     "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
   },
   "materialization_sequence": [
     {
-      "command": "create <operator-pocketmd-lite-intake.json> from packet template",
+      "command": "create <operator-pocketmd-lite-intake.json> from implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
       "produces": "<operator-pocketmd-lite-intake.json>",
       "step_id": "fill_pocketmd_lite_operator_intake_packet"
     },
@@ -217,7 +221,7 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/operator-intake",
   "schema_version": "pocketmd-lite-operator-intake-packet.v1",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
   "status": "ready_for_operator_input",
   "summary": {
     "current_blocker_count": 4,
@@ -225,6 +229,7 @@
     "gate_unblock_plan_count": 1,
     "minimum_refinement_case_count": 1,
     "minimum_top_k_candidate_count": 1,
+    "operator_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "product_surface_ready": false,
     "required_case_field_count": 14,
     "required_slot_count": 1

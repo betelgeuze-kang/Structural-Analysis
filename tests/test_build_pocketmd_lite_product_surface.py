@@ -68,6 +68,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "pocketmd_lite_science_product_surface.json"
             ),
         },
+        "operator_template": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_operator_template.json"
+        ),
         "command": (
             "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
             "--intake <operator-pocketmd-lite-intake.json> "
@@ -263,6 +267,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "artifact": (
             "implementation/phase1/release_evidence/productization/"
             "pocketmd_lite_operator_intake_packet.json"
+        ),
+        "template_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_operator_template.json"
         ),
         "first_blocker": "pocketmd_lite_topk_candidate_rows_missing",
         "first_blocked_target": "top_k_refinement_operator_intake",

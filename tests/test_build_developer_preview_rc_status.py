@@ -183,7 +183,6 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert final_gates["linux_windows_reproducibility_confirmed"]["blockers"] == [
         "linux_windows_parity_receipts_missing",
         "platform_replay_receipt_missing:windows",
-        "platform_replay_receipt_not_passed:linux",
     ]
     parity_gate_grouping = final_gates["linux_windows_reproducibility_confirmed"][
         "blocker_grouping_metadata"
@@ -641,7 +640,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert parity_handoff["parity_blocker_grouping"]["groups"][
         "git_clean_clone_spillover"
     ]["blockers"] == []
-    assert parity_handoff["parity_gate_blocker_grouping"]["blocker_count"] == 3
+    assert parity_handoff["parity_gate_blocker_grouping"]["blocker_count"] == 2
     assert parity_handoff["parity_gate_blocker_grouping"]["groups"][
         "git_clean_clone_spillover"
     ]["blockers"] == []

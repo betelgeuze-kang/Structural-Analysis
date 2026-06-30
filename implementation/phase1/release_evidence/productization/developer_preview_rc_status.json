@@ -324,7 +324,7 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 3,
+        "blocker_count": 2,
         "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
         "groups": {
           "git_clean_clone_spillover": {
@@ -334,10 +334,8 @@
             "scope": "tracked_elsewhere_clean_checkout_gate"
           },
           "platform_receipt_contract": {
-            "blocker_count": 1,
-            "blockers": [
-              "platform_replay_receipt_not_passed:linux"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Present platform replay receipts that do not satisfy the contract.",
             "scope": "direct_linux_windows_parity_gate"
           },
@@ -357,8 +355,7 @@
       },
       "blockers": [
         "linux_windows_parity_receipts_missing",
-        "platform_replay_receipt_missing:windows",
-        "platform_replay_receipt_not_passed:linux"
+        "platform_replay_receipt_missing:windows"
       ],
       "contract_pass": false,
       "evidence": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json; implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json; implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
@@ -562,7 +559,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T00:28:54.582875+00:00",
+  "generated_at": "2026-06-30T00:39:03.294449+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:57c9c896dc72c55d500c5b7d4beadb04ddb81b6ec54ad9a4712ec6d562425176",
@@ -570,8 +567,8 @@
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:76915d86f3c0663c9930bb5a4130c044ee08332f6d294832e7aa9252f470bb60",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:be8d8cfa05885d432b63ecd23c7959e913c1bad1664d453ad2b11e0cbb8503d4",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:46ef82c27a866ca9143c0e0be09b3ded9c9795e9c1cb6451852d0780d8479dd5",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:006e42f030fe61e4f9878b2417413c68dbebe4a9388d899e90669b7d60a44813",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:ad8bec02ff46a356d4370c3aa1fd7a7d82551b84cfb370e613108357a7df9c24",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": "sha256:fb612e88bc196e0c323190da8a0d29f409286ff1c8748257e47ef5eceee0cf65",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:60b59a12228241029f9ff1ad43d27baa1b379372aa69ba859948a3ebae29b3bd",
@@ -579,12 +576,12 @@
     "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:f751d99e9f57600250ff2e00293ec33003b34136a9639fc08ba079f6d28eb3f0",
     "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:4df92b656667ebbb1d840ebf35b323d32d4e18259488445d4468218ca1b77cb3",
     "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:40b81f70d380a18935ecbabf350248f293149231d99e0e6b735cb999f1829719",
-    "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:7fb52ccb7904e3d049b3e0770101823142b2c5f0166a306b1491266a663a6fa2",
+    "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:ea8d838223aeac09c1379cec1cc2fbd7eb4e9c2eb25eaa4051d0eccabf9c48cd",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:17e35a1dd5fdbe4adf308dc21f3bef47a7a7903d6a3f203e64ebbb805ca24016",
     "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:65dbe88321949aa98153ef9d54cf5752020f24255a6d5f31604c528c31fe2ed2",
-    "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:2ebd3c6489f7b5d953a5542e186b00cd2ea1d210a6691bfb60b910d413808557",
-    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:40e8676e510d56f77bc37e3049a059812ac3d86949dd26c0fe5a0083a8256f12",
+    "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
+    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:650baf0ab3cc97b83af694043704442c15bf6fea9f629af84c2c91549303e5f5",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:09666d378c3a47e05f950efa6fa54c539c8298be0ef711d03a58a2de4da6dbb6",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:5084026e9afead2793d133534b2809b75f2a940d34ab02f626b6ace37430a3ba",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
@@ -1641,8 +1638,7 @@
     "linux_windows_reproducibility_handoff": {
       "blocked_by": [
         "linux_windows_parity_receipts_missing",
-        "platform_replay_receipt_missing:windows",
-        "platform_replay_receipt_not_passed:linux"
+        "platform_replay_receipt_missing:windows"
       ],
       "claim_boundary": "This receipt defines and checks the Linux/Windows platform replay evidence required for the Developer Preview RC parity gate. It does not prove parity until independent passing Linux and Windows receipts are attached, and it does not replace the separate git clean-clone reproduction gate.",
       "clean_clone_blockers_tracked_elsewhere": [],
@@ -1700,7 +1696,7 @@
       ],
       "owner_action": "Attach passing Linux and Windows platform replay receipts from the same tracked source state, then rerun this parity status receipt before promoting the RC parity gate.",
       "parity_blocker_grouping": {
-        "blocker_count": 3,
+        "blocker_count": 2,
         "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
         "groups": {
           "git_clean_clone_spillover": {
@@ -1710,10 +1706,8 @@
             "scope": "tracked_elsewhere_clean_checkout_gate"
           },
           "platform_receipt_contract": {
-            "blocker_count": 1,
-            "blockers": [
-              "platform_replay_receipt_not_passed:linux"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Present platform replay receipts that do not satisfy the contract.",
             "scope": "direct_linux_windows_parity_gate"
           },
@@ -1732,9 +1726,7 @@
         "unassigned_blockers": []
       },
       "parity_comparison_contract": {
-        "blocked_platforms": [
-          "linux"
-        ],
+        "blocked_platforms": [],
         "checksum_keys": [
           "acquisition_plan",
           "buildingsmart_dirty_ifc_acquisition_receipt",
@@ -1771,7 +1763,7 @@
       },
       "parity_contract_pass": false,
       "parity_gate_blocker_grouping": {
-        "blocker_count": 3,
+        "blocker_count": 2,
         "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
         "groups": {
           "git_clean_clone_spillover": {
@@ -1781,10 +1773,8 @@
             "scope": "tracked_elsewhere_clean_checkout_gate"
           },
           "platform_receipt_contract": {
-            "blocker_count": 1,
-            "blockers": [
-              "platform_replay_receipt_not_passed:linux"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Present platform replay receipts that do not satisfy the contract.",
             "scope": "direct_linux_windows_parity_gate"
           },
@@ -2536,6 +2526,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "8d4b4e189b3789cc142c23f0c7a9f600884598d2",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
   "status": "blocked"
 }

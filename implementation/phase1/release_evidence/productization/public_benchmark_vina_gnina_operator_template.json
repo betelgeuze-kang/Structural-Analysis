@@ -1,0 +1,103 @@
+{
+  "case_key": "cases",
+  "claim_boundary": "This is a fillable operator template seed. It is not benchmark evidence, does not attach restricted public benchmark source data, and does not close Tier beta until an operator supplies real rows and receipts.",
+  "contract_pass": true,
+  "depends_on": [
+    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+    "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json"
+  ],
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-30T00:43:57.192759+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:aa00c41785c3fca7fdec61fbc6f6f9cecc25e4e860672ac5f8d2d104597c0247",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:4bdd70f42a9171857713ca310d4e547eed1fab19fc95290cde2b312cd69fc68a",
+    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
+    "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
+    "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
+    "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
+    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:5ab4892003b73ef194edd139e77f49e69b7bacbe5124bad55eab0153879babdd",
+    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c21641e971fd7675a2a3d24cb6a11a1c2a7bee7f3322cfbd5b931803f4884ba",
+    "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:364d355cd4e6d67500b02dd47a32582df7486ea125045b2f38be7be3bf5b5161"
+  },
+  "intake_artifact": "<operator-vina-gnina-comparison-intake.json>",
+  "local_source_file_fields": [],
+  "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-comparison-intake.json> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+  "materialization_ready": false,
+  "minimum_evidence": {
+    "comparison_case_count": 1,
+    "receipt_fields": [
+      "source_license_or_accession",
+      "source_checksum",
+      "provenance_ref"
+    ],
+    "required_engine_run_fields": [
+      "engine_id",
+      "docking_run_id",
+      "predicted_ligand_path_or_pose_ref",
+      "symmetry_aware_rmsd_angstrom",
+      "pose_success",
+      "score",
+      "score_direction"
+    ],
+    "required_engines": [
+      "vina",
+      "gnina"
+    ]
+  },
+  "operator_values_filled": false,
+  "owner_input_required": true,
+  "required_fields": [
+    "case_id",
+    "source_family",
+    "complex_id",
+    "reference_pose_id",
+    "engine_runs",
+    "source_license_or_accession",
+    "source_checksum",
+    "provenance_ref"
+  ],
+  "reuse_policy": "public_benchmark_operator_template_seed_from_intake_packet",
+  "reused_evidence": true,
+  "schema_version": "public-benchmark-operator-template.v1",
+  "slot_id": "vina_gnina_comparison_intake",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
+  "status": "operator_template_seed",
+  "template": {
+    "cases": [
+      {
+        "case_id": "casf_pdbbind_subset_001",
+        "complex_id": "SOURCE_COMPLEX_ID",
+        "engine_runs": [
+          {
+            "docking_run_id": "SOURCE_COMPLEX_ID_vina_run",
+            "engine_id": "vina",
+            "pose_success": null,
+            "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/vina_pose.sdf",
+            "score": null,
+            "score_direction": "lower_is_better",
+            "symmetry_aware_rmsd_angstrom": null
+          },
+          {
+            "docking_run_id": "SOURCE_COMPLEX_ID_gnina_run",
+            "engine_id": "gnina",
+            "pose_success": null,
+            "predicted_ligand_path_or_pose_ref": "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/gnina_pose.sdf",
+            "score": null,
+            "score_direction": "lower_is_better",
+            "symmetry_aware_rmsd_angstrom": null
+          }
+        ],
+        "provenance_ref": "operator_supplied_vina_gnina_run_receipt",
+        "reference_pose_id": "SOURCE_COMPLEX_ID_reference_ligand",
+        "source_checksum": "sha256:operator_supplied_vina_gnina_rows_checksum",
+        "source_family": "CASF/PDBBind",
+        "source_license_or_accession": "operator_supplied_casf_pdbbind_accession"
+      }
+    ]
+  },
+  "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
+  "template_id": "vina_gnina_comparison_intake_operator_template",
+  "title": "Vina/GNINA docking engine comparison rows",
+  "validation_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-comparison-intake.json> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked"
+}

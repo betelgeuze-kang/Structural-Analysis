@@ -1,0 +1,71 @@
+{
+  "case_key": "cases",
+  "claim_boundary": "This is a fillable operator template seed for bounded PocketMD Lite top-k refinement rows. It is not refinement evidence and does not unlock broad all-atom MD, FEP, long-timescale dynamics, or de novo binding claims.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-30T00:43:57.211884+00:00",
+  "input_checksums": {
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:90d26cbbd440886bc14e60e57a778f77e32c4f3c4954f704c5f73016e7b4d2bc",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
+  },
+  "intake_artifact": "<operator-pocketmd-lite-intake.json>",
+  "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+  "materialization_ready": false,
+  "operator_values_filled": false,
+  "owner_input_required": true,
+  "required_case_fields": [
+    "case_id",
+    "source_family",
+    "top_k_rank",
+    "candidate_id",
+    "pre_refinement_energy_proxy",
+    "post_refinement_energy_proxy",
+    "local_min_survived",
+    "contact_persistence_rate",
+    "h_bond_persistence_rate",
+    "clash_count_before",
+    "clash_count_after",
+    "uncertainty_interval",
+    "provenance_ref",
+    "source_checksum"
+  ],
+  "reuse_policy": "pocketmd_lite_operator_template_generated_from_contract",
+  "reused_evidence": false,
+  "schema_version": "pocketmd-lite-operator-template.v1",
+  "slot_id": "top_k_refinement_rows",
+  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
+  "status": "operator_template_seed",
+  "template": {
+    "cases": [
+      {
+        "candidate_id": "",
+        "case_id": "pocketmd_lite_case_001",
+        "clash_count_after": null,
+        "clash_count_before": null,
+        "contact_persistence_rate": null,
+        "h_bond_persistence_rate": null,
+        "local_min_survived": null,
+        "post_refinement_energy_proxy": null,
+        "pre_refinement_energy_proxy": null,
+        "provenance_ref": "",
+        "source_checksum": "",
+        "source_family": "CASF/PDBBind or GPCR operator intake",
+        "top_k_rank": 1,
+        "uncertainty_interval": {
+          "high": null,
+          "low": null,
+          "unit": "energy_proxy_delta"
+        }
+      }
+    ]
+  },
+  "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
+  "template_id": "pocketmd_lite_top_k_refinement_operator_template",
+  "top_k_policy": {
+    "candidate_scope": "top_k_candidates_only",
+    "default_top_k": 5,
+    "max_top_k": 20,
+    "requires_upstream_ranked_candidates": true
+  },
+  "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
+}

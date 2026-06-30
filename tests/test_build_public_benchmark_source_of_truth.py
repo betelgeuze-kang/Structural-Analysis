@@ -83,6 +83,10 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "first_blocked_target": "casf_pdbbind_subset_intake",
         "manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
         "first_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
+        "template_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_casf_pdbbind_operator_template.json"
+        ),
         "required_slot_count": 4,
         "blocked_operator_slot_count": 4,
         "minimum_evidence": {

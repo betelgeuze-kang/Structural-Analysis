@@ -133,6 +133,9 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
         "case_count"
     ] == 12
+    assert gate_plan["casf_pdbbind_subset_intake"]["template_artifact"].endswith(
+        "public_benchmark_casf_pdbbind_operator_template.json"
+    )
     assert gate_plan["dud_e_lit_pcba_enrichment_intake"][
         "materialization_steps"
     ] == ["materialize_enrichment_scorecard"]
@@ -148,6 +151,9 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gap_register["casf_pdbbind_subset_intake"]["first_next_action"] == (
         "attach at least 12 local CASF/PDBBind case descriptors"
     )
+    assert public_benchmark["summary"]["operator_template_artifacts"][
+        "pose_coordinate_intake"
+    ].endswith("public_benchmark_pose_coordinate_operator_template.json")
     assert public_benchmark["summary"]["symmetry_rmsd_scorecard_summary"] == {
         "status": "ready",
         "dry_run_case_count": 1,
@@ -247,6 +253,9 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gate_plan["minimum_evidence"]["candidate_scope"] == (
         "upstream_ranked_top_k_candidates_only"
     )
+    assert gate_plan["template_artifact"].endswith(
+        "pocketmd_lite_operator_template.json"
+    )
     assert (
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_readonly_api.json"
@@ -262,9 +271,17 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "pocketmd_lite_operator_intake_packet.json"
         in pocketmd["evidence_artifacts"]
     )
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_operator_template.json"
+        in pocketmd["evidence_artifacts"]
+    )
     assert pocketmd["summary"]["readonly_api_status"] == "ready_for_seed_artifacts"
     assert pocketmd["summary"]["readonly_api_route"] == "/product/pocketmd-lite"
-    assert pocketmd["summary"]["readonly_api_endpoint_count"] == 6
+    assert pocketmd["summary"]["readonly_api_endpoint_count"] == 7
+    assert pocketmd["summary"]["operator_template_artifact"].endswith(
+        "pocketmd_lite_operator_template.json"
+    )
     assert pocketmd["summary"]["handoff_status"] == (
         "handoff_ready_operator_evidence_required"
     )
