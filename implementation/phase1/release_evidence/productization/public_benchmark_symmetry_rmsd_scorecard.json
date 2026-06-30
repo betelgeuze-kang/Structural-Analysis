@@ -3,10 +3,10 @@
   "contract_pass": true,
   "dry_run_case_count": 1,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T10:08:44.808852+00:00",
+  "generated_at": "2026-06-30T10:23:51.861423+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:0799eac22f73b7676f73bea67a3b36cecd3c4b2f9bc67a0d85f85de6a8159d71",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:6bb5843980faeeb051b99e4491c5fea6ee98ceb6d3c8e133a11b0f36924dbf9f",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:f1dcb245ae52604ca43b5fcc2bce64e9f225adf999334641e74bfa3c371af6eb",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:4f6c70a458fc5ae5ad54967a6009831cad04baac6742863fcb0cdc0322d09ce7",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:147b3fd1bbd0a5edce98ab1657763b0bf79cddbd362da968a591c1a25d107a55",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:031c17195862f073c2d17cdc71bf99e9d6c06517092ae8255dc26f8767d05d2e",
@@ -16,7 +16,7 @@
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:eab5faa0e1f3acf11e7779bcd25ccdaa9066092e1fb3754b8e38d1bedb33098d",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:4d416674af098164a1e10e3137303a7b14719ae9c5518cea7b79fac0a3791c22"
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:c3b37ea81879e7e477b2de6c646c0afbb5e60300c128dfbf250406487e8ac8bc"
   },
   "materializer": {
     "claim_boundary": "The materializer computes per-case symmetry-aware RMSD from pose-validity input and reports pose-success counts. It does not infer chemistry or claim Tier beta.",
@@ -71,6 +71,6 @@
     }
   ],
   "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
-  "source_commit_sha": "4e21e33a7db60ec6ac8b38394c0b3ec02393e40a",
+  "source_commit_sha": "cfe0199e5a98d23436b8d814388e416afab910ae",
   "status": "ready"
 }
