@@ -62,15 +62,15 @@
   "claim_boundary": "This bundle indexes local public-benchmark harness artifacts only. It does not fetch benchmark data, run docking engines, attach external receipts, or promote Tier beta readiness by itself.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T17:32:15.712574+00:00",
+  "generated_at": "2026-06-30T17:49:32.730501+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:7cddda494f0b9796298d21d17408a0adea77e51a1a52eae0e9fdfebab431b784",
+    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:0ecb4a6d16aa511c176c917344ecc0348c284914f240af1a3e309032ae2937a1",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:6af494c6000a42853b1905281e155930010add2ae572e8620bc8f6dc54aefaf7",
-    "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json": "sha256:7f5e3fa8c09979a29e9748c2a0bcd68f0a8d259017b66b2157f8338707731846",
-    "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json": "sha256:0151d94be49a5079317a60d601b625cb5e66ba693ea93243a20292b6219498a5",
-    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:1929a9b56d678179888177479a4f00352e476a4f06d355b131a8bd40c67e7581",
-    "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json": "sha256:27460ed2c1da4818fcfb697e0d0f150d4d639f8dd6352c516810de9075bfc5df",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json": "sha256:9b2a771550c24904baddc7f9010ee0c2ee178b26b347d2384372bff6d6db81ed",
+    "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json": "sha256:d8fc565fc94649bd6b1424c04abaccaaf063a3eeed7d494503aedad0eae9bf85",
+    "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json": "sha256:4c194bc99e2244f24d0dcbd261bd400dd1ae5d02eab3276f52ae3bc983f3dd6e",
+    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:88ec652558ef08a6258486e1c540dc76b872954972f7bf44c1fa068b71c68b71",
+    "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json": "sha256:7e56a61923db5d362a1bb39e5ae5c9263a435e51c23d6faab2be9e247fbca9a4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json": "sha256:af304d6ac1b9a1973a0102d8fedfc39e29d82b202510e237ec5801eb1fac5e2d",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:4aad49f57b3abebeea55418acaf8679c5fc8574f8741677005b9bf85f2e66937"
   },
   "materialization_report": {
@@ -82,6 +82,6 @@
   "reuse_policy": "public_benchmark_harness_bundle_from_materialized_local_artifacts",
   "reused_evidence": false,
   "schema_version": "public-benchmark-harness-bundle.v1",
-  "source_commit_sha": "900af1a8a0a3f62964dae87e7b45b06aca939c0e",
+  "source_commit_sha": "5c81c708df94f05a5fd535073a23c31faf410c88",
   "status": "ready"
 }
