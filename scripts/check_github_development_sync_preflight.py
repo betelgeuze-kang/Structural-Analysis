@@ -24,6 +24,7 @@ DEFAULT_MAIN_REF = "origin/main"
 DEFAULT_FETCH_REMOTE = "origin"
 IGNORED_WORKTREE_STATUS_PREFIXES = (
     "implementation/phase1/release_evidence/productization/",
+    "implementation/phase1/release_evidence/surface/",
 )
 
 
