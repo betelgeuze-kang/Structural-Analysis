@@ -31,14 +31,14 @@
           "casf_pdbbind_ligand_symmetry_contracts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-06-30T10:40:40.887752+00:00",
+        "generated_at": "2026-06-30T10:48:35.251524+00:00",
         "ready_values": {
           "materialized_case_count": 0,
           "public_benchmark_ready": false,
           "target_subset_case_count": 12
         },
         "schema_version": "public-benchmark-subset-manifest.v1",
-        "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
+        "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
         "status": "source_material_required"
       },
       "current_ready": false,
@@ -107,12 +107,12 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-06-30T10:40:40.890558+00:00",
+        "generated_at": "2026-06-30T10:48:35.254213+00:00",
         "ready_values": {
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-pose-validity-packet.v1",
-        "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
+        "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
         "status": "ready_for_dry_run"
       },
       "current_ready": false,
@@ -148,13 +148,13 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-06-30T10:40:40.892844+00:00",
+        "generated_at": "2026-06-30T10:48:35.256421+00:00",
         "ready_values": {
           "dry_run_case_count": 1,
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
-        "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
+        "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
         "status": "ready"
       },
       "current_ready": false,
@@ -198,13 +198,13 @@
           "dud_e_lit_pcba_active_decoy_labels_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-06-30T10:40:40.894821+00:00",
+        "generated_at": "2026-06-30T10:48:35.258373+00:00",
         "ready_values": {
           "public_benchmark_enrichment_ready": false,
           "real_enrichment_target_count": 0
         },
         "schema_version": "public-benchmark-enrichment-scorecard.v1",
-        "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
+        "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -242,13 +242,13 @@
           "vina_gnina_external_receipts_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-06-30T10:40:40.896799+00:00",
+        "generated_at": "2026-06-30T10:48:35.260292+00:00",
         "ready_values": {
           "public_benchmark_engine_comparison_ready": false,
           "real_comparison_case_count": 0
         },
         "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-        "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
+        "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -363,14 +363,14 @@
           "public_benchmark_external_receipts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-06-30T10:40:40.902764+00:00",
+        "generated_at": "2026-06-30T10:48:35.265804+00:00",
         "ready_values": {
           "blocker_count": 9,
           "public_benchmark_ready": false,
           "tier_beta_ready": false
         },
         "schema_version": "public-benchmark-source-of-truth.v1",
-        "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
+        "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
         "status": "seed_ready_materialization_blocked"
       },
       "current_ready": false,
@@ -438,14 +438,14 @@
         "casf_pdbbind_ligand_symmetry_contracts_missing"
       ],
       "contract_pass": true,
-      "generated_at": "2026-06-30T10:40:40.887752+00:00",
+      "generated_at": "2026-06-30T10:48:35.251524+00:00",
       "ready_values": {
         "materialized_case_count": 0,
         "public_benchmark_ready": false,
         "target_subset_case_count": 12
       },
       "schema_version": "public-benchmark-subset-manifest.v1",
-      "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
+      "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
       "status": "source_material_required"
     },
     "current_ready": false,
@@ -666,6 +666,7 @@
         "materialize_symmetry_rmsd_scorecard"
       ],
       "minimum_evidence": {
+        "benchmark_split_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "case_count": 12,
         "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
@@ -756,18 +757,18 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-06-30T10:41:26.610166+00:00",
+  "generated_at": "2026-06-30T10:49:17.567465+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:45e4e821e1a6401e9463e00c16f11fa44ff441c7bfd0b26fe4c9fb42b5b070b9",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:f50e05de1631f7edd4df0a4a9e0d8fb579c96400930fc38305fc6814704373d4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a9d24e2b7e58f70acdaffa71e5011452f4bfd53d511dd9acafc22f6039e48e57",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:1d5672a9b6f9ef17592b49425fc463570f61154e66be291e6f0401349df8b369",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
-    "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:147b3fd1bbd0a5edce98ab1657763b0bf79cddbd362da968a591c1a25d107a55",
-    "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:031c17195862f073c2d17cdc71bf99e9d6c06517092ae8255dc26f8767d05d2e",
-    "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:388a1fc34b73e3dd22c7f1f0c9f7d78bfa71c0bc160ea5b4e55b2292d92c25d0",
+    "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:982514df1528ca96198c13ab483691a2ccdb54f3cf14ffa72536c415dfd8ab24",
+    "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:d965fae24ace310a8dac00208f8c4d8ff2b2ea356a21254da7b03966ced9678e",
+    "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:d18e8cc8f99d1c8f565340e6a622cd99667b2a837d7c584edfec69a30c9d9037",
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:6b5cb3f5598d99f62d9eb757b2926febfb9b3899c5ad4d72ea1645cc6da41c7b",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:5d4df26f2457a692c2ee89eb4022c522d57bf2b8a071544e720ec87107b66a79",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
-    "scripts/validate_public_benchmark_pose_validity.py": "sha256:eab5faa0e1f3acf11e7779bcd25ccdaa9066092e1fb3754b8e38d1bedb33098d",
+    "scripts/validate_public_benchmark_pose_validity.py": "sha256:3f9e47f60d8b7400e21858aebd2cd5d2126d602cc78d410956e06a68ed20e0f2",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:29952cfd4fa87521656da83c518c0d860b4f3bf0d7c500d88d15879c57e43616"
   },
   "input_slots": [
@@ -991,12 +992,14 @@
         "materialize_symmetry_rmsd_scorecard"
       ],
       "minimum_evidence": {
+        "benchmark_split_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "case_count": 12,
         "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
       },
       "owner_actions": [
         "use case_id values from the materialized CASF/PDBBind subset manifest",
+        "preserve benchmark_split from the materialized subset manifest",
         "preserve pose_success_metric=symmetry_aware_ligand_rmsd_angstrom from the subset manifest",
         "attach reference and predicted ligand atom coordinates in the declared atom order",
         "keep receptor context and symmetry permutation contracts explicit",
@@ -1006,6 +1009,7 @@
       "required_fields": [
         "case_id",
         "pose_success_metric",
+        "benchmark_split",
         "reference_atoms",
         "predicted_atoms",
         "ligand_atom_order_contract",
@@ -1018,6 +1022,7 @@
       "template": {
         "cases": [
           {
+            "benchmark_split": "CASF-core",
             "case_id": "casf_pdbbind_subset_001",
             "ligand_atom_order_contract": {
               "atom_count": 2,
@@ -1505,6 +1510,7 @@
         "materialize_symmetry_rmsd_scorecard"
       ],
       "minimum_evidence": {
+        "benchmark_split_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "case_count": 12,
         "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
@@ -1649,7 +1655,7 @@
   ],
   "route": "/product/public-benchmark/operator-intake",
   "schema_version": "public-benchmark-operator-intake-packet.v1",
-  "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
+  "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {
@@ -1777,6 +1783,7 @@
         "materialize_symmetry_rmsd_scorecard"
       ],
       "minimum_evidence": {
+        "benchmark_split_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "case_count": 12,
         "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"

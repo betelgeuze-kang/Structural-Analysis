@@ -6,13 +6,13 @@
     "base_residual_updates": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
     "basis_kind": "existing_sidecar_metadata_refresh"
   },
-  "generated_at": "2026-06-30T10:41:24.973642+00:00",
+  "generated_at": "2026-06-30T10:49:15.707538+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:6d63867b2bd97ef6ed8702c7169e2d6e32345b5377bd0eb9ca15c9a76e9ecb97"
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:16d1f55121bf9ce18508a313b8f0f9da332669aebcc56fac004df6b19529f7a8"
   },
   "reused_evidence": true,
   "schema_version": "residual-holdout-closure-updates.v1",
-  "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
+  "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
   "updates": {
     "RH-001": {
       "closed_at_utc": "2026-06-05T13:35:55.060315+00:00",
