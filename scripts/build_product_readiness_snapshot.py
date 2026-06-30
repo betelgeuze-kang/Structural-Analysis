@@ -420,6 +420,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         },
         "developer_preview_rc_status": {
             "scripts/build_developer_preview_rc_status.py",
+            "scripts/build_phase6_linux_windows_parity_status.py",
         },
         "developer_preview_readiness": {
             "scripts/build_developer_preview_readiness.py",
