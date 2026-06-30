@@ -526,6 +526,65 @@ def test_hip_required_probe_without_runtime_blocker_list_keeps_generic_blockers(
     assert payload["production_hip_residual_jacobian_path"] is False
 
 
+def test_hip_required_preflight_only_skips_cpu_assembler_and_child_probe(
+    monkeypatch,
+) -> None:
+    def build_direct_residual_assembler(**_kwargs):
+        raise AssertionError("Preflight-only proof must not use the CPU assembler")
+
+    def run_mgt_direct_residual_newton_probe(**_kwargs):
+        raise AssertionError("Preflight-only proof must not run the child proof")
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(
+        probe_module,
+        "run_mgt_direct_residual_newton_probe",
+        run_mgt_direct_residual_newton_probe,
+    )
+    monkeypatch.setattr(probe_module, "_git_head", lambda: "fixture-commit")
+    monkeypatch.setattr(
+        probe_module,
+        "_rocm_hip_runtime_preflight",
+        lambda: {
+            "checked_at": "fixture-time",
+            "hip_available": True,
+            "torch_importable": True,
+            "torch_rocm_build": True,
+            "torch_hip_device_available": True,
+            "runtime_blockers": [],
+        },
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        component_only=True,
+        require_hip_residual_engine=True,
+        hip_runtime_preflight_only=True,
+    )
+
+    assert payload["status"] == "partial"
+    assert payload["source_commit_sha"] == "fixture-commit"
+    assert payload["reused_evidence"] is False
+    assert payload["rocm_hip_required"] is True
+    assert (
+        payload["execution_mode"]
+        == "hip_required_runtime_preflight_only_no_child_execution"
+    )
+    assert payload["cpu_diagnostic_assembler_used"] is False
+    assert payload["production_hip_residual_jacobian_path"] is False
+    assert payload["consistent_residual_jacobian_newton_gate_passed"] is False
+    assert payload["rocm_hip_runtime_preflight"]["hip_available"] is True
+    assert payload["hip_direct_probe"]["executed"] is False
+    assert payload["blockers"] == [
+        "hip_residual_jacobian_consistency_preflight_only",
+        "hip_residual_jacobian_consistency_not_executed",
+    ]
+
+
 def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
     monkeypatch,
 ) -> None:

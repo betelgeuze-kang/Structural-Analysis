@@ -1775,6 +1775,7 @@ def run_mgt_residual_jacobian_consistency_probe(
     ),
     shell_pressure_load_path_policy: str = "all_components",
     require_hip_residual_engine: bool = False,
+    hip_runtime_preflight_only: bool = False,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -1789,6 +1790,74 @@ def run_mgt_residual_jacobian_consistency_probe(
             "unavailable_reason": "not_required_for_legacy_cpu_diagnostic",
         }
     )
+    if require_hip_residual_engine and hip_runtime_preflight_only:
+        runtime_blockers = hip_preflight.get("runtime_blockers")
+        runtime_blocker_names = (
+            [item for item in runtime_blockers if isinstance(item, str) and item]
+            if isinstance(runtime_blockers, list)
+            else []
+        )
+        blockers = [
+            *(
+                []
+                if bool(hip_preflight.get("hip_available"))
+                else ["rocm_hip_runtime_unavailable"]
+            ),
+            *[f"hip_runtime::{item}" for item in runtime_blocker_names],
+            "hip_residual_jacobian_consistency_preflight_only",
+            "hip_residual_jacobian_consistency_not_executed",
+        ]
+        payload = {
+            "schema_version": SCHEMA_VERSION,
+            "generated_at": generated_at,
+            "source_commit_sha": source_commit_sha,
+            "engine_version": ENGINE_VERSION,
+            "reused_evidence": False,
+            "status": "partial",
+            "residual_jacobian_consistency_ready": False,
+            "consistent_residual_jacobian_newton_passed": False,
+            "consistent_residual_jacobian_newton_gate_passed": False,
+            "rocm_hip_required": True,
+            "execution_mode": "hip_required_runtime_preflight_only_no_child_execution",
+            "cpu_diagnostic_assembler_used": False,
+            "production_hip_residual_jacobian_path": False,
+            "rocm_hip_runtime_preflight": hip_preflight,
+            "component_only": bool(component_only),
+            "checkpoint": {"path": str(checkpoint_npz)},
+            "load_scale": None,
+            "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+            "hip_direct_probe": {
+                "schema_version": (
+                    "mgt-residual-jacobian-consistency-hip-direct-proof.v1"
+                ),
+                "executed": False,
+                "execution_error": None,
+                "elapsed_seconds": 0.0,
+                "source_commit_sha": None,
+                "status": None,
+                "direct_residual_newton_ready": None,
+                "production_hip_residual_jacobian_path": False,
+                "hip_residual_engine_contract_passed": False,
+                "consistent_residual_jacobian_newton_gate_passed": False,
+            },
+            "direction_rows": [],
+            "state_scale_sweep": [],
+            "runtime_metrics": {
+                "setup_and_reference_seconds": 0.0,
+                "base_assembly_seconds": 0.0,
+                "total_seconds": time.perf_counter() - started,
+            },
+            "claim_boundary": (
+                "Production ROCm/HIP residual-Jacobian consistency was requested, "
+                "but this receipt only records the ROCm/HIP runtime preflight. The "
+                "HIP-required direct residual Newton proof was not executed, this "
+                "module's CPU diagnostic assembler was not used, and this receipt "
+                "does not close G1."
+            ),
+            "blockers": list(dict.fromkeys(blockers)),
+        }
+        _write_json_payload(output_json, payload)
+        return payload
     if require_hip_residual_engine and not bool(hip_preflight.get("hip_available")):
         runtime_blockers = hip_preflight.get("runtime_blockers")
         runtime_blocker_names = (
@@ -2240,6 +2309,14 @@ def main(argv: list[str] | None = None) -> int:
             "or the proof path is not implemented, emit a non-promoting partial receipt."
         ),
     )
+    parser.add_argument(
+        "--hip-runtime-preflight-only",
+        action="store_true",
+        help=(
+            "With --require-hip-residual-engine, record only the ROCm/HIP runtime "
+            "preflight and emit a non-promoting receipt without running the child proof."
+        ),
+    )
     args = parser.parse_args(argv)
     state_scale_values = tuple(
         float(value.strip())
@@ -2273,6 +2350,7 @@ def main(argv: list[str] | None = None) -> int:
         ),
         shell_pressure_load_path_policy=str(args.shell_pressure_load_path_policy),
         require_hip_residual_engine=bool(args.require_hip_residual_engine),
+        hip_runtime_preflight_only=bool(args.hip_runtime_preflight_only),
     )
     print(
         "mgt-residual-jacobian-consistency:",
