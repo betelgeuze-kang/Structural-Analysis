@@ -258,7 +258,7 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T23:10:57.581067+00:00",
+  "generated_at": "2026-06-30T23:20:52.404366+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:2bbc10ac99905a79e94dfcb287939225e5aea7d20aeaef9b41e52552889bc902",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:f4247bc74bc0b7ef2f948ba8aeb1c180bb6ab73ee3d2a1f1f5e04f6661e99857",
@@ -448,6 +448,6 @@
   "reuse_policy": "public_benchmark_harness_bundle_from_materialized_local_artifacts",
   "reused_evidence": false,
   "schema_version": "public-benchmark-harness-bundle.v1",
-  "source_commit_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
+  "source_commit_sha": "99a2946b54da6d2bed72cc289fa8b03743fd43ec",
   "status": "artifact_bundle_incomplete"
 }

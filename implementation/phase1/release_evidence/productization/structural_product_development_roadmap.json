@@ -1,5 +1,5 @@
 {
-  "blocked_stage_count": 7,
+  "blocked_stage_count": 6,
   "claim_boundary": "This surface summarizes current evidence-readiness progress for the structural solver product. It is not a product-complete, paid-pilot, limited-commercial, or GA/enterprise claim while any stage remains blocked.",
   "contract_pass": false,
   "current_position": {
@@ -9,32 +9,32 @@
     "limited_commercial_ready": false,
     "paid_pilot_ready": false,
     "pm_milestones": "5/5",
-    "pm_release_areas": "12/16",
+    "pm_release_areas": "13/16",
     "release_ready": false,
-    "snapshot_blocker_count": 53,
-    "snapshot_status": "stale_or_inconsistent",
+    "snapshot_blocker_count": 34,
+    "snapshot_status": "blocked",
     "workstation_delivery_ready": true
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_requirement_progress_percent": 58.3,
-  "generated_at": "2026-06-30T23:11:34.875077+00:00",
+  "evidence_requirement_progress_percent": 64.6,
+  "generated_at": "2026-06-30T23:20:57.679404+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:df33465a8d9b139151d145729b1510530833fd1007f3547bcabe8b195eac2631",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:a81a3c57f68d2b2aa98cc739193dd94af4d569abb9cd3a8fd7d11200c2f592c9",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:480d7102fde91955b68ab922968ebc1b5fd143c74f304ffdac57427a484ec0b6",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:ef35543346e7fbb6001b7e7b7a74eeb9d3a34614b8284a639c38948ec61eccff",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:33aca4fb07f9edf4ca438c549fe941fc341edd4729710cee500e88c13986ff76",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e5a6dc32e9c56d96099e5df09092b228aca08670e4a4cd76610ea55aef4f1204",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:e0cf83ccf2eab27e6a0b9bf4a5514865098ad30f04bff6624b89819bb96912ca",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fca437c272fe9a0a954ee4f6d4499bce7faab9e5e1f31c02b8f028797d0ba896",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:b86679832cc1fa900cdc4fd5d9d6afe9e9193f7a4b089bbf4f9134ae439763b6",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ec13b04ff91b1af2a0f639cf186b246ea6a21ee3a491cd0d35e9d8c188542ecf",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:133fcbd21be1311a9d1c26fc6b289a81234f3fe12d9dbc2f05785dec88a3c15c",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:8c18e22fddce76c56fb349df5f14cdf4dd466d66eaf0a5a150dfe141946d3f98",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:66d94d32ea12764600aa5fed3d877238ff8b2660ae764b240ac39c2565051502",
     "scripts/build_structural_product_development_roadmap.py": "sha256:7fefa7570e85ee2d5a4c130fcd9bd12577146739ced51a2da9a15b6d115a302a"
   },
-  "passed_evidence_requirement_count": 28,
-  "primary_blocker": "freshness_or_snapshot_integrity_not_closed",
+  "passed_evidence_requirement_count": 31,
+  "primary_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
   "product_completion_claim": false,
-  "ready_stage_count": 0,
+  "ready_stage_count": 1,
   "recommended_next_slice": [
     "land_ci_license_ux_release_area_evidence",
     "close_developer_preview_medium_large_and_parity_gates",
@@ -49,7 +49,7 @@
         "human_ux_blocker_count": 12,
         "license_status": "not_configured",
         "pm_milestones": "5/5",
-        "pm_release_areas": "12/16"
+        "pm_release_areas": "13/16"
       },
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
@@ -148,9 +148,7 @@
   "reused_evidence": true,
   "roadmap_stages": [
     {
-      "blockers": [
-        "freshness_or_snapshot_integrity_not_closed"
-      ],
+      "blockers": [],
       "claim_boundary": "Fresh metadata does not replace heavy validation or external release evidence.",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
@@ -160,16 +158,16 @@
       "next_actions": [
         "keep_release_evidence_freshness_report_green"
       ],
-      "passed_count": 1,
-      "progress_percent": 33.3,
+      "passed_count": 3,
+      "progress_percent": 100.0,
       "required_count": 3,
       "stage_id": "evidence_freshness_and_snapshot_integrity",
-      "status": "partial",
+      "status": "ready",
       "summary": {
         "fresh_artifact_count": 18,
         "fresh_artifact_pass_count": 18,
-        "snapshot_blocker_count": 53,
-        "stale_or_inconsistent": true
+        "snapshot_blocker_count": 34,
+        "stale_or_inconsistent": false
       }
     },
     {
@@ -178,10 +176,7 @@
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::remote_mutation_approval_required",
-        "github_sync::github_sync_remote_sync_pending",
-        "github_sync::github_sync_preflight_not_synced"
+        "security::license_status_not_configured"
       ],
       "claim_boundary": "Milestone readiness is not full release readiness until all release areas pass.",
       "evidence_artifacts": [
@@ -193,8 +188,8 @@
         "attach_product_license_status_approval",
         "attach_passing_human_new_user_observation"
       ],
-      "passed_count": 17,
-      "progress_percent": 81.0,
+      "passed_count": 18,
+      "progress_percent": 85.7,
       "required_count": 21,
       "stage_id": "pm_release_gate",
       "status": "partial",
@@ -207,7 +202,7 @@
         "milestone_pass_count": 5,
         "paid_pilot_candidate": true,
         "release_area_count": 16,
-        "release_area_green_count": 12
+        "release_area_green_count": 13
       }
     },
     {
@@ -321,7 +316,6 @@
     },
     {
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "independent_product_not_ready",
         "g1_full_mesh_full_load_not_ready",
         "g1_full_load_hip_newton_lane_not_ready",
@@ -348,7 +342,7 @@
       "summary": {
         "limited_commercial_milestone_ready": true,
         "limited_commercial_ready": false,
-        "solver_product_blocker_count": 6,
+        "solver_product_blocker_count": 5,
         "solver_product_ready": false
       }
     },
@@ -383,11 +377,11 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
-  "stage_average_progress_percent": 44.3,
+  "source_commit_sha": "99a2946b54da6d2bed72cc289fa8b03743fd43ec",
+  "stage_average_progress_percent": 54.5,
   "stage_count": 7,
   "status": "blocked",
-  "summary_line": "Structural product roadmap: BLOCKED | evidence_progress=58.3% | stage_average=44.3% | ready_stages=0/7 | primary_blocker=freshness_or_snapshot_integrity_not_closed",
+  "summary_line": "Structural product roadmap: BLOCKED | evidence_progress=64.6% | stage_average=54.5% | ready_stages=1/7 | primary_blocker=basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
   "surface_id": "structural_product_development_roadmap",
   "surface_scope": "structural_solver_product_completion"
 }
