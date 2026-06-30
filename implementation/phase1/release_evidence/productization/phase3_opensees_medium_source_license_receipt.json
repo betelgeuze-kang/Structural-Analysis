@@ -26,7 +26,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-23T16:09:52.091100+00:00",
+  "generated_at": "2026-06-30T00:19:32.200864+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl": "sha256:309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl": "sha256:ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
@@ -108,7 +108,7 @@
   "phase3_closure_claim": false,
   "redistribution_allowed": false,
   "schema_version": "phase3-opensees-medium-source-license-receipt.v1",
-  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_url_candidates": [],
   "source_url_verified": false,

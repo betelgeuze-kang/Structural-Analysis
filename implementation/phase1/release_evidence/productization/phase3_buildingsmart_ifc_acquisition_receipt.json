@@ -14,7 +14,7 @@
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
   "expected_import_health_contract_count": 2,
-  "generated_at": "2026-06-23T16:09:52.124496+00:00",
+  "generated_at": "2026-06-30T00:19:32.232351+00:00",
   "import_health_execution_count": 0,
   "input_checksums": {
     "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:26dd5f0c966de200428b095d64882890a7597706b038cea473170b458f0eb48a",
@@ -188,7 +188,7 @@
     }
   ],
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
   "source_file_acquired_count": 0,
   "status": "blocked"
 }
