@@ -235,6 +235,62 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
         for row in _as_list(payload.get("operator_evidence_gap_register"))
         if isinstance(row, dict)
     ]
+    operator_handoff_queue = [
+        {
+            "queue_priority": int(row.get("queue_priority") or 0),
+            "handoff_id": str(row.get("handoff_id") or ""),
+            "route": str(row.get("route") or ""),
+            "operator_intake_artifact": str(row.get("operator_intake_artifact") or ""),
+            "operator_intake_markdown_artifact": str(
+                row.get("operator_intake_markdown_artifact") or ""
+            ),
+            "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
+            "first_next_action": str(row.get("first_next_action") or ""),
+            "template_artifact": str(row.get("template_artifact") or ""),
+            "blocked_tier_beta_criteria": [
+                str(item) for item in _as_list(row.get("blocked_tier_beta_criteria"))
+            ],
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(row.get("validation_command") or ""),
+            "depends_on": [str(item) for item in _as_list(row.get("depends_on"))],
+        }
+        for row in _as_list(payload.get("operator_handoff_queue"))
+        if isinstance(row, dict)
+    ]
+    if not operator_handoff_queue:
+        operator_handoff_queue = [
+            {
+                "queue_priority": int(row.get("slot_priority") or 0),
+                "handoff_id": f"public_benchmark::{row.get('slot_id') or ''}",
+                "route": "/product/public-benchmark/operator-intake",
+                "operator_intake_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE),
+                "operator_intake_markdown_artifact": str(
+                    DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD
+                ),
+                "slot_id": str(row.get("slot_id") or ""),
+                "status": str(row.get("status") or ""),
+                "first_next_action": str(row.get("first_next_action") or ""),
+                "template_artifact": str(row.get("template_artifact") or ""),
+                "blocked_tier_beta_criteria": [
+                    str(item)
+                    for item in _as_list(row.get("blocked_tier_beta_criteria"))
+                ],
+                "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+                "materialization_steps": [
+                    str(item) for item in _as_list(row.get("materialization_steps"))
+                ],
+                "materialization_command": "",
+                "validation_command": "",
+                "depends_on": [],
+            }
+            for row in operator_evidence_gap_register
+            if bool(row.get("tier_beta_blocked"))
+        ]
     tier_beta_criteria = [
         {
             "criterion_id": str(row.get("criterion_id") or ""),
@@ -311,6 +367,15 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
             "first_operator_evidence_gap": _as_dict(
                 payload.get("first_operator_evidence_gap")
             ),
+            "operator_handoff_queue_count": int(
+                payload.get("operator_handoff_queue_count")
+                or len(operator_handoff_queue)
+            ),
+            "first_operator_handoff": _as_dict(
+                payload.get("first_operator_handoff")
+                or (operator_handoff_queue[0] if operator_handoff_queue else {})
+            ),
+            "operator_handoff_queue": operator_handoff_queue,
             "minimum_subset_case_count": int(
                 operator_intake.get("minimum_subset_case_count")
                 or source_operator_summary.get("minimum_subset_case_count")

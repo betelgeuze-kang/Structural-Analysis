@@ -841,6 +841,31 @@ def build_source_of_truth(
             first_operator_evidence_gap.get("template_artifact") or ""
         ),
     }
+    operator_handoff_queue = [
+        {
+            "queue_priority": int(row["slot_priority"]),
+            "handoff_id": f"public_benchmark::{row['slot_id']}",
+            "route": PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE,
+            "operator_intake_artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
+            "operator_intake_markdown_artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT),
+            "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
+            "first_next_action": str(row.get("first_next_action") or ""),
+            "template_artifact": str(row.get("template_artifact") or ""),
+            "blocked_tier_beta_criteria": [
+                str(item) for item in row.get("blocked_tier_beta_criteria", [])
+            ],
+            "minimum_evidence": dict(row.get("minimum_evidence") or {}),
+            "materialization_steps": [
+                str(step) for step in row.get("materialization_steps", [])
+            ],
+            "materialization_command": str(row.get("materialization_command") or ""),
+            "validation_command": str(row.get("validation_command") or ""),
+            "depends_on": [str(path) for path in row.get("depends_on", [])],
+        }
+        for row in operator_evidence_gap_register
+        if row.get("tier_beta_blocked")
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -885,6 +910,11 @@ def build_source_of_truth(
         "blocked_operator_slot_count": blocked_operator_slot_count,
         "root_cause_tags": root_cause_tags,
         "operator_handoff_summary": operator_handoff_summary,
+        "operator_handoff_queue_count": len(operator_handoff_queue),
+        "first_operator_handoff": (
+            operator_handoff_queue[0] if operator_handoff_queue else {}
+        ),
+        "operator_handoff_queue": operator_handoff_queue,
         "tier_beta_gate": tier_beta_gate,
         "source_families": [
             {

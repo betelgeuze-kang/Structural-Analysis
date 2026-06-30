@@ -77,6 +77,21 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "operator_source_material_required",
         "operator_receipts_required",
     ]
+    assert source["operator_handoff_queue_count"] == 4
+    assert source["first_operator_handoff"]["handoff_id"] == (
+        "public_benchmark::casf_pdbbind_subset_intake"
+    )
+    assert source["first_operator_handoff"]["template_artifact"].endswith(
+        "public_benchmark_casf_pdbbind_operator_template.json"
+    )
+    assert {
+        row["slot_id"]: row["route"] for row in source["operator_handoff_queue"]
+    } == {
+        "casf_pdbbind_subset_intake": "/product/public-benchmark/operator-intake",
+        "pose_coordinate_intake": "/product/public-benchmark/operator-intake",
+        "dud_e_lit_pcba_enrichment_intake": "/product/public-benchmark/operator-intake",
+        "vina_gnina_comparison_intake": "/product/public-benchmark/operator-intake",
+    }
     assert source["operator_handoff_summary"] == {
         "route": "/product/public-benchmark/operator-intake",
         "artifact": (
@@ -140,6 +155,32 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "public_benchmark_subset_manifest.json --fail-blocked"
         ),
     }
+    assert source["operator_handoff_queue_count"] == 4
+    assert source["first_operator_handoff"] == source["operator_handoff_queue"][0]
+    assert source["first_operator_handoff"]["handoff_id"] == (
+        "public_benchmark::casf_pdbbind_subset_intake"
+    )
+    assert source["first_operator_handoff"]["route"] == (
+        "/product/public-benchmark/operator-intake"
+    )
+    assert source["first_operator_handoff"]["blocked_tier_beta_criteria"] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
+    assert source["first_operator_handoff"]["first_next_action"] == (
+        "attach at least 12 local CASF/PDBBind case descriptors"
+    )
+    assert source["first_operator_handoff"]["template_artifact"].endswith(
+        "public_benchmark_casf_pdbbind_operator_template.json"
+    )
+    assert (
+        "materialize_public_benchmark_subset_manifest.py"
+        in source["first_operator_handoff"]["materialization_command"]
+    )
+    assert (
+        "validate_public_benchmark_subset_manifest.py"
+        in source["first_operator_handoff"]["validation_command"]
+    )
     assert source["tier_beta_gate"]["status"] == "blocked"
     assert source["tier_beta_gate"]["claim"] == "tier_beta_public_benchmark_harness"
     assert source["tier_beta_gate"]["minimum_subset_case_count"] == 12

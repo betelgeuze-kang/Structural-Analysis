@@ -96,6 +96,19 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "casf_pdbbind_subset_materialized",
         "external_receipts_attached",
     ]
+    assert public_benchmark["summary"]["operator_handoff_queue_count"] == 4
+    assert public_benchmark["summary"]["first_operator_handoff"]["handoff_id"] == (
+        "public_benchmark::casf_pdbbind_subset_intake"
+    )
+    assert public_benchmark["summary"]["first_operator_handoff"][
+        "blocked_tier_beta_criteria"
+    ] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
+    assert public_benchmark["summary"]["operator_handoff_queue"][0][
+        "template_artifact"
+    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
     assert public_benchmark["summary"]["minimum_subset_case_count"] == 12
     assert public_benchmark["summary"]["tier_beta_gate_status"] == "blocked"
     assert public_benchmark["summary"]["tier_beta_failed_criterion_count"] == 7
@@ -154,6 +167,19 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert public_benchmark["summary"]["operator_template_artifacts"][
         "pose_coordinate_intake"
     ].endswith("public_benchmark_pose_coordinate_operator_template.json")
+    assert public_benchmark["summary"]["operator_handoff_queue_count"] == 4
+    assert public_benchmark["summary"]["first_operator_handoff"]["handoff_id"] == (
+        "public_benchmark::casf_pdbbind_subset_intake"
+    )
+    assert public_benchmark["summary"]["first_operator_handoff"][
+        "template_artifact"
+    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
+    assert {
+        row["slot_id"]: row["template_artifact"]
+        for row in public_benchmark["summary"]["operator_handoff_queue"]
+    }["vina_gnina_comparison_intake"].endswith(
+        "public_benchmark_vina_gnina_operator_template.json"
+    )
     assert public_benchmark["summary"]["symmetry_rmsd_scorecard_summary"] == {
         "status": "ready",
         "dry_run_case_count": 1,
