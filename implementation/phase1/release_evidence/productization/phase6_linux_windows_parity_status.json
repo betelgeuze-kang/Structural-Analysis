@@ -1,10 +1,9 @@
 {
   "blocked_by": [
-    "linux_windows_parity_receipts_missing",
     "platform_replay_receipt_missing:windows"
   ],
   "blocker_grouping_metadata": {
-    "blocker_count": 2,
+    "blocker_count": 1,
     "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
     "groups": {
       "git_clean_clone_spillover": {
@@ -20,9 +19,8 @@
         "scope": "direct_linux_windows_parity_gate"
       },
       "platform_receipt_presence": {
-        "blocker_count": 2,
+        "blocker_count": 1,
         "blockers": [
-          "linux_windows_parity_receipts_missing",
           "platform_replay_receipt_missing:windows"
         ],
         "description": "Missing required Linux/Windows replay receipts.",
@@ -85,14 +83,14 @@
     "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
     "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
   },
-  "generated_at": "2026-06-30T12:04:14.000811+00:00",
+  "generated_at": "2026-06-30T13:54:56.557382+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
-    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:c38fb99ee3f50b29b4327edbc996edc68efe349e2746ae4e68c1397f903b668f",
+    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:788173990a532ba1dfc2e0e4990ab3958ce1ac8ffff2e4310bdd4702b136df37",
     "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json": "missing",
-    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:e31ed25c587d3b3fafa53474daec062817b95bf7b306b3fc5755f1ad73a7449c"
+    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:01e52e2b7252ce505466d53bb552989948cbe098bc87f7d9ab9a41ddd79b3090"
   },
   "linux_local_replay_receipt_source": {
     "claim_boundary": "Linux local replay evidence is limited to the isolated minimal worktree-copy clean-checkout receipt and does not satisfy Windows parity or the git clean-clone gate.",
@@ -238,7 +236,7 @@
   "reuse_policy": "phase6_parity_status_aggregates_phase3_seed_replay_expectations",
   "reused_evidence": true,
   "schema_version": "phase6-linux-windows-parity-status.v1",
-  "source_commit_sha": "e380adcd99ef03b23c99f893e97b61c92a169da2",
+  "source_commit_sha": "71cf3fe0d24882750524a01c063987ab8a75a20e",
   "status": "blocked",
   "summary_line": "Phase 6 Linux/Windows parity: BLOCKED | receipts=1/2 | missing=windows"
 }

@@ -21,7 +21,7 @@
   "current_medium_model_scorecard_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T13:49:20.293975+00:00",
+  "generated_at": "2026-06-30T13:54:56.305984+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
@@ -172,7 +172,7 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "9abaa635fd56f8d6e63c8991082f5fe675d47f65",
+  "source_commit_sha": "71cf3fe0d24882750524a01c063987ab8a75a20e",
   "source_id": "opensees_scbf16b_medium_candidate",
   "status": "blocked",
   "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=3/9"

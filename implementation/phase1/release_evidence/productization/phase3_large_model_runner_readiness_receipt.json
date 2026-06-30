@@ -35,7 +35,7 @@
     "source_checksum_count": 0,
     "valid_execution_case_count": 0
   },
-  "generated_at": "2026-06-30T13:49:20.333779+00:00",
+  "generated_at": "2026-06-30T13:54:56.470956+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/large_model_execution_receipts": "missing",
     "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:c0eb7e47f2e6f2d6b840254c68ec64c7bab49124470813d354ccf0f1257b6866",
@@ -160,7 +160,7 @@
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
   "source_checksum_count": 0,
-  "source_commit_sha": "9abaa635fd56f8d6e63c8991082f5fe675d47f65",
+  "source_commit_sha": "71cf3fe0d24882750524a01c063987ab8a75a20e",
   "source_id": "opensees_megatall_model_2_large",
   "status": "blocked",
   "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | evidence=2/9"
