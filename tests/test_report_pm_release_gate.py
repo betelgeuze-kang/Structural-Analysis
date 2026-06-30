@@ -2319,6 +2319,33 @@ def test_github_sync_preflight_source_state_allows_evidence_only_delta(
     ]
 
 
+def test_github_sync_preflight_source_state_allows_surface_json_delta(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        report_pm_release_gate,
+        "_git_rev_parse",
+        lambda value: {"old": "old-sha", "new": "new-sha"}.get(value, ""),
+    )
+    monkeypatch.setattr(
+        report_pm_release_gate,
+        "_git_diff_name_only",
+        lambda source, current: [
+            "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+        ],
+    )
+
+    fresh, kind, changed_paths = report_pm_release_gate._github_sync_preflight_source_state(
+        "old", "new"
+    )
+
+    assert fresh is True
+    assert kind == "evidence_only_delta"
+    assert changed_paths == [
+        "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+    ]
+
+
 def test_github_sync_preflight_source_state_blocks_source_delta(monkeypatch) -> None:
     monkeypatch.setattr(
         report_pm_release_gate,

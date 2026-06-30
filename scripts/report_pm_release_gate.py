@@ -205,6 +205,15 @@ def _git_diff_name_only(source_commit: str, current_commit: str) -> list[str]:
     return [line.strip() for line in output.splitlines() if line.strip()]
 
 
+def _github_sync_receipt_delta_path(path: str) -> bool:
+    if path.startswith("implementation/phase1/release_evidence/productization/"):
+        return True
+    return (
+        path.startswith("implementation/phase1/release_evidence/surface/")
+        and path.endswith(".json")
+    )
+
+
 def _github_sync_preflight_source_state(
     preflight_head: str, current_head: str
 ) -> tuple[bool, str, list[str]]:
@@ -220,7 +229,7 @@ def _github_sync_preflight_source_state(
     non_evidence_paths = [
         path
         for path in changed_paths
-        if not path.startswith("implementation/phase1/release_evidence/productization/")
+        if not _github_sync_receipt_delta_path(path)
     ]
     if non_evidence_paths:
         return False, "source_delta", non_evidence_paths
