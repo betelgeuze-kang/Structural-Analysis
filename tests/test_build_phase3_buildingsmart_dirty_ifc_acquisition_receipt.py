@@ -21,8 +21,8 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def test_dirty_ifc_acquisition_receipt_authors_negative_contracts_without_credit() -> None:
-    payload = module.build_phase3_buildingsmart_dirty_ifc_acquisition_receipt(repo_root=REPO_ROOT)
+def test_dirty_ifc_acquisition_receipt_authors_negative_contracts_without_credit(tmp_path: Path) -> None:
+    payload = module.build_phase3_buildingsmart_dirty_ifc_acquisition_receipt(repo_root=tmp_path)
 
     assert payload["schema_version"] == "phase3-buildingsmart-dirty-ifc-acquisition-receipt.v1"
     assert payload["status"] == "blocked"
@@ -40,7 +40,7 @@ def test_dirty_ifc_acquisition_receipt_authors_negative_contracts_without_credit
     assert "per_file_license_review_pending" in payload["blockers"]
     assert "dirty_import_execution_missing" in payload["blockers"]
     assert "silent_data_loss_negative_gate_not_executed" in payload["blockers"]
-    assert "does not download or bundle IFC files" in payload["claim_boundary"]
+    assert "does not bundle IFC files" in payload["claim_boundary"]
 
     requirement = payload["phase3_ifc_import_case_requirement"]
     assert requirement["minimum_clean_dirty_import_case_count"] == 10
@@ -62,6 +62,7 @@ def test_dirty_ifc_acquisition_receipt_authors_negative_contracts_without_credit
     }
     clinic = rows["buildingsmart_community_clinic_structural"]
     assert clinic["filename"] == "Clinic_Structural.ifc"
+    assert clinic["source_url"].startswith("https://media.githubusercontent.com/media/")
     assert clinic["source_url"].endswith("/Medical-Dental%20Clinic/Clinic_Structural.ifc")
     assert clinic["source_sha256"] == ""
     assert clinic["source_checksum_status"] == "pending_until_operator_acquisition"
@@ -78,6 +79,50 @@ def test_dirty_ifc_acquisition_receipt_authors_negative_contracts_without_credit
     assert contract["text_scan_only"] is True
     assert contract["phase3_quantity_credit_claim"] is False
     assert "ifc_geometry_not_canonicalized" in contract["required_blocked_fields"]
+
+
+def test_dirty_ifc_acquisition_receipt_attaches_local_source_checksums(tmp_path: Path) -> None:
+    payload_without_sources = module.build_phase3_buildingsmart_dirty_ifc_acquisition_receipt(repo_root=tmp_path)
+    first_row = payload_without_sources["selected_files"][0]
+    path = tmp_path / first_row["local_path"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("ISO-10303-21; DIRTY IFC SAMPLE; END-ISO-10303-21;", encoding="utf-8")
+
+    payload = module.build_phase3_buildingsmart_dirty_ifc_acquisition_receipt(repo_root=tmp_path)
+
+    assert payload["source_file_acquired_count"] == 1
+    assert payload["source_checksum_attached_count"] == 1
+    row = next(item for item in payload["selected_files"] if item["case_id"] == first_row["case_id"])
+    assert row["source_file_acquired"] is True
+    assert row["source_checksum_status"] == "attached_from_local_private_corpus"
+    assert row["source_sha256"].startswith("sha256:")
+    assert "source_file_not_acquired" not in row["blockers"]
+    assert "source_sha256_missing" not in row["blockers"]
+    assert "per_file_license_review_pending" in row["blockers"]
+
+
+def test_dirty_ifc_acquisition_receipt_rejects_git_lfs_pointer(tmp_path: Path) -> None:
+    payload_without_sources = module.build_phase3_buildingsmart_dirty_ifc_acquisition_receipt(repo_root=tmp_path)
+    first_row = payload_without_sources["selected_files"][0]
+    path = tmp_path / first_row["local_path"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "version https://git-lfs.github.com/spec/v1\n"
+        "oid sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+        "size 234567\n",
+        encoding="utf-8",
+    )
+
+    payload = module.build_phase3_buildingsmart_dirty_ifc_acquisition_receipt(repo_root=tmp_path)
+
+    assert payload["source_file_acquired_count"] == 0
+    assert payload["source_checksum_attached_count"] == 0
+    assert "source_file_git_lfs_pointer_not_acquired" in payload["blockers"]
+    row = next(item for item in payload["selected_files"] if item["case_id"] == first_row["case_id"])
+    assert row["source_file_acquired"] is False
+    assert row["source_file_is_git_lfs_pointer"] is True
+    assert row["source_checksum_status"] == "git_lfs_pointer_not_source_file"
+    assert row["source_sha256"] == ""
 
 
 def test_dirty_ifc_acquisition_check_detects_missing_output(tmp_path: Path) -> None:

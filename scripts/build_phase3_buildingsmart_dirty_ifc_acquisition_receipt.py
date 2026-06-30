@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -24,7 +25,7 @@ from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json"
-COMMUNITY_RAW_BASE = "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main"
+COMMUNITY_DOWNLOAD_BASE = "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main"
 PHASE3_REQUIRED_IFC_IMPORT_CASE_COUNT = 10
 ACQUISITION_PYTHON_SNIPPET = (
     "from pathlib import Path; "
@@ -110,8 +111,51 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _is_git_lfs_pointer(path: Path) -> bool:
+    try:
+        with path.open("rb") as handle:
+            prefix = handle.read(128)
+    except OSError:
+        return False
+    return prefix.startswith(b"version https://git-lfs.github.com/spec/v1")
+
+
+def _attach_local_source_state(repo_root: Path, row: dict[str, Any]) -> dict[str, Any]:
+    local_path = repo_root / str(row["local_path"])
+    is_lfs_pointer = local_path.exists() and local_path.is_file() and _is_git_lfs_pointer(local_path)
+    acquired = local_path.exists() and local_path.is_file() and not is_lfs_pointer
+    updated = dict(row)
+    updated["source_file_acquired"] = acquired
+    updated["source_file_is_git_lfs_pointer"] = is_lfs_pointer
+    if acquired:
+        updated["source_sha256"] = _sha256(local_path)
+        updated["source_checksum_status"] = "attached_from_local_private_corpus"
+        updated["blockers"] = [
+            blocker
+            for blocker in row["blockers"]
+            if blocker not in {"source_file_not_acquired", "source_sha256_missing"}
+        ]
+    else:
+        updated["source_file_acquired"] = False
+        if is_lfs_pointer:
+            updated["source_checksum_status"] = "git_lfs_pointer_not_source_file"
+            updated["blockers"] = [
+                *row["blockers"],
+                "source_file_git_lfs_pointer_not_acquired",
+            ]
+    return updated
+
+
 def _source_url(folder: str, filename: str) -> str:
-    return f"{COMMUNITY_RAW_BASE}/{quote(folder, safe='/')}/{quote(filename)}"
+    return f"{COMMUNITY_DOWNLOAD_BASE}/{quote(folder, safe='/')}/{quote(filename)}"
 
 
 def _selected_file(row: dict[str, Any]) -> dict[str, Any]:
@@ -201,8 +245,13 @@ def build_phase3_buildingsmart_dirty_ifc_acquisition_receipt(
     source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
-    selected_files = [_selected_file(row) for row in DIRTY_CANDIDATES]
+    selected_files = [
+        _attach_local_source_state(repo_root, _selected_file(row))
+        for row in DIRTY_CANDIDATES
+    ]
     selected_dirty_count = len(selected_files)
+    source_file_acquired_count = sum(1 for row in selected_files if row["source_file_acquired"])
+    source_checksum_attached_count = sum(1 for row in selected_files if row["source_sha256"])
     blockers = sorted({blocker for row in selected_files for blocker in row["blockers"]})
     return {
         "schema_version": "phase3-buildingsmart-dirty-ifc-acquisition-receipt.v1",
@@ -224,8 +273,8 @@ def build_phase3_buildingsmart_dirty_ifc_acquisition_receipt(
         "phase3_closure_claim": False,
         "developer_preview_release_candidate_claim": False,
         "selected_file_count": selected_dirty_count,
-        "source_file_acquired_count": 0,
-        "source_checksum_attached_count": 0,
+        "source_file_acquired_count": source_file_acquired_count,
+        "source_checksum_attached_count": source_checksum_attached_count,
         "expected_negative_import_contract_count": selected_dirty_count,
         "dirty_import_execution_count": 0,
         "ready_source_count": 0,
@@ -248,8 +297,8 @@ def build_phase3_buildingsmart_dirty_ifc_acquisition_receipt(
         "claim_boundary": (
             "This receipt narrows the buildingSMART dirty IFC lane from source identity to "
             "selected-file acquisition and expected negative/import-hardening contracts. It "
-            "does not download or bundle IFC files, compute selected-file checksums, approve "
-            "redistribution, execute import-health checks, or close Phase 3."
+            "records local private-corpus acquisition/checksums when present, but it does not "
+            "bundle IFC files, approve redistribution, execute import-health checks, or close Phase 3."
         ),
     }
 

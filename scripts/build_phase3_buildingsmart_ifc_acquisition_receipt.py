@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -59,6 +60,49 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a JSON object.")
     return payload
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _is_git_lfs_pointer(path: Path) -> bool:
+    try:
+        with path.open("rb") as handle:
+            prefix = handle.read(128)
+    except OSError:
+        return False
+    return prefix.startswith(b"version https://git-lfs.github.com/spec/v1")
+
+
+def _attach_local_source_state(repo_root: Path, row: dict[str, Any]) -> dict[str, Any]:
+    local_path = repo_root / str(row["local_path"])
+    is_lfs_pointer = local_path.exists() and local_path.is_file() and _is_git_lfs_pointer(local_path)
+    acquired = local_path.exists() and local_path.is_file() and not is_lfs_pointer
+    updated = dict(row)
+    updated["source_file_acquired"] = acquired
+    updated["source_file_is_git_lfs_pointer"] = is_lfs_pointer
+    if acquired:
+        updated["source_sha256"] = _sha256(local_path)
+        updated["source_checksum_status"] = "attached_from_local_private_corpus"
+        updated["blockers"] = [
+            blocker
+            for blocker in row["blockers"]
+            if blocker not in {"source_file_not_acquired", "source_sha256_missing"}
+        ]
+    else:
+        updated["source_file_acquired"] = False
+        if is_lfs_pointer:
+            updated["source_checksum_status"] = "git_lfs_pointer_not_source_file"
+            updated["blockers"] = [
+                *row["blockers"],
+                "source_file_git_lfs_pointer_not_acquired",
+            ]
+    return updated
 
 
 def _selected_file(
@@ -164,6 +208,7 @@ def build_phase3_buildingsmart_ifc_acquisition_receipt(
             expected_structural_classes=["IFCBEAM", "IFCMEMBER", "IFCSLAB"],
         ),
     ]
+    selected_files = [_attach_local_source_state(repo_root, row) for row in selected_files]
     selected_clean_import_contract_count = len(selected_files)
     selected_dirty_import_contract_count = 0
     selected_total_import_contract_count = selected_clean_import_contract_count + selected_dirty_import_contract_count
@@ -171,6 +216,8 @@ def build_phase3_buildingsmart_ifc_acquisition_receipt(
         PHASE3_REQUIRED_IFC_IMPORT_CASE_COUNT - selected_total_import_contract_count,
         0,
     )
+    source_file_acquired_count = sum(1 for row in selected_files if row["source_file_acquired"])
+    source_checksum_attached_count = sum(1 for row in selected_files if row["source_sha256"])
     blockers = sorted(
         {
             blocker
@@ -198,8 +245,8 @@ def build_phase3_buildingsmart_ifc_acquisition_receipt(
         "phase3_closure_claim": False,
         "developer_preview_release_candidate_claim": False,
         "selected_file_count": len(selected_files),
-        "source_file_acquired_count": 0,
-        "source_checksum_attached_count": 0,
+        "source_file_acquired_count": source_file_acquired_count,
+        "source_checksum_attached_count": source_checksum_attached_count,
         "expected_import_health_contract_count": len(selected_files),
         "import_health_execution_count": 0,
         "ready_source_count": 0,
@@ -225,9 +272,9 @@ def build_phase3_buildingsmart_ifc_acquisition_receipt(
         "blockers": blockers,
         "claim_boundary": (
             "This receipt narrows the buildingSMART clean IFC lane from source identity to "
-            "selected-file acquisition and import-health expectation contracts. It does not "
-            "download or bundle IFC files, compute selected-file checksums, approve redistribution, "
-            "execute import-health checks, or close Phase 3."
+            "selected-file acquisition and import-health expectation contracts. It records local "
+            "private-corpus acquisition/checksums when present, but it does not bundle IFC files, "
+            "approve redistribution, execute import-health checks, or close Phase 3."
         ),
     }
 
