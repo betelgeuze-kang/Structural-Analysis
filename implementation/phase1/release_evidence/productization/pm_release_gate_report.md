@@ -1,6 +1,6 @@
 # PM Release Gate
 
-- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
+- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
 - `recommended_scope`: Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.
 - `paid_pilot_candidate`: `True`
 - `limited_commercial_milestone_ready`: `True`
@@ -15,11 +15,11 @@
 - `commercial_solver_gap_ready`: `False`
 - `ai_engine_gap_ready`: `False`
 - `release_allowed`: `False`
-- `blocked_release_count`: `12`
+- `blocked_release_count`: `5`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `17`
+- `operator_action_count`: `20`
 - `approval_token_count`: `4`
-- `stale_artifact_count`: `7`
+- `stale_artifact_count`: `0`
 - `evidence_surface_count`: `12`
 - `missing_evidence_surface_count`: `0`
 - `locked_evidence_surface_count`: `3`
@@ -47,7 +47,7 @@
 |---|---|---|
 | basic_ci Basic CI | blocked | pr_ci_30_consecutive_pass_evidence_missing, nightly_ci_30_consecutive_pass_evidence_missing |
 | strict_ci Strict CI | pass | none |
-| evidence_freshness Evidence Freshness | blocked | p1_benchmark_breadth_status::input_dependency_newer_than_artifact, customer_shadow_evidence_intake_packet::source_commit_mismatch, fresh_full_validation_lane_status::source_commit_mismatch, fresh_full_validation_lane_status::input_dependency_newer_than_artifact, evidence_console_scope_status::source_commit_mismatch, evidence_console_scope_status::input_dependency_newer_than_artifact, developer_preview_rc_status::input_dependency_newer_than_artifact |
+| evidence_freshness Evidence Freshness | pass | none |
 | core_engine Core Engine | pass | none |
 | ndtha NDTHA | pass | none |
 | residual Residual | pass | none |
