@@ -660,6 +660,192 @@ def _checkpoint_resolution_gate(
     }, blockers
 
 
+def _g1_lane_blocker_partition(
+    *,
+    checkpoint_resolution_gate: dict[str, Any],
+    load_path_provenance: dict[str, Any],
+    load_path_provenance_blockers: list[str],
+    hip_consistency_proof: dict[str, Any],
+    child_gate_evidence: dict[str, Any],
+    child_hip_residual_refresh_evidence: dict[str, Any],
+) -> dict[str, Any]:
+    worker = hip_consistency_proof.get("production_rocm_hip_residual_jvp_worker")
+    worker = worker if isinstance(worker, dict) else {}
+    return {
+        "schema_version": "g1-full-load-hip-newton-blocker-partition.v1",
+        "checkpoint_resolution": {
+            "ready": checkpoint_resolution_gate.get("passed") is True,
+            "blockers": _string_list(checkpoint_resolution_gate.get("blockers")),
+            "required_load_scale": checkpoint_resolution_gate.get("required_load_scale"),
+            "highest_observed_load_scale": checkpoint_resolution_gate.get(
+                "highest_observed_load_scale"
+            ),
+            "highest_observed_gap_to_required_load_scale": (
+                checkpoint_resolution_gate.get(
+                    "highest_observed_gap_to_required_load_scale"
+                )
+            ),
+            "full_load_candidate_count": checkpoint_resolution_gate.get(
+                "full_load_candidate_count"
+            ),
+        },
+        "load_path_provenance": {
+            "ready": not load_path_provenance_blockers,
+            "blockers": list(load_path_provenance_blockers),
+            "provenance_below_required_full_load": load_path_provenance.get(
+                "provenance_below_required_full_load"
+            ),
+        },
+        "hip_consistency_proof": {
+            "ready": bool(
+                hip_consistency_proof.get("present") is True
+                and hip_consistency_proof.get(
+                    "consistent_residual_jacobian_newton_gate_passed"
+                )
+                is True
+                and hip_consistency_proof.get("cpu_diagnostic_assembler_used") is False
+                and hip_consistency_proof.get("production_hip_residual_jacobian_path")
+                is True
+                and not _string_list(hip_consistency_proof.get("receipt_blockers"))
+            ),
+            "source_state_fresh": hip_consistency_proof.get("source_state_fresh"),
+            "receipt_blockers": _string_list(hip_consistency_proof.get("receipt_blockers")),
+            "runtime_blockers": _string_list(hip_consistency_proof.get("runtime_blockers")),
+        },
+        "production_rocm_hip_residual_jvp_worker": {
+            "ready": worker.get("ready") is True,
+            "residual_jvp_worker_path_ready": worker.get(
+                "residual_jvp_worker_path_ready"
+            ),
+            "g1_closure_gate_ready": worker.get("g1_closure_gate_ready"),
+            "blockers": _string_list(worker.get("blockers")),
+            "residual_jvp_worker_path_blockers": _string_list(
+                worker.get("residual_jvp_worker_path_blockers")
+            ),
+            "g1_closure_gate_blockers": _string_list(
+                worker.get("g1_closure_gate_blockers")
+            ),
+        },
+        "child_direct_probe": {
+            "ready": child_gate_evidence.get("ready") is True,
+            "gate_blockers": _string_list(child_gate_evidence.get("blockers")),
+            "hip_residual_refresh_ready": (
+                child_hip_residual_refresh_evidence.get("ready") is True
+            ),
+            "hip_residual_refresh_blockers": _string_list(
+                child_hip_residual_refresh_evidence.get("blockers")
+            ),
+        },
+        "claim_boundary": (
+            "This partition is diagnostic only. It separates checkpoint, load-path, "
+            "HIP consistency, worker, and child-probe blockers without promoting "
+            "G1 or full-load readiness."
+        ),
+    }
+
+
+def _g1_lane_next_actions(
+    *,
+    checkpoint_resolution_gate: dict[str, Any],
+    hip_consistency_proof: dict[str, Any],
+    child_gate_evidence: dict[str, Any],
+    child_hip_residual_refresh_evidence: dict[str, Any],
+    command: list[str],
+) -> list[dict[str, Any]]:
+    actions: list[dict[str, Any]] = []
+    if checkpoint_resolution_gate.get("passed") is not True:
+        actions.append(
+            {
+                "id": "generate_full_load_1p0_checkpoint_candidate",
+                "reason": "checkpoint_resolution_no_full_load_candidate",
+                "required_load_scale": checkpoint_resolution_gate.get(
+                    "required_load_scale"
+                ),
+                "highest_observed_load_scale": checkpoint_resolution_gate.get(
+                    "highest_observed_load_scale"
+                ),
+                "highest_observed_gap_to_required_load_scale": (
+                    checkpoint_resolution_gate.get(
+                        "highest_observed_gap_to_required_load_scale"
+                    )
+                ),
+                "acceptance_receipt": (
+                    "a loadable mgt-direct-residual-newton-state.v1 checkpoint with "
+                    "load_scale >= required_load_scale and no load-path provenance "
+                    "contradiction"
+                ),
+                "rerun_command": (
+                    "python3 scripts/run_g1_full_load_hip_newton_lane.py "
+                    "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
+                ),
+            }
+        )
+    worker = hip_consistency_proof.get("production_rocm_hip_residual_jvp_worker")
+    worker = worker if isinstance(worker, dict) else {}
+    if hip_consistency_proof.get("source_state_fresh") is False:
+        actions.append(
+            {
+                "id": "refresh_hip_consistency_proof_for_current_head",
+                "reason": "hip_consistency_proof_source_commit_sha_mismatch",
+                "source_state_kind": hip_consistency_proof.get("source_state_kind"),
+                "changed_paths_since_source_commit": hip_consistency_proof.get(
+                    "changed_paths_since_source_commit"
+                ),
+            }
+        )
+    if (
+        hip_consistency_proof.get("consistent_residual_jacobian_newton_gate_passed")
+        is not True
+    ):
+        actions.append(
+            {
+                "id": "close_consistent_residual_jacobian_newton_gate",
+                "reason": "hip_consistency_proof_gate_not_passed",
+                "worker_id": worker.get("worker_id"),
+                "worker_residual_jvp_path_ready": worker.get(
+                    "residual_jvp_worker_path_ready"
+                ),
+                "worker_g1_closure_gate_ready": worker.get("g1_closure_gate_ready"),
+                "receipt_blockers": _string_list(
+                    hip_consistency_proof.get("receipt_blockers")
+                ),
+                "worker_g1_closure_gate_blockers": _string_list(
+                    worker.get("g1_closure_gate_blockers")
+                ),
+            }
+        )
+    if (
+        checkpoint_resolution_gate.get("passed") is True
+        and hip_consistency_proof.get("consistent_residual_jacobian_newton_gate_passed")
+        is True
+        and (
+            child_gate_evidence.get("ready") is not True
+            or child_hip_residual_refresh_evidence.get("ready") is not True
+        )
+    ):
+        actions.append(
+            {
+                "id": "run_full_load_child_direct_probe_with_hip_refresh",
+                "reason": "child_direct_probe_evidence_missing_or_blocked",
+                "command": command,
+                "required_child_gate_blockers": _string_list(
+                    child_gate_evidence.get("blockers")
+                ),
+                "required_hip_refresh_blockers": _string_list(
+                    child_hip_residual_refresh_evidence.get("blockers")
+                ),
+            }
+        )
+    actions.append(
+        {
+            "id": "preserve_non_promoting_boundary_until_all_g1_receipts_pass",
+            "reason": "g1_closure_requires_full_load_child_and_external_hip_proof",
+            "promotes_g1_closure": False,
+        }
+    )
+    return actions
+
+
 def _direct_probe_command(
     *,
     checkpoint_npz: Path,
@@ -997,6 +1183,28 @@ def build_lane_report(
         *evidence_sources,
         DIRECT_PROBE,
     ]
+    initial_child_hip_residual_refresh_evidence = _child_hip_residual_refresh_evidence({})
+    initial_child_gate_evidence = _child_gate_evidence(
+        {},
+        {},
+        required_load_scale=float(required_load_scale),
+        full_load_tolerance=float(full_load_tolerance),
+    )
+    blocker_partition = _g1_lane_blocker_partition(
+        checkpoint_resolution_gate=checkpoint_resolution_gate,
+        load_path_provenance=load_path_provenance,
+        load_path_provenance_blockers=load_path_provenance_blockers,
+        hip_consistency_proof=hip_consistency_proof,
+        child_gate_evidence=initial_child_gate_evidence,
+        child_hip_residual_refresh_evidence=initial_child_hip_residual_refresh_evidence,
+    )
+    lane_next_actions = _g1_lane_next_actions(
+        checkpoint_resolution_gate=checkpoint_resolution_gate,
+        hip_consistency_proof=hip_consistency_proof,
+        child_gate_evidence=initial_child_gate_evidence,
+        child_hip_residual_refresh_evidence=initial_child_hip_residual_refresh_evidence,
+        command=command,
+    )
     base_payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
@@ -1016,15 +1224,10 @@ def build_lane_report(
         "dry_run": bool(dry_run),
         "command": command,
         "hip_consistency_proof": hip_consistency_proof,
-        "child_hip_residual_refresh_evidence": (
-            _child_hip_residual_refresh_evidence({})
-        ),
-        "child_gate_evidence": _child_gate_evidence(
-            {},
-            {},
-            required_load_scale=float(required_load_scale),
-            full_load_tolerance=float(full_load_tolerance),
-        ),
+        "blocker_partition": blocker_partition,
+        "lane_next_actions": lane_next_actions,
+        "child_hip_residual_refresh_evidence": initial_child_hip_residual_refresh_evidence,
+        "child_gate_evidence": initial_child_gate_evidence,
         "child_safety_requirements": [
             "child_reused_evidence_false",
             "child_source_commit_matches_lane",
@@ -1120,6 +1323,21 @@ def build_lane_report(
         and child_gate.get("fallback_zero_passed") is True
     )
     child_blockers = child_payload.get("blockers") if isinstance(child_payload, dict) else []
+    final_blocker_partition = _g1_lane_blocker_partition(
+        checkpoint_resolution_gate=checkpoint_resolution_gate,
+        load_path_provenance=load_path_provenance,
+        load_path_provenance_blockers=load_path_provenance_blockers,
+        hip_consistency_proof=hip_consistency_proof,
+        child_gate_evidence=child_gate_evidence,
+        child_hip_residual_refresh_evidence=child_hip_residual_refresh_evidence,
+    )
+    final_lane_next_actions = _g1_lane_next_actions(
+        checkpoint_resolution_gate=checkpoint_resolution_gate,
+        hip_consistency_proof=hip_consistency_proof,
+        child_gate_evidence=child_gate_evidence,
+        child_hip_residual_refresh_evidence=child_hip_residual_refresh_evidence,
+        command=command,
+    )
     return {
         **base_payload,
         "status": "ready" if child_ready else "blocked",
@@ -1133,6 +1351,8 @@ def build_lane_report(
         "child_output_json": str(output_json),
         "child_hip_residual_refresh_evidence": child_hip_residual_refresh_evidence,
         "child_gate_evidence": child_gate_evidence,
+        "blocker_partition": final_blocker_partition,
+        "lane_next_actions": final_lane_next_actions,
     }, 0 if child_ready else 1
 
 

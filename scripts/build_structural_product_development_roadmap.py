@@ -100,6 +100,28 @@ def _first_blockers(blockers: list[str], limit: int = 12) -> list[str]:
     return rows
 
 
+def _unique_strings(rows: list[str]) -> list[str]:
+    seen: set[str] = set()
+    unique: list[str] = []
+    for row in rows:
+        if not row or row in seen:
+            continue
+        seen.add(row)
+        unique.append(row)
+    return unique
+
+
+def _lane_next_action_ids(payload: dict[str, Any]) -> list[str]:
+    action_ids: list[str] = []
+    for row in _as_list(payload.get("lane_next_actions")):
+        if not isinstance(row, dict):
+            continue
+        action_id = str(row.get("id") or "").strip()
+        if action_id:
+            action_ids.append(action_id)
+    return _unique_strings(action_ids)
+
+
 def _count_pm_milestones(pm_report: dict[str, Any]) -> tuple[int, int]:
     rows = [row for row in _as_list(pm_report.get("milestones")) if isinstance(row, dict)]
     return (
@@ -367,12 +389,15 @@ def build_structural_product_development_roadmap(
             numerator=g1_numerator,
             denominator=2,
             blockers=g1_blockers,
-            next_actions=[
-                "continue_from_global_connectivity_and_consistent_newton_path",
-                "stop_row_only_support_or_elastic_link_correction_loop",
-                "prove_full_load_1_0_checkpoint",
-                "prove_production_rocm_hip_residual_jacobian_lane",
-            ],
+            next_actions=_unique_strings(
+                [
+                    *_lane_next_action_ids(g1_full_load),
+                    "continue_from_global_connectivity_and_consistent_newton_path",
+                    "stop_row_only_support_or_elastic_link_correction_loop",
+                    "prove_full_load_1_0_checkpoint",
+                    "prove_production_rocm_hip_residual_jacobian_lane",
+                ]
+            ),
             evidence_artifacts=[
                 G1_DIRECT_RESIDUAL,
                 G1_FULL_LOAD_HIP,

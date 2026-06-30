@@ -113,7 +113,14 @@ def _write_minimal_inputs(repo_root: Path) -> None:
     _write_json(productization / "mgt_g1_direct_residual_terminal_gate_report.json", {"contract_pass": True})
     _write_json(
         productization / "g1_full_load_hip_newton_lane_report.json",
-        {"contract_pass": False, "blockers": ["full_load_hip_newton_not_closed"]},
+        {
+            "contract_pass": False,
+            "blockers": ["full_load_hip_newton_not_closed"],
+            "lane_next_actions": [
+                {"id": "generate_full_load_1p0_checkpoint_candidate"},
+                {"id": "close_consistent_residual_jacobian_newton_gate"},
+            ],
+        },
     )
     _write_json(
         productization / "g1_global_connectivity_load_path_audit.json",
@@ -205,6 +212,10 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         stages["g1_solver_closure"]["summary"]["row_only_correction_loop_stopped"]
         is True
     )
+    assert stages["g1_solver_closure"]["next_actions"][:2] == [
+        "generate_full_load_1p0_checkpoint_candidate",
+        "close_consistent_residual_jacobian_newton_gate",
+    ]
     assert (
         "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json"
         in stages["g1_solver_closure"]["evidence_artifacts"]

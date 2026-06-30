@@ -99,6 +99,27 @@ def test_sub_full_load_checkpoint_blocks_before_execution(tmp_path: Path) -> Non
         checkpoint_resolution_gate["highest_observed_gap_to_required_load_scale"]
         == 1.0 - 0.656
     )
+    partition = payload["blocker_partition"]
+    assert partition["checkpoint_resolution"]["ready"] is False
+    assert partition["checkpoint_resolution"]["highest_observed_load_scale"] == 0.656
+    assert partition["checkpoint_resolution"]["full_load_candidate_count"] == 0
+    assert (
+        "checkpoint_resolution_no_full_load_candidate"
+        in partition["checkpoint_resolution"]["blockers"]
+    )
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    assert "generate_full_load_1p0_checkpoint_candidate" in next_actions
+    assert (
+        next_actions["generate_full_load_1p0_checkpoint_candidate"][
+            "highest_observed_gap_to_required_load_scale"
+        ]
+        == 1.0 - 0.656
+    )
+    assert (
+        next_actions["generate_full_load_1p0_checkpoint_candidate"]["rerun_command"]
+        == "python3 scripts/run_g1_full_load_hip_newton_lane.py "
+        "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
+    )
     assert payload["child_gate_evidence"]["ready"] is False
     assert payload["child_gate_evidence"]["material_newton_breadth_passed"] is False
     assert (
@@ -214,6 +235,12 @@ def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Pa
     assert (
         "child_hip_required_accepted_residual_refresh_proven"
         in payload["child_safety_requirements"]
+    )
+    next_action_ids = [row["id"] for row in payload["lane_next_actions"]]
+    assert "run_full_load_child_direct_probe_with_hip_refresh" in next_action_ids
+    assert (
+        "generate_full_load_1p0_checkpoint_candidate"
+        not in next_action_ids
     )
     assert "material Newton breadth" in payload["claim_boundary"]
     assert "separate HIP-required residual/Jacobian" in payload["claim_boundary"]
@@ -374,6 +401,18 @@ def test_partial_hip_consistency_proof_blocks_lane_promotion(
     assert payload["contract_pass"] is False
     assert "hip_consistency_proof_gate_not_passed" in payload["blockers"]
     assert "hip_consistency_proof_has_blockers" in payload["blockers"]
+    partition = payload["blocker_partition"]
+    assert partition["checkpoint_resolution"]["ready"] is True
+    assert partition["hip_consistency_proof"]["ready"] is False
+    assert partition["production_rocm_hip_residual_jvp_worker"]["ready"] is False
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    assert "close_consistent_residual_jacobian_newton_gate" in next_actions
+    assert (
+        next_actions["close_consistent_residual_jacobian_newton_gate"][
+            "worker_id"
+        ]
+        == "consistent_residual_jacobian_newton_rocm_worker"
+    )
     assert payload["child_exit_code"] is None
     assert not child.exists()
 
