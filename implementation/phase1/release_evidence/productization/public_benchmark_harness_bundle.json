@@ -62,7 +62,7 @@
   "claim_boundary": "This bundle indexes local public-benchmark harness artifacts only. It does not fetch benchmark data, run docking engines, attach external receipts, or promote Tier beta readiness by itself.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T17:51:57.910934+00:00",
+  "generated_at": "2026-06-30T18:03:00.863756+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:0ecb4a6d16aa511c176c917344ecc0348c284914f240af1a3e309032ae2937a1",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:6af494c6000a42853b1905281e155930010add2ae572e8620bc8f6dc54aefaf7",
@@ -82,6 +82,6 @@
   "reuse_policy": "public_benchmark_harness_bundle_from_materialized_local_artifacts",
   "reused_evidence": false,
   "schema_version": "public-benchmark-harness-bundle.v1",
-  "source_commit_sha": "29d16b8ee06ec294f55199f32fe72175a8995d5a",
+  "source_commit_sha": "79241e4d2918e2d460e4ea2c19e6e7e2a1df091a",
   "status": "ready"
 }
