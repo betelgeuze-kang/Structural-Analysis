@@ -27,7 +27,7 @@ DEFAULT_OUT = Path(
     "gpcr_hard_decoy_operator_template.json"
 )
 SCHEMA_VERSION = "gpcr-hard-decoy-operator-intake.v1"
-SUPPORTED_ROW_FORMATS = ("csv", "tsv", "json")
+SUPPORTED_ROW_FORMATS = ("csv", "tsv", "json", "jsonl", "ndjson")
 DEFAULT_SCORE_DIRECTION = "higher_is_better"
 
 
@@ -114,6 +114,19 @@ def _read_json_rows(path: Path) -> list[dict[str, Any]]:
     return _flat_rows_from_json(payload)
 
 
+def _read_jsonl_rows(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        token = line.strip()
+        if not token:
+            continue
+        row = json.loads(token)
+        if not isinstance(row, dict):
+            raise ValueError(f"line_{line_number}:jsonl_row_must_be_object")
+        rows.append(row)
+    return rows
+
+
 def _read_delimited_rows(path: Path, *, delimiter: str) -> list[dict[str, Any]]:
     with path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle, delimiter=delimiter)
@@ -124,6 +137,8 @@ def _read_source_rows(path: Path) -> list[dict[str, Any]]:
     suffix = path.suffix.lower()
     if suffix == ".json":
         return _read_json_rows(path)
+    if suffix in {".jsonl", ".ndjson"}:
+        return _read_jsonl_rows(path)
     if suffix == ".tsv":
         return _read_delimited_rows(path, delimiter="\t")
     if suffix == ".csv":
@@ -272,7 +287,12 @@ def build_gpcr_hard_decoy_operator_template_from_rows(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
-    parser.add_argument("--rows", type=Path, required=True, help="CSV, TSV, or JSON raw ranking rows.")
+    parser.add_argument(
+        "--rows",
+        type=Path,
+        required=True,
+        help="CSV, TSV, JSON, JSONL, or NDJSON raw ranking rows.",
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--source-id", default="")
     parser.add_argument("--source-url", default="")

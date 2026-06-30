@@ -25,7 +25,7 @@ from release_evidence_metadata import file_sha256, release_evidence_metadata  # 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "pocketmd_lite_operator_intake.json"
 SCHEMA_VERSION = "pocketmd-lite-operator-intake.v1"
-SUPPORTED_ROW_FORMATS = ("csv", "tsv", "json")
+SUPPORTED_ROW_FORMATS = ("csv", "tsv", "json", "jsonl", "ndjson")
 DEFAULT_MAX_TOP_K = 20
 UNCERTAINTY_FLAT_FIELDS = ("uncertainty_low", "uncertainty_high", "uncertainty_unit")
 
@@ -103,10 +103,25 @@ def _read_json_rows(path: Path) -> list[dict[str, Any]]:
     return _flat_rows_from_json(payload)
 
 
+def _read_jsonl_rows(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        token = line.strip()
+        if not token:
+            continue
+        row = json.loads(token)
+        if not isinstance(row, dict):
+            raise ValueError(f"line_{line_number}:jsonl_row_must_be_object")
+        rows.append(row)
+    return rows
+
+
 def _read_source_rows(path: Path) -> list[dict[str, Any]]:
     suffix = path.suffix.lower()
     if suffix == ".json":
         return _read_json_rows(path)
+    if suffix in {".jsonl", ".ndjson"}:
+        return _read_jsonl_rows(path)
     if suffix == ".tsv":
         return _read_delimited_rows(path, delimiter="\t")
     if suffix == ".csv":
@@ -376,7 +391,12 @@ def build_pocketmd_lite_operator_intake_from_rows(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
-    parser.add_argument("--rows", type=Path, required=True, help="CSV, TSV, or JSON top-k refinement rows.")
+    parser.add_argument(
+        "--rows",
+        type=Path,
+        required=True,
+        help="CSV, TSV, JSON, JSONL, or NDJSON top-k refinement rows.",
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--source-id", default="")
     parser.add_argument("--source-url", default="")

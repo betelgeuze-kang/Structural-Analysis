@@ -45,6 +45,35 @@ def _write_csv(path: Path, *, targets: tuple[str, ...] = ("DRD2", "HTR2A", "OPRM
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _write_jsonl(path: Path, *, targets: tuple[str, ...] = ("DRD2", "HTR2A", "OPRM1")) -> None:
+    rows: list[dict[str, object]] = []
+    for target_id in targets:
+        rows.extend(
+            [
+                {
+                    "target_id": target_id,
+                    "molecule_id": f"{target_id.lower()}_positive",
+                    "score": 0.9,
+                    "is_positive": True,
+                    "is_decoy": False,
+                    "score_direction": "higher_is_better",
+                },
+                {
+                    "target_id": target_id,
+                    "molecule_id": f"{target_id.lower()}_decoy",
+                    "score": 0.1,
+                    "is_positive": False,
+                    "is_decoy": True,
+                    "score_direction": "higher_is_better",
+                },
+            ]
+        )
+    path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+
+
 def test_materializes_operator_template_from_flat_csv_rows(tmp_path: Path) -> None:
     rows = tmp_path / "gpcr_rows.csv"
     _write_csv(rows)
@@ -83,6 +112,34 @@ def test_materializes_operator_template_from_flat_csv_rows(tmp_path: Path) -> No
             "score": 0.1,
         },
     ]
+    report = suite_module.materialize_gpcr_hard_decoy_suite_report(
+        payload,
+        repo_root=REPO_ROOT,
+    )
+    assert report["status"] == "ready"
+    assert report["broad_gpcr_family_claim_safe"] is True
+    assert report["phase3_exit_gate"]["failed_criteria"] == []
+
+
+def test_materializes_operator_template_from_jsonl_rows(tmp_path: Path) -> None:
+    rows = tmp_path / "gpcr_rows.jsonl"
+    _write_jsonl(rows)
+
+    payload = module.build_gpcr_hard_decoy_operator_template_from_rows(
+        rows_path=rows,
+        repo_root=REPO_ROOT,
+    )
+
+    assert payload["operator_input_source"]["supported_source_formats"] == [
+        "csv",
+        "tsv",
+        "json",
+        "jsonl",
+        "ndjson",
+    ]
+    assert payload["operator_input_source"]["row_count"] == 6
+    assert payload["operator_input_source"]["accepted_target_row_count"] == 6
+
     report = suite_module.materialize_gpcr_hard_decoy_suite_report(
         payload,
         repo_root=REPO_ROOT,

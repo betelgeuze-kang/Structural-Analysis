@@ -150,6 +150,13 @@ def _write_csv(path: Path) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:
+    path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+
+
 def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None:
     rows = tmp_path / "pocketmd_lite_rows.csv"
     _write_csv(rows)
@@ -227,6 +234,58 @@ def test_materializes_operator_intake_from_nested_json_rows(tmp_path: Path) -> N
             clash_after=1,
         )
     ]
+
+
+def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:
+    rows = tmp_path / "pocketmd_lite_rows.ndjson"
+    _write_jsonl(
+        rows,
+        [
+            _row(
+                case_id="case_ndjson",
+                candidate_id="pose_1",
+                top_k_rank=1,
+                local_min_survived=True,
+                contact_rate=0.9,
+                h_bond_rate=0.8,
+                clash_before=4,
+                clash_after=1,
+            ),
+            _row(
+                case_id="case_ndjson",
+                candidate_id="pose_2",
+                top_k_rank=2,
+                local_min_survived=True,
+                contact_rate=0.7,
+                h_bond_rate=0.4,
+                clash_before=3,
+                clash_after=2,
+            ),
+        ],
+    )
+
+    payload = module.build_pocketmd_lite_operator_intake_from_rows(
+        rows_path=rows,
+        repo_root=REPO_ROOT,
+    )
+
+    assert payload["operator_input_source"]["supported_source_formats"] == [
+        "csv",
+        "tsv",
+        "json",
+        "jsonl",
+        "ndjson",
+    ]
+    assert payload["operator_input_source"]["row_count"] == 2
+    assert payload["operator_input_source"]["case_count"] == 1
+
+    report = survival_module.materialize_pocketmd_lite_topk_survival_report(
+        payload,
+        repo_root=REPO_ROOT,
+    )
+    assert report["status"] == "ready"
+    assert report["product_surface_ready"] is True
+    assert report["phase4_exit_gate"]["failed_criteria"] == []
 
 
 def test_blocks_invalid_checksum_and_non_topk_rank(tmp_path: Path) -> None:
