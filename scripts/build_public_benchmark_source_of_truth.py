@@ -273,6 +273,7 @@ def _dry_run_pose_case() -> dict[str, Any]:
     return {
         "case_id": "dry_run_symmetry_swap_pose",
         "source_family": "synthetic",
+        "benchmark_split": "synthetic-dry-run",
         "protein_structure_path": "synthetic://public_benchmark/dry_run/protein.pdb",
         "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "receptor_context": {

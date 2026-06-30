@@ -174,10 +174,16 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
     ]
     assert "pose_success_metric" in pose["required_fields"]
+    assert "benchmark_split" in pose["required_fields"]
     assert "reference_atoms" in pose["required_fields"]
+    assert pose["template"]["cases"][0]["benchmark_split"] == "CASF-core"
     assert (
         pose["template"]["cases"][0]["pose_success_metric"]
         == "symmetry_aware_ligand_rmsd_angstrom"
+    )
+    assert pose["minimum_evidence"]["benchmark_split_source"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_subset_manifest.json"
     )
     assert (
         "materialize_public_benchmark_pose_validity_input.py"

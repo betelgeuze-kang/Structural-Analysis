@@ -148,6 +148,7 @@ def _case_packet_row(
     return {
         "case_id": str(validation_row.get("case_id") or pose_case.get("case_id") or ""),
         "source_family": str(pose_case.get("source_family") or ""),
+        "benchmark_split": str(pose_case.get("benchmark_split") or ""),
         "pose_success_metric": str(pose_case.get("pose_success_metric") or ""),
         "subset_manifest_case_checksum": str(pose_case.get("subset_manifest_case_checksum") or ""),
         "status": str(validation_row.get("status") or "blocked"),

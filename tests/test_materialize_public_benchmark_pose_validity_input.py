@@ -28,6 +28,7 @@ def _subset_manifest() -> dict[str, object]:
             {
                 "case_id": "case_a",
                 "source_family": "CASF/PDBBind",
+                "benchmark_split": "CASF-core",
                 "complex_id": "case_a_complex",
                 "protein_structure_path": "benchmarks/case_a/protein.pdb",
                 "reference_ligand_path": "benchmarks/case_a/ligand_ref.sdf",
@@ -82,6 +83,7 @@ def test_pose_validity_input_materializer_builds_ready_real_case() -> None:
     assert payload["blockers"] == []
     case = payload["cases"][0]
     assert case["source_family"] == "CASF/PDBBind"
+    assert case["benchmark_split"] == "CASF-core"
     assert case["protein_structure_path"] == "benchmarks/case_a/protein.pdb"
     assert case["pose_success_metric"] == "symmetry_aware_ligand_rmsd_angstrom"
     assert case["rmsd_threshold_angstrom"] == 2.0

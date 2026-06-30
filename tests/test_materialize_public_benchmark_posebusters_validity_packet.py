@@ -27,6 +27,7 @@ def _pose_case(case_id: str = "case_a", source_family: str = "CASF/PDBBind") -> 
     return {
         "case_id": case_id,
         "source_family": source_family,
+        "benchmark_split": "CASF-core" if source_family != "synthetic" else "synthetic-dry-run",
         "protein_structure_path": "benchmarks/case_a/protein.pdb",
         "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "receptor_context": {"binding_site_frame": "operator_attached_frame"},
@@ -69,6 +70,7 @@ def test_posebusters_packet_materializer_builds_ready_real_case() -> None:
     assert packet["blockers"] == []
     row = packet["case_rows"][0]
     assert row["case_id"] == "case_a"
+    assert row["benchmark_split"] == "CASF-core"
     assert row["pose_success_metric"] == "symmetry_aware_ligand_rmsd_angstrom"
     assert row["pose_success"] is True
     assert {check["status"] for check in row["check_results"]} == {"pass"}

@@ -179,6 +179,7 @@ def _subset_case_template() -> dict[str, Any]:
 def _pose_case_template() -> dict[str, Any]:
     return {
         "case_id": "casf_pdbbind_subset_001",
+        "benchmark_split": "CASF-core",
         "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "reference_atoms": [
             {"element": "C", "x": 0.0, "y": 0.0, "z": 0.0},
@@ -804,6 +805,7 @@ def build_public_benchmark_operator_intake_packet(
             template={"cases": [_pose_case_template()]},
             owner_actions=[
                 "use case_id values from the materialized CASF/PDBBind subset manifest",
+                "preserve benchmark_split from the materialized subset manifest",
                 "preserve pose_success_metric=symmetry_aware_ligand_rmsd_angstrom from the subset manifest",
                 "attach reference and predicted ligand atom coordinates in the declared atom order",
                 "keep receptor context and symmetry permutation contracts explicit",
@@ -822,6 +824,7 @@ def build_public_benchmark_operator_intake_packet(
             minimum_evidence={
                 "case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
                 "case_id_source": str(DEFAULT_SUBSET_MANIFEST),
+                "benchmark_split_source": str(DEFAULT_SUBSET_MANIFEST),
                 "coordinate_contract": (
                     "reference_atoms and predicted_atoms in the declared ligand atom order"
                 ),

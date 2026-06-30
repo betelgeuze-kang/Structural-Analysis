@@ -61,6 +61,7 @@ def _materialize_pose_case(
     case = {
         "case_id": case_id,
         "source_family": subset_row.get("source_family") or pose_row.get("source_family") or "CASF/PDBBind",
+        "benchmark_split": subset_row.get("benchmark_split") or pose_row.get("benchmark_split") or "",
         "protein_structure_path": (
             subset_row.get("protein_structure_path")
             or pose_row.get("protein_structure_path")

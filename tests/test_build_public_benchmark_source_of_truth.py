@@ -385,6 +385,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "required_pose_fields": [
             "case_id",
             "pose_success_metric",
+            "benchmark_split",
             "reference_atoms",
             "predicted_atoms",
             "ligand_atom_order_contract",
@@ -703,6 +704,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert pose_packet["validator"]["required_pose_fields"] == [
         "case_id",
         "pose_success_metric",
+        "benchmark_split",
         "reference_atoms",
         "predicted_atoms",
         "ligand_atom_order_contract",

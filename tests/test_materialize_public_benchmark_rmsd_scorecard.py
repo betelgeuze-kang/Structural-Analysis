@@ -25,6 +25,7 @@ def _pose_case(case_id: str = "case_a", threshold: float = 2.0) -> dict[str, obj
     return {
         "case_id": case_id,
         "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
         "protein_structure_path": "benchmarks/case_a/protein.pdb",
         "reference_atoms": [
             {"element": "C", "x": 0.0, "y": 0.0, "z": 0.0},
@@ -66,6 +67,7 @@ def test_rmsd_scorecard_materializer_scores_real_pose_input() -> None:
     assert scorecard["pose_success_rate"] == 1.0
     row = scorecard["rows"][0]
     assert row["case_id"] == "case_a"
+    assert row["benchmark_split"] == "CASF-core"
     assert row["score"]["best_permutation"] == [0, 2, 1, 3]
     assert row["score"]["pose_success"] is True
 

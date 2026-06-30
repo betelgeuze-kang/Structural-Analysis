@@ -28,6 +28,7 @@ REQUIRED_POSE_SUCCESS_METRIC = "symmetry_aware_ligand_rmsd_angstrom"
 REQUIRED_POSE_FIELDS = (
     "case_id",
     "pose_success_metric",
+    "benchmark_split",
     "reference_atoms",
     "predicted_atoms",
     "ligand_atom_order_contract",

@@ -50,6 +50,7 @@ def _score_case(row: dict[str, Any]) -> dict[str, Any]:
     return {
         "case_id": str(row.get("case_id") or ""),
         "source_family": str(row.get("source_family") or ""),
+        "benchmark_split": str(row.get("benchmark_split") or ""),
         "subset_manifest_case_checksum": str(row.get("subset_manifest_case_checksum") or ""),
         "score": score,
     }

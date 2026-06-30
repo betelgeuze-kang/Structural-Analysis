@@ -24,6 +24,7 @@ def _valid_pose_case(case_id: str = "dry_run_pose") -> dict[str, object]:
     return {
         "case_id": case_id,
         "source_family": "synthetic",
+        "benchmark_split": "synthetic-dry-run",
         "protein_structure_path": "synthetic://protein.pdb",
         "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "receptor_context": {"binding_site_frame": "synthetic_identity_frame"},
@@ -88,6 +89,17 @@ def test_pose_validity_validator_blocks_invalid_pose_success_metric() -> None:
     assert result["status"] == "blocked"
     assert result["pose_validity_ready"] is False
     assert "wrong_metric_pose:pose_success_metric_invalid" in result["blockers"]
+
+
+def test_pose_validity_validator_requires_benchmark_split() -> None:
+    case = _valid_pose_case("missing_split_pose")
+    case.pop("benchmark_split")
+
+    result = module.validate_pose_validity_payload({"cases": [case]})
+
+    assert result["status"] == "blocked"
+    assert result["pose_validity_ready"] is False
+    assert "missing_split_pose:benchmark_split_missing" in result["blockers"]
 
 
 def test_pose_validity_validator_cli_writes_result(tmp_path: Path) -> None:
