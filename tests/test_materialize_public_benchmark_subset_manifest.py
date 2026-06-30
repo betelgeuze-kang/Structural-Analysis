@@ -118,6 +118,23 @@ def test_materializer_blocks_missing_ligand_atom_ids(tmp_path: Path) -> None:
     assert manifest["materialization_report"]["materialization_blocker_count"] == 0
 
 
+def test_materializer_blocks_missing_identity_symmetry_permutation(tmp_path: Path) -> None:
+    case = _case_descriptor(tmp_path, "case_a")
+    case["symmetry_permutation_contract"] = {
+        "permutations": [[0, 2, 1]],
+    }
+
+    manifest = module.materialize_subset_manifest(
+        {"target_subset_case_count": 1, "cases": [case]},
+        repo_root=tmp_path,
+    )
+
+    assert manifest["public_benchmark_ready"] is False
+    assert manifest["blockers"] == ["case_row_0:symmetry_identity_permutation_missing"]
+    assert manifest["materialization_report"]["validation_blocker_count"] == 1
+    assert manifest["materialization_report"]["materialization_blocker_count"] == 0
+
+
 def test_materializer_blocks_invalid_declared_source_checksum(tmp_path: Path) -> None:
     case = _case_descriptor(tmp_path, "case_a")
     case["source_checksum"] = "sha256:not-a-real-digest"
