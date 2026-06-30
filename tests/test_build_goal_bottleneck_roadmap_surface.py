@@ -133,7 +133,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert ci_handoff["owner"] == "release_ci_owner"
     assert ci_handoff["handoff_state"] == "external_owner_input_ready"
     assert ci_handoff["external_input_required"] is True
-    assert ci_handoff["evidence_state"] == "missing_tracked_ci_streak_evidence"
+    assert ci_handoff["evidence_state"] == "no_pull_request_run_source"
     assert ci_handoff["acceptance_criteria_count"] == 4
     assert "ci_streak_intake_packet" in ci_handoff["evidence_artifact_keys"]
     ux_handoff = release_area_handoffs[
