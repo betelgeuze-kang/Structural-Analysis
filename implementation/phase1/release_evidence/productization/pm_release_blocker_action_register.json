@@ -26,10 +26,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T03:28:04.081823+00:00",
+  "generated_at": "2026-06-30T03:31:00.956174+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:621676a17434e319e21e0a52a74e8a7d5b161cdadb0e71de9edca8003121da8f",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:7e26bab2e4386135b50b5a65aa69aea9b794347a7a2a0d546790b27920daa4bf",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:de1f2245ccf65bc7a4b88eac0ea4032aa8930d7d1ed972f6037784b62183230a",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:869f8f5118805880c82f3d02378b1a044cbd7bdfc2fbd7086b8a479213cb75f5",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -496,7 +496,7 @@
       "evidence_snapshot": {
         "artifact_count": 15,
         "blocker_count": 2,
-        "current_source_commit_sha": "0b94b2f6578a0c7ea5057a6338800c4534c02473",
+        "current_source_commit_sha": "df8a88265f1eb752d054be8c8f4cd42a0e7b4e1d",
         "max_age_days": 30.0,
         "pass_count": 13
       },
@@ -565,7 +565,7 @@
       "evidence_snapshot": {
         "artifact_count": 15,
         "blocker_count": 2,
-        "current_source_commit_sha": "0b94b2f6578a0c7ea5057a6338800c4534c02473",
+        "current_source_commit_sha": "df8a88265f1eb752d054be8c8f4cd42a0e7b4e1d",
         "max_age_days": 30.0,
         "pass_count": 13
       },
@@ -1106,7 +1106,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "0b94b2f6578a0c7ea5057a6338800c4534c02473",
+  "source_commit_sha": "df8a88265f1eb752d054be8c8f4cd42a0e7b4e1d",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
