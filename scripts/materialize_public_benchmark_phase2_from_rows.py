@@ -136,6 +136,7 @@ def _row_intake_contracts(
             "minimum_phase2_component_counts": minimum_component_counts,
             "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             "source_receipt_required_fields": common_source_receipt_fields,
+            "source_actuality_policy": row_bundle.SOURCE_ACTUALITY_POLICY,
             "feeds_components": ["casf_pdbbind_pose_success_harness"],
             "materialization_chain": [
                 "materialize_public_benchmark_subset_manifest",
@@ -159,6 +160,17 @@ def _row_intake_contracts(
             "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
             "default_rmsd_threshold_angstrom": DEFAULT_THRESHOLD_ANGSTROM,
             "minimum_phase2_component_counts": minimum_component_counts,
+            "source_actuality_policy": {
+                "required_pose_source_receipt_fields": list(
+                    row_bundle.POSE_SOURCE_RECEIPT_FIELDS
+                ),
+                "placeholder_markers_rejected": list(
+                    row_bundle.PLACEHOLDER_SOURCE_TEXT_MARKERS
+                ),
+                "placeholder_provenance_prefixes_rejected": list(
+                    row_bundle.PLACEHOLDER_PROVENANCE_PREFIXES
+                ),
+            },
             "feeds_components": [
                 "symmetry_aware_ligand_rmsd",
                 "posebusters_style_pose_validity",
@@ -189,6 +201,7 @@ def _row_intake_contracts(
             ),
             "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             "source_receipt_required_fields": common_source_receipt_fields,
+            "source_actuality_policy": row_bundle.SOURCE_ACTUALITY_POLICY,
             "computed_metrics": [
                 "roc_auc",
                 "enrichment_factor_1pct",
@@ -221,6 +234,7 @@ def _row_intake_contracts(
             ),
             "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             "source_receipt_required_fields": common_source_receipt_fields,
+            "source_actuality_policy": row_bundle.SOURCE_ACTUALITY_POLICY,
             "computed_comparison_fields": [
                 "case_count",
                 "engine_case_counts",
@@ -457,9 +471,21 @@ def build_public_benchmark_phase2_row_audit(
         }
 
     components = _components_from_report(materialization_report)
+    operator_materialization_report = operator_bundle.get("materialization_report", {})
+    if not isinstance(operator_materialization_report, dict):
+        operator_materialization_report = {}
+    source_actuality_check = operator_materialization_report.get("source_actuality_check", {})
+    if not isinstance(source_actuality_check, dict):
+        source_actuality_check = {}
+    source_actuality_blockers = [
+        str(blocker)
+        for blocker in source_actuality_check.get("blockers", [])
+        if str(blocker)
+    ]
     phase2_ready = bool(
         materialization_report.get("phase2_ready")
         and artifact_bundle.get("phase2_ready")
+        and not source_actuality_blockers
     )
     phase2_exit_gate = materialization_report.get("phase2_exit_gate")
     if not isinstance(phase2_exit_gate, dict):
@@ -473,6 +499,10 @@ def build_public_benchmark_phase2_row_audit(
         if str(blocker)
     ]
     blockers.extend(f"phase2_exit_gate::{criterion}" for criterion in failed_criteria)
+    blockers.extend(
+        f"operator_bundle_source_actuality::{blocker}"
+        for blocker in source_actuality_blockers
+    )
     blockers.extend(
         f"{component['component_id']}::{blocker}"
         for component in components
@@ -494,9 +524,8 @@ def build_public_benchmark_phase2_row_audit(
         "missing_row_inputs": [],
         "row_input_contract": ROW_INPUTS,
         "row_intake_contracts": row_intake_contracts,
-        "operator_bundle_materialization_report": operator_bundle.get(
-            "materialization_report", {}
-        ),
+            "operator_bundle_materialization_report": operator_materialization_report,
+            "operator_bundle_source_actuality_check": source_actuality_check,
         "phase2_exit_gate": phase2_exit_gate,
         "blockers": blockers,
         "component_count": len(components),

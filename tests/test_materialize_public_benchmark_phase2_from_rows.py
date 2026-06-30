@@ -84,8 +84,9 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                     **_write_case_files(root, case_id),
                     "ligand_atom_order_contract": ligand_contract,
                     "symmetry_permutation_contract": symmetry_contract,
-                    "source_license_or_accession": "CASF/PDBBind:test-accession",
-                    "provenance_ref": f"operator://casf-pdbbind/{case_id}",
+                    "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_id}",
+                    "source_checksum": _checksum(f"PDBBind-CASF-2016-core:{case_id}"),
+                    "provenance_ref": f"local-evidence://public-benchmark/casf-pdbbind/{case_id}",
                     "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
                     "rmsd_threshold_angstrom": 2.0,
                 }
@@ -108,7 +109,7 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                     "protein_structure_path": f"benchmarks/{case_id}/protein.pdb",
                     "receptor_context": {
                         "binding_site_frame": "operator_supplied_receptor_frame",
-                        "provenance_ref": f"operator://pose/{case_id}",
+                        "provenance_ref": f"local-evidence://public-benchmark/pose/{case_id}",
                     },
                 }
                 for case_id in case_ids
@@ -123,9 +124,9 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                     "benchmark_family": "DUD-E",
                     "target_id": "AA2AR",
                     "score_direction": "higher_is_better",
-                    "source_license_or_accession": "DUD-E:AA2AR",
-                    "source_checksum": _checksum("DUD-E:AA2AR"),
-                    "provenance_ref": "operator://dud-e/AA2AR",
+                    "source_license_or_accession": "DUD-E:AA2AR:release-2015",
+                    "source_checksum": _checksum("DUD-E:AA2AR:release-2015"),
+                    "provenance_ref": "local-evidence://public-benchmark/dud-e/AA2AR",
                     "scored_molecules": [
                         {"molecule_id": "active_1", "is_active": True, "score": 0.9},
                         {"molecule_id": "decoy_1", "is_active": False, "score": 0.1},
@@ -144,9 +145,9 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                     "benchmark_split": "CASF-core",
                     "complex_id": f"{case_ids[0]}_complex",
                     "reference_pose_id": f"{case_ids[0]}_reference",
-                    "source_license_or_accession": "CASF/PDBBind:test-accession",
+                    "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_ids[0]}",
                     "source_checksum": _checksum("vina-gnina-case-a"),
-                    "provenance_ref": f"operator://vina-gnina/{case_ids[0]}",
+                    "provenance_ref": f"local-evidence://public-benchmark/vina-gnina/{case_ids[0]}",
                     "engine_runs": [
                         {
                             "engine_id": "vina",
@@ -283,6 +284,8 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
         "vina_gnina_comparison_adapter": True,
         "dud_e_lit_pcba_enrichment": True,
     }
+    assert audit["operator_bundle_source_actuality_check"]["contract_pass"] is True
+    assert audit["operator_bundle_source_actuality_check"]["blockers"] == []
 
     assert (tmp_path / "operator_bundle.json").exists()
     assert (tmp_path / "harness_report.json").exists()
@@ -353,5 +356,42 @@ def test_public_benchmark_phase2_row_audit_blocks_one_case_smoke_rows(
     ]
     assert any(
         blocker.endswith("real_benchmark_case_count_below_required:1<12")
+        for blocker in audit["blockers"]
+    )
+
+
+def test_public_benchmark_phase2_row_audit_blocks_placeholder_source_receipts(
+    tmp_path: Path,
+) -> None:
+    rows = _write_phase2_rows(tmp_path)
+    subset_payload = json.loads(rows["subset"].read_text(encoding="utf-8"))
+    subset_payload["rows"][0]["source_license_or_accession"] = "CASF/PDBBind:test-accession"
+    subset_payload["rows"][0]["source_checksum"] = "sha256:" + "a" * 64
+    subset_payload["rows"][0]["provenance_ref"] = "operator://casf-pdbbind/case_01"
+    _write_json(rows["subset"], subset_payload)
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        subset_rows_path=rows["subset"],
+        pose_rows_path=rows["pose"],
+        enrichment_rows_path=rows["enrichment"],
+        vina_gnina_rows_path=rows["vina_gnina"],
+        target_subset_case_count=module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["contract_pass"] is False
+    assert audit["phase2_ready"] is False
+    source_check = audit["operator_bundle_source_actuality_check"]
+    assert source_check["contract_pass"] is False
+    assert "subset_rows:case_01:source_license_or_accession_placeholder" in source_check["blockers"]
+    assert "subset_rows:case_01:source_checksum_placeholder_digest" in source_check["blockers"]
+    assert "subset_rows:case_01:provenance_ref_placeholder" in source_check["blockers"]
+    assert any(
+        blocker.startswith("operator_bundle_source_actuality::subset_rows:case_01:")
         for blocker in audit["blockers"]
     )

@@ -7,6 +7,7 @@ import argparse
 import csv
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any
 
@@ -50,6 +51,37 @@ VINA_ENGINE_FIELDS = (
     "score_direction",
     "pose_success_rmsd_threshold_angstrom",
 )
+SOURCE_RECEIPT_FIELDS = (
+    "source_license_or_accession",
+    "source_checksum",
+    "provenance_ref",
+)
+POSE_SOURCE_RECEIPT_FIELDS = ("receptor_context.provenance_ref",)
+SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
+PLACEHOLDER_SOURCE_TEXT_MARKERS = (
+    "<operator",
+    "dry-run",
+    "dummy",
+    "example.invalid",
+    "example://",
+    "fake",
+    "fixture",
+    "mock",
+    "operator_supplied",
+    "placeholder",
+    "synthetic",
+    "test-accession",
+    "todo",
+    "unit-test",
+)
+PLACEHOLDER_PROVENANCE_PREFIXES = ("operator://",)
+SOURCE_ACTUALITY_POLICY = {
+    "required_source_receipt_fields": list(SOURCE_RECEIPT_FIELDS),
+    "required_pose_source_receipt_fields": list(POSE_SOURCE_RECEIPT_FIELDS),
+    "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+    "placeholder_markers_rejected": list(PLACEHOLDER_SOURCE_TEXT_MARKERS),
+    "placeholder_provenance_prefixes_rejected": list(PLACEHOLDER_PROVENANCE_PREFIXES),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -90,6 +122,139 @@ def _normalize_row(row: dict[str, Any]) -> dict[str, Any]:
         else:
             normalized[str(key)] = value
     return normalized
+
+
+def _string(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def _contains_placeholder_marker(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(marker in lowered for marker in PLACEHOLDER_SOURCE_TEXT_MARKERS)
+
+
+def _has_placeholder_provenance_prefix(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_PROVENANCE_PREFIXES)
+
+
+def _is_sha256_ref(value: Any) -> bool:
+    return bool(SOURCE_CHECKSUM_PATTERN.fullmatch(_string(value)))
+
+
+def _is_repeated_placeholder_checksum(value: Any) -> bool:
+    text = _string(value)
+    if not _is_sha256_ref(text):
+        return False
+    digest = text.split(":", 1)[1].lower()
+    return len(set(digest)) == 1
+
+
+def _source_receipt_actuality_blockers(
+    row: dict[str, Any],
+    *,
+    group_id: str,
+    row_key: str,
+) -> list[str]:
+    blockers: list[str] = []
+    prefix = f"{group_id}:{row_key}"
+    for field in SOURCE_RECEIPT_FIELDS:
+        value = row.get(field)
+        text = _string(value)
+        if not text:
+            blockers.append(f"{prefix}:{field}_missing")
+            continue
+        if _contains_placeholder_marker(text):
+            blockers.append(f"{prefix}:{field}_placeholder")
+        if field == "source_checksum":
+            if not _is_sha256_ref(text):
+                blockers.append(f"{prefix}:source_checksum_invalid")
+            elif _is_repeated_placeholder_checksum(text):
+                blockers.append(f"{prefix}:source_checksum_placeholder_digest")
+        if field == "provenance_ref" and _has_placeholder_provenance_prefix(text):
+            blockers.append(f"{prefix}:provenance_ref_placeholder")
+    return blockers
+
+
+def _pose_source_actuality_blockers(row: dict[str, Any], *, row_key: str) -> list[str]:
+    receptor_context = row.get("receptor_context")
+    provenance_ref = ""
+    if isinstance(receptor_context, dict):
+        provenance_ref = _string(receptor_context.get("provenance_ref"))
+    blockers: list[str] = []
+    prefix = f"pose_rows:{row_key}"
+    if not provenance_ref:
+        blockers.append(f"{prefix}:receptor_context.provenance_ref_missing")
+    elif _contains_placeholder_marker(provenance_ref) or _has_placeholder_provenance_prefix(provenance_ref):
+        blockers.append(f"{prefix}:receptor_context.provenance_ref_placeholder")
+    return blockers
+
+
+def _row_key(row: dict[str, Any], *, fallback: str, preferred_fields: tuple[str, ...]) -> str:
+    for field in preferred_fields:
+        value = _string(row.get(field))
+        if value:
+            return value
+    return fallback
+
+
+def _source_actuality_check(
+    *,
+    subset_rows: list[dict[str, Any]],
+    pose_rows: list[dict[str, Any]],
+    enrichment_targets: list[dict[str, Any]],
+    vina_gnina_cases: list[dict[str, Any]],
+) -> dict[str, Any]:
+    blockers: list[str] = []
+    for index, row in enumerate(subset_rows):
+        blockers.extend(
+            _source_receipt_actuality_blockers(
+                row,
+                group_id="subset_rows",
+                row_key=_row_key(row, fallback=f"row_{index}", preferred_fields=("case_id", "complex_id")),
+            )
+        )
+    for index, row in enumerate(pose_rows):
+        blockers.extend(
+            _pose_source_actuality_blockers(
+                row,
+                row_key=_row_key(row, fallback=f"row_{index}", preferred_fields=("case_id",)),
+            )
+        )
+    for index, row in enumerate(enrichment_targets):
+        blockers.extend(
+            _source_receipt_actuality_blockers(
+                row,
+                group_id="enrichment_rows",
+                row_key=_row_key(row, fallback=f"target_{index}", preferred_fields=("target_id",)),
+            )
+        )
+    for index, row in enumerate(vina_gnina_cases):
+        blockers.extend(
+            _source_receipt_actuality_blockers(
+                row,
+                group_id="vina_gnina_rows",
+                row_key=_row_key(row, fallback=f"case_{index}", preferred_fields=("case_id", "complex_id")),
+            )
+        )
+    blockers = sorted(dict.fromkeys(blockers))
+    return {
+        "contract_pass": not blockers,
+        "blocker_count": len(blockers),
+        "blockers": blockers,
+        "checked_row_counts": {
+            "subset_rows": len(subset_rows),
+            "pose_rows": len(pose_rows),
+            "enrichment_targets": len(enrichment_targets),
+            "vina_gnina_cases": len(vina_gnina_cases),
+        },
+        "policy": SOURCE_ACTUALITY_POLICY,
+        "claim_boundary": (
+            "This check rejects fixture, dry-run, placeholder, operator://, and repeated-digest "
+            "source receipts before Public Benchmark Phase 2 can be promoted as actual evidence. "
+            "It does not independently verify external licenses or download public benchmark data."
+        ),
+    }
 
 
 def _rows_from_json(payload: Any) -> list[dict[str, Any]]:
@@ -205,6 +370,12 @@ def build_public_benchmark_operator_bundle_from_rows(
     vina_gnina_rows = _load_rows(vina_gnina_rows_path)
     enrichment_targets = _build_enrichment_targets(enrichment_rows)
     vina_gnina_cases = _build_vina_gnina_cases(vina_gnina_rows)
+    source_actuality_check = _source_actuality_check(
+        subset_rows=subset_rows,
+        pose_rows=pose_rows,
+        enrichment_targets=enrichment_targets,
+        vina_gnina_cases=vina_gnina_cases,
+    )
     target_count = target_subset_case_count or len(subset_rows)
 
     input_paths = [
@@ -254,6 +425,8 @@ def build_public_benchmark_operator_bundle_from_rows(
             "vina_gnina_row_count": len(vina_gnina_rows),
             "vina_gnina_case_count": len(vina_gnina_cases),
             "accepted_row_formats": ["json", "jsonl", "ndjson", "csv"],
+            "source_actuality_check": source_actuality_check,
+            "source_actuality_blockers": source_actuality_check["blockers"],
             "phase2_harness_inputs": {
                 "casf_pdbbind_pose_success_harness": len(subset_rows) > 0 and len(pose_rows) > 0,
                 "symmetry_aware_ligand_rmsd": len(pose_rows) > 0,
