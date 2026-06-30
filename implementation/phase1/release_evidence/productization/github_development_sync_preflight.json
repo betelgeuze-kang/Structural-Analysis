@@ -1,6 +1,5 @@
 {
   "blockers": [
-    "worktree_not_clean",
     "remote_mutation_approval_required"
   ],
   "checks": {
@@ -11,7 +10,8 @@
     "main_synced_to_head": false,
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
-    "worktree_clean": false
+    "worktree_clean": true,
+    "worktree_only_ignored_evidence_dirty": true
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -20,7 +20,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-30T20:04:22.120711+00:00",
+  "generated_at": "2026-06-30T20:09:07.602442+00:00",
   "pending_remote_updates": [
     {
       "action": "fast-forward push current HEAD to main",
@@ -29,7 +29,7 @@
       "target": "origin/main"
     }
   ],
-  "preflight_pass": false,
+  "preflight_pass": true,
   "r4_disclosure": {
     "action": "fast-forward push current HEAD to main",
     "impact": "GitHub pending refs become externally visible at the local development state.",
@@ -48,13 +48,15 @@
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
+    "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "2fa0d76e4eb152db4048f2382bad572eb7eb1b2e",
-    "main_ahead_count": 145,
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+    "local_head_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
+    "main_ahead_count": 149,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "2fa0d76e4eb152db4048f2382bad572eb7eb1b2e",
+    "remote_feature_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
     "remote_main_ref": "origin/main",
     "remote_main_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
     "remote_safety": {
@@ -70,7 +72,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
   },
-  "status": "blocked"
+  "status": "approval_required"
 }

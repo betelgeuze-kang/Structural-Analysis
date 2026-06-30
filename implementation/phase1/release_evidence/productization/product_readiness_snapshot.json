@@ -2876,20 +2876,20 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-30T20:03:50.897512+00:00",
+  "generated_at": "2026-06-30T20:09:31.752133+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
-    "README.md": "sha256:1910e8847838bf50516c280053d89afd20c96b07b850ff7bd006ce5fe9651ae1",
-    "docs/commercialization-gap-current-state.md": "sha256:cfb8e5bc77be60af1bcda498bdb9f1d5fda12a2dfe7827d7ca3432a62994dbfa",
+    "README.md": "sha256:f7fe7017c8df5a7797788aeae2dd5ef114860e527df0f25e10363f1656bb8ede",
+    "docs/commercialization-gap-current-state.md": "sha256:c09e7e0d7be8771ff584d8da248bc14ce3e0f8fe575e6e1a6bfbf6ebb08f4abf",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:f072ae1fb2bb0f42266c520a4504a707322ceb5bdca27176d497166bc00b362d",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:143d96303976defe13e3a60588a5451805b7da804f2364fe91e667fedc01878d",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:7dc5f795b650e9b32188bed7e905d28b89cd8fa7b0e6faafa005f4b37eb7eb44",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:25d4d25d9703b5e28cc90afedcf41290186442bc5e8e67b1b1cc13ee25c156db",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:2629bf6e00701f1850d33c730f4edbc74174be15180007559b11ac415552c02c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:6acc836ce9456d1028ca1129405eed83789ef06006e141dac7723aae163d8655",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:0c27f6494128f41e81d446b62ba1d768ad2bed5440a8e14bc30620e6a9e99836",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:3cfe76e60d54d8af4478451872b81008eb46f737fd5666dd7166eebf84c9c58d",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:9cc233f8991a23e88e808c5d8d860f0f654b9b53ac7619aafc3eab9af0a58a08",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:eba760e8cf98a0966c81554d84839d0079e9a5afe7cdab1558036c0ddf430b26",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:60ca751a24b9fad59096a7a6db6317412f7c7299de1f05606148f54700918a74",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c34ff5d4f32d72483e5b37bbfa8f07dd7567e8cfe0bbe3af6b747ba9cd484abf",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:a6b3d48b8c42fa27650cb9951ff56ba8ee294b5d6da1f2e10bbfa80b9005408c",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:69d1d2cc6e3db8fee4c4857c2e703e34db981fe807af5479766b179b36e010e6",
@@ -2901,7 +2901,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4d1d5489b9c5dd4f2b89948337c509f2d4199014270972a3bf9c826278b65f3e",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:dd233cd6a20f8a3e443f3a2951048126a2aa0aab0978cf8e62dbf065dde7750b",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5dadcdb5f0b50a87133df436cc61f2d7a8bf928605e6ebcb28d8f76b40ddeaf8",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0c6af176cec219d5294be6788cca278954a810acceb1d1111284566c817f4cdd",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:30a83ea2f7d883ca8db99b6c7191a2270da8148b95c822d2a91a15b68d02b592",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:b4222bb65e949a15fe183dae24b2d2315426c11ba4e9bae897a1994e342a7c31",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -3556,7 +3556,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "b5a682a625da8e5b871d249c4822011579ce009f",
+  "source_commit_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3645,18 +3645,15 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [
-          "README.md",
-          "docs/commercialization-gap-current-state.md"
-        ],
-        "generated_at": "2026-06-30T20:02:22.333960+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-30T20:09:26.139618+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "a8e917fc04ffb5e1b292c565ac5421c58c8065de",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
         "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
@@ -3664,6 +3661,7 @@
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/check_github_development_sync_preflight.py",
           "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
@@ -3672,6 +3670,7 @@
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_check_github_development_sync_preflight.py",
           "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
@@ -3695,6 +3694,7 @@
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/check_github_development_sync_preflight.py",
           "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
@@ -3703,6 +3703,7 @@
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_check_github_development_sync_preflight.py",
           "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
@@ -3759,41 +3760,38 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T20:03:33.802876+00:00",
+        "generated_at": "2026-06-30T20:09:26.317992+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "b5a682a625da8e5b871d249c4822011579ce009f",
+        "source_commit_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T20:03:38.715914+00:00",
+        "generated_at": "2026-06-30T20:09:25.900126+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "b5a682a625da8e5b871d249c4822011579ce009f",
+        "source_commit_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
-        "changed_paths_since_source_commit": [
-          "README.md",
-          "docs/commercialization-gap-current-state.md"
-        ],
-        "generated_at": "2026-06-30T20:02:21.487468+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-30T20:09:25.141403+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "a8e917fc04ffb5e1b292c565ac5421c58c8065de",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
         "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_kind": "exact"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
@@ -3888,8 +3886,10 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "scripts/check_github_development_sync_preflight.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/report_pm_release_gate.py",
+          "tests/test_check_github_development_sync_preflight.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_report_pm_release_gate.py"
         ],
