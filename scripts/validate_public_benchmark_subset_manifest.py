@@ -12,6 +12,12 @@ from typing import Any
 
 SCHEMA_VERSION = "public-benchmark-subset-manifest-validation.v1"
 REQUIRED_POSE_SUCCESS_METRIC = "symmetry_aware_ligand_rmsd_angstrom"
+SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS = (
+    "CASF-core",
+    "PDBBind-core",
+    "PDBBind-refined",
+    "PDBBind-general",
+)
 LOCAL_SOURCE_FILE_FIELDS = (
     "protein_structure_path",
     "reference_ligand_path",
@@ -20,6 +26,7 @@ LOCAL_SOURCE_FILE_FIELDS = (
 REQUIRED_CASE_FIELDS = (
     "case_id",
     "source_family",
+    "benchmark_split",
     "complex_id",
     "protein_structure_path",
     "reference_ligand_path",
@@ -92,6 +99,9 @@ def _validate_case_row(row: dict[str, Any], *, index: int) -> list[str]:
                 )
     if row.get("source_family") not in {"CASF/PDBBind"}:
         blockers.append(f"case_row_{index}:unsupported_source_family")
+    benchmark_split = str(row.get("benchmark_split") or "").strip()
+    if benchmark_split and benchmark_split not in SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS:
+        blockers.append(f"case_row_{index}:unsupported_benchmark_split")
     atom_order = row.get("ligand_atom_order_contract")
     if isinstance(atom_order, dict):
         atom_count = int(atom_order.get("atom_count") or 0)
@@ -153,8 +163,10 @@ def validate_subset_manifest(payload: dict[str, Any]) -> dict[str, Any]:
         "claim_boundary": (
             "This validator checks the local subset manifest structure, required case-row "
             "fields, atom-order contracts, explicit symmetry permutations, and identity "
-            "permutation coverage. It does not download public benchmark files, verify "
-            "redistribution rights beyond declared fields, or claim benchmark performance."
+            "permutation coverage. It also requires a declared CASF/PDBBind benchmark "
+            "split so subset rows remain traceable to their benchmark role. It does not "
+            "download public benchmark files, verify redistribution rights beyond "
+            "declared fields, or claim benchmark performance."
         ),
     }
 

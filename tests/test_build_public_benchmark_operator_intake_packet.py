@@ -119,6 +119,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert subset["required_fields"] == [
         "case_id",
         "source_family",
+        "benchmark_split",
         "complex_id",
         "protein_structure_path",
         "reference_ligand_path",
@@ -138,6 +139,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         subset["template"]["cases"][0]["pose_success_metric"]
         == "symmetry_aware_ligand_rmsd_angstrom"
     )
+    assert subset["template"]["cases"][0]["benchmark_split"] == "CASF-core"
     assert subset["template"]["cases"][0]["rmsd_threshold_angstrom"] == 2.0
     assert subset["local_source_file_fields"] == [
         "protein_structure_path",
@@ -148,9 +150,15 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "casf_pdbbind_subset_manifest_contract"
     )
     assert subset["manifest_contract"]["nested_contracts"][0]["field"] == (
+        "benchmark_split"
+    )
+    assert subset["manifest_contract"]["nested_contracts"][0][
+        "supported_values"
+    ] == ["CASF-core", "PDBBind-core", "PDBBind-refined", "PDBBind-general"]
+    assert subset["manifest_contract"]["nested_contracts"][1]["field"] == (
         "ligand_atom_order_contract"
     )
-    assert subset["manifest_contract"]["nested_contracts"][1]["field"] == (
+    assert subset["manifest_contract"]["nested_contracts"][2]["field"] == (
         "symmetry_permutation_contract"
     )
     assert (
@@ -298,6 +306,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert (
         gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"]["case_count"] == 12
     )
+    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
+        "supported_benchmark_splits"
+    ] == ["CASF-core", "PDBBind-core", "PDBBind-refined", "PDBBind-general"]
     assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
         "ligand_atom_order_contract_fields"
     ] == ["atom_count", "atom_ids"]

@@ -38,6 +38,7 @@ def _case_descriptor(root: Path, case_id: str) -> dict[str, object]:
     return {
         "case_id": case_id,
         "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
         "complex_id": f"{case_id}_complex",
         **_write_case_files(root, case_id),
         "ligand_atom_order_contract": {
@@ -70,6 +71,7 @@ def test_materializer_builds_ready_subset_manifest_from_local_intake(tmp_path: P
     assert manifest["materialized_case_count"] == 1
     row = manifest["case_rows"][0]
     assert row["source_checksum"].startswith("sha256:")
+    assert row["benchmark_split"] == "CASF-core"
     assert row["pose_success_metric"] == "symmetry_aware_ligand_rmsd_angstrom"
     assert row["rmsd_threshold_angstrom"] == 2.0
     assert len(row["source_file_checksums"]) == 3
@@ -149,6 +151,21 @@ def test_materializer_blocks_invalid_declared_source_checksum(tmp_path: Path) ->
     assert manifest["materialization_report"]["validation_blocker_count"] == 1
     assert manifest["materialization_report"]["materialization_blocker_count"] == 0
     assert len(manifest["case_rows"][0]["source_file_checksums"]) == 3
+
+
+def test_materializer_blocks_unsupported_benchmark_split(tmp_path: Path) -> None:
+    case = _case_descriptor(tmp_path, "case_a")
+    case["benchmark_split"] = "private_test_split"
+
+    manifest = module.materialize_subset_manifest(
+        {"target_subset_case_count": 1, "cases": [case]},
+        repo_root=tmp_path,
+    )
+
+    assert manifest["public_benchmark_ready"] is False
+    assert manifest["blockers"] == ["case_row_0:unsupported_benchmark_split"]
+    assert manifest["materialization_report"]["validation_blocker_count"] == 1
+    assert manifest["materialization_report"]["materialization_blocker_count"] == 0
 
 
 def test_materializer_cli_writes_manifest_and_report(tmp_path: Path) -> None:

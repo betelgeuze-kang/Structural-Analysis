@@ -20,6 +20,7 @@ from validate_public_benchmark_subset_manifest import (  # noqa: E402
     LOCAL_SOURCE_FILE_FIELDS,
     REQUIRED_POSE_SUCCESS_METRIC,
     REQUIRED_CASE_FIELDS,
+    SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS,
     validate_subset_manifest,
 )
 
@@ -78,6 +79,7 @@ def _case_row_template() -> dict[str, Any]:
     return {
         "case_id": "casf_pdbbind_subset_001",
         "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
         "complex_id": "",
         "protein_structure_path": "",
         "reference_ligand_path": "",
@@ -191,6 +193,7 @@ def materialize_subset_manifest(
         "case_row_schema": {
             "required_fields": list(REQUIRED_CASE_FIELDS),
             "template": _case_row_template(),
+            "supported_benchmark_splits": list(SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS),
             "validation_command": (
                 "python3 scripts/validate_public_benchmark_subset_manifest.py "
                 "--manifest <materialized-subset-manifest.json> --fail-blocked"

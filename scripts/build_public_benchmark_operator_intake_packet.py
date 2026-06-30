@@ -15,7 +15,10 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
-from validate_public_benchmark_subset_manifest import REQUIRED_CASE_FIELDS  # noqa: E402
+from validate_public_benchmark_subset_manifest import (  # noqa: E402
+    REQUIRED_CASE_FIELDS,
+    SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS,
+)
 from validate_public_benchmark_pose_validity import REQUIRED_POSE_FIELDS  # noqa: E402
 from materialize_public_benchmark_subset_manifest import (  # noqa: E402
     LOCAL_SOURCE_FILE_FIELDS,
@@ -149,6 +152,7 @@ def _subset_case_template() -> dict[str, Any]:
     return {
         "case_id": "casf_pdbbind_subset_001",
         "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
         "complex_id": "SOURCE_COMPLEX_ID",
         "protein_structure_path": "operator_attached/casf_pdbbind/SOURCE_COMPLEX_ID/protein.pdb",
         "reference_ligand_path": "operator_attached/casf_pdbbind/SOURCE_COMPLEX_ID/reference_ligand.sdf",
@@ -264,10 +268,20 @@ def _casf_pdbbind_subset_manifest_contract(
         "produces": str(DEFAULT_SUBSET_MANIFEST),
         "target_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
+        "supported_benchmark_splits": list(SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS),
         "required_local_source_file_fields": [
             str(row) for row in LOCAL_SOURCE_FILE_FIELDS
         ],
         "nested_contracts": [
+            {
+                "field": "benchmark_split",
+                "required_fields": ["benchmark_split"],
+                "supported_values": list(SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS),
+                "validation_rules": [
+                    "benchmark_split is one of the supported CASF/PDBBind split labels",
+                    "benchmark_split stays attached to every materialized case row",
+                ],
+            },
             {
                 "field": "ligand_atom_order_contract",
                 "required_fields": ["atom_count", "atom_ids"],
@@ -748,6 +762,7 @@ def build_public_benchmark_operator_intake_packet(
                 "attach at least 12 local CASF/PDBBind case descriptors",
                 "attach protein, reference ligand, and predicted pose or docking-run files",
                 "declare license or accession references without redistributing restricted source data",
+                "declare benchmark_split for every case using a supported CASF/PDBBind split label",
                 "declare ligand atom order and symmetry permutations for every case",
                 "declare pose_success_metric=symmetry_aware_ligand_rmsd_angstrom and a positive RMSD threshold",
                 "run the subset materializer with --fail-blocked",
@@ -761,6 +776,7 @@ def build_public_benchmark_operator_intake_packet(
             minimum_evidence={
                 "case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
                 "source_family": "CASF/PDBBind",
+                "supported_benchmark_splits": list(SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS),
                 "local_source_file_fields": [
                     str(row) for row in LOCAL_SOURCE_FILE_FIELDS
                 ],

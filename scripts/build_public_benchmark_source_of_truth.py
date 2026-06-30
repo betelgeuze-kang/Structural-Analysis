@@ -21,6 +21,7 @@ from score_symmetry_aware_ligand_rmsd import (  # noqa: E402
 )
 from validate_public_benchmark_subset_manifest import (  # noqa: E402
     REQUIRED_CASE_FIELDS,
+    SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS,
     validate_subset_manifest,
 )
 from validate_public_benchmark_external_receipts import (  # noqa: E402
@@ -124,6 +125,7 @@ def _case_row_template() -> dict[str, Any]:
     return {
         "case_id": "casf_pdbbind_subset_001",
         "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
         "complex_id": "",
         "protein_structure_path": "",
         "reference_ligand_path": "",
@@ -163,6 +165,7 @@ def _operator_slot(
         "metric_role": metric_role,
         "required_fields": [
             "complex_id",
+            "benchmark_split",
             "protein_structure_path",
             "reference_ligand_path",
             "predicted_ligand_path_or_docking_run_id",
@@ -200,6 +203,7 @@ def build_subset_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "case_row_schema": {
             "required_fields": list(REQUIRED_CASE_FIELDS),
             "template": _case_row_template(),
+            "supported_benchmark_splits": list(SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS),
             "validation_command": (
                 "python3 scripts/validate_public_benchmark_subset_manifest.py "
                 "--manifest implementation/phase1/release_evidence/productization/"
@@ -1436,6 +1440,7 @@ def build_source_of_truth(
             "status": "ready_for_operator_intake",
             "intake_case_key": "cases",
             "required_case_fields": list(REQUIRED_CASE_FIELDS),
+            "supported_benchmark_splits": list(SUPPORTED_CASF_PDBBIND_BENCHMARK_SPLITS),
             "local_source_file_fields": [
                 "protein_structure_path",
                 "reference_ligand_path",

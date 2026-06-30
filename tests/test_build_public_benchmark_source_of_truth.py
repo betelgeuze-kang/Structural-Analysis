@@ -204,6 +204,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "minimum_evidence": {
             "case_count": 12,
             "source_family": "CASF/PDBBind",
+            "supported_benchmark_splits": [
+                "CASF-core",
+                "PDBBind-core",
+                "PDBBind-refined",
+                "PDBBind-general",
+            ],
             "local_source_file_fields": [
                 "protein_structure_path",
                 "reference_ligand_path",
@@ -342,6 +348,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "required_case_fields": [
             "case_id",
             "source_family",
+            "benchmark_split",
             "complex_id",
             "protein_structure_path",
             "reference_ligand_path",
@@ -353,6 +360,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "provenance_ref",
             "pose_success_metric",
             "rmsd_threshold_angstrom",
+        ],
+        "supported_benchmark_splits": [
+            "CASF-core",
+            "PDBBind-core",
+            "PDBBind-refined",
+            "PDBBind-general",
         ],
         "local_source_file_fields": [
             "protein_structure_path",
@@ -534,7 +547,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert (
         evidence_gap_register["casf_pdbbind_subset_intake"]["manifest_contract"][
             "nested_contracts"
-        ][1]["field"]
+        ][2]["field"]
         == "symmetry_permutation_contract"
     )
     assert evidence_gap_register["pose_coordinate_intake"][
@@ -589,6 +602,9 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert (
         gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"]["case_count"] == 12
     )
+    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
+        "supported_benchmark_splits"
+    ] == ["CASF-core", "PDBBind-core", "PDBBind-refined", "PDBBind-general"]
     assert gate_plan["casf_pdbbind_subset_intake"]["manifest_contract_id"] == (
         "casf_pdbbind_subset_manifest_contract"
     )
@@ -629,6 +645,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert subset["case_row_schema"]["required_fields"] == [
         "case_id",
         "source_family",
+        "benchmark_split",
         "complex_id",
         "protein_structure_path",
         "reference_ligand_path",
@@ -642,6 +659,13 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "rmsd_threshold_angstrom",
     ]
     assert subset["case_row_schema"]["template"]["source_family"] == "CASF/PDBBind"
+    assert subset["case_row_schema"]["template"]["benchmark_split"] == "CASF-core"
+    assert subset["case_row_schema"]["supported_benchmark_splits"] == [
+        "CASF-core",
+        "PDBBind-core",
+        "PDBBind-refined",
+        "PDBBind-general",
+    ]
     assert (
         "validate_public_benchmark_subset_manifest.py"
         in subset["case_row_schema"]["validation_command"]
@@ -793,6 +817,7 @@ def test_public_benchmark_source_of_truth_ready_is_derived_from_gate() -> None:
         {
             "case_id": "case_a",
             "source_family": "CASF/PDBBind",
+            "benchmark_split": "CASF-core",
             "complex_id": "1abc",
             "protein_structure_path": "benchmarks/case_a/protein.pdb",
             "reference_ligand_path": "benchmarks/case_a/ref.sdf",

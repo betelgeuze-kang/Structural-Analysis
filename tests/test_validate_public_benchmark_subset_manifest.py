@@ -24,6 +24,7 @@ def _complete_row(case_id: str) -> dict[str, object]:
     return {
         "case_id": case_id,
         "source_family": "CASF/PDBBind",
+        "benchmark_split": "CASF-core",
         "complex_id": f"{case_id}_complex",
         "protein_structure_path": f"benchmarks/{case_id}/protein.pdb",
         "reference_ligand_path": f"benchmarks/{case_id}/ligand_ref.sdf",
@@ -125,6 +126,21 @@ def test_validate_manifest_rejects_invalid_source_checksum() -> None:
 
     assert result["public_benchmark_ready"] is False
     assert result["blockers"] == ["case_row_0:source_checksum_invalid"]
+
+
+def test_validate_manifest_rejects_unsupported_benchmark_split() -> None:
+    row = _complete_row("case_a")
+    row["benchmark_split"] = "private_test_split"
+
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "case_rows": [row],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert result["blockers"] == ["case_row_0:unsupported_benchmark_split"]
 
 
 def test_validate_manifest_requires_symmetry_aware_pose_success_metric() -> None:
