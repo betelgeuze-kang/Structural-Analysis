@@ -1,11 +1,11 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-06-30T12:09:16.963748+00:00",
-  "source_commit_sha": "b0e100eecc5f8a4879cd85336d3cf79c661ef34b",
+  "generated_at": "2026-06-30T12:11:41.437397+00:00",
+  "source_commit_sha": "a705fe6db686db0a4d7434676c6e78549b901082",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_freeze_boundary_status.json": "sha256:85722797bc2ff90c5fc6492aee108418d64ab73b5965d9770c0969a6e777c0f5",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:acc09d2d5bdeb8709eb95adde21e6104371e7578a948523810f90ad6f99e552a",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:d75ae5d03caad28885b440c2b8cbe7ecd25309143b95185bacb80c50d3db0fd3",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json": "sha256:9dcb3fdb95c865eb269a4a6b2049e42dcccd499f585fa0c92c59931c88f18e28",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json": "sha256:becfdc4a1808f049c6d1737a9d34a580d24c295ed700f5f205318c8313576a82",
