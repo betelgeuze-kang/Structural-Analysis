@@ -2,6 +2,7 @@
   "blockers": [
     "checkpoint_load_scale_below_required_full_load",
     "checkpoint_resolution_no_full_load_candidate",
+    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_has_blockers"
   ],
@@ -1427,20 +1428,11 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T08:58:37.382489+00:00",
+  "generated_at": "2026-06-30T09:02:22.286769+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
-      "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-      "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-      "implementation/phase1/release_evidence/productization/non_expert_release_briefing_report.json",
-      "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-      "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-      "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-      "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-      "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-      "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-      "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-      "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+      "scripts/build_product_readiness_snapshot.py",
+      "tests/test_build_product_readiness_snapshot.py"
     ],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -1468,8 +1460,8 @@
     "rocm_hip_required": true,
     "runtime_blockers": [],
     "source_commit_sha": "ecd6490bf7a095de9efe4ec5cd2e83aad59a711b",
-    "source_state_fresh": true,
-    "source_state_kind": "receipt_only_commit",
+    "source_state_fresh": false,
+    "source_state_kind": "non_receipt_paths_changed",
     "status": "partial"
   },
   "input_checksums": {
@@ -1489,6 +1481,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "5d6f3adcf92c6b1a3f44b025179b20b1aa880b4c",
+  "source_commit_sha": "430ccb51fa9de3b7584fcb8ac60b86ccb22fb6c2",
   "status": "blocked"
 }

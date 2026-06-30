@@ -28,6 +28,69 @@
     "ranking_pr_auc_ci_low_min": 0.45,
     "top20_hit_rate_min": 0.2
   },
+  "first_target_execution_preflight_blocker": {
+    "blocked_phase3_criteria": [
+      "ranking_pr_auc_ci_low_min",
+      "top20_hit_rate_min",
+      "decoys_above_positive_count_max",
+      "no_positive_out_anchored_by_top_decoys"
+    ],
+    "blockers": [
+      "DRD2:ranking_pr_auc_ci_low_required",
+      "DRD2:top20_hit_rate_required",
+      "DRD2:decoys_above_positive_count_required",
+      "DRD2:positive_out_anchored_by_top_decoys_required"
+    ],
+    "claim_boundary": "This row is a read-only preflight over the current GPCR operator template and suite report. It does not infer missing metrics or promote broad GPCR claims.",
+    "current_ready": false,
+    "current_values": {
+      "decoys_above_positive_count": null,
+      "positive_out_anchored_by_top_decoys": null,
+      "ranking_pr_auc_ci_low": null,
+      "top20_hit_rate": null
+    },
+    "first_blocker": "DRD2:ranking_pr_auc_ci_low_required",
+    "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
+    "minimum_evidence": {
+      "criterion_by_field": {
+        "decoys_above_positive_count": "decoys_above_positive_count_max",
+        "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+        "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate": "top20_hit_rate_min"
+      },
+      "required_operator_fields": [
+        "target_id",
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys"
+      ],
+      "target_id": "DRD2",
+      "thresholds": {
+        "decoys_above_positive_count": "<=0",
+        "positive_out_anchored_by_top_decoys": false,
+        "ranking_pr_auc_ci_low": ">=0.45",
+        "top20_hit_rate": ">=0.2"
+      }
+    },
+    "missing_operator_fields": [
+      "ranking_pr_auc_ci_low",
+      "top20_hit_rate",
+      "decoys_above_positive_count",
+      "positive_out_anchored_by_top_decoys"
+    ],
+    "phase3_blocked": true,
+    "root_cause_tags": [
+      "operator_values_required"
+    ],
+    "slot_id": "drd2_hard_decoy_metrics",
+    "status": "operator_input_required",
+    "suite_contract_pass": false,
+    "suite_status": "blocked",
+    "target_id": "DRD2",
+    "target_priority": 1,
+    "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
+  },
   "gate_unblock_plan": [
     {
       "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
@@ -157,12 +220,12 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-06-30T01:30:28.666751+00:00",
+  "generated_at": "2026-06-30T09:02:41.455682+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1d1cf9fbbeac7a55ea0ab43180eef1291cc254a2c9ffbca44bb3dc08a4e48144",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:a076379fc363426d995c31c9919b4b3d6b694cf4da547f7b19547f4de1ff5984",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:abaff6768125fe389cf0ba7ce261f3b9ec4c408affe5d4ca832566c6ebf8a725",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:ffff585c3520c2aa2044ea092422c9d18a714814e9fc19d7d7d5b359b4cc7e97",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:84fa19ec0e035aa50ea4266fcc59cad4257953c08a3526bc47fb3f936d080f47"
   },
   "linked_artifacts": {
@@ -254,18 +317,213 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "9eb7edaf52a38ce1d287fba839cc167c9d8afe83",
+  "source_commit_sha": "dfd6a81df264e1dd4c42f95721ebf0d9094a917a",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
     "current_blocker_count": 12,
     "first_blocked_target": "DRD2",
+    "first_target_execution_preflight_blocker": "DRD2:ranking_pr_auc_ci_low_required",
+    "first_target_execution_preflight_target": "DRD2",
     "gate_unblock_plan_count": 3,
     "minimum_metric_field_count_per_target": 4,
     "minimum_target_count": 3,
-    "required_slot_count": 3
+    "required_slot_count": 3,
+    "target_execution_preflight_count": 3
   },
   "summary_line": "GPCR hard-decoy operator intake packet: READY | targets=3 | first_blocked_target=DRD2",
+  "target_execution_preflight": [
+    {
+      "blocked_phase3_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys"
+      ],
+      "blockers": [
+        "DRD2:ranking_pr_auc_ci_low_required",
+        "DRD2:top20_hit_rate_required",
+        "DRD2:decoys_above_positive_count_required",
+        "DRD2:positive_out_anchored_by_top_decoys_required"
+      ],
+      "claim_boundary": "This row is a read-only preflight over the current GPCR operator template and suite report. It does not infer missing metrics or promote broad GPCR claims.",
+      "current_ready": false,
+      "current_values": {
+        "decoys_above_positive_count": null,
+        "positive_out_anchored_by_top_decoys": null,
+        "ranking_pr_auc_ci_low": null,
+        "top20_hit_rate": null
+      },
+      "first_blocker": "DRD2:ranking_pr_auc_ci_low_required",
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
+      "minimum_evidence": {
+        "criterion_by_field": {
+          "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+          "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate": "top20_hit_rate_min"
+        },
+        "required_operator_fields": [
+          "target_id",
+          "ranking_pr_auc_ci_low",
+          "top20_hit_rate",
+          "decoys_above_positive_count",
+          "positive_out_anchored_by_top_decoys"
+        ],
+        "target_id": "DRD2",
+        "thresholds": {
+          "decoys_above_positive_count": "<=0",
+          "positive_out_anchored_by_top_decoys": false,
+          "ranking_pr_auc_ci_low": ">=0.45",
+          "top20_hit_rate": ">=0.2"
+        }
+      },
+      "missing_operator_fields": [
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys"
+      ],
+      "phase3_blocked": true,
+      "root_cause_tags": [
+        "operator_values_required"
+      ],
+      "slot_id": "drd2_hard_decoy_metrics",
+      "status": "operator_input_required",
+      "suite_contract_pass": false,
+      "suite_status": "blocked",
+      "target_id": "DRD2",
+      "target_priority": 1,
+      "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
+    },
+    {
+      "blocked_phase3_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys"
+      ],
+      "blockers": [
+        "HTR2A:ranking_pr_auc_ci_low_required",
+        "HTR2A:top20_hit_rate_required",
+        "HTR2A:decoys_above_positive_count_required",
+        "HTR2A:positive_out_anchored_by_top_decoys_required"
+      ],
+      "claim_boundary": "This row is a read-only preflight over the current GPCR operator template and suite report. It does not infer missing metrics or promote broad GPCR claims.",
+      "current_ready": false,
+      "current_values": {
+        "decoys_above_positive_count": null,
+        "positive_out_anchored_by_top_decoys": null,
+        "ranking_pr_auc_ci_low": null,
+        "top20_hit_rate": null
+      },
+      "first_blocker": "HTR2A:ranking_pr_auc_ci_low_required",
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
+      "minimum_evidence": {
+        "criterion_by_field": {
+          "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+          "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate": "top20_hit_rate_min"
+        },
+        "required_operator_fields": [
+          "target_id",
+          "ranking_pr_auc_ci_low",
+          "top20_hit_rate",
+          "decoys_above_positive_count",
+          "positive_out_anchored_by_top_decoys"
+        ],
+        "target_id": "HTR2A",
+        "thresholds": {
+          "decoys_above_positive_count": "<=0",
+          "positive_out_anchored_by_top_decoys": false,
+          "ranking_pr_auc_ci_low": ">=0.45",
+          "top20_hit_rate": ">=0.2"
+        }
+      },
+      "missing_operator_fields": [
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys"
+      ],
+      "phase3_blocked": true,
+      "root_cause_tags": [
+        "operator_values_required"
+      ],
+      "slot_id": "htr2a_hard_decoy_metrics",
+      "status": "operator_input_required",
+      "suite_contract_pass": false,
+      "suite_status": "blocked",
+      "target_id": "HTR2A",
+      "target_priority": 2,
+      "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
+    },
+    {
+      "blocked_phase3_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys"
+      ],
+      "blockers": [
+        "OPRM1:ranking_pr_auc_ci_low_required",
+        "OPRM1:top20_hit_rate_required",
+        "OPRM1:decoys_above_positive_count_required",
+        "OPRM1:positive_out_anchored_by_top_decoys_required"
+      ],
+      "claim_boundary": "This row is a read-only preflight over the current GPCR operator template and suite report. It does not infer missing metrics or promote broad GPCR claims.",
+      "current_ready": false,
+      "current_values": {
+        "decoys_above_positive_count": null,
+        "positive_out_anchored_by_top_decoys": null,
+        "ranking_pr_auc_ci_low": null,
+        "top20_hit_rate": null
+      },
+      "first_blocker": "OPRM1:ranking_pr_auc_ci_low_required",
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
+      "minimum_evidence": {
+        "criterion_by_field": {
+          "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+          "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate": "top20_hit_rate_min"
+        },
+        "required_operator_fields": [
+          "target_id",
+          "ranking_pr_auc_ci_low",
+          "top20_hit_rate",
+          "decoys_above_positive_count",
+          "positive_out_anchored_by_top_decoys"
+        ],
+        "target_id": "OPRM1",
+        "thresholds": {
+          "decoys_above_positive_count": "<=0",
+          "positive_out_anchored_by_top_decoys": false,
+          "ranking_pr_auc_ci_low": ">=0.45",
+          "top20_hit_rate": ">=0.2"
+        }
+      },
+      "missing_operator_fields": [
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys"
+      ],
+      "phase3_blocked": true,
+      "root_cause_tags": [
+        "operator_values_required"
+      ],
+      "slot_id": "oprm1_hard_decoy_metrics",
+      "status": "operator_input_required",
+      "suite_contract_pass": false,
+      "suite_status": "blocked",
+      "target_id": "OPRM1",
+      "target_priority": 3,
+      "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
+    }
+  ],
+  "target_execution_preflight_count": 3,
   "target_slots": [
     {
       "exit_criteria": {

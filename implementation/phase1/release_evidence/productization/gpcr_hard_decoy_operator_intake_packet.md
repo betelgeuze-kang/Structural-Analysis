@@ -20,6 +20,14 @@
 | `HTR2A` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys"], "target_id": "HTR2A", "thresholds": {"decoys_above_positive_count": "<=0", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
 | `OPRM1` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys"], "target_id": "OPRM1", "thresholds": {"decoys_above_positive_count": "<=0", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
 
+## Target Execution Preflight
+
+| Target | Ready | Missing Fields | First Blocker |
+|---|---|---|---|
+| `DRD2` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys` | `DRD2:ranking_pr_auc_ci_low_required` |
+| `HTR2A` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys` | `HTR2A:ranking_pr_auc_ci_low_required` |
+| `OPRM1` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys` | `OPRM1:ranking_pr_auc_ci_low_required` |
+
 ## Materialization Sequence
 
 - `fill_gpcr_hard_decoy_operator_template`: `edit implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json`
