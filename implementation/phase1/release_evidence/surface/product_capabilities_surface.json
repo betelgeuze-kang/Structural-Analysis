@@ -235,7 +235,7 @@
               ]
             },
             "slot_id": "casf_pdbbind_subset_intake",
-            "template_artifact": "",
+            "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
             "unblocks_tier_beta_criteria": [
               "casf_pdbbind_subset_materialized",
               "external_receipts_attached"
@@ -253,7 +253,7 @@
               "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
             },
             "slot_id": "pose_coordinate_intake",
-            "template_artifact": "",
+            "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
             "unblocks_tier_beta_criteria": [
               "real_pose_validity_packet_materialized",
               "symmetry_rmsd_scorecard_real_cases",
@@ -282,7 +282,7 @@
               ]
             },
             "slot_id": "dud_e_lit_pcba_enrichment_intake",
-            "template_artifact": "",
+            "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
             "unblocks_tier_beta_criteria": [
               "dud_e_lit_pcba_enrichment_ready",
               "external_receipts_attached"
@@ -314,7 +314,7 @@
               ]
             },
             "slot_id": "vina_gnina_comparison_intake",
-            "template_artifact": "",
+            "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
             "unblocks_tier_beta_criteria": [
               "vina_gnina_comparison_ready",
               "external_receipts_attached"
@@ -1079,28 +1079,28 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-06-30T00:42:19.213218+00:00",
+  "generated_at": "2026-06-30T00:59:26.051407+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:cd9721b5f888cdaf6b8a21d4eebc61236491bf73b2347ab7c3ae667b52fc88b9",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:beb648a879262dbf52294fb7a9df05ffe59f20aa9c5d32d2a4ae0d06511dc496",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:dbe8a09a77f11d85a148751721fc71d0c8ac0e087ca3038f575c8f5f9a63855d",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json": "sha256:9621d05ff0cf781897321f8b5000cd4620c88972b98c7c852f795ab171abeb3b",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md": "sha256:4e8a44624068cda8110c2986014663a2bddb61333cc5e81d90e77d8477d0401e",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:fdda22413819eb04a979306b7c2434a111ecc1bd7589cf825346bcb9a291b586",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:5d90e0a1f3d1377ddf2ef35fcb10715b4a45144a19a53c8644843f50ee7bbdc8",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:0c983911bdb62b7f459cefe173940d7b83c5a8a3aeaa38dac05251d045dd6acf",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:c0054de6c721e4740ab9cb1f4a19e545ac1eaf6542d207002563e4c049d937d1",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:a43599c68895956bf028bbd1607a9b4bb32a333310d21b38a762036a537f83cb",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:8aa69e769de7300d9c9f3ecf32b01690d25aa4ce6c37908dc1cb604f1825ae6f",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:ef50c77b0801fe9fcfd65e36994db0ae0130b3a32edc7ef336297402a16f070e",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:e96fad780acb4d2dadc7c93c9931503adaaf08789fd4278738b18a650ea4cba5",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:c13dbc2c6b3db85810af7a60d723b1c42840fdb2459f4d636f27c86a8488a8e0",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:96ac96e9d3bc5d25c04d91fba957e191231dc85afadbbd513758548e48bb4dfa",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:095b966c0c66563716ea5ec6ccc577ef9785eee12221df4563491e411853d1a2",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:6e8480060290850cbf6a88441ea3df1a18f85cb3c2f00a84130e839503387f89",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:9bb7adaacc5bb20b5197dc17d4ef6dd9d2ce000fcc16c831aaaffddf3c8546b2",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md": "sha256:40a6b7980527fd62daa075b2672b83fb839804c8f6c5e757c62ede460d55bff5",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:9626f5bb1441fbdfc3f552eb0ed1016f53a0ca3c3c1261d7e3666d35cc8eb15b",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:d6c08018f941d5185e11c8a26b925e7e1db726cb153dfef0b33ace68c262f247",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:0d57c89df5c33d8fba0557d7f8cf421c301ed4bfe754a95b892df3abecaca0ed",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
-    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:6403c0b8b1484cdc1469bb419ac9195087037a784bacbcf32eee04ef0e424823",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:02e6131c7b0a15199594c6c8d66618098cc5aa928eb4ecea34ab76ffbef377f3",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
@@ -1127,7 +1127,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
+  "source_commit_sha": "5a3c8481a9b74f7699820c1e6b595666a5c3fdd4",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
