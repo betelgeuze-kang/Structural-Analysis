@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -21,20 +22,20 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def _sha(char: str) -> str:
-    return "sha256:" + char * 64
+def _sha(seed: str) -> str:
+    return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
 def _subset_row(case_id: str) -> dict[str, object]:
     return {
         "case_id": case_id,
-        "source_license_or_accession": f"CASF/PDBBind:{case_id}",
-        "source_checksum": _sha("a"),
-        "provenance_ref": f"operator://subset/{case_id}",
+        "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_id}",
+        "source_checksum": _sha(f"PDBBind-CASF-2016-core:{case_id}"),
+        "provenance_ref": f"local-evidence://public-benchmark/subset/{case_id}",
         "source_file_checksums": {
-            f"{case_id}/protein.pdb": _sha("b"),
-            f"{case_id}/ligand.sdf": _sha("c"),
-            f"{case_id}/pose.sdf": _sha("d"),
+            f"{case_id}/protein.pdb": _sha(f"{case_id}:protein"),
+            f"{case_id}/ligand.sdf": _sha(f"{case_id}:ligand"),
+            f"{case_id}/pose.sdf": _sha(f"{case_id}:pose"),
         },
     }
 
@@ -68,9 +69,9 @@ def test_external_receipts_pass_for_complete_rows() -> None:
             "target_rows": [
                 {
                     "target_id": "target_a",
-                    "source_license_or_accession": "DUD-E:target_a",
-                    "source_checksum": _sha("e"),
-                    "provenance_ref": "operator://enrichment/target_a",
+                    "source_license_or_accession": "DUD-E:target_a:release-2015",
+                    "source_checksum": _sha("DUD-E:target_a:release-2015"),
+                    "provenance_ref": "local-evidence://public-benchmark/enrichment/target_a",
                 }
             ]
         },
@@ -78,9 +79,9 @@ def test_external_receipts_pass_for_complete_rows() -> None:
             "case_rows": [
                 {
                     "case_id": "case_a",
-                    "source_license_or_accession": "CASF/PDBBind:case_a",
-                    "source_checksum": _sha("f"),
-                    "provenance_ref": "operator://vina-gnina/case_a",
+                    "source_license_or_accession": "PDBBind-CASF-2016-core:case_a",
+                    "source_checksum": _sha("vina-gnina:case_a"),
+                    "provenance_ref": "local-evidence://public-benchmark/vina-gnina/case_a",
                 }
             ]
         },
@@ -130,6 +131,29 @@ def test_external_receipts_require_subset_provenance_and_valid_checksums() -> No
     assert coverage["missing_expected_artifact_roles"] == [
         "dud_e_lit_pcba_enrichment_scorecard",
         "vina_gnina_comparison_adapter",
+    ]
+
+
+def test_external_receipts_reject_placeholder_source_receipts() -> None:
+    row = _subset_row("case_a")
+    row["source_license_or_accession"] = "CASF/PDBBind:test-accession"
+    row["source_checksum"] = "sha256:" + "a" * 64
+    row["provenance_ref"] = "operator://subset/case_a"
+    row["source_file_checksums"] = {"case_a/protein.pdb": "sha256:" + "b" * 64}
+
+    result = module.validate_external_receipts(
+        subset_manifest={"case_rows": [row]},
+        enrichment_scorecard={"target_rows": []},
+        vina_gnina_comparison_adapter={"case_rows": []},
+    )
+
+    assert result["public_benchmark_external_receipts_ready"] is False
+    assert "subset_manifest:case_a:source_license_or_accession_placeholder" in result["blockers"]
+    assert "subset_manifest:case_a:source_checksum_placeholder_digest" in result["blockers"]
+    assert "subset_manifest:case_a:provenance_ref_placeholder" in result["blockers"]
+    assert "subset_manifest:case_a:source_file_checksum_0_placeholder_digest" in result["blockers"]
+    assert result["source_actuality_policy"]["placeholder_provenance_prefixes_rejected"] == [
+        "operator://"
     ]
 
 

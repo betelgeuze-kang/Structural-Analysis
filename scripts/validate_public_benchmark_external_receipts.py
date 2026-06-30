@@ -30,6 +30,28 @@ REQUIRED_RECEIPT_FIELDS_BY_ARTIFACT_ROLE = {
     "dud_e_lit_pcba_enrichment_scorecard": REQUIRED_RECEIPT_FIELDS,
     "vina_gnina_comparison_adapter": REQUIRED_RECEIPT_FIELDS,
 }
+PLACEHOLDER_SOURCE_TEXT_MARKERS = (
+    "<operator",
+    "dry-run",
+    "dummy",
+    "example.invalid",
+    "example://",
+    "fake",
+    "fixture",
+    "mock",
+    "operator_supplied",
+    "placeholder",
+    "synthetic",
+    "test-accession",
+    "todo",
+    "unit-test",
+)
+PLACEHOLDER_PROVENANCE_PREFIXES = ("operator://",)
+SOURCE_ACTUALITY_POLICY = {
+    "placeholder_markers_rejected": list(PLACEHOLDER_SOURCE_TEXT_MARKERS),
+    "placeholder_provenance_prefixes_rejected": list(PLACEHOLDER_PROVENANCE_PREFIXES),
+    "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -50,6 +72,24 @@ def _string(value: Any) -> str:
 
 def _is_sha256_ref(value: Any) -> bool:
     return bool(re.fullmatch(r"sha256:[0-9a-fA-F]{64}", _string(value)))
+
+
+def _contains_placeholder_marker(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(marker in lowered for marker in PLACEHOLDER_SOURCE_TEXT_MARKERS)
+
+
+def _has_placeholder_provenance_prefix(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_PROVENANCE_PREFIXES)
+
+
+def _is_repeated_placeholder_checksum(value: Any) -> bool:
+    text = _string(value)
+    if not _is_sha256_ref(text):
+        return False
+    digest = text.split(":", 1)[1].lower()
+    return len(set(digest)) == 1
 
 
 def _receipt_blockers(
@@ -77,12 +117,25 @@ def _receipt_blockers(
                     blockers.append(
                         f"{row_key}:source_file_checksum_{checksum_index}_invalid"
                     )
+                elif _is_repeated_placeholder_checksum(checksum):
+                    blockers.append(
+                        f"{row_key}:source_file_checksum_{checksum_index}_placeholder_digest"
+                    )
             continue
-        if not _string(row.get(field)):
+        value = row.get(field)
+        text = _string(value)
+        if not text:
             blockers.append(f"{row_key}:{field}_blank")
+            continue
+        if _contains_placeholder_marker(text):
+            blockers.append(f"{row_key}:{field}_placeholder")
+        if field == "provenance_ref" and _has_placeholder_provenance_prefix(text):
+            blockers.append(f"{row_key}:provenance_ref_placeholder")
     checksum = row.get("source_checksum")
     if checksum not in (None, "") and not _is_sha256_ref(checksum):
         blockers.append(f"{row_key}:source_checksum_invalid")
+    elif _is_repeated_placeholder_checksum(checksum):
+        blockers.append(f"{row_key}:source_checksum_placeholder_digest")
     return blockers
 
 
@@ -261,6 +314,7 @@ def validate_external_receipts(
         ),
         "required_receipt_fields": list(REQUIRED_RECEIPT_FIELDS),
         "required_subset_receipt_fields": list(REQUIRED_SUBSET_RECEIPT_FIELDS),
+        "source_actuality_policy": SOURCE_ACTUALITY_POLICY,
         "receipt_coverage": receipt_coverage,
         "receipt_rows": receipt_rows,
         "blocker_count": len(blockers),

@@ -70,8 +70,9 @@ def _case_payload(root: Path, case_id: str) -> tuple[dict[str, object], dict[str
         **_write_case_files(root, case_id),
         "ligand_atom_order_contract": ligand_contract,
         "symmetry_permutation_contract": symmetry_contract,
-        "source_license_or_accession": "CASF/PDBBind:test-accession",
-        "provenance_ref": f"operator://casf-pdbbind/{case_id}",
+        "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_id}",
+        "source_checksum": _checksum(f"PDBBind-CASF-2016-core:{case_id}"),
+        "provenance_ref": f"local-evidence://public-benchmark/casf-pdbbind/{case_id}",
         "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "rmsd_threshold_angstrom": 2.0,
     }
@@ -86,7 +87,7 @@ def _case_payload(root: Path, case_id: str) -> tuple[dict[str, object], dict[str
         "protein_structure_path": f"benchmarks/{case_id}/protein.pdb",
         "receptor_context": {
             "binding_site_frame": "operator_supplied_receptor_frame",
-            "provenance_ref": f"operator://pose/{case_id}",
+            "provenance_ref": f"local-evidence://public-benchmark/pose/{case_id}",
         },
     }
     return subset_case, pose_case
@@ -117,9 +118,9 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                         {"molecule_id": "active_1", "is_active": True, "score": 0.9},
                         {"molecule_id": "decoy_1", "is_active": False, "score": 0.1},
                     ],
-                    "source_license_or_accession": "DUD-E:AA2AR",
-                    "source_checksum": _checksum("DUD-E:AA2AR"),
-                    "provenance_ref": "operator://dud-e/AA2AR",
+                    "source_license_or_accession": "DUD-E:AA2AR:release-2015",
+                    "source_checksum": _checksum("DUD-E:AA2AR:release-2015"),
+                    "provenance_ref": "local-evidence://public-benchmark/dud-e/AA2AR",
                 }
             ]
         },
@@ -151,9 +152,14 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                             "score_direction": "lower_is_better",
                         },
                     ],
-                    "source_license_or_accession": "CASF/PDBBind:test-accession",
+                    "source_license_or_accession": (
+                        f"PDBBind-CASF-2016-core:{first_case_id}"
+                    ),
                     "source_checksum": _checksum("vina-gnina-case-a"),
-                    "provenance_ref": f"operator://vina-gnina/{first_case_id}",
+                    "provenance_ref": (
+                        "local-evidence://public-benchmark/vina-gnina/"
+                        f"{first_case_id}"
+                    ),
                 }
             ]
         },

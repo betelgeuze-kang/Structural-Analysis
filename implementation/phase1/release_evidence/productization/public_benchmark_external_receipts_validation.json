@@ -81,5 +81,27 @@
     "source_file_checksums"
   ],
   "schema_version": "public-benchmark-external-receipt-validation.v1",
+  "source_actuality_policy": {
+    "placeholder_markers_rejected": [
+      "<operator",
+      "dry-run",
+      "dummy",
+      "example.invalid",
+      "example://",
+      "fake",
+      "fixture",
+      "mock",
+      "operator_supplied",
+      "placeholder",
+      "synthetic",
+      "test-accession",
+      "todo",
+      "unit-test"
+    ],
+    "placeholder_provenance_prefixes_rejected": [
+      "operator://"
+    ],
+    "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+  },
   "status": "operator_receipts_required"
 }
