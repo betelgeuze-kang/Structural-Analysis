@@ -188,7 +188,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T10:49:21.797874+00:00",
+  "generated_at": "2026-06-30T10:53:25.894899+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -199,27 +199,27 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:984dc275a0caac7739cb2e15cdf2ee0318385f8455051f0b9b4819c9a4078343",
+      "input_checksum": "sha256:8ffb9debd8e9c60eec20a1a63fbc131ea02debb245c80e12facc16d7e918c627",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
+      "source_commit_sha": "1a03249a4ae341630be5a8ec07bff509b1db75a0",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:00570235c279a3fe34575f22a9e097fa2dce875173ceab0128a6a128f3fa7f66",
+      "input_checksum": "sha256:fd81d358c9596c8d45136b25731ecf21893191f4dad5f5723fff260642e55f6f",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
+      "source_commit_sha": "1a03249a4ae341630be5a8ec07bff509b1db75a0",
       "status": "blocked"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:984dc275a0caac7739cb2e15cdf2ee0318385f8455051f0b9b4819c9a4078343",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:00570235c279a3fe34575f22a9e097fa2dce875173ceab0128a6a128f3fa7f66"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:8ffb9debd8e9c60eec20a1a63fbc131ea02debb245c80e12facc16d7e918c627",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:fd81d358c9596c8d45136b25731ecf21893191f4dad5f5723fff260642e55f6f"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -1663,6 +1663,7 @@
           "scripts/materialize_public_benchmark_subset_manifest.py",
           "scripts/validate_public_benchmark_pose_validity.py",
           "scripts/validate_public_benchmark_subset_manifest.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
           "tests/test_materialize_public_benchmark_pose_validity_input.py",
@@ -2030,6 +2031,6 @@
       }
     }
   },
-  "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
+  "source_commit_sha": "1a03249a4ae341630be5a8ec07bff509b1db75a0",
   "status": "blocked"
 }

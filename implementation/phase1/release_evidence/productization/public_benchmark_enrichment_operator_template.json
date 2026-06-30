@@ -4,9 +4,9 @@
   "contract_pass": true,
   "depends_on": [],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T10:49:17.580353+00:00",
+  "generated_at": "2026-06-30T10:53:18.489418+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:1a3261f61334379f4ed5f1a0acfc192ba966e6ddf159efed38df5717125e3050",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:53a84098e86e4e2b63bd56ea56a8da69247198763788f81b352d73224c9cc239",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:1d5672a9b6f9ef17592b49425fc463570f61154e66be291e6f0401349df8b369",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:982514df1528ca96198c13ab483691a2ccdb54f3cf14ffa72536c415dfd8ab24",
@@ -15,7 +15,7 @@
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:6b5cb3f5598d99f62d9eb757b2926febfb9b3899c5ad4d72ea1645cc6da41c7b",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:5d4df26f2457a692c2ee89eb4022c522d57bf2b8a071544e720ec87107b66a79",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
-    "scripts/validate_public_benchmark_pose_validity.py": "sha256:3f9e47f60d8b7400e21858aebd2cd5d2126d602cc78d410956e06a68ed20e0f2",
+    "scripts/validate_public_benchmark_pose_validity.py": "sha256:51c107c5d5c56aaa3fdb63b91f76c515109b86d664effe8fb65922e5c628a3d1",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:29952cfd4fa87521656da83c518c0d860b4f3bf0d7c500d88d15879c57e43616"
   },
   "intake_artifact": "<operator-dud-e-lit-pcba-enrichment-intake.json>",
@@ -58,7 +58,7 @@
   "reused_evidence": true,
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "dud_e_lit_pcba_enrichment_intake",
-  "source_commit_sha": "fb7d29ba0ec253d628c9330fd6cbf995a2d98844",
+  "source_commit_sha": "1a03249a4ae341630be5a8ec07bff509b1db75a0",
   "status": "operator_template_seed",
   "template": {
     "targets": [
