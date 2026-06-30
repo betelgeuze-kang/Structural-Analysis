@@ -1,5 +1,5 @@
 {
-  "blocked_roadmap_row_count": 3,
+  "blocked_roadmap_row_count": 4,
   "capability_summary_rows": [
     {
       "blocker_count": 0,
@@ -87,7 +87,7 @@
     },
     "phase_id": "phase_2_public_benchmark_harness",
     "phase_label": "Phase 2",
-    "queue_priority": 1,
+    "queue_priority": 2,
     "roadmap_item": "Public benchmark harness",
     "root_cause_tags": [
       "operator_source_material_required",
@@ -147,7 +147,7 @@
     },
     "phase_id": "phase_2_public_benchmark_harness",
     "phase_label": "Phase 2",
-    "phase_queue_priority": 1,
+    "phase_queue_priority": 2,
     "queue_priority": 1,
     "roadmap_item": "Public benchmark harness",
     "root_cause_tags": [
@@ -161,12 +161,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T03:26:27.585354+00:00",
+  "generated_at": "2026-06-30T03:28:13.560196+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:d5f27e19224137df501234c6ddc5bcf894d3a97442329db6d361baca7168f8d5",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:dbe8a09a77f11d85a148751721fc71d0c8ac0e087ca3038f575c8f5f9a63855d",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:ecb127cb2cf8372f8e21b4f21d4b27b459fc2b665aa457af569e7369feb96d9c",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8a2c8fb1a04f21b8932ecc287c789e07f3a9f386897026dfb5ea96eed7c2bb1d",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:3857bdad3b8017740f05fb3774fe3e01f2fc54bef8aa7111f30dbf42db77470d",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:621676a17434e319e21e0a52a74e8a7d5b161cdadb0e71de9edca8003121da8f",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:8f83ee0e835cebf583587e145e957954241c75cfc030b50b8b9564540b862a9e",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:f74885aa4ba34963fb81ba2162d03a07ffb658bbff5939a34e919521212efe35",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:ef50c77b0801fe9fcfd65e36994db0ae0130b3a32edc7ef336297402a16f070e",
@@ -174,12 +174,12 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:5613044e907cde8c6a6f614bf5d7f08dcf19c526321208b1bb17898b0bf4e27d",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:4459ec6444d57d718d6ceb183c13fb7681c1631218af23d18b2f8da3a40cb4fc",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:62a5c4f1277a81dbaee1afe08c9762c206c1f4343f603d248fb34f81ee80a84d",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:65c83e4d5b45b405e6a2b7d7d1995ee101427ab45c6618d732dee0034f352fea",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:88c8917424f78e045d9db856ba3367c5b9710c9dce29ba38a8ea977d0392df95",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f2ed95e23fc7afb0e8eb648f96501cccdbbee0597ae7235250e3a09649479fc3",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:6736ffcf87cfe113ab7b489c8033853d61349ce8e54290b1290c5fe225dbabd8",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:96257385404517d03016a14e2d01ddc6b7fdfc65ffadb1c949cca1e3928ee204",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:ee947e114747bb7d299990f8d87d5eabf21afa46496e3a5b91a57accfa2be754",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:c998551d78da5148060a4c63b5540441303e997af7f9b3e80ec77467aec7298b",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:9249e60dfde918d8d47d35ba797ec1fea14a46fc275daa69f7aa341cd50841c9",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
@@ -199,7 +199,8 @@
     "attach_vina_gnina_comparison_intake",
     "run_public_benchmark_vina_gnina_comparison_materializer",
     "refresh_public_benchmark_source_of_truth",
-    "regenerate_goal_bottleneck_roadmap_surface"
+    "regenerate_goal_bottleneck_roadmap_surface",
+    "refresh_stale_goal_artifacts"
   ],
   "non_expert_release_briefing": {
     "audience": "non_expert_pm_operator",
@@ -281,7 +282,7 @@
       },
       "phase_id": "phase_2_public_benchmark_harness",
       "phase_label": "Phase 2",
-      "queue_priority": 1,
+      "queue_priority": 2,
       "roadmap_item": "Public benchmark harness",
       "root_cause_tags": [
         "operator_source_material_required",
@@ -341,7 +342,7 @@
       },
       "phase_id": "phase_2_public_benchmark_harness",
       "phase_label": "Phase 2",
-      "phase_queue_priority": 1,
+      "phase_queue_priority": 2,
       "queue_priority": 1,
       "roadmap_item": "Public benchmark harness",
       "root_cause_tags": [
@@ -447,11 +448,18 @@
     "primary_release_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "primary_roadmap_bottleneck": "public_benchmark_source_of_truth_not_ready",
     "primary_roadmap_phase_id": "phase_2_public_benchmark_harness",
-    "refresh_required_operator_action_count": 0,
-    "refresh_required_operator_actions": [],
+    "refresh_required_operator_action_count": 1,
+    "refresh_required_operator_actions": [
+      {
+        "action_id": "refresh_release_evidence_freshness",
+        "artifact": "release_evidence_freshness_report",
+        "reason": "release_evidence_freshness_report has stale or incomplete source-of-truth blockers",
+        "status": "refresh_required"
+      }
+    ],
     "release_allowed": false,
-    "release_area_blocker_count": 5,
-    "release_area_owner_handoff_count": 5,
+    "release_area_blocker_count": 7,
+    "release_area_owner_handoff_count": 7,
     "release_area_owner_handoffs": [
       {
         "acceptance_criteria": [
@@ -502,6 +510,48 @@
         "owner": "release_ci_owner",
         "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "title": "Basic CI"
+      },
+      {
+        "acceptance_criteria": [
+          "`release_evidence_freshness_report.json.contract_pass == true`",
+          "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+          "`evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`"
+        ],
+        "acceptance_criteria_count": 3,
+        "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+        "evidence_artifact_keys": [
+          "pm_release_gate_report",
+          "release_evidence_freshness",
+          "release_evidence_freshness_report"
+        ],
+        "evidence_state": "release_evidence_metadata_missing",
+        "external_input_required": false,
+        "handoff_state": "local_remediation_ready",
+        "namespace": "evidence_freshness",
+        "owner": "release_owner",
+        "owner_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+        "title": "Evidence Freshness"
+      },
+      {
+        "acceptance_criteria": [
+          "`release_evidence_freshness_report.json.contract_pass == true`",
+          "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+          "`evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`"
+        ],
+        "acceptance_criteria_count": 3,
+        "blocker_id": "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+        "evidence_artifact_keys": [
+          "pm_release_gate_report",
+          "release_evidence_freshness",
+          "release_evidence_freshness_report"
+        ],
+        "evidence_state": "release_evidence_metadata_missing",
+        "external_input_required": false,
+        "handoff_state": "local_remediation_ready",
+        "namespace": "evidence_freshness",
+        "owner": "release_owner",
+        "owner_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+        "title": "Evidence Freshness"
       },
       {
         "acceptance_criteria": [
@@ -631,7 +681,7 @@
       },
       "phase_id": "phase_2_public_benchmark_harness",
       "phase_label": "Phase 2",
-      "queue_priority": 1,
+      "queue_priority": 2,
       "roadmap_item": "Public benchmark harness",
       "root_cause_tags": [
         "operator_source_material_required",
@@ -695,7 +745,7 @@
       },
       "phase_id": "phase_3_gpcr_hard_decoy_closure",
       "phase_label": "Phase 3",
-      "queue_priority": 2,
+      "queue_priority": 3,
       "roadmap_item": "GPCR hard-decoy closure",
       "root_cause_tags": [
         "operator_values_required"
@@ -769,7 +819,7 @@
       },
       "phase_id": "phase_4_pocketmd_lite",
       "phase_label": "Phase 4",
-      "queue_priority": 3,
+      "queue_priority": 4,
       "roadmap_item": "PocketMD Lite science product surface",
       "root_cause_tags": [
         "operator_refinement_rows_required"
@@ -832,7 +882,7 @@
       },
       "phase_id": "phase_2_public_benchmark_harness",
       "phase_label": "Phase 2",
-      "phase_queue_priority": 1,
+      "phase_queue_priority": 2,
       "queue_priority": 1,
       "roadmap_item": "Public benchmark harness",
       "root_cause_tags": [
@@ -879,7 +929,7 @@
       },
       "phase_id": "phase_2_public_benchmark_harness",
       "phase_label": "Phase 2",
-      "phase_queue_priority": 1,
+      "phase_queue_priority": 2,
       "queue_priority": 2,
       "roadmap_item": "Public benchmark harness",
       "root_cause_tags": [
@@ -935,7 +985,7 @@
       },
       "phase_id": "phase_2_public_benchmark_harness",
       "phase_label": "Phase 2",
-      "phase_queue_priority": 1,
+      "phase_queue_priority": 2,
       "queue_priority": 3,
       "roadmap_item": "Public benchmark harness",
       "root_cause_tags": [
@@ -995,7 +1045,7 @@
       },
       "phase_id": "phase_2_public_benchmark_harness",
       "phase_label": "Phase 2",
-      "phase_queue_priority": 1,
+      "phase_queue_priority": 2,
       "queue_priority": 4,
       "roadmap_item": "Public benchmark harness",
       "root_cause_tags": [
@@ -1062,7 +1112,7 @@
       },
       "phase_id": "phase_3_gpcr_hard_decoy_closure",
       "phase_label": "Phase 3",
-      "phase_queue_priority": 2,
+      "phase_queue_priority": 3,
       "queue_priority": 5,
       "roadmap_item": "GPCR hard-decoy closure",
       "root_cause_tags": [
@@ -1128,7 +1178,7 @@
       },
       "phase_id": "phase_3_gpcr_hard_decoy_closure",
       "phase_label": "Phase 3",
-      "phase_queue_priority": 2,
+      "phase_queue_priority": 3,
       "queue_priority": 6,
       "roadmap_item": "GPCR hard-decoy closure",
       "root_cause_tags": [
@@ -1194,7 +1244,7 @@
       },
       "phase_id": "phase_3_gpcr_hard_decoy_closure",
       "phase_label": "Phase 3",
-      "phase_queue_priority": 2,
+      "phase_queue_priority": 3,
       "queue_priority": 7,
       "roadmap_item": "GPCR hard-decoy closure",
       "root_cause_tags": [
@@ -1271,7 +1321,7 @@
       },
       "phase_id": "phase_4_pocketmd_lite",
       "phase_label": "Phase 4",
-      "phase_queue_priority": 3,
+      "phase_queue_priority": 4,
       "queue_priority": 8,
       "roadmap_item": "PocketMD Lite science product surface",
       "root_cause_tags": [
@@ -1317,19 +1367,25 @@
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
     "approval_token_count": 4,
-    "blocked_release_count": 5,
+    "blocked_release_count": 7,
     "broad_gpcr_family_claim_safe": false,
     "evidence_surface_count": 12,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 20,
+    "operator_action_count": 16,
     "pocketmd_lite_product_surface_ready": false,
     "public_benchmark_ready": false,
     "release_allowed": false,
-    "stale_artifact_count": 0
+    "stale_artifact_count": 2
   },
   "release_decision_operator_actions": [
+    {
+      "action_id": "refresh_release_evidence_freshness",
+      "artifact": "release_evidence_freshness_report",
+      "reason": "release_evidence_freshness_report has stale or incomplete source-of-truth blockers",
+      "status": "refresh_required"
+    },
     {
       "action_id": "resolve_h_bond_evidence_surface",
       "artifact": "h_bond_backmap_evidence_surface",
@@ -1543,22 +1599,22 @@
     {
       "blocked_criteria": [],
       "blocked_criteria_count": 0,
-      "bottleneck": "",
+      "bottleneck": "source_of_truth_gap_classification_open",
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
         "docs/source-of-truth-gap-classification.md"
       ],
       "first_blocked_target": "",
-      "first_blocker": "",
+      "first_blocker": "source_of_truth_gap_candidate_unclassified",
       "linked_routes": [],
       "next_actions": [
-        "keep_aggregator_freshness_policy_visible"
+        "classify_remaining_source_of_truth_gap_candidates"
       ],
       "phase_id": "phase_0_source_of_truth_hardening",
       "phase_label": "Phase 0",
       "roadmap_item": "/goal source-of-truth gap hardening",
       "root_cause_tags": [],
-      "state": "ready",
+      "state": "blocked",
       "summary": {
         "aggregator_review_count": 3,
         "candidate_count": 5,
@@ -1595,7 +1651,7 @@
           }
         ],
         "fixed_count": 2,
-        "freshness_blocker_count": 0
+        "freshness_blocker_count": 2
       }
     },
     {
@@ -1627,7 +1683,7 @@
         "action_register_contract_pass": false,
         "approval_token_count": 4,
         "blocked_capability_count": 4,
-        "blocked_release_count": 5,
+        "blocked_release_count": 7,
         "first_locked_science_evidence_surface": {
           "bottleneck": "h_bond_evidence_surface_locked",
           "capability_blocker_count": 2,
@@ -1652,7 +1708,7 @@
             "h_bond_backmap_evidence_surface"
           ]
         },
-        "operator_action_count": 20,
+        "operator_action_count": 16,
         "product_capability_count": 5,
         "release_allowed": false,
         "science_evidence_surface_bottlenecks": [
@@ -3361,7 +3417,7 @@
       ]
     }
   },
-  "source_commit_sha": "f5e01128ad4a1561db83c4dccd5baee055b3bfd5",
+  "source_commit_sha": "0b94b2f6578a0c7ea5057a6338800c4534c02473",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
@@ -3410,7 +3466,7 @@
     "fixed_count": 2
   },
   "status": "ready_release_blocked",
-  "summary_line": "Goal bottleneck roadmap surface: READY | release_allowed=False | primary_bottleneck=public_benchmark_source_of_truth_not_ready | blocked_roadmap_rows=3",
+  "summary_line": "Goal bottleneck roadmap surface: READY | release_allowed=False | primary_bottleneck=public_benchmark_source_of_truth_not_ready | blocked_roadmap_rows=4",
   "surface_id": "goal_bottleneck_roadmap_surface",
   "surface_kind": "goal_bottleneck_roadmap_surface",
   "surface_scope": "goal_release_bottleneck_and_product_roadmap"
