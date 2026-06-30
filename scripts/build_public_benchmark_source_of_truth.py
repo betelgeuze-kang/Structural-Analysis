@@ -112,6 +112,7 @@ SOURCE_CHECKSUM_POLICY = {
 def _source_input_paths() -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_source_of_truth.py"),
+        Path("scripts/materialize_public_benchmark_harness_bundle.py"),
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
         Path("scripts/materialize_public_benchmark_pose_success_harness.py"),
@@ -129,6 +130,67 @@ def _source_input_paths() -> list[Path]:
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _pose_packet_real_case_count(packet: dict[str, Any]) -> int:
+    return max(
+        _as_int(packet.get("real_benchmark_case_count")),
+        _as_int(
+            _as_dict(packet.get("dry_run_validation")).get("real_benchmark_case_count")
+        ),
+    )
+
+
+def _pose_packet_validation_ready(packet: dict[str, Any]) -> bool:
+    return bool(packet.get("posebusters_validity_ready")) or bool(
+        _as_dict(packet.get("dry_run_validation")).get("pose_validity_ready")
+    )
+
+
+def _pose_packet_validator_schema_version(packet: dict[str, Any]) -> str:
+    return str(
+        _as_dict(packet.get("validator")).get("schema_version")
+        or packet.get("validator_schema_version")
+        or ""
+    )
+
+
+def _pose_packet_materializer_schema_version(packet: dict[str, Any]) -> str:
+    return str(
+        _as_dict(packet.get("materializer")).get("schema_version")
+        or _as_dict(packet.get("materialization_report")).get("schema_version")
+        or ""
+    )
+
+
+def _materializer_schema_version(payload: dict[str, Any]) -> str:
+    return str(
+        _as_dict(payload.get("materializer")).get("schema_version")
+        or _as_dict(payload.get("materialization_report")).get("schema_version")
+        or ""
+    )
+
+
+def _nested_materialization_command(
+    payload: dict[str, Any],
+    nested_key: str,
+    fallback: str,
+) -> str:
+    return str(
+        _as_dict(payload.get(nested_key)).get("materialization_command")
+        or fallback
+    )
 
 
 def _case_row_template() -> dict[str, Any]:
@@ -528,8 +590,8 @@ def build_pose_success_harness(
                 "source_family": str(dry_run_row["source_family"]),
                 "benchmark_split": str(dry_run_row["benchmark_split"]),
                 "status": "pass",
-                "pose_validity_pass": bool(
-                    pose_validity_packet["dry_run_validation"]["pose_validity_ready"]
+                "pose_validity_pass": _pose_packet_validation_ready(
+                    pose_validity_packet
                 ),
                 "pose_success": bool(score["pose_success"]),
                 "symmetry_aware_ligand_rmsd_angstrom": score["best_rmsd_angstrom"],
@@ -1083,9 +1145,7 @@ def _phase2_slice_progress(
 ) -> dict[str, Any]:
     target_subset_case_count = int(subset_manifest["target_subset_case_count"])
     subset_materialized_count = int(subset_manifest["materialized_case_count"])
-    pose_real_case_count = int(
-        pose_validity_packet["dry_run_validation"]["real_benchmark_case_count"]
-    )
+    pose_real_case_count = _pose_packet_real_case_count(pose_validity_packet)
     rmsd_real_case_count = int(rmsd_scorecard["real_benchmark_case_count"])
     pose_success_harness_real_case_count = int(
         pose_success_harness["real_benchmark_case_count"]
@@ -1158,9 +1218,9 @@ def _phase2_slice_progress(
             "slice_id": "casf_pdbbind_pose_success_harness_contract",
             "status": "contract_ready",
             "artifact": str(DEFAULT_POSE_SUCCESS_HARNESS_OUT),
-            "materializer_schema_version": pose_success_harness["materializer"][
-                "schema_version"
-            ],
+            "materializer_schema_version": _materializer_schema_version(
+                pose_success_harness
+            ),
             "dry_run_case_count": int(pose_success_harness["dry_run_case_count"]),
             "real_benchmark_case_count": pose_success_harness_real_case_count,
         },
@@ -1328,9 +1388,7 @@ def build_source_of_truth(
         subset_case_rows,
         target_subset_case_count=target_subset_case_count,
     )
-    pose_real_case_count = int(
-        pose_validity_packet["dry_run_validation"]["real_benchmark_case_count"]
-    )
+    pose_real_case_count = _pose_packet_real_case_count(pose_validity_packet)
     rmsd_real_case_count = int(rmsd_scorecard["real_benchmark_case_count"])
     pose_success_harness_real_case_count = int(
         pose_success_harness["real_benchmark_case_count"]
@@ -1437,12 +1495,19 @@ def build_source_of_truth(
     tier_beta_gate["failed_criteria"] = failed_gate_criteria
     tier_beta_ready = not failed_gate_criteria
     tier_beta_gate["status"] = "ready" if tier_beta_ready else "blocked"
+    first_rmsd_row = next(
+        (row for row in rmsd_scorecard.get("rows", []) if isinstance(row, dict)),
+        {},
+    )
+    first_rmsd_score = _as_dict(first_rmsd_row.get("score"))
     symmetry_rmsd_scorecard_summary = {
         "status": rmsd_scorecard["status"],
         "dry_run_case_count": rmsd_scorecard["dry_run_case_count"],
         "real_benchmark_case_count": rmsd_scorecard["real_benchmark_case_count"],
-        "dry_run_pose_success": bool(
-            rmsd_scorecard["rows"][0]["score"]["pose_success"]
+        "dry_run_pose_success": (
+            bool(first_rmsd_score["pose_success"])
+            if "pose_success" in first_rmsd_score
+            else None
         ),
     }
     operator_evidence_gap_register = _operator_evidence_gap_register(
@@ -1680,18 +1745,16 @@ def build_source_of_truth(
             "required_check_count": sum(
                 1 for row in pose_validity_packet["checks"] if row["required"]
             ),
-            "validator_schema_version": pose_validity_packet["validator"][
-                "schema_version"
-            ],
-            "materializer_schema_version": pose_validity_packet["materializer"][
-                "schema_version"
-            ],
-            "dry_run_pose_validity_ready": pose_validity_packet["dry_run_validation"][
-                "pose_validity_ready"
-            ],
-            "real_benchmark_case_count": pose_validity_packet["dry_run_validation"][
-                "real_benchmark_case_count"
-            ],
+            "validator_schema_version": _pose_packet_validator_schema_version(
+                pose_validity_packet
+            ),
+            "materializer_schema_version": _pose_packet_materializer_schema_version(
+                pose_validity_packet
+            ),
+            "dry_run_pose_validity_ready": _pose_packet_validation_ready(
+                pose_validity_packet
+            ),
+            "real_benchmark_case_count": pose_real_case_count,
         },
         "symmetry_rmsd_scorecard_summary": symmetry_rmsd_scorecard_summary,
         "symmetry_rmsd_summary": symmetry_rmsd_scorecard_summary,
@@ -1868,9 +1931,17 @@ def build_source_of_truth(
                 "reference_ligand_path",
                 "predicted_ligand_path_or_docking_run_id",
             ],
-            "materialization_command": subset_manifest["case_row_schema"][
-                "materialization_command"
-            ],
+            "materialization_command": _nested_materialization_command(
+                subset_manifest,
+                "case_row_schema",
+                (
+                    "python3 scripts/materialize_public_benchmark_subset_manifest.py "
+                    "--intake <operator-casf-pdbbind-intake.json> "
+                    f"--out-manifest {DEFAULT_SUBSET_MANIFEST_OUT} "
+                    f"--out-report {PRODUCTIZATION / 'public_benchmark_subset_materialization_report.json'} "
+                    "--fail-blocked"
+                ),
+            ),
             "claim_boundary": (
                 "The materializer consumes operator-attached local CASF/PDBBind case "
                 "descriptors and files, computes checksums, and validates the subset "
@@ -1882,9 +1953,18 @@ def build_source_of_truth(
             "status": "ready_for_operator_intake",
             "required_pose_fields": list(REQUIRED_POSE_FIELDS),
             "pose_intake_case_key": "cases",
-            "materialization_command": pose_validity_packet["validator"][
-                "materialization_command"
-            ],
+            "materialization_command": _nested_materialization_command(
+                pose_validity_packet,
+                "validator",
+                (
+                    "python3 scripts/materialize_public_benchmark_pose_validity_input.py "
+                    f"--subset-manifest {DEFAULT_SUBSET_MANIFEST_OUT} "
+                    "--pose-intake <operator-pose-coordinate-intake.json> "
+                    f"--out-input {PRODUCTIZATION / 'public_benchmark_pose_validity_input.json'} "
+                    f"--out-report {PRODUCTIZATION / 'public_benchmark_pose_validity_materialization_report.json'} "
+                    "--fail-blocked"
+                ),
+            ),
             "claim_boundary": (
                 "The pose materializer joins a materialized subset manifest with "
                 "operator-attached reference/predicted ligand coordinates and receptor "
@@ -1895,9 +1975,11 @@ def build_source_of_truth(
         "rmsd_scorecard_materializer": {
             "schema_version": RMSD_MATERIALIZER_SCHEMA_VERSION,
             "status": "ready_for_pose_validity_input",
-            "materialization_command": rmsd_scorecard["materializer"][
-                "materialization_command"
-            ],
+            "materialization_command": _nested_materialization_command(
+                rmsd_scorecard,
+                "materializer",
+                "python3 scripts/materialize_public_benchmark_rmsd_scorecard.py",
+            ),
             "claim_boundary": (
                 "The RMSD scorecard materializer consumes validated pose-coordinate input "
                 "and produces per-case symmetry-aware ligand RMSD rows plus pose-success "
@@ -1907,9 +1989,11 @@ def build_source_of_truth(
         "posebusters_validity_packet_materializer": {
             "schema_version": POSEBUSTERS_PACKET_MATERIALIZER_SCHEMA_VERSION,
             "status": "ready_for_pose_validity_input",
-            "materialization_command": pose_validity_packet["materializer"][
-                "materialization_command"
-            ],
+            "materialization_command": _nested_materialization_command(
+                pose_validity_packet,
+                "materializer",
+                "python3 scripts/materialize_public_benchmark_posebusters_validity_packet.py",
+            ),
             "claim_boundary": (
                 "The PoseBusters-style packet materializer consumes validated "
                 "pose-coordinate input and emits per-case sanity-check rows for real "
@@ -1919,9 +2003,11 @@ def build_source_of_truth(
         "pose_success_harness_materializer": {
             "schema_version": POSE_SUCCESS_HARNESS_MATERIALIZER_SCHEMA_VERSION,
             "status": "ready_for_pose_validity_packet_and_rmsd_scorecard",
-            "materialization_command": pose_success_harness["materializer"][
-                "materialization_command"
-            ],
+            "materialization_command": _nested_materialization_command(
+                pose_success_harness,
+                "materializer",
+                "python3 scripts/materialize_public_benchmark_pose_success_harness.py",
+            ),
             "claim_boundary": (
                 "The pose-success harness materializer joins per-case "
                 "PoseBusters-style validity rows with symmetry-aware RMSD rows. It "
@@ -1932,9 +2018,11 @@ def build_source_of_truth(
         "enrichment_scorecard_materializer": {
             "schema_version": ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
             "status": "ready_for_operator_intake",
-            "materialization_command": enrichment_scorecard["materializer"][
-                "materialization_command"
-            ],
+            "materialization_command": _nested_materialization_command(
+                enrichment_scorecard,
+                "materializer",
+                "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py",
+            ),
             "claim_boundary": (
                 "The enrichment materializer consumes DUD-E/LIT-PCBA scored molecule "
                 "rows and reports EF@1%, EF@5%, and ROC-AUC per target. It does not "
@@ -1944,9 +2032,11 @@ def build_source_of_truth(
         "vina_gnina_comparison_materializer": {
             "schema_version": VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
             "status": "ready_for_operator_intake",
-            "materialization_command": vina_gnina_comparison_adapter["materializer"][
-                "materialization_command"
-            ],
+            "materialization_command": _nested_materialization_command(
+                vina_gnina_comparison_adapter,
+                "materializer",
+                "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+            ),
             "claim_boundary": (
                 "The Vina/GNINA adapter materializer consumes operator-attached engine "
                 "comparison rows and reports per-engine pose-success summaries. It does "

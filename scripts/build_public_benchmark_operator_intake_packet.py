@@ -76,6 +76,9 @@ DEFAULT_ENRICHMENT_SCORECARD = (
 DEFAULT_EXTERNAL_RECEIPTS_VALIDATION = (
     PRODUCTIZATION / "public_benchmark_external_receipts_validation.json"
 )
+DEFAULT_HARNESS_BUNDLE_REPORT = (
+    PRODUCTIZATION / "public_benchmark_harness_bundle_materialization_report.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_OPERATOR_TEMPLATE_DIR = PRODUCTIZATION
@@ -129,6 +132,7 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
 def _input_paths(source_of_truth_path: Path) -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_operator_intake_packet.py"),
+        Path("scripts/materialize_public_benchmark_harness_bundle.py"),
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
@@ -764,6 +768,13 @@ def build_public_benchmark_operator_intake_packet(
         f"--vina-gnina-comparison-adapter {DEFAULT_VINA_GNINA_COMPARISON_ADAPTER} "
         f"--out {DEFAULT_EXTERNAL_RECEIPTS_VALIDATION} --fail-blocked"
     )
+    harness_bundle_materialization = (
+        "python3 scripts/materialize_public_benchmark_harness_bundle.py "
+        "--bundle <operator-public-benchmark-bundle.json> "
+        f"--out-dir {PRODUCTIZATION} "
+        f"--out-report {DEFAULT_HARNESS_BUNDLE_REPORT} "
+        "--fail-blocked"
+    )
     refresh_source = (
         "python3 scripts/build_public_benchmark_source_of_truth.py "
         f"--source-of-truth-out {DEFAULT_SOURCE_OF_TRUTH} "
@@ -1090,6 +1101,32 @@ def build_public_benchmark_operator_intake_packet(
         "operator_template_artifact_count": len(operator_template_artifacts),
         "operator_template_artifacts": operator_template_artifacts,
         "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        "operator_bundle_materialization": {
+            "schema_version": "public-benchmark-harness-bundle-materialization.v1",
+            "command": harness_bundle_materialization,
+            "bundle_artifact": "<operator-public-benchmark-bundle.json>",
+            "produces": {
+                "bundle_report": str(DEFAULT_HARNESS_BUNDLE_REPORT),
+                "subset_manifest": str(DEFAULT_SUBSET_MANIFEST),
+                "pose_validity_input": str(DEFAULT_POSE_VALIDITY_INPUT),
+                "pose_validity_packet": str(DEFAULT_POSE_VALIDITY_PACKET),
+                "rmsd_scorecard": str(DEFAULT_RMSD_SCORECARD),
+                "pose_success_harness": str(DEFAULT_POSE_SUCCESS_HARNESS),
+                "enrichment_scorecard": str(DEFAULT_ENRICHMENT_SCORECARD),
+                "vina_gnina_comparison_adapter": str(
+                    DEFAULT_VINA_GNINA_COMPARISON_ADAPTER
+                ),
+                "external_receipts_validation": str(
+                    DEFAULT_EXTERNAL_RECEIPTS_VALIDATION
+                ),
+                "source_of_truth": str(DEFAULT_SOURCE_OF_TRUTH),
+            },
+            "claim_boundary": (
+                "This is a convenience entrypoint over the same materializers listed "
+                "in materialization_sequence; it still requires operator-attached "
+                "local benchmark files, scored rows, engine runs, and receipts."
+            ),
+        },
         "materialization_sequence": materialization_sequence,
         "execution_preflight_checklist": execution_preflight_checklist,
         "execution_preflight_checklist_count": len(execution_preflight_checklist),
@@ -1124,10 +1161,12 @@ def build_public_benchmark_operator_intake_packet(
             "enrichment_scorecard": str(DEFAULT_ENRICHMENT_SCORECARD),
             "vina_gnina_comparison_adapter": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
             "external_receipts_validation": str(DEFAULT_EXTERNAL_RECEIPTS_VALIDATION),
+            "harness_bundle_report": str(DEFAULT_HARNESS_BUNDLE_REPORT),
             "operator_templates": operator_template_artifacts,
         },
         "next_actions": [
             "fill_public_benchmark_operator_intake_packet",
+            "run_public_benchmark_harness_bundle_materializer",
             "run_public_benchmark_subset_materializer",
             "run_public_benchmark_pose_validity_materializer",
             "run_public_benchmark_rmsd_scorecard_materializer",

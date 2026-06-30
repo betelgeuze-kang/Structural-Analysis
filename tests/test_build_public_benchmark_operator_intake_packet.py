@@ -437,6 +437,23 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_external_receipts_validation.json"
     )
+    assert packet["linked_artifacts"]["harness_bundle_report"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_harness_bundle_materialization_report.json"
+    )
+    assert packet["operator_bundle_materialization"]["schema_version"] == (
+        "public-benchmark-harness-bundle-materialization.v1"
+    )
+    assert "materialize_public_benchmark_harness_bundle.py" in packet[
+        "operator_bundle_materialization"
+    ]["command"]
+    assert packet["operator_bundle_materialization"]["produces"]["source_of_truth"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_of_truth.json"
+    )
+    assert packet["next_actions"][1] == (
+        "run_public_benchmark_harness_bundle_materializer"
+    )
     assert packet["operator_template_schema_version"] == (
         "public-benchmark-operator-template.v1"
     )
