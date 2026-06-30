@@ -142,7 +142,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T22:22:56.572212+00:00",
+  "generated_at": "2026-06-30T22:26:47.290075+00:00",
   "goal_roadmap_linkage": {
     "bottleneck": "pocketmd_lite_science_product_surface_locked",
     "next_goal_actions": [
@@ -760,7 +760,7 @@
   ],
   "schema_version": "pocketmd-lite-science-product-surface.v1",
   "science_surface_family": "pocketmd_lite",
-  "source_commit_sha": "abedaa9cbb5de07b1916fc9f409af8c22810ca15",
+  "source_commit_sha": "cbbc83e9be543ac308eabf3544db6004f1843392",
   "status": "locked",
   "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
   "surface_id": "pocketmd_lite_science_product_surface",
