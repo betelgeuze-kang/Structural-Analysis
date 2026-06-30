@@ -3,7 +3,7 @@
   "contract_pass": true,
   "dry_run_case_count": 1,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:37:49.597619+00:00",
+  "generated_at": "2026-06-30T06:38:45.540455+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:8826a9d99b7355d6333ca1863ef65460303c22baff3357d367a312a66c3e9dcb",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:23aa9f0b15a76fc44725f0e47dbc3526363ae28bff3f810e91c31598994f7e51",
@@ -71,6 +71,6 @@
     }
   ],
   "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
-  "source_commit_sha": "474cde0277c0bfd79cf993a69288a2b9c608ada0",
+  "source_commit_sha": "5dfd6afd6119f488537644e4666e47bf9ff73a09",
   "status": "ready"
 }

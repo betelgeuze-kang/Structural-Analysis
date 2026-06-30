@@ -97,7 +97,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T06:37:54.086472+00:00",
+  "generated_at": "2026-06-30T06:38:48.938190+00:00",
   "human_ux_summary": {
     "evidence_artifacts": {
       "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -123,10 +123,10 @@
     "workflow_step_pass_count": 0
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:1dc8436a5217e0afc33a353f2b6fd117fbd98c66cea72edc9e440f69fede4737",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:78ef6f3d2cd302ef94588840159461d3c49337d9ebd0cbb281fc9d00762bfa99",
     "scripts/build_non_expert_release_briefing_report.py": "sha256:be86ab4bef3d9fdda099eed97b0b0a338fd2f7bd6cf30d9b8fdd54002de62d0b"
   },
-  "next_owner_action_count": 6,
+  "next_owner_action_count": 8,
   "next_owner_actions": [
     {
       "blocker_id": "casf_pdbbind_source_material_not_attached",
@@ -169,6 +169,20 @@
       "owner": "product_legal_owner",
       "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
       "source": "release_area"
+    },
+    {
+      "blocker_id": "github_sync::github_sync_preflight::worktree_not_clean",
+      "external_input_required": true,
+      "owner": "release_owner",
+      "owner_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "source": "release_area"
+    },
+    {
+      "blocker_id": "github_sync::github_sync_preflight_not_synced",
+      "external_input_required": true,
+      "owner": "release_owner",
+      "owner_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "source": "release_area"
     }
   ],
   "plain_status": "Release is blocked. The product can remain in restricted alpha/beta preparation, but it must not be presented as fully release-ready.",
@@ -188,8 +202,8 @@
   "read_model_ready": true,
   "reason_code": "PASS",
   "release_allowed": false,
-  "release_area_blocker_count": 5,
-  "release_area_owner_handoff_count": 5,
+  "release_area_blocker_count": 7,
+  "release_area_owner_handoff_count": 7,
   "reuse_policy": "non_expert_release_briefing_report_from_goal_bottleneck_surface",
   "reused_evidence": true,
   "route": "/goal/non-expert-release-briefing",
@@ -197,6 +211,6 @@
   "source_artifacts": {
     "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
   },
-  "source_commit_sha": "474cde0277c0bfd79cf993a69288a2b9c608ada0",
+  "source_commit_sha": "5dfd6afd6119f488537644e4666e47bf9ff73a09",
   "status": "ready_release_blocked"
 }
