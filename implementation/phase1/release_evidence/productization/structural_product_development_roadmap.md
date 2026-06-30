@@ -1,6 +1,6 @@
 # Structural Product Development Roadmap
 
-Structural product roadmap: BLOCKED | evidence_progress=58.3% | stage_average=44.3% | ready_stages=0/7 | primary_blocker=freshness_or_snapshot_integrity_not_closed
+Structural product roadmap: BLOCKED | evidence_progress=64.6% | stage_average=54.5% | ready_stages=1/7 | primary_blocker=basic_ci::pr_ci_30_consecutive_pass_evidence_missing
 
 ## Current Position
 
@@ -10,18 +10,17 @@ Structural product roadmap: BLOCKED | evidence_progress=58.3% | stage_average=44
 - `limited_commercial_ready`: `False`
 - `paid_pilot_ready`: `False`
 - `pm_milestones`: `5/5`
-- `pm_release_areas`: `12/16`
+- `pm_release_areas`: `13/16`
 - `release_ready`: `False`
-- `snapshot_blocker_count`: `40`
-- `snapshot_status`: `stale_or_inconsistent`
+- `snapshot_blocker_count`: `34`
+- `snapshot_status`: `blocked`
 - `workstation_delivery_ready`: `True`
 
 ## Roadmap Stages
 
-- `evidence_freshness_and_snapshot_integrity`: partial (1/3, 33.3%)
-  - first blocker: `freshness_or_snapshot_integrity_not_closed`
+- `evidence_freshness_and_snapshot_integrity`: ready (3/3, 100.0%)
   - next action: `keep_release_evidence_freshness_report_green`
-- `pm_release_gate`: partial (17/21, 81.0%)
+- `pm_release_gate`: partial (18/21, 85.7%)
   - first blocker: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
   - next action: `collect_30_pr_ci_and_nightly_ci_streak_evidence`
 - `developer_preview_rc`: partial (5/9, 55.6%)
@@ -34,7 +33,7 @@ Structural product roadmap: BLOCKED | evidence_progress=58.3% | stage_average=44
   - first blocker: `customer_shadow_below_required:0/3`
   - next action: `complete_3_customer_shadow_cases`
 - `commercial_solver_claim_upgrade`: partial (2/5, 40.0%)
-  - first blocker: `snapshot_source_state_not_consistent`
+  - first blocker: `independent_product_not_ready`
   - next action: `close_external_benchmark_receipts`
 - `enterprise_productization`: partial (1/4, 25.0%)
   - first blocker: `independent_product_ready_false`
