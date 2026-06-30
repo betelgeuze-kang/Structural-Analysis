@@ -68,6 +68,10 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         == "source_file_checksums"
     )
     assert source["required_slot_count"] == 4
+    assert source["operator_template_artifact_count"] == 4
+    assert source["operator_template_artifacts"][
+        "casf_pdbbind_subset_intake"
+    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
     assert source["blocked_operator_slot_count"] == 4
     assert source["root_cause_tags"] == [
         "operator_source_material_required",
@@ -79,6 +83,24 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "implementation/phase1/release_evidence/productization/"
             "public_benchmark_operator_intake_packet.json"
         ),
+        "operator_template_artifacts": {
+            "casf_pdbbind_subset_intake": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_casf_pdbbind_operator_template.json"
+            ),
+            "dud_e_lit_pcba_enrichment_intake": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_enrichment_operator_template.json"
+            ),
+            "pose_coordinate_intake": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_pose_coordinate_operator_template.json"
+            ),
+            "vina_gnina_comparison_intake": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_vina_gnina_operator_template.json"
+            ),
+        },
         "first_blocker": "casf_pdbbind_source_material_not_attached",
         "first_blocked_target": "casf_pdbbind_subset_intake",
         "manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
@@ -88,6 +110,8 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "public_benchmark_casf_pdbbind_operator_template.json"
         ),
         "required_slot_count": 4,
+        "operator_template_schema_version": "public-benchmark-operator-template.v1",
+        "operator_template_artifact_count": 4,
         "blocked_operator_slot_count": 4,
         "minimum_evidence": {
             "case_count": 12,

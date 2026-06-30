@@ -808,6 +808,9 @@ def build_source_of_truth(
     operator_handoff_summary = {
         "route": PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE,
         "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
+        "operator_template_artifacts": dict(
+            operator_intake_packet.get("operator_template_artifacts") or {}
+        ),
         "first_blocker": blockers[0] if blockers else "",
         "first_blocked_target": first_blocked_target,
         "manifest_contract_id": first_manifest_contract_id,
@@ -815,6 +818,15 @@ def build_source_of_truth(
             first_operator_evidence_gap.get("first_next_action") or ""
         ),
         "required_slot_count": int(operator_intake_packet["required_slot_count"]),
+        "operator_template_schema_version": str(
+            operator_intake_packet.get("operator_template_schema_version") or ""
+        ),
+        "operator_template_artifact_count": int(
+            operator_intake_packet.get("operator_template_artifact_count") or 0
+        ),
+        "operator_template_artifacts": dict(
+            operator_intake_packet.get("operator_template_artifacts") or {}
+        ),
         "blocked_operator_slot_count": blocked_operator_slot_count,
         "minimum_evidence": dict(
             first_operator_evidence_gap.get("minimum_evidence") or {}
@@ -861,6 +873,15 @@ def build_source_of_truth(
         "first_manifest_contract": first_manifest_contract,
         "casf_pdbbind_subset_manifest_contract": first_manifest_contract,
         "required_slot_count": int(operator_intake_packet["required_slot_count"]),
+        "operator_template_schema_version": str(
+            operator_intake_packet.get("operator_template_schema_version") or ""
+        ),
+        "operator_template_artifact_count": int(
+            operator_intake_packet.get("operator_template_artifact_count") or 0
+        ),
+        "operator_template_artifacts": dict(
+            operator_intake_packet.get("operator_template_artifacts") or {}
+        ),
         "blocked_operator_slot_count": blocked_operator_slot_count,
         "root_cause_tags": root_cause_tags,
         "operator_handoff_summary": operator_handoff_summary,
