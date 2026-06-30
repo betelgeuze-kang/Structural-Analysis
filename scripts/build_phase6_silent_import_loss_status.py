@@ -151,15 +151,27 @@ def _blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
         "claim_boundary": (
             "Query/GUI spillover blockers are carried through for visibility from the "
             "Phase 3 source-license receipt, but they are not direct silent-import-loss "
-            "closure blockers. The RC gate remains blocked until the direct source, "
-            "checksum, license, quantity-credit, import execution, and silent-loss gate "
-            "groups are clear."
+            "closure blockers and are excluded from the direct RC gate blocker list. "
+            "The RC gate remains blocked until the direct source, checksum, license, "
+            "quantity-credit, import execution, and silent-loss gate groups are clear."
         ),
         "groups": groups,
         "unassigned_blockers": [
             blocker for blocker in blockers if blocker not in grouped_blockers
         ],
     }
+
+
+def _direct_and_spillover_blockers(blockers: list[str]) -> tuple[list[str], list[str]]:
+    direct: list[str] = []
+    spillover: list[str] = []
+    query_group = BLOCKER_GROUPS["query_gui_spillover"]
+    for blocker in blockers:
+        if _blocker_matches_group(blocker, query_group):
+            spillover.append(blocker)
+        else:
+            direct.append(blocker)
+    return sorted(dict.fromkeys(direct)), sorted(dict.fromkeys(spillover))
 
 
 def _selected_count(payload: dict[str, Any]) -> int:
@@ -242,9 +254,10 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         blockers.append(
             f"ifc_import_health_execution_count_below_required:{import_health_execution_count}/{REQUIRED_IFC_IMPORT_CASE_COUNT}"
         )
-    blockers = sorted(dict.fromkeys(blockers))
+    all_blockers = sorted(dict.fromkeys(blockers))
+    direct_blockers, spillover_blockers = _direct_and_spillover_blockers(all_blockers)
     contract_pass = bool(
-        not blockers
+        not direct_blockers
         and case_count_ready
         and source_acquired
         and checksums_ready
@@ -267,7 +280,7 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
             "query_expected_answers_missing",
             "query_task_file_checksums_missing",
         }
-        for blocker in blockers
+        for blocker in all_blockers
     ):
         owner_actions.append("close or explicitly defer the ifc-bench query/GUI spillover blockers")
     owner_action = "; ".join(owner_actions) + "; then refresh the RC final gate."
@@ -309,8 +322,11 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
             "dirty_acquisition_receipt": PHASE3_IFC_DIRTY_ACQUISITION.as_posix(),
             "source_license_receipt": PHASE3_IFC_SOURCE_LICENSE.as_posix(),
         },
-        "blockers": blockers,
-        "blocker_grouping_metadata": _blocker_grouping_metadata(blockers),
+        "blockers": direct_blockers,
+        "direct_blockers": direct_blockers,
+        "spillover_blockers": spillover_blockers,
+        "all_blockers": all_blockers,
+        "blocker_grouping_metadata": _blocker_grouping_metadata(all_blockers),
         "owner_action": owner_action,
         "summary_line": (
             "Phase 6 silent import loss: "
@@ -323,7 +339,9 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
             "receipts for the RC silent-import-loss final gate. It does not download or "
             "bundle IFC files, approve product redistribution, prove import execution, "
             "or prove zero silent import loss until acquired/checksummed sources, license "
-            "review, import-health execution, and silent-data-loss negative gates all pass."
+            "review, import-health execution, and silent-data-loss negative gates all pass. "
+            "Query/GUI corpus readiness is reported separately as spillover evidence and "
+            "does not by itself block the direct silent-import-loss final gate."
         ),
     }
 

@@ -1082,6 +1082,15 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "clean_acquisition_blockers": list(ifc_clean_acquisition.get("blockers", [])),
             "dirty_acquisition_blockers": list(ifc_dirty_acquisition.get("blockers", [])),
             "silent_import_loss_blockers": list(silent_import_loss.get("blockers", [])),
+            "silent_import_loss_direct_blockers": list(
+                silent_import_loss.get("direct_blockers", silent_import_loss.get("blockers", []))
+            ),
+            "silent_import_loss_spillover_blockers": list(
+                silent_import_loss.get("spillover_blockers", [])
+            ),
+            "silent_import_loss_all_blockers": list(
+                silent_import_loss.get("all_blockers", silent_import_loss.get("blockers", []))
+            ),
             "silent_import_loss_blocker_grouping": (
                 silent_import_loss.get("blocker_grouping_metadata")
                 if isinstance(silent_import_loss.get("blocker_grouping_metadata"), dict)

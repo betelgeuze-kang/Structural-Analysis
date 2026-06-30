@@ -122,6 +122,10 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "per_file_license_review_pending" in silent_blockers
     assert "phase3_ifc_import_case_quantity_credit_missing" in silent_blockers
     assert "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review" in silent_blockers
+    assert "gui_task_runner_not_implemented" not in silent_blockers
+    assert "query_expected_answers_missing" not in silent_blockers
+    assert "query_task_file_checksums_missing" not in silent_blockers
+    assert "dataset_repository_url_missing" not in silent_blockers
     assert "expected contracts alone do not prove" in " ".join(
         final_gates["silent_import_loss_zero"]["notes"]
     )
@@ -496,6 +500,18 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     ]
     assert "phase3_ifc_import_case_quantity_credit_missing" in ifc_handoff[
         "silent_import_loss_blockers"
+    ]
+    assert ifc_handoff["silent_import_loss_direct_blockers"] == ifc_handoff[
+        "silent_import_loss_blockers"
+    ]
+    assert "gui_task_runner_not_implemented" not in ifc_handoff[
+        "silent_import_loss_direct_blockers"
+    ]
+    assert "gui_task_runner_not_implemented" in ifc_handoff[
+        "silent_import_loss_spillover_blockers"
+    ]
+    assert "gui_task_runner_not_implemented" in ifc_handoff[
+        "silent_import_loss_all_blockers"
     ]
     grouping = ifc_handoff["silent_import_loss_blocker_grouping"]
     assert grouping["schema_version"] == "phase6-silent-import-loss-blocker-groups.v1"

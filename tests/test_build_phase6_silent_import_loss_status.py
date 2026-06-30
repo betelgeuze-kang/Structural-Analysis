@@ -58,6 +58,19 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
     assert "product_legal_license_review_pending" in payload["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_missing" in payload["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review" in payload["blockers"]
+    assert "dataset_repository_url_missing" not in payload["blockers"]
+    assert "gui_task_runner_not_implemented" not in payload["blockers"]
+    assert "query_expected_answers_missing" not in payload["blockers"]
+    assert "query_task_file_checksums_missing" not in payload["blockers"]
+    assert payload["direct_blockers"] == payload["blockers"]
+    assert payload["spillover_blockers"] == [
+        "dataset_repository_url_missing",
+        "gui_task_runner_not_implemented",
+        "query_expected_answers_missing",
+        "query_task_file_checksums_missing",
+    ]
+    assert all(blocker in payload["all_blockers"] for blocker in payload["blockers"])
+    assert all(blocker in payload["all_blockers"] for blocker in payload["spillover_blockers"])
     assert "silent_data_loss_negative_gate_not_executed" not in payload["blockers"]
     assert "silent_import_loss_gate_not_executed" not in payload["blockers"]
     assert "silent_import_loss_gate_not_implemented" not in payload["blockers"]
@@ -82,11 +95,13 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
         "query_task_file_checksums_missing",
     ]
     assert "not direct silent-import-loss closure blockers" in grouping["claim_boundary"]
+    assert "excluded from the direct RC gate blocker list" in grouping["claim_boundary"]
     assert "complete product/legal and per-file license review" in payload["owner_action"]
     assert "close or explicitly defer the ifc-bench query/GUI spillover blockers" in payload["owner_action"]
     assert payload["owner_action"].endswith("then refresh the RC final gate.")
     assert "expected contracts" not in payload["claim_boundary"]
     assert "does not download or bundle IFC files" in payload["claim_boundary"]
+    assert "reported separately as spillover evidence" in payload["claim_boundary"]
 
 
 def test_phase6_silent_import_loss_status_check_detects_missing_output(tmp_path: Path) -> None:
