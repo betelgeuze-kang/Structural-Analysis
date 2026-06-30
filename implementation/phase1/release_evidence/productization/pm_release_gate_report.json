@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-30T02:47:46.857282+00:00",
+  "generated_at": "2026-06-30T03:00:28.596306+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -81,7 +81,7 @@
     "implementation/phase1/ci_gate_report.pr.json": "sha256:a235f1cff8d5d0946c104a6c5c668e7166b922af4e5ca7c49b9a34cc52855fa9",
     "implementation/phase1/commercial_readiness_report.strict_breadth.json": "sha256:7afba5b468e56f6c88e2e222376bce6ca5d0da5caf06185bb604bfae1fe9a528",
     "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json": "sha256:c2d5c6a6c32d44c1efa951e2f68078f90d74795a1ce9db5e6eb620522833fa76",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:268554ea086ad0f283dc6be11523aaa5e298b93049dfaef6b037bc62143dcc26",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:c3236b1a225be2a66f2a3f4a8338a1d56672f6347df9a992a7b398d0c269e2e8",
     "implementation/phase1/element_material_breadth_gate_report.json": "sha256:a92cecd8599d94ed8280ade651f861dd87b6f501b7cdad856f91c99afdbcc181",
     "implementation/phase1/midas_exact_roundtrip_closure_gate_report.json": "sha256:ffc11770277fdebb186c05b30439357b6628f38e3231742942d0f4aa063c67ae",
     "implementation/phase1/midas_interoperability_gate_report.json": "sha256:bda3e63af56bb0097cce32db2d1581d77f01ec37c9b7a2cb3e182de85f690714",
@@ -90,38 +90,38 @@
     "implementation/phase1/ndtha_long_profile_report.json": "sha256:d9d9af8ffd289a5d9375ae3a4ce4caa7208161157f2c2c700e274d6dbd2a0f90",
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/production_runtime_packaging_manifest.json": "sha256:9b76649f947ec13ab53e248f181735ddede6d900c60ac0573a030534c2f2d958",
-    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d7f3dacaa26eb3fa61c40843a10c9502375af99097f6dbeeee1d92a00f23b596",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:3b9e5ee3d325314415b2c2359a7a290217d127c79e9f4c603a42db2f5fdc804f",
     "implementation/phase1/release/release_registry.json": "sha256:704b42f0a7a623a846991ae5ed8ee9324b6ba7bb914a44ff7a3508a795e88175",
     "implementation/phase1/release/support_bundle/license_status.json": "sha256:147abf67f7c0fa71a4f60cb12470f38114e8e3075367b875f274df9a1755d03c",
     "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json": "sha256:92d0eb0334e90227d4e1b28ae8145df9b5c1e7389bd98466fe9791495291c574",
     "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json": "sha256:d117ed27c586d8f599dfb1cfa8968b3aad48e83b70c005bc5a32d5b6440e95ac",
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:e5e5fe6e6fb02cdf2f369e745ba232a87f066a726e0969286a41e6e9ac6ccc83",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:99dbf724b3cd30373aa227f7b04058b6a777500a46b5cdb12dbfafdd75a7ce9e",
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:44332b69b0d6dbae421bd52a3027b9351e30d9e761518c7da50acc3f764bfb10",
     "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json": "sha256:a09a6f069955dc132241f1cf62a09410fa22e829cdce922ea88ca69bc0cd5b6c",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:12817a2e2a350c255ca16a5550f23b7d96df00363281c41bf95a61173da2cd3f",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:2a26ebcaa38f84e59f9e75a03f833deedf748ea1024e8ca159a4edb80ac41416",
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json": "sha256:60766fe101aaac8fe37a5228f7f31dfd193b1320a9844f5d9996a8afb710c364",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
-    "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:63311f81e5cac604ba62ca78a2751ccfbefd66bb4f845378d4f7bcd1a4beda18",
-    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:7295dba50339b907573292df0bd7fa57637d7d795fc8c7fa8d8ca326f34130fe",
-    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:c491f409cfe110fc96b6f5e474d8fbf6b5140cac4bf34a4b6da426212545f212",
-    "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:5ea0e3460c6a9a935bdcd1cf4db1788185a57fee732589d39e53cf2e41caf42f",
+    "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:9b4432a1f96a39f1b0a0379b9eedcc602f76a5926c2ac1c04cf574bac540693f",
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:5ae9508e3b18f755d3d2d909c118342a95dbd52f56909399893cd64d76c3acbb",
+    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:b707ffdae45dbccb86d889281abdf9a7a4f4b6957a38710aac4344f8d2a3d9bf",
+    "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:cdff3b5525f137f88028b3d4cdecf1f96cc322f890e62eb6d1c2daf94a4e3ce0",
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
-    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:e865d9431cf186d7afc27698c942906c5953aa1af478e7284efad647c694e392",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:3e0c5868ad6e37a7bb7128a0ae7c10434e4941c84d823b2d05dce792e8636b91",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:b1d3bec51452adcf2ef0f8cb29718b442ad1bf5389843a498c21c27621f6f728",
+    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:bd1c8461364a6aa6dbd0c351dfb37f23610ab2b83382160dce8974efea88d5bd",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:fbd1181b83271da96f53c305f39d5073fa815fa4654deead411e6b60c2625faa",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:00ab060beea61cd8b8bcc926005a8e43bf1b6439a5505cd94ebbc834714bb5a1",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:4ac129270a848082cb91311a59366e4ee56048b80d34a8026d67107372850cb7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:62a5c4f1277a81dbaee1afe08c9762c206c1f4343f603d248fb34f81ee80a84d",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:5bd1c180fb7a7926fbf967b01cfb07104695c43e70a6a674ab86038ea1e2f339",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:7437bd55576bdec830458267b4ec559f9cc819e3d5a8ca7760687b258947e49e",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
     "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json": "sha256:47247dbebb8504aefb7c6106e8c717a3d2f74fd089eb756c54c2664acf7de4e7",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:8c554b637e93bc909236dee30dbfce2d0f1d42659602f5efe6163b78641db725",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:d70c0f841a03127fdf4a6f7cb6df9fe77d327d93d97c5b153401ebbddf4aad8b",
     "implementation/phase1/release_evidence/productization/ux_release_readiness_report.json": "sha256:d8c98cbf1a14ac137d638a6701c3c7c95ff171828efc0ab075d12a6bc4886aa4",
     "implementation/phase1/release_evidence/productization/worst_case_report.json": "sha256:bef6af55560c5094526cfc686123a549cfb267edf1559f642e9deccd4dbdb2b4",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
@@ -140,7 +140,7 @@
     "implementation/phase1/runtime_sbom.json": "sha256:bbb01dd56ce313c1daf5504ef94d9bda86559c063595f0ab289e866bb8d807f4",
     "implementation/phase1/solver_hip_e2e_contract_report.json": "sha256:b1351c13b406990f0be83b713007844149f69c5e87d0b5d3feb8e2859305dabb",
     "implementation/phase1/structure_viewer_performance_budget_manifest.json": "sha256:812cb97ff4be17e3fefe7c6c5aec9ada413974a91f3bd3df5e4c61351f939996",
-    "implementation/phase1/support_bundle_manifest.json": "sha256:68ad66e40bd423d8a982ecf2769e6344f3b3de1052780fa275c614b0571b543e",
+    "implementation/phase1/support_bundle_manifest.json": "sha256:984e1dbce4bd7c30030e968bea5278e2fcf8662ff8b41ec725a9557c0661c132",
     "implementation/phase1/workflow_productization_gate_report.json": "sha256:a2e7b7c2d1bcb280ad117fad82b22a61f400bf5fada03d547c67223e06a87b64",
     "implementation/phase1/workstation_service_budget.json": "sha256:cc74c453c597c82529b7c77cf011d162982478bc8f67a51e21ec3df0eca05860",
     "implementation/phase1/zero_copy_real_probe_report_strict.json": "sha256:00befd00a5c44e17d02b5f89dd94d59983ac71208fa976e13326ce0170463884"
@@ -338,13 +338,13 @@
         ],
         "pm_blocker_closure_board_external_owner_input_ready_count": 9,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
-        "pm_blocker_closure_board_handoff_ready_count": 9,
-        "pm_blocker_closure_board_open_blocker_count": 9,
+        "pm_blocker_closure_board_handoff_ready_count": 13,
+        "pm_blocker_closure_board_open_blocker_count": 13,
         "pm_blocker_register_external_owner_input_ready_count": 9,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 9,
-        "pm_blocker_register_open_blocker_count": 9,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 13,
+        "pm_blocker_register_open_blocker_count": 13,
+        "pm_blocker_register_release_area_blocker_count": 9,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
         "pm_release_reproduction_command_audit_command_count": 320,
         "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=320 | violations=0",
@@ -357,7 +357,7 @@
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "b1e14ed6fd2e73c7f81556e02cb1cab546145966463e890439bce2637f2eded6",
+        "support_bundle_export_archive_sha256": "b18e5d35afea80afe5df5d21a56e44664f42f13d1405128396a92a9c0d4211b7",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
@@ -369,7 +369,7 @@
         "support_bundle_pm_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "support_bundle_pm_failure_bundle_coverage": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
-        "support_bundle_pm_failure_bundle_coverage_sha256": "ecad67727cd71c13fd1ee315c432ae2e40a3d1502df346cd205d376ada7e1301",
+        "support_bundle_pm_failure_bundle_coverage_sha256": "82eedfa317d322ad2516a3028dd9edef71dc3aa3c410f9aa4486137f78ee87dd",
         "support_bundle_pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "support_bundle_pm_release_gate_completion_audit": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
         "support_bundle_pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
@@ -515,7 +515,7 @@
       "summary": {
         "artifact_count": 15,
         "blocker_count": 0,
-        "current_source_commit_sha": "76d436ea19cd0094de56929b51e0e2d013af884f",
+        "current_source_commit_sha": "32d8abcc587815f614ed5be6b543dcb45eb37900",
         "max_age_days": 30.0,
         "pass_count": 15
       },
@@ -837,18 +837,18 @@
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
         "one_click_failure_bundle_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "one_click_failure_bundle_archive_sha256": "b1e14ed6fd2e73c7f81556e02cb1cab546145966463e890439bce2637f2eded6",
+        "one_click_failure_bundle_archive_sha256": "b18e5d35afea80afe5df5d21a56e44664f42f13d1405128396a92a9c0d4211b7",
         "pm_blocker_closure_board_external_owner_input_ready_count": 9,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
-        "pm_blocker_closure_board_handoff_ready_count": 9,
-        "pm_blocker_closure_board_open_blocker_count": 9,
+        "pm_blocker_closure_board_handoff_ready_count": 13,
+        "pm_blocker_closure_board_open_blocker_count": 13,
         "pm_blocker_register_external_owner_input_ready_count": 9,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 9,
-        "pm_blocker_register_open_blocker_count": 9,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 13,
+        "pm_blocker_register_open_blocker_count": 13,
+        "pm_blocker_register_release_area_blocker_count": 9,
         "pm_failure_bundle_coverage_index": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
-        "pm_failure_bundle_coverage_index_sha256": "ecad67727cd71c13fd1ee315c432ae2e40a3d1502df346cd205d376ada7e1301",
+        "pm_failure_bundle_coverage_index_sha256": "82eedfa317d322ad2516a3028dd9edef71dc3aa3c410f9aa4486137f78ee87dd",
         "pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "pm_release_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
@@ -945,7 +945,7 @@
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
         "remote_mutation_approval_pending": false,
-        "remote_mutation_approved": false,
+        "remote_mutation_approved": true,
         "remote_sync_needed": false,
         "status": "synced"
       },
@@ -1166,7 +1166,7 @@
     "h_bond_evidence_surface_present": true,
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 13,
+    "operator_action_count": 17,
     "operator_actions": [
       {
         "action_id": "resolve_h_bond_evidence_surface",
@@ -1266,6 +1266,7 @@
           "external_receipts_attached"
         ],
         "blocked_criteria_count": 7,
+        "blocked_operator_slot_count": 4,
         "blockers": [
           "casf_pdbbind_source_material_not_attached",
           "public_benchmark_real_pose_predictions_missing",
@@ -1276,6 +1277,74 @@
         "bottleneck": "public_benchmark_source_of_truth_not_ready",
         "first_blocked_target": "casf_pdbbind_subset_intake",
         "first_blocker": "casf_pdbbind_source_material_not_attached",
+        "first_operator_handoff": {
+          "blocked_tier_beta_criteria": [
+            "casf_pdbbind_subset_materialized",
+            "external_receipts_attached"
+          ],
+          "depends_on": [],
+          "first_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
+          "handoff_id": "public_benchmark::casf_pdbbind_subset_intake",
+          "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+          "materialization_steps": [
+            "materialize_subset_manifest"
+          ],
+          "minimum_evidence": {
+            "case_count": 12,
+            "ligand_atom_order_contract_fields": [
+              "atom_count",
+              "atom_ids"
+            ],
+            "local_source_file_fields": [
+              "protein_structure_path",
+              "reference_ligand_path",
+              "predicted_ligand_path_or_docking_run_id"
+            ],
+            "materialized_manifest_fields": [
+              "source_file_checksums"
+            ],
+            "receipt_fields": [
+              "source_license_or_accession",
+              "source_checksum"
+            ],
+            "source_family": "CASF/PDBBind",
+            "symmetry_permutation_contract_fields": [
+              "permutations"
+            ]
+          },
+          "operator_intake_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+          "operator_intake_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md",
+          "queue_priority": 1,
+          "route": "/product/public-benchmark/operator-intake",
+          "slot_id": "casf_pdbbind_subset_intake",
+          "status": "operator_input_required",
+          "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
+          "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
+        },
+        "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+        "minimum_evidence": {
+          "case_count": 12,
+          "ligand_atom_order_contract_fields": [
+            "atom_count",
+            "atom_ids"
+          ],
+          "local_source_file_fields": [
+            "protein_structure_path",
+            "reference_ligand_path",
+            "predicted_ligand_path_or_docking_run_id"
+          ],
+          "materialized_manifest_fields": [
+            "source_file_checksums"
+          ],
+          "receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum"
+          ],
+          "source_family": "CASF/PDBBind",
+          "symmetry_permutation_contract_fields": [
+            "permutations"
+          ]
+        },
         "next_actions": [
           "fill_public_benchmark_operator_intake_packet",
           "attach_checked_casf_pdbbind_subset_source_files",
@@ -1291,12 +1360,19 @@
           "attach_vina_gnina_comparison_intake",
           "run_public_benchmark_vina_gnina_comparison_materializer"
         ],
+        "operator_handoff_queue_count": 4,
+        "operator_intake_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "operator_intake_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md",
+        "operator_intake_route": "/product/public-benchmark/operator-intake",
+        "operator_template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
         "reason": "public benchmark source-of-truth is seed_ready_materialization_blocked; first_blocker=casf_pdbbind_source_material_not_attached; first_blocked_target=casf_pdbbind_subset_intake; root_cause_tags=operator_source_material_required,operator_receipts_required; next_action=fill_public_benchmark_operator_intake_packet",
+        "required_slot_count": 4,
         "root_cause_tags": [
           "operator_source_material_required",
           "operator_receipts_required"
         ],
-        "status": "public_benchmark_evidence_required"
+        "status": "public_benchmark_evidence_required",
+        "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
       }
     ],
     "pocketmd_lite_product_surface_ready": false,
@@ -1441,6 +1517,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "76d436ea19cd0094de56929b51e0e2d013af884f",
+  "source_commit_sha": "32d8abcc587815f614ed5be6b543dcb45eb37900",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }

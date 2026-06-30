@@ -41,7 +41,7 @@
   "current_worktree_diagnostic_source": "product_readiness_snapshot.state_consistency.worktree",
   "current_worktree_diagnostics_included": false,
   "developer_preview_release_candidate_claim": false,
-  "generated_at": "2026-06-30T00:38:51.258397+00:00",
+  "generated_at": "2026-06-30T02:59:41.195160+00:00",
   "git_clean_clone_contract_pass": true,
   "git_clean_clone_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
   "git_clean_clone_status": "pass",
@@ -91,7 +91,7 @@
   "recommended_action_counts": {},
   "resolve_or_commit_dirty_tracked_paths": [],
   "schema_version": "phase3-release-control-cleanup-plan.v1",
-  "source_commit_sha": "90dd5490b95110f9dab24a3e446b7d4371bae083",
+  "source_commit_sha": "32d8abcc587815f614ed5be6b543dcb45eb37900",
   "status": "ready",
   "track_or_add_required_paths": []
 }
