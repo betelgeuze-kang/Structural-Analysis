@@ -82,7 +82,7 @@
     },
     "phase_id": "phase_2_public_benchmark_harness",
     "phase_label": "Phase 2",
-    "phase_queue_priority": 2,
+    "phase_queue_priority": 1,
     "queue_priority": 1,
     "roadmap_item": "Public benchmark harness",
     "root_cause_tags": [
@@ -96,7 +96,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T03:31:01.603410+00:00",
+  "generated_at": "2026-06-30T03:35:02.042231+00:00",
   "human_ux_summary": {
     "evidence_artifacts": {
       "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -122,10 +122,10 @@
     "workflow_step_pass_count": 0
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:0e7a4e4fce6b40001187d4442a23da4c0b983e4ed37565d41657f48cdea63faf",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:bef2a95acf6409753a757d62b55d900a9b450a4758588b537acb8794af6747b5",
     "scripts/build_non_expert_release_briefing_report.py": "sha256:be86ab4bef3d9fdda099eed97b0b0a338fd2f7bd6cf30d9b8fdd54002de62d0b"
   },
-  "next_owner_action_count": 8,
+  "next_owner_action_count": 6,
   "next_owner_actions": [
     {
       "blocker_id": "casf_pdbbind_source_material_not_attached",
@@ -146,20 +146,6 @@
       "external_input_required": true,
       "owner": "release_ci_owner",
       "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
-      "source": "release_area"
-    },
-    {
-      "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-      "external_input_required": false,
-      "owner": "release_owner",
-      "owner_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
-      "source": "release_area"
-    },
-    {
-      "blocker_id": "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
-      "external_input_required": false,
-      "owner": "release_owner",
-      "owner_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
       "source": "release_area"
     },
     {
@@ -201,8 +187,8 @@
   "read_model_ready": true,
   "reason_code": "PASS",
   "release_allowed": false,
-  "release_area_blocker_count": 7,
-  "release_area_owner_handoff_count": 7,
+  "release_area_blocker_count": 5,
+  "release_area_owner_handoff_count": 5,
   "reuse_policy": "non_expert_release_briefing_report_from_goal_bottleneck_surface",
   "reused_evidence": true,
   "route": "/goal/non-expert-release-briefing",
@@ -210,6 +196,6 @@
   "source_artifacts": {
     "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
   },
-  "source_commit_sha": "df8a88265f1eb752d054be8c8f4cd42a0e7b4e1d",
+  "source_commit_sha": "a16984b493353624afdef9b2556b146a686b6e76",
   "status": "ready_release_blocked"
 }

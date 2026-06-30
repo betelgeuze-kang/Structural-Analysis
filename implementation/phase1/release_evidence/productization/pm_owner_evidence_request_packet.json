@@ -1,24 +1,22 @@
 {
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 7,
+    "release_area_blocker_count": 5,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-      "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-      "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured"
     ],
-    "release_area_green_count": 12,
-    "release_area_summary": "12/16",
+    "release_area_green_count": 13,
+    "release_area_summary": "13/16",
     "release_area_total_count": 16
   },
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-06-30T03:31:01.103144+00:00",
+  "generated_at": "2026-06-30T03:35:01.149667+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -1824,131 +1822,6 @@
     },
     {
       "acceptance_criteria": [
-        "`release_evidence_freshness_report.json.contract_pass == true`",
-        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
-        "`evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`",
-        "`evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`"
-      ],
-      "blocked_release_tiers": [
-        "release_tier.limited_commercial_full_gate_ready",
-        "release_tier.ga_enterprise_evidence_gate_pass"
-      ],
-      "blocker_count": 2,
-      "blocker_ids": [
-        "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-        "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact"
-      ],
-      "evidence_states": [
-        "release_evidence_metadata_missing"
-      ],
-      "expected_intake_artifacts": [],
-      "expected_intake_details": [],
-      "expected_intake_paths": [],
-      "external_input_required": false,
-      "incomplete_blockers": [],
-      "intake_current_blockers": [],
-      "intake_field_request_rows": [],
-      "intake_lane_request_rows": [],
-      "intake_signoff_request_rows": [],
-      "next_actions": [
-        "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports."
-      ],
-      "owner": "release_owner",
-      "owner_input_required": false,
-      "reproduction_commands": [
-        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "request_rows": [
-        {
-          "acceptance_criteria": [
-            "`release_evidence_freshness_report.json.contract_pass == true`",
-            "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
-            "`evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`"
-          ],
-          "blocked_release_tiers": [
-            "release_tier.limited_commercial_full_gate_ready",
-            "release_tier.ga_enterprise_evidence_gate_pass"
-          ],
-          "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-          "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
-          "evidence_artifacts": {
-            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-            "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-            "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
-          },
-          "evidence_state": "release_evidence_metadata_missing",
-          "expected_intake_artifact": "",
-          "expected_intake_detail": {},
-          "expected_intake_path": "",
-          "external_input_required": false,
-          "handoff_ready": true,
-          "handoff_state": "local_remediation_ready",
-          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
-          "owner_input_required": false,
-          "reproduction_commands": [
-            "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-          ],
-          "scope": "release_area",
-          "title": "Evidence Freshness",
-          "verification_commands": [
-            "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-          ]
-        },
-        {
-          "acceptance_criteria": [
-            "`release_evidence_freshness_report.json.contract_pass == true`",
-            "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
-            "`evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`"
-          ],
-          "blocked_release_tiers": [
-            "release_tier.limited_commercial_full_gate_ready",
-            "release_tier.ga_enterprise_evidence_gate_pass"
-          ],
-          "blocker_id": "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
-          "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
-          "evidence_artifacts": {
-            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-            "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-            "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
-          },
-          "evidence_state": "release_evidence_metadata_missing",
-          "expected_intake_artifact": "",
-          "expected_intake_detail": {},
-          "expected_intake_path": "",
-          "external_input_required": false,
-          "handoff_ready": true,
-          "handoff_state": "local_remediation_ready",
-          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
-          "owner_input_required": false,
-          "reproduction_commands": [
-            "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-          ],
-          "scope": "release_area",
-          "title": "Evidence Freshness",
-          "verification_commands": [
-            "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-          ]
-        }
-      ],
-      "request_state": "ready_for_owner_input",
-      "verification_commands": [
-        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
-    {
-      "acceptance_criteria": [
         "`ga_enterprise_readiness_report.json.contract_pass == true` or no `independent_vv_missing` blocker",
         "`ga_enterprise_signoff_intake_packet.json` shows independent V&V evidence accepted",
         "`independent_vv_missing` absent from `ga_enterprise_blockers`"
@@ -2302,7 +2175,7 @@
   ],
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
   "pm_release_gate_reviewer_handoff": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
-  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304",
   "reason_code": "PASS",
   "release_tier_owner_packets": [
     {
@@ -2313,8 +2186,6 @@
       "blockers": [
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-        "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-        "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured"
@@ -2345,8 +2216,6 @@
           "blockers": [
             "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
             "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-            "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-            "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
             "security::license_status_not_configured"
@@ -2391,8 +2260,6 @@
         "customer_shadow::completed_shadow_case_count_below_minimum",
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-        "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-        "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured"
@@ -2660,8 +2527,6 @@
             "customer_shadow::completed_shadow_case_count_below_minimum",
             "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
             "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-            "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-            "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
             "security::license_status_not_configured"
@@ -2827,7 +2692,7 @@
   ],
   "schema_version": "pm-owner-evidence-request-packet.v1",
   "summary": {
-    "blocked_release_tier_impact_count": 18,
+    "blocked_release_tier_impact_count": 14,
     "evidence_closure_pass": false,
     "expected_intake_contract_pass_count": 1,
     "expected_intake_count": 5,
@@ -2843,14 +2708,14 @@
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "missing_release_tier_impact_count": 0,
-    "open_blocker_count": 11,
-    "open_blocker_with_release_tier_impact_count": 11,
+    "open_blocker_count": 9,
+    "open_blocker_with_release_tier_impact_count": 9,
     "owner_input_required_count": 9,
-    "owner_packet_count": 7,
+    "owner_packet_count": 6,
     "paid_pilot_candidate": true,
-    "release_area_blocker_count": 7,
+    "release_area_blocker_count": 5,
     "release_area_gate_ready": false,
-    "release_area_green_count": 12,
+    "release_area_green_count": 13,
     "release_area_total_count": 16,
     "release_tier_external_input_required_count": 2,
     "release_tier_impact_contract_pass": true,
@@ -2859,5 +2724,5 @@
     "release_tier_owner_packet_count": 2,
     "release_tier_request_count": 2
   },
-  "summary_line": "PM owner evidence request packet: PASS | owners=7 | open_blockers=11 | tier_requests=2 | incomplete=0"
+  "summary_line": "PM owner evidence request packet: PASS | owners=6 | open_blockers=9 | tier_requests=2 | incomplete=0"
 }
