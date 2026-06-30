@@ -1206,7 +1206,7 @@
     }
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T07:26:35.450688+00:00",
+  "generated_at": "2026-06-30T07:35:11.603375+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:cb672e5a3ac1b0d0aa6e95d74e9ef52b25cc33ed13cdc8a4b37c94f7f146f34a",
@@ -1238,7 +1238,7 @@
   "reuse_policy": "non_promoting_full_structural_graph_audit_from_existing_f2g_dominant_rows",
   "reused_evidence": true,
   "schema_version": "g1-global-connectivity-load-path-audit.v1",
-  "source_commit_sha": "edf869b7595a24e23e000d6a5883c68b2d19134f",
+  "source_commit_sha": "77e62ff1f8de41454bd1cf11baed53e186a1c783",
   "status": "ready",
   "summary": {
     "dominant_dof_row_count": 64,
