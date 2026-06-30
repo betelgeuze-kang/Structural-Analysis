@@ -4,10 +4,10 @@
   "contract_pass": true,
   "depends_on": [],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T16:39:36.971538+00:00",
+  "generated_at": "2026-06-30T17:23:18.763189+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:5e6c23255de1c0006cdfd22ceeccac1c35557f7d38bb78c6c2afa2e51c4a3979",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:7128199efb24530483b5758c1019a38e21b5d161c05021072d2397aa4f6292fa",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:2127d917e5e06024b9ee3d4b3a65d559b79c8ae676643d5dd50f064c0e8cf14d",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d9fe13a03263cc08f18008d7132295e30ddaf448133a8072a30456f523ae48f7",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:edd2e1f2c560695f83e4f6dc30489379d16fe7a798541e82179cb5b933a6bf72",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:4aad49f57b3abebeea55418acaf8679c5fc8574f8741677005b9bf85f2e66937",
     "scripts/materialize_public_benchmark_pose_success_harness.py": "sha256:b1031511d159a8dcd03c16abaf49ed894db43dda58978fae32239ba47f28f4a9",
@@ -83,7 +83,7 @@
   "reused_evidence": true,
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "casf_pdbbind_subset_intake",
-  "source_commit_sha": "8a32bee6b937b3cfd2f60ed0e88ed84741434e8f",
+  "source_commit_sha": "2d0a40b0964cabe48a41496e04950c427ea2184f",
   "status": "operator_template_seed",
   "template": {
     "cases": [
