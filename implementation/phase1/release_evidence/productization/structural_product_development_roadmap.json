@@ -11,24 +11,24 @@
     "pm_milestones": "5/5",
     "pm_release_areas": "13/16",
     "release_ready": false,
-    "snapshot_blocker_count": 52,
+    "snapshot_blocker_count": 46,
     "snapshot_status": "stale_or_inconsistent",
     "workstation_delivery_ready": true
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 60.4,
-  "generated_at": "2026-06-30T07:56:27.696851+00:00",
+  "generated_at": "2026-06-30T07:58:47.988703+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:6b2af41cdcbe773a689a0b4bc6ed1692e9612db16777a34117626ee258c66ea2",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:22076c38b907e9aa1efd982e21ed5b058b5160f829379929a75109b1c6466f8e",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:4474b25e95877dbddff3b946fcc58ec77a52571da66e3c3a970693fd75548379",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:d50e48495c1c769b346c1020016752bead20824a952efd51c739bf36e166b32b",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:1c9fd5effe87e7dec15af66688a40c53399ae7e1da2bd30ff6d1ec367df98089",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:5a0c4ab4c65d8ce6c31ab1b7848b71521c01b3bfe0f747989d58a0c2d00641d3",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:aade7c0bffbbf2aaf2cc7137fe3b00ac7c37f004b5a65421c054e38d690343d6",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:7a1c83b9d0f7c3db8823dfeaf4078d6ed4cf71396ac97211f0cb194bd9aba31e",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a024ded227f372e43751e73790ee401274d5c8ce25d443fef0320d9652abb269",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:2beffec64b96d6766accaafb940bf80a0d21aba8bb129668be48cd8c4713b4d4",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:3ead985f250746bad88b6d92dc0da484a53931ee43105e713436be460cfa7610",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:32774afc4a18e81e6079506d2ac6d2287a4d6a1ceb49dfc27fb66c8e0aa81a01",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:9227b585d1b72ac43ba3fa7b660901e3a9a2e17e3eedc6503c56b47319790d21",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a7dd1217fca0b4bdde16a2b026d3b55c249e644fafe8d97c07b981539e863684",
     "scripts/build_structural_product_development_roadmap.py": "sha256:b97ffee5a0bdada4f7f1159ecc58a7d4fa9be11c40b747741219affe67995ffe"
   },
   "passed_evidence_requirement_count": 29,
@@ -66,7 +66,7 @@
       "summary": {
         "fresh_artifact_count": 15,
         "fresh_artifact_pass_count": 15,
-        "snapshot_blocker_count": 52,
+        "snapshot_blocker_count": 46,
         "stale_or_inconsistent": true
       }
     },
@@ -271,7 +271,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "dba240d6a9d9f4d3388c13528fb2ccd3fbcab20b",
+  "source_commit_sha": "31c27d5c8502ab79013425bb076adec35d917bf2",
   "stage_average_progress_percent": 44.9,
   "stage_count": 7,
   "status": "blocked",
