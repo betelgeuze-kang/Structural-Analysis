@@ -482,7 +482,7 @@ def _metric_value(
     computed_metrics: dict[str, Any],
     field_name: str,
 ) -> Any:
-    if field_name in row:
+    if field_name in row and row.get(field_name) is not None:
         return row.get(field_name)
     return computed_metrics.get(field_name)
 
@@ -506,7 +506,11 @@ def _computed_metric_consistency_blockers(
         "positive_out_anchored_by_top_decoys",
     )
     for field_name in comparable_fields:
-        if field_name not in row or computed_metrics.get(field_name) is None:
+        if (
+            field_name not in row
+            or row.get(field_name) is None
+            or computed_metrics.get(field_name) is None
+        ):
             continue
         supplied = row.get(field_name)
         computed = computed_metrics[field_name]
