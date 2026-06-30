@@ -1,0 +1,43 @@
+{
+  "analysis_type": "model_health",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "convergence_history": [],
+  "developer_preview": true,
+  "engine_version": "1.0.0",
+  "input_checksum": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+  "metrics": {
+    "adapter_scope": "topology/model-health import only; deterministic solver closure and MGT load assembly remain outside this adapter",
+    "element_count": 12728,
+    "load_count": 18,
+    "node_count": 13047,
+    "support_count": 2133
+  },
+  "solver": "phase3_large_model_operator_execution",
+  "status": "blocked",
+  "tolerance": 1e-08,
+  "unsupported_features": [
+    {
+      "detail": "*ELASTICLINK rows are preserved in metadata only by this thin MGT adapter.",
+      "kind": "mgt_elastic_link_unsupported",
+      "row_count": 1692
+    },
+    {
+      "detail": "*OFFSET rows are preserved in metadata only by this thin MGT adapter.",
+      "kind": "mgt_beam_offset_unsupported",
+      "row_count": 708
+    },
+    {
+      "detail": "*STORY-ECCEN rows are preserved in metadata only by this thin MGT adapter.",
+      "kind": "mgt_story_eccentricity_unsupported",
+      "row_count": 1
+    },
+    {
+      "detail": "*THICKNESS rows are preserved in metadata only by this thin MGT adapter.",
+      "kind": "mgt_thickness_unsupported",
+      "row_count": 25
+    }
+  ],
+  "warnings": [
+    "MGT sections preserved only as metadata, not canonical analysis inputs: BNDR-GROUP,DOMAIN-ELEMENT,EIGEN-CTRL,ENDDATA,LC-COLOR,LENGTH,MAIN-DOMAIN,MATL-COLOR,MEMBER,REBAR-MATL-CODE,SECT-COLOR,SECT-SCALE..."
+  ]
+}

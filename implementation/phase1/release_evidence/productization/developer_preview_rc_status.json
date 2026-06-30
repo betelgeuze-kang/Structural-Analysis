@@ -188,23 +188,20 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 8,
+        "blocker_count": 5,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
-            "blocker_count": 3,
+            "blocker_count": 1,
             "blockers": [
-              "large_model_crash_oom_free_count_below_required:0/2",
-              "large_model_execution_count_below_required:0/2",
               "large_model_scorecard_or_review_count_below_required:0/2"
             ],
             "description": "Large-model execution, crash/OOM-free, and scorecard/review count gaps.",
             "scope": "large_model_quantity_gate"
           },
           "large_runner_execution": {
-            "blocker_count": 2,
+            "blocker_count": 1,
             "blockers": [
-              "large_model_execution_receipt_missing",
               "large_model_scorecard_or_review_missing"
             ],
             "description": "Large-model runner, execution receipt, and review gaps.",
@@ -245,13 +242,10 @@
         "unassigned_blockers": []
       },
       "blockers": [
-        "large_model_execution_receipt_missing",
         "large_model_scorecard_or_review_missing",
         "license_review_pending",
         "normalization_not_implemented",
         "reference_outputs_missing",
-        "large_model_crash_oom_free_count_below_required:0/2",
-        "large_model_execution_count_below_required:0/2",
         "large_model_scorecard_or_review_count_below_required:0/2"
       ],
       "contract_pass": false,
@@ -505,10 +499,10 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T21:37:28.270677+00:00",
+  "generated_at": "2026-06-30T21:50:03.856865+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:0abb30c53884f1ffbd11aeb1220af8fa82a3a785bc904094aff39a01947dbde4",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:898f7404885b4a6583992701f3456ce4da61766ac31ffa931a665380348fa1d4",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:5b9bcd27c9b93c425c1b2c839864d154285405aeadde999b9f2424ab29967452",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:69d1d2cc6e3db8fee4c4857c2e703e34db981fe807af5479766b179b36e010e6",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4d1d5489b9c5dd4f2b89948337c509f2d4199014270972a3bf9c826278b65f3e",
@@ -525,7 +519,7 @@
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
-    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:384b6ec2fa0fbb31930c762c5da948929e53603cb3c48e1b53e699574b95da9c",
+    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:eb609663956bbf0b60f812f95a6d0ee70f424103e57ab16d0f476e3b65a888d6",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:8c456eec13f2b3a47efa4e17d1fc838d0e3deb093bfe93fca5eae62d0d7ce7d1",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:cc5edab07c763d44c75f7005eca66f235afb0d81ef4bc21115f60bfea8459790",
@@ -539,23 +533,20 @@
     "benchmark_quantity_handoff": {
       "acquisition_plan": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
       "benchmark_scale_blocker_grouping": {
-        "blocker_count": 12,
+        "blocker_count": 9,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
-            "blocker_count": 3,
+            "blocker_count": 1,
             "blockers": [
-              "large_model_crash_oom_free_count_below_required:0/2",
-              "large_model_execution_count_below_required:0/2",
               "large_model_scorecard_or_review_count_below_required:0/2"
             ],
             "description": "Large-model execution, crash/OOM-free, and scorecard/review count gaps.",
             "scope": "large_model_quantity_gate"
           },
           "large_runner_execution": {
-            "blocker_count": 2,
+            "blocker_count": 1,
             "blockers": [
-              "large_model_execution_receipt_missing",
               "large_model_scorecard_or_review_missing"
             ],
             "description": "Large-model runner, execution receipt, and review gaps.",
@@ -622,7 +613,6 @@
         },
         "large_structural_models": {
           "acquisition_blockers": [
-            "large_model_execution_receipt_missing",
             "large_model_scorecard_or_review_missing",
             "license_review_pending",
             "normalization_not_implemented",
@@ -630,23 +620,20 @@
           ],
           "benchmark_scale_gate": {
             "blocker_grouping_metadata": {
-              "blocker_count": 8,
+              "blocker_count": 5,
               "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
               "groups": {
                 "large_quantity_shortfall": {
-                  "blocker_count": 3,
+                  "blocker_count": 1,
                   "blockers": [
-                    "large_model_crash_oom_free_count_below_required:0/2",
-                    "large_model_execution_count_below_required:0/2",
                     "large_model_scorecard_or_review_count_below_required:0/2"
                   ],
                   "description": "Large-model execution, crash/OOM-free, and scorecard/review count gaps.",
                   "scope": "large_model_quantity_gate"
                 },
                 "large_runner_execution": {
-                  "blocker_count": 2,
+                  "blocker_count": 1,
                   "blockers": [
-                    "large_model_execution_receipt_missing",
                     "large_model_scorecard_or_review_missing"
                   ],
                   "description": "Large-model runner, execution receipt, and review gaps.",
@@ -687,9 +674,6 @@
               "unassigned_blockers": []
             },
             "blockers": [
-              "large_model_crash_oom_free_count_below_required:0/2",
-              "large_model_execution_count_below_required:0/2",
-              "large_model_execution_receipt_missing",
               "large_model_scorecard_or_review_count_below_required:0/2",
               "large_model_scorecard_or_review_missing",
               "license_review_pending",
@@ -698,11 +682,11 @@
             ],
             "claim_boundary": "This receipt is a readiness contract for large-model execution evidence. The runner command and resource envelope are implemented, but this does not acquire sources, approve licenses, run mega-tall models, prove crash/OOM-free behavior, create scorecards, satisfy 2/2 large executions, or close Phase 3/Developer Preview RC.",
             "contract_pass": false,
-            "crash_oom_free_execution_count": 0,
-            "current_large_model_execution_receipt_count": 0,
+            "crash_oom_free_execution_count": 2,
+            "current_large_model_execution_receipt_count": 2,
             "current_large_source_model_count": 2,
             "receipt": "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json",
-            "required_evidence_pass_count": 4,
+            "required_evidence_pass_count": 5,
             "required_large_model_count": 2,
             "scorecard_or_review_count": 0,
             "source_checksum_count": 2,
@@ -714,7 +698,6 @@
           "remaining": 0,
           "required": 2,
           "runner_blockers": [
-            "large_model_execution_receipt_missing",
             "large_model_scorecard_or_review_missing",
             "license_review_pending",
             "normalization_not_implemented",
@@ -1053,13 +1036,14 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 5,
+    "developer_preview_blocker_count": 6,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "human_ux::observation_file_missing"
+      "human_ux::observation_file_missing",
+      "stale_or_inconsistent:worktree_dirty"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -1366,23 +1350,20 @@
     },
     "large_model_runner_handoff": {
       "benchmark_scale_blocker_grouping": {
-        "blocker_count": 8,
+        "blocker_count": 5,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
-            "blocker_count": 3,
+            "blocker_count": 1,
             "blockers": [
-              "large_model_crash_oom_free_count_below_required:0/2",
-              "large_model_execution_count_below_required:0/2",
               "large_model_scorecard_or_review_count_below_required:0/2"
             ],
             "description": "Large-model execution, crash/OOM-free, and scorecard/review count gaps.",
             "scope": "large_model_quantity_gate"
           },
           "large_runner_execution": {
-            "blocker_count": 2,
+            "blocker_count": 1,
             "blockers": [
-              "large_model_execution_receipt_missing",
               "large_model_scorecard_or_review_missing"
             ],
             "description": "Large-model runner, execution receipt, and review gaps.",
@@ -1425,23 +1406,20 @@
       "benchmark_scale_contract_pass": false,
       "benchmark_scale_gate": {
         "blocker_grouping_metadata": {
-          "blocker_count": 8,
+          "blocker_count": 5,
           "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
           "groups": {
             "large_quantity_shortfall": {
-              "blocker_count": 3,
+              "blocker_count": 1,
               "blockers": [
-                "large_model_crash_oom_free_count_below_required:0/2",
-                "large_model_execution_count_below_required:0/2",
                 "large_model_scorecard_or_review_count_below_required:0/2"
               ],
               "description": "Large-model execution, crash/OOM-free, and scorecard/review count gaps.",
               "scope": "large_model_quantity_gate"
             },
             "large_runner_execution": {
-              "blocker_count": 2,
+              "blocker_count": 1,
               "blockers": [
-                "large_model_execution_receipt_missing",
                 "large_model_scorecard_or_review_missing"
               ],
               "description": "Large-model runner, execution receipt, and review gaps.",
@@ -1482,9 +1460,6 @@
           "unassigned_blockers": []
         },
         "blockers": [
-          "large_model_crash_oom_free_count_below_required:0/2",
-          "large_model_execution_count_below_required:0/2",
-          "large_model_execution_receipt_missing",
           "large_model_scorecard_or_review_count_below_required:0/2",
           "large_model_scorecard_or_review_missing",
           "license_review_pending",
@@ -1493,11 +1468,11 @@
         ],
         "claim_boundary": "This receipt is a readiness contract for large-model execution evidence. The runner command and resource envelope are implemented, but this does not acquire sources, approve licenses, run mega-tall models, prove crash/OOM-free behavior, create scorecards, satisfy 2/2 large executions, or close Phase 3/Developer Preview RC.",
         "contract_pass": false,
-        "crash_oom_free_execution_count": 0,
-        "current_large_model_execution_receipt_count": 0,
+        "crash_oom_free_execution_count": 2,
+        "current_large_model_execution_receipt_count": 2,
         "current_large_source_model_count": 2,
         "receipt": "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json",
-        "required_evidence_pass_count": 4,
+        "required_evidence_pass_count": 5,
         "required_large_model_count": 2,
         "scorecard_or_review_count": 0,
         "source_checksum_count": 2,
@@ -1507,18 +1482,17 @@
       "benchmark_scale_status": "blocked",
       "benchmark_scale_status_receipt": "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json",
       "blockers": [
-        "large_model_execution_receipt_missing",
         "large_model_scorecard_or_review_missing",
         "license_review_pending",
         "normalization_not_implemented",
         "reference_outputs_missing"
       ],
       "claim_boundary": "This receipt is a readiness contract for large-model execution evidence. The runner command and resource envelope are implemented, but this does not acquire sources, approve licenses, run mega-tall models, prove crash/OOM-free behavior, create scorecards, satisfy 2/2 large executions, or close Phase 3/Developer Preview RC.",
-      "crash_oom_free_execution_count": 0,
-      "current_large_model_execution_receipt_count": 0,
+      "crash_oom_free_execution_count": 2,
+      "current_large_model_execution_receipt_count": 2,
       "owner_action": "Complete license review for the attached large OpenSees/reference models, attach reference outputs, normalize them into the canonical model, run the operator execution receipt command for each model, then attach crash/OOM-free execution receipts and scorecard or approved REVIEW evidence.",
       "required_evidence_count": 9,
-      "required_evidence_pass_count": 4,
+      "required_evidence_pass_count": 5,
       "required_large_model_count": 2,
       "resource_envelope": {
         "artifact_retention_policy": "operator_attached_execution_receipt_result_and_validation_report",
@@ -2489,6 +2463,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "752fadd00ddc18d74d272c84f7f3c6cb1b80eaf4",
+  "source_commit_sha": "cc6b2edd920087b292c601cc975443db8f6d5dcb",
   "status": "blocked"
 }

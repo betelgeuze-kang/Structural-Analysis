@@ -178,6 +178,41 @@ def _benchmark_scale_blocker_grouping_metadata(blockers: list[str]) -> dict[str,
     }
 
 
+def _filter_satisfied_large_receipt_blockers(
+    blockers: list[str],
+    *,
+    required: int,
+    execution_count: int,
+    crash_oom_free_count: int,
+    scorecard_or_review_count: int,
+) -> list[str]:
+    filtered: list[str] = []
+    for blocker in blockers:
+        if (
+            execution_count >= required
+            and (
+                blocker == "large_model_execution_receipt_missing"
+                or blocker.startswith("large_model_execution_count_below_required:")
+            )
+        ):
+            continue
+        if (
+            crash_oom_free_count >= required
+            and blocker.startswith("large_model_crash_oom_free_count_below_required:")
+        ):
+            continue
+        if (
+            scorecard_or_review_count >= required
+            and (
+                blocker == "large_model_scorecard_or_review_missing"
+                or blocker.startswith("large_model_scorecard_or_review_count_below_required:")
+            )
+        ):
+            continue
+        filtered.append(blocker)
+    return filtered
+
+
 def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     medium = _load_json(repo_root, PHASE3_MEDIUM_MODEL_SCORECARD)
@@ -233,6 +268,13 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
         large_blockers.append(
             f"large_model_scorecard_or_review_count_below_required:{large_scorecard_or_review}/{large_required}"
         )
+    large_blockers = _filter_satisfied_large_receipt_blockers(
+        large_blockers,
+        required=large_required,
+        execution_count=large_execution,
+        crash_oom_free_count=large_crash_oom_free,
+        scorecard_or_review_count=large_scorecard_or_review,
+    )
     medium_blockers = sorted(dict.fromkeys(medium_blockers))
     large_blockers = sorted(dict.fromkeys(large_blockers))
     all_blockers = sorted(dict.fromkeys([*medium_blockers, *large_blockers]))

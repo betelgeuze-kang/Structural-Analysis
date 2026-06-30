@@ -54,24 +54,26 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert large["contract_pass"] is False
     assert large["required_large_model_count"] == 2
     assert large["current_large_source_model_count"] == 2
-    assert large["current_large_model_execution_receipt_count"] == 0
-    assert large["crash_oom_free_execution_count"] == 0
+    assert large["current_large_model_execution_receipt_count"] == 2
+    assert large["crash_oom_free_execution_count"] == 2
     assert large["scorecard_or_review_count"] == 0
     assert large["source_url_verified_count"] == 2
     assert large["source_checksum_count"] == 2
     assert "large_structural_models_current_below_required:0/2" not in large["blockers"]
-    assert "large_model_execution_count_below_required:0/2" in large["blockers"]
-    assert "large_model_crash_oom_free_count_below_required:0/2" in large["blockers"]
+    assert "large_model_execution_count_below_required:0/2" not in large["blockers"]
+    assert "large_model_crash_oom_free_count_below_required:0/2" not in large["blockers"]
     assert "large_model_runner_not_implemented" not in large["blockers"]
-    assert "large_model_execution_receipt_missing" in large["blockers"]
+    assert "large_model_execution_receipt_missing" not in large["blockers"]
+    assert "large_model_scorecard_or_review_missing" in large["blockers"]
+    assert "large_model_scorecard_or_review_count_below_required:0/2" in large["blockers"]
     large_grouping = large["blocker_grouping_metadata"]
     assert large_grouping["schema_version"] == "phase6-benchmark-scale-blocker-groups.v1"
     assert large_grouping["blocker_count"] == len(large["blockers"])
     assert large_grouping["unassigned_blockers"] == []
-    assert "large_model_execution_receipt_missing" in large_grouping["groups"][
+    assert "large_model_scorecard_or_review_missing" in large_grouping["groups"][
         "large_runner_execution"
     ]["blockers"]
-    assert "large_model_crash_oom_free_count_below_required:0/2" in large_grouping[
+    assert "large_model_scorecard_or_review_count_below_required:0/2" in large_grouping[
         "groups"
     ]["large_quantity_shortfall"]["blockers"]
     assert "large_structural_models_current_below_required:0/2" not in large_grouping[

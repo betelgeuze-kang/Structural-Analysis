@@ -80,10 +80,11 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert not any(blocker.startswith("large_structural_models_current_below_required") for blocker in large_blockers)
     assert "large_model_runner_not_implemented" not in large_blockers
     assert "nightly_lane_not_configured" not in large_blockers
-    assert "large_model_execution_receipt_missing" in large_blockers
+    assert "large_model_execution_receipt_missing" not in large_blockers
     assert "large_model_scorecard_or_review_missing" in large_blockers
-    assert "large_model_execution_count_below_required:0/2" in large_blockers
-    assert "large_model_crash_oom_free_count_below_required:0/2" in large_blockers
+    assert "large_model_execution_count_below_required:0/2" not in large_blockers
+    assert "large_model_crash_oom_free_count_below_required:0/2" not in large_blockers
+    assert "large_model_scorecard_or_review_count_below_required:0/2" in large_blockers
     assert final_gates["large_models_crash_oom_free"]["evidence"].endswith(
         "phase6_benchmark_scale_status.json"
     )
@@ -93,7 +94,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert large_gate_grouping["schema_version"] == "phase6-benchmark-scale-blocker-groups.v1"
     assert large_gate_grouping["blocker_count"] == len(large_blockers)
     assert large_gate_grouping["unassigned_blockers"] == []
-    assert "large_model_execution_receipt_missing" in large_gate_grouping["groups"][
+    assert "large_model_scorecard_or_review_missing" in large_gate_grouping["groups"][
         "large_runner_execution"
     ]["blockers"]
     assert "Policy-only acquisition rows" in " ".join(
@@ -389,12 +390,17 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     )
     assert (
         "large_model_execution_receipt_missing"
+        not in quantity_handoff["targets"]["large_structural_models"]["runner_blockers"]
+    )
+    assert (
+        "large_model_scorecard_or_review_missing"
         in quantity_handoff["targets"]["large_structural_models"]["runner_blockers"]
     )
     large_scale_gate = quantity_handoff["targets"]["large_structural_models"]["benchmark_scale_gate"]
     assert large_scale_gate["status"] == "blocked"
     assert large_scale_gate["contract_pass"] is False
-    assert "large_model_crash_oom_free_count_below_required:0/2" in large_scale_gate["blockers"]
+    assert "large_model_crash_oom_free_count_below_required:0/2" not in large_scale_gate["blockers"]
+    assert "large_model_scorecard_or_review_count_below_required:0/2" in large_scale_gate["blockers"]
     assert quantity_handoff["targets"]["ifc_clean_dirty_import_cases"]["remaining"] == 10
     assert "does not create medium/large benchmark evidence" in quantity_handoff["claim_boundary"]
     medium_scorecard_handoff = payload["known_limitations"]["medium_model_scorecard_handoff"]
@@ -444,17 +450,18 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "large_quantity_shortfall"
     ]["scope"] == "large_model_quantity_gate"
     assert large_runner_handoff["required_large_model_count"] == 2
-    assert large_runner_handoff["current_large_model_execution_receipt_count"] == 0
-    assert large_runner_handoff["crash_oom_free_execution_count"] == 0
+    assert large_runner_handoff["current_large_model_execution_receipt_count"] == 2
+    assert large_runner_handoff["crash_oom_free_execution_count"] == 2
     assert large_runner_handoff["scorecard_or_review_count"] == 0
-    assert large_runner_handoff["required_evidence_pass_count"] == 4
+    assert large_runner_handoff["required_evidence_pass_count"] == 5
     assert large_runner_handoff["runner_command_ready"] is True
     assert "run_phase3_large_model_execution_receipt.py" in large_runner_handoff[
         "runner_command_template"
     ]
     assert large_runner_handoff["resource_envelope"]["default_memory_limit_gb"] == 64.0
     assert "large_model_runner_not_implemented" not in large_runner_handoff["blockers"]
-    assert "large_model_execution_receipt_missing" in large_runner_handoff["blockers"]
+    assert "large_model_execution_receipt_missing" not in large_runner_handoff["blockers"]
+    assert "large_model_scorecard_or_review_missing" in large_runner_handoff["blockers"]
     assert large_runner_handoff["runner_receipt_template"]["schema_version"] == (
         "phase3-large-model-execution-receipt.v1"
     )

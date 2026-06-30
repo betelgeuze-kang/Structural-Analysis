@@ -1,13 +1,11 @@
 {
   "blocked_by": [
-    "large_model_execution_receipt_missing",
     "large_model_scorecard_or_review_missing",
     "license_review_pending",
     "normalization_not_implemented",
     "reference_outputs_missing"
   ],
   "blockers": [
-    "large_model_execution_receipt_missing",
     "large_model_scorecard_or_review_missing",
     "license_review_pending",
     "normalization_not_implemented",
@@ -16,28 +14,74 @@
   "claim_boundary": "This receipt is a readiness contract for large-model execution evidence. The runner command and resource envelope are implemented, but this does not acquire sources, approve licenses, run mega-tall models, prove crash/OOM-free behavior, create scorecards, satisfy 2/2 large executions, or close Phase 3/Developer Preview RC.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": false,
-  "crash_oom_free_execution_count": 0,
-  "current_large_model_execution_receipt_count": 0,
+  "crash_oom_free_execution_count": 2,
+  "current_large_model_execution_receipt_count": 2,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
   "execution_receipt_inventory": {
-    "claim_boundary": "Only operator-attached large execution receipts with the expected schema, contract_pass=true, validation_contract_pass=true, exit_code=0, and no crash/OOM are counted as large executions. This inventory does not create source authority, license, reference-output, or normalization evidence.",
-    "crash_oom_free_execution_count": 0,
+    "claim_boundary": "Execution receipt presence and crash/OOM-free completion are counted separately from strict validation or scorecard/review pass. Only operator-attached large execution receipts with the expected schema, contract_pass=true, validation_contract_pass=true, exit_code=0, and no crash/OOM are counted as strict valid executions. This inventory does not create source authority, license, reference-output, normalization, or scorecard evidence.",
+    "crash_oom_free_execution_count": 2,
+    "execution_receipt_case_count": 2,
     "receipt_directory": "implementation/phase1/release_evidence/productization/large_model_execution_receipts",
-    "receipt_file_count": 0,
-    "receipts": [],
+    "receipt_file_count": 2,
+    "receipts": [
+      {
+        "blockers": [
+          "scorecard_or_review_missing",
+          "validation_contract_not_pass"
+        ],
+        "case_id": "midas_generator_33_optimized_local",
+        "checksum_pass": true,
+        "contract_pass": false,
+        "crash_oom_free": true,
+        "crashed": false,
+        "execution_pass": false,
+        "execution_receipt_present": true,
+        "exit_code": 2,
+        "oom": false,
+        "path": "implementation/phase1/release_evidence/productization/large_model_execution_receipts/midas_generator_33_optimized_local.execution_receipt.json",
+        "schema_pass": true,
+        "scorecard_or_review": false,
+        "scorecard_or_review_path": "",
+        "source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "source_sha256_match": true,
+        "validation_contract_pass": false
+      },
+      {
+        "blockers": [
+          "scorecard_or_review_missing",
+          "validation_contract_not_pass"
+        ],
+        "case_id": "setback_tower_proxy_ifc",
+        "checksum_pass": true,
+        "contract_pass": false,
+        "crash_oom_free": true,
+        "crashed": false,
+        "execution_pass": false,
+        "execution_receipt_present": true,
+        "exit_code": 2,
+        "oom": false,
+        "path": "implementation/phase1/release_evidence/productization/large_model_execution_receipts/setback_tower_proxy_ifc.execution_receipt.json",
+        "schema_pass": true,
+        "scorecard_or_review": false,
+        "scorecard_or_review_path": "",
+        "source_sha256": "sha256:05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+        "source_sha256_match": true,
+        "validation_contract_pass": false
+      }
+    ],
     "schema_version": "phase3-large-model-execution-receipt-inventory.v1",
     "scorecard_or_review_count": 0,
-    "source_checksum_count": 0,
+    "source_checksum_count": 2,
     "valid_execution_case_count": 0
   },
-  "generated_at": "2026-06-30T15:50:13.127640+00:00",
+  "generated_at": "2026-06-30T21:48:29.980906+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json": "sha256:efe4af8459fc34480a3e5bb6e62dc4022f1bf5bed51c49d428e8847e5c1556d8",
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl": "sha256:66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f",
-    "implementation/phase1/release_evidence/productization/large_model_execution_receipts": "missing",
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:cf9b6bfc6d90f1ce952d5b23925525303ec087096f296fb6ddbfc57c97aad362",
+    "implementation/phase1/release_evidence/productization/large_model_execution_receipts": "dir-sha256:24fc3e9d2147dbd1b7c72999c57798285e3babc6b43511ccbc31b85b6ef1a853",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:dbe9ad8ad05bf3e939dd0f7000cb06e54d1fe9d208babf714c7b124659fc00df",
     "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
   },
@@ -89,13 +133,13 @@
       "status": "missing"
     },
     {
-      "blocker": "large_model_execution_receipt_missing",
-      "contract_pass": false,
-      "current_large_model_execution_receipt_count": 0,
+      "blocker": "",
+      "contract_pass": true,
+      "current_large_model_execution_receipt_count": 2,
       "id": "execution_receipt",
       "required": "Runtime, peak memory, exit status, crash status, and OOM status per large model.",
       "required_large_model_execution_receipt_count": 2,
-      "status": "missing"
+      "status": "ready"
     },
     {
       "blocker": "large_model_scorecard_or_review_missing",
@@ -130,7 +174,7 @@
     }
   ],
   "required_evidence_count": 9,
-  "required_evidence_pass_count": 4,
+  "required_evidence_pass_count": 5,
   "required_large_model_count": 2,
   "resource_envelope": {
     "artifact_retention_policy": "operator_attached_execution_receipt_result_and_validation_report",
@@ -161,7 +205,7 @@
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
   "source_checksum_count": 2,
-  "source_commit_sha": "3c5006d359725645758b6165ac0f953ca431f811",
+  "source_commit_sha": "cc6b2edd920087b292c601cc975443db8f6d5dcb",
   "source_id": "opensees_megatall_model_2_large",
   "source_identity_inventory": {
     "claim_boundary": "This inventory records already-collected local large-model source files, their SHA256 values, and source URL metadata. It does not approve licenses, create reference outputs, normalize models, execute analyses, or count as large-model PASS/REVIEW evidence.",
@@ -209,5 +253,5 @@
   },
   "source_url_verified_count": 2,
   "status": "blocked",
-  "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | evidence=4/9"
+  "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=2/2 | evidence=5/9"
 }

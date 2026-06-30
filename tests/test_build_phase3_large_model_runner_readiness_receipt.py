@@ -31,8 +31,14 @@ def _write_minimal_large_readiness_inputs(repo_root: Path) -> None:
     runner.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
 
 
-def test_large_model_runner_readiness_receipt_blocks_without_execution_evidence() -> None:
-    payload = module.build_phase3_large_model_runner_readiness_receipt(repo_root=REPO_ROOT)
+def test_large_model_runner_readiness_receipt_blocks_without_execution_evidence(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_large_readiness_inputs(tmp_path)
+    payload = module.build_phase3_large_model_runner_readiness_receipt(
+        repo_root=tmp_path,
+        source_commit_sha="test-sha",
+    )
 
     assert payload["schema_version"] == "phase3-large-model-runner-readiness-receipt.v1"
     assert payload["status"] == "blocked"
@@ -44,18 +50,19 @@ def test_large_model_runner_readiness_receipt_blocks_without_execution_evidence(
     assert payload["current_large_model_execution_receipt_count"] == 0
     assert payload["crash_oom_free_execution_count"] == 0
     assert payload["scorecard_or_review_count"] == 0
-    assert payload["source_url_verified_count"] == 2
-    assert payload["source_checksum_count"] == 2
-    assert payload["source_identity_inventory"]["source_url_candidate_count"] == 2
-    assert payload["source_identity_inventory"]["source_checksum_count"] == 2
+    assert payload["source_url_verified_count"] == 0
+    assert payload["source_checksum_count"] == 0
+    assert payload["source_identity_inventory"]["source_url_candidate_count"] == 0
+    assert payload["source_identity_inventory"]["source_checksum_count"] == 0
     assert payload["execution_receipt_inventory"]["receipt_file_count"] == 0
-    assert payload["required_evidence_pass_count"] == 4
+    assert payload["execution_receipt_inventory"]["execution_receipt_case_count"] == 0
+    assert payload["required_evidence_pass_count"] == 2
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
     assert payload["runner_command_ready"] is True
     assert "run_phase3_large_model_execution_receipt.py" in payload["runner_command_template"]
     assert payload["resource_envelope"]["default_timeout_seconds"] == 7200
-    assert "source_url_verification_pending" not in payload["blockers"]
-    assert "checksum_missing" not in payload["blockers"]
+    assert "source_url_verification_pending" in payload["blockers"]
+    assert "checksum_missing" in payload["blockers"]
     assert "large_model_runner_not_implemented" not in payload["blockers"]
     assert "nightly_lane_not_configured" not in payload["blockers"]
     assert "large_model_execution_receipt_missing" in payload["blockers"]
@@ -66,6 +73,51 @@ def test_large_model_runner_readiness_receipt_blocks_without_execution_evidence(
     assert payload["runner_receipt_template"]["contract_pass"] is False
     assert "runner command and resource envelope are implemented" in payload["claim_boundary"]
     assert "does not acquire sources" in payload["claim_boundary"]
+
+
+def test_large_model_runner_readiness_counts_crash_oom_free_receipts_separately(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_large_readiness_inputs(tmp_path)
+    receipt_dir = tmp_path / module.LARGE_RECEIPT_DIR
+    for index in range(2):
+        _write_json(
+            receipt_dir / f"large-{index}.execution_receipt.json",
+            {
+                "schema_version": "phase3-large-model-execution-receipt.v1",
+                "case_id": f"large-{index}",
+                "contract_pass": False,
+                "validation_contract_pass": False,
+                "exit_code": 2,
+                "crashed": False,
+                "oom": False,
+                "source_sha256": f"sha256:{index:064x}",
+                "source_sha256_match": True,
+                "scorecard_or_review_path": "",
+                "blockers": [
+                    "scorecard_or_review_missing",
+                    "validation_contract_not_pass",
+                ],
+            },
+        )
+
+    payload = module.build_phase3_large_model_runner_readiness_receipt(
+        repo_root=tmp_path,
+        source_commit_sha="test-sha",
+    )
+
+    assert payload["current_large_model_execution_receipt_count"] == 2
+    assert payload["crash_oom_free_execution_count"] == 2
+    assert payload["scorecard_or_review_count"] == 0
+    assert payload["execution_receipt_inventory"]["execution_receipt_case_count"] == 2
+    assert payload["execution_receipt_inventory"]["valid_execution_case_count"] == 0
+    assert payload["required_evidence_pass_count"] == 4
+    assert "large_model_execution_receipt_missing" not in payload["blockers"]
+    assert "large_model_scorecard_or_review_missing" in payload["blockers"]
+    assert "source_url_verification_pending" in payload["blockers"]
+    assert "license_review_pending" in payload["blockers"]
+    assert payload["contract_pass"] is False
+    assert payload["developer_preview_release_candidate_claim"] is False
 
 
 def test_large_model_runner_readiness_counts_operator_execution_receipts(tmp_path: Path) -> None:
@@ -99,6 +151,7 @@ def test_large_model_runner_readiness_counts_operator_execution_receipts(tmp_pat
     assert payload["scorecard_or_review_count"] == 2
     assert payload["source_url_verified_count"] == 0
     assert payload["source_checksum_count"] == 2
+    assert payload["execution_receipt_inventory"]["execution_receipt_case_count"] == 2
     assert payload["execution_receipt_inventory"]["valid_execution_case_count"] == 2
     assert payload["required_evidence_pass_count"] == 5
     assert "checksum_missing" not in payload["blockers"]

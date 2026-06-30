@@ -1,0 +1,27 @@
+{
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "comparisons": [],
+  "contract_pass": false,
+  "convergence_history": [],
+  "developer_preview": true,
+  "developer_preview_blocked_fields": [
+    "mgt_elastic_link_unsupported",
+    "mgt_beam_offset_unsupported",
+    "mgt_story_eccentricity_unsupported",
+    "mgt_thickness_unsupported"
+  ],
+  "engine_version": "1.0.0",
+  "input_checksum": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+  "passed_fields": [],
+  "status": "blocked",
+  "tolerance": 1e-08,
+  "unsupported_fields": [
+    "mgt_elastic_link_unsupported",
+    "mgt_beam_offset_unsupported",
+    "mgt_story_eccentricity_unsupported",
+    "mgt_thickness_unsupported"
+  ],
+  "warnings": [
+    "MGT sections preserved only as metadata, not canonical analysis inputs: BNDR-GROUP,DOMAIN-ELEMENT,EIGEN-CTRL,ENDDATA,LC-COLOR,LENGTH,MAIN-DOMAIN,MATL-COLOR,MEMBER,REBAR-MATL-CODE,SECT-COLOR,SECT-SCALE..."
+  ]
+}

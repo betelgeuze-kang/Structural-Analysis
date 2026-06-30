@@ -217,6 +217,41 @@ def _acquisition_blockers_for_lanes(acquisition_plan: dict[str, Any], lanes: set
     return sorted(dict.fromkeys(blockers))
 
 
+def _filter_satisfied_large_receipt_blockers(
+    blockers: list[str],
+    *,
+    required: int,
+    execution_count: int,
+    crash_oom_free_count: int,
+    scorecard_or_review_count: int,
+) -> list[str]:
+    filtered: list[str] = []
+    for blocker in blockers:
+        if (
+            execution_count >= required
+            and (
+                blocker == "large_model_execution_receipt_missing"
+                or blocker.startswith("large_model_execution_count_below_required:")
+            )
+        ):
+            continue
+        if (
+            crash_oom_free_count >= required
+            and blocker.startswith("large_model_crash_oom_free_count_below_required:")
+        ):
+            continue
+        if (
+            scorecard_or_review_count >= required
+            and (
+                blocker == "large_model_scorecard_or_review_missing"
+                or blocker.startswith("large_model_scorecard_or_review_count_below_required:")
+            )
+        ):
+            continue
+        filtered.append(blocker)
+    return filtered
+
+
 def _blocker_counts(blockers: list[str]) -> dict[str, int]:
     counts: dict[str, int] = {}
     for blocker in blockers:
@@ -550,6 +585,27 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
         if isinstance(benchmark_scale.get("large_gate"), dict)
         else {}
     )
+    large_execution_count = int(
+        benchmark_large_gate.get(
+            "current_large_model_execution_receipt_count",
+            large_model_runner.get("current_large_model_execution_receipt_count", 0),
+        )
+        or 0
+    )
+    large_crash_oom_free_count = int(
+        benchmark_large_gate.get(
+            "crash_oom_free_execution_count",
+            large_model_runner.get("crash_oom_free_execution_count", 0),
+        )
+        or 0
+    )
+    large_scorecard_or_review_count = int(
+        benchmark_large_gate.get(
+            "scorecard_or_review_count",
+            large_model_runner.get("scorecard_or_review_count", 0),
+        )
+        or 0
+    )
     large_current = max(
         large_current,
         int(benchmark_large_gate.get("current_large_source_model_count", 0) or 0),
@@ -562,6 +618,27 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
     benchmark_large_blockers = [
         str(blocker) for blocker in benchmark_large_gate.get("blockers", []) if str(blocker)
     ]
+    large_acquisition_blockers = _filter_satisfied_large_receipt_blockers(
+        large_acquisition_blockers,
+        required=large_required,
+        execution_count=large_execution_count,
+        crash_oom_free_count=large_crash_oom_free_count,
+        scorecard_or_review_count=large_scorecard_or_review_count,
+    )
+    large_runner_blockers = _filter_satisfied_large_receipt_blockers(
+        large_runner_blockers,
+        required=large_required,
+        execution_count=large_execution_count,
+        crash_oom_free_count=large_crash_oom_free_count,
+        scorecard_or_review_count=large_scorecard_or_review_count,
+    )
+    benchmark_large_blockers = _filter_satisfied_large_receipt_blockers(
+        benchmark_large_blockers,
+        required=large_required,
+        execution_count=large_execution_count,
+        crash_oom_free_count=large_crash_oom_free_count,
+        scorecard_or_review_count=large_scorecard_or_review_count,
+    )
     analytic_component_ready = bool(
         scorecard_ready
         and analytic_current >= analytic_required

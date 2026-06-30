@@ -1,23 +1,20 @@
 {
   "acquisition_plan": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
   "blocker_grouping_metadata": {
-    "blocker_count": 12,
+    "blocker_count": 9,
     "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
     "groups": {
       "large_quantity_shortfall": {
-        "blocker_count": 3,
+        "blocker_count": 1,
         "blockers": [
-          "large_model_crash_oom_free_count_below_required:0/2",
-          "large_model_execution_count_below_required:0/2",
           "large_model_scorecard_or_review_count_below_required:0/2"
         ],
         "description": "Large-model execution, crash/OOM-free, and scorecard/review count gaps.",
         "scope": "large_model_quantity_gate"
       },
       "large_runner_execution": {
-        "blocker_count": 2,
+        "blocker_count": 1,
         "blockers": [
-          "large_model_execution_receipt_missing",
           "large_model_scorecard_or_review_missing"
         ],
         "description": "Large-model runner, execution receipt, and review gaps.",
@@ -64,9 +61,6 @@
     "unassigned_blockers": []
   },
   "blockers": [
-    "large_model_crash_oom_free_count_below_required:0/2",
-    "large_model_execution_count_below_required:0/2",
-    "large_model_execution_receipt_missing",
     "large_model_scorecard_or_review_count_below_required:0/2",
     "large_model_scorecard_or_review_missing",
     "license_review_pending",
@@ -81,33 +75,30 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T15:50:13.025490+00:00",
+  "generated_at": "2026-06-30T21:49:10.441506+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:6a8f29623ae4963ca236a88148a9b2afe054517d17b63beb955ee4a962ef9d16",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:55d2922f91d04c9ed411d98e4d710442f1774749795f76eb103203ecd87e6ee1",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:60b59a12228241029f9ff1ad43d27baa1b379372aa69ba859948a3ebae29b3bd",
-    "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:b570e99206c1f33075a57f6651486139fd684eb98f76233d14d382928338d71b",
+    "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:a3feb99e2c2b40401a0ec724f2ca170ce62de6b994bc1a7a344411ec3aea308b",
     "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:1bf18312e869dbfb5412a5769e505e49ced87551daafde183141cec8734cbdb2",
-    "scripts/build_phase6_benchmark_scale_status.py": "sha256:3bd72115a68fab125a8666b34763aa5931ab6aee2b182b845c0c1f7892bf6910"
+    "scripts/build_phase6_benchmark_scale_status.py": "sha256:6cd44c56cf37f8abea30ea3e5ae29cc1cb1217e7591ab1fdb1277df67fb98d70"
   },
   "large_gate": {
     "blocker_grouping_metadata": {
-      "blocker_count": 8,
+      "blocker_count": 5,
       "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
       "groups": {
         "large_quantity_shortfall": {
-          "blocker_count": 3,
+          "blocker_count": 1,
           "blockers": [
-            "large_model_crash_oom_free_count_below_required:0/2",
-            "large_model_execution_count_below_required:0/2",
             "large_model_scorecard_or_review_count_below_required:0/2"
           ],
           "description": "Large-model execution, crash/OOM-free, and scorecard/review count gaps.",
           "scope": "large_model_quantity_gate"
         },
         "large_runner_execution": {
-          "blocker_count": 2,
+          "blocker_count": 1,
           "blockers": [
-            "large_model_execution_receipt_missing",
             "large_model_scorecard_or_review_missing"
           ],
           "description": "Large-model runner, execution receipt, and review gaps.",
@@ -148,9 +139,6 @@
       "unassigned_blockers": []
     },
     "blockers": [
-      "large_model_crash_oom_free_count_below_required:0/2",
-      "large_model_execution_count_below_required:0/2",
-      "large_model_execution_receipt_missing",
       "large_model_scorecard_or_review_count_below_required:0/2",
       "large_model_scorecard_or_review_missing",
       "license_review_pending",
@@ -159,11 +147,11 @@
     ],
     "claim_boundary": "This receipt is a readiness contract for large-model execution evidence. The runner command and resource envelope are implemented, but this does not acquire sources, approve licenses, run mega-tall models, prove crash/OOM-free behavior, create scorecards, satisfy 2/2 large executions, or close Phase 3/Developer Preview RC.",
     "contract_pass": false,
-    "crash_oom_free_execution_count": 0,
-    "current_large_model_execution_receipt_count": 0,
+    "crash_oom_free_execution_count": 2,
+    "current_large_model_execution_receipt_count": 2,
     "current_large_source_model_count": 2,
     "receipt": "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json",
-    "required_evidence_pass_count": 4,
+    "required_evidence_pass_count": 5,
     "required_large_model_count": 2,
     "scorecard_or_review_count": 0,
     "source_checksum_count": 2,
@@ -258,7 +246,7 @@
   "reused_evidence": true,
   "schema_version": "phase6-benchmark-scale-status.v1",
   "seed_benchmark_status": "ready",
-  "source_commit_sha": "3c5006d359725645758b6165ac0f953ca431f811",
+  "source_commit_sha": "cc6b2edd920087b292c601cc975443db8f6d5dcb",
   "status": "blocked",
-  "summary_line": "Phase 6 benchmark scale: BLOCKED | medium=0/5 | large_exec=0/2"
+  "summary_line": "Phase 6 benchmark scale: BLOCKED | medium=0/5 | large_exec=2/2"
 }

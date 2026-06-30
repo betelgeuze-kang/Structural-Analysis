@@ -241,11 +241,12 @@ def _receipt_files(repo_root: Path, receipt_dir: Path) -> list[Path]:
     resolved = receipt_dir if receipt_dir.is_absolute() else repo_root / receipt_dir
     if not resolved.exists():
         return []
-    return sorted(path for path in resolved.glob("*.json") if path.is_file())
+    return sorted(path for path in resolved.glob("*.execution_receipt.json") if path.is_file())
 
 
 def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
     receipt_rows: list[dict[str, Any]] = []
+    execution_receipt_case_ids: set[str] = set()
     execution_case_ids: set[str] = set()
     crash_oom_free_case_ids: set[str] = set()
     scorecard_or_review_case_ids: set[str] = set()
@@ -264,7 +265,13 @@ def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         source_sha256 = str(payload.get("source_sha256") or "")
         source_sha256_match = bool(payload.get("source_sha256_match") is True)
         scorecard_or_review_path = str(payload.get("scorecard_or_review_path") or "")
-        execution_pass = bool(
+        execution_receipt_present = bool(
+            schema_pass
+            and source_sha256.startswith("sha256:")
+            and source_sha256_match
+            and exit_code is not None
+        )
+        strict_execution_pass = bool(
             schema_pass
             and contract_pass
             and validation_pass
@@ -272,14 +279,18 @@ def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
             and not oom
             and exit_code == 0
         )
-        crash_oom_free_pass = bool(execution_pass and not crashed and not oom)
-        scorecard_or_review_pass = bool(execution_pass and scorecard_or_review_path)
+        crash_oom_free_pass = bool(execution_receipt_present and not crashed and not oom)
+        scorecard_or_review_pass = bool(
+            execution_receipt_present and crash_oom_free_pass and scorecard_or_review_path
+        )
         checksum_pass = bool(
             schema_pass
             and source_sha256.startswith("sha256:")
             and source_sha256_match
         )
-        if execution_pass:
+        if execution_receipt_present:
+            execution_receipt_case_ids.add(case_id)
+        if strict_execution_pass:
             execution_case_ids.add(case_id)
         if crash_oom_free_pass:
             crash_oom_free_case_ids.add(case_id)
@@ -300,7 +311,8 @@ def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
                 "source_sha256": source_sha256,
                 "source_sha256_match": source_sha256_match,
                 "scorecard_or_review_path": scorecard_or_review_path,
-                "execution_pass": execution_pass,
+                "execution_receipt_present": execution_receipt_present,
+                "execution_pass": strict_execution_pass,
                 "crash_oom_free": crash_oom_free_pass,
                 "scorecard_or_review": scorecard_or_review_pass,
                 "checksum_pass": checksum_pass,
@@ -311,16 +323,20 @@ def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         "schema_version": "phase3-large-model-execution-receipt-inventory.v1",
         "receipt_directory": LARGE_RECEIPT_DIR.as_posix(),
         "receipt_file_count": len(receipt_rows),
+        "execution_receipt_case_count": len(execution_receipt_case_ids),
         "valid_execution_case_count": len(execution_case_ids),
         "crash_oom_free_execution_count": len(crash_oom_free_case_ids),
         "scorecard_or_review_count": len(scorecard_or_review_case_ids),
         "source_checksum_count": len(checksum_case_ids),
         "receipts": receipt_rows,
         "claim_boundary": (
-            "Only operator-attached large execution receipts with the expected schema, "
+            "Execution receipt presence and crash/OOM-free completion are counted "
+            "separately from strict validation or scorecard/review pass. Only "
+            "operator-attached large execution receipts with the expected schema, "
             "contract_pass=true, validation_contract_pass=true, exit_code=0, and no "
-            "crash/OOM are counted as large executions. This inventory does not create "
-            "source authority, license, reference-output, or normalization evidence."
+            "crash/OOM are counted as strict valid executions. This inventory does "
+            "not create source authority, license, reference-output, normalization, "
+            "or scorecard evidence."
         ),
     }
 
@@ -356,7 +372,7 @@ def build_phase3_large_model_runner_readiness_receipt(
     receipt_inventory = _large_model_execution_receipt_inventory(repo_root)
     source_identity_inventory = _large_model_source_identity_inventory(repo_root)
     required_large_model_count = 2
-    execution_count = int(receipt_inventory["valid_execution_case_count"])
+    execution_count = int(receipt_inventory["execution_receipt_case_count"])
     crash_oom_free_count = int(receipt_inventory["crash_oom_free_execution_count"])
     scorecard_or_review_count = int(receipt_inventory["scorecard_or_review_count"])
     source_url_count = int(source_identity_inventory["source_url_candidate_count"])
