@@ -2914,7 +2914,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-30T17:19:11.913429+00:00",
+  "generated_at": "2026-06-30T17:26:38.330919+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
@@ -2924,8 +2924,8 @@
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:548c9a41c618dcecb8d7dc451a7555d5553865ddd83c4097c129a64758252d14",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:eefee87ccb1bd7a45a67539d7d701f976960594a27d2bf56a6e7127524ece598",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:07f09bf4b5f351f0683af5132eac4db8e118416def85a5a8631c20c07e6cf447",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:9cd06dd2c320b324acb04e3e7301fa57d078a79a6eead431dbd434e0b7a6a1fc",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:29b1bef8b7855f83b061d52db6bbed976648695f493baa90ced6372f8193b20c",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:021920d932660b7422a498faa4d92bc32906f271932d1ad35896e9bfac2ee5bc",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:3408c84db0bad6b74859cd796d4a23ce0cb4e4a62838e4346aa7b33ac1da9d31",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:9cc233f8991a23e88e808c5d8d860f0f654b9b53ac7619aafc3eab9af0a58a08",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:e0e196da9d190afbfdeaa3b08b83aac9a17dba0f24c0048f5a2dcf7f11d5a152",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c34ff5d4f32d72483e5b37bbfa8f07dd7567e8cfe0bbe3af6b747ba9cd484abf",
@@ -3611,7 +3611,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "6b86aa2ce6c0ecd984b022aa8acb54d47b13058d",
+  "source_commit_sha": "a7413efcc1f5fcf8b3a68ea91d17a23ed4094013",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3704,6 +3704,7 @@
           "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_pocketmd_lite_product_surface.py",
+          "scripts/build_public_benchmark_operator_intake_packet.py",
           "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"
@@ -3832,24 +3833,24 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T17:18:59.654634+00:00",
+        "generated_at": "2026-06-30T17:26:37.903486+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "6b86aa2ce6c0ecd984b022aa8acb54d47b13058d",
+        "source_commit_sha": "a7413efcc1f5fcf8b3a68ea91d17a23ed4094013",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T17:19:11.728440+00:00",
+        "generated_at": "2026-06-30T17:26:38.144670+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "6b86aa2ce6c0ecd984b022aa8acb54d47b13058d",
+        "source_commit_sha": "a7413efcc1f5fcf8b3a68ea91d17a23ed4094013",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3859,6 +3860,7 @@
           "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_pocketmd_lite_product_surface.py",
+          "scripts/build_public_benchmark_operator_intake_packet.py",
           "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"
