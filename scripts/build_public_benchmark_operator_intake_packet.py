@@ -133,6 +133,7 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
 def _input_paths(source_of_truth_path: Path) -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_operator_intake_packet.py"),
+        Path("scripts/materialize_public_benchmark_operator_bundle_from_rows.py"),
         Path("scripts/materialize_public_benchmark_harness_bundle.py"),
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
@@ -776,6 +777,15 @@ def build_public_benchmark_operator_intake_packet(
         f"--out-report {DEFAULT_HARNESS_BUNDLE_REPORT} "
         "--fail-blocked"
     )
+    row_bundle_import = (
+        "python3 scripts/materialize_public_benchmark_operator_bundle_from_rows.py "
+        "--subset-rows <operator-casf-pdbbind-subset-rows.jsonl> "
+        "--pose-rows <operator-pose-coordinate-rows.jsonl> "
+        "--enrichment-rows <operator-dud-e-lit-pcba-scored-molecule-rows.csv> "
+        "--vina-gnina-rows <operator-vina-gnina-run-rows.csv> "
+        "--target-subset-case-count 12 "
+        "--out <operator-public-benchmark-bundle.json>"
+    )
     harness_bundle_index = (
         "python3 scripts/materialize_public_benchmark_harness_bundle.py "
         f"--out {DEFAULT_HARNESS_BUNDLE}"
@@ -1108,6 +1118,23 @@ def build_public_benchmark_operator_intake_packet(
         "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
         "operator_bundle_materialization": {
             "schema_version": "public-benchmark-harness-bundle-materialization.v1",
+            "row_bundle_import": {
+                "schema_version": "public-benchmark-operator-bundle-from-rows.v1",
+                "command": row_bundle_import,
+                "produces": "<operator-public-benchmark-bundle.json>",
+                "accepted_row_formats": ["json", "jsonl", "ndjson", "csv"],
+                "row_groups": {
+                    "subset_rows": "CASF/PDBBind case descriptors and local file refs",
+                    "pose_rows": "reference/predicted ligand coordinate rows",
+                    "enrichment_rows": "DUD-E/LIT-PCBA scored molecule rows grouped by target",
+                    "vina_gnina_rows": "Vina/GNINA engine run rows grouped by case",
+                },
+                "claim_boundary": (
+                    "This import only reshapes local operator row files into the "
+                    "operator bundle consumed by the harness materializer; downstream "
+                    "materializers still perform the readiness checks."
+                ),
+            },
             "command": harness_bundle_materialization,
             "artifact_index_command": harness_bundle_index,
             "bundle_artifact": "<operator-public-benchmark-bundle.json>",
@@ -1174,6 +1201,7 @@ def build_public_benchmark_operator_intake_packet(
         },
         "next_actions": [
             "fill_public_benchmark_operator_intake_packet",
+            "materialize_public_benchmark_operator_bundle_from_rows",
             "run_public_benchmark_harness_bundle_materializer",
             "run_public_benchmark_subset_materializer",
             "run_public_benchmark_pose_validity_materializer",

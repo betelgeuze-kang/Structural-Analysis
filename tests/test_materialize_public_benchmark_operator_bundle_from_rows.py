@@ -1,0 +1,225 @@
+from __future__ import annotations
+
+import csv
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_PATH = REPO_ROOT / "scripts" / "materialize_public_benchmark_operator_bundle_from_rows.py"
+if str(REPO_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+spec = importlib.util.spec_from_file_location(
+    "materialize_public_benchmark_operator_bundle_from_rows",
+    SCRIPT_PATH,
+)
+assert spec is not None
+module = importlib.util.module_from_spec(spec)
+assert spec.loader is not None
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+
+def _write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:
+    path.write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows),
+        encoding="utf-8",
+    )
+
+
+def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def test_public_benchmark_operator_bundle_from_row_files_groups_flat_rows(
+    tmp_path: Path,
+) -> None:
+    subset_rows = tmp_path / "subset.jsonl"
+    pose_rows = tmp_path / "pose.json"
+    enrichment_rows = tmp_path / "enrichment.csv"
+    vina_gnina_rows = tmp_path / "vina_gnina.csv"
+
+    _write_jsonl(
+        subset_rows,
+        [
+            {
+                "case_id": "case_a",
+                "source_family": "CASF/PDBBind",
+                "benchmark_split": "CASF-core",
+                "complex_id": "case_a_complex",
+                "protein_structure_path": "benchmarks/case_a/protein.pdb",
+                "reference_ligand_path": "benchmarks/case_a/ref.sdf",
+                "predicted_ligand_path_or_docking_run_id": "benchmarks/case_a/pred.sdf",
+                "ligand_atom_order_contract": {"atom_count": 2, "atom_ids": ["C1", "O1"]},
+                "symmetry_permutation_contract": {"permutations": [[0, 1]]},
+                "source_license_or_accession": "CASF/PDBBind:test-accession",
+                "source_checksum": "sha256:" + "a" * 64,
+                "provenance_ref": "operator://case_a",
+                "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+                "rmsd_threshold_angstrom": 2.0,
+            }
+        ],
+    )
+    pose_rows.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {
+                        "case_id": "case_a",
+                        "reference_atoms": [{"element": "C", "x": 0, "y": 0, "z": 0}],
+                        "predicted_atoms": [{"element": "C", "x": 0.1, "y": 0, "z": 0}],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    _write_csv(
+        enrichment_rows,
+        [
+            {
+                "benchmark_family": "DUD-E",
+                "target_id": "AA2AR",
+                "score_direction": "higher_is_better",
+                "source_license_or_accession": "DUD-E:AA2AR",
+                "source_checksum": "sha256:" + "b" * 64,
+                "provenance_ref": "operator://dud-e/AA2AR",
+                "molecule_id": "active_1",
+                "is_active": "true",
+                "score": "0.9",
+            },
+            {
+                "benchmark_family": "DUD-E",
+                "target_id": "AA2AR",
+                "score_direction": "higher_is_better",
+                "source_license_or_accession": "DUD-E:AA2AR",
+                "source_checksum": "sha256:" + "b" * 64,
+                "provenance_ref": "operator://dud-e/AA2AR",
+                "molecule_id": "decoy_1",
+                "is_active": "false",
+                "score": "0.1",
+            },
+        ],
+    )
+    _write_csv(
+        vina_gnina_rows,
+        [
+            {
+                "case_id": "case_a",
+                "source_family": "CASF/PDBBind",
+                "benchmark_split": "CASF-core",
+                "complex_id": "case_a_complex",
+                "reference_pose_id": "case_a_ref",
+                "source_license_or_accession": "CASF/PDBBind:test-accession",
+                "source_checksum": "sha256:" + "c" * 64,
+                "provenance_ref": "operator://vina-gnina/case_a",
+                "engine_id": "vina",
+                "docking_run_id": "case_a_vina",
+                "predicted_ligand_path_or_pose_ref": "operator://vina.sdf",
+                "symmetry_aware_rmsd_angstrom": "1.4",
+                "pose_success": "true",
+                "score": "-7.2",
+                "score_direction": "lower_is_better",
+            },
+            {
+                "case_id": "case_a",
+                "source_family": "CASF/PDBBind",
+                "benchmark_split": "CASF-core",
+                "complex_id": "case_a_complex",
+                "reference_pose_id": "case_a_ref",
+                "source_license_or_accession": "CASF/PDBBind:test-accession",
+                "source_checksum": "sha256:" + "c" * 64,
+                "provenance_ref": "operator://vina-gnina/case_a",
+                "engine_id": "gnina",
+                "docking_run_id": "case_a_gnina",
+                "predicted_ligand_path_or_pose_ref": "operator://gnina.sdf",
+                "symmetry_aware_rmsd_angstrom": "1.6",
+                "pose_success": "true",
+                "score": "-7.8",
+                "score_direction": "lower_is_better",
+            },
+        ],
+    )
+
+    payload = module.build_public_benchmark_operator_bundle_from_rows(
+        subset_rows_path=subset_rows,
+        pose_rows_path=pose_rows,
+        enrichment_rows_path=enrichment_rows,
+        vina_gnina_rows_path=vina_gnina_rows,
+        target_subset_case_count=12,
+        repo_root=REPO_ROOT,
+    )
+
+    assert payload["schema_version"] == "public-benchmark-operator-bundle.v1"
+    assert payload["target_subset_case_count"] == 12
+    assert payload["casf_pdbbind_subset_intake"]["cases"][0]["case_id"] == "case_a"
+    targets = payload["dud_e_lit_pcba_enrichment_intake"]["targets"]
+    assert len(targets) == 1
+    assert targets[0]["target_id"] == "AA2AR"
+    assert [row["is_active"] for row in targets[0]["scored_molecules"]] == [True, False]
+    comparison_cases = payload["vina_gnina_comparison_intake"]["cases"]
+    assert len(comparison_cases) == 1
+    assert [row["engine_id"] for row in comparison_cases[0]["engine_runs"]] == [
+        "vina",
+        "gnina",
+    ]
+    assert payload["materialization_report"] == {
+        "schema_version": "public-benchmark-operator-bundle-from-rows.v1",
+        "subset_row_count": 1,
+        "pose_row_count": 1,
+        "enrichment_row_count": 2,
+        "enrichment_target_count": 1,
+        "vina_gnina_row_count": 2,
+        "vina_gnina_case_count": 1,
+        "accepted_row_formats": ["json", "jsonl", "ndjson", "csv"],
+    }
+
+
+def test_public_benchmark_operator_bundle_from_rows_cli_writes_bundle(
+    tmp_path: Path,
+) -> None:
+    subset_rows = tmp_path / "subset.json"
+    pose_rows = tmp_path / "pose.json"
+    enrichment_rows = tmp_path / "enrichment.json"
+    vina_gnina_rows = tmp_path / "vina_gnina.json"
+    out = tmp_path / "operator_bundle.json"
+
+    subset_rows.write_text(json.dumps({"rows": [{"case_id": "case_a"}]}), encoding="utf-8")
+    pose_rows.write_text(json.dumps({"cases": [{"case_id": "case_a"}]}), encoding="utf-8")
+    enrichment_rows.write_text(
+        json.dumps({"targets": [{"target_id": "AA2AR", "scored_molecules": []}]}),
+        encoding="utf-8",
+    )
+    vina_gnina_rows.write_text(
+        json.dumps({"cases": [{"case_id": "case_a", "engine_runs": []}]}),
+        encoding="utf-8",
+    )
+
+    assert (
+        module.main(
+            [
+                "--subset-rows",
+                str(subset_rows),
+                "--pose-rows",
+                str(pose_rows),
+                "--enrichment-rows",
+                str(enrichment_rows),
+                "--vina-gnina-rows",
+                str(vina_gnina_rows),
+                "--target-subset-case-count",
+                "12",
+                "--out",
+                str(out),
+            ]
+        )
+        == 0
+    )
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["target_subset_case_count"] == 12
+    assert payload["materialization_report"]["subset_row_count"] == 1

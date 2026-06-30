@@ -113,6 +113,7 @@ SOURCE_CHECKSUM_POLICY = {
 def _source_input_paths() -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_source_of_truth.py"),
+        Path("scripts/materialize_public_benchmark_operator_bundle_from_rows.py"),
         Path("scripts/materialize_public_benchmark_harness_bundle.py"),
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
@@ -2079,6 +2080,7 @@ def build_source_of_truth(
         "blockers": blockers,
         "next_actions": [
             "fill_public_benchmark_operator_intake_packet",
+            "materialize_public_benchmark_operator_bundle_from_rows",
             "attach_checked_casf_pdbbind_subset_source_files",
             "run_public_benchmark_subset_materializer",
             "fill_ligand_atom_order_and_symmetry_permutation_contracts",

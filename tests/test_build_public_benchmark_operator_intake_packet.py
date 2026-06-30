@@ -448,6 +448,15 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
     assert packet["operator_bundle_materialization"]["schema_version"] == (
         "public-benchmark-harness-bundle-materialization.v1"
     )
+    assert packet["operator_bundle_materialization"]["row_bundle_import"][
+        "schema_version"
+    ] == "public-benchmark-operator-bundle-from-rows.v1"
+    assert "materialize_public_benchmark_operator_bundle_from_rows.py" in packet[
+        "operator_bundle_materialization"
+    ]["row_bundle_import"]["command"]
+    assert packet["operator_bundle_materialization"]["row_bundle_import"][
+        "accepted_row_formats"
+    ] == ["json", "jsonl", "ndjson", "csv"]
     assert "materialize_public_benchmark_harness_bundle.py" in packet[
         "operator_bundle_materialization"
     ]["command"]
@@ -463,6 +472,9 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
         "operator_bundle_materialization"
     ]["artifact_index_command"]
     assert packet["next_actions"][1] == (
+        "materialize_public_benchmark_operator_bundle_from_rows"
+    )
+    assert packet["next_actions"][2] == (
         "run_public_benchmark_harness_bundle_materializer"
     )
     assert packet["operator_template_schema_version"] == (

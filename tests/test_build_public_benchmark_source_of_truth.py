@@ -775,6 +775,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     )
     assert source["next_actions"] == [
         "fill_public_benchmark_operator_intake_packet",
+        "materialize_public_benchmark_operator_bundle_from_rows",
         "attach_checked_casf_pdbbind_subset_source_files",
         "run_public_benchmark_subset_materializer",
         "fill_ligand_atom_order_and_symmetry_permutation_contracts",
