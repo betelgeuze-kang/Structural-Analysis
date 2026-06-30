@@ -1,12 +1,11 @@
 {
   "blockers": [
-    "feature_remote_not_ancestor_of_head",
     "remote_mutation_approval_required"
   ],
   "checks": {
     "explicit_remote_mutation_approval": false,
-    "feature_fast_forward_possible": false,
-    "feature_synced_to_head": false,
+    "feature_fast_forward_possible": true,
+    "feature_synced_to_head": true,
     "main_fast_forward_possible": true,
     "main_synced_to_head": false,
     "remote_fetch_ok": true,
@@ -21,14 +20,8 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-30T21:28:44.223010+00:00",
+  "generated_at": "2026-06-30T21:31:56.750515+00:00",
   "pending_remote_updates": [
-    {
-      "action": "push current HEAD to feature",
-      "command": "git push origin codex/seed-pr-ci-source-evidence:codex/seed-pr-ci-source-evidence",
-      "rollback": "restore feature to previous remote SHA 41974c0c61f35df459213fcf86d7262ff2cf15ef with an approved restore action",
-      "target": "origin/codex/seed-pr-ci-source-evidence"
-    },
     {
       "action": "fast-forward push current HEAD to main",
       "command": "git push origin HEAD:main",
@@ -36,14 +29,13 @@
       "target": "origin/main"
     }
   ],
-  "preflight_pass": false,
+  "preflight_pass": true,
   "r4_disclosure": {
-    "action": "push current HEAD to feature; fast-forward push current HEAD to main",
+    "action": "fast-forward push current HEAD to main",
     "impact": "GitHub pending refs become externally visible at the local development state.",
     "risk": "Main CI and external reviewers immediately see the current commits.",
-    "rollback": "restore feature to previous remote SHA 41974c0c61f35df459213fcf86d7262ff2cf15ef with an approved restore action; restore main to previous remote SHA 7079101466cb50831e4d81298512cd7eefb99b6c with an approved revert/restore action",
+    "rollback": "restore main to previous remote SHA 7079101466cb50831e4d81298512cd7eefb99b6c with an approved revert/restore action",
     "target": [
-      "origin/codex/seed-pr-ci-source-evidence",
       "origin/main"
     ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
@@ -57,14 +49,14 @@
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
-    "feature_ahead_count": 1,
-    "feature_fast_forward_possible": false,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-    "local_head_sha": "64b38eca642f835d75994572610789881ed3aa7f",
-    "main_ahead_count": 183,
+    "feature_ahead_count": 0,
+    "feature_fast_forward_possible": true,
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json\n M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
+    "local_head_sha": "8e79297701d41abecf6ea747eb7ca54a803cbc4d",
+    "main_ahead_count": 184,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "41974c0c61f35df459213fcf86d7262ff2cf15ef",
+    "remote_feature_sha": "8e79297701d41abecf6ea747eb7ca54a803cbc4d",
     "remote_main_ref": "origin/main",
     "remote_main_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
     "remote_safety": {
@@ -80,7 +72,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json\n M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json"
   },
-  "status": "blocked"
+  "status": "approval_required"
 }
