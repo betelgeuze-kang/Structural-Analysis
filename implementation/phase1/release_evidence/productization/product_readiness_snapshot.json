@@ -2940,7 +2940,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-30T22:14:41.691515+00:00",
+  "generated_at": "2026-06-30T22:15:23.981827+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
@@ -2950,7 +2950,7 @@
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:143d96303976defe13e3a60588a5451805b7da804f2364fe91e667fedc01878d",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:7dc5f795b650e9b32188bed7e905d28b89cd8fa7b0e6faafa005f4b37eb7eb44",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:25d4d25d9703b5e28cc90afedcf41290186442bc5e8e67b1b1cc13ee25c156db",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:38b626060604dd08234b90b00ae0d6055c3ac5bb9163ec7248c67d32b955f36b",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:dcdc8fcab9464b7debe2e598028f66d3464b64056de0dd7ed33f8b8846375687",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:d35610ef135f98f441437db502c31aebdbf3f0241cd405e436afaca125273e57",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:9cc233f8991a23e88e808c5d8d860f0f654b9b53ac7619aafc3eab9af0a58a08",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:0937c3841af705aabc633a4b57c0c02bdee6bd9e6d4d133c384a7dd271542e6c",
@@ -3623,7 +3623,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "f3722b1a18f5f2f92be21b79d27404c7f8e9c07a",
+  "source_commit_sha": "cc1b7e0ae0737d0d371fb2031c15b5c055150592",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3931,12 +3931,12 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T22:14:15.520510+00:00",
+        "generated_at": "2026-06-30T22:15:18.725058+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "f3722b1a18f5f2f92be21b79d27404c7f8e9c07a",
+        "source_commit_sha": "cc1b7e0ae0737d0d371fb2031c15b5c055150592",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -4250,8 +4250,9 @@
       "dirty": false,
       "dirty_paths": [
         "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
+        "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4277,8 +4278,9 @@
       },
       "status_rows": [
         " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
+        " M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
       ]
     }
   },
