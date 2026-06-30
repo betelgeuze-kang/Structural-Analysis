@@ -5,7 +5,7 @@
   "claim_boundary": "This is read-only GitHub Actions self-hosted runner metadata. PASS only means at least one runner with the required labels is online and idle at collection time; it does not create CI streak evidence, mutate billing, or register a runner.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T12:46:43.944418+00:00",
+  "generated_at": "2026-06-30T13:10:12.051347+00:00",
   "matching_runner_count": 1,
   "online_matching_runner_count": 0,
   "query_error": "",
@@ -38,6 +38,6 @@
   ],
   "runner_count": 1,
   "schema_version": "github-actions-self-hosted-runner-status.v1",
-  "source_commit_sha": "6bb7e62f5be384042ebc5a16a73d09ffd0d58497",
+  "source_commit_sha": "a5487bd036d27ca9014ea255863115259d21ac1a",
   "status": "blocked"
 }

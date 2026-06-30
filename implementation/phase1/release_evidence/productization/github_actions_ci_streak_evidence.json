@@ -2,10 +2,10 @@
   "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit. Local workflow trigger metadata is parsed from the current checkout and does not refresh or replace GitHub Actions run-history evidence.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T12:46:57.816860+00:00",
+  "generated_at": "2026-06-30T13:10:25.744238+00:00",
   "input_checksums": {
     ".github/workflows": "dir-sha256:8acb8a126ead40b2ce6a7ce24dbb8569bfdb9d927ed74296b6bc740c056936e3",
-    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:226eb7d628f3e6495770517dd8908b832251cabb9e85a9d3e8f9cd3e957d85ae"
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:7ce993c232f3d5b81100a51d1c2cb99500cefa1f5d9deaec04673aace8a2adea"
   },
   "lanes": {
     "nightly": {
@@ -219,11 +219,10 @@
         "pull_request"
       ],
       "blockers": [
-        "pr_pull_request_run_source_absent",
         "pr_github_actions_30_consecutive_pass_evidence_missing"
       ],
       "consecutive_pass_count": 0,
-      "ignored_event_count": 120,
+      "ignored_event_count": 119,
       "ignored_event_names": [
         "push"
       ],
@@ -264,7 +263,7 @@
         "workflow_dispatch"
       ],
       "pass_count": 0,
-      "pull_request_run_source_present": false,
+      "pull_request_run_source_present": true,
       "queried_run_count": 120,
       "query_error": "",
       "registered_workflow": {
@@ -273,8 +272,22 @@
         "path": ".github/workflows/ci.yml",
         "state": "active"
       },
-      "rows": [],
-      "run_count": 0,
+      "rows": [
+        {
+          "conclusion": "",
+          "created_at": "2026-06-30T13:09:45Z",
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "a5487bd036d27ca9014ea255863115259d21ac1a",
+          "pass": false,
+          "run_id": 28446801152,
+          "status": "queued",
+          "updated_at": "2026-06-30T13:09:45Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28446801152",
+          "workflow": "CI"
+        }
+      ],
+      "run_count": 1,
       "threshold": 30,
       "threshold_pass": false,
       "workflow": "CI",
@@ -286,7 +299,7 @@
   "repo": "betelgeuze-kang/Structural-Analysis",
   "reused_evidence": true,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "0030f691d269f9b1a97d702da6299575e691447a",
+  "source_commit_sha": "a5487bd036d27ca9014ea255863115259d21ac1a",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 0,
@@ -297,14 +310,14 @@
     "pr_consecutive_pass_count": 0,
     "pr_job_start_blocker_count": 0,
     "pr_local_required_trigger_present": true,
-    "pr_pull_request_run_source_present": false,
+    "pr_pull_request_run_source_present": true,
     "pr_threshold_pass": false,
     "pr_workflow_registered": true
   },
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 8,
-    "local_workflow_metadata_generated_at": "2026-06-30T12:56:19.915900+00:00",
+    "local_workflow_metadata_generated_at": "2026-06-30T13:10:51.922175+00:00",
     "local_workflows": [
       {
         "exists": true,
