@@ -73,7 +73,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert kpis["operator_action_count"] >= 13
     assert {key: value for key, value in kpis.items() if key != "operator_action_count"} == {
         "approval_token_count": 4,
-        "blocked_release_count": 5,
+        "blocked_release_count": 7,
         "broad_gpcr_family_claim_safe": False,
         "evidence_surface_count": 12,
         "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",

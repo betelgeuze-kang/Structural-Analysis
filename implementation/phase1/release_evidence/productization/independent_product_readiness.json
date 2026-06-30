@@ -128,12 +128,12 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-06-30T10:00:12.999697+00:00",
+  "generated_at": "2026-06-30T10:10:21.675243+00:00",
   "independent_commercial_product_ready": false,
   "input_checksums": {
-    "README.md": "sha256:ce47417faa96ba0510be43d37755dfa2f310cae7c5ce6c638cf8165997fc93a7",
+    "README.md": "sha256:c03f547f4590336d994549c1b20cc528e4b16051a925e7d1d158014e52ecb634",
     "docs/architecture-definition-document.md": "sha256:69aadd156758df4429bcc0d223f68f115818c6bff8239550043cd0e840748222",
-    "docs/commercialization-gap-current-state.md": "sha256:4409d303ee27713220c4c047d54467085e03f5f698ca4fb95fc6d4eb0c17ea95",
+    "docs/commercialization-gap-current-state.md": "sha256:1de814bcbfbb352e7ec49f318f9b7e58cacad11fa706bad58dad1e078c80ef0d",
     "docs/commercialization-improvement-priority-assessment.md": "sha256:c4ae5576d72aac533864aad1e6ca926ae325e981c566ea08901e50f91e70298a",
     "docs/independent-commercial-productization-plan.md": "sha256:739f2c5ff437dc3e2cb8131177a9d6f22d632fa788decab829be197219b11537",
     "docs/production-ops-security.md": "sha256:f83f3482d42d11a62c615659f5050e7e8f2dd5b603ff29208331129b2354a21f",
@@ -144,14 +144,14 @@
     "implementation/phase1/production_runtime_packaging_manifest.json": "sha256:9b76649f947ec13ab53e248f181735ddede6d900c60ac0573a030534c2f2d958",
     "implementation/phase1/project_ops_api_service.py": "sha256:a8b316fa8a7f7c28ab51752137d11891cf3b3c69978febddc3d1a50d7a8ea80b",
     "implementation/phase1/project_ops_deployment_drill_manifest.json": "sha256:9de92a86a0a414b222d4b6724a9ce54da33e31ea9fd5859f66194e289d0fa1c5",
-    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:486639ee36a19a8eacc341fde5da00ffb3e71b24a813c4af732f601c5a5a55a9",
-    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:46cc92c211c56b1b7eab3ed400838257d3f2a3a8c9151dc92d763b99f63b98f9",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:e6180ca136ab43d771d1ed1018460325cb5003edc7db2c922678940cfd88d499",
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:6888e46e6e85a3f38a98d2e09f562c64a04071712d403663bf282a0b1585fbf4",
     "implementation/phase1/source_boundary_allowlist.json": "sha256:3fe8d06bc0118b4ceb92498b3250657d964cc60ce00f420569938f860e18a507",
     "implementation/phase1/structure_viewer_browser_performance_probe.json": "sha256:bf7c000487aee9b46112110b3b8a3f65e43806babd3e96b44bc4e3ffafba64d4",
     "implementation/phase1/structure_viewer_performance_budget_manifest.json": "sha256:812cb97ff4be17e3fefe7c6c5aec9ada413974a91f3bd3df5e4c61351f939996",
     "implementation/phase1/structure_viewer_visual_regression_baseline.json": "sha256:70908d83636063c26f0fb0136f928365e0fca2dc826dcefa44efffe8dc1b6503",
     "implementation/phase1/support_bundle_manifest.json": "sha256:951a4fa774e682fb9850477c32ce541ad4040291301a2103fcb50ecab981559a",
-    "implementation/phase1/workstation_delivery_readiness.json": "sha256:1266f7519005dcf4e3f9a7b1e9017e7a4048fe128dc2a629bd799f99918ffbca",
+    "implementation/phase1/workstation_delivery_readiness.json": "sha256:b03aed232738e4ffb3ff5fd7022abb68965b1c5e9af17ed9a229eb050a334cd1",
     "implementation/phase1/zero_copy_real_probe_report_strict.json": "sha256:00befd00a5c44e17d02b5f89dd94d59983ac71208fa976e13326ce0170463884"
   },
   "next_actions": [
@@ -162,7 +162,7 @@
   "recommended_claim": "Commercial engineer-in-loop acceleration for 95-99% repeated workflows; not a full autonomous commercial replacement.",
   "reused_evidence": false,
   "schema_version": "independent-commercial-product-readiness.v1",
-  "source_commit_sha": "609b290db428bc4b1ca79a346dddb4529e5ef77d",
+  "source_commit_sha": "4e21e33a7db60ec6ac8b38394c0b3ec02393e40a",
   "status": "blocked",
   "summary_line": "Independent commercial product readiness: BLOCKED | score=80.0/100 | full_autonomous_replacement_ready=False",
   "workstation_delivery_service": {

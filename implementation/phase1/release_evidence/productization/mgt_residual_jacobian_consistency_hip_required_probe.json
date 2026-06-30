@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-06-30T09:49:33.831751+00:00",
-  "source_commit_sha": "12d1729856210bfe58e519409e2c1bfe26215ed6",
+  "generated_at": "2026-06-30T10:00:46.770978+00:00",
+  "source_commit_sha": "609b290db428bc4b1ca79a346dddb4529e5ef77d",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -13,7 +13,7 @@
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-06-30T09:49:33.833451+00:00",
+    "checked_at": "2026-06-30T10:00:46.772691+00:00",
     "hip_available": true,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -90,8 +90,8 @@
     "schema_version": "mgt-residual-jacobian-consistency-hip-direct-proof.v1",
     "executed": true,
     "execution_error": null,
-    "elapsed_seconds": 191.92595642599917,
-    "source_commit_sha": "6c535bfb2262e5ff6e1cbd09af62b9120ebe26c2",
+    "elapsed_seconds": 192.17923525600054,
+    "source_commit_sha": "aa4d92548e68f0658f772bd4f5d523859ab57f11",
     "status": "partial",
     "direct_residual_newton_ready": false,
     "production_hip_residual_jacobian_path": true,
@@ -133,7 +133,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 193.01459542199154
+    "total_seconds": 193.25410714399186
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
   "blockers": [
