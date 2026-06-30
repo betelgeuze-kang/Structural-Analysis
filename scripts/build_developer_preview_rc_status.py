@@ -1516,6 +1516,11 @@ def _strip_volatile(payload: Any, path: tuple[str, ...] = ()) -> Any:
             for key, value in payload.items()
             if key not in {"generated_at"}
             and not (path == () and key == "source_commit_sha")
+            and not (
+                path == ("input_checksums",)
+                and key
+                == "implementation/phase1/release_evidence/productization/developer_preview_readiness.json"
+            )
         }
     if isinstance(payload, list):
         return [_strip_volatile(item, path) for item in payload]

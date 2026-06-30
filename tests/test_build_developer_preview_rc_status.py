@@ -852,3 +852,32 @@ def test_developer_preview_rc_status_check_allows_source_commit_wrapper_drift(
 
     assert ok is True
     assert message == "developer_preview_rc_status_consistent"
+
+
+def test_developer_preview_rc_status_check_allows_readiness_checksum_cycle(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "developer_preview_rc_status.json"
+    out_md = tmp_path / "developer_preview_rc_status.md"
+    module.write_developer_preview_rc_status(
+        repo_root=REPO_ROOT,
+        out_path=out,
+        out_md_path=out_md,
+    )
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["input_checksums"][
+        "implementation/phase1/release_evidence/productization/developer_preview_readiness.json"
+    ] = "sha256:receipt-cycle-refresh"
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message = module.check_developer_preview_rc_status(
+        repo_root=REPO_ROOT,
+        out_path=out,
+        out_md_path=out_md,
+    )
+
+    assert ok is True
+    assert message == "developer_preview_rc_status_consistent"
