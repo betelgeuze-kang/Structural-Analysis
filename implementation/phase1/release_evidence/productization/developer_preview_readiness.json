@@ -188,7 +188,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-29T23:48:35.779336+00:00",
+  "generated_at": "2026-06-30T00:05:37.019579+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -199,11 +199,11 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:6ab3afe46faaf073b91adeffc28810c2635480cb5321a28a24cd56f5a411a341",
+      "input_checksum": "sha256:b078517b44340aec5409f16e6178e6ee16bbdb780614529439da9673e5561117",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "5dca21418de7a3e168e2061ce7e8d991fa534c5d",
+      "source_commit_sha": "1161d52a2421cbe39cb98a08ada7880d37c76e3e",
       "status": "ready"
     },
     "product_readiness_snapshot": {
@@ -211,14 +211,14 @@
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "6eff39c957446e2b17a473afa1e96c6ba183c946",
+      "source_commit_sha": "1161d52a2421cbe39cb98a08ada7880d37c76e3e",
       "status": "blocked"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:6ab3afe46faaf073b91adeffc28810c2635480cb5321a28a24cd56f5a411a341",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:b078517b44340aec5409f16e6178e6ee16bbdb780614529439da9673e5561117",
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:efd02e86684e2f58d0bc57b6cf8ead64e48c367fd60a010fbcd32493466aa8e0"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
@@ -2028,6 +2028,6 @@
       }
     }
   },
-  "source_commit_sha": "6eff39c957446e2b17a473afa1e96c6ba183c946",
+  "source_commit_sha": "1161d52a2421cbe39cb98a08ada7880d37c76e3e",
   "status": "blocked"
 }
