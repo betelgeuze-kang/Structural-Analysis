@@ -11,7 +11,7 @@
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": true
+    "worktree_only_ignored_evidence_dirty": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -20,7 +20,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-30T21:31:56.750515+00:00",
+  "generated_at": "2026-06-30T21:37:13.829860+00:00",
   "pending_remote_updates": [
     {
       "action": "fast-forward push current HEAD to main",
@@ -51,12 +51,12 @@
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json\n M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
-    "local_head_sha": "8e79297701d41abecf6ea747eb7ca54a803cbc4d",
-    "main_ahead_count": 184,
+    "ignored_worktree_status_short": "",
+    "local_head_sha": "752fadd00ddc18d74d272c84f7f3c6cb1b80eaf4",
+    "main_ahead_count": 187,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "8e79297701d41abecf6ea747eb7ca54a803cbc4d",
+    "remote_feature_sha": "752fadd00ddc18d74d272c84f7f3c6cb1b80eaf4",
     "remote_main_ref": "origin/main",
     "remote_main_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
     "remote_safety": {
@@ -72,7 +72,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json\n M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json"
+    "worktree_status_short": ""
   },
   "status": "approval_required"
 }
