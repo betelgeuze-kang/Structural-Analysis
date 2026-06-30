@@ -963,6 +963,285 @@ def _g1_lane_next_actions(
     return actions
 
 
+def _dedupe_strings(rows: list[str]) -> list[str]:
+    seen: set[str] = set()
+    unique: list[str] = []
+    for row in rows:
+        if not isinstance(row, str) or not row or row in seen:
+            continue
+        seen.add(row)
+        unique.append(row)
+    return unique
+
+
+def _g1_lane_terminal_requirement_breakdown(
+    *,
+    checkpoint_resolution_gate: dict[str, Any],
+    load_path_provenance: dict[str, Any],
+    load_path_provenance_blockers: list[str],
+    hip_consistency_proof: dict[str, Any],
+    hip_consistency_blockers: list[str],
+    child_gate_evidence: dict[str, Any],
+    child_hip_residual_refresh_evidence: dict[str, Any],
+    command: list[str],
+) -> dict[str, Any]:
+    worker = hip_consistency_proof.get("production_rocm_hip_residual_jvp_worker")
+    worker = worker if isinstance(worker, dict) else {}
+
+    checkpoint_blockers = _dedupe_strings(
+        [
+            *_string_list(checkpoint_resolution_gate.get("blockers")),
+            *load_path_provenance_blockers,
+        ]
+    )
+    checkpoint_ready = bool(
+        checkpoint_resolution_gate.get("passed") is True
+        and not load_path_provenance_blockers
+    )
+
+    hip_proof_worker_prefixes = (
+        "hip_consistency_proof_worker",
+        "hip_consistency_proof_residual_jvp_worker",
+        "hip_consistency_proof_production_rocm_hip_residual_jvp_worker",
+    )
+    hip_proof_blockers = _dedupe_strings(
+        [
+            blocker
+            for blocker in hip_consistency_blockers
+            if not blocker.startswith(hip_proof_worker_prefixes)
+        ]
+    )
+    hip_proof_ready = bool(
+        hip_consistency_proof.get("present") is True
+        and hip_consistency_proof.get("source_state_fresh") is True
+        and hip_consistency_proof.get("reused_evidence") is False
+        and hip_consistency_proof.get("rocm_hip_required") is True
+        and hip_consistency_proof.get("cpu_diagnostic_assembler_used") is False
+        and hip_consistency_proof.get("production_hip_residual_jacobian_path") is True
+        and hip_consistency_proof.get("consistent_residual_jacobian_newton_gate_passed")
+        is True
+        and not _string_list(hip_consistency_proof.get("receipt_blockers"))
+        and not _string_list(hip_consistency_proof.get("runtime_blockers"))
+    )
+
+    worker_blockers = _dedupe_strings(
+        [
+            *[
+                blocker
+                for blocker in hip_consistency_blockers
+                if blocker.startswith(hip_proof_worker_prefixes)
+            ],
+            *_string_list(worker.get("blockers")),
+            *_string_list(worker.get("residual_jvp_worker_path_blockers")),
+            *_string_list(worker.get("g1_closure_gate_blockers")),
+        ]
+    )
+    worker_ready = bool(
+        worker.get("ready") is True
+        and worker.get("residual_jvp_worker_path_ready") is True
+        and worker.get("g1_closure_gate_ready") is True
+        and not worker_blockers
+    )
+
+    child_blockers = _dedupe_strings(
+        [
+            *_string_list(child_gate_evidence.get("blockers")),
+            *_string_list(child_hip_residual_refresh_evidence.get("blockers")),
+        ]
+    )
+    child_upstream_blockers = [
+        requirement_id
+        for requirement_id, ready in (
+            ("full_load_checkpoint_1p0", checkpoint_ready),
+            ("hip_consistent_residual_jacobian_newton_proof", hip_proof_ready),
+            ("production_rocm_hip_residual_jvp_worker", worker_ready),
+        )
+        if not ready
+    ]
+    child_ready = bool(
+        child_gate_evidence.get("ready") is True
+        and child_hip_residual_refresh_evidence.get("ready") is True
+    )
+
+    requirements = [
+        {
+            "id": "full_load_checkpoint_1p0",
+            "label": "Full-load 1.0 checkpoint candidate",
+            "ready": checkpoint_ready,
+            "status": "ready" if checkpoint_ready else "blocked",
+            "acceptance_evidence": (
+                "A loadable mgt-direct-residual-newton-state.v1 checkpoint with "
+                "load_scale >= required_load_scale and no load-path provenance "
+                "contradiction."
+            ),
+            "observed": {
+                "required_load_scale": checkpoint_resolution_gate.get(
+                    "required_load_scale"
+                ),
+                "highest_observed_load_scale": checkpoint_resolution_gate.get(
+                    "highest_observed_load_scale"
+                ),
+                "highest_observed_gap_to_required_load_scale": (
+                    checkpoint_resolution_gate.get(
+                        "highest_observed_gap_to_required_load_scale"
+                    )
+                ),
+                "full_load_candidate_count": checkpoint_resolution_gate.get(
+                    "full_load_candidate_count"
+                ),
+                "load_path_provenance_passed": not load_path_provenance_blockers,
+                "provenance_below_required_full_load": load_path_provenance.get(
+                    "provenance_below_required_full_load"
+                ),
+            },
+            "blockers": checkpoint_blockers,
+            "next_action_ids": (
+                []
+                if checkpoint_ready
+                else ["generate_full_load_1p0_checkpoint_candidate"]
+            ),
+            "rerun_command": (
+                "python3 scripts/run_g1_full_load_hip_newton_lane.py "
+                "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
+            ),
+        },
+        {
+            "id": "hip_consistent_residual_jacobian_newton_proof",
+            "label": "HIP-required consistent residual/Jacobian Newton proof",
+            "ready": hip_proof_ready,
+            "status": "ready" if hip_proof_ready else "blocked",
+            "acceptance_evidence": (
+                "mgt_residual_jacobian_consistency_hip_required_probe.json passes "
+                "the consistent residual/Jacobian Newton gate on the production "
+                "ROCm/HIP path with no CPU diagnostic assembler or receipt blockers."
+            ),
+            "observed": {
+                "path": hip_consistency_proof.get("path"),
+                "present": hip_consistency_proof.get("present"),
+                "source_state_fresh": hip_consistency_proof.get("source_state_fresh"),
+                "source_state_kind": hip_consistency_proof.get("source_state_kind"),
+                "consistent_residual_jacobian_newton_gate_passed": (
+                    hip_consistency_proof.get(
+                        "consistent_residual_jacobian_newton_gate_passed"
+                    )
+                ),
+                "receipt_blocker_count": len(
+                    _string_list(hip_consistency_proof.get("receipt_blockers"))
+                ),
+                "runtime_blocker_count": len(
+                    _string_list(hip_consistency_proof.get("runtime_blockers"))
+                ),
+            },
+            "blockers": hip_proof_blockers,
+            "next_action_ids": (
+                []
+                if hip_proof_ready
+                else ["close_consistent_residual_jacobian_newton_gate"]
+            ),
+            "rerun_command": (
+                "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py "
+                "--require-hip-residual-engine "
+                "--checkpoint-npz <full-load-checkpoint.npz> "
+                "--output-json implementation/phase1/release_evidence/productization/"
+                "mgt_residual_jacobian_consistency_hip_required_probe.json"
+            ),
+        },
+        {
+            "id": "production_rocm_hip_residual_jvp_worker",
+            "label": "Production ROCm/HIP residual/JVP worker",
+            "ready": worker_ready,
+            "status": "ready" if worker_ready else "blocked",
+            "acceptance_evidence": (
+                "The production_rocm_hip_residual_jvp_worker contract is ready, "
+                "its residual/JVP path is ready, and its G1 closure gate is ready."
+            ),
+            "observed": {
+                "worker_id": worker.get("worker_id"),
+                "status": worker.get("status"),
+                "ready": worker.get("ready"),
+                "residual_jvp_worker_path_ready": worker.get(
+                    "residual_jvp_worker_path_ready"
+                ),
+                "g1_closure_gate_ready": worker.get("g1_closure_gate_ready"),
+            },
+            "blockers": worker_blockers,
+            "next_action_ids": (
+                []
+                if worker_ready
+                else ["close_consistent_residual_jacobian_newton_gate"]
+            ),
+        },
+        {
+            "id": "full_load_child_direct_probe",
+            "label": "Full-load child direct residual Newton probe",
+            "ready": child_ready,
+            "status": (
+                "ready"
+                if child_ready
+                else (
+                    "deferred_upstream_blocked"
+                    if child_upstream_blockers
+                    else "blocked"
+                )
+            ),
+            "acceptance_evidence": (
+                "The child direct residual Newton probe passes full-load closure, "
+                "direct residual, relative increment, fallback-zero, material Newton "
+                "breadth, consistent residual/Jacobian Newton, and HIP accepted-state "
+                "residual refresh gates."
+            ),
+            "observed": {
+                "child_gate_ready": child_gate_evidence.get("ready"),
+                "hip_residual_refresh_ready": child_hip_residual_refresh_evidence.get(
+                    "ready"
+                ),
+                "command": command,
+            },
+            "upstream_blocking_requirement_ids": child_upstream_blockers,
+            "blockers": child_blockers,
+            "next_action_ids": (
+                []
+                if child_ready
+                else ["run_full_load_child_direct_probe_with_hip_refresh"]
+            ),
+        },
+    ]
+    ready_count = sum(1 for row in requirements if row["ready"] is True)
+    deferred_count = sum(
+        1 for row in requirements if row.get("status") == "deferred_upstream_blocked"
+    )
+    blocked_ids = [str(row["id"]) for row in requirements if row["ready"] is not True]
+    active_requirement = next(
+        (row for row in requirements if row.get("status") == "blocked"),
+        next(
+            (
+                row
+                for row in requirements
+                if row.get("status") == "deferred_upstream_blocked"
+            ),
+            None,
+        ),
+    )
+    return {
+        "schema_version": "g1-full-load-hip-newton-terminal-requirement-breakdown.v1",
+        "ready_requirement_count": ready_count,
+        "requirement_count": len(requirements),
+        "blocked_requirement_count": len(blocked_ids),
+        "deferred_requirement_count": deferred_count,
+        "blocked_requirement_ids": blocked_ids,
+        "active_terminal_requirement_id": (
+            active_requirement.get("id") if isinstance(active_requirement, dict) else None
+        ),
+        "requirements": requirements,
+        "lane_ready_when_all_requirements_ready": ready_count == len(requirements),
+        "claim_boundary": (
+            "This breakdown is an operator handoff, not a promotion. It names the "
+            "terminal G1 full-load HIP/Newton receipts that must all pass before "
+            "the lane can claim readiness."
+        ),
+    }
+
+
 def _direct_probe_command(
     *,
     checkpoint_npz: Path,
@@ -1329,6 +1608,16 @@ def build_lane_report(
         child_hip_residual_refresh_evidence=initial_child_hip_residual_refresh_evidence,
         command=command,
     )
+    terminal_requirement_breakdown = _g1_lane_terminal_requirement_breakdown(
+        checkpoint_resolution_gate=checkpoint_resolution_gate,
+        load_path_provenance=load_path_provenance,
+        load_path_provenance_blockers=load_path_provenance_blockers,
+        hip_consistency_proof=hip_consistency_proof,
+        hip_consistency_blockers=hip_consistency_blockers,
+        child_gate_evidence=initial_child_gate_evidence,
+        child_hip_residual_refresh_evidence=initial_child_hip_residual_refresh_evidence,
+        command=command,
+    )
     base_payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
@@ -1351,6 +1640,7 @@ def build_lane_report(
         "hip_consistency_proof": hip_consistency_proof,
         "blocker_partition": blocker_partition,
         "lane_next_actions": lane_next_actions,
+        "terminal_requirement_breakdown": terminal_requirement_breakdown,
         "child_hip_residual_refresh_evidence": initial_child_hip_residual_refresh_evidence,
         "child_gate_evidence": initial_child_gate_evidence,
         "child_safety_requirements": [
@@ -1464,6 +1754,16 @@ def build_lane_report(
         child_hip_residual_refresh_evidence=child_hip_residual_refresh_evidence,
         command=command,
     )
+    final_terminal_requirement_breakdown = _g1_lane_terminal_requirement_breakdown(
+        checkpoint_resolution_gate=checkpoint_resolution_gate,
+        load_path_provenance=load_path_provenance,
+        load_path_provenance_blockers=load_path_provenance_blockers,
+        hip_consistency_proof=hip_consistency_proof,
+        hip_consistency_blockers=hip_consistency_blockers,
+        child_gate_evidence=child_gate_evidence,
+        child_hip_residual_refresh_evidence=child_hip_residual_refresh_evidence,
+        command=command,
+    )
     return {
         **base_payload,
         "status": "ready" if child_ready else "blocked",
@@ -1479,6 +1779,7 @@ def build_lane_report(
         "child_gate_evidence": child_gate_evidence,
         "blocker_partition": final_blocker_partition,
         "lane_next_actions": final_lane_next_actions,
+        "terminal_requirement_breakdown": final_terminal_requirement_breakdown,
     }, 0 if child_ready else 1
 
 

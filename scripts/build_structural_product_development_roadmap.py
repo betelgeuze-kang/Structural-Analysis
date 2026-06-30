@@ -256,6 +256,9 @@ def build_structural_product_development_roadmap(
     g1_full_ready = g1_full_load.get("contract_pass") is True
     g1_numerator = int(g1_direct_ready) + int(g1_full_ready)
     g1_blockers = [str(row) for row in _as_list(g1_full_load.get("blockers"))]
+    g1_terminal_breakdown = _as_dict(
+        g1_full_load.get("terminal_requirement_breakdown")
+    )
     g1_global_summary = _as_dict(g1_global_connectivity.get("summary"))
     g1_global_decision = _as_dict(g1_global_connectivity.get("decision_record"))
     g1_cause_signals = _as_dict(g1_cause_narrowing.get("evidence_signals"))
@@ -442,6 +445,16 @@ def build_structural_product_development_roadmap(
                     g1_cause_signals.get("f2h_lightweight_0p1_0p2_0p4_ready")
                 ),
                 "recommended_g1_next_direction": g1_recommended_next_lane,
+                "full_load_hip_newton_terminal_ready_requirements": (
+                    f"{_as_int(g1_terminal_breakdown.get('ready_requirement_count'))}/"
+                    f"{_as_int(g1_terminal_breakdown.get('requirement_count'))}"
+                    if g1_terminal_breakdown
+                    else "missing"
+                ),
+                "full_load_hip_newton_active_terminal_requirement": str(
+                    g1_terminal_breakdown.get("active_terminal_requirement_id")
+                    or "missing"
+                ),
             },
         ),
         _stage_row(
@@ -572,6 +585,16 @@ def build_structural_product_development_roadmap(
                 "direct_residual_terminal_gate_ready": g1_direct_ready,
                 "full_load_hip_newton_lane_ready": g1_full_ready,
                 "recommended_g1_next_direction": g1_recommended_next_lane,
+                "terminal_requirements": (
+                    f"{_as_int(g1_terminal_breakdown.get('ready_requirement_count'))}/"
+                    f"{_as_int(g1_terminal_breakdown.get('requirement_count'))}"
+                    if g1_terminal_breakdown
+                    else "missing"
+                ),
+                "active_terminal_requirement": str(
+                    g1_terminal_breakdown.get("active_terminal_requirement_id")
+                    or "missing"
+                ),
                 "row_only_correction_loop_stopped": _as_bool(
                     g1_cause_decision.get(
                         "stop_row_only_support_or_elastic_link_correction_loop"

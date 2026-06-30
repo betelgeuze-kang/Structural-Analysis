@@ -120,6 +120,25 @@ def test_sub_full_load_checkpoint_blocks_before_execution(tmp_path: Path) -> Non
         == "python3 scripts/run_g1_full_load_hip_newton_lane.py "
         "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
     )
+    terminal = payload["terminal_requirement_breakdown"]
+    assert (
+        terminal["schema_version"]
+        == "g1-full-load-hip-newton-terminal-requirement-breakdown.v1"
+    )
+    assert terminal["requirement_count"] == 4
+    assert terminal["active_terminal_requirement_id"] == "full_load_checkpoint_1p0"
+    requirements = {row["id"]: row for row in terminal["requirements"]}
+    assert requirements["full_load_checkpoint_1p0"]["ready"] is False
+    assert (
+        "checkpoint_resolution_no_full_load_candidate"
+        in requirements["full_load_checkpoint_1p0"]["blockers"]
+    )
+    child_requirement = requirements["full_load_child_direct_probe"]
+    assert child_requirement["status"] == "deferred_upstream_blocked"
+    assert (
+        "full_load_checkpoint_1p0"
+        in child_requirement["upstream_blocking_requirement_ids"]
+    )
     assert payload["child_gate_evidence"]["ready"] is False
     assert payload["child_gate_evidence"]["material_newton_breadth_passed"] is False
     assert (
@@ -334,6 +353,18 @@ def test_child_probe_result_must_report_full_load_and_fallback_zero(
     assert payload["hip_consistency_proof"]["cpu_diagnostic_assembler_used"] is False
     assert payload["hip_consistency_proof"]["production_hip_residual_jacobian_path"] is True
     assert payload["blockers"] == []
+    terminal = payload["terminal_requirement_breakdown"]
+    assert terminal["ready_requirement_count"] == 4
+    assert terminal["blocked_requirement_ids"] == []
+    assert terminal["active_terminal_requirement_id"] is None
+    requirements = {row["id"]: row for row in terminal["requirements"]}
+    assert requirements["full_load_checkpoint_1p0"]["ready"] is True
+    assert (
+        requirements["hip_consistent_residual_jacobian_newton_proof"]["ready"]
+        is True
+    )
+    assert requirements["production_rocm_hip_residual_jvp_worker"]["ready"] is True
+    assert requirements["full_load_child_direct_probe"]["ready"] is True
 
 
 def test_missing_hip_consistency_proof_blocks_lane_promotion(
@@ -795,6 +826,14 @@ def _write_hip_consistency_proof(
         "ready": worker_ready,
         "status": "ready" if worker_ready else "blocked",
         "blockers": [] if worker_ready else ["fixture_worker_not_ready"],
+        "residual_jvp_worker_path_ready": worker_ready,
+        "residual_jvp_worker_path_blockers": (
+            [] if worker_ready else ["fixture_worker_not_ready"]
+        ),
+        "g1_closure_gate_ready": worker_ready,
+        "g1_closure_gate_blockers": (
+            [] if worker_ready else ["fixture_worker_not_ready"]
+        ),
         "required_for_g1_closure": True,
         "promotes_g1_closure": False,
         "cpu_fallback_allowed": False,

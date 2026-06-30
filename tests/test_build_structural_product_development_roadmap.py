@@ -120,6 +120,14 @@ def _write_minimal_inputs(repo_root: Path) -> None:
                 {"id": "generate_full_load_1p0_checkpoint_candidate"},
                 {"id": "close_consistent_residual_jacobian_newton_gate"},
             ],
+            "terminal_requirement_breakdown": {
+                "schema_version": (
+                    "g1-full-load-hip-newton-terminal-requirement-breakdown.v1"
+                ),
+                "ready_requirement_count": 1,
+                "requirement_count": 4,
+                "active_terminal_requirement_id": "full_load_checkpoint_1p0",
+            },
         },
     )
     _write_json(
@@ -198,6 +206,18 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         ]["current_position"]["recommended_g1_next_direction"]
         == "consistent_residual_jacobian_newton_rocm_worker"
     )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["terminal_requirements"]
+        == "1/4"
+    )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["active_terminal_requirement"]
+        == "full_load_checkpoint_1p0"
+    )
     assert details[
         "collect_customer_shadow_and_external_benchmark_terminal_receipts"
     ]["current_position"]["completed_shadow_case_count"] == 1
@@ -229,6 +249,18 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     assert (
         stages["g1_solver_closure"]["summary"]["recommended_g1_next_direction"]
         == "consistent_residual_jacobian_newton_rocm_worker"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "full_load_hip_newton_terminal_ready_requirements"
+        ]
+        == "1/4"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "full_load_hip_newton_active_terminal_requirement"
+        ]
+        == "full_load_checkpoint_1p0"
     )
     assert (
         stages["g1_solver_closure"]["summary"]["row_only_correction_loop_stopped"]
