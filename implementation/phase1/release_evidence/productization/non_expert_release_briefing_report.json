@@ -103,7 +103,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T13:01:39.973944+00:00",
+  "generated_at": "2026-06-30T13:16:39.303474+00:00",
   "human_ux_summary": {
     "evidence_artifacts": {
       "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -129,7 +129,7 @@
     "workflow_step_pass_count": 0
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:efba6d7859cdba0a46fff9e610f7162a770e1e5a2a96ad497b9faf211387eb60",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:a21c1a2c419e1bc19b70018f3be25f51fd49173b6b5ec3cd65df5eaaef391eb8",
     "scripts/build_non_expert_release_briefing_report.py": "sha256:be86ab4bef3d9fdda099eed97b0b0a338fd2f7bd6cf30d9b8fdd54002de62d0b"
   },
   "next_owner_action_count": 6,
@@ -145,7 +145,7 @@
       "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "external_input_required": true,
       "owner": "release_ci_owner",
-      "owner_action": "No pull_request-triggered CI runs have been observed for the CI workflow (120 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+      "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "source": "release_area"
     },
     {
@@ -203,6 +203,6 @@
   "source_artifacts": {
     "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
   },
-  "source_commit_sha": "946a472c18994e2c7b19ae599523df13309b8f40",
+  "source_commit_sha": "3f4285c47c57b95bc113cca497f44c750017743a",
   "status": "ready_release_blocked"
 }

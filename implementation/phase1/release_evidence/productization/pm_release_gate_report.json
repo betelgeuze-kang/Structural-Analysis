@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-30T13:00:44.071176+00:00",
+  "generated_at": "2026-06-30T13:16:30.952711+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -90,12 +90,12 @@
     "implementation/phase1/ndtha_long_profile_report.json": "sha256:d9d9af8ffd289a5d9375ae3a4ce4caa7208161157f2c2c700e274d6dbd2a0f90",
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/production_runtime_packaging_manifest.json": "sha256:9b76649f947ec13ab53e248f181735ddede6d900c60ac0573a030534c2f2d958",
-    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:12b0222e717cd2d8b3dccb52a9fa87d348f6f77d5c57a7584c6bb8b7db15d077",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:705225bef7d12d453290e254b58a2fad0ede5522cf60d492a9ed47e2d3555720",
     "implementation/phase1/release/release_registry.json": "sha256:704b42f0a7a623a846991ae5ed8ee9324b6ba7bb914a44ff7a3508a795e88175",
     "implementation/phase1/release/support_bundle/license_status.json": "sha256:147abf67f7c0fa71a4f60cb12470f38114e8e3075367b875f274df9a1755d03c",
     "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json": "sha256:92d0eb0334e90227d4e1b28ae8145df9b5c1e7389bd98466fe9791495291c574",
-    "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json": "sha256:774cf8948bd1d3888408652c525d8b59db4bfacd37f999f146a3ffcce253c91b",
-    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:1e3bbd8f8e779e08d8a6e7ec0c75bb15a1fc059a3e93f567b2f0e0fce3383126",
+    "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json": "sha256:fc52ec918be5b63a97a6ac0870d9c3ab289df01924ca4ff2f389a5d8fd18a93c",
+    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:c939b92e8df59b6191b0a5e4d9df13c1ecab90e6ff8661f0c0677d019436d440",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:34136377e7ca08579cca3f8ffb35c5c662ad600c16c6549516971948ccff92ab",
     "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json": "sha256:a09a6f069955dc132241f1cf62a09410fa22e829cdce922ea88ca69bc0cd5b6c",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:57511c712e4a06ee0f618bac9ad66f4ba19d56be5cb3a2d1df118c411495e1da",
@@ -103,20 +103,20 @@
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:409681f26033cc2762ed750b353ef582dd5666f1d67e9b89598e63443211f8f4",
-    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:c85e21163a892350057c7f64f317e50a5fd3c9fa811a6b962bae5986cb150357",
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:84eed2e61720e43dbb4e387b960d317e452879efb274a475dbef8c9f23eb8784",
     "implementation/phase1/release_evidence/productization/github_development_sync_preflight_report.json": "sha256:1f2524a31ad2d631a223abd182ca37a458e690bb35b080462ab8becd34b913fc",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:6dfaf22272fa117afc9210b6b9b62a057d65683b0a9ad14f4b54090d7c11b2c7",
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:6c79ba747152e1dd0ab2d9f910ffaa10f8343ab565d75fc92a0868e1bd6a0ad7",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:0ca8ac017f13b553fe84f71b13ca6571b0528681f25fbd33ff08419decb184d9",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:5d13c678310e12f351c179d00fc9358e4c526430b6f404ea36add7515bb38bca",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:437faa4489690d24b28fa96f72ea5f5ee4559f7e3a444edf116c0457cab95273",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:6d57ca800013cd33bf3bf5dd54a325999b865d44bde15d39375c96fbd326c3dd",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:3f79df66b36a7a48c649b95ca9438b40cc697eb471079191cd81f0a790d6cc1d",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:587d764bd8b76be68f15f81f9c7f7f4fb64a838933220a21b4bec0c2d5f91a45",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d0c3cf39487a61fd2f34cecd1376be0043a040762fc61bf95a48f9da9a363883",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:1416ecc6033320716cf9e92d560e6372fbac00c160cd9e83cbe3c08b59cfad57",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -430,9 +430,9 @@
       "ok": false,
       "status": "blocked",
       "summary": {
-        "ci_streak_source_evidence_age_hours": 0.011,
+        "ci_streak_source_evidence_age_hours": 0.04,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-06-30T12:46:57.816860+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-06-30T13:10:25.744238+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
         "nightly_github_actions_pass_streak_count": 0,
@@ -460,11 +460,11 @@
           "workflow_dispatch"
         ],
         "pr_missing_consecutive_pass_count": 30,
-        "pr_owner_action": "No pull_request-triggered CI runs have been observed for the CI workflow (120 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+        "pr_owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "pr_pass_streak_count": 0,
-        "pr_pull_request_run_source_present": false,
+        "pr_pull_request_run_source_present": true,
         "pr_source_evidence_release_credit_pass": false,
-        "pr_streak_source": "no_pull_request_run_source",
+        "pr_streak_source": "missing_tracked_ci_evidence",
         "required_consecutive_pass_count": 30
       },
       "title": "Basic CI"
@@ -515,7 +515,7 @@
       "summary": {
         "artifact_count": 15,
         "blocker_count": 0,
-        "current_source_commit_sha": "cc4c55c76ac9cb98280fc16b00e91d6a3846b1f8",
+        "current_source_commit_sha": "65f3954c4777b86ca7df0bd09f5c89cb2c71b27e",
         "max_age_days": 30.0,
         "pass_count": 15
       },
@@ -1545,6 +1545,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "946a472c18994e2c7b19ae599523df13309b8f40",
+  "source_commit_sha": "3f4285c47c57b95bc113cca497f44c750017743a",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }

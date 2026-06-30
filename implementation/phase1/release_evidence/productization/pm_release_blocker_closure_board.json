@@ -25,10 +25,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T13:00:57.932255+00:00",
+  "generated_at": "2026-06-30T13:16:31.037564+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:437faa4489690d24b28fa96f72ea5f5ee4559f7e3a444edf116c0457cab95273",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c689010c45772d0e4dbc8cc38668689412cf3a180027de64b5d382c310cabd0a",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:176cf2ed0506c9cfa7c584634ba72f50ebd89ffccaf25acfa75e9d12156debda",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:ef362721967d70fae2bf00c1a48abb9e65a98c53e0a0fe10d12e314bbfc358e3",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:c1d51c93e91a69095fab5303dfe3d4331003c783b636386a2b9f26fa03b1d8e0"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -48,11 +48,11 @@
       "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "closure_state": "external_owner_input_ready",
-      "evidence_state": "no_pull_request_run_source",
+      "evidence_state": "missing_tracked_ci_streak_evidence",
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "No pull_request-triggered CI runs have been observed for the CI workflow (120 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+      "next_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner": "release_ci_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -373,7 +373,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "946a472c18994e2c7b19ae599523df13309b8f40",
+  "source_commit_sha": "3f4285c47c57b95bc113cca497f44c750017743a",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,

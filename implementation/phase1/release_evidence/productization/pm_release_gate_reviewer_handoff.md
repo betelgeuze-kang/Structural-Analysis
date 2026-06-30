@@ -34,10 +34,10 @@
 - Owner: `release_ci_owner`
 - Release area status: `blocked_external_owner_input_ready`
 - Closure state: `external_owner_input_ready`
-- Evidence state: `no_pull_request_run_source`
+- Evidence state: `missing_tracked_ci_streak_evidence`
 - External input required: `True`
 - Owner input required: `True`
-- Next action: No pull_request-triggered CI runs have been observed for the CI workflow (120 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.
+- Next action: Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.
 
 Acceptance criteria:
 - `pr_pass_streak_count >= 30` in `pm_release_gate_report.json`
