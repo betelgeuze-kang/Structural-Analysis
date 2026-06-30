@@ -89,6 +89,75 @@ def _git_head() -> str:
         return ""
 
 
+def _git_rev_parse(ref: str) -> str:
+    if not ref:
+        return ""
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", ref],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _git_diff_name_only(base: str, head: str) -> list[str]:
+    if not base or not head:
+        return []
+    try:
+        output = subprocess.check_output(
+            ["git", "diff", "--name-only", base, head],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return []
+    return [line.strip() for line in output.splitlines() if line.strip()]
+
+
+def _receipt_commit_allowed_path(path: str) -> bool:
+    if path in {"README.md", "docs/commercialization-gap-current-state.md"}:
+        return True
+    if path.startswith("docs/ai/dispatch/") and path.endswith(".md"):
+        return True
+    if path.startswith("implementation/phase1/release_evidence/productization/"):
+        return path.endswith((".json", ".md"))
+    if path.startswith("implementation/phase1/release_evidence/surface/"):
+        return path.endswith(".json")
+    if path in {
+        "implementation/phase1/customer_shadow_evidence_status.json",
+        "implementation/phase1/support_bundle_manifest.json",
+        "implementation/phase1/workstation_delivery_readiness.json",
+        "implementation/phase1/release/independent_product_readiness.json",
+        "implementation/phase1/release/external_benchmark_submission_readiness.json",
+    }:
+        return True
+    return False
+
+
+def _source_state_freshness(
+    *, proof_source_commit: str, lane_source_commit_sha: str
+) -> tuple[bool, str, list[str]]:
+    if not proof_source_commit:
+        return False, "missing_source_commit", []
+    if not lane_source_commit_sha or proof_source_commit == lane_source_commit_sha:
+        return True, "exact", []
+    proof_source = _git_rev_parse(proof_source_commit)
+    lane_source = _git_rev_parse(lane_source_commit_sha)
+    if not proof_source or not lane_source:
+        return False, "unresolved_source_commit", []
+    changed_paths = _git_diff_name_only(proof_source, lane_source)
+    non_receipt_paths = [
+        path for path in changed_paths if not _receipt_commit_allowed_path(path)
+    ]
+    if non_receipt_paths:
+        return False, "non_receipt_paths_changed", non_receipt_paths
+    return True, "receipt_only_commit", changed_paths
+
+
 def _read_optional_float(archive: Any, key: str) -> float | None:
     if key not in archive.files:
         return None
@@ -711,7 +780,11 @@ def _hip_consistency_proof_assessment(
     proof_source_commit = str(payload.get("source_commit_sha", "") or "")
     if not proof_source_commit:
         blockers.append("hip_consistency_proof_source_commit_sha_missing")
-    elif lane_source_commit_sha and proof_source_commit != lane_source_commit_sha:
+    source_state_fresh, source_state_kind, changed_paths = _source_state_freshness(
+        proof_source_commit=proof_source_commit,
+        lane_source_commit_sha=lane_source_commit_sha,
+    )
+    if proof_source_commit and not source_state_fresh:
         blockers.append("hip_consistency_proof_source_commit_sha_mismatch")
     if payload.get("rocm_hip_required") is not True:
         blockers.append("hip_consistency_proof_rocm_hip_not_required")
@@ -741,6 +814,9 @@ def _hip_consistency_proof_assessment(
         "present": proof_json.exists(),
         "status": payload.get("status"),
         "source_commit_sha": proof_source_commit,
+        "source_state_fresh": source_state_fresh,
+        "source_state_kind": source_state_kind,
+        "changed_paths_since_source_commit": changed_paths,
         "reused_evidence": payload.get("reused_evidence"),
         "rocm_hip_required": payload.get("rocm_hip_required"),
         "execution_mode": payload.get("execution_mode"),

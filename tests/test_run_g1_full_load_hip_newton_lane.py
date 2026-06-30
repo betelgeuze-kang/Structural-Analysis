@@ -706,6 +706,79 @@ def _write_hip_consistency_proof(
     proof.write_text(json.dumps(payload), encoding="utf-8")
 
 
+def test_hip_proof_receipt_only_source_commit_is_fresh(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha="proof-commit",
+        gate_passed=False,
+        blockers=["consistent_residual_jacobian_newton_not_proven"],
+    )
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_rev_parse",
+        lambda ref: {"proof-commit": "proof-sha", "lane-commit": "lane-sha"}.get(ref, ""),
+    )
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_diff_name_only",
+        lambda base, head: [
+            "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+            "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+        ],
+    )
+
+    summary, blockers = run_g1_full_load_hip_newton_lane._hip_consistency_proof_assessment(
+        proof_json=proof,
+        lane_source_commit_sha="lane-commit",
+    )
+
+    assert "hip_consistency_proof_source_commit_sha_mismatch" not in blockers
+    assert "hip_consistency_proof_gate_not_passed" in blockers
+    assert "hip_consistency_proof_has_blockers" in blockers
+    assert summary["source_state_fresh"] is True
+    assert summary["source_state_kind"] == "receipt_only_commit"
+    assert summary["changed_paths_since_source_commit"] == [
+        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+    ]
+
+
+def test_hip_proof_non_receipt_source_commit_still_blocks(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(proof, source_commit_sha="proof-commit")
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_rev_parse",
+        lambda ref: {"proof-commit": "proof-sha", "lane-commit": "lane-sha"}.get(ref, ""),
+    )
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_diff_name_only",
+        lambda base, head: [
+            "scripts/run_g1_full_load_hip_newton_lane.py",
+        ],
+    )
+
+    summary, blockers = run_g1_full_load_hip_newton_lane._hip_consistency_proof_assessment(
+        proof_json=proof,
+        lane_source_commit_sha="lane-commit",
+    )
+
+    assert "hip_consistency_proof_source_commit_sha_mismatch" in blockers
+    assert summary["source_state_fresh"] is False
+    assert summary["source_state_kind"] == "non_receipt_paths_changed"
+    assert summary["changed_paths_since_source_commit"] == [
+        "scripts/run_g1_full_load_hip_newton_lane.py",
+    ]
+
+
 def test_child_reused_evidence_blocks_lane_promotion(
     tmp_path: Path,
     monkeypatch: Any,
