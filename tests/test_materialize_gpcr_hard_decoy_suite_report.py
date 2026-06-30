@@ -30,22 +30,63 @@ def _passing_target(target_id: str) -> dict[str, object]:
 
 
 def _positive_first_hard_decoy_rows() -> list[dict[str, object]]:
+    positives = [
+        {
+            "molecule_id": f"positive_{index}",
+            "score": 1.0 - index / 100,
+            "is_positive": True,
+            "is_decoy": False,
+        }
+        for index in range(1, 5)
+    ]
+    decoys = [
+        {
+            "molecule_id": f"decoy_{index}",
+            "score": 0.50 - index / 100,
+            "is_positive": False,
+            "is_decoy": True,
+        }
+        for index in range(1, 21)
+    ]
+    return positives + decoys
+
+
+def _decoy_first_hard_decoy_rows() -> list[dict[str, object]]:
+    return [
+        {
+            "molecule_id": "decoy_1",
+            "score": 0.99,
+            "is_positive": False,
+            "is_decoy": True,
+        },
+        *[
+            {
+                "molecule_id": f"positive_{index}",
+                "score": 0.95 - index / 100,
+                "is_positive": True,
+                "is_decoy": False,
+            }
+            for index in range(1, 5)
+        ],
+        *[
+            {
+                "molecule_id": f"decoy_{index}",
+                "score": 0.50 - index / 100,
+                "is_positive": False,
+                "is_decoy": True,
+            }
+            for index in range(2, 21)
+        ],
+    ]
+
+
+def _fixture_sized_hard_decoy_rows() -> list[dict[str, object]]:
     return [
         {"molecule_id": "positive_1", "score": 0.95, "is_positive": True, "is_decoy": False},
         {"molecule_id": "positive_2", "score": 0.90, "is_positive": True, "is_decoy": False},
         {"molecule_id": "positive_3", "score": 0.85, "is_positive": True, "is_decoy": False},
         {"molecule_id": "decoy_1", "score": 0.40, "is_positive": False, "is_decoy": True},
         {"molecule_id": "decoy_2", "score": 0.10, "is_positive": False, "is_decoy": True},
-    ]
-
-
-def _decoy_first_hard_decoy_rows() -> list[dict[str, object]]:
-    return [
-        {"molecule_id": "decoy_1", "score": 0.99, "is_positive": False, "is_decoy": True},
-        {"molecule_id": "positive_1", "score": 0.90, "is_positive": True, "is_decoy": False},
-        {"molecule_id": "positive_2", "score": 0.85, "is_positive": True, "is_decoy": False},
-        {"molecule_id": "decoy_2", "score": 0.20, "is_positive": False, "is_decoy": True},
-        {"molecule_id": "decoy_3", "score": 0.10, "is_positive": False, "is_decoy": True},
     ]
 
 
@@ -141,7 +182,9 @@ def test_gpcr_hard_decoy_suite_blocks_summary_metrics_without_raw_rows() -> None
     ]
     raw_gate = report["phase3_exit_gate"]["criteria"][-1]
     assert raw_gate["failed_targets"] == ["DRD2", "HTR2A", "OPRM1"]
-    assert raw_gate["required"] == "computed_from_raw_hard_decoy_rows"
+    assert raw_gate["required"] == (
+        "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+    )
     assert report["blockers"] == [
         "DRD2:hard_decoy_rows_required_for_actual_closure",
         "HTR2A:hard_decoy_rows_required_for_actual_closure",
@@ -178,6 +221,64 @@ def test_gpcr_hard_decoy_suite_blocks_raw_rows_without_source_receipt() -> None:
     ]
 
 
+def test_gpcr_hard_decoy_suite_blocks_fixture_sized_raw_rows(
+    tmp_path: Path,
+) -> None:
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        _with_source_receipt(
+            {
+                "targets": [
+                    {
+                        "target_id": target_id,
+                        "score_direction": "higher_is_better",
+                        "hard_decoy_rows": _fixture_sized_hard_decoy_rows(),
+                    }
+                    for target_id in ("DRD2", "HTR2A", "OPRM1")
+                ]
+            },
+            tmp_path,
+        ),
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["target_pass_count"] == 0
+    assert report["root_cause_tags"] == ["hard_decoy_row_quality_required"]
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "raw_hard_decoy_rows_actual_closure"
+    ]
+    raw_gate = report["phase3_exit_gate"]["criteria"][-1]
+    assert raw_gate["current_by_target"] == {
+        "DRD2": "computed_but_quality_blocked",
+        "HTR2A": "computed_but_quality_blocked",
+        "OPRM1": "computed_but_quality_blocked",
+    }
+    assert raw_gate["failed_targets"] == ["DRD2", "HTR2A", "OPRM1"]
+    assert raw_gate["blockers"][:3] == [
+        "DRD2:hard_decoy_rows_positive_count_below_actual_closure_minimum",
+        "DRD2:hard_decoy_rows_decoy_count_below_actual_closure_minimum",
+        "DRD2:hard_decoy_rows_total_count_below_actual_closure_minimum",
+    ]
+    first_row = report["target_rows"][0]
+    assert first_row["top20_hit_rate"] == 0.6
+    assert first_row["computed_hard_decoy_metrics"]["hard_decoy_row_quality"] == {
+        "blockers": [
+            "DRD2:hard_decoy_rows_positive_count_below_actual_closure_minimum",
+            "DRD2:hard_decoy_rows_decoy_count_below_actual_closure_minimum",
+            "DRD2:hard_decoy_rows_total_count_below_actual_closure_minimum",
+        ],
+        "contract_pass": False,
+        "decoy_count": 2,
+        "minimums": {
+            "min_decoy_count_per_target": 20,
+            "min_positive_count_per_target": 4,
+            "min_total_row_count_per_target": 24,
+        },
+        "positive_count": 3,
+        "total_row_count": 5,
+    }
+
+
 def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows(
     tmp_path: Path,
 ) -> None:
@@ -189,12 +290,24 @@ def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows(
     assert report["status"] == "ready"
     assert report["broad_gpcr_family_claim_safe"] is True
     first_row = report["target_rows"][0]
-    assert first_row["top20_hit_rate"] == 0.6
+    assert first_row["top20_hit_rate"] == 0.2
     assert first_row["decoys_above_positive_count"] == 0
     assert first_row["positive_out_anchored_by_top_decoys"] is False
     assert first_row["computed_hard_decoy_metrics"]["ranking_pr_auc"] == 1.0
     assert first_row["ranking_pr_auc_ci_low"] == 1.0
     assert first_row["computed_hard_decoy_metrics"]["ranking_pr_auc_ci_low"] == 1.0
+    assert first_row["computed_hard_decoy_metrics"]["hard_decoy_row_quality"] == {
+        "blockers": [],
+        "contract_pass": True,
+        "decoy_count": 20,
+        "minimums": {
+            "min_decoy_count_per_target": 20,
+            "min_positive_count_per_target": 4,
+            "min_total_row_count_per_target": 24,
+        },
+        "positive_count": 4,
+        "total_row_count": 24,
+    }
     assert first_row["computed_hard_decoy_metrics"]["ranking_pr_auc_ci_method"] == (
         "deterministic_stratified_bootstrap_average_precision"
     )
@@ -415,7 +528,14 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                 "top20_hit_rate": ">=0.2",
                 "decoys_above_positive_count": "<=0",
                 "positive_out_anchored_by_top_decoys": False,
-                "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+                "hard_decoy_rows": (
+                    "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+                ),
+            },
+            "raw_row_quality_minimums": {
+                "min_decoy_count_per_target": 20,
+                "min_positive_count_per_target": 4,
+                "min_total_row_count_per_target": 24,
             },
             "criterion_by_field": {
                 "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
@@ -457,6 +577,7 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                         "top20_hit_rate",
                         "decoys_above_positive_count",
                         "positive_out_anchored_by_top_decoys",
+                        "hard_decoy_row_quality",
                     ],
                 },
             ],

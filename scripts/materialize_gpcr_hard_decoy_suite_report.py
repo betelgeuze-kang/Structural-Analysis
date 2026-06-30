@@ -48,6 +48,11 @@ EXIT_CRITERIA = {
     "positive_out_anchored_by_top_decoys_allowed": False,
 }
 ACTUAL_CLOSURE_CRITERION_ID = "raw_hard_decoy_rows_actual_closure"
+RAW_ROW_QUALITY_CRITERIA = {
+    "min_positive_count_per_target": 4,
+    "min_decoy_count_per_target": 20,
+    "min_total_row_count_per_target": 24,
+}
 PHASE3_MATERIALIZATION_STEPS = [
     "materialize_gpcr_hard_decoy_suite_report",
     "refresh_gpcr_hard_decoy_product_report",
@@ -81,8 +86,11 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
             "top20_hit_rate": ">=0.2",
             "decoys_above_positive_count": "<=0",
             "positive_out_anchored_by_top_decoys": False,
-            "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+            "hard_decoy_rows": (
+                "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+            ),
         },
+        "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
         "criterion_by_field": {
             "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
             "top20_hit_rate": "top20_hit_rate_min",
@@ -114,6 +122,7 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
                     "top20_hit_rate",
                     "decoys_above_positive_count",
                     "positive_out_anchored_by_top_decoys",
+                    "hard_decoy_row_quality",
                 ],
             },
         ],
@@ -477,6 +486,16 @@ def _computed_hard_decoy_metrics(
         return {
             "hard_decoy_row_count": len(raw_rows),
             "valid_hard_decoy_row_count": len(normalized_rows),
+            "hard_decoy_positive_count": positive_count,
+            "hard_decoy_decoy_count": decoy_count,
+            "hard_decoy_row_quality": {
+                "contract_pass": False,
+                "minimums": dict(RAW_ROW_QUALITY_CRITERIA),
+                "positive_count": positive_count,
+                "decoy_count": decoy_count,
+                "total_row_count": len(normalized_rows),
+                "blockers": blockers,
+            },
             "calculation_status": "blocked",
         }, blockers, root_cause_tags
 
@@ -515,9 +534,28 @@ def _computed_hard_decoy_metrics(
         normalized_rows=normalized_rows,
         score_direction=score_direction,
     )
+    quality_blockers: list[str] = []
+    quality_root_cause_tags: list[str] = []
+    if positive_count < RAW_ROW_QUALITY_CRITERIA["min_positive_count_per_target"]:
+        quality_blockers.append(
+            f"{target_id}:hard_decoy_rows_positive_count_below_actual_closure_minimum"
+        )
+    if decoy_count < RAW_ROW_QUALITY_CRITERIA["min_decoy_count_per_target"]:
+        quality_blockers.append(
+            f"{target_id}:hard_decoy_rows_decoy_count_below_actual_closure_minimum"
+        )
+    if len(normalized_rows) < RAW_ROW_QUALITY_CRITERIA["min_total_row_count_per_target"]:
+        quality_blockers.append(
+            f"{target_id}:hard_decoy_rows_total_count_below_actual_closure_minimum"
+        )
+    if quality_blockers:
+        quality_root_cause_tags.append("hard_decoy_row_quality_required")
+
     return {
         "hard_decoy_row_count": len(raw_rows),
         "valid_hard_decoy_row_count": len(normalized_rows),
+        "hard_decoy_positive_count": positive_count,
+        "hard_decoy_decoy_count": decoy_count,
         "score_direction": score_direction,
         "ranking_pr_auc": average_precision,
         "ranking_pr_auc_ci_low": average_precision_ci_low,
@@ -533,8 +571,18 @@ def _computed_hard_decoy_metrics(
             "decoys_above_positive_count=decoys_before_best_positive; "
             "positive_out_anchored_by_top_decoys=any_positive_ranked_below_best_decoy"
         ),
-        "calculation_status": "computed",
-    }, [], []
+        "hard_decoy_row_quality": {
+            "contract_pass": not quality_blockers,
+            "minimums": dict(RAW_ROW_QUALITY_CRITERIA),
+            "positive_count": positive_count,
+            "decoy_count": decoy_count,
+            "total_row_count": len(normalized_rows),
+            "blockers": quality_blockers,
+        },
+        "calculation_status": (
+            "computed" if not quality_blockers else "computed_but_quality_blocked"
+        ),
+    }, quality_blockers, quality_root_cause_tags
 
 
 def _metric_value(
@@ -816,7 +864,7 @@ def _actual_hard_decoy_rows_gate(*, target_rows: list[dict[str, Any]]) -> dict[s
         "criterion_id": ACTUAL_CLOSURE_CRITERION_ID,
         "pass": not failed_targets,
         "current_by_target": current_by_target,
-        "required": "computed_from_raw_hard_decoy_rows",
+        "required": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
         "failed_targets": failed_targets,
         "blockers": blockers,
     }

@@ -18,6 +18,7 @@ from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from materialize_gpcr_hard_decoy_suite_report import (  # noqa: E402
     ACTUAL_CLOSURE_CRITERION_ID,
     EXIT_CRITERIA,
+    RAW_ROW_QUALITY_CRITERIA,
     REQUIRED_TARGETS,
     SCHEMA_VERSION as SUITE_REPORT_SCHEMA_VERSION,
 )
@@ -250,8 +251,11 @@ def _target_execution_preflight_checklist(
                         "positive_out_anchored_by_top_decoys": EXIT_CRITERIA[
                             "positive_out_anchored_by_top_decoys_allowed"
                         ],
-                        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+                        "hard_decoy_rows": (
+                            "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+                        ),
                     },
+                    "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
                 },
                 "materialization_command": materialize_command,
                 "validation_command": materialize_command,
@@ -285,8 +289,11 @@ def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
                     "positive_out_anchored_by_top_decoys": EXIT_CRITERIA[
                         "positive_out_anchored_by_top_decoys_allowed"
                     ],
-                    "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+                    "hard_decoy_rows": (
+                        "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+                    ),
                 },
+                "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
             },
             "materialization_steps": [
                 "materialize_gpcr_hard_decoy_suite_report",
@@ -383,6 +390,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "minimum_target_count": len(REQUIRED_TARGETS),
         "minimum_metric_field_count_per_target": 4,
         "minimum_raw_hard_decoy_row_fields": list(RAW_HARD_DECOY_ROW_FIELDS),
+        "minimum_raw_hard_decoy_row_quality": dict(RAW_ROW_QUALITY_CRITERIA),
         "operator_template": {
             "artifact": str(DEFAULT_OPERATOR_TEMPLATE),
             "schema_version": str(template.get("schema_version") or "gpcr-hard-decoy-operator-intake.v1"),
@@ -400,6 +408,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
                 "target_id",
                 *RAW_HARD_DECOY_ROW_FIELDS,
             ],
+            "minimum_row_quality_per_target": dict(RAW_ROW_QUALITY_CRITERIA),
             "optional_row_fields": ["score_direction"],
             "required_targets": list(REQUIRED_TARGETS),
             "default_score_direction": "higher_is_better",
