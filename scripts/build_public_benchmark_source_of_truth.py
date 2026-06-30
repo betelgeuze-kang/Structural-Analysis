@@ -1007,7 +1007,7 @@ def build_source_of_truth(
     first_manifest_contract_id = str(first_manifest_contract.get("contract_id") or "")
     blockers = []
     if subset_materialized_count < target_subset_case_count:
-        blockers.append("casf_pdbbind_source_material_not_attached")
+        blockers.extend(str(blocker) for blocker in subset_manifest["blockers"])
     if pose_real_case_count < target_subset_case_count:
         blockers.append("public_benchmark_real_pose_predictions_missing")
         blockers.append("public_benchmark_real_pose_validity_rows_missing")

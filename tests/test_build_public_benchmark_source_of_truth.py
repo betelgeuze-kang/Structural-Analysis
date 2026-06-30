@@ -51,9 +51,11 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     }
     assert source["tier_beta_ready"] is False
     assert source["public_benchmark_ready"] is False
-    assert source["blocker_count"] == 7
+    assert source["blocker_count"] == 9
     assert source["blockers"] == [
         "casf_pdbbind_source_material_not_attached",
+        "casf_pdbbind_case_checksums_missing",
+        "casf_pdbbind_ligand_symmetry_contracts_missing",
         "public_benchmark_real_pose_predictions_missing",
         "public_benchmark_real_pose_validity_rows_missing",
         "public_benchmark_real_rmsd_rows_missing",
