@@ -163,29 +163,60 @@ def _capability_handoff_slot(summary: dict[str, Any]) -> dict[str, Any]:
     )
     if not slot:
         return {}
+    slot_id = str(slot.get("slot_id") or "")
+    queue_match = {}
+    for row in _as_list(summary.get("operator_handoff_queue")):
+        if not isinstance(row, dict):
+            continue
+        if slot_id and str(row.get("slot_id") or "") == slot_id:
+            queue_match = row
+            break
     blocked_criteria = (
         _as_list(slot.get("blocked_tier_beta_criteria"))
+        or _as_list(queue_match.get("blocked_tier_beta_criteria"))
         or _as_list(slot.get("blocked_phase3_criteria"))
+        or _as_list(queue_match.get("blocked_phase3_criteria"))
         or _as_list(slot.get("blocked_phase4_criteria"))
+        or _as_list(queue_match.get("blocked_phase4_criteria"))
         or _as_list(slot.get("blocked_criteria"))
+        or _as_list(queue_match.get("blocked_criteria"))
         or _as_list(slot.get("unblocks_tier_beta_criteria"))
+        or _as_list(queue_match.get("unblocks_tier_beta_criteria"))
         or _as_list(slot.get("unblocks_phase3_criteria"))
+        or _as_list(queue_match.get("unblocks_phase3_criteria"))
         or _as_list(slot.get("unblocks_phase4_criteria"))
+        or _as_list(queue_match.get("unblocks_phase4_criteria"))
     )
     return {
-        "slot_id": str(slot.get("slot_id") or ""),
-        "target_id": str(slot.get("target_id") or ""),
-        "handoff_id": str(slot.get("handoff_id") or ""),
-        "status": str(slot.get("status") or ""),
+        "slot_id": slot_id,
+        "target_id": str(slot.get("target_id") or queue_match.get("target_id") or ""),
+        "handoff_id": str(slot.get("handoff_id") or queue_match.get("handoff_id") or ""),
+        "status": str(slot.get("status") or queue_match.get("status") or ""),
         "blocked_criteria": [str(row) for row in blocked_criteria],
-        "first_next_action": str(slot.get("first_next_action") or ""),
-        "template_artifact": str(slot.get("template_artifact") or ""),
-        "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
+        "first_next_action": str(
+            slot.get("first_next_action") or queue_match.get("first_next_action") or ""
+        ),
+        "template_artifact": str(
+            slot.get("template_artifact") or queue_match.get("template_artifact") or ""
+        ),
+        "minimum_evidence": _as_dict(
+            slot.get("minimum_evidence") or queue_match.get("minimum_evidence")
+        ),
         "materialization_steps": [
-            str(row) for row in _as_list(slot.get("materialization_steps"))
+            str(row)
+            for row in (
+                _as_list(slot.get("materialization_steps"))
+                or _as_list(queue_match.get("materialization_steps"))
+            )
         ],
-        "materialization_command": str(slot.get("materialization_command") or ""),
-        "validation_command": str(slot.get("validation_command") or ""),
+        "materialization_command": str(
+            slot.get("materialization_command")
+            or queue_match.get("materialization_command")
+            or ""
+        ),
+        "validation_command": str(
+            slot.get("validation_command") or queue_match.get("validation_command") or ""
+        ),
     }
 
 
@@ -221,6 +252,12 @@ def _blocked_capability_register(
                 "first_next_action": first_next_action,
                 "operator_intake_route": str(
                     summary.get("operator_intake_route") or ""
+                ),
+                "operator_intake_artifact": str(
+                    summary.get("operator_intake_artifact") or ""
+                ),
+                "operator_intake_markdown_artifact": str(
+                    summary.get("operator_intake_markdown_artifact") or ""
                 ),
                 "operator_intake_packet_status": str(
                     summary.get("operator_intake_packet_status") or ""
@@ -648,6 +685,10 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
                 or _as_dict(operator_intake.get("read_model")).get("route")
                 or ""
             ),
+            "operator_intake_artifact": str(DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET),
+            "operator_intake_markdown_artifact": str(
+                DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD
+            ),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
             ),
@@ -737,6 +778,15 @@ def _h_bond_capability(repo_root: Path) -> dict[str, Any]:
             "first_blocked_target": str(surface.get("first_blocked_target") or ""),
             "root_cause_tags": [str(row) for row in _as_list(surface.get("root_cause_tags"))],
             "operator_intake_packet_status": str(operator_intake.get("status") or ""),
+            "operator_intake_route": str(
+                operator_intake.get("route")
+                or _as_dict(operator_intake.get("read_model")).get("route")
+                or "/product/capabilities"
+            ),
+            "operator_intake_artifact": str(DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET),
+            "operator_intake_markdown_artifact": str(
+                DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET_MD
+            ),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
             ),
@@ -835,6 +885,10 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
                 or ""
             ),
             "operator_intake_packet_status": str(operator_intake.get("status") or ""),
+            "operator_intake_artifact": str(DEFAULT_GPCR_OPERATOR_INTAKE_PACKET),
+            "operator_intake_markdown_artifact": str(
+                DEFAULT_GPCR_OPERATOR_INTAKE_PACKET_MD
+            ),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
             ),

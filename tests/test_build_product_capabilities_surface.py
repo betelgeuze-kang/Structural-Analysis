@@ -81,9 +81,16 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert first_blocked_capability["operator_intake_route"] == (
         "/product/public-benchmark/operator-intake"
     )
+    assert first_blocked_capability["operator_intake_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_operator_intake_packet.json"
+    )
     assert first_blocked_capability["operator_intake_required_slot_count"] == 4
     assert first_blocked_capability["handoff_slot"]["slot_id"] == (
         "casf_pdbbind_subset_intake"
+    )
+    assert first_blocked_capability["handoff_slot"]["handoff_id"] == (
+        "public_benchmark::casf_pdbbind_subset_intake"
     )
     assert first_blocked_capability["handoff_slot"]["blocked_criteria"] == [
         "casf_pdbbind_subset_materialized",
@@ -101,6 +108,15 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert blocked_register["pocketmd_lite_top_k_refinement"][
         "first_blocked_target"
     ] == "top_k_refinement_operator_intake"
+    assert blocked_register["h_bond_backmap_evidence"][
+        "operator_intake_artifact"
+    ].endswith("h_bond_backmap_operator_intake_packet.json")
+    assert blocked_register["gpcr_hard_decoy_evidence"][
+        "operator_intake_artifact"
+    ].endswith("gpcr_hard_decoy_operator_intake_packet.json")
+    assert blocked_register["pocketmd_lite_top_k_refinement"][
+        "operator_intake_artifact"
+    ].endswith("pocketmd_lite_operator_intake_packet.json")
     assert blocked_register["pocketmd_lite_top_k_refinement"]["handoff_slot"][
         "materialization_command"
     ].startswith("python3 scripts/materialize_pocketmd_lite_topk_survival_report.py")
