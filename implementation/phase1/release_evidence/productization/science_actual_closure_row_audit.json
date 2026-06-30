@@ -32,13 +32,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T20:58:33.467536+00:00",
+  "generated_at": "2026-06-30T21:15:19.100638+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:c1df25fb0f85f5640fe6ab5362ec14a05563a3db20ab4c08192910325a6d17ca",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:287e04a7fd9210843ed9fbe376ce6f5d5eb1b6763d14fce5f91767935eacb4dc",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:0a3b4416ffaea6b9c394535a5c9b422183d5ec396c5e785b02a0149cc04db64a",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:cbe3da9485435cbe6101dc5c28409fc5b55aa823df1be37937ffaff7f30ac637",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:e44ad3df474509d811cd699751acca1b0217c3a8483cdd8a6a14292870030399",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:e7c4d1e86469dc966bfdb58fc37f16fa7d323ed3976a7d72fc4d3167feca58b5"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:f2973d8c809422f33369299655339dc4572bf99d74c97fcead40957a10866fe6"
   },
   "missing_row_inputs": [
     "gpcr_rows",
@@ -81,6 +81,11 @@
         "positive_out_anchored_by_top_decoys_allowed": false,
         "ranking_pr_auc_ci_low_min": 0.45,
         "top20_hit_rate_min": 0.2
+      },
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
       },
       "required_flat_row_fields": [
         "target_id",
@@ -171,6 +176,6 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "f26668290601bdbde1a2d802844d8d4235180b25",
+  "source_commit_sha": "303ddc0a54e8293100220b68378caf013a8bc0b0",
   "status": "operator_evidence_required"
 }

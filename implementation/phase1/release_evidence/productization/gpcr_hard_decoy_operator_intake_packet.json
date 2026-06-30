@@ -65,6 +65,11 @@
         "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
         "top20_hit_rate": "top20_hit_rate_min"
       },
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
+      },
       "required_hard_decoy_row_fields": [
         "molecule_id",
         "score",
@@ -83,7 +88,7 @@
       "target_id": "DRD2",
       "thresholds": {
         "decoys_above_positive_count": "<=0",
-        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
         "positive_out_anchored_by_top_decoys": false,
         "ranking_pr_auc_ci_low": ">=0.45",
         "top20_hit_rate": ">=0.2"
@@ -127,6 +132,11 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "raw_row_quality_minimums": {
+          "min_decoy_count_per_target": 20,
+          "min_positive_count_per_target": 4,
+          "min_total_row_count_per_target": 24
+        },
         "required_hard_decoy_row_fields": [
           "molecule_id",
           "score",
@@ -145,7 +155,7 @@
         "target_id": "DRD2",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
-          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -180,6 +190,11 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "raw_row_quality_minimums": {
+          "min_decoy_count_per_target": 20,
+          "min_positive_count_per_target": 4,
+          "min_total_row_count_per_target": 24
+        },
         "required_hard_decoy_row_fields": [
           "molecule_id",
           "score",
@@ -198,7 +213,7 @@
         "target_id": "HTR2A",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
-          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -233,6 +248,11 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "raw_row_quality_minimums": {
+          "min_decoy_count_per_target": 20,
+          "min_positive_count_per_target": 4,
+          "min_total_row_count_per_target": 24
+        },
         "required_hard_decoy_row_fields": [
           "molecule_id",
           "score",
@@ -251,7 +271,7 @@
         "target_id": "OPRM1",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
-          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -272,14 +292,14 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-06-30T16:58:35.564489+00:00",
+  "generated_at": "2026-06-30T21:15:01.603103+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:fd2e1ce0d395751d944c92520f355ed74fead4a17ef1bf20e34b31dba961edd2",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:c610de914991d4ed7b39302c32dd62b1a822011772574efd293a4df5d58e0bbc",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:a5fd06dd1080c4aa37072e7007f8e2c95ab440d5a4047ab9bf3cc6f7087e3860",
-    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:4f392c85a218e41517a062ea18249aa561a457d4749bf5ca0e9673b14e4fa359",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:f0ef037ce680518fdb13a8ae4ba50c289f4ff9ea604f6d77c3bd45fa6dda81d9"
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:ff59d3ea1cbeccd91614d76476c85f969839ff4e26d3881c26835950ed8bdb33",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:ec423227469ed6a77b04f770c78e44f95c3816c7b8735e5bb2ea6a3ada70ef1e",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:6a32012ebc12d5b944cb159d0756cfd5b7a9355d9df69b2502becb6d8710e648",
+    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:c1df25fb0f85f5640fe6ab5362ec14a05563a3db20ab4c08192910325a6d17ca",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:0a3b4416ffaea6b9c394535a5c9b422183d5ec396c5e785b02a0149cc04db64a"
   },
   "linked_artifacts": {
     "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -327,6 +347,11 @@
     "is_positive",
     "is_decoy"
   ],
+  "minimum_raw_hard_decoy_row_quality": {
+    "min_decoy_count_per_target": 20,
+    "min_positive_count_per_target": 4,
+    "min_total_row_count_per_target": 24
+  },
   "minimum_target_count": 3,
   "next_actions": [
     "attach_gpcr_hard_decoy_raw_row_file",
@@ -359,6 +384,11 @@
     "claim_boundary": "This import step only groups operator-attached raw ranking rows into the template. The suite materializer still computes all metrics and keeps Phase 3 locked unless every target passes.",
     "command": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
     "default_score_direction": "higher_is_better",
+    "minimum_row_quality_per_target": {
+      "min_decoy_count_per_target": 20,
+      "min_positive_count_per_target": 4,
+      "min_total_row_count_per_target": 24
+    },
     "optional_row_fields": [
       "score_direction"
     ],
@@ -413,7 +443,7 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "49cb04ed197d3e7f71cc7774d2110b4307dffade",
+  "source_commit_sha": "303ddc0a54e8293100220b68378caf013a8bc0b0",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
@@ -464,6 +494,11 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "raw_row_quality_minimums": {
+          "min_decoy_count_per_target": 20,
+          "min_positive_count_per_target": 4,
+          "min_total_row_count_per_target": 24
+        },
         "required_hard_decoy_row_fields": [
           "molecule_id",
           "score",
@@ -482,7 +517,7 @@
         "target_id": "DRD2",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
-          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -544,6 +579,11 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "raw_row_quality_minimums": {
+          "min_decoy_count_per_target": 20,
+          "min_positive_count_per_target": 4,
+          "min_total_row_count_per_target": 24
+        },
         "required_hard_decoy_row_fields": [
           "molecule_id",
           "score",
@@ -562,7 +602,7 @@
         "target_id": "HTR2A",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
-          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -624,6 +664,11 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "raw_row_quality_minimums": {
+          "min_decoy_count_per_target": 20,
+          "min_positive_count_per_target": 4,
+          "min_total_row_count_per_target": 24
+        },
         "required_hard_decoy_row_fields": [
           "molecule_id",
           "score",
@@ -642,7 +687,7 @@
         "target_id": "OPRM1",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
-          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
