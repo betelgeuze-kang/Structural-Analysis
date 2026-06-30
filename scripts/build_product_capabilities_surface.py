@@ -29,6 +29,9 @@ DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE = (
 DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD = (
     PRODUCTIZATION / "public_benchmark_operator_intake_packet.md"
 )
+DEFAULT_PUBLIC_BENCHMARK_HARNESS_BUNDLE = (
+    PRODUCTIZATION / "public_benchmark_harness_bundle.json"
+)
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_POCKETMD_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 DEFAULT_POCKETMD_TOPK_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
@@ -324,6 +327,7 @@ def _structural_solver_capability(repo_root: Path) -> dict[str, Any]:
 def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
     payload = _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK)
     operator_intake = _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE)
+    harness_bundle = _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK_HARNESS_BUNDLE)
     source_operator_summary = _as_dict(payload.get("operator_intake_packet"))
     tier_beta_gate = _as_dict(payload.get("tier_beta_gate"))
     operator_slots = [
@@ -451,6 +455,7 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
             DEFAULT_PUBLIC_BENCHMARK,
             DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
             DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD,
+            DEFAULT_PUBLIC_BENCHMARK_HARNESS_BUNDLE,
         ],
         contract_pass=bool(_truthy_contract(payload) and ready),
         blocker_count=len(_blockers(payload)),
@@ -522,6 +527,13 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
             ),
             "operator_intake_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE),
             "operator_intake_markdown_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD),
+            "harness_bundle_artifact": str(DEFAULT_PUBLIC_BENCHMARK_HARNESS_BUNDLE),
+            "harness_bundle_status": str(harness_bundle.get("status") or ""),
+            "harness_bundle_artifact_count": int(harness_bundle.get("artifact_count") or 0),
+            "harness_bundle_missing_artifact_count": int(
+                harness_bundle.get("missing_artifact_count") or 0
+            ),
+            "harness_bundle_index": _as_dict(payload.get("harness_bundle_index")),
             "operator_template_artifacts": _as_dict(
                 operator_intake.get("operator_template_artifacts")
                 or source_operator_summary.get("operator_template_artifacts")

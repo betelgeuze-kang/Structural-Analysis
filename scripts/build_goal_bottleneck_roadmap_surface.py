@@ -28,6 +28,9 @@ DEFAULT_PUBLIC_BENCHMARK = PRODUCTIZATION / "public_benchmark_source_of_truth.js
 DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE = (
     PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 )
+DEFAULT_PUBLIC_BENCHMARK_HARNESS_BUNDLE = (
+    PRODUCTIZATION / "public_benchmark_harness_bundle.json"
+)
 DEFAULT_GPCR_PRODUCT_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
 DEFAULT_GPCR_OPERATOR_INTAKE_PACKET = (
     PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
@@ -96,6 +99,7 @@ def _input_paths() -> list[Path]:
         DEFAULT_FRESHNESS_REPORT,
         DEFAULT_PUBLIC_BENCHMARK,
         DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
+        DEFAULT_PUBLIC_BENCHMARK_HARNESS_BUNDLE,
         DEFAULT_GPCR_PRODUCT_REPORT,
         DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
         DEFAULT_GPCR_SURFACE,
@@ -581,7 +585,11 @@ def _public_benchmark_row(
         first_blocker=str(action.get("first_blocker") or _first_str(blockers)),
         first_blocked_target=first_blocked_target,
         root_cause_tags=root_cause_tags,
-        evidence_artifacts=[DEFAULT_PUBLIC_BENCHMARK, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE],
+        evidence_artifacts=[
+            DEFAULT_PUBLIC_BENCHMARK,
+            DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
+            DEFAULT_PUBLIC_BENCHMARK_HARNESS_BUNDLE,
+        ],
         linked_routes=[source_route, operator_route, "/product/capabilities"],
         next_actions=_dedupe(
             [str(row) for row in _as_list(action.get("next_actions"))]
@@ -601,6 +609,10 @@ def _public_benchmark_row(
             "operator_intake_packet_status": str(
                 public_benchmark_operator_intake.get("status") or ""
             ),
+            "harness_bundle_index": _as_dict(
+                public_benchmark.get("harness_bundle_index")
+            ),
+            "harness_bundle_artifact": str(DEFAULT_PUBLIC_BENCHMARK_HARNESS_BUNDLE),
             "operator_template_artifacts": _as_dict(
                 public_benchmark_operator_intake.get("operator_template_artifacts")
                 or source_operator_summary.get("operator_template_artifacts")

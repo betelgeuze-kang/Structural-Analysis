@@ -111,6 +111,14 @@ DEFAULT_ARTIFACTS = (
         Path("scripts/build_public_benchmark_source_of_truth.py"),
     ),
     (
+        "public_benchmark_harness_bundle",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_harness_bundle.json"
+        ),
+        Path("scripts/materialize_public_benchmark_harness_bundle.py"),
+    ),
+    (
         "accuracy_parity_scorecard",
         Path("implementation/phase1/real_accuracy_validation_report.json"),
         Path("implementation/phase1/run_real_accuracy_validation.py"),

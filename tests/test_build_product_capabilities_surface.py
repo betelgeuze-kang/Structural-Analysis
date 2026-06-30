@@ -177,6 +177,15 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert public_benchmark["summary"]["minimum_subset_case_count"] == 12
     assert public_benchmark["summary"]["tier_beta_gate_status"] == "blocked"
     assert public_benchmark["summary"]["tier_beta_failed_criterion_count"] == 8
+    assert public_benchmark["summary"]["harness_bundle_artifact"].endswith(
+        "public_benchmark_harness_bundle.json"
+    )
+    assert public_benchmark["summary"]["harness_bundle_status"] == "ready"
+    assert public_benchmark["summary"]["harness_bundle_artifact_count"] == 7
+    assert public_benchmark["summary"]["harness_bundle_missing_artifact_count"] == 0
+    assert public_benchmark["summary"]["harness_bundle_index"]["status"] == (
+        "ready_for_local_artifact_index"
+    )
     assert [
         row["criterion_id"]
         for row in public_benchmark["summary"]["tier_beta_gate_criteria"]
@@ -257,6 +266,20 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_operator_intake_packet.json"
         in public_benchmark["evidence_artifacts"]
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_harness_bundle.json"
+        in public_benchmark["evidence_artifacts"]
+    )
+    assert public_benchmark["summary"]["harness_bundle_artifact"].endswith(
+        "public_benchmark_harness_bundle.json"
+    )
+    assert public_benchmark["summary"]["harness_bundle_status"] == "ready"
+    assert public_benchmark["summary"]["harness_bundle_artifact_count"] == 7
+    assert (
+        public_benchmark["summary"]["harness_bundle_index"]["artifact"]
+        == "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
     )
     assert "attach_dud_e_lit_pcba_enrichment_intake" in public_benchmark["next_actions"]
     assert "attach_vina_gnina_comparison_intake" in public_benchmark["next_actions"]

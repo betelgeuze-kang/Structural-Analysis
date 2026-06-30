@@ -86,6 +86,30 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["operator_template_artifacts"][
         "casf_pdbbind_subset_intake"
     ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
+    assert source["harness_bundle_index"] == {
+        "schema_version": "public-benchmark-harness-bundle.v1",
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_harness_bundle.json"
+        ),
+        "status": "ready_for_local_artifact_index",
+        "artifact_index_command": (
+            "python3 scripts/materialize_public_benchmark_harness_bundle.py "
+            "--out implementation/phase1/release_evidence/productization/"
+            "public_benchmark_harness_bundle.json"
+        ),
+        "materialization_report": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_harness_bundle_materialization_report.json"
+        ),
+        "claim_boundary": (
+            "Indexes local public-benchmark harness artifacts only; it does not "
+            "fetch, license, redistribute, or approve external benchmark data."
+        ),
+    }
+    assert source["linked_artifacts"]["harness_bundle"].endswith(
+        "public_benchmark_harness_bundle.json"
+    )
     assert source["blocked_operator_slot_count"] == 4
     assert source["root_cause_tags"] == [
         "operator_source_material_required",
@@ -560,6 +584,31 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         row["family_id"]: row["materialization_status"]
         for row in source["source_families"]
     }["vina_gnina"] == "operator_intake_required"
+    assert source["harness_bundle_index"] == {
+        "schema_version": "public-benchmark-harness-bundle.v1",
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_harness_bundle.json"
+        ),
+        "status": "ready_for_local_artifact_index",
+        "artifact_index_command": (
+            "python3 scripts/materialize_public_benchmark_harness_bundle.py "
+            "--out implementation/phase1/release_evidence/productization/"
+            "public_benchmark_harness_bundle.json"
+        ),
+        "materialization_report": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_harness_bundle_materialization_report.json"
+        ),
+        "claim_boundary": (
+            "Indexes local public-benchmark harness artifacts only; it does not "
+            "fetch, license, redistribute, or approve external benchmark data."
+        ),
+    }
+    assert source["linked_artifacts"]["harness_bundle"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_harness_bundle.json"
+    )
     assert source["operator_intake_packet"]["schema_version"] == (
         "public-benchmark-operator-intake-packet.v1"
     )

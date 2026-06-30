@@ -64,6 +64,7 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
     SUPPORTED_ENGINES as VINA_GNINA_SUPPORTED_ENGINES,
 )
 from build_public_benchmark_operator_intake_packet import (  # noqa: E402
+    DEFAULT_HARNESS_BUNDLE as DEFAULT_HARNESS_BUNDLE_OUT,
     DEFAULT_OPERATOR_TEMPLATE_DIR,
     DEFAULT_OUT as DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
     build_public_benchmark_operator_intake_packet,
@@ -1619,6 +1620,16 @@ def build_source_of_truth(
         for row in operator_evidence_gap_register
         if row.get("tier_beta_blocked")
     ]
+    linked_operator_artifacts = dict(operator_intake_packet.get("linked_artifacts") or {})
+    operator_bundle_materialization = dict(
+        operator_intake_packet.get("operator_bundle_materialization") or {}
+    )
+    operator_bundle_outputs = dict(operator_bundle_materialization.get("produces") or {})
+    harness_bundle_artifact = str(
+        linked_operator_artifacts.get("harness_bundle")
+        or operator_bundle_outputs.get("artifact_bundle")
+        or DEFAULT_HARNESS_BUNDLE_OUT
+    )
     source_input_paths = _source_input_paths()
     metadata = release_evidence_metadata(
         input_paths=source_input_paths,
@@ -1706,6 +1717,26 @@ def build_source_of_truth(
         ),
         "operator_blocker_detail_register": operator_blocker_detail_register,
         "tier_beta_gate": tier_beta_gate,
+        "harness_bundle_index": {
+            "schema_version": "public-benchmark-harness-bundle.v1",
+            "artifact": harness_bundle_artifact,
+            "status": "ready_for_local_artifact_index",
+            "artifact_index_command": str(
+                operator_bundle_materialization.get("artifact_index_command") or ""
+            ),
+            "materialization_report": str(
+                operator_bundle_outputs.get("bundle_report") or ""
+            ),
+            "claim_boundary": (
+                "Indexes local public-benchmark harness artifacts only; it does not "
+                "fetch, license, redistribute, or approve external benchmark data."
+            ),
+        },
+        "linked_artifacts": {
+            "harness_bundle": harness_bundle_artifact,
+            "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
+            "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT),
+        },
         "source_families": [
             {
                 "family_id": "casf_pdbbind",
@@ -1876,6 +1907,8 @@ def build_source_of_truth(
             "operator_template_artifacts": dict(
                 operator_intake_packet.get("operator_template_artifacts") or {}
             ),
+            "linked_artifacts": linked_operator_artifacts,
+            "operator_bundle_materialization": operator_bundle_materialization,
             "minimum_subset_case_count": operator_intake_packet[
                 "minimum_subset_case_count"
             ],

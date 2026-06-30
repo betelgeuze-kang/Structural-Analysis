@@ -195,12 +195,13 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     assert "evidence_console_scope_status" in labels
     assert "developer_preview_rc_status" in labels
     assert "public_benchmark_source_of_truth" in labels
+    assert "public_benchmark_harness_bundle" in labels
     assert "accuracy_parity_scorecard" in labels
     assert "product_production_ai_checkpoint_readiness" in labels
     assert "goal_readiness_rollup" not in labels
     assert "product_goal_completion_audit" not in labels
     assert "goal_operator_action_board" not in labels
-    assert len(artifacts) == 15
+    assert len(artifacts) == 16
 
     for label, artifact_path, producer_path in artifacts:
         assert isinstance(artifact_path, Path)
@@ -212,6 +213,13 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     )
     assert str(public_benchmark[1]).endswith("public_benchmark_source_of_truth.json")
     assert str(public_benchmark[2]).endswith("build_public_benchmark_source_of_truth.py")
+    harness_bundle = next(
+        entry for entry in artifacts if entry[0] == "public_benchmark_harness_bundle"
+    )
+    assert str(harness_bundle[1]).endswith("public_benchmark_harness_bundle.json")
+    assert str(harness_bundle[2]).endswith(
+        "materialize_public_benchmark_harness_bundle.py"
+    )
 
 
 def test_source_of_truth_gap_classification_keeps_rollups_out_of_leaf_freshness() -> None:
