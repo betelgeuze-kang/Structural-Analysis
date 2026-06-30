@@ -236,7 +236,14 @@ def _lane_row(lane: str, manifest: dict[str, Any], source_evidence: dict[str, An
     manifest_consecutive = _as_int(manifest_lane.get("consecutive_pass_count"))
     source_consecutive = _as_int(source_lane.get("source_consecutive_pass_count"))
     source_credit_pass = source_lane.get("source_release_credit_pass") is True
-    consecutive = source_consecutive if source_credit_pass else 0
+    source_observation_usable = bool(
+        source_evidence.get("present") is True
+        and source_evidence.get("schema_pass") is True
+        and source_evidence.get("freshness_pass") is True
+        and source_evidence.get("threshold_match") is True
+        and source_lane.get("source_lane_present") is True
+    )
+    consecutive = source_consecutive if source_observation_usable else 0
     missing = max(0, threshold - consecutive)
     manifest_threshold_pass = manifest_lane.get("threshold_pass") is True
     threshold_pass = bool(manifest_threshold_pass and source_credit_pass and consecutive >= threshold)
@@ -254,6 +261,7 @@ def _lane_row(lane: str, manifest: dict[str, Any], source_evidence: dict[str, An
         "missing_consecutive_pass_count": missing,
         "local_consecutive_pass_count": _as_int(manifest_lane.get("local_consecutive_pass_count")),
         "github_actions_consecutive_pass_count": source_consecutive,
+        "source_observation_usable": source_observation_usable,
         "github_actions_threshold_pass": source_lane.get("source_threshold_pass") is True,
         "github_actions_workflow_registered": source_lane.get(
             "workflow_registered",
@@ -416,7 +424,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `ci_consecutive_pass_manifest`: `{payload['ci_consecutive_pass_manifest']}`",
         f"- `github_actions_ci_streak_evidence`: `{payload['github_actions_ci_streak_evidence']}`",
         "",
-        "| Lane | Streak | Missing | Source | Workflow Registered | Pass | Owner Action |",
+        "| Lane | Observed Streak | Missing | Source | Workflow Registered | Pass | Owner Action |",
         "|---|---:|---:|---|---|---|---|",
     ]
     for row in payload["lane_rows"]:
