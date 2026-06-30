@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-30T08:23:47.408591+00:00",
+  "generated_at": "2026-06-30T08:35:10.504262+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -110,13 +110,13 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:8fe961201b2bb568847b985c1f820274767399fc2e2a485d3e6eddc9adb903f2",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:a1acb46b30b0c6e77180a82c1f78e2db025f2cdd24af3d823a886b2fe96f5636",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:0ac3b5437b295e216bcd2b4f1c86852372e939f7bb462341d844f353c5e960fd",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:a2ba9705f3911536d5a9e80fe44796040984803831a8e78ed5f5044d47c24478",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:690b594b2bded8cee414c862d289dad91c4117a92be1f67e7c4ed48414d48354",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:4ac129270a848082cb91311a59366e4ee56048b80d34a8026d67107372850cb7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a1e6f15ac162cb60559880e6b0da7b9b125de74445de844500e967404051d8ad",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:7aeaec0b268e513aca54a3cf9226b9888b3015ed41307154296eb8016d38422e",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:e31bdbb136a50b180e5e6785f1db0fe8d640c3cd80459c2cd5dd9714148e1348",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:109fbd7b08b1db3f95a212e343f317d1db44a64f95f7e641be6c302e9404ea86",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -130,7 +130,7 @@
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:0d57c89df5c33d8fba0557d7f8cf421c301ed4bfe754a95b892df3abecaca0ed",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:856c8f6f594f19ceb28cb24fd8fd87c4c008ccf11e9ac9dd87aca35c209f1adc",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:4596e80009243e4db5d48a8b09c2375376936557b8510d13baee494cf6e53f52",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:61f484b101c4f8705ba26d60398a4854b429866ec028ef5fe2ec8bcbf67d29c1",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
@@ -515,7 +515,7 @@
       "summary": {
         "artifact_count": 15,
         "blocker_count": 0,
-        "current_source_commit_sha": "213becea7b1844db4fd0b712e0aea6e34c21e062",
+        "current_source_commit_sha": "d9855ab4c34c3c993a99e387d3dbee7738aa05f8",
         "max_age_days": 30.0,
         "pass_count": 15
       },
@@ -1533,6 +1533,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "7fe01e00d6291b265c74b40ef8b0d70c42f2c5d7",
+  "source_commit_sha": "d9855ab4c34c3c993a99e387d3dbee7738aa05f8",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }
