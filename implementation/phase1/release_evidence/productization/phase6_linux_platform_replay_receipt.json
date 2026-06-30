@@ -195,11 +195,11 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-06-30T13:54:56.554420+00:00",
+  "generated_at": "2026-06-30T13:58:09.987556+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
-    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:01e52e2b7252ce505466d53bb552989948cbe098bc87f7d9ab9a41ddd79b3090"
+    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:1d0d4e426748f38891d376fa75aeee9fde33c6d7a8a6f1d1760b9834deb1bc53"
   },
   "local_dirty_inputs": [],
   "local_dirty_inputs_scope": "isolated_replay_checkout",

@@ -97,7 +97,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T13:54:56.660645+00:00",
+  "generated_at": "2026-06-30T13:58:10.093790+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -130,8 +130,8 @@
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bf203893592e2a9b6425c2e64e29cddf41053a0adc84d1fdae09fc0d40e7423b",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:4d109b7517b4ddf3c745aba5d36f5baec3c9204d7fefa748ebe7d7844e4a8bfd",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:765c4f5aa1c8f141a38171aa225d5e93eec3fc9ac0713a411d9863d26987e8c9",
     "scripts/build_phase6_ux_observation_status.py": "sha256:c3561740aed6a486b4cf666675e23e98d9da6b2cdfdacab97136190ebdd0816f"
   },
   "intake_packet_gate": {
@@ -183,7 +183,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "71cf3fe0d24882750524a01c063987ab8a75a20e",
+  "source_commit_sha": "cde7573e4c67f5e33dce7d06c76a823bae7b6d3e",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=5/5 | browser=True"
 }

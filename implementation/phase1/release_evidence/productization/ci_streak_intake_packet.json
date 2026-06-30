@@ -12,7 +12,7 @@
     "nightly:github_actions_lane_streak_below_threshold",
     "nightly:github_actions_filtered_run_count_below_threshold"
   ],
-  "generated_at": "2026-06-30T13:54:57.593799+00:00",
+  "generated_at": "2026-06-30T13:58:10.968123+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -112,7 +112,7 @@
   "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 0.742,
+    "age_hours": 0.796,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -222,7 +222,7 @@
     "pr_missing_consecutive_pass_count": 30,
     "pr_pull_request_run_source_present": true,
     "pr_source_threshold_pass": false,
-    "source_evidence_age_hours": 0.742,
+    "source_evidence_age_hours": 0.796,
     "source_evidence_freshness_pass": true,
     "source_evidence_generated_at": "2026-06-30T13:10:25.744238+00:00",
     "source_evidence_pass": false,
