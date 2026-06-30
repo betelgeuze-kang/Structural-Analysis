@@ -311,14 +311,14 @@ def build_report(
         "evidence_ref_present_pass": _field_present(observation, "evidence_ref"),
         "evidence_ref_resolvable_pass": bool(evidence_ref_resolution["resolvable"]),
         "evidence_ref_not_self_reference_pass": bool(
-            not _field_present(observation, "evidence_ref")
-            or not evidence_ref_resolution["resolvable"]
-            or not evidence_ref_self_reference
+            _field_present(observation, "evidence_ref")
+            and evidence_ref_resolution["resolvable"]
+            and not evidence_ref_self_reference
         ),
         "evidence_ref_not_template_reference_pass": bool(
-            not _field_present(observation, "evidence_ref")
-            or not evidence_ref_resolution["resolvable"]
-            or not evidence_ref_template_reference
+            _field_present(observation, "evidence_ref")
+            and evidence_ref_resolution["resolvable"]
+            and not evidence_ref_template_reference
         ),
         "approval_decision_pass": decision in ACCEPTED_DECISIONS,
     }
