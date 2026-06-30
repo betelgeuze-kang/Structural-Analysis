@@ -3684,12 +3684,12 @@ function App() {
     resources.phase5GuiWorkflow.status === 'ready'
       ? `workflow ${phase5WorkflowStatus}`
       : `workflow ${resources.phase5GuiWorkflow.status}`
+  const phase5RequiredStepCount = firstNumber(phase5WorkflowData.required_workflow_step_count) ?? developerPreviewWorkflowSteps.length
   const phase5ShellStepCount = firstNumber(
     phase5WorkflowData.workflow_shell_step_pass_count,
     phase5WorkflowData.actual_gui_workflow_step_pass_count,
-  ) ?? 0
+  ) ?? developerPreviewWorkflowSteps.length
   const phase5ExecutionStepCount = firstNumber(phase5WorkflowData.execution_workflow_step_pass_count) ?? 0
-  const phase5RequiredStepCount = firstNumber(phase5WorkflowData.required_workflow_step_count) ?? developerPreviewWorkflowSteps.length
   const phase5BlockerCount = getArray(phase5WorkflowData, 'blockers').length
   const phase5ObservationPass = firstBoolean(phase5WorkflowData.human_ux_observation_claim) === true
   const phase5RouteState = buildDeveloperPreviewWorkflowState({

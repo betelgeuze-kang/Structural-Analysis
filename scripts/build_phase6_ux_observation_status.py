@@ -349,7 +349,7 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
                 task_based_ux_test.get("browser_execution_status", "missing")
             ),
             "task_based_ux_browser_execution_blocker": str(
-                task_based_ux_test.get("execution_blocker", "")
+                task_based_ux_test.get("execution_blocker") or ""
             ),
             "task_based_ux_browser_execution_environment_blocker": bool(
                 browser_execution_environment["environment_blocker"]

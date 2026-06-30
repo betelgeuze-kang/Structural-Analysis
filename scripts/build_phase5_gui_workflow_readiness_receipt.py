@@ -281,7 +281,16 @@ def _task_based_ux_test_contract(
     )
     browser_execution_receipt_attached = bool(browser_execution_receipt)
     browser_execution_passed = bool(browser_execution_receipt.get("contract_pass") is True)
-    blocker_classification = _browser_execution_blocker_classification(browser_execution_receipt)
+    blocker_classification = (
+        {
+            "blocker_category": "",
+            "blocker_reason_code": "",
+            "environment_blocker": False,
+            "blocker_evidence": {},
+        }
+        if browser_execution_passed
+        else _browser_execution_blocker_classification(browser_execution_receipt)
+    )
     environment_execution_blocker = (
         f"{TASK_BASED_UX_ENVIRONMENT_BLOCKER}:"
         f"{blocker_classification['blocker_reason_code']}"
@@ -290,7 +299,7 @@ def _task_based_ux_test_contract(
         and blocker_classification["environment_blocker"] is True
         else None
     )
-    execution_blocker = (
+    execution_blocker = None if browser_execution_passed else (
         "task_based_ux_browser_execution_not_passed"
         if browser_execution_receipt_attached
         else "task_based_ux_browser_execution_receipt_missing"
@@ -814,7 +823,15 @@ def build_phase5_gui_workflow_readiness_receipt(
     intake_step_ids = _workflow_step_ids(intake)
     shell_pass_ids = {str(row["id"]) for row in shell_rows if row["contract_pass"] is True}
     missing_shell_ids = sorted(required_step_ids.difference(shell_pass_ids))
-    execution_pass_ids: set[str] = set()
+    executed_steps = browser_execution_receipt.get("executed_workflow_steps")
+    execution_pass_ids = {
+        str(step_id)
+        for step_id in executed_steps
+        if isinstance(step_id, str)
+    } if (
+        browser_execution_receipt.get("contract_pass") is True
+        and isinstance(executed_steps, list)
+    ) else set()
     missing_execution_ids = sorted(required_step_ids.difference(execution_pass_ids))
     blockers = [
         *[f"gui_workflow_shell_step_not_proven:{step_id}" for step_id in missing_shell_ids],
@@ -889,7 +906,7 @@ def build_phase5_gui_workflow_readiness_receipt(
         "partial_actual_gui_workflow_steps": [],
         "execution_workflow_step_pass_count": len(execution_pass_ids),
         "missing_execution_workflow_steps": missing_execution_ids,
-        "execution_receipt_count": 0,
+        "execution_receipt_count": 1 if browser_execution_receipt.get("contract_pass") is True else 0,
         "task_based_ux_test": task_based_ux_test,
         "task_based_ux_browser_execution_receipt": browser_execution_receipt,
         "handoff_surface": {

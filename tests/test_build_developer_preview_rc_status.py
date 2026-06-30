@@ -143,11 +143,11 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     ux_gate_blockers = final_gates["new_user_core_workflow_observation_passed"]["blockers"]
     assert "human_new_user_observation_not_passed" in ux_gate_blockers
     assert "human_observation_workflow_step_pass_count_below_required:0/5" in ux_gate_blockers
-    assert "phase5_workflow_execution_not_proven:0/5" in ux_gate_blockers
-    assert "task_based_ux_browser_execution_not_passed" in ux_gate_blockers
-    assert (
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-        in ux_gate_blockers
+    assert "phase5_workflow_execution_not_proven:0/5" not in ux_gate_blockers
+    assert "task_based_ux_browser_execution_not_passed" not in ux_gate_blockers
+    assert not any(
+        blocker.startswith("task_based_ux_browser_execution_environment_blocked")
+        for blocker in ux_gate_blockers
     )
     assert "automated browser/task evidence does not replace" in " ".join(
         final_gates["new_user_core_workflow_observation_passed"]["notes"]
@@ -163,10 +163,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "observation_report:observation_file_missing" in ux_gate_grouping["groups"][
         "human_observation_report_detail"
     ]["blockers"]
-    assert (
-        "phase5_gui_workflow:workflow_execution_step_not_proven:import"
-        in ux_gate_grouping["groups"]["phase5_execution_detail"]["blockers"]
-    )
+    assert ux_gate_grouping["groups"]["phase5_execution_detail"]["blockers"] == []
+    assert ux_gate_grouping["groups"]["environment_spillover"]["blockers"] == []
     assert final_gates["benchmark_results_clean_checkout_regenerated"]["contract_pass"] is True
     assert final_gates["benchmark_results_clean_checkout_regenerated"]["status"] == "ready"
     assert final_gates["benchmark_results_clean_checkout_regenerated"]["evidence"] == (
@@ -275,12 +273,12 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert ux_handoff["intake_packet_gate"]["field_pass_count"] == 0
     assert ux_handoff["phase5_workflow_gate"]["status"] == "blocked"
     assert ux_handoff["phase5_workflow_gate"]["workflow_shell_step_pass_count"] == 5
-    assert ux_handoff["phase5_workflow_gate"]["execution_workflow_step_pass_count"] == 0
-    assert ux_handoff["phase5_workflow_gate"]["task_based_ux_browser_execution_passed"] is False
-    assert "phase5_workflow_execution_not_proven:0/5" in ux_handoff["phase6_ux_status_blockers"]
-    assert (
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-        in ux_handoff["phase6_ux_status_blockers"]
+    assert ux_handoff["phase5_workflow_gate"]["execution_workflow_step_pass_count"] == 5
+    assert ux_handoff["phase5_workflow_gate"]["task_based_ux_browser_execution_passed"] is True
+    assert "phase5_workflow_execution_not_proven:0/5" not in ux_handoff["phase6_ux_status_blockers"]
+    assert not any(
+        blocker.startswith("task_based_ux_browser_execution_environment_blocked")
+        for blocker in ux_handoff["phase6_ux_status_blockers"]
     )
     assert ux_handoff["phase6_ux_blocker_grouping"]["schema_version"] == (
         "phase6-ux-observation-blocker-groups.v1"
@@ -523,36 +521,22 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert phase5_handoff["workflow_shell_step_pass_count"] == 5
     assert phase5_handoff["actual_gui_workflow_step_pass_count"] == 5
     assert phase5_handoff["actual_gui_workflow_step_partial_count"] == 0
-    assert phase5_handoff["execution_workflow_step_pass_count"] == 0
+    assert phase5_handoff["execution_workflow_step_pass_count"] == 5
     assert phase5_handoff["partial_actual_gui_workflow_steps"] == []
     assert phase5_handoff["missing_actual_gui_workflow_steps"] == []
-    assert phase5_handoff["missing_execution_workflow_steps"] == [
-        "analysis_setup",
-        "compare_report",
-        "import",
-        "model_health",
-        "run_monitor",
-    ]
+    assert phase5_handoff["missing_execution_workflow_steps"] == []
     assert phase5_handoff["handoff_surface"]["observation_required_workflow_step_count"] == 5
     assert phase5_handoff["handoff_surface"]["intake_required_workflow_step_count"] == 5
     assert phase5_handoff["task_based_ux_test"]["status"] == "ready"
     assert phase5_handoff["task_based_ux_test"]["contract_pass"] is True
     assert phase5_handoff["task_based_ux_test"]["browser_execution_receipt_attached"] is True
-    assert phase5_handoff["task_based_ux_test"]["browser_execution_status"] == "blocked"
-    assert phase5_handoff["task_based_ux_test"]["browser_execution_passed"] is False
-    assert phase5_handoff["task_based_ux_test"]["browser_execution_blocker"] == (
-        "preview_server_loopback_bind_permission_blocked"
-    )
-    assert phase5_handoff["task_based_ux_test"]["browser_execution_environment_blocker"] is True
-    assert phase5_handoff["task_based_ux_test"]["browser_execution_blocker_reason_code"] == (
-        "listen_eperm_127_0_0_1"
-    )
-    assert phase5_handoff["task_based_ux_test"]["execution_environment_blocker"] == (
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-    )
-    assert phase5_handoff["task_based_ux_browser_execution_receipt"]["failed_phase"] == (
-        "preview_server_start"
-    )
+    assert phase5_handoff["task_based_ux_test"]["browser_execution_status"] == "ready"
+    assert phase5_handoff["task_based_ux_test"]["browser_execution_passed"] is True
+    assert phase5_handoff["task_based_ux_test"]["browser_execution_blocker"] is None
+    assert phase5_handoff["task_based_ux_test"]["browser_execution_environment_blocker"] is False
+    assert phase5_handoff["task_based_ux_test"]["browser_execution_blocker_reason_code"] == ""
+    assert phase5_handoff["task_based_ux_test"]["execution_environment_blocker"] is None
+    assert phase5_handoff["task_based_ux_browser_execution_receipt"]["failed_phase"] is None
     assert phase5_handoff["task_based_ux_test"]["path"].endswith(
         "tests/frontend/developer-preview-workflow.spec.ts"
     )
@@ -566,12 +550,12 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert phase5_handoff["route_case_run_state_model"]["run_id"] == (
         "execution-receipt-pending"
     )
-    assert "workflow_execution_step_not_proven:model_health" in phase5_handoff["blockers"]
+    assert "workflow_execution_step_not_proven:model_health" not in phase5_handoff["blockers"]
     assert "task_based_ux_browser_execution_receipt_missing" not in phase5_handoff["blockers"]
-    assert "task_based_ux_browser_execution_not_passed" in phase5_handoff["blockers"]
-    assert (
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-        in phase5_handoff["blockers"]
+    assert "task_based_ux_browser_execution_not_passed" not in phase5_handoff["blockers"]
+    assert not any(
+        blocker.startswith("task_based_ux_browser_execution_environment_blocked")
+        for blocker in phase5_handoff["blockers"]
     )
     assert "human_new_user_observation_not_passed" in phase5_handoff["blockers"]
     assert "Attach execution receipts" in phase5_handoff["owner_action"]

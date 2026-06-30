@@ -12,6 +12,8 @@ import subprocess
 import sys
 import time
 from typing import Any
+from urllib.error import URLError
+from urllib.request import urlopen
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = Path(__file__).resolve().parents[1]
@@ -71,6 +73,47 @@ def _clip_output(value: str, *, limit: int = 2400) -> str:
 
 def _completed_output(result: subprocess.CompletedProcess[str]) -> str:
     return _clip_output((result.stdout or "") + (result.stderr or ""))
+
+
+def _wait_for_preview(
+    preview: subprocess.Popen[str],
+    *,
+    timeout_seconds: float = 20.0,
+) -> dict[str, Any]:
+    started_at = time.monotonic()
+    last_error = ""
+    while time.monotonic() - started_at < timeout_seconds:
+        if preview.poll() is not None:
+            output = preview.stdout.read() if preview.stdout is not None else ""
+            return {
+                "ready": False,
+                "exit_code": preview.returncode,
+                "elapsed_seconds": round(time.monotonic() - started_at, 3),
+                "output_excerpt": _clip_output(output),
+                "last_error": last_error,
+            }
+        try:
+            with urlopen(BASE_URL, timeout=1.0) as response:
+                status_code = int(response.getcode())
+            if 200 <= status_code < 500:
+                return {
+                    "ready": True,
+                    "exit_code": None,
+                    "elapsed_seconds": round(time.monotonic() - started_at, 3),
+                    "http_status": status_code,
+                    "last_error": "",
+                }
+            last_error = f"http_status_{status_code}"
+        except (OSError, URLError) as exc:
+            last_error = f"{exc.__class__.__name__}: {exc}"
+        time.sleep(0.25)
+    return {
+        "ready": False,
+        "exit_code": None,
+        "elapsed_seconds": round(time.monotonic() - started_at, 3),
+        "output_excerpt": "",
+        "last_error": last_error or "preview_server_readiness_timeout",
+    }
 
 
 def _preview_start_blocker(output: str) -> dict[str, Any]:
@@ -216,17 +259,25 @@ def run_phase5_task_based_ux_browser_smoke(
         stderr=subprocess.STDOUT,
         text=True,
     )
-    time.sleep(2)
-    preview_output = ""
-    if preview.poll() is not None:
-        if preview.stdout is not None:
-            preview_output = preview.stdout.read()
+    preview_ready = _wait_for_preview(preview)
+    commands["preview"] = {
+        "argv": PREVIEW_CMD,
+        "base_url": BASE_URL,
+        **preview_ready,
+    }
+    if not preview_ready["ready"]:
+        preview_output = str(preview_ready.get("output_excerpt") or "")
+        if preview.poll() is None:
+            return _blocked_payload(
+                repo_root=repo_root,
+                source_commit_sha=source_commit_sha,
+                phase="preview_server_ready",
+                blocker="preview_server_readiness_timeout",
+                blocker_category="preview_server_readiness_failure",
+                blocker_reason_code="preview_server_not_reachable",
+                commands=commands,
+            )
         preview_blocker = _preview_start_blocker(preview_output)
-        commands["preview"] = {
-            "argv": PREVIEW_CMD,
-            "exit_code": preview.returncode,
-            "output_excerpt": _clip_output(preview_output),
-        }
         return _blocked_payload(
             repo_root=repo_root,
             source_commit_sha=source_commit_sha,

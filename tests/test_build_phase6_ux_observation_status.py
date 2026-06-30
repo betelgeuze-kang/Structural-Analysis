@@ -40,19 +40,17 @@ def test_phase6_ux_observation_status_blocks_without_human_and_execution_evidenc
     assert payload["intake_packet_gate"]["field_pass_count"] == 0
     assert payload["phase5_workflow_gate"]["status"] == "blocked"
     assert payload["phase5_workflow_gate"]["workflow_shell_step_pass_count"] == 5
-    assert payload["phase5_workflow_gate"]["execution_workflow_step_pass_count"] == 0
-    assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_passed"] is False
-    assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_environment_blocker"] is True
-    assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_blocker_reason_code"] == (
-        "listen_eperm_127_0_0_1"
-    )
+    assert payload["phase5_workflow_gate"]["execution_workflow_step_pass_count"] == 5
+    assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_passed"] is True
+    assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_environment_blocker"] is False
+    assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_blocker_reason_code"] == ""
     assert "human_new_user_observation_not_passed" in payload["blockers"]
     assert "human_observation_workflow_step_pass_count_below_required:0/5" in payload["blockers"]
-    assert "phase5_workflow_execution_not_proven:0/5" in payload["blockers"]
-    assert "task_based_ux_browser_execution_not_passed" in payload["blockers"]
-    assert (
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-        in payload["blockers"]
+    assert "phase5_workflow_execution_not_proven:0/5" not in payload["blockers"]
+    assert "task_based_ux_browser_execution_not_passed" not in payload["blockers"]
+    assert not any(
+        blocker.startswith("task_based_ux_browser_execution_environment_blocked")
+        for blocker in payload["blockers"]
     )
     assert "observation_report:observation_file_missing" in payload["blockers"]
     grouping = payload["blocker_grouping_metadata"]
@@ -72,14 +70,8 @@ def test_phase6_ux_observation_status_blocks_without_human_and_execution_evidenc
     assert "observation_report:observation_file_missing" in grouping["groups"][
         "human_observation_report_detail"
     ]["blockers"]
-    assert (
-        "phase5_gui_workflow:workflow_execution_step_not_proven:import"
-        in grouping["groups"]["phase5_execution_detail"]["blockers"]
-    )
-    assert (
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-        in grouping["groups"]["environment_spillover"]["blockers"]
-    )
+    assert grouping["groups"]["phase5_execution_detail"]["blockers"] == []
+    assert grouping["groups"]["environment_spillover"]["blockers"] == []
     assert "phase5_gui_workflow:human_new_user_observation_not_passed" in grouping[
         "groups"
     ]["duplicate_source_detail"]["blockers"]

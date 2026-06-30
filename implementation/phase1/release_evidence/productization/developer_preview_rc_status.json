@@ -367,7 +367,7 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 27,
+        "blocker_count": 17,
         "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
         "groups": {
           "duplicate_source_detail": {
@@ -379,11 +379,8 @@
             "scope": "duplicate_source_detail"
           },
           "environment_spillover": {
-            "blocker_count": 2,
-            "blockers": [
-              "phase5_gui_workflow:task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
-              "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Local browser execution environment blockers that prevent rehearsal evidence but do not by themselves close or fail the human observation.",
             "scope": "local_environment_blocker"
           },
@@ -424,24 +421,15 @@
             "scope": "owner_handoff_not_gate_closure"
           },
           "phase5_execution_detail": {
-            "blocker_count": 5,
-            "blockers": [
-              "phase5_gui_workflow:workflow_execution_step_not_proven:analysis_setup",
-              "phase5_gui_workflow:workflow_execution_step_not_proven:compare_report",
-              "phase5_gui_workflow:workflow_execution_step_not_proven:import",
-              "phase5_gui_workflow:workflow_execution_step_not_proven:model_health",
-              "phase5_gui_workflow:workflow_execution_step_not_proven:run_monitor"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Per-step GUI workflow execution blockers from the Phase 5 receipt.",
             "scope": "phase5_execution_step_detail"
           },
           "phase5_execution_root": {
-            "blocker_count": 4,
+            "blocker_count": 1,
             "blockers": [
-              "phase5_gui_workflow:task_based_ux_browser_execution_not_passed",
-              "phase5_gui_workflow_readiness_not_passed",
-              "phase5_workflow_execution_not_proven:0/5",
-              "task_based_ux_browser_execution_not_passed"
+              "phase5_gui_workflow_readiness_not_passed"
             ],
             "description": "Aggregate GUI execution and browser-test pass/fail blockers for the five-step workflow.",
             "scope": "phase5_execution_aggregate"
@@ -467,17 +455,7 @@
         "observation_report:required_workflow_steps_missing",
         "observation_report:workflow_steps_missing",
         "phase5_gui_workflow:human_new_user_observation_not_passed",
-        "phase5_gui_workflow:task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
-        "phase5_gui_workflow:task_based_ux_browser_execution_not_passed",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:analysis_setup",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:compare_report",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:import",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:model_health",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:run_monitor",
         "phase5_gui_workflow_readiness_not_passed",
-        "phase5_workflow_execution_not_proven:0/5",
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
-        "task_based_ux_browser_execution_not_passed",
         "ux_observation_intake_packet_not_passed"
       ],
       "contract_pass": false,
@@ -559,11 +537,11 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T02:26:51.015428+00:00",
+  "generated_at": "2026-06-30T02:44:05.892391+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:c134483836debe1269fe40b7fe60d695c6c5704b0c7f65a1ad2bbbc4f393bd5c",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:2d99b2ccfef43b95c9c248720cd4527275cec919c5a89a75c9db3eb5fd9f4a1c",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:2adfdafb37a370c1ef02e1284f5f838b2ccc20aae7a1b76cca9f5f6e3887c4bd",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:14caf83c2377d2e0e3b284660ea6e5f64ca3888793fe0aa7a4b042ef14d9c910",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:c6ed1c5676c3cb5195126432e622edefab4baf848e3ebcb5f3fbe5ced4d9092d",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:adc9a65f5f085a3aba3ed888d561c906a1eb80129661a97fd092348a46d4f671",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:46ef82c27a866ca9143c0e0be09b3ded9c9795e9c1cb6451852d0780d8479dd5",
@@ -578,12 +556,12 @@
     "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:40b81f70d380a18935ecbabf350248f293149231d99e0e6b735cb999f1829719",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:ea8d838223aeac09c1379cec1cc2fbd7eb4e9c2eb25eaa4051d0eccabf9c48cd",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
-    "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:17e35a1dd5fdbe4adf308dc21f3bef47a7a7903d6a3f203e64ebbb805ca24016",
+    "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:38d1f5e06b8d808ce8af5d4fbd189ac134de972c9b0565834e8cc9a3bb89b5a8",
     "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:65dbe88321949aa98153ef9d54cf5752020f24255a6d5f31604c528c31fe2ed2",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:650baf0ab3cc97b83af694043704442c15bf6fea9f629af84c2c91549303e5f5",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:09666d378c3a47e05f950efa6fa54c539c8298be0ef711d03a58a2de4da6dbb6",
-    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:5084026e9afead2793d133534b2809b75f2a940d34ab02f626b6ace37430a3ba",
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:d134942ef79fbadd747d9a7b0754e3932d93526f2db5181056218d8ca369260f",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:d3753786b625c64cff6e6d9306f5e428cff3e71bbab6b62cf76e6242df6b4069",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
@@ -1135,13 +1113,14 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 5,
+    "developer_preview_blocker_count": 6,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "human_ux::observation_file_missing"
+      "human_ux::observation_file_missing",
+      "stale_or_inconsistent:worktree_dirty"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -2085,17 +2064,10 @@
       "actual_gui_workflow_step_partial_count": 0,
       "actual_gui_workflow_step_pass_count": 5,
       "blockers": [
-        "human_new_user_observation_not_passed",
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
-        "task_based_ux_browser_execution_not_passed",
-        "workflow_execution_step_not_proven:analysis_setup",
-        "workflow_execution_step_not_proven:compare_report",
-        "workflow_execution_step_not_proven:import",
-        "workflow_execution_step_not_proven:model_health",
-        "workflow_execution_step_not_proven:run_monitor"
+        "human_new_user_observation_not_passed"
       ],
       "claim_boundary": "This receipt separates visible GUI workflow shell coverage from execution receipts, task-based browser smoke tests, UX observation templates, and owner handoff packets. A rendered five-step shell or a test artifact does not prove task execution, human new-user success, Phase 5 closure, or Developer Preview RC readiness.",
-      "execution_workflow_step_pass_count": 0,
+      "execution_workflow_step_pass_count": 5,
       "gui_workflow_readiness_receipt": "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json",
       "handoff_surface": {
         "intake_missing_required_workflow_steps": [],
@@ -2107,13 +2079,7 @@
         "observation_required_workflow_step_count": 5
       },
       "missing_actual_gui_workflow_steps": [],
-      "missing_execution_workflow_steps": [
-        "analysis_setup",
-        "compare_report",
-        "import",
-        "model_health",
-        "run_monitor"
-      ],
+      "missing_execution_workflow_steps": [],
       "owner_action": "Attach execution receipts for the five-step GUI workflow and a passing human new-user observation record for that exact workflow before promoting Phase 5 or Developer Preview RC readiness.",
       "partial_actual_gui_workflow_steps": [],
       "required_workflow_step_count": 5,
@@ -2143,23 +2109,9 @@
       },
       "task_based_ux_browser_execution_receipt": {
         "base_url": "http://127.0.0.1:4173",
-        "blocked_workflow_steps": [
-          "import",
-          "model_health",
-          "analysis_setup",
-          "run_monitor",
-          "compare_report"
-        ],
-        "blocker": "preview_server_loopback_bind_permission_blocked",
-        "blocker_category": "environment_loopback_bind_permission",
-        "blocker_evidence": {
-          "address": "127.0.0.1",
-          "code": "EPERM",
-          "port": 4173,
-          "syscall": "listen"
-        },
-        "blocker_reason_code": "listen_eperm_127_0_0_1",
-        "browser_execution_passed": false,
+        "blocked_workflow_steps": [],
+        "blocker": null,
+        "browser_execution_passed": true,
         "claim_boundary": "This receipt records an actual local attempt to run the Phase 5 task-based Playwright browser smoke. It proves browser execution only when the Playwright command exits 0 against a served app.",
         "claim_boundary_version": "developer-preview-core-api-v1",
         "commands": {
@@ -2170,7 +2122,17 @@
               "build"
             ],
             "exit_code": 0,
-            "output_excerpt": "\n> structural-optimization-workbench@1.0.0 build\n> tsc --noEmit && vite build\n\nvite v8.0.16 building client environment for production...\n\u001b[2K\ntransforming...✓ 19 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/developerPreviewWorkflow.worker-DYkMGago.js    0.43 kB\ndist/index.html                                            1.00 kB │ gzip:  0.57 kB\ndist/assets/index-CMNzzxcX.css                            30.62 kB │ gzip:  5.72 kB\ndist/assets/index-CKuiw8XN.js                            283.22 kB │ gzip: 76.73 kB\n\n✓ built in 117ms\n"
+            "output_excerpt": "\n> structural-optimization-workbench@1.0.0 build\n> tsc --noEmit && vite build\n\nvite v8.0.16 building client environment for production...\n\u001b[2K\ntransforming...✓ 53 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/developerPreviewWorkflow.worker-DYkMGago.js    0.43 kB\ndist/index.html                                            1.00 kB │ gzip:  0.57 kB\ndist/assets/index-BoRvJG_V.css                            52.33 kB │ gzip:  9.46 kB\ndist/assets/index-BR69z-hp.js                            372.41 kB │ gzip: 97.12 kB\n\n✓ built in 116ms\n"
+          },
+          "playwright": {
+            "argv": [
+              "npx",
+              "playwright",
+              "test",
+              "tests/frontend/developer-preview-workflow.spec.ts"
+            ],
+            "exit_code": 0,
+            "output_excerpt": "\nRunning 1 test using 1 worker\n\n  ✓  1 tests/frontend/developer-preview-workflow.spec.ts:13:1 › Developer Preview workflow shell exposes five task steps without readiness promotion (2.7s)\n\n  1 passed (6.3s)\n"
           },
           "preview": {
             "argv": [
@@ -2183,25 +2145,34 @@
               "--port",
               "4173"
             ],
-            "exit_code": 1,
-            "output_excerpt": "\n> structural-optimization-workbench@1.0.0 preview\n> vite preview --host 127.0.0.1 --port 4173\n\nerror when starting preview server:\nError: listen EPERM: operation not permitted 127.0.0.1:4173\n    at Server.setupListenHandle [as _listen2] (node:net:1886:21)\n    at listenInCluster (node:net:1965:12)\n    at doListen (node:net:2139:7)\n    at process.processTicksAndRejections (node:internal/process/task_queues:83:21) {\n  code: 'EPERM',\n  errno: -1,\n  syscall: 'listen',\n  address: '127.0.0.1',\n  port: 4173\n}\n"
+            "base_url": "http://127.0.0.1:4173",
+            "elapsed_seconds": 0.507,
+            "exit_code": null,
+            "http_status": 200,
+            "last_error": "",
+            "ready": true
           }
         },
-        "contract_pass": false,
+        "contract_pass": true,
         "engine_version": "1.0.0",
-        "environment_blocker": true,
-        "executed_workflow_steps": [],
-        "failed_phase": "preview_server_start",
-        "generated_at": "2026-06-23T15:52:14.057211+00:00",
+        "executed_workflow_steps": [
+          "import",
+          "model_health",
+          "analysis_setup",
+          "run_monitor",
+          "compare_report"
+        ],
+        "failed_phase": null,
+        "generated_at": "2026-06-30T02:43:48.099058+00:00",
         "input_checksums": {
-          "package.json": "sha256:ea041fe994a1088c476c8c1ecd459af578b19d19d40aca6307c6dd4471b31275",
-          "scripts/run_phase5_task_based_ux_browser_smoke.py": "sha256:1dfdcffb5e47b96c817a52651daeae10b6994cf2d711e9b7f6654dafbf6c1ab9",
-          "src/App.tsx": "sha256:a7dbc97ef43c67e16df81332abda9e0988308f7e4936be8e829189839af5457d",
+          "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
+          "scripts/run_phase5_task_based_ux_browser_smoke.py": "sha256:7e2caac1211c3d8c17e18694d3132a9d24bbca3b431b64e7ce06ba3f6975f301",
+          "src/App.tsx": "sha256:d97eec615c57de2fd4f161bdc09caf773266f9d4df9a677864c0c70631fb4df0",
           "src/workbench/DeveloperPreviewWorkflowPanel.tsx": "sha256:95bec3c0caaff2f23cdae2c4679eaac1a1a730b87a0fc53cafda320879b10c83",
           "src/workbench/developerPreviewWorkflow.ts": "sha256:ce80e7fecdf8b7479fd19d78fa16501a318a98da35f068c09b9a1a5894831f96",
           "src/workbench/developerPreviewWorkflow.worker.ts": "sha256:bb8a425a4c4239e8a21b1db459f058699390fd5cf8922e2a16259a05939de065",
           "src/workbench/developerPreviewWorkflowState.ts": "sha256:99ad24d06f523d8c7b9586b48ea39b15ccbd6be9189a2dab6451df43a67bf17f",
-          "tests/frontend/developer-preview-workflow.spec.ts": "sha256:94f92ea6cfb5f2a529ebe915d7014f42a814f5dc78408e107f65154776bd9401"
+          "tests/frontend/developer-preview-workflow.spec.ts": "sha256:9f24b6a9f1714e775ca052718b2d4cb1b1b984fc6e53b352719a980a49f22039"
         },
         "required_workflow_steps": [
           "import",
@@ -2211,28 +2182,23 @@
           "compare_report"
         ],
         "schema_version": "phase5-task-based-ux-browser-execution.v1",
-        "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
-        "status": "blocked",
-        "summary_line": "Phase 5 task-based UX browser execution: BLOCKED | phase=preview_server_start | blocker=preview_server_loopback_bind_permission_blocked",
+        "source_commit_sha": "bf31c6ff743063995a958ecff3e6db72b6190b85",
+        "status": "ready",
+        "summary_line": "Phase 5 task-based UX browser execution: READY | executed=5/5",
         "test_path": "tests/frontend/developer-preview-workflow.spec.ts"
       },
       "task_based_ux_test": {
         "blocks_readiness_promotion": true,
-        "browser_execution_blocker": "preview_server_loopback_bind_permission_blocked",
-        "browser_execution_blocker_category": "environment_loopback_bind_permission",
-        "browser_execution_blocker_evidence": {
-          "address": "127.0.0.1",
-          "code": "EPERM",
-          "port": 4173,
-          "syscall": "listen"
-        },
-        "browser_execution_blocker_reason_code": "listen_eperm_127_0_0_1",
-        "browser_execution_environment_blocker": true,
-        "browser_execution_failed_phase": "preview_server_start",
-        "browser_execution_passed": false,
+        "browser_execution_blocker": null,
+        "browser_execution_blocker_category": "",
+        "browser_execution_blocker_evidence": {},
+        "browser_execution_blocker_reason_code": "",
+        "browser_execution_environment_blocker": false,
+        "browser_execution_failed_phase": null,
+        "browser_execution_passed": true,
         "browser_execution_receipt": "implementation/phase1/release_evidence/productization/phase5_task_based_ux_browser_execution_receipt.json",
         "browser_execution_receipt_attached": true,
-        "browser_execution_status": "blocked",
+        "browser_execution_status": "ready",
         "claim_boundary": "The Playwright task smoke is a runnable test artifact. It does not prove the UX final gate until a browser execution receipt passes in an environment that can launch a browser and serve/open the app.",
         "contract_pass": true,
         "covered_labels": [
@@ -2249,8 +2215,8 @@
           "model_health",
           "run_monitor"
         ],
-        "execution_blocker": "task_based_ux_browser_execution_not_passed",
-        "execution_environment_blocker": "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
+        "execution_blocker": null,
+        "execution_environment_blocker": null,
         "missing_step_ids": [],
         "path": "tests/frontend/developer-preview-workflow.spec.ts",
         "required_step_ids": [
@@ -2332,37 +2298,24 @@
       "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
       "phase5_workflow_gate": {
         "blockers": [
-          "human_new_user_observation_not_passed",
-          "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
-          "task_based_ux_browser_execution_not_passed",
-          "workflow_execution_step_not_proven:analysis_setup",
-          "workflow_execution_step_not_proven:compare_report",
-          "workflow_execution_step_not_proven:import",
-          "workflow_execution_step_not_proven:model_health",
-          "workflow_execution_step_not_proven:run_monitor"
+          "human_new_user_observation_not_passed"
         ],
         "contract_pass": false,
-        "execution_workflow_step_pass_count": 0,
-        "missing_execution_workflow_steps": [
-          "analysis_setup",
-          "compare_report",
-          "import",
-          "model_health",
-          "run_monitor"
-        ],
+        "execution_workflow_step_pass_count": 5,
+        "missing_execution_workflow_steps": [],
         "receipt": "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json",
         "required_workflow_step_count": 5,
         "status": "blocked",
-        "task_based_ux_browser_execution_blocker": "task_based_ux_browser_execution_not_passed",
-        "task_based_ux_browser_execution_blocker_reason_code": "listen_eperm_127_0_0_1",
-        "task_based_ux_browser_execution_environment_blocker": true,
-        "task_based_ux_browser_execution_environment_detail": "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
-        "task_based_ux_browser_execution_passed": false,
-        "task_based_ux_browser_execution_status": "blocked",
+        "task_based_ux_browser_execution_blocker": "",
+        "task_based_ux_browser_execution_blocker_reason_code": "",
+        "task_based_ux_browser_execution_environment_blocker": false,
+        "task_based_ux_browser_execution_environment_detail": "",
+        "task_based_ux_browser_execution_passed": true,
+        "task_based_ux_browser_execution_status": "ready",
         "workflow_shell_step_pass_count": 5
       },
       "phase6_ux_blocker_grouping": {
-        "blocker_count": 27,
+        "blocker_count": 17,
         "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
         "groups": {
           "duplicate_source_detail": {
@@ -2374,11 +2327,8 @@
             "scope": "duplicate_source_detail"
           },
           "environment_spillover": {
-            "blocker_count": 2,
-            "blockers": [
-              "phase5_gui_workflow:task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
-              "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Local browser execution environment blockers that prevent rehearsal evidence but do not by themselves close or fail the human observation.",
             "scope": "local_environment_blocker"
           },
@@ -2419,24 +2369,15 @@
             "scope": "owner_handoff_not_gate_closure"
           },
           "phase5_execution_detail": {
-            "blocker_count": 5,
-            "blockers": [
-              "phase5_gui_workflow:workflow_execution_step_not_proven:analysis_setup",
-              "phase5_gui_workflow:workflow_execution_step_not_proven:compare_report",
-              "phase5_gui_workflow:workflow_execution_step_not_proven:import",
-              "phase5_gui_workflow:workflow_execution_step_not_proven:model_health",
-              "phase5_gui_workflow:workflow_execution_step_not_proven:run_monitor"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Per-step GUI workflow execution blockers from the Phase 5 receipt.",
             "scope": "phase5_execution_step_detail"
           },
           "phase5_execution_root": {
-            "blocker_count": 4,
+            "blocker_count": 1,
             "blockers": [
-              "phase5_gui_workflow:task_based_ux_browser_execution_not_passed",
-              "phase5_gui_workflow_readiness_not_passed",
-              "phase5_workflow_execution_not_proven:0/5",
-              "task_based_ux_browser_execution_not_passed"
+              "phase5_gui_workflow_readiness_not_passed"
             ],
             "description": "Aggregate GUI execution and browser-test pass/fail blockers for the five-step workflow.",
             "scope": "phase5_execution_aggregate"
@@ -2462,17 +2403,7 @@
         "observation_report:required_workflow_steps_missing",
         "observation_report:workflow_steps_missing",
         "phase5_gui_workflow:human_new_user_observation_not_passed",
-        "phase5_gui_workflow:task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
-        "phase5_gui_workflow:task_based_ux_browser_execution_not_passed",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:analysis_setup",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:compare_report",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:import",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:model_health",
-        "phase5_gui_workflow:workflow_execution_step_not_proven:run_monitor",
         "phase5_gui_workflow_readiness_not_passed",
-        "phase5_workflow_execution_not_proven:0/5",
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
-        "task_based_ux_browser_execution_not_passed",
         "ux_observation_intake_packet_not_passed"
       ],
       "report_blockers": [
@@ -2526,6 +2457,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "8b8bb2bb41fd2477f05dbd5efd4fb8c05cd7879e",
+  "source_commit_sha": "bf31c6ff743063995a958ecff3e6db72b6190b85",
   "status": "blocked"
 }

@@ -20,7 +20,7 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def test_phase5_gui_workflow_readiness_blocks_without_execution_or_human_observation() -> None:
+def test_phase5_gui_workflow_readiness_blocks_without_human_observation() -> None:
     payload = module.build_phase5_gui_workflow_readiness_receipt(repo_root=REPO_ROOT)
 
     assert payload["schema_version"] == "phase5-gui-workflow-readiness-receipt.v1"
@@ -35,8 +35,8 @@ def test_phase5_gui_workflow_readiness_blocks_without_execution_or_human_observa
     assert payload["workflow_shell_step_pass_count"] == 5
     assert payload["actual_gui_workflow_step_pass_count"] == 5
     assert payload["actual_gui_workflow_step_partial_count"] == 0
-    assert payload["execution_workflow_step_pass_count"] == 0
-    assert payload["execution_receipt_count"] == 0
+    assert payload["execution_workflow_step_pass_count"] == 5
+    assert payload["execution_receipt_count"] == 1
     assert payload["task_based_ux_test"]["status"] == "ready"
     assert payload["task_based_ux_test"]["contract_pass"] is True
     assert payload["task_based_ux_test"]["path"] == "tests/frontend/developer-preview-workflow.spec.ts"
@@ -45,36 +45,29 @@ def test_phase5_gui_workflow_readiness_blocks_without_execution_or_human_observa
         "phase5_task_based_ux_browser_execution_receipt.json"
     )
     assert payload["task_based_ux_test"]["browser_execution_receipt_attached"] is True
-    assert payload["task_based_ux_test"]["browser_execution_status"] == "blocked"
-    assert payload["task_based_ux_test"]["browser_execution_passed"] is False
-    assert payload["task_based_ux_test"]["browser_execution_blocker"] == (
-        "preview_server_loopback_bind_permission_blocked"
-    )
-    assert payload["task_based_ux_test"]["browser_execution_failed_phase"] == "preview_server_start"
-    assert payload["task_based_ux_test"]["browser_execution_environment_blocker"] is True
-    assert payload["task_based_ux_test"]["browser_execution_blocker_reason_code"] == (
-        "listen_eperm_127_0_0_1"
-    )
-    assert payload["task_based_ux_test"]["execution_environment_blocker"] == (
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-    )
+    assert payload["task_based_ux_test"]["browser_execution_status"] == "ready"
+    assert payload["task_based_ux_test"]["browser_execution_passed"] is True
+    assert payload["task_based_ux_test"]["browser_execution_blocker"] is None
+    assert payload["task_based_ux_test"]["browser_execution_failed_phase"] is None
+    assert payload["task_based_ux_test"]["browser_execution_environment_blocker"] is False
+    assert payload["task_based_ux_test"]["browser_execution_blocker_reason_code"] == ""
+    assert payload["task_based_ux_test"]["execution_environment_blocker"] is None
+    assert payload["task_based_ux_test"]["execution_blocker"] is None
     assert payload["task_based_ux_test"]["missing_step_ids"] == []
     assert payload["task_based_ux_test"]["blocks_readiness_promotion"] is True
-    assert payload["task_based_ux_browser_execution_receipt"]["status"] == "blocked"
-    assert payload["task_based_ux_browser_execution_receipt"]["contract_pass"] is False
-    assert payload["task_based_ux_browser_execution_receipt"]["failed_phase"] == "preview_server_start"
-    assert payload["task_based_ux_browser_execution_receipt"]["blocker"] == (
-        "preview_server_loopback_bind_permission_blocked"
-    )
-    assert payload["task_based_ux_browser_execution_receipt"]["browser_execution_passed"] is False
-    assert payload["task_based_ux_browser_execution_receipt"]["executed_workflow_steps"] == []
-    assert payload["task_based_ux_browser_execution_receipt"]["blocked_workflow_steps"] == [
+    assert payload["task_based_ux_browser_execution_receipt"]["status"] == "ready"
+    assert payload["task_based_ux_browser_execution_receipt"]["contract_pass"] is True
+    assert payload["task_based_ux_browser_execution_receipt"]["failed_phase"] is None
+    assert payload["task_based_ux_browser_execution_receipt"]["blocker"] is None
+    assert payload["task_based_ux_browser_execution_receipt"]["browser_execution_passed"] is True
+    assert payload["task_based_ux_browser_execution_receipt"]["executed_workflow_steps"] == [
         "import",
         "model_health",
         "analysis_setup",
         "run_monitor",
         "compare_report",
     ]
+    assert payload["task_based_ux_browser_execution_receipt"]["blocked_workflow_steps"] == []
     assert payload["route_case_run_state_model"]["status"] == "ready"
     assert payload["route_case_run_state_model"]["contract_pass"] is True
     assert payload["route_case_run_state_model"]["route_id"] == "developer-preview-local-workflow"
@@ -187,13 +180,7 @@ def test_phase5_gui_workflow_readiness_blocks_without_execution_or_human_observa
     assert all(payload["evidence_console_absorption_contract"]["model_anchor_pass"].values())
     assert payload["partial_actual_gui_workflow_steps"] == []
     assert payload["missing_actual_gui_workflow_steps"] == []
-    assert payload["missing_execution_workflow_steps"] == [
-        "analysis_setup",
-        "compare_report",
-        "import",
-        "model_health",
-        "run_monitor",
-    ]
+    assert payload["missing_execution_workflow_steps"] == []
     assert payload["required_workflow_steps"] == [
         {"id": "import", "label": "Import"},
         {"id": "model_health", "label": "Model Health"},
@@ -210,13 +197,13 @@ def test_phase5_gui_workflow_readiness_blocks_without_execution_or_human_observa
         "Phase5 workflow step: Import",
     ]
     assert rows["model_health"]["status"] == "ready"
-    assert "workflow_execution_step_not_proven:import" in payload["blockers"]
-    assert "workflow_execution_step_not_proven:model_health" in payload["blockers"]
+    assert "workflow_execution_step_not_proven:import" not in payload["blockers"]
+    assert "workflow_execution_step_not_proven:model_health" not in payload["blockers"]
     assert "task_based_ux_browser_execution_receipt_missing" not in payload["blockers"]
-    assert "task_based_ux_browser_execution_not_passed" in payload["blockers"]
-    assert (
-        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
-        in payload["blockers"]
+    assert "task_based_ux_browser_execution_not_passed" not in payload["blockers"]
+    assert not any(
+        blocker.startswith("task_based_ux_browser_execution_environment_blocked")
+        for blocker in payload["blockers"]
     )
     assert "status_vocabulary_contract_not_ready" not in payload["blockers"]
     assert "value_kind_contract_not_ready" not in payload["blockers"]

@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-30T02:26:51.393597+00:00",
+  "generated_at": "2026-06-30T02:44:06.300842+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -109,14 +109,14 @@
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
-    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:6c8c67e2d8371bdb2fa488979e25827327f940a5304624b3102925e9480258d2",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8282859efeee39e8759502814bafe6197874c65c8ff763aedb6ca3c85e362c5b",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:05c7a048652f929f4fcda147eb3c1506b0eb425df5d4aca138e26e8ccd65a39d",
+    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:0433b4b243d464189297cd6d3af97435b3cb66c92b0e53b0bb6c88964fd0961d",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:f09df3fd912a541ed59d19b2d80e60a123c8b5f7f84e09a6f532402b861d55b7",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:2ca3170428bc448208549dcfa2b74f46d93542f973d3985dbf5be4b4cf601a92",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:4ac129270a848082cb91311a59366e4ee56048b80d34a8026d67107372850cb7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:62a5c4f1277a81dbaee1afe08c9762c206c1f4343f603d248fb34f81ee80a84d",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ec9f4378a182765ea8a2d2d7a62984c6de955c24ae850ca97489c87774c2262e",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:f78d1ce7e6b25eda32cff5185c911d8ac66115354bd5f3d0ba51b7b895d1e1a8",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -140,7 +140,7 @@
     "implementation/phase1/runtime_sbom.json": "sha256:bbb01dd56ce313c1daf5504ef94d9bda86559c063595f0ab289e866bb8d807f4",
     "implementation/phase1/solver_hip_e2e_contract_report.json": "sha256:b1351c13b406990f0be83b713007844149f69c5e87d0b5d3feb8e2859305dabb",
     "implementation/phase1/structure_viewer_performance_budget_manifest.json": "sha256:812cb97ff4be17e3fefe7c6c5aec9ada413974a91f3bd3df5e4c61351f939996",
-    "implementation/phase1/support_bundle_manifest.json": "sha256:906b9728d00b68e87d8a32d576e75e208cf6e66256509a52e7920bdda55cccde",
+    "implementation/phase1/support_bundle_manifest.json": "sha256:b9aeb86c98e7e3e8462c0d3cbacce1fde2a9b20f4d7ff46d1b1a5dc2721e22e3",
     "implementation/phase1/workflow_productization_gate_report.json": "sha256:a2e7b7c2d1bcb280ad117fad82b22a61f400bf5fada03d547c67223e06a87b64",
     "implementation/phase1/workstation_service_budget.json": "sha256:cc74c453c597c82529b7c77cf011d162982478bc8f67a51e21ec3df0eca05860",
     "implementation/phase1/zero_copy_real_probe_report_strict.json": "sha256:00befd00a5c44e17d02b5f89dd94d59983ac71208fa976e13326ce0170463884"
@@ -357,7 +357,7 @@
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "299f834520af1ae515750a3c1dc14e68485a7f8706c8048b19d013aede112125",
+        "support_bundle_export_archive_sha256": "a35137a6f6d3d6c76fdec1c61b2a6638443eceea778fc161ffae230ca4c9e10a",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
@@ -369,7 +369,7 @@
         "support_bundle_pm_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "support_bundle_pm_failure_bundle_coverage": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
-        "support_bundle_pm_failure_bundle_coverage_sha256": "318031cac994df33c5864f88396f439fc6337c05bc410b67f18a8bcfa84742e7",
+        "support_bundle_pm_failure_bundle_coverage_sha256": "8fcf89158884fb31573f021b6889d69bbf19c4ddd4b728d75236087da30e1690",
         "support_bundle_pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "support_bundle_pm_release_gate_completion_audit": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
         "support_bundle_pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
@@ -515,7 +515,7 @@
       "summary": {
         "artifact_count": 15,
         "blocker_count": 0,
-        "current_source_commit_sha": "8b8bb2bb41fd2477f05dbd5efd4fb8c05cd7879e",
+        "current_source_commit_sha": "bf31c6ff743063995a958ecff3e6db72b6190b85",
         "max_age_days": 30.0,
         "pass_count": 15
       },
@@ -837,7 +837,7 @@
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
         "one_click_failure_bundle_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "one_click_failure_bundle_archive_sha256": "299f834520af1ae515750a3c1dc14e68485a7f8706c8048b19d013aede112125",
+        "one_click_failure_bundle_archive_sha256": "a35137a6f6d3d6c76fdec1c61b2a6638443eceea778fc161ffae230ca4c9e10a",
         "pm_blocker_closure_board_external_owner_input_ready_count": 9,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 9,
@@ -848,7 +848,7 @@
         "pm_blocker_register_open_blocker_count": 9,
         "pm_blocker_register_release_area_blocker_count": 5,
         "pm_failure_bundle_coverage_index": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
-        "pm_failure_bundle_coverage_index_sha256": "318031cac994df33c5864f88396f439fc6337c05bc410b67f18a8bcfa84742e7",
+        "pm_failure_bundle_coverage_index_sha256": "8fcf89158884fb31573f021b6889d69bbf19c4ddd4b728d75236087da30e1690",
         "pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "pm_release_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
@@ -1441,6 +1441,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "8b8bb2bb41fd2477f05dbd5efd4fb8c05cd7879e",
+  "source_commit_sha": "bf31c6ff743063995a958ecff3e6db72b6190b85",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }
