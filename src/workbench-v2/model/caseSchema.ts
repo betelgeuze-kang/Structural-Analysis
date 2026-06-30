@@ -4,8 +4,9 @@
 // - UNKNOWN FIELDS ARE ALLOWED (forward-compatible): unrecognized keys are kept
 //   and ignored, never an error.
 // - HARD BLOCK (case rejected) when: schemaVersion is wrong, the source checksum
-//   is missing, or the unit system is missing — we will not show analysis values
-//   without units or provenance.
+//   is missing, the unit system is missing/unsupported, or the coordinate system
+//   is missing/unsupported — we will not show analysis values without explicit
+//   units, coordinates, and provenance.
 // - SOFT (convergence unavailable) when analysis.converged is absent: the case
 //   still loads, but convergence is reported as UNAVAILABLE, never inferred.
 
@@ -119,7 +120,18 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
   if (!str(prov.sourceSha256)) errors.push('provenance.sourceSha256 is missing (source checksum required)')
 
   const model = isRecord(raw.model) ? raw.model : {}
-  if (!str(model.unitSystem)) errors.push('model.unitSystem is missing (units required)')
+  const unitSystem = str(model.unitSystem)
+  const coordinateSystem = str(model.coordinateSystem)
+  if (!unitSystem) {
+    errors.push('model.unitSystem is missing (units required)')
+  } else if (unitSystem !== 'SI') {
+    errors.push(`unsupported model.unitSystem: ${unitSystem} (expected SI)`)
+  }
+  if (!coordinateSystem) {
+    errors.push('model.coordinateSystem is missing (coordinate system required)')
+  } else if (coordinateSystem !== 'global_xyz') {
+    errors.push(`unsupported model.coordinateSystem: ${coordinateSystem} (expected global_xyz)`)
+  }
 
   const analysis = isRecord(raw.analysis) ? raw.analysis : null
   const convergenceAvailable = analysis != null && typeof analysis.converged === 'boolean'
@@ -142,8 +154,8 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
       generatedAt: str(prov.generatedAt) ?? 'unknown',
     },
     model: {
-      unitSystem: 'SI' as UnitSystem,
-      coordinateSystem: (str(model.coordinateSystem) ?? 'global_xyz') as CoordinateSystem,
+      unitSystem: unitSystem as UnitSystem,
+      coordinateSystem: coordinateSystem as CoordinateSystem,
       nodeCount: fin(model.nodeCount) ?? 0,
       elementCount: fin(model.elementCount) ?? 0,
       dofCount: fin(model.dofCount) ?? 0,
