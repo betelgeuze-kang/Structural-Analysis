@@ -75,13 +75,13 @@
     "source_checksum_count": 2,
     "valid_execution_case_count": 0
   },
-  "generated_at": "2026-06-30T21:52:36.355352+00:00",
+  "generated_at": "2026-06-30T23:46:43.371362+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json": "sha256:efe4af8459fc34480a3e5bb6e62dc4022f1bf5bed51c49d428e8847e5c1556d8",
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl": "sha256:66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f",
     "implementation/phase1/release_evidence/productization/large_model_execution_receipts": "dir-sha256:24fc3e9d2147dbd1b7c72999c57798285e3babc6b43511ccbc31b85b6ef1a853",
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:395e9636b7023ef67f1ac196477e778393ead4a827d796d150011ff4c758a8db",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:8a9e393a1c0d9c40ca51648a74ae2de0ea514cf4e12d696d1671fcd3680d469c",
     "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
   },
@@ -90,8 +90,124 @@
     "large-model-performance"
   ],
   "large_model_execution_claim": false,
+  "next_actions": [
+    "complete_large_model_license_review",
+    "attach_large_reference_outputs",
+    "record_large_canonical_normalization",
+    "attach_large_scorecard_or_approved_review"
+  ],
+  "operator_next_actions": [
+    {
+      "action": "Attach product/legal approval for local large-model execution and claim boundaries.",
+      "clears_blockers": [
+        "license_review_pending"
+      ],
+      "id": "complete_large_model_license_review",
+      "owner": "product_legal",
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "action": "Attach reference outputs or approved REVIEW baselines for the selected large models.",
+      "clears_blockers": [
+        "reference_outputs_missing"
+      ],
+      "id": "attach_large_reference_outputs",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 2,
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check"
+      ]
+    },
+    {
+      "action": "Record canonical units, coordinates, and mapping coverage for each selected large model.",
+      "clears_blockers": [
+        "normalization_not_implemented"
+      ],
+      "id": "record_large_canonical_normalization",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 2,
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check"
+      ]
+    },
+    {
+      "accepted_decisions": [
+        "PASS",
+        "APPROVED_REVIEW"
+      ],
+      "action": "Attach a scorecard PASS or explicit approved REVIEW record for each large model receipt.",
+      "clears_blockers": [
+        "large_model_scorecard_or_review_missing"
+      ],
+      "id": "attach_large_scorecard_or_approved_review",
+      "owner": "benchmark_reviewer",
+      "remaining_case_count": 2,
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    }
+  ],
   "owner_action": "Complete license review for the attached large OpenSees/reference models, attach reference outputs, normalize them into the canonical model, run the operator execution receipt command for each model, then attach crash/OOM-free execution receipts and scorecard or approved REVIEW evidence.",
   "phase3_closure_claim": false,
+  "recommended_next_actions": [
+    {
+      "action": "Attach product/legal approval for local large-model execution and claim boundaries.",
+      "clears_blockers": [
+        "license_review_pending"
+      ],
+      "id": "complete_large_model_license_review",
+      "owner": "product_legal",
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "action": "Attach reference outputs or approved REVIEW baselines for the selected large models.",
+      "clears_blockers": [
+        "reference_outputs_missing"
+      ],
+      "id": "attach_large_reference_outputs",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 2,
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check"
+      ]
+    },
+    {
+      "action": "Record canonical units, coordinates, and mapping coverage for each selected large model.",
+      "clears_blockers": [
+        "normalization_not_implemented"
+      ],
+      "id": "record_large_canonical_normalization",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 2,
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check"
+      ]
+    },
+    {
+      "accepted_decisions": [
+        "PASS",
+        "APPROVED_REVIEW"
+      ],
+      "action": "Attach a scorecard PASS or explicit approved REVIEW record for each large model receipt.",
+      "clears_blockers": [
+        "large_model_scorecard_or_review_missing"
+      ],
+      "id": "attach_large_scorecard_or_approved_review",
+      "owner": "benchmark_reviewer",
+      "remaining_case_count": 2,
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    }
+  ],
   "required_evidence": [
     {
       "blocker": "",
@@ -205,7 +321,7 @@
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
   "source_checksum_count": 2,
-  "source_commit_sha": "8fa366e78d74693f26fb171e75ff20c3881bf40b",
+  "source_commit_sha": "ec879d29fce747b9ac83f6d87d682512aef904b0",
   "source_id": "opensees_megatall_model_2_large",
   "source_identity_inventory": {
     "claim_boundary": "This inventory records already-collected local large-model source files, their SHA256 values, and source URL metadata. It does not approve licenses, create reference outputs, normalize models, execute analyses, or count as large-model PASS/REVIEW evidence.",
@@ -253,5 +369,19 @@
   },
   "source_url_verified_count": 2,
   "status": "blocked",
+  "summary": {
+    "crash_oom_free_execution_count": 2,
+    "current_large_model_execution_receipt_count": 2,
+    "remaining_crash_oom_free_count": 0,
+    "remaining_execution_receipt_count": 0,
+    "remaining_scorecard_or_review_count": 2,
+    "required_evidence_count": 9,
+    "required_evidence_pass_count": 5,
+    "required_large_model_count": 2,
+    "runner_command_ready": true,
+    "scorecard_or_review_count": 0,
+    "source_checksum_count": 2,
+    "source_url_verified_count": 2
+  },
   "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=2/2 | evidence=5/9"
 }

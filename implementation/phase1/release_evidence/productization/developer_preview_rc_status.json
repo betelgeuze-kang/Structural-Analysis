@@ -499,13 +499,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T23:31:43.555440+00:00",
+  "generated_at": "2026-06-30T23:54:29.944164+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:93909b26d622000710e06f1667a35b1999ff97ba2708df5c93c369efc8d20779",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:c7a3d1520095d4d36857d1cc962998c16a1aa1bf90a43848a4126d7b927a8928",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:812b133e848a4517c43638018ae1c46171ed9841c41c70aad7dfd4cca0c16ade",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:0c76b528846fa5b0dde19da227065009fba748876e337587344d63cb94ce63fe",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:a6a317145dc20b93e247a07d2c3f04de49f0c47a7adf5f93888e8e5d7df6c7d1",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:c51085489730ff77b88985790b6c8feef045b5bd0978da65efaea5751f34ea71",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:cbaf117208c2583171d27672cbabae05a4c81550d51701b2b3398c013013e64d",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:43b81643d519ff5f5389f4b6686023dee7048da8fd5230225e41698846604015",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:55d2922f91d04c9ed411d98e4d710442f1774749795f76eb103203ecd87e6ee1",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -525,7 +525,7 @@
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:cc5edab07c763d44c75f7005eca66f235afb0d81ef4bc21115f60bfea8459790",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:29a089f90646c75733a4eb5900ae0d1129ebedc13b6990c894915c2958c30be1",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:ab134d1e60721d66e674d88606d258784b6f4f541b8a0c726b3699c4f5e231db",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f3f29ec0fdb04508b52ee5ac11967a1fdb3db51f11cd3a6bcad9568c896dac1b",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
   },
@@ -2665,6 +2665,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "50ff7d33008936e0f06b26dee4c40cf9052eb590",
+  "source_commit_sha": "ec879d29fce747b9ac83f6d87d682512aef904b0",
   "status": "blocked"
 }
