@@ -103,7 +103,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T12:09:18.184172+00:00",
+  "generated_at": "2026-06-30T12:11:21.148639+00:00",
   "human_ux_summary": {
     "evidence_artifacts": {
       "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -129,7 +129,7 @@
     "workflow_step_pass_count": 0
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:364b27c05fca09af4c7bd1e7513df5ea0f751d7ebbd0e6dcbb465fe223736720",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:d43da3619cf9166b356ce349548daec3262453c1ea67c7babeba3e6716b5f086",
     "scripts/build_non_expert_release_briefing_report.py": "sha256:be86ab4bef3d9fdda099eed97b0b0a338fd2f7bd6cf30d9b8fdd54002de62d0b"
   },
   "next_owner_action_count": 6,
@@ -203,6 +203,6 @@
   "source_artifacts": {
     "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
   },
-  "source_commit_sha": "b0e100eecc5f8a4879cd85336d3cf79c661ef34b",
+  "source_commit_sha": "479a737c1cc943ecc22d6c17c3574a0efd9983b8",
   "status": "ready_release_blocked"
 }
