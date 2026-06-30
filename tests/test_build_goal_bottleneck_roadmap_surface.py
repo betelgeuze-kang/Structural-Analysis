@@ -94,12 +94,12 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert briefing["audience"] == "non_expert_pm_operator"
     assert briefing["release_allowed"] is False
     assert briefing["primary_release_blocker"] == (
-        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+        "M5::pm_blocker_closure_board_count_mismatch"
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
-    assert briefing["release_area_blocker_count"] == 8
-    assert briefing["release_area_owner_handoff_count"] == 8
+    assert briefing["release_area_blocker_count"] == 7
+    assert briefing["release_area_owner_handoff_count"] == 7
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
@@ -384,6 +384,19 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "casf_pdbbind_subset_materialized",
         "external_receipts_attached",
     ]
+    assert phase_2["summary"]["operator_handoff_queue_count"] == 4
+    assert phase_2["summary"]["first_operator_handoff"]["handoff_id"] == (
+        "public_benchmark::casf_pdbbind_subset_intake"
+    )
+    assert phase_2["summary"]["first_operator_handoff"][
+        "blocked_tier_beta_criteria"
+    ] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
+    assert phase_2["summary"]["operator_handoff_queue"][0][
+        "materialization_command"
+    ].startswith("python3 scripts/materialize_public_benchmark_subset_manifest.py")
     assert phase_2["summary"]["minimum_subset_case_count"] == 12
     assert phase_2["summary"]["tier_beta_gate_status"] == "blocked"
     assert phase_2["summary"]["tier_beta_failed_criterion_count"] == 7
