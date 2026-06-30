@@ -46,8 +46,14 @@ def _write_case_files(root: Path, case_id: str) -> dict[str, str]:
     return {field: path.relative_to(root).as_posix() for field, path in files.items()}
 
 
-def _write_phase2_rows(root: Path) -> dict[str, Path]:
-    case_id = "case_a"
+def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str, Path]:
+    resolved_case_count = (
+        case_count or module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT
+    )
+    case_ids = [
+        f"case_{index:02d}"
+        for index in range(1, resolved_case_count + 1)
+    ]
     ligand_contract = {
         "atom_count": 2,
         "atom_ids": ["C1", "O1"],
@@ -83,6 +89,7 @@ def _write_phase2_rows(root: Path) -> dict[str, Path]:
                     "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
                     "rmsd_threshold_angstrom": 2.0,
                 }
+                for case_id in case_ids
             ]
         },
     )
@@ -104,6 +111,7 @@ def _write_phase2_rows(root: Path) -> dict[str, Path]:
                         "provenance_ref": f"operator://pose/{case_id}",
                     },
                 }
+                for case_id in case_ids
             ]
         },
     )
@@ -131,18 +139,18 @@ def _write_phase2_rows(root: Path) -> dict[str, Path]:
         {
             "cases": [
                 {
-                    "case_id": case_id,
+                    "case_id": case_ids[0],
                     "source_family": "CASF/PDBBind",
                     "benchmark_split": "CASF-core",
-                    "complex_id": f"{case_id}_complex",
-                    "reference_pose_id": f"{case_id}_reference",
+                    "complex_id": f"{case_ids[0]}_complex",
+                    "reference_pose_id": f"{case_ids[0]}_reference",
                     "source_license_or_accession": "CASF/PDBBind:test-accession",
                     "source_checksum": _checksum("vina-gnina-case-a"),
-                    "provenance_ref": f"operator://vina-gnina/{case_id}",
+                    "provenance_ref": f"operator://vina-gnina/{case_ids[0]}",
                     "engine_runs": [
                         {
                             "engine_id": "vina",
-                            "docking_run_id": f"{case_id}_vina",
+                            "docking_run_id": f"{case_ids[0]}_vina",
                             "predicted_ligand_path_or_pose_ref": "operator://vina.sdf",
                             "symmetry_aware_rmsd_angstrom": 1.4,
                             "pose_success": True,
@@ -151,7 +159,7 @@ def _write_phase2_rows(root: Path) -> dict[str, Path]:
                         },
                         {
                             "engine_id": "gnina",
-                            "docking_run_id": f"{case_id}_gnina",
+                            "docking_run_id": f"{case_ids[0]}_gnina",
                             "predicted_ligand_path_or_pose_ref": "operator://gnina.sdf",
                             "symmetry_aware_rmsd_angstrom": 1.6,
                             "pose_success": True,
@@ -211,6 +219,20 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         "predicted_atoms",
     ]
     assert pose_contract["default_rmsd_threshold_angstrom"] == 2.0
+    assert subset_contract["minimum_phase2_component_counts"][
+        "casf_pdbbind_pose_success_harness"
+    ] == {
+        "real_benchmark_case_count": (
+            module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT
+        )
+    }
+    assert pose_contract["minimum_phase2_component_counts"][
+        "symmetry_aware_ligand_rmsd"
+    ] == {
+        "real_benchmark_case_count": (
+            module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT
+        )
+    }
     enrichment_contract = contracts["enrichment_rows"]
     assert enrichment_contract["supported_benchmark_families"] == [
         "DUD-E",
@@ -238,7 +260,7 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
         pose_rows_path=rows["pose"],
         enrichment_rows_path=rows["enrichment"],
         vina_gnina_rows_path=rows["vina_gnina"],
-        target_subset_case_count=1,
+        target_subset_case_count=module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
         operator_bundle_out=tmp_path / "operator_bundle.json",
         out_dir=tmp_path / "out",
         harness_report_out=tmp_path / "harness_report.json",
@@ -268,3 +290,39 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     artifact_bundle = json.loads((tmp_path / "artifact_bundle.json").read_text())
     assert artifact_bundle["phase2_ready"] is True
     assert artifact_bundle["phase2_exit_gate"]["status"] == "ready"
+
+
+def test_public_benchmark_phase2_row_audit_blocks_one_case_smoke_rows(
+    tmp_path: Path,
+) -> None:
+    rows = _write_phase2_rows(tmp_path, case_count=1)
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        subset_rows_path=rows["subset"],
+        pose_rows_path=rows["pose"],
+        enrichment_rows_path=rows["enrichment"],
+        vina_gnina_rows_path=rows["vina_gnina"],
+        target_subset_case_count=1,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["contract_pass"] is False
+    assert audit["phase2_ready"] is False
+    assert audit["component_ready_count"] == 2
+    assert audit["phase2_exit_gate"]["failed_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready",
+    ]
+    assert "phase2_exit_gate::casf_pdbbind_pose_success_harness_ready" in audit[
+        "blockers"
+    ]
+    assert any(
+        blocker.endswith("real_benchmark_case_count_below_required:1<12")
+        for blocker in audit["blockers"]
+    )

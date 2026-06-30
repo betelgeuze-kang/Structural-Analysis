@@ -15,6 +15,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from build_public_benchmark_operator_intake_packet import (  # noqa: E402
+    TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
     build_public_benchmark_operator_intake_packet,
 )
 from build_public_benchmark_source_of_truth import build_source_of_truth  # noqa: E402
@@ -125,7 +126,7 @@ PHASE2_REQUIRED_COMPONENTS = (
         "criterion_id": "casf_pdbbind_pose_success_harness_ready",
         "ready_field": READY_FIELDS["pose_success_harness"],
         "count_field": "real_benchmark_case_count",
-        "required_minimum_count": 1,
+        "required_minimum_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
     },
     {
         "component_id": "symmetry_aware_ligand_rmsd",
@@ -134,7 +135,7 @@ PHASE2_REQUIRED_COMPONENTS = (
         "criterion_id": "symmetry_aware_ligand_rmsd_ready",
         "ready_field": READY_FIELDS["rmsd_scorecard"],
         "count_field": "real_benchmark_case_count",
-        "required_minimum_count": 1,
+        "required_minimum_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
     },
     {
         "component_id": "posebusters_style_pose_validity",
@@ -143,7 +144,7 @@ PHASE2_REQUIRED_COMPONENTS = (
         "criterion_id": "posebusters_style_pose_validity_ready",
         "ready_field": READY_FIELDS["pose_validity_packet"],
         "count_field": "real_benchmark_case_count",
-        "required_minimum_count": 1,
+        "required_minimum_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
     },
     {
         "component_id": "vina_gnina_comparison_adapter",
@@ -362,6 +363,14 @@ def _build_phase2_exit_gate(
     }
 
 
+def _phase2_component_blockers(component_rows: list[dict[str, Any]]) -> list[str]:
+    return [
+        f"{row['component_id']}::{blocker}"
+        for row in component_rows
+        for blocker in _as_list(row.get("blockers"))
+    ]
+
+
 def materialize_public_benchmark_artifact_bundle(
     artifact_paths: list[Path],
     *,
@@ -406,8 +415,11 @@ def materialize_public_benchmark_artifact_bundle(
             )
         )
 
+    missing_artifact_blockers = list(blockers)
     phase2_components = _phase2_component_rows(rows)
     phase2_exit_gate = _build_phase2_exit_gate(phase2_components)
+    blockers.extend(_phase2_component_blockers(phase2_components))
+    blockers = sorted(dict.fromkeys(blockers))
     phase2_ready = phase2_exit_gate["status"] == "ready"
 
     return {
@@ -424,7 +436,7 @@ def materialize_public_benchmark_artifact_bundle(
         "status": "ready" if not blockers else "artifact_bundle_incomplete",
         "contract_pass": not blockers,
         "artifact_count": len(rows),
-        "missing_artifact_count": len(blockers),
+        "missing_artifact_count": len(missing_artifact_blockers),
         "artifact_rows": rows,
         "required_components": list(PHASE2_REQUIRED_COMPONENTS),
         "components": phase2_components,
@@ -434,7 +446,7 @@ def materialize_public_benchmark_artifact_bundle(
         "materialization_report": {
             "schema_version": FULL_MATERIALIZER_SCHEMA_VERSION,
             "artifact_count": len(rows),
-            "missing_artifact_count": len(blockers),
+            "missing_artifact_count": len(missing_artifact_blockers),
             "phase2_component_count": len(phase2_components),
             "phase2_ready_component_count": sum(
                 1 for row in phase2_components if row["ready"]
@@ -620,12 +632,13 @@ def materialize_public_benchmark_harness_bundle(
 
     phase2_components = _phase2_component_rows(artifact_summaries)
     phase2_exit_gate = _build_phase2_exit_gate(phase2_components)
+    blockers.extend(_phase2_component_blockers(phase2_components))
+    blockers = sorted(dict.fromkeys(blockers))
     phase2_ready = phase2_exit_gate["status"] == "ready"
+    source_public_benchmark_ready = bool(source_of_truth.get("public_benchmark_ready"))
     source_tier_beta_ready = bool(source_of_truth.get("tier_beta_ready"))
     tier_beta_ready = bool(source_tier_beta_ready and phase2_ready)
-    bundle_ready = bool(source_of_truth.get("public_benchmark_ready")) and bool(
-        phase2_ready and not blockers
-    )
+    bundle_ready = bool(source_public_benchmark_ready and phase2_ready and not blockers)
     report_input_paths = [
         Path("scripts/materialize_public_benchmark_harness_bundle.py")
     ]
@@ -642,7 +655,8 @@ def materialize_public_benchmark_harness_bundle(
         ),
         "status": "ready" if bundle_ready else "operator_evidence_required",
         "contract_pass": bundle_ready,
-        "public_benchmark_ready": bool(source_of_truth.get("public_benchmark_ready")),
+        "public_benchmark_ready": bundle_ready,
+        "source_of_truth_public_benchmark_ready": source_public_benchmark_ready,
         "tier_beta_ready": tier_beta_ready,
         "source_of_truth_tier_beta_ready": source_tier_beta_ready,
         "required_components": list(PHASE2_REQUIRED_COMPONENTS),

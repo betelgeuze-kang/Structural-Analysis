@@ -110,6 +110,12 @@ def _row_intake_contracts(
         "source_checksum",
         "provenance_ref",
     ]
+    minimum_component_counts = {
+        str(row["component_id"]): {
+            str(row["count_field"]): int(row["required_minimum_count"])
+        }
+        for row in harness_bundle.PHASE2_REQUIRED_COMPONENTS
+    }
     return {
         "subset_rows": {
             "row_input_id": "subset_rows",
@@ -127,6 +133,7 @@ def _row_intake_contracts(
                 subset_manifest.REQUIRED_POSE_SUCCESS_METRIC
             ),
             "default_target_subset_case_count": target_case_count,
+            "minimum_phase2_component_counts": minimum_component_counts,
             "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             "source_receipt_required_fields": common_source_receipt_fields,
             "feeds_components": ["casf_pdbbind_pose_success_harness"],
@@ -151,6 +158,7 @@ def _row_intake_contracts(
             ],
             "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
             "default_rmsd_threshold_angstrom": DEFAULT_THRESHOLD_ANGSTROM,
+            "minimum_phase2_component_counts": minimum_component_counts,
             "feeds_components": [
                 "symmetry_aware_ligand_rmsd",
                 "posebusters_style_pose_validity",
@@ -186,6 +194,7 @@ def _row_intake_contracts(
                 "enrichment_factor_1pct",
                 "enrichment_factor_5pct",
             ],
+            "minimum_phase2_component_counts": minimum_component_counts,
             "feeds_components": ["dud_e_or_lit_pcba_enrichment"],
             "materialization_chain": [
                 "materialize_public_benchmark_enrichment_scorecard",
@@ -218,6 +227,7 @@ def _row_intake_contracts(
                 "pose_success_rate",
                 "symmetry_aware_rmsd_median_angstrom",
             ],
+            "minimum_phase2_component_counts": minimum_component_counts,
             "feeds_components": ["vina_gnina_comparison_adapter"],
             "materialization_chain": [
                 "materialize_public_benchmark_vina_gnina_comparison_adapter",
@@ -229,6 +239,7 @@ def _row_intake_contracts(
             "artifact_bundle": str(artifact_bundle_out),
             "out_dir": str(out_dir),
             "required_artifact_roles": list(ARTIFACT_BUNDLE_ROLES),
+            "minimum_phase2_component_counts": minimum_component_counts,
         },
         "claim_boundary": (
             "These row contracts describe operator-attached Phase 2 benchmark inputs. "
