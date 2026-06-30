@@ -1,6 +1,5 @@
 {
   "blockers": [
-    "worktree_not_clean",
     "remote_mutation_approval_required"
   ],
   "checks": {
@@ -11,7 +10,7 @@
     "main_synced_to_head": false,
     "remote_fetch_ok": null,
     "remote_safety_ok": true,
-    "worktree_clean": false
+    "worktree_clean": true
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -20,7 +19,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-30T19:41:32.981536+00:00",
+  "generated_at": "2026-06-30T19:46:18.936846+00:00",
   "pending_remote_updates": [
     {
       "action": "fast-forward push current HEAD to main",
@@ -29,7 +28,7 @@
       "target": "origin/main"
     }
   ],
-  "preflight_pass": false,
+  "preflight_pass": true,
   "r4_disclosure": {
     "action": "fast-forward push current HEAD to main",
     "impact": "GitHub pending refs become externally visible at the local development state.",
@@ -50,11 +49,11 @@
     "branch": "codex/seed-pr-ci-source-evidence",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "c16f696e7df446ac1ae72b206aa40d6e130f4d21",
-    "main_ahead_count": 135,
+    "local_head_sha": "5eb7c2c9cea4dde22375030f628140c6f168e4cb",
+    "main_ahead_count": 139,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "c16f696e7df446ac1ae72b206aa40d6e130f4d21",
+    "remote_feature_sha": "5eb7c2c9cea4dde22375030f628140c6f168e4cb",
     "remote_main_ref": "origin/main",
     "remote_main_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
     "remote_safety": {
@@ -70,7 +69,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
+    "worktree_status_short": ""
   },
-  "status": "blocked"
+  "status": "approval_required"
 }
