@@ -341,12 +341,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 5,
+      "blocker_count": 7,
       "category_counts": {
         "benchmark": 0,
-        "future commercial": 32,
+        "future commercial": 33,
         "numerical": 4,
-        "software product": 1
+        "software product": 3
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -355,7 +355,7 @@
         "gpu_hip": "performance_track_after_cpu_reference_parity",
         "new_feature_development": "frozen_until_developer_preview_baseline_is_clean"
       },
-      "future_commercial_blocker_count": 32,
+      "future_commercial_blocker_count": 33,
       "gap_ledger_closure_requirement_visibility": {
         "ai_engine_guardrail_rows_ready": true,
         "autonomous_ai_engine_claim_blockers": [
@@ -2879,20 +2879,20 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-30T19:36:53.756569+00:00",
+  "generated_at": "2026-06-30T19:38:54.515177+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
-    "README.md": "sha256:a1d4089576e56b253f8dd2c1267b3725bec8767173bbfadfe5ca18e42b97be52",
-    "docs/commercialization-gap-current-state.md": "sha256:0163dbb21e74785d2e4488a1c9fb8127014b76783fab28ad678ebbfeeb7ab11b",
+    "README.md": "sha256:45a719d6a5913314a7e224f448c5912214f8e53830fefd9a9e4ef5ccc65fd01f",
+    "docs/commercialization-gap-current-state.md": "sha256:2cf9ec122dd919ddc8f0c77813e8cf5969827d7aab423a00feaa2fdac28c74ff",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:f072ae1fb2bb0f42266c520a4504a707322ceb5bdca27176d497166bc00b362d",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:143d96303976defe13e3a60588a5451805b7da804f2364fe91e667fedc01878d",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:7dc5f795b650e9b32188bed7e905d28b89cd8fa7b0e6faafa005f4b37eb7eb44",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:25d4d25d9703b5e28cc90afedcf41290186442bc5e8e67b1b1cc13ee25c156db",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:e07cc996a0616c986b63ef1a3cd56613e15d1f9bb7e9abd30814e1299d3b144c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:080691a4a34e61b7ec535b4a456c26e96b1ad88c5ddc645db3573674605ea2aa",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:39b98e9f24e5bb759c61dba15cc4f25ce2410638f1176655ad3b767604588911",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f62da2dbd25e5f89c79b1f240b76ebf9d00d9c157667092d6b2ec93baa9adc69",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:9cc233f8991a23e88e808c5d8d860f0f654b9b53ac7619aafc3eab9af0a58a08",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:90d18c5ed3a92c42b93876a1b17535605c74cd279c6c9ecc881e6a174070a3aa",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:d2ff86a92da6b2447353714128208efd6a5a87024b609d29929af82c24cd39f0",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c34ff5d4f32d72483e5b37bbfa8f07dd7567e8cfe0bbe3af6b747ba9cd484abf",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:a6b3d48b8c42fa27650cb9951ff56ba8ee294b5d6da1f2e10bbfa80b9005408c",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:69d1d2cc6e3db8fee4c4857c2e703e34db981fe807af5479766b179b36e010e6",
@@ -2904,7 +2904,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4d1d5489b9c5dd4f2b89948337c509f2d4199014270972a3bf9c826278b65f3e",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:dd233cd6a20f8a3e443f3a2951048126a2aa0aab0978cf8e62dbf065dde7750b",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:6253df3f49ee0b798aa8ec5d48832b43cf04f13d7feba59aafcfccc98aef1016",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1094763b65af9c555bc4842185b5f11acd6219be343a0712cb33cfdd20c639a2",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:30a83ea2f7d883ca8db99b6c7191a2270da8148b95c822d2a91a15b68d02b592",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:b4222bb65e949a15fe183dae24b2d2315426c11ba4e9bae897a1994e342a7c31",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -3560,7 +3560,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+  "source_commit_sha": "f1e9e966f68a0e4c5605850627268b0186a42bea",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3650,12 +3650,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T19:36:48.275987+00:00",
+        "generated_at": "2026-06-30T19:38:48.946907+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "f1e9e966f68a0e4c5605850627268b0186a42bea",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3756,36 +3756,36 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T19:36:47.941893+00:00",
+        "generated_at": "2026-06-30T19:38:48.602454+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "f1e9e966f68a0e4c5605850627268b0186a42bea",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T19:36:48.002899+00:00",
+        "generated_at": "2026-06-30T19:38:48.663683+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "f1e9e966f68a0e4c5605850627268b0186a42bea",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-30T19:36:47.679670+00:00",
+        "generated_at": "2026-06-30T19:38:48.335907+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "84b4f18385f61b35f878f0c0905612864b68e257",
+        "source_commit_sha": "f1e9e966f68a0e4c5605850627268b0186a42bea",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -4007,29 +4007,19 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
+        "README.md",
+        "docs/commercialization-gap-current-state.md",
         "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
         "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
         "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
         "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
+        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4054,29 +4044,19 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
+        " M README.md",
+        " M docs/commercialization-gap-current-state.md",
         " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
         " M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
         " M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
+        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
         " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
+        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
       ]
     }
   },
