@@ -188,7 +188,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T12:17:40.480084+00:00",
+  "generated_at": "2026-06-30T12:18:42.290892+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -199,27 +199,27 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:96814cc4dfda26bfea278f98e2af5f248012aa24d51db6b363d0a4987fb07b7d",
+      "input_checksum": "sha256:28fb0c24bcca5f106ca8c939cd5c1371f7c7f7cdb64165b70aede04dd2cda009",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "4c05fe352402c9fcc2153e1863035305fc9e0325",
+      "source_commit_sha": "f4def5a0d8edcee59c0b05374f0e6a5cd8c13db4",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:b2081d0a8d3f0b5635cecd006b2130fbb0c74a93ddec12494e4cc6174a06064d",
+      "input_checksum": "sha256:8689791358ab9314559d144b7fcec7c32fafa3ea3130fe09e0a99d3ba44c8979",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "26ee9447b28ed9af4f5656607e4cecaf07423fe9",
+      "source_commit_sha": "4c05fe352402c9fcc2153e1863035305fc9e0325",
       "status": "blocked"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:96814cc4dfda26bfea278f98e2af5f248012aa24d51db6b363d0a4987fb07b7d",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:b2081d0a8d3f0b5635cecd006b2130fbb0c74a93ddec12494e4cc6174a06064d"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:28fb0c24bcca5f106ca8c939cd5c1371f7c7f7cdb64165b70aede04dd2cda009",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:8689791358ab9314559d144b7fcec7c32fafa3ea3130fe09e0a99d3ba44c8979"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -1662,6 +1662,7 @@
         ],
         "changed_paths_since_source_commit": [
           "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_materialize_gpcr_hard_decoy_suite_report.py"
         ],
         "consistent_residual_jacobian_newton_gate_passed": false,
@@ -2025,6 +2026,6 @@
       }
     }
   },
-  "source_commit_sha": "4c05fe352402c9fcc2153e1863035305fc9e0325",
+  "source_commit_sha": "f4def5a0d8edcee59c0b05374f0e6a5cd8c13db4",
   "status": "blocked"
 }
