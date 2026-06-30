@@ -142,6 +142,40 @@ def _operator_evidence_gap_register(report: dict[str, Any]) -> list[dict[str, An
     return rows
 
 
+def _operator_handoff_summary(
+    report: dict[str, Any],
+    operator_evidence_gap_register: list[dict[str, Any]],
+) -> dict[str, Any]:
+    first_operator_evidence_gap = (
+        operator_evidence_gap_register[0] if operator_evidence_gap_register else {}
+    )
+    blockers = _as_list(report.get("blockers"))
+    return {
+        "route": GPCR_OPERATOR_INTAKE_ROUTE,
+        "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET),
+        "first_blocker": str(blockers[0]) if blockers else "",
+        "first_blocked_target": str(report.get("first_blocked_target") or ""),
+        "first_next_action": str(
+            first_operator_evidence_gap.get("first_next_action") or ""
+        ),
+        "required_slot_count": len(REQUIRED_TARGETS),
+        "blocked_operator_slot_count": len(operator_evidence_gap_register),
+        "minimum_evidence": dict(
+            first_operator_evidence_gap.get("minimum_evidence") or {}
+        ),
+        "materialization_steps": [
+            str(row)
+            for row in _as_list(first_operator_evidence_gap.get("materialization_steps"))
+        ],
+        "materialization_command": str(
+            first_operator_evidence_gap.get("materialization_command") or ""
+        ),
+        "validation_command": str(
+            first_operator_evidence_gap.get("validation_command") or ""
+        ),
+    }
+
+
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
@@ -434,11 +468,19 @@ def materialize_gpcr_hard_decoy_suite_report(
         broad_safe=broad_safe,
         first_blocked_target=first_blocked_target,
     )
+    operator_gap_report = {
+        "phase3_exit_gate": phase3_exit_gate,
+        "target_rows": target_rows,
+    }
+    operator_evidence_gap_register = _operator_evidence_gap_register(operator_gap_report)
+    first_operator_evidence_gap = (
+        operator_evidence_gap_register[0] if operator_evidence_gap_register else {}
+    )
     input_paths = [Path("scripts/materialize_gpcr_hard_decoy_suite_report.py")]
     if intake_path is not None:
         input_paths.append(intake_path)
 
-    return {
+    payload = {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
             input_paths=input_paths,
@@ -452,11 +494,17 @@ def materialize_gpcr_hard_decoy_suite_report(
         "target_count": len(REQUIRED_TARGETS),
         "target_pass_count": target_pass_count,
         "first_blocked_target": first_blocked_target,
+        "first_blocker": blockers[0] if blockers else "",
         "root_cause_tags": root_cause_tags,
         "exit_criteria": EXIT_CRITERIA,
         "phase3_exit_gate": phase3_exit_gate,
         "target_rows": target_rows,
         "blockers": blockers,
+        "operator_intake_route": GPCR_OPERATOR_INTAKE_ROUTE,
+        "operator_intake_required_slot_count": len(REQUIRED_TARGETS),
+        "operator_evidence_gap_count": len(operator_evidence_gap_register),
+        "first_operator_evidence_gap": first_operator_evidence_gap,
+        "operator_evidence_gap_register": operator_evidence_gap_register,
         "summary_line": (
             "GPCR hard-decoy suite: PASS"
             if broad_safe
@@ -473,6 +521,11 @@ def materialize_gpcr_hard_decoy_suite_report(
             "all required numeric receipts."
         ),
     }
+    payload["operator_handoff_summary"] = _operator_handoff_summary(
+        payload,
+        operator_evidence_gap_register,
+    )
+    return payload
 
 
 def build_gpcr_evidence_surface(
@@ -501,30 +554,10 @@ def build_gpcr_evidence_surface(
             "regenerate_goal_bottleneck_roadmap_surface",
         ]
     )
-    operator_handoff_summary = {
-        "route": GPCR_OPERATOR_INTAKE_ROUTE,
-        "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET),
-        "first_blocker": first_blocker,
-        "first_blocked_target": str(report.get("first_blocked_target") or ""),
-        "first_next_action": str(
-            first_operator_evidence_gap.get("first_next_action") or ""
-        ),
-        "required_slot_count": len(REQUIRED_TARGETS),
-        "blocked_operator_slot_count": len(operator_evidence_gap_register),
-        "minimum_evidence": dict(
-            first_operator_evidence_gap.get("minimum_evidence") or {}
-        ),
-        "materialization_steps": [
-            str(row)
-            for row in _as_list(first_operator_evidence_gap.get("materialization_steps"))
-        ],
-        "materialization_command": str(
-            first_operator_evidence_gap.get("materialization_command") or ""
-        ),
-        "validation_command": str(
-            first_operator_evidence_gap.get("validation_command") or ""
-        ),
-    }
+    operator_handoff_summary = _operator_handoff_summary(
+        report,
+        operator_evidence_gap_register,
+    )
     input_paths = [
         Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),
     ]

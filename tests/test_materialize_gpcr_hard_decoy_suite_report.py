@@ -40,7 +40,12 @@ def test_gpcr_hard_decoy_suite_passes_required_targets() -> None:
     assert report["broad_gpcr_family_claim_safe"] is True
     assert report["target_pass_count"] == 3
     assert report["first_blocked_target"] == ""
+    assert report["first_blocker"] == ""
     assert report["blockers"] == []
+    assert report["operator_evidence_gap_count"] == 0
+    assert report["first_operator_evidence_gap"] == {}
+    assert report["operator_handoff_summary"]["first_blocker"] == ""
+    assert report["operator_handoff_summary"]["blocked_operator_slot_count"] == 0
     assert report["phase3_exit_gate"]["status"] == "ready"
     assert report["phase3_exit_gate"]["failed_criterion_count"] == 0
     assert report["phase3_exit_gate"]["failed_criteria"] == []
@@ -61,9 +66,34 @@ def test_gpcr_hard_decoy_suite_blocks_missing_operator_values() -> None:
     assert report["status"] == "locked"
     assert report["broad_gpcr_family_claim_safe"] is False
     assert report["first_blocked_target"] == "DRD2"
+    assert report["first_blocker"] == "DRD2:operator_metrics_required"
     assert report["root_cause_tags"] == ["operator_values_required"]
     assert "DRD2:ranking_pr_auc_ci_low_required" in report["blockers"]
     assert "OPRM1:positive_out_anchored_by_top_decoys_required" in report["blockers"]
+    assert report["operator_intake_route"] == (
+        "/product/gpcr-hard-decoy-suite-report/operator-intake"
+    )
+    assert report["operator_intake_required_slot_count"] == 3
+    assert report["operator_evidence_gap_count"] == 3
+    assert report["first_operator_evidence_gap"]["slot_id"] == (
+        "drd2_hard_decoy_metrics"
+    )
+    assert report["first_operator_evidence_gap"]["target_id"] == "DRD2"
+    assert report["first_operator_evidence_gap"]["blocked_phase3_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
+    assert report["operator_handoff_summary"]["first_blocker"] == (
+        "DRD2:operator_metrics_required"
+    )
+    assert report["operator_handoff_summary"]["first_blocked_target"] == "DRD2"
+    assert report["operator_handoff_summary"]["first_next_action"] == (
+        "fill DRD2 hard-decoy metrics in the GPCR operator intake packet"
+    )
+    assert report["operator_handoff_summary"]["blocked_operator_slot_count"] == 3
+    assert report["operator_handoff_summary"]["minimum_evidence"]["target_id"] == "DRD2"
     assert report["phase3_exit_gate"]["status"] == "blocked"
     assert report["phase3_exit_gate"]["failed_criterion_count"] == 4
     assert report["phase3_exit_gate"]["failed_criteria"] == [

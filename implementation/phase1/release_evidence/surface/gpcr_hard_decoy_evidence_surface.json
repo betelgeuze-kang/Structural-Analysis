@@ -34,6 +34,7 @@
       "no_positive_out_anchored_by_top_decoys"
     ],
     "first_next_action": "fill DRD2 hard-decoy metrics in the GPCR operator intake packet",
+    "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
     "materialization_steps": [
       "materialize_gpcr_hard_decoy_suite_report",
       "refresh_gpcr_hard_decoy_product_report",
@@ -66,12 +67,13 @@
     "slot_id": "drd2_hard_decoy_metrics",
     "slot_priority": 1,
     "status": "operator_input_required",
-    "target_id": "DRD2"
+    "target_id": "DRD2",
+    "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
   },
-  "generated_at": "2026-06-29T21:21:23.676026+00:00",
+  "generated_at": "2026-06-30T12:03:40.770065+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:a076379fc363426d995c31c9919b4b3d6b694cf4da547f7b19547f4de1ff5984",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8aa214a5c7a627b8a9dc1fe401ae114ebc57a005368d0cb1a18079ac23a5cd01"
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:02818f111ca413a064706640a7ab8658abea1b1da45ce421fdcc2fa489516b1c",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:f4977e672b68ddb630ade56cc2a7f48988588bd948bc8a7c6fb74ba199c1308d"
   },
   "locked": true,
   "next_actions": [
@@ -92,6 +94,7 @@
         "no_positive_out_anchored_by_top_decoys"
       ],
       "first_next_action": "fill DRD2 hard-decoy metrics in the GPCR operator intake packet",
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
       "materialization_steps": [
         "materialize_gpcr_hard_decoy_suite_report",
         "refresh_gpcr_hard_decoy_product_report",
@@ -124,7 +127,8 @@
       "slot_id": "drd2_hard_decoy_metrics",
       "slot_priority": 1,
       "status": "operator_input_required",
-      "target_id": "DRD2"
+      "target_id": "DRD2",
+      "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
     },
     {
       "blocked_phase3_criteria": [
@@ -134,6 +138,7 @@
         "no_positive_out_anchored_by_top_decoys"
       ],
       "first_next_action": "fill HTR2A hard-decoy metrics in the GPCR operator intake packet",
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
       "materialization_steps": [
         "materialize_gpcr_hard_decoy_suite_report",
         "refresh_gpcr_hard_decoy_product_report",
@@ -166,7 +171,8 @@
       "slot_id": "htr2a_hard_decoy_metrics",
       "slot_priority": 2,
       "status": "operator_input_required",
-      "target_id": "HTR2A"
+      "target_id": "HTR2A",
+      "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
     },
     {
       "blocked_phase3_criteria": [
@@ -176,6 +182,7 @@
         "no_positive_out_anchored_by_top_decoys"
       ],
       "first_next_action": "fill OPRM1 hard-decoy metrics in the GPCR operator intake packet",
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
       "materialization_steps": [
         "materialize_gpcr_hard_decoy_suite_report",
         "refresh_gpcr_hard_decoy_product_report",
@@ -208,7 +215,8 @@
       "slot_id": "oprm1_hard_decoy_metrics",
       "slot_priority": 3,
       "status": "operator_input_required",
-      "target_id": "OPRM1"
+      "target_id": "OPRM1",
+      "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
     }
   ],
   "operator_handoff_summary": {
@@ -217,6 +225,7 @@
     "first_blocked_target": "DRD2",
     "first_blocker": "DRD2:ranking_pr_auc_ci_low_required",
     "first_next_action": "fill DRD2 hard-decoy metrics in the GPCR operator intake packet",
+    "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
     "materialization_steps": [
       "materialize_gpcr_hard_decoy_suite_report",
       "refresh_gpcr_hard_decoy_product_report",
@@ -246,7 +255,8 @@
       }
     },
     "required_slot_count": 3,
-    "route": "/product/gpcr-hard-decoy-suite-report/operator-intake"
+    "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
+    "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
   },
   "operator_intake_required_slot_count": 3,
   "operator_intake_route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
@@ -354,7 +364,7 @@
   ],
   "schema_version": "gpcr-hard-decoy-evidence-surface.v1",
   "science_surface_family": "gpcr",
-  "source_commit_sha": "c5329b7c2214312cf9048addfbb1f3cf8cae9a43",
+  "source_commit_sha": "e380adcd99ef03b23c99f893e97b61c92a169da2",
   "status": "locked",
   "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
   "summary_line": "GPCR hard-decoy suite: LOCKED | first_blocked_target=DRD2 | root_cause=operator_values_required",

@@ -188,7 +188,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T11:53:03.019217+00:00",
+  "generated_at": "2026-06-30T12:07:11.222312+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -199,27 +199,27 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:355f5ec66e853efa6ebeea92e60ace8c4100dae4c4f0ca9bcbf4fd9ba872ae27",
+      "input_checksum": "sha256:8be1d6c5ea4e2fd9c64a411433da763017e22447c08198f74f832345614af29f",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "ee89bc8fffd891d558711eca54fc7d2c0cc4e350",
+      "source_commit_sha": "fec7079b2da42aa26444e16c177ed645e1f76a4b",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:1f46ff464897ce7f99e09c1a1b71da1f9a732e40cc55aaf67ebfb467a7da4283",
+      "input_checksum": "sha256:b2081d0a8d3f0b5635cecd006b2130fbb0c74a93ddec12494e4cc6174a06064d",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "731305db945c74f9ebc3c5c67b700902c50a62a2",
+      "source_commit_sha": "e380adcd99ef03b23c99f893e97b61c92a169da2",
       "status": "blocked"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:355f5ec66e853efa6ebeea92e60ace8c4100dae4c4f0ca9bcbf4fd9ba872ae27",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:1f46ff464897ce7f99e09c1a1b71da1f9a732e40cc55aaf67ebfb467a7da4283"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:8be1d6c5ea4e2fd9c64a411433da763017e22447c08198f74f832345614af29f",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:b2081d0a8d3f0b5635cecd006b2130fbb0c74a93ddec12494e4cc6174a06064d"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -364,6 +364,7 @@
           "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::full_load_gate_not_closed",
@@ -395,11 +396,11 @@
           {
             "active": true,
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
-            "represented_detail_blocker_count": 8,
+            "represented_detail_blocker_count": 9,
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 21,
+        "suppressed_detail_blocker_count": 22,
         "unmatched_detail_blockers": [
           "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate"
         ]
@@ -449,6 +450,7 @@
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::*",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::*",
         "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::*",
@@ -1655,9 +1657,13 @@
           "hip_consistency_proof_gate_not_passed",
           "hip_consistency_proof_has_blockers",
           "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready",
+          "hip_consistency_proof_source_commit_sha_mismatch",
           "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed"
         ],
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py"
+        ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
         "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
@@ -1678,9 +1684,9 @@
         "reused_evidence": false,
         "rocm_hip_required": true,
         "runtime_blockers": [],
-        "source_commit_sha": "731305db945c74f9ebc3c5c67b700902c50a62a2",
-        "source_state_fresh": true,
-        "source_state_kind": "exact",
+        "source_commit_sha": "ee89bc8fffd891d558711eca54fc7d2c0cc4e350",
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -1691,7 +1697,7 @@
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 21,
+      "suppressed_detail_blocker_count": 22,
       "suppressed_detail_blockers": [
         "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
         "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate",
@@ -1710,6 +1716,7 @@
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_has_blockers",
         "g1_full_load_lane::hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready",
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
         "g1_full_load_lane::observed_load_scale_below_required_full_load",
@@ -2018,6 +2025,6 @@
       }
     }
   },
-  "source_commit_sha": "ee89bc8fffd891d558711eca54fc7d2c0cc4e350",
+  "source_commit_sha": "fec7079b2da42aa26444e16c177ed645e1f76a4b",
   "status": "blocked"
 }
