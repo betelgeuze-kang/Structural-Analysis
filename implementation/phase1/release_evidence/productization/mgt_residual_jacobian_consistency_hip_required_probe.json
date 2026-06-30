@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-06-30T09:03:22.245990+00:00",
-  "source_commit_sha": "dfd6a81df264e1dd4c42f95721ebf0d9094a917a",
+  "generated_at": "2026-06-30T09:25:26.868629+00:00",
+  "source_commit_sha": "4145d35faf9432e2100b2f6ec623e560eda9291c",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -13,7 +13,7 @@
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-06-30T09:03:22.247753+00:00",
+    "checked_at": "2026-06-30T09:25:26.870376+00:00",
     "hip_available": true,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -90,12 +90,12 @@
     "schema_version": "mgt-residual-jacobian-consistency-hip-direct-proof.v1",
     "executed": true,
     "execution_error": null,
-    "elapsed_seconds": 157.83061504499346,
-    "source_commit_sha": "73ec5b7ca33016875657206b45bd6c24ae7cc240",
+    "elapsed_seconds": 193.36906194400217,
+    "source_commit_sha": "b776a74f030c92c043c9b08cde055cfbf997b516",
     "status": "partial",
     "direct_residual_newton_ready": false,
     "production_hip_residual_jacobian_path": true,
-    "hip_residual_engine_contract_passed": false,
+    "hip_residual_engine_contract_passed": true,
     "consistent_residual_jacobian_newton_gate_passed": false,
     "matrix_free_global_krylov": {
       "enabled": true,
@@ -105,11 +105,14 @@
       "require_hip_krylov_solver": true,
       "hip_krylov_solver_used": true,
       "accepted_state_refresh_cpu_used": false,
-      "accepted_state_tangent_refresh_backend": "cpu_full_assembly",
-      "accepted_state_tangent_refresh_cpu_used": true,
-      "accepted_state_tangent_refresh_hip_used": false,
-      "accepted_state_tangent_refresh_closure_blocked": true,
-      "accepted_state_tangent_refresh_closure_blocker": "rocm_hip_acceptance_tangent_refresh_required_for_closure",
+      "accepted_state_tangent_refresh_backend": "current_tangent_residual_row_hip_finite_difference_residual_jvp",
+      "accepted_state_tangent_refresh_cpu_used": false,
+      "accepted_state_tangent_refresh_hip_used": true,
+      "accepted_state_tangent_refresh_deferred_to": "current_tangent_residual_row_correction",
+      "accepted_state_tangent_refresh_deferred_satisfied": true,
+      "accepted_state_tangent_refresh_deferred_backend": "hip_finite_difference_residual_jvp",
+      "accepted_state_tangent_refresh_closure_blocked": false,
+      "accepted_state_tangent_refresh_closure_blocker": "",
       "jvp_row_count": 1,
       "jvp_rows_retained": true
     },
@@ -119,7 +122,10 @@
       "batch_replay_backend": "hip_full_residual",
       "require_hip_batch_replay": true,
       "accepted_state_refresh_cpu_used": false,
-      "accepted_state_tangent_refresh_cpu_used": false
+      "accepted_state_tangent_refresh_cpu_used": false,
+      "accepted_state_tangent_refresh_backend": "hip_finite_difference_residual_jvp",
+      "accepted_state_tangent_refresh_hip_used": true,
+      "accepted_state_tangent_refresh_column_count": 1
     }
   },
   "direction_rows": [],
@@ -127,7 +133,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 158.89929467000184
+    "total_seconds": 194.45312187100353
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
   "blockers": [
@@ -136,14 +142,7 @@
     "hip_direct_probe::consistent_jacobian_or_globalization_required",
     "hip_direct_probe::direct_residual_gate_not_closed",
     "hip_direct_probe::full_load_gate_not_closed",
-    "hip_direct_probe::g1_fallback_zero_audit_not_closed",
-    "hip_direct_probe::hip_residual_engine::matrix_free_global_krylov::accepted_state_tangent_refresh_cpu_used",
-    "hip_direct_probe::hip_residual_engine_contract_not_closed",
     "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
-    "hip_direct_probe::rocm_hip_acceptance_refresh_required_for_closure",
-    "hip_direct_probe_consistent_residual_jacobian_not_closed",
-    "hip_direct_probe_fallback_zero_not_closed",
-    "hip_direct_probe_hip_residual_engine_contract_not_closed",
-    "hip_residual_engine::matrix_free_global_krylov::accepted_state_tangent_refresh_cpu_used"
+    "hip_direct_probe_consistent_residual_jacobian_not_closed"
   ]
 }
