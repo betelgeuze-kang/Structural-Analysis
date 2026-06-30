@@ -372,12 +372,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 21,
+      "blocker_count": 20,
       "category_counts": {
         "benchmark": 0,
-        "future commercial": 33,
+        "future commercial": 32,
         "numerical": 6,
-        "software product": 15
+        "software product": 14
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -386,7 +386,7 @@
         "gpu_hip": "performance_track_after_cpu_reference_parity",
         "new_feature_development": "frozen_until_developer_preview_baseline_is_clean"
       },
-      "future_commercial_blocker_count": 33,
+      "future_commercial_blocker_count": 32,
       "gap_ledger_closure_requirement_visibility": {
         "ai_engine_guardrail_rows_ready": true,
         "autonomous_ai_engine_claim_blockers": [
@@ -2903,7 +2903,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-30T16:15:21.716210+00:00",
+  "generated_at": "2026-06-30T16:16:56.341126+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
@@ -2914,7 +2914,7 @@
     "implementation/phase1/release/independent_product_readiness.json": "sha256:eefee87ccb1bd7a45a67539d7d701f976960594a27d2bf56a6e7127524ece598",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:07f09bf4b5f351f0683af5132eac4db8e118416def85a5a8631c20c07e6cf447",
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:b117607ad010f9416de9d0c1e243bc6b95b133753c9246c7cb958e2c78f6384f",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:bec6297891420cf3ce819ee621f49e50296da394f7318912b96296747947e3d9",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:bc30fcf49b403369712f01d1be526f3ce17dd75726265f2da0bfa85929621cc1",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:9cc233f8991a23e88e808c5d8d860f0f654b9b53ac7619aafc3eab9af0a58a08",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:3efada9501087e4ab5b3dc5c8a3986dceccf5a8a54f222627330c0389de3ba1c",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c34ff5d4f32d72483e5b37bbfa8f07dd7567e8cfe0bbe3af6b747ba9cd484abf",
@@ -3592,7 +3592,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "a7b3fded3fb76ccc92546eef2f80128295aa02b3",
+  "source_commit_sha": "a9538054278309d7e14b1d993a79da576ee5860c",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3780,16 +3780,17 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md"
         ],
-        "generated_at": "2026-06-30T16:11:49.061532+00:00",
+        "generated_at": "2026-06-30T16:16:15.503015+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "c00a79c3fe741fb6728bf026478ca6384bf21f0d",
+        "source_commit_sha": "efc752c79910c03c22bd0388a5b4f5a5375566c5",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "developer_preview_rc_status",
