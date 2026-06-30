@@ -32,13 +32,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T22:26:59.940091+00:00",
+  "generated_at": "2026-06-30T23:28:58.559289+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:c1df25fb0f85f5640fe6ab5362ec14a05563a3db20ab4c08192910325a6d17ca",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:42c983c6f6d04c35648a16379ba814c9349ed2427c4251a2b7e2c55736d13111",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:64178f42968f6c8d8629ca8cbb812228dcd2d26241de49752be044f2a4622b79",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:0655d7535f5e97e4964a8ce44af48c0bdba4ef6c0901105c0b221ad1583d526d",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:9b65f960330d285840a80cb0240897ce91dc183f013f70fbb9d05aaedb60c70b"
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:493daab9100f920c8f17ab7729ef31e8fee96e1d3b96dcf8840d218de7917817",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2469abdafaf8024df93a36c74532d0f7ae62b6738dfe95f6f8b751a6b98d0398",
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:fbddeea81228fca0e6037db12a658189dd39e719ab36483be2040afb11575e06"
   },
   "missing_row_inputs": [
     "gpcr_rows",
@@ -131,6 +131,24 @@
       },
       "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
       "max_top_k": 20,
+      "per_row_source_actuality_policy": {
+        "placeholder_markers_rejected": [
+          "<operator",
+          "fixture",
+          "synthetic",
+          "mock",
+          "placeholder",
+          "dummy",
+          "example",
+          "operator_supplied",
+          "unit-test",
+          "test-only"
+        ],
+        "placeholder_provenance_prefixes_rejected": [
+          "operator://"
+        ],
+        "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+      },
       "required_case_fields": [
         "case_id",
         "source_family",
@@ -167,7 +185,8 @@
         "source_url",
         "source_license",
         "source_artifact_sha256",
-        "per_row_source_checksum"
+        "per_row_source_checksum",
+        "per_row_provenance_ref"
       ],
       "top_k_row_quality_minimums": {
         "min_candidate_count_per_case": 2,
@@ -182,6 +201,6 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "1e6933e0c8a7f058d925cec27aea30d0e8dbc589",
+  "source_commit_sha": "5cc16eeb18bd3757839ccc850705bb40a90438d4",
   "status": "operator_evidence_required"
 }

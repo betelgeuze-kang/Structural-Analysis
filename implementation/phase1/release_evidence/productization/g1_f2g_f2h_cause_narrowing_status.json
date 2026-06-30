@@ -1,5 +1,61 @@
 {
   "blockers": [],
+  "cause_ranking": [
+    {
+      "classification": "deprioritized",
+      "evidence": [
+        "direct_support_member_count=0/64",
+        "direct_elastic_link_endpoint_count=0/64",
+        "elastic_link_reachable_to_support_count=0/64"
+      ],
+      "hypothesis": "direct_support_or_elastic_link_row_missing",
+      "next_action": "stop_row_only_support_or_elastic_link_corrections_unless_new_authoritative_rows_are_found"
+    },
+    {
+      "classification": "load_path_transfer_or_tangent_gap",
+      "evidence": [
+        "dominant near-null rows are not support members or elastic-link endpoints",
+        "elastic-link graph does not reach authored supports for dominant rows",
+        "boundary spring context is not full global frame/shell tangent integration",
+        "full_structural_graph_audit_status=ready",
+        "global_connectivity_classification=element_graph_connects_dominant_modes_to_supports",
+        "element_graph_reachable_nodes=8/8"
+      ],
+      "hypothesis": "global_connectivity_or_load_path_transfer_gap",
+      "next_action": "shift_from_connectivity_inventory_to_consistent_residual_jacobian_newton"
+    },
+    {
+      "classification": "active_secondary",
+      "evidence": [
+        "near-null packet is distributed translation/rotation-like",
+        "F2h 0.1->0.2->0.4 status=ready",
+        "residual_trend=nondecreasing"
+      ],
+      "hypothesis": "weak_restraint_or_geometric_softening",
+      "next_action": "compare load-dependent near-null packets and geometric stiffness contributions at 0.2 and 0.4"
+    },
+    {
+      "classification": "required_for_closure",
+      "evidence": [
+        "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
+        "G1 full-load HIP/Newton lane remains blocked"
+      ],
+      "hypothesis": "consistent_residual_jacobian_newton_gap",
+      "next_action": "continue consistent residual/Jacobian Newton path before any G1 promotion"
+    },
+    {
+      "classification": "required_for_production_residency",
+      "evidence": [
+        "hip_consistency_proof_gate_not_passed",
+        "hip_consistency_proof_worker_g1_closure_gate_not_ready",
+        "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
+        "hip_consistency_proof_has_blockers",
+        "production HIP/JVP lane is not proven by the non-promoting F2g/F2h receipts"
+      ],
+      "hypothesis": "production_rocm_hip_residual_jvp_lane_gap",
+      "next_action": "build/execute production ROCm HIP residual/JVP worker when runtime devices are available"
+    }
+  ],
   "claim_boundary": "This receipt narrows the next G1 diagnostic direction from existing F2g/F2h evidence. It does not close G1, promote full-load 1.0, or prove production ROCm/HIP residency.",
   "contract_pass": true,
   "decision_record": {
@@ -50,7 +106,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-06-30T21:10:04.141762+00:00",
+  "generated_at": "2026-06-30T23:28:58.522627+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -109,10 +165,10 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:4f72a8fc36405ae4cbc65647f97b94adb6537dcc5b343fa9ee9a796037cab2e0",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:65164d40a070686adee8a107e84eb2b9485d5dc8135711d6352f6df95810aa95",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e5a6dc32e9c56d96099e5df09092b228aca08670e4a4cd76610ea55aef4f1204",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:850ebe4c2a26151813761d5ff05f7f28afbedae4efcf3adec2cb9b83ffab83f8",
-    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:6db718bfb082e714daecccb998ea9ce82dad286025aac13fa39207b044e1da69"
+    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:d0b088b95c3e1202bc0899d970f159898a4d6ffde41fca5730f8838ecc792379"
   },
   "next_actions": [
     "stop_row_only_support_or_elastic_link_correction_loop",
@@ -123,6 +179,53 @@
   ],
   "promotes_g1_closure": false,
   "reason_code": "PASS",
+  "recommended_next_actions": [
+    {
+      "acceptance_evidence": [
+        "g1_f2g_f2h_cause_narrowing_status.summary.support_or_link_row_gap_disfavored == true",
+        "g1_global_connectivity_load_path_audit.summary.dominant_nodes_without_element_path_to_support_count == 0"
+      ],
+      "action_id": "stop_row_only_support_or_elastic_link_corrections",
+      "priority": 1,
+      "rationale": "Dominant near-null rows are not direct support/elastic-link rows, and the full structural element graph connects the dominant nodes to authored supports.",
+      "status": "ready"
+    },
+    {
+      "acceptance_evidence": [
+        "mgt_residual_jacobian_consistency_hip_required_probe.status == ready",
+        "g1_full_load_hip_newton_lane_report.contract_pass == true",
+        "g1_full_load_hip_newton_lane_report.summary.max_accepted_load_scale >= 1.0"
+      ],
+      "action_id": "execute_consistent_residual_jacobian_newton_rocm_worker_lane",
+      "priority": 2,
+      "rationale": "F2h reaches 0.4 in the lightweight continuation, but G1 full-load closure is still blocked by consistent residual/Jacobian Newton and HIP proof gates.",
+      "required_receipts": [
+        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
+      ],
+      "status": "required_for_g1_closure"
+    },
+    {
+      "acceptance_evidence": [
+        "load-scale 0.2 and 0.4 near-null packet comparison",
+        "geometric-stiffness contribution audit with stop reasons"
+      ],
+      "action_id": "compare_load_dependent_near_null_and_geometric_stiffness",
+      "priority": 3,
+      "rationale": "Residuals are nondecreasing over 0.1->0.2->0.4, so weak-restraint/geometric softening remains an active secondary diagnostic instead of a closure claim.",
+      "status": "secondary_diagnostic"
+    },
+    {
+      "acceptance_evidence": [
+        "production ROCm/HIP residual worker receipt with no CPU fallback",
+        "JVP/residual residency proof and parity against CPU reference"
+      ],
+      "action_id": "build_production_rocm_hip_residual_jvp_worker",
+      "priority": 4,
+      "rationale": "The current receipts are non-promoting diagnostics; production ROCm/HIP residual/JVP residency still needs a dedicated worker proof.",
+      "status": "required_for_production_residency"
+    }
+  ],
   "reuse_policy": "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice",
   "reused_evidence": true,
   "root_cause_classification": {
@@ -161,7 +264,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "8c133d0694466dbfd185c598661ea48ba00e5c60",
+  "source_commit_sha": "5cc16eeb18bd3757839ccc850705bb40a90438d4",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
