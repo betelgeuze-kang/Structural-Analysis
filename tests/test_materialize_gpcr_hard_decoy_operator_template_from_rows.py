@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import sys
 
@@ -134,5 +135,5 @@ def test_cli_writes_operator_template_when_missing_targets_are_allowed(
             "--allow-missing-targets",
         ]
     ) == 0
-    payload = __import__("json").loads(out.read_text(encoding="utf-8"))
+    payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["operator_input_source"]["missing_targets"] == ["HTR2A", "OPRM1"]
