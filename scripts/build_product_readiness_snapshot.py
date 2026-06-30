@@ -490,6 +490,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/materialize_public_benchmark_harness_bundle.py",
             "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
             "scripts/materialize_public_benchmark_phase2_from_rows.py",
+            "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
             "scripts/validate_public_benchmark_external_receipts.py",
         },
         "ux_new_user_observation_report": {
