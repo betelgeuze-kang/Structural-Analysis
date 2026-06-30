@@ -202,7 +202,14 @@ def test_pocketmd_lite_materializer_blocks_empty_intake() -> None:
     assert report["product_surface_ready"] is False
     assert report["first_blocked_target"] == "top_k_refinement_operator_intake"
     assert report["root_cause_tags"] == ["operator_refinement_rows_required"]
-    assert "pocketmd_lite_topk_candidate_rows_missing" in report["blockers"]
+    assert report["blockers"] == [
+        "pocketmd_lite_topk_candidate_rows_missing",
+        "pocketmd_lite_local_min_survival_rows_missing",
+        "pocketmd_lite_contact_persistence_rows_missing",
+        "pocketmd_lite_h_bond_persistence_rows_missing",
+        "pocketmd_lite_clash_relief_rows_missing",
+        "pocketmd_lite_uncertainty_rows_missing",
+    ]
     assert report["phase4_exit_gate"]["status"] == "blocked"
     assert report["phase4_exit_gate"]["failed_criterion_count"] == 7
     assert surface["status"] == "locked"
@@ -277,4 +284,11 @@ def test_pocketmd_lite_materializer_cli_fail_blocked_returns_one(tmp_path: Path)
 
     report = json.loads(out_report.read_text(encoding="utf-8"))
     assert report["product_surface_ready"] is False
-    assert "pocketmd_lite_topk_candidate_rows_missing" in report["blockers"]
+    assert report["blockers"] == [
+        "pocketmd_lite_topk_candidate_rows_missing",
+        "pocketmd_lite_local_min_survival_rows_missing",
+        "pocketmd_lite_contact_persistence_rows_missing",
+        "pocketmd_lite_h_bond_persistence_rows_missing",
+        "pocketmd_lite_clash_relief_rows_missing",
+        "pocketmd_lite_uncertainty_rows_missing",
+    ]

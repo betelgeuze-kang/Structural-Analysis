@@ -67,6 +67,14 @@ BLOCKED_CLAIMS = (
     "long_timescale_md_claim",
     "de_novo_binding_mode_claim",
 )
+EMPTY_INTAKE_BLOCKERS = (
+    "pocketmd_lite_topk_candidate_rows_missing",
+    "pocketmd_lite_local_min_survival_rows_missing",
+    "pocketmd_lite_contact_persistence_rows_missing",
+    "pocketmd_lite_h_bond_persistence_rows_missing",
+    "pocketmd_lite_clash_relief_rows_missing",
+    "pocketmd_lite_uncertainty_rows_missing",
+)
 SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 
 
@@ -474,10 +482,7 @@ def materialize_pocketmd_lite_topk_survival_report(
     blockers = [blocker for row in rows for blocker in row["blockers"]]
     root_cause_tags = list(dict.fromkeys(tag for row in rows for tag in row["root_cause_tags"]))
     if not rows:
-        blockers.append("pocketmd_lite_topk_candidate_rows_missing")
-        blockers.append("pocketmd_lite_local_min_survival_rows_missing")
-        blockers.append("pocketmd_lite_contact_hbond_persistence_rows_missing")
-        blockers.append("pocketmd_lite_uncertainty_rows_missing")
+        blockers.extend(EMPTY_INTAKE_BLOCKERS)
         root_cause_tags.append("operator_refinement_rows_required")
 
     summary = _summary(rows, blockers)

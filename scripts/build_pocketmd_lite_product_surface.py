@@ -48,6 +48,18 @@ SOURCE_CHECKSUM_POLICY = {
     "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
     "required_receipt_field": "source_checksum",
 }
+POCKETMD_LITE_OPERATOR_EVIDENCE_BLOCKERS = [
+    "pocketmd_lite_topk_candidate_rows_missing",
+    "pocketmd_lite_local_min_survival_rows_missing",
+    "pocketmd_lite_contact_persistence_rows_missing",
+    "pocketmd_lite_h_bond_persistence_rows_missing",
+    "pocketmd_lite_clash_relief_rows_missing",
+    "pocketmd_lite_uncertainty_rows_missing",
+]
+POCKETMD_LITE_SURFACE_BLOCKERS = [
+    *POCKETMD_LITE_OPERATOR_EVIDENCE_BLOCKERS,
+    "pocketmd_lite_broad_all_atom_fep_claim_locked",
+]
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -322,12 +334,7 @@ def build_contract(*, repo_root: Path = ROOT) -> dict[str, Any]:
 
 
 def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
-    blockers = [
-        "pocketmd_lite_topk_candidate_rows_missing",
-        "pocketmd_lite_local_min_survival_rows_missing",
-        "pocketmd_lite_contact_hbond_persistence_rows_missing",
-        "pocketmd_lite_uncertainty_rows_missing",
-    ]
+    blockers = list(POCKETMD_LITE_OPERATOR_EVIDENCE_BLOCKERS)
     first_blocker = blockers[0]
     first_blocked_target = "top_k_refinement_operator_intake"
     root_cause_tags = ["operator_refinement_rows_required"]
@@ -782,11 +789,7 @@ def build_surface(
     delivery_handoff: dict[str, Any],
     repo_root: Path = ROOT,
 ) -> dict[str, Any]:
-    blockers = [
-        "pocketmd_lite_topk_refinement_rows_required",
-        "pocketmd_lite_survival_report_blocked",
-        "pocketmd_lite_broad_all_atom_fep_claim_locked",
-    ]
+    blockers = list(POCKETMD_LITE_SURFACE_BLOCKERS)
     phase4_exit_gate = topk_survival_report.get("phase4_exit_gate")
     if not isinstance(phase4_exit_gate, dict):
         report_summary = topk_survival_report.get("summary")

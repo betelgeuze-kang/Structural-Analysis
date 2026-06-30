@@ -94,14 +94,21 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert survival["contract_pass"] is False
     assert survival["summary_line"] == (
         "PocketMD Lite top-k survival report: LOCKED | "
-        "first_blocked_target=top_k_refinement_operator_intake | blockers=4"
+        "first_blocked_target=top_k_refinement_operator_intake | blockers=6"
     )
     assert survival["first_blocker"] == "pocketmd_lite_topk_candidate_rows_missing"
     assert survival["first_blocked_target"] == "top_k_refinement_operator_intake"
     assert survival["root_cause_tags"] == ["operator_refinement_rows_required"]
     assert survival["real_refinement_case_count"] == 0
     assert survival["summary"]["local_min_survival_rate"] is None
-    assert "pocketmd_lite_topk_candidate_rows_missing" in survival["blockers"]
+    assert survival["blockers"] == [
+        "pocketmd_lite_topk_candidate_rows_missing",
+        "pocketmd_lite_local_min_survival_rows_missing",
+        "pocketmd_lite_contact_persistence_rows_missing",
+        "pocketmd_lite_h_bond_persistence_rows_missing",
+        "pocketmd_lite_clash_relief_rows_missing",
+        "pocketmd_lite_uncertainty_rows_missing",
+    ]
     assert "uncertainty_width_median" in survival["required_metrics"]
     assert "source_checksum" in survival["required_case_fields"]
     assert survival["materializer"]["status"] == "ready_for_operator_intake"
@@ -314,6 +321,15 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert surface["first_blocked_target"] == "top_k_refinement_operator_intake"
     assert surface["first_blocker"] == "pocketmd_lite_topk_candidate_rows_missing"
     assert surface["root_cause_tags"] == ["operator_refinement_rows_required"]
+    assert surface["blockers"] == [
+        "pocketmd_lite_topk_candidate_rows_missing",
+        "pocketmd_lite_local_min_survival_rows_missing",
+        "pocketmd_lite_contact_persistence_rows_missing",
+        "pocketmd_lite_h_bond_persistence_rows_missing",
+        "pocketmd_lite_clash_relief_rows_missing",
+        "pocketmd_lite_uncertainty_rows_missing",
+        "pocketmd_lite_broad_all_atom_fep_claim_locked",
+    ]
     assert surface["operator_intake_route"] == "/product/pocketmd-lite/operator-intake"
     assert surface["operator_intake_required_slot_count"] == 1
     assert surface["operator_evidence_gap_count"] == 1
@@ -495,9 +511,9 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
             "contract_pass": False,
             "status": "locked",
             "reason_code": "ERR_POCKETMD_LITE_PRODUCT_SURFACE_LOCKED",
-            "blocker_count": 3,
+            "blocker_count": 7,
             "locked": True,
-            "missing": False,
+            "missing": True,
             "summary_line": (
                 "PocketMD Lite science product surface: LOCKED | "
                 "top-k refinement operator rows required"
