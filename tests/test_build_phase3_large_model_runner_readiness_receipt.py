@@ -58,6 +58,20 @@ def test_large_model_runner_readiness_receipt_blocks_without_execution_evidence(
     assert payload["execution_receipt_inventory"]["execution_receipt_case_count"] == 0
     assert payload["required_evidence_pass_count"] == 2
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
+    assert payload["summary"] == {
+        "required_large_model_count": 2,
+        "current_large_model_execution_receipt_count": 0,
+        "crash_oom_free_execution_count": 0,
+        "scorecard_or_review_count": 0,
+        "source_url_verified_count": 0,
+        "source_checksum_count": 0,
+        "remaining_execution_receipt_count": 2,
+        "remaining_crash_oom_free_count": 2,
+        "remaining_scorecard_or_review_count": 2,
+        "required_evidence_pass_count": 2,
+        "required_evidence_count": len(payload["required_evidence"]),
+        "runner_command_ready": True,
+    }
     assert payload["runner_command_ready"] is True
     assert "run_phase3_large_model_execution_receipt.py" in payload["runner_command_template"]
     assert payload["resource_envelope"]["default_timeout_seconds"] == 7200
@@ -71,6 +85,16 @@ def test_large_model_runner_readiness_receipt_blocks_without_execution_evidence(
     assert payload["runner_receipt_template"]["crashed"] is False
     assert payload["runner_receipt_template"]["oom"] is False
     assert payload["runner_receipt_template"]["contract_pass"] is False
+    assert payload["next_actions"] == [
+        "verify_large_model_source_urls",
+        "complete_large_model_license_review",
+        "attach_large_model_source_checksums",
+        "attach_large_reference_outputs",
+        "record_large_canonical_normalization",
+        "run_large_model_execution_receipts",
+        "attach_large_scorecard_or_approved_review",
+    ]
+    assert payload["recommended_next_actions"] == payload["operator_next_actions"]
     assert "runner command and resource envelope are implemented" in payload["claim_boundary"]
     assert "does not acquire sources" in payload["claim_boundary"]
 
@@ -112,6 +136,9 @@ def test_large_model_runner_readiness_counts_crash_oom_free_receipts_separately(
     assert payload["execution_receipt_inventory"]["execution_receipt_case_count"] == 2
     assert payload["execution_receipt_inventory"]["valid_execution_case_count"] == 0
     assert payload["required_evidence_pass_count"] == 4
+    assert payload["summary"]["remaining_execution_receipt_count"] == 0
+    assert payload["summary"]["remaining_crash_oom_free_count"] == 0
+    assert payload["summary"]["remaining_scorecard_or_review_count"] == 2
     assert "large_model_execution_receipt_missing" not in payload["blockers"]
     assert "large_model_scorecard_or_review_missing" in payload["blockers"]
     assert "source_url_verification_pending" in payload["blockers"]
@@ -154,6 +181,9 @@ def test_large_model_runner_readiness_counts_operator_execution_receipts(tmp_pat
     assert payload["execution_receipt_inventory"]["execution_receipt_case_count"] == 2
     assert payload["execution_receipt_inventory"]["valid_execution_case_count"] == 2
     assert payload["required_evidence_pass_count"] == 5
+    assert payload["summary"]["remaining_execution_receipt_count"] == 0
+    assert payload["summary"]["remaining_crash_oom_free_count"] == 0
+    assert payload["summary"]["remaining_scorecard_or_review_count"] == 0
     assert "checksum_missing" not in payload["blockers"]
     assert "large_model_execution_receipt_missing" not in payload["blockers"]
     assert "large_model_scorecard_or_review_missing" not in payload["blockers"]

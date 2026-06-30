@@ -89,6 +89,122 @@ RESOURCE_ENVELOPE = {
     "artifact_retention_policy": "operator_attached_execution_receipt_result_and_validation_report",
     "execution_scope": "operator_workstation_or_scheduled_self_hosted_runner",
 }
+
+
+def _large_operator_next_actions(
+    blockers: list[str],
+    *,
+    required_large_model_count: int,
+    execution_count: int,
+    crash_oom_free_count: int,
+    scorecard_or_review_count: int,
+    source_url_count: int,
+    source_checksum_count: int,
+) -> list[dict[str, Any]]:
+    blocker_set = set(blockers)
+    actions: list[dict[str, Any]] = []
+    if "source_url_verification_pending" in blocker_set:
+        actions.append(
+            {
+                "id": "verify_large_model_source_urls",
+                "owner": "benchmark_operator",
+                "action": "Attach verified upstream URL/DOI evidence for each selected large model.",
+                "clears_blockers": ["source_url_verification_pending"],
+                "remaining_case_count": max(required_large_model_count - source_url_count, 0),
+                "validation_commands": [
+                    "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+                    "python3 scripts/build_developer_preview_rc_status.py --check",
+                ],
+            }
+        )
+    if "license_review_pending" in blocker_set:
+        actions.append(
+            {
+                "id": "complete_large_model_license_review",
+                "owner": "product_legal",
+                "action": "Attach product/legal approval for local large-model execution and claim boundaries.",
+                "clears_blockers": ["license_review_pending"],
+                "validation_commands": [
+                    "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+                    "python3 scripts/build_developer_preview_rc_status.py --check",
+                ],
+            }
+        )
+    if "checksum_missing" in blocker_set:
+        actions.append(
+            {
+                "id": "attach_large_model_source_checksums",
+                "owner": "benchmark_operator",
+                "action": "Record SHA256 checksums for each selected large model source file or archive.",
+                "clears_blockers": ["checksum_missing"],
+                "remaining_case_count": max(required_large_model_count - source_checksum_count, 0),
+                "validation_commands": [
+                    "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+                ],
+            }
+        )
+    if "reference_outputs_missing" in blocker_set:
+        actions.append(
+            {
+                "id": "attach_large_reference_outputs",
+                "owner": "benchmark_operator",
+                "action": "Attach reference outputs or approved REVIEW baselines for the selected large models.",
+                "clears_blockers": ["reference_outputs_missing"],
+                "remaining_case_count": required_large_model_count,
+                "validation_commands": [
+                    "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+                ],
+            }
+        )
+    if "normalization_not_implemented" in blocker_set:
+        actions.append(
+            {
+                "id": "record_large_canonical_normalization",
+                "owner": "benchmark_operator",
+                "action": "Record canonical units, coordinates, and mapping coverage for each selected large model.",
+                "clears_blockers": ["normalization_not_implemented"],
+                "remaining_case_count": required_large_model_count,
+                "validation_commands": [
+                    "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+                ],
+            }
+        )
+    if "large_model_execution_receipt_missing" in blocker_set:
+        actions.append(
+            {
+                "id": "run_large_model_execution_receipts",
+                "owner": "benchmark_operator",
+                "action": "Run the large-model execution receipt command and retain runtime, memory, crash, and OOM evidence.",
+                "clears_blockers": ["large_model_execution_receipt_missing"],
+                "remaining_case_count": max(required_large_model_count - execution_count, 0),
+                "crash_oom_free_case_count": crash_oom_free_count,
+                "runner_command_template": RUNNER_COMMAND_TEMPLATE,
+                "validation_commands": [
+                    "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+                    "python3 scripts/build_developer_preview_rc_status.py --check",
+                ],
+            }
+        )
+    if "large_model_scorecard_or_review_missing" in blocker_set:
+        actions.append(
+            {
+                "id": "attach_large_scorecard_or_approved_review",
+                "owner": "benchmark_reviewer",
+                "action": "Attach a scorecard PASS or explicit approved REVIEW record for each large model receipt.",
+                "clears_blockers": ["large_model_scorecard_or_review_missing"],
+                "remaining_case_count": max(
+                    required_large_model_count - scorecard_or_review_count,
+                    0,
+                ),
+                "accepted_decisions": ["PASS", "APPROVED_REVIEW"],
+                "validation_commands": [
+                    "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+                    "python3 scripts/build_developer_preview_rc_status.py --check",
+                ],
+            }
+        )
+    return actions
+
 REQUIRED_EVIDENCE = (
     {
         "id": "authoritative_source",
@@ -461,6 +577,38 @@ def build_phase3_large_model_runner_readiness_receipt(
         }
     )
     required_evidence_pass_count = sum(1 for row in evidence_rows if row.get("contract_pass") is True)
+    operator_next_actions = _large_operator_next_actions(
+        blockers,
+        required_large_model_count=required_large_model_count,
+        execution_count=execution_count,
+        crash_oom_free_count=crash_oom_free_count,
+        scorecard_or_review_count=scorecard_or_review_count,
+        source_url_count=source_url_count,
+        source_checksum_count=source_checksum_count,
+    )
+    summary = {
+        "required_large_model_count": required_large_model_count,
+        "current_large_model_execution_receipt_count": execution_count,
+        "crash_oom_free_execution_count": crash_oom_free_count,
+        "scorecard_or_review_count": scorecard_or_review_count,
+        "source_url_verified_count": source_url_count,
+        "source_checksum_count": source_checksum_count,
+        "remaining_execution_receipt_count": max(
+            required_large_model_count - execution_count,
+            0,
+        ),
+        "remaining_crash_oom_free_count": max(
+            required_large_model_count - crash_oom_free_count,
+            0,
+        ),
+        "remaining_scorecard_or_review_count": max(
+            required_large_model_count - scorecard_or_review_count,
+            0,
+        ),
+        "required_evidence_pass_count": required_evidence_pass_count,
+        "required_evidence_count": len(evidence_rows),
+        "runner_command_ready": runner_command_ready,
+    }
     return {
         "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -485,6 +633,7 @@ def build_phase3_large_model_runner_readiness_receipt(
         "execution_receipt_inventory": receipt_inventory,
         "required_evidence_count": len(evidence_rows),
         "required_evidence_pass_count": required_evidence_pass_count,
+        "summary": summary,
         "required_evidence": evidence_rows,
         "runner_command_ready": runner_command_ready,
         "runner_command_template": RUNNER_COMMAND_TEMPLATE,
@@ -509,6 +658,9 @@ def build_phase3_large_model_runner_readiness_receipt(
         },
         "blocked_by": blockers,
         "blockers": blockers,
+        "operator_next_actions": operator_next_actions,
+        "recommended_next_actions": operator_next_actions,
+        "next_actions": [str(row.get("id")) for row in operator_next_actions],
         "owner_action": (
             "Complete license review for the attached large OpenSees/reference models, "
             "attach reference outputs, normalize them into the canonical model, run "

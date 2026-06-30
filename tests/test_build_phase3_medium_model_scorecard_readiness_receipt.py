@@ -75,6 +75,18 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["license_review_status"] == "identified_gpl_3_0_product_legal_review_required"
     assert payload["required_evidence_pass_count"] == 4
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
+    assert payload["summary"] == {
+        "required_medium_model_count": 5,
+        "current_medium_model_scorecard_count": 0,
+        "pass_or_approved_review_count": 0,
+        "remaining_scorecard_case_count": 5,
+        "remaining_pass_or_review_case_count": 5,
+        "required_evidence_pass_count": 4,
+        "required_evidence_count": len(payload["required_evidence"]),
+        "runner_command_ready": True,
+        "source_url_verified": True,
+        "license_review_status": "identified_gpl_3_0_product_legal_review_required",
+    }
     assert "source_url_verification_pending" not in payload["blockers"]
     assert "license_review_pending" in payload["blockers"]
     assert "reference_outputs_missing" in payload["blockers"]
@@ -104,6 +116,14 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert scorecard_gap["remaining_case_count"] == 5
     assert scorecard_gap["receipt_directory"].endswith("medium_model_scorecard_receipts")
     assert [row["id"] for row in payload["operator_next_actions"]] == [
+        "complete_product_legal_license_review",
+        "attach_medium_reference_outputs",
+        "record_medium_canonical_normalization",
+        "run_medium_scorecard_receipts",
+        "attach_medium_pass_or_approved_review_decisions",
+    ]
+    assert payload["recommended_next_actions"] == payload["operator_next_actions"]
+    assert payload["next_actions"] == [
         "complete_product_legal_license_review",
         "attach_medium_reference_outputs",
         "record_medium_canonical_normalization",
@@ -152,6 +172,8 @@ def test_medium_model_scorecard_readiness_counts_operator_scorecard_receipts(tmp
         row["id"] for row in payload["missing_evidence_breakdown"]
     }
     assert payload["case_input_requirements"]["remaining_case_count"] == 0
+    assert payload["summary"]["remaining_scorecard_case_count"] == 0
+    assert payload["summary"]["remaining_pass_or_review_case_count"] == 0
     assert "opensees_medium_scorecard_execution_missing" not in payload["blockers"]
     assert "medium_model_pass_or_review_missing" not in payload["blockers"]
     assert "source_url_verification_pending" in payload["blockers"]

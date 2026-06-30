@@ -129,7 +129,9 @@ def test_public_benchmark_operator_bundle_from_row_files_groups_flat_rows(
                 "provenance_ref": "local-evidence://public-benchmark/vina-gnina/case_a",
                 "engine_id": "vina",
                 "docking_run_id": "case_a_vina",
-                "predicted_ligand_path_or_pose_ref": "operator://vina.sdf",
+                "predicted_ligand_path_or_pose_ref": (
+                    "local-evidence://public-benchmark/vina-gnina/case_a/vina.sdf"
+                ),
                 "symmetry_aware_rmsd_angstrom": "1.4",
                 "pose_success": "true",
                 "score": "-7.2",
@@ -146,7 +148,9 @@ def test_public_benchmark_operator_bundle_from_row_files_groups_flat_rows(
                 "provenance_ref": "local-evidence://public-benchmark/vina-gnina/case_a",
                 "engine_id": "gnina",
                 "docking_run_id": "case_a_gnina",
-                "predicted_ligand_path_or_pose_ref": "operator://gnina.sdf",
+                "predicted_ligand_path_or_pose_ref": (
+                    "local-evidence://public-benchmark/vina-gnina/case_a/gnina.sdf"
+                ),
                 "symmetry_aware_rmsd_angstrom": "1.6",
                 "pose_success": "true",
                 "score": "-7.8",
@@ -285,7 +289,14 @@ def test_public_benchmark_operator_bundle_from_rows_flags_placeholder_sources(
                         "source_license_or_accession": "CASF/PDBBind:test-accession",
                         "source_checksum": "sha256:" + "c" * 64,
                         "provenance_ref": "operator://vina-gnina/case_a",
-                        "engine_runs": [],
+                        "engine_runs": [
+                            {
+                                "engine_id": "vina",
+                                "predicted_ligand_path_or_pose_ref": (
+                                    "operator://poses/vina.sdf"
+                                ),
+                            }
+                        ],
                     }
                 ]
             }
@@ -309,6 +320,10 @@ def test_public_benchmark_operator_bundle_from_rows_flags_placeholder_sources(
     assert "subset_rows:case_a:provenance_ref_placeholder" in source_check["blockers"]
     assert "pose_rows:case_a:receptor_context.provenance_ref_placeholder" in source_check["blockers"]
     assert "enrichment_rows:AA2AR:source_license_or_accession_placeholder" in source_check["blockers"]
+    assert (
+        "vina_gnina_rows:case_a:engine_run_0:"
+        "predicted_ligand_path_or_pose_ref_placeholder"
+    ) in source_check["blockers"]
 
 
 def test_public_benchmark_operator_bundle_from_rows_cli_writes_bundle(

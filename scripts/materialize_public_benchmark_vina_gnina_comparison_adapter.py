@@ -52,6 +52,23 @@ REQUIRED_ENGINE_RUN_FIELDS = (
     "score_direction",
 )
 SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
+PLACEHOLDER_SOURCE_TEXT_MARKERS = (
+    "<operator",
+    "dry-run",
+    "dummy",
+    "example.invalid",
+    "example://",
+    "fake",
+    "fixture",
+    "mock",
+    "operator_supplied",
+    "placeholder",
+    "synthetic",
+    "test-accession",
+    "todo",
+    "unit-test",
+)
+PLACEHOLDER_PROVENANCE_PREFIXES = ("operator://",)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -80,6 +97,23 @@ def _boolean(value: Any) -> bool | None:
 
 def _is_sha256_ref(value: str) -> bool:
     return bool(SOURCE_CHECKSUM_PATTERN.fullmatch(value))
+
+
+def _contains_placeholder_marker(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(marker in lowered for marker in PLACEHOLDER_SOURCE_TEXT_MARKERS)
+
+
+def _has_placeholder_provenance_prefix(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_PROVENANCE_PREFIXES)
+
+
+def _is_repeated_placeholder_checksum(value: str) -> bool:
+    if not _is_sha256_ref(value):
+        return False
+    digest = value.split(":", 1)[1].lower()
+    return len(set(digest)) == 1
 
 
 def _engine_id(value: Any) -> str:
@@ -156,6 +190,16 @@ def _normalize_engine_run(
     if "predicted_ligand_path_or_pose_ref" in row and not pose_ref:
         blockers.append(f"{run_key}:predicted_ligand_path_or_pose_ref_blank")
         root_cause_tags.append("operator_values_required")
+    elif (
+        "predicted_ligand_path_or_pose_ref" in row
+        and pose_ref
+        and (
+            _has_placeholder_provenance_prefix(pose_ref)
+            or _contains_placeholder_marker(pose_ref)
+        )
+    ):
+        blockers.append(f"{run_key}:predicted_ligand_path_or_pose_ref_placeholder")
+        root_cause_tags.append("operator_receipts_required")
     if "symmetry_aware_rmsd_angstrom" in row and (rmsd is None or rmsd < 0.0):
         blockers.append(f"{run_key}:symmetry_aware_rmsd_angstrom_invalid")
         root_cause_tags.append("operator_values_required")
@@ -234,6 +278,30 @@ def _normalize_case(row: dict[str, Any], *, index: int) -> dict[str, Any]:
             root_cause_tags.append("operator_values_required")
     if "source_checksum" in row and source_checksum and not _is_sha256_ref(source_checksum):
         blockers.append(f"{case_key}:source_checksum_invalid")
+        root_cause_tags.append("operator_receipts_required")
+    elif (
+        "source_checksum" in row
+        and source_checksum
+        and _is_repeated_placeholder_checksum(source_checksum)
+    ):
+        blockers.append(f"{case_key}:source_checksum_placeholder_digest")
+        root_cause_tags.append("operator_receipts_required")
+    if (
+        "source_license_or_accession" in row
+        and source_license
+        and _contains_placeholder_marker(source_license)
+    ):
+        blockers.append(f"{case_key}:source_license_or_accession_placeholder")
+        root_cause_tags.append("operator_receipts_required")
+    if (
+        "provenance_ref" in row
+        and provenance_ref
+        and (
+            _has_placeholder_provenance_prefix(provenance_ref)
+            or _contains_placeholder_marker(provenance_ref)
+        )
+    ):
+        blockers.append(f"{case_key}:provenance_ref_placeholder")
         root_cause_tags.append("operator_receipts_required")
     if (
         "benchmark_split" in row

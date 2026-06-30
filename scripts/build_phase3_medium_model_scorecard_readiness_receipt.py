@@ -656,6 +656,30 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         current_scorecard_count=current_scorecard_count,
         pass_or_approved_review_count=pass_or_approved_review_count,
     )
+    operator_next_actions = _operator_next_actions(
+        blockers,
+        required_medium_model_count=required_medium_model_count,
+        current_scorecard_count=current_scorecard_count,
+        pass_or_approved_review_count=pass_or_approved_review_count,
+    )
+    summary = {
+        "required_medium_model_count": required_medium_model_count,
+        "current_medium_model_scorecard_count": current_scorecard_count,
+        "pass_or_approved_review_count": pass_or_approved_review_count,
+        "remaining_scorecard_case_count": max(
+            required_medium_model_count - current_scorecard_count,
+            0,
+        ),
+        "remaining_pass_or_review_case_count": max(
+            required_medium_model_count - pass_or_approved_review_count,
+            0,
+        ),
+        "required_evidence_pass_count": evidence_pass_count,
+        "required_evidence_count": len(evidence_rows),
+        "runner_command_ready": runner_command_ready,
+        "source_url_verified": bool(source_license_receipt.get("source_url_verified") is True),
+        "license_review_status": str(source_license_receipt.get("license_review_status") or ""),
+    }
     return {
         "schema_version": "phase3-medium-model-scorecard-readiness-receipt.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -681,6 +705,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "license_review_status": str(source_license_receipt.get("license_review_status") or ""),
         "required_evidence_count": len(evidence_rows),
         "required_evidence_pass_count": evidence_pass_count,
+        "summary": summary,
         "required_evidence": evidence_rows,
         "runner_command_ready": runner_command_ready,
         "runner_command_template": RUNNER_COMMAND_TEMPLATE,
@@ -721,12 +746,9 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
             "contract_pass": False,
         },
         "missing_evidence_breakdown": missing_evidence,
-        "operator_next_actions": _operator_next_actions(
-            blockers,
-            required_medium_model_count=required_medium_model_count,
-            current_scorecard_count=current_scorecard_count,
-            pass_or_approved_review_count=pass_or_approved_review_count,
-        ),
+        "operator_next_actions": operator_next_actions,
+        "recommended_next_actions": operator_next_actions,
+        "next_actions": [str(row.get("id")) for row in operator_next_actions],
         "case_input_requirements": _case_input_requirements(
             required_medium_model_count=required_medium_model_count,
             current_scorecard_count=current_scorecard_count,

@@ -152,7 +152,10 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                         {
                             "engine_id": "vina",
                             "docking_run_id": f"{case_ids[0]}_vina",
-                            "predicted_ligand_path_or_pose_ref": "operator://vina.sdf",
+                            "predicted_ligand_path_or_pose_ref": (
+                                "local-evidence://public-benchmark/vina-gnina/"
+                                f"{case_ids[0]}/vina.sdf"
+                            ),
                             "symmetry_aware_rmsd_angstrom": 1.4,
                             "pose_success": True,
                             "score": -7.2,
@@ -161,7 +164,10 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                         {
                             "engine_id": "gnina",
                             "docking_run_id": f"{case_ids[0]}_gnina",
-                            "predicted_ligand_path_or_pose_ref": "operator://gnina.sdf",
+                            "predicted_ligand_path_or_pose_ref": (
+                                "local-evidence://public-benchmark/vina-gnina/"
+                                f"{case_ids[0]}/gnina.sdf"
+                            ),
                             "symmetry_aware_rmsd_angstrom": 1.6,
                             "pose_success": True,
                             "score": -7.8,

@@ -136,7 +136,10 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                         {
                             "engine_id": "vina",
                             "docking_run_id": f"{first_case_id}_vina",
-                            "predicted_ligand_path_or_pose_ref": "operator://vina.sdf",
+                            "predicted_ligand_path_or_pose_ref": (
+                                "local-evidence://public-benchmark/vina-gnina/"
+                                f"{first_case_id}/vina.sdf"
+                            ),
                             "symmetry_aware_rmsd_angstrom": 1.4,
                             "pose_success": True,
                             "score": -7.2,
@@ -145,7 +148,10 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                         {
                             "engine_id": "gnina",
                             "docking_run_id": f"{first_case_id}_gnina",
-                            "predicted_ligand_path_or_pose_ref": "operator://gnina.sdf",
+                            "predicted_ligand_path_or_pose_ref": (
+                                "local-evidence://public-benchmark/vina-gnina/"
+                                f"{first_case_id}/gnina.sdf"
+                            ),
                             "symmetry_aware_rmsd_angstrom": 1.6,
                             "pose_success": True,
                             "score": -7.8,

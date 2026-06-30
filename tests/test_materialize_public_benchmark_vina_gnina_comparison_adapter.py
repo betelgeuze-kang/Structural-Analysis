@@ -37,7 +37,9 @@ def _engine_run(
     return {
         "engine_id": engine_id,
         "docking_run_id": f"{engine_id}_run_001",
-        "predicted_ligand_path_or_pose_ref": f"operator://poses/{engine_id}.sdf",
+        "predicted_ligand_path_or_pose_ref": (
+            f"local-evidence://public-benchmark/vina-gnina/{engine_id}.sdf"
+        ),
         "symmetry_aware_rmsd_angstrom": rmsd,
         "pose_success": pose_success,
         "score": score,
@@ -60,9 +62,9 @@ def _case(case_id: str) -> dict[str, object]:
             _engine_run("vina", rmsd=1.4, pose_success=True, score=-7.2),
             _engine_run("gnina", rmsd=2.2, pose_success=False, score=-6.9),
         ],
-        "source_license_or_accession": f"CASF/PDBBind:{case_id}",
+        "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_id}",
         "source_checksum": _checksum(case_id),
-        "provenance_ref": f"operator://vina-gnina/{case_id}",
+        "provenance_ref": f"local-evidence://public-benchmark/vina-gnina/{case_id}",
     }
 
 
@@ -202,6 +204,39 @@ def test_vina_gnina_comparison_adapter_blocks_invalid_checksum() -> None:
     assert adapter["contract_pass"] is False
     assert adapter["first_blocked_target"] == "case_a"
     assert "case_a:source_checksum_invalid" in adapter["blockers"]
+    assert "operator_receipts_required" in adapter["root_cause_tags"]
+
+
+def test_vina_gnina_comparison_adapter_blocks_placeholder_receipts() -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    first_case["source_license_or_accession"] = "CASF/PDBBind:test-accession"
+    first_case["source_checksum"] = "sha256:" + "a" * 64
+    first_case["provenance_ref"] = "operator://vina-gnina/case_a"
+    engine_runs = first_case["engine_runs"]
+    assert isinstance(engine_runs, list)
+    first_run = engine_runs[0]
+    assert isinstance(first_run, dict)
+    first_run["predicted_ligand_path_or_pose_ref"] = "operator://poses/vina.sdf"
+
+    adapter = module.materialize_vina_gnina_comparison_adapter(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert adapter["status"] == "operator_evidence_required"
+    assert adapter["contract_pass"] is False
+    assert adapter["first_blocked_target"] == "case_a"
+    assert "case_a:source_license_or_accession_placeholder" in adapter["blockers"]
+    assert "case_a:source_checksum_placeholder_digest" in adapter["blockers"]
+    assert "case_a:provenance_ref_placeholder" in adapter["blockers"]
+    assert (
+        "case_a:engine_run_0:predicted_ligand_path_or_pose_ref_placeholder"
+        in adapter["blockers"]
+    )
     assert "operator_receipts_required" in adapter["root_cause_tags"]
 
 
