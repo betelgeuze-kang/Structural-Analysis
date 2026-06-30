@@ -203,6 +203,8 @@ def build_public_benchmark_operator_bundle_from_rows(
     pose_rows = _load_rows(pose_rows_path)
     enrichment_rows = _load_rows(enrichment_rows_path)
     vina_gnina_rows = _load_rows(vina_gnina_rows_path)
+    enrichment_targets = _build_enrichment_targets(enrichment_rows)
+    vina_gnina_cases = _build_vina_gnina_cases(vina_gnina_rows)
     target_count = target_subset_case_count or len(subset_rows)
 
     input_paths = [
@@ -226,27 +228,46 @@ def build_public_benchmark_operator_bundle_from_rows(
             "cases": subset_rows,
         },
         "pose_coordinate_intake": {"cases": pose_rows},
+        "pose_validity_intake": {
+            "cases": pose_rows,
+            "consumer_chain": [
+                "public_benchmark_pose_validity_input",
+                "public_benchmark_posebusters_validity_packet",
+                "public_benchmark_symmetry_rmsd_scorecard",
+                "public_benchmark_pose_success_harness",
+            ],
+        },
         "dud_e_lit_pcba_enrichment_intake": {
-            "targets": _build_enrichment_targets(enrichment_rows)
+            "targets": enrichment_targets
         },
         "vina_gnina_comparison_intake": {
-            "cases": _build_vina_gnina_cases(vina_gnina_rows)
+            "cases": vina_gnina_cases
         },
         "materialization_report": {
             "schema_version": SCHEMA_VERSION,
             "subset_row_count": len(subset_rows),
             "pose_row_count": len(pose_rows),
+            "pose_validity_case_count": len(pose_rows),
+            "posebusters_validity_case_count": len(pose_rows),
             "enrichment_row_count": len(enrichment_rows),
-            "enrichment_target_count": len(_build_enrichment_targets(enrichment_rows)),
+            "enrichment_target_count": len(enrichment_targets),
             "vina_gnina_row_count": len(vina_gnina_rows),
-            "vina_gnina_case_count": len(_build_vina_gnina_cases(vina_gnina_rows)),
+            "vina_gnina_case_count": len(vina_gnina_cases),
             "accepted_row_formats": ["json", "jsonl", "ndjson", "csv"],
+            "phase2_harness_inputs": {
+                "casf_pdbbind_pose_success_harness": len(subset_rows) > 0 and len(pose_rows) > 0,
+                "symmetry_aware_ligand_rmsd": len(pose_rows) > 0,
+                "posebusters_style_pose_validity": len(pose_rows) > 0,
+                "vina_gnina_comparison_adapter": len(vina_gnina_cases) > 0,
+                "dud_e_lit_pcba_enrichment": len(enrichment_targets) > 0,
+            },
         },
         "claim_boundary": (
             "This importer only reshapes operator-attached public benchmark row files "
-            "into the existing public benchmark harness bundle format. It does not "
-            "download data, approve licenses, run docking engines, or promote Tier beta "
-            "without the downstream harness materializer passing."
+            "into the existing public benchmark harness bundle format, including "
+            "PoseBusters-style validity input derived from the pose-coordinate rows. "
+            "It does not download data, approve licenses, run docking engines, or "
+            "promote Tier beta without the downstream harness materializer passing."
         ),
     }
 

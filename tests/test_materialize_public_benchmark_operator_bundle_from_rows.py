@@ -159,6 +159,13 @@ def test_public_benchmark_operator_bundle_from_row_files_groups_flat_rows(
     assert payload["schema_version"] == "public-benchmark-operator-bundle.v1"
     assert payload["target_subset_case_count"] == 12
     assert payload["casf_pdbbind_subset_intake"]["cases"][0]["case_id"] == "case_a"
+    assert payload["pose_validity_intake"]["cases"][0]["case_id"] == "case_a"
+    assert payload["pose_validity_intake"]["consumer_chain"] == [
+        "public_benchmark_pose_validity_input",
+        "public_benchmark_posebusters_validity_packet",
+        "public_benchmark_symmetry_rmsd_scorecard",
+        "public_benchmark_pose_success_harness",
+    ]
     targets = payload["dud_e_lit_pcba_enrichment_intake"]["targets"]
     assert len(targets) == 1
     assert targets[0]["target_id"] == "AA2AR"
@@ -173,11 +180,20 @@ def test_public_benchmark_operator_bundle_from_row_files_groups_flat_rows(
         "schema_version": "public-benchmark-operator-bundle-from-rows.v1",
         "subset_row_count": 1,
         "pose_row_count": 1,
+        "pose_validity_case_count": 1,
+        "posebusters_validity_case_count": 1,
         "enrichment_row_count": 2,
         "enrichment_target_count": 1,
         "vina_gnina_row_count": 2,
         "vina_gnina_case_count": 1,
         "accepted_row_formats": ["json", "jsonl", "ndjson", "csv"],
+        "phase2_harness_inputs": {
+            "casf_pdbbind_pose_success_harness": True,
+            "symmetry_aware_ligand_rmsd": True,
+            "posebusters_style_pose_validity": True,
+            "vina_gnina_comparison_adapter": True,
+            "dud_e_lit_pcba_enrichment": True,
+        },
     }
 
 
