@@ -24,9 +24,21 @@
   "current_large_model_execution_receipt_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T07:39:31.427490+00:00",
+  "execution_receipt_inventory": {
+    "claim_boundary": "Only operator-attached large execution receipts with the expected schema, contract_pass=true, validation_contract_pass=true, exit_code=0, and no crash/OOM are counted as large executions. This inventory does not create source authority, license, reference-output, or normalization evidence.",
+    "crash_oom_free_execution_count": 0,
+    "receipt_directory": "implementation/phase1/release_evidence/productization/large_model_execution_receipts",
+    "receipt_file_count": 0,
+    "receipts": [],
+    "schema_version": "phase3-large-model-execution-receipt-inventory.v1",
+    "scorecard_or_review_count": 0,
+    "source_checksum_count": 0,
+    "valid_execution_case_count": 0
+  },
+  "generated_at": "2026-06-30T09:47:41.098425+00:00",
   "input_checksums": {
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:a7a6f6f415f00b6cd49f68a13f888e29ba32c40f18191340716d7fba367924e4",
+    "implementation/phase1/release_evidence/productization/large_model_execution_receipts": "missing",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:c0eb7e47f2e6f2d6b840254c68ec64c7bab49124470813d354ccf0f1257b6866",
     "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:cce4195b4798fc23ca1c0ee683c9564e2656fdd1f6c3d4ef3f6c4cbd032c6ccd"
   },
@@ -55,8 +67,10 @@
     {
       "blocker": "checksum_missing",
       "contract_pass": false,
+      "current_source_checksum_count": 0,
       "id": "source_checksum",
       "required": "SHA256 for each acquired source file or archive.",
+      "required_source_checksum_count": 2,
       "status": "missing"
     },
     {
@@ -76,15 +90,19 @@
     {
       "blocker": "large_model_execution_receipt_missing",
       "contract_pass": false,
+      "current_large_model_execution_receipt_count": 0,
       "id": "execution_receipt",
       "required": "Runtime, peak memory, exit status, crash status, and OOM status per large model.",
+      "required_large_model_execution_receipt_count": 2,
       "status": "missing"
     },
     {
       "blocker": "large_model_scorecard_or_review_missing",
       "contract_pass": false,
+      "current_scorecard_or_review_count": 0,
       "id": "scorecard_or_review",
       "required": "Large-model scorecard pass or explicit approved REVIEW decision.",
+      "required_scorecard_or_review_count": 2,
       "status": "missing"
     },
     {
@@ -141,7 +159,8 @@
   },
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
-  "source_commit_sha": "22bb98753ef94638893ba1c10b4f96cf93af5ada",
+  "source_checksum_count": 0,
+  "source_commit_sha": "12d1729856210bfe58e519409e2c1bfe26215ed6",
   "source_id": "opensees_megatall_model_2_large",
   "status": "blocked",
   "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | evidence=2/9"

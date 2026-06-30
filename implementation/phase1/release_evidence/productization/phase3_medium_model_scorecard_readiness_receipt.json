@@ -21,11 +21,12 @@
   "current_medium_model_scorecard_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T07:39:27.463967+00:00",
+  "generated_at": "2026-06-30T09:47:40.934053+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
-    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:46a9fd3ae7fd9904b988c56fa79021e1ed57f8de26316c4501e563e8fa9809b2",
+    "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:89fcdf02dde84b34d83f7f6027f713ae02be37c47fbab6791232ccb217326345",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:1f7e307b69037e4587b9cdf776762e4d4d2cafc6e97e41c795ba74e34c5014e1",
     "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:cce4195b4798fc23ca1c0ee683c9564e2656fdd1f6c3d4ef3f6c4cbd032c6ccd"
@@ -92,15 +93,19 @@
     {
       "blocker": "opensees_medium_scorecard_execution_missing",
       "contract_pass": false,
+      "current_scorecard_receipt_count": 0,
       "id": "scorecard_execution",
       "required": "OpenSees medium scorecard execution retaining residual, increment, and convergence history.",
+      "required_scorecard_receipt_count": 5,
       "status": "missing"
     },
     {
       "blocker": "medium_model_pass_or_review_missing",
       "contract_pass": false,
+      "current_pass_or_approved_review_count": 0,
       "id": "pass_or_approved_review",
       "required": "Per-case PASS or explicit pre-approved REVIEW decision for selected medium models.",
+      "required_pass_or_approved_review_count": 5,
       "status": "missing"
     },
     {
@@ -138,6 +143,15 @@
   "runner_command_ready": true,
   "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
   "schema_version": "phase3-medium-model-scorecard-readiness-receipt.v1",
+  "scorecard_receipt_inventory": {
+    "claim_boundary": "Only operator-attached medium scorecard receipts with the expected schema, contract_pass=true, validation_contract_pass=true, and no crash/OOM are counted. This inventory does not create source, license, reference-output, or normalization evidence.",
+    "pass_or_approved_review_count": 0,
+    "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
+    "receipt_file_count": 0,
+    "receipts": [],
+    "schema_version": "phase3-medium-model-scorecard-receipt-inventory.v1",
+    "valid_scorecard_case_count": 0
+  },
   "scorecard_receipt_template": {
     "case_id": "OPERATOR_ATTACHED_CASE_ID",
     "contract_pass": false,
@@ -158,7 +172,7 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "22bb98753ef94638893ba1c10b4f96cf93af5ada",
+  "source_commit_sha": "12d1729856210bfe58e519409e2c1bfe26215ed6",
   "source_id": "opensees_scbf16b_medium_candidate",
   "status": "blocked",
   "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=3/9"

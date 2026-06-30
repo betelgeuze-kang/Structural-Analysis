@@ -188,7 +188,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T09:28:10.004642+00:00",
+  "generated_at": "2026-06-30T09:47:41.275357+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -199,27 +199,27 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:c90a2782e6e879f4b4c84949b697ebeeadbbb6160aabd43eb4a6e4744d7fd829",
+      "input_checksum": "sha256:b7731bf169b3d3244bace73fbe15d3a9cbf6af29bf3736f9c1bd93a49f06c91c",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "b776a74f030c92c043c9b08cde055cfbf997b516",
+      "source_commit_sha": "12d1729856210bfe58e519409e2c1bfe26215ed6",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:7bdf7c4d3d2e2bc9a09a2c7e37b359340f887598a9eb833704db0b706f1f9b70",
+      "input_checksum": "sha256:04e5e777d45e179c424cc0340dd94827977cd605dfeea9dc998596c584c758a7",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "94599d70a42bf366e509228d842b66d1941fd694",
+      "source_commit_sha": "ff8accdf3cfd32a50ad33e58d47690ae8a606851",
       "status": "blocked"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:c90a2782e6e879f4b4c84949b697ebeeadbbb6160aabd43eb4a6e4744d7fd829",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:7bdf7c4d3d2e2bc9a09a2c7e37b359340f887598a9eb833704db0b706f1f9b70"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:b7731bf169b3d3244bace73fbe15d3a9cbf6af29bf3736f9c1bd93a49f06c91c",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:04e5e777d45e179c424cc0340dd94827977cd605dfeea9dc998596c584c758a7"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -1655,11 +1655,11 @@
           "hip_consistency_proof_source_commit_sha_mismatch"
         ],
         "changed_paths_since_source_commit": [
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
-          "scripts/build_product_capabilities_surface.py",
-          "tests/test_build_product_capabilities_surface.py",
-          "tests/test_mgt_direct_residual_newton_probe.py"
+          "scripts/build_phase3_large_model_runner_readiness_receipt.py",
+          "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_build_phase3_large_model_runner_readiness_receipt.py",
+          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py"
         ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
@@ -1674,20 +1674,13 @@
           "hip_direct_probe::consistent_jacobian_or_globalization_required",
           "hip_direct_probe::direct_residual_gate_not_closed",
           "hip_direct_probe::full_load_gate_not_closed",
-          "hip_direct_probe::g1_fallback_zero_audit_not_closed",
-          "hip_direct_probe::hip_residual_engine::matrix_free_global_krylov::accepted_state_tangent_refresh_cpu_used",
-          "hip_direct_probe::hip_residual_engine_contract_not_closed",
           "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
-          "hip_direct_probe::rocm_hip_acceptance_refresh_required_for_closure",
-          "hip_direct_probe_consistent_residual_jacobian_not_closed",
-          "hip_direct_probe_fallback_zero_not_closed",
-          "hip_direct_probe_hip_residual_engine_contract_not_closed",
-          "hip_residual_engine::matrix_free_global_krylov::accepted_state_tangent_refresh_cpu_used"
+          "hip_direct_probe_consistent_residual_jacobian_not_closed"
         ],
         "reused_evidence": false,
         "rocm_hip_required": true,
         "runtime_blockers": [],
-        "source_commit_sha": "dfd6a81df264e1dd4c42f95721ebf0d9094a917a",
+        "source_commit_sha": "4145d35faf9432e2100b2f6ec623e560eda9291c",
         "source_state_fresh": false,
         "source_state_kind": "non_receipt_paths_changed",
         "status": "partial"
@@ -2026,6 +2019,6 @@
       }
     }
   },
-  "source_commit_sha": "b776a74f030c92c043c9b08cde055cfbf997b516",
+  "source_commit_sha": "12d1729856210bfe58e519409e2c1bfe26215ed6",
   "status": "blocked"
 }

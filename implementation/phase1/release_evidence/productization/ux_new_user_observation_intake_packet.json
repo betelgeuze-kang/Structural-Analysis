@@ -214,7 +214,7 @@
       "template_value": "derived from observation timestamps"
     }
   ],
-  "generated_at": "2026-06-22T18:17:37.676201+00:00",
+  "generated_at": "2026-06-30T09:46:29.938517+00:00",
   "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
   "observation_report_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
   "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
