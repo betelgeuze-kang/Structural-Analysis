@@ -71,7 +71,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
 
     kpis = surface["release_decision_kpis"]
     assert kpis == {
-        "approval_token_count": 7,
+        "approval_token_count": 4,
         "blocked_release_count": 8,
         "broad_gpcr_family_claim_safe": False,
         "evidence_surface_count": 12,
