@@ -32,15 +32,24 @@ def test_phase3_ifc_source_license_receipt_keeps_claim_boundary_blocked() -> Non
     assert payload["source_count"] == 3
     assert payload["source_url_verified_count"] == 3
     assert payload["ready_source_count"] == 0
+    assert payload["source_file_acquired_count"] == 10
+    assert payload["source_checksum_attached_count"] == 10
+    assert payload["import_health_execution_count"] == 10
+    assert payload["import_health_contract_pass_count"] == 10
+    assert payload["visible_entity_accounting_case_count"] == 10
+    assert payload["silent_import_loss_gate_pass_count"] == 10
+    assert payload["quantity_credit_ready_count"] == 0
+    assert payload["source_license_review_pass_count"] == 0
+    assert payload["source_license_review_blocker_count"] == 3
     assert payload["redistribution_allowed_source_count"] == 0
     assert payload["commercial_use_allowed_source_count"] == 0
-    assert "selected_file_checksums_missing" in payload["blockers"]
-    assert "import_health_execution_missing" in payload["blockers"]
-    assert "dirty_import_execution_missing" in payload["blockers"]
+    assert "selected_file_checksums_missing" not in payload["blockers"]
+    assert "import_health_execution_missing" not in payload["blockers"]
+    assert "dirty_import_execution_missing" not in payload["blockers"]
     assert "query_expected_answers_missing" in payload["blockers"]
     assert "phase3_ifc_import_case_count_below_minimum" not in payload["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_missing" in payload["blockers"]
-    assert "silent_import_loss_gate_not_executed" in payload["blockers"]
+    assert "silent_import_loss_gate_not_executed" not in payload["blockers"]
     assert "silent_import_loss_gate_not_implemented" not in payload["blockers"]
     assert "download or bundle" in payload["claim_boundary"]
     assert "close Phase 3" in payload["claim_boundary"]
@@ -68,8 +77,15 @@ def test_phase3_ifc_source_license_receipt_keeps_claim_boundary_blocked() -> Non
     assert pcert["redistribution_allowed"] is False
     assert pcert["commercial_use_allowed"] is False
     assert pcert["ready_for_phase3_quantity_credit"] is False
-    assert pcert["expected_output_status"] == "authored_import_health_contracts_pending_execution"
-    assert "silent_import_loss_gate_not_executed" in pcert["blockers"]
+    assert pcert["checksum_status"] == "selected_file_checksums_attached_from_local_private_corpus"
+    assert pcert["source_file_acquired_count"] == 2
+    assert pcert["source_checksum_attached_count"] == 2
+    assert pcert["import_health_execution_count"] == 2
+    assert pcert["import_health_contract_pass_count"] == 2
+    assert pcert["silent_import_loss_gate_pass_count"] == 2
+    assert pcert["expected_output_status"] == "import_health_contracts_executed_and_passed_pending_license_review"
+    assert pcert["blockers"] == ["product_legal_license_review_pending"]
+    assert "silent_import_loss_gate_not_executed" not in pcert["blockers"]
     assert "silent_import_loss_gate_not_implemented" not in pcert["blockers"]
     assert "Building-Structural.ifc" in pcert["candidate_files"]
     assert "Infra-Bridge.ifc" in pcert["candidate_files"]
@@ -78,14 +94,20 @@ def test_phase3_ifc_source_license_receipt_keeps_claim_boundary_blocked() -> Non
     assert community["lanes"] == ["buildingsmart-dirty-ifc"]
     assert community["source_url"] == "https://github.com/buildingsmart-community/Community-Sample-Test-Files"
     assert "dirty_file_selection_pending" not in community["blockers"]
-    assert "dirty_import_execution_missing" in community["blockers"]
-    assert community["expected_output_status"] == "authored_negative_import_contracts_pending_execution"
+    assert "dirty_import_execution_missing" not in community["blockers"]
+    assert community["blockers"] == ["per_file_license_review_pending"]
+    assert community["expected_output_status"] == "import_health_contracts_executed_and_passed_pending_license_review"
     assert community["acquisition_receipt_path"].endswith(
         "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json"
     )
     assert len(community["candidate_files"]) == 8
     assert "Clinic_Structural.ifc" in community["candidate_files"]
-    assert community["checksum_status"] == "missing_until_dirty_file_acquisition"
+    assert community["checksum_status"] == "selected_file_checksums_attached_from_local_private_corpus"
+    assert community["source_file_acquired_count"] == 8
+    assert community["source_checksum_attached_count"] == 8
+    assert community["import_health_execution_count"] == 8
+    assert community["import_health_contract_pass_count"] == 8
+    assert community["silent_import_loss_gate_pass_count"] == 8
 
     ifc_bench = sources["ifc_bench_v2_arxiv_query_tasks"]
     assert ifc_bench["lanes"] == ["ifc-query-and-gui"]

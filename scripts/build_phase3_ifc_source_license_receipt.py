@@ -34,6 +34,9 @@ DIRTY_IFC_CANDIDATE_FILES = [
     "Clinic_Plumbing.ifc",
     "Clinic_Structural.ifc",
 ]
+PHASE3_IFC_CLEAN_ACQUISITION = PRODUCTIZATION / "phase3_buildingsmart_ifc_acquisition_receipt.json"
+PHASE3_IFC_DIRTY_ACQUISITION = PRODUCTIZATION / "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json"
+PHASE3_IFC_IMPORT_HEALTH = PRODUCTIZATION / "phase3_ifc_import_health_execution_receipt.json"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -59,12 +62,126 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _load_receipt(repo_root: Path, path: Path) -> dict[str, Any]:
+    resolved = path if path.is_absolute() else repo_root / path
+    if not resolved.exists():
+        return {}
+    try:
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _acquisition_stats(payload: dict[str, Any], selected_count: int) -> dict[str, Any]:
+    acquired_count = int(payload.get("source_file_acquired_count", 0) or 0)
+    checksum_count = int(payload.get("source_checksum_attached_count", 0) or 0)
+    return {
+        "source_file_acquired_count": acquired_count,
+        "source_checksum_attached_count": checksum_count,
+        "source_files_acquired": selected_count > 0 and acquired_count >= selected_count,
+        "selected_file_checksums_ready": selected_count > 0 and checksum_count >= selected_count,
+    }
+
+
+def _import_health_stats(payload: dict[str, Any], lane_kind: str, selected_count: int) -> dict[str, Any]:
+    case_receipts = [
+        row
+        for row in payload.get("case_receipts", [])
+        if isinstance(row, dict) and row.get("lane_kind") == lane_kind
+    ]
+    executed_count = sum(1 for row in case_receipts if row.get("import_health_executed") is True)
+    contract_pass_count = sum(1 for row in case_receipts if row.get("import_health_contract_pass") is True)
+    silent_gate_pass_count = sum(
+        1
+        for row in case_receipts
+        if isinstance(row.get("silent_import_loss_gate"), dict)
+        and row["silent_import_loss_gate"].get("contract_pass") is True
+    )
+    return {
+        "import_health_execution_count": executed_count,
+        "import_health_contract_pass_count": contract_pass_count,
+        "silent_import_loss_gate_pass_count": silent_gate_pass_count,
+        "import_health_execution_ready": selected_count > 0 and executed_count >= selected_count,
+        "import_health_contract_ready": selected_count > 0 and contract_pass_count >= selected_count,
+        "silent_import_loss_gate_executed": selected_count > 0 and silent_gate_pass_count >= selected_count,
+    }
+
+
+def _ifc_source_blockers(
+    *,
+    selected_file_checksums_ready: bool,
+    import_health_execution_ready: bool,
+    import_health_contract_ready: bool,
+    silent_import_loss_gate_executed: bool,
+    license_blocker: str,
+    import_execution_blocker: str,
+    silent_gate_blocker: str,
+) -> list[str]:
+    blockers = []
+    if not selected_file_checksums_ready:
+        blockers.append("selected_file_checksums_missing")
+    if not import_health_execution_ready or not import_health_contract_ready:
+        blockers.append(import_execution_blocker)
+    if not silent_import_loss_gate_executed:
+        blockers.append(silent_gate_blocker)
+    blockers.append(license_blocker)
+    return blockers
+
+
+def _ifc_checksum_status(stats: dict[str, Any]) -> str:
+    if stats["selected_file_checksums_ready"]:
+        return "selected_file_checksums_attached_from_local_private_corpus"
+    if stats["source_files_acquired"]:
+        return "selected_files_acquired_checksum_receipt_incomplete"
+    return "missing_until_acquisition_script_fetches_selected_files"
+
+
+def _ifc_expected_output_status(stats: dict[str, Any]) -> str:
+    if stats["import_health_contract_ready"] and stats["silent_import_loss_gate_executed"]:
+        return "import_health_contracts_executed_and_passed_pending_license_review"
+    if stats["import_health_execution_ready"]:
+        return "import_health_execution_complete_contract_review_blocked"
+    return "authored_import_health_contracts_pending_execution"
+
+
 def build_phase3_ifc_source_license_receipt(
     *,
     repo_root: Path = ROOT,
     source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
+    clean_acquisition = _load_receipt(repo_root, PHASE3_IFC_CLEAN_ACQUISITION)
+    dirty_acquisition = _load_receipt(repo_root, PHASE3_IFC_DIRTY_ACQUISITION)
+    import_health = _load_receipt(repo_root, PHASE3_IFC_IMPORT_HEALTH)
+    clean_selected_count = 2
+    dirty_selected_count = len(DIRTY_IFC_CANDIDATE_FILES)
+    clean_stats = {
+        **_acquisition_stats(clean_acquisition, clean_selected_count),
+        **_import_health_stats(import_health, "clean", clean_selected_count),
+    }
+    dirty_stats = {
+        **_acquisition_stats(dirty_acquisition, dirty_selected_count),
+        **_import_health_stats(import_health, "dirty", dirty_selected_count),
+    }
+    clean_blockers = _ifc_source_blockers(
+        selected_file_checksums_ready=clean_stats["selected_file_checksums_ready"],
+        import_health_execution_ready=clean_stats["import_health_execution_ready"],
+        import_health_contract_ready=clean_stats["import_health_contract_ready"],
+        silent_import_loss_gate_executed=clean_stats["silent_import_loss_gate_executed"],
+        license_blocker="product_legal_license_review_pending",
+        import_execution_blocker="import_health_execution_missing",
+        silent_gate_blocker="silent_import_loss_gate_not_executed",
+    )
+    dirty_blockers = _ifc_source_blockers(
+        selected_file_checksums_ready=dirty_stats["selected_file_checksums_ready"],
+        import_health_execution_ready=dirty_stats["import_health_execution_ready"],
+        import_health_contract_ready=dirty_stats["import_health_contract_ready"],
+        silent_import_loss_gate_executed=dirty_stats["silent_import_loss_gate_executed"],
+        license_blocker="per_file_license_review_pending",
+        import_execution_blocker="dirty_import_execution_missing",
+        silent_gate_blocker="silent_data_loss_negative_gate_not_executed",
+    )
     sources = [
         {
             "source_id": "buildingsmart_pcert_sample_scene",
@@ -81,8 +198,9 @@ def build_phase3_ifc_source_license_receipt(
             "license_review_status": "declared_upstream_license_seen_product_legal_review_pending",
             "redistribution_allowed": False,
             "commercial_use_allowed": False,
-            "checksum_status": "missing_until_acquisition_script_fetches_selected_files",
-            "expected_output_status": "authored_import_health_contracts_pending_execution",
+            "checksum_status": _ifc_checksum_status(clean_stats),
+            "expected_output_status": _ifc_expected_output_status(clean_stats),
+            **clean_stats,
             "acquisition_receipt_path": (
                 "implementation/phase1/release_evidence/productization/"
                 "phase3_buildingsmart_ifc_acquisition_receipt.json"
@@ -90,16 +208,11 @@ def build_phase3_ifc_source_license_receipt(
             "ready_for_phase3_quantity_credit": False,
             "claim_boundary": (
                 "Official buildingSMART PCERT sample source identity and declared license "
-                "URL are attached, but no source file checksums, product/legal approval, "
-                "executed import-health/silent-import-loss gate outputs, or Phase 3 "
-                "quantity credit are claimed."
+                "URL are attached. Local source/checksum and import-health status are "
+                "reflected from generated receipts, but product/legal approval and "
+                "Phase 3 quantity credit are not claimed."
             ),
-            "blockers": [
-                "selected_file_checksums_missing",
-                "product_legal_license_review_pending",
-                "import_health_execution_missing",
-                "silent_import_loss_gate_not_executed",
-            ],
+            "blockers": clean_blockers,
         },
         {
             "source_id": "buildingsmart_community_dirty_samples",
@@ -116,8 +229,9 @@ def build_phase3_ifc_source_license_receipt(
             "license_review_status": "declared_upstream_license_seen_per_file_review_pending",
             "redistribution_allowed": False,
             "commercial_use_allowed": False,
-            "checksum_status": "missing_until_dirty_file_acquisition",
-            "expected_output_status": "authored_negative_import_contracts_pending_execution",
+            "checksum_status": _ifc_checksum_status(dirty_stats),
+            "expected_output_status": _ifc_expected_output_status(dirty_stats),
+            **dirty_stats,
             "acquisition_receipt_path": (
                 "implementation/phase1/release_evidence/productization/"
                 "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json"
@@ -125,16 +239,11 @@ def build_phase3_ifc_source_license_receipt(
             "ready_for_phase3_quantity_credit": False,
             "claim_boundary": (
                 "Community sample source identity and declared license URL are attached "
-                "with eight selected dirty/import-hardening IFC contracts. Per-file "
-                "license review, checksums, import-health execution, and quantity "
-                "credit remain blocked."
+                "with eight selected dirty/import-hardening IFC contracts. Local "
+                "source/checksum and import-health status are reflected from generated "
+                "receipts, but per-file license review and quantity credit remain blocked."
             ),
-            "blockers": [
-                "selected_file_checksums_missing",
-                "per_file_license_review_pending",
-                "dirty_import_execution_missing",
-                "silent_data_loss_negative_gate_not_executed",
-            ],
+            "blockers": dirty_blockers,
         },
         {
             "source_id": "ifc_bench_v2_arxiv_query_tasks",
@@ -184,6 +293,18 @@ def build_phase3_ifc_source_license_receipt(
     if remaining_import_contract_count > 0:
         count_blockers.append("phase3_ifc_import_case_count_below_minimum")
     blockers = sorted({blocker for row in sources for blocker in [*row["blockers"], *count_blockers]})
+    source_file_acquired_count = int(clean_stats["source_file_acquired_count"]) + int(
+        dirty_stats["source_file_acquired_count"]
+    )
+    source_checksum_attached_count = int(clean_stats["source_checksum_attached_count"]) + int(
+        dirty_stats["source_checksum_attached_count"]
+    )
+    source_license_review_blocker_count = sum(
+        1
+        for row in sources
+        if any("license" in blocker or "legal" in blocker for blocker in row["blockers"])
+    )
+    quantity_credit_ready_count = int(import_health.get("quantity_credit_ready_count", 0) or 0)
     return {
         "schema_version": "phase3-ifc-source-license-receipt.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -207,6 +328,21 @@ def build_phase3_ifc_source_license_receipt(
         "source_count": len(sources),
         "source_url_verified_count": sum(1 for row in sources if row["source_url_verified"]),
         "ready_source_count": sum(1 for row in sources if row["ready_for_phase3_quantity_credit"]),
+        "source_file_acquired_count": source_file_acquired_count,
+        "source_checksum_attached_count": source_checksum_attached_count,
+        "import_health_execution_count": int(import_health.get("import_health_execution_count", 0) or 0),
+        "import_health_contract_pass_count": int(
+            import_health.get("import_health_contract_pass_count", 0) or 0
+        ),
+        "visible_entity_accounting_case_count": int(
+            import_health.get("visible_entity_accounting_case_count", 0) or 0
+        ),
+        "silent_import_loss_gate_pass_count": int(
+            import_health.get("silent_import_loss_gate_pass_count", 0) or 0
+        ),
+        "quantity_credit_ready_count": quantity_credit_ready_count,
+        "source_license_review_pass_count": 0,
+        "source_license_review_blocker_count": source_license_review_blocker_count,
         "redistribution_allowed_source_count": sum(1 for row in sources if row["redistribution_allowed"]),
         "commercial_use_allowed_source_count": sum(1 for row in sources if row["commercial_use_allowed"]),
         "phase3_ifc_import_case_requirement": {
@@ -215,7 +351,7 @@ def build_phase3_ifc_source_license_receipt(
             "selected_dirty_import_contract_count": selected_dirty_import_contract_count,
             "selected_total_import_contract_count": selected_total_import_contract_count,
             "remaining_import_contract_count": remaining_import_contract_count,
-            "quantity_credit_ready_count": 0,
+            "quantity_credit_ready_count": quantity_credit_ready_count,
             "import_health_execution_receipt_path": (
                 "implementation/phase1/release_evidence/productization/"
                 "phase3_ifc_import_health_execution_receipt.json"
@@ -225,17 +361,19 @@ def build_phase3_ifc_source_license_receipt(
             "claim_boundary": (
                 "The Phase 3 roadmap requires at least 10 clean/dirty IFC import cases. "
                 "Current source-license evidence identifies two clean PCERT contracts "
-                "and eight dirty/import-hardening community contracts; none have source "
-                "checksums, product legal approval, import-health execution, or quantity credit."
+                "and eight dirty/import-hardening community contracts. Local "
+                "source/checksum and import-health execution evidence is reflected when "
+                "present, but quantity credit remains blocked until product/legal and "
+                "per-file license review pass."
             ),
         },
         "sources": sources,
         "blockers": blockers,
         "claim_boundary": (
             "This receipt attaches source identity and upstream license URLs for selected "
-            "IFC benchmark candidates. It does not download or bundle IFC files, approve "
-            "redistribution/commercial use, attach file checksums, author expected outputs, "
-            "or close Phase 3."
+            "IFC benchmark candidates and reflects local generated acquisition/import-health "
+            "receipts when present. It does not download or bundle IFC files, approve "
+            "redistribution/commercial use, or close Phase 3."
         ),
     }
 

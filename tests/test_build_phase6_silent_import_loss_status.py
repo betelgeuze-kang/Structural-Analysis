@@ -20,7 +20,7 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def test_phase6_silent_import_loss_status_blocks_without_ifc_execution() -> None:
+def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_spillover() -> None:
     payload = module.build_phase6_silent_import_loss_status(repo_root=REPO_ROOT)
 
     assert payload["schema_version"] == "phase6-silent-import-loss-status.v1"
@@ -31,49 +31,49 @@ def test_phase6_silent_import_loss_status_blocks_without_ifc_execution() -> None
     assert payload["clean_selected_file_count"] == 2
     assert payload["dirty_selected_file_count"] == 8
     assert payload["selected_import_case_count"] == 10
-    assert payload["import_health_execution_count"] == 0
-    assert payload["import_health_contract_pass_count"] == 0
+    assert payload["source_file_acquired_count"] == 10
+    assert payload["source_checksum_attached_count"] == 10
+    assert payload["import_health_execution_count"] == 10
+    assert payload["import_health_contract_pass_count"] == 10
+    assert payload["visible_entity_accounting_case_count"] == 10
+    assert payload["silent_import_loss_gate_pass_count"] == 10
+    assert payload["quantity_credit_ready_count"] == 0
+    assert payload["silent_import_loss_zero"] is False
     assert payload["evidence_requirements"]["clean_dirty_import_case_count"] == {
         "current": 10,
         "required": 10,
         "contract_pass": True,
     }
-    assert payload["evidence_requirements"]["source_files_acquired"] is False
-    assert payload["evidence_requirements"]["selected_file_checksums_ready"] is False
+    assert payload["evidence_requirements"]["source_files_acquired"] is True
+    assert payload["evidence_requirements"]["selected_file_checksums_ready"] is True
     assert payload["evidence_requirements"]["product_license_review_ready"] is False
-    assert payload["evidence_requirements"]["import_health_execution_ready"] is False
-    assert payload["evidence_requirements"]["silent_data_loss_negative_gate_executed"] is False
+    assert payload["evidence_requirements"]["import_health_execution_ready"] is True
+    assert payload["evidence_requirements"]["silent_data_loss_negative_gate_executed"] is True
     assert payload["readiness_inputs"]["import_health_receipt"].endswith(
         "phase3_ifc_import_health_execution_receipt.json"
     )
-    assert "source_file_not_acquired" in payload["blockers"]
-    assert "source_sha256_missing" in payload["blockers"]
-    assert "selected_file_checksums_missing" in payload["blockers"]
+    assert "source_file_not_acquired" not in payload["blockers"]
+    assert "source_sha256_missing" not in payload["blockers"]
+    assert "selected_file_checksums_missing" not in payload["blockers"]
     assert "product_legal_license_review_pending" in payload["blockers"]
-    assert "silent_data_loss_negative_gate_not_executed" in payload["blockers"]
-    assert "silent_import_loss_gate_not_executed" in payload["blockers"]
+    assert "phase3_ifc_import_case_quantity_credit_missing" in payload["blockers"]
+    assert "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review" in payload["blockers"]
+    assert "silent_data_loss_negative_gate_not_executed" not in payload["blockers"]
+    assert "silent_import_loss_gate_not_executed" not in payload["blockers"]
     assert "silent_import_loss_gate_not_implemented" not in payload["blockers"]
-    assert "ifc_import_health_execution_count_below_required:0/10" in payload["blockers"]
+    assert "ifc_import_health_execution_count_below_required:0/10" not in payload["blockers"]
     grouping = payload["blocker_grouping_metadata"]
     assert grouping["schema_version"] == "phase6-silent-import-loss-blocker-groups.v1"
     assert grouping["unassigned_blockers"] == []
     groups = grouping["groups"]
     assert groups["source_acquisition"]["display_name"] == "source/acquisition"
     assert groups["source_acquisition"]["scope"] == "direct_silent_import_loss"
-    assert "source_file_not_acquired" in groups["source_acquisition"]["blockers"]
-    assert "source_sha256_missing" in groups["checksum"]["blockers"]
-    assert "selected_file_checksums_missing" in groups["checksum"]["blockers"]
+    assert groups["source_acquisition"]["blockers"] == []
+    assert groups["checksum"]["blockers"] == []
     assert "product_legal_license_review_pending" in groups["license_legal"]["blockers"]
-    assert "import_health_execution_missing" in groups["import_execution"]["blockers"]
-    assert (
-        "ifc_import_health_execution_count_below_required:0/10"
-        in groups["import_execution"]["blockers"]
-    )
-    assert (
-        "silent_data_loss_negative_gate_not_executed"
-        in groups["silent_loss_gate"]["blockers"]
-    )
-    assert "silent_import_loss_gate_not_executed" in groups["silent_loss_gate"]["blockers"]
+    assert "phase3_ifc_import_case_quantity_credit_missing" in groups["quantity_credit"]["blockers"]
+    assert groups["import_execution"]["blockers"] == []
+    assert groups["silent_loss_gate"]["blockers"] == []
     assert groups["query_gui_spillover"]["scope"] == "spillover_not_direct_silent_import_loss"
     assert groups["query_gui_spillover"]["blockers"] == [
         "dataset_repository_url_missing",
@@ -82,8 +82,8 @@ def test_phase6_silent_import_loss_status_blocks_without_ifc_execution() -> None
         "query_task_file_checksums_missing",
     ]
     assert "not direct silent-import-loss closure blockers" in grouping["claim_boundary"]
-    assert "regenerate the Phase 3 import-health execution receipt" in payload["owner_action"]
-    assert "regenerate and check this Phase 6 silent-import-loss status" in payload["owner_action"]
+    assert "complete product/legal and per-file license review" in payload["owner_action"]
+    assert "close or explicitly defer the ifc-bench query/GUI spillover blockers" in payload["owner_action"]
     assert payload["owner_action"].endswith("then refresh the RC final gate.")
     assert "expected contracts" not in payload["claim_boundary"]
     assert "does not download or bundle IFC files" in payload["claim_boundary"]

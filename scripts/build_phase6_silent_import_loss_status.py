@@ -33,7 +33,6 @@ BLOCKER_GROUPS = {
         "blockers": {
             "source_file_not_acquired",
             "phase3_ifc_import_case_count_below_minimum",
-            "phase3_ifc_import_case_quantity_credit_missing",
         },
     },
     "checksum": {
@@ -50,6 +49,14 @@ BLOCKER_GROUPS = {
         "blockers": {
             "product_legal_license_review_pending",
             "per_file_license_review_pending",
+        },
+    },
+    "quantity_credit": {
+        "display_name": "quantity credit",
+        "scope": "direct_silent_import_loss",
+        "blockers": {
+            "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+            "phase3_ifc_import_case_quantity_credit_missing",
         },
     },
     "import_execution": {
@@ -145,7 +152,8 @@ def _blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
             "Query/GUI spillover blockers are carried through for visibility from the "
             "Phase 3 source-license receipt, but they are not direct silent-import-loss "
             "closure blockers. The RC gate remains blocked until the direct source, "
-            "checksum, license, import execution, and silent-loss gate groups are clear."
+            "checksum, license, quantity-credit, import execution, and silent-loss gate "
+            "groups are clear."
         ),
         "groups": groups,
         "unassigned_blockers": [
@@ -173,19 +181,38 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
     import_health_contract_pass_count = int(
         import_health.get("import_health_contract_pass_count", 0) or 0
     )
-    source_blockers = _blockers(source_license)
-    all_ifc_blockers = _blockers(import_health, clean_acquisition, dirty_acquisition, source_license)
-    source_acquired = not any("source_file_not_acquired" in blocker for blocker in all_ifc_blockers)
-    checksums_ready = not any(
-        "checksum" in blocker or "sha256" in blocker for blocker in all_ifc_blockers
+    source_file_acquired_count = int(
+        import_health.get("source_file_acquired_count", 0)
+        or int(clean_acquisition.get("source_file_acquired_count", 0) or 0)
+        + int(dirty_acquisition.get("source_file_acquired_count", 0) or 0)
     )
+    source_checksum_attached_count = int(
+        import_health.get("source_checksum_attached_count", 0)
+        or int(clean_acquisition.get("source_checksum_attached_count", 0) or 0)
+        + int(dirty_acquisition.get("source_checksum_attached_count", 0) or 0)
+    )
+    visible_entity_accounting_case_count = int(
+        import_health.get("visible_entity_accounting_case_count", 0) or 0
+    )
+    silent_import_loss_gate_pass_count = int(
+        import_health.get("silent_import_loss_gate_pass_count", 0) or 0
+    )
+    quantity_credit_ready_count = int(
+        import_health.get("quantity_credit_ready_count", 0) or 0
+    )
+    source_blockers = _blockers(source_license)
+    acquisition_blockers = _blockers(clean_acquisition, dirty_acquisition)
+    import_health_blockers = _blockers(import_health)
+    source_acquired = source_file_acquired_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
+    checksums_ready = source_checksum_attached_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
     license_ready = not any("license" in blocker or "legal" in blocker for blocker in source_blockers)
-    import_health_ready = bool(import_health.get("contract_pass") is True)
-    silent_negative_gate_executed = not any(
-        "silent_data_loss_negative_gate_not_executed" in blocker
-        or "silent_import_loss_gate_not_executed" in blocker
-        or "silent_import_loss_gate_not_implemented" in blocker
-        for blocker in all_ifc_blockers
+    import_health_ready = bool(
+        import_health_execution_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
+        and import_health_contract_pass_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
+    )
+    silent_negative_gate_executed = bool(
+        silent_import_loss_gate_pass_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
+        and visible_entity_accounting_case_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
     )
     case_count_ready = selected_import_case_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
     evidence_requirements = {
@@ -200,7 +227,13 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         "import_health_execution_ready": import_health_ready,
         "silent_data_loss_negative_gate_executed": silent_negative_gate_executed,
     }
-    blockers = _blockers(import_health, clean_acquisition, dirty_acquisition, source_license)
+    blockers = _blockers(import_health, source_license)
+    if not source_acquired or not checksums_ready:
+        blockers.extend(acquisition_blockers)
+    if not import_health_ready:
+        blockers.extend(import_health_blockers)
+    if not silent_negative_gate_executed:
+        blockers.extend(import_health.get("silent_import_loss_gate", {}).get("blockers", []))
     if not case_count_ready:
         blockers.append(
             f"ifc_import_case_count_below_required:{selected_import_case_count}/{REQUIRED_IFC_IMPORT_CASE_COUNT}"
@@ -219,6 +252,27 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         and import_health_ready
         and silent_negative_gate_executed
     )
+    owner_actions = []
+    if not source_acquired or not checksums_ready:
+        owner_actions.append("acquire/checksum all selected clean/dirty IFC source files")
+    if not import_health_ready or not silent_negative_gate_executed:
+        owner_actions.append("regenerate Phase 3 import-health and silent-data-loss receipts")
+    if not license_ready or quantity_credit_ready_count < REQUIRED_IFC_IMPORT_CASE_COUNT:
+        owner_actions.append("complete product/legal and per-file license review for quantity credit")
+    if any(
+        blocker
+        in {
+            "dataset_repository_url_missing",
+            "gui_task_runner_not_implemented",
+            "query_expected_answers_missing",
+            "query_task_file_checksums_missing",
+        }
+        for blocker in blockers
+    ):
+        owner_actions.append("close or explicitly defer the ifc-bench query/GUI spillover blockers")
+    owner_action = "; ".join(owner_actions) + "; then refresh the RC final gate."
+    if contract_pass:
+        owner_action = "Silent-import-loss evidence is ready; refresh the RC final gate."
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -240,8 +294,14 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         "clean_selected_file_count": clean_selected_file_count,
         "dirty_selected_file_count": dirty_selected_file_count,
         "selected_import_case_count": selected_import_case_count,
+        "source_file_acquired_count": source_file_acquired_count,
+        "source_checksum_attached_count": source_checksum_attached_count,
         "import_health_execution_count": import_health_execution_count,
         "import_health_contract_pass_count": import_health_contract_pass_count,
+        "visible_entity_accounting_case_count": visible_entity_accounting_case_count,
+        "silent_import_loss_gate_pass_count": silent_import_loss_gate_pass_count,
+        "quantity_credit_ready_count": quantity_credit_ready_count,
+        "silent_import_loss_zero": contract_pass,
         "evidence_requirements": evidence_requirements,
         "readiness_inputs": {
             "import_health_receipt": PHASE3_IFC_IMPORT_HEALTH.as_posix(),
@@ -251,13 +311,7 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         },
         "blockers": blockers,
         "blocker_grouping_metadata": _blocker_grouping_metadata(blockers),
-        "owner_action": (
-            "Acquire the selected clean/dirty IFC files and record source/checksum evidence; "
-            "complete product/legal and per-file license review; regenerate the Phase 3 "
-            "import-health execution receipt by running import-health and silent-data-loss "
-            "negative gates for every selected case; regenerate and check this Phase 6 "
-            "silent-import-loss status; then refresh the RC final gate."
-        ),
+        "owner_action": owner_action,
         "summary_line": (
             "Phase 6 silent import loss: "
             f"{'READY' if contract_pass else 'BLOCKED'} | selected="
