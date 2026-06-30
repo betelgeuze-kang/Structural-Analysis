@@ -162,10 +162,23 @@ def _with_source_receipt(
         "mode": "raw_top_k_refinement_rows",
         "source_artifact": str(source_artifact),
         "source_artifact_sha256": _file_sha256(source_artifact),
-        "source_id": "unit-test-pocketmd-lite-topk-rows",
-        "source_url": "https://example.invalid/pocketmd-lite-topk-rows",
-        "source_license": "fixture-only",
+        "source_id": "operator_attached_pocketmd_lite_topk_rows",
+        "source_url": "https://zenodo.org/records/7654321",
+        "source_license": "CC-BY-4.0",
     }
+    return payload
+
+
+def _with_placeholder_source_receipt(
+    intake: dict[str, object],
+    tmp_path: Path,
+) -> dict[str, object]:
+    payload = _with_source_receipt(intake, tmp_path)
+    source = payload["operator_input_source"]
+    assert isinstance(source, dict)
+    source["source_id"] = "unit-test-pocketmd-lite-topk-rows"
+    source["source_url"] = "https://example.invalid/pocketmd-lite-topk-rows"
+    source["source_license"] = "fixture-only"
     return payload
 
 
@@ -326,6 +339,33 @@ def test_pocketmd_lite_materializer_blocks_rows_without_source_receipt() -> None
     assert report["blockers"] == ["operator_input_source_receipt_required"]
     assert "operator_input_source_receipt_required" in report["blockers"]
     assert "operator_receipts_required" in report["root_cause_tags"]
+    assert report["phase4_exit_gate"]["failed_criteria"] == ["report_blockers_resolved"]
+
+
+def test_pocketmd_lite_materializer_blocks_placeholder_source_receipt(
+    tmp_path: Path,
+) -> None:
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        _with_placeholder_source_receipt(_valid_intake(), tmp_path),
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["product_surface_ready"] is False
+    assert report["operator_input_source_receipt"]["source_actuality_check"][
+        "contract_pass"
+    ] is False
+    assert report["operator_input_source_receipt"]["blockers"] == [
+        "operator_input_source_source_id_placeholder",
+        "operator_input_source_source_license_placeholder",
+        "operator_input_source_source_url_placeholder",
+    ]
+    assert report["blockers"] == [
+        "operator_input_source_source_id_placeholder",
+        "operator_input_source_source_license_placeholder",
+        "operator_input_source_source_url_placeholder",
+    ]
     assert report["phase4_exit_gate"]["failed_criteria"] == ["report_blockers_resolved"]
 
 

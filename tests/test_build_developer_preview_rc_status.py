@@ -434,6 +434,20 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert medium_scorecard_handoff["scorecard_receipt_template"]["schema_version"] == (
         "phase3-medium-model-scorecard-receipt.v1"
     )
+    assert {
+        row["id"] for row in medium_scorecard_handoff["missing_evidence_breakdown"]
+    } >= {
+        "license_approval",
+        "reference_outputs",
+        "canonical_normalization",
+        "scorecard_execution",
+        "pass_or_approved_review",
+    }
+    assert medium_scorecard_handoff["case_input_requirements"]["required_case_count"] == 5
+    assert medium_scorecard_handoff["case_input_requirements"]["remaining_case_count"] == 5
+    assert "run_medium_scorecard_receipts" in {
+        row["id"] for row in medium_scorecard_handoff["operator_next_actions"]
+    }
     assert "Attach product legal license approval" in medium_scorecard_handoff["owner_action"]
     assert "parser-only" in medium_scorecard_handoff["claim_boundary"]
     large_runner_handoff = payload["known_limitations"]["large_model_runner_handoff"]

@@ -107,12 +107,22 @@ def _with_source_receipt(intake: dict[str, object], tmp_path: Path) -> dict[str,
             "mode": "raw_hard_decoy_rows",
             "source_artifact": str(source),
             "source_artifact_sha256": module.file_sha256(source),
-            "source_id": "fixture_gpcr_hard_decoy_rows",
-            "source_url": "https://example.test/gpcr-hard-decoy-fixture",
-            "source_license": "fixture-only",
+            "source_id": "operator_attached_gpcr_hard_decoy_rows",
+            "source_url": "https://zenodo.org/records/1234567",
+            "source_license": "CC-BY-4.0",
             "source_version": "test-v1",
         },
     }
+
+
+def _with_placeholder_source_receipt(intake: dict[str, object], tmp_path: Path) -> dict[str, object]:
+    payload = _with_source_receipt(intake, tmp_path)
+    source = payload["operator_input_source"]
+    assert isinstance(source, dict)
+    source["source_id"] = "fixture_gpcr_hard_decoy_rows"
+    source["source_url"] = "https://example.test/gpcr-hard-decoy-fixture"
+    source["source_license"] = "fixture-only"
+    return payload
 
 
 def _passing_intake(tmp_path: Path) -> dict[str, object]:
@@ -216,6 +226,38 @@ def test_gpcr_hard_decoy_suite_blocks_raw_rows_without_source_receipt() -> None:
     assert report["target_rows"][0]["computed_hard_decoy_metrics"]["calculation_status"] == (
         "computed_without_source_receipt"
     )
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "raw_hard_decoy_rows_actual_closure"
+    ]
+
+
+def test_gpcr_hard_decoy_suite_blocks_placeholder_source_receipt(
+    tmp_path: Path,
+) -> None:
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        _with_placeholder_source_receipt(
+            {
+                "targets": [
+                    _passing_target_from_rows("DRD2"),
+                    _passing_target_from_rows("HTR2A"),
+                    _passing_target_from_rows("OPRM1"),
+                ]
+            },
+            tmp_path,
+        ),
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["operator_input_source_receipt"]["source_actuality_check"][
+        "contract_pass"
+    ] is False
+    assert report["operator_input_source_receipt"]["blockers"] == [
+        "operator_input_source_source_id_placeholder",
+        "operator_input_source_source_license_placeholder",
+        "operator_input_source_source_url_placeholder",
+    ]
+    assert "DRD2:operator_input_source_source_license_placeholder" in report["blockers"]
     assert report["phase3_exit_gate"]["failed_criteria"] == [
         "raw_hard_decoy_rows_actual_closure"
     ]

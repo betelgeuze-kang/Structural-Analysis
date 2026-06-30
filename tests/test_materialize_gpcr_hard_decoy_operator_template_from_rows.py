@@ -81,9 +81,9 @@ def test_materializes_operator_template_from_flat_csv_rows(tmp_path: Path) -> No
     payload = module.build_gpcr_hard_decoy_operator_template_from_rows(
         rows_path=rows,
         repo_root=REPO_ROOT,
-        source_id="fixture",
-        source_url="https://example.test/gpcr-fixture.csv",
-        source_license="fixture-license",
+        source_id="operator_attached_gpcr_rows_csv",
+        source_url="https://zenodo.org/records/1234567",
+        source_license="CC-BY-4.0",
     )
 
     assert payload["schema_version"] == "gpcr-hard-decoy-operator-intake.v1"
@@ -117,9 +117,14 @@ def test_materializes_operator_template_from_flat_csv_rows(tmp_path: Path) -> No
         payload,
         repo_root=REPO_ROOT,
     )
-    assert report["status"] == "ready"
-    assert report["broad_gpcr_family_claim_safe"] is True
-    assert report["phase3_exit_gate"]["failed_criteria"] == []
+    assert report["status"] == "locked"
+    assert report["broad_gpcr_family_claim_safe"] is False
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "raw_hard_decoy_rows_actual_closure"
+    ]
+    assert "DRD2:hard_decoy_rows_positive_count_below_actual_closure_minimum" in report[
+        "blockers"
+    ]
 
 
 def test_materializes_operator_template_from_jsonl_rows(tmp_path: Path) -> None:
@@ -129,9 +134,9 @@ def test_materializes_operator_template_from_jsonl_rows(tmp_path: Path) -> None:
     payload = module.build_gpcr_hard_decoy_operator_template_from_rows(
         rows_path=rows,
         repo_root=REPO_ROOT,
-        source_id="fixture-jsonl",
-        source_url="https://example.test/gpcr-fixture.jsonl",
-        source_license="fixture-license",
+        source_id="operator_attached_gpcr_rows_jsonl",
+        source_url="https://zenodo.org/records/1234567",
+        source_license="CC-BY-4.0",
     )
 
     assert payload["operator_input_source"]["supported_source_formats"] == [
@@ -148,9 +153,11 @@ def test_materializes_operator_template_from_jsonl_rows(tmp_path: Path) -> None:
         payload,
         repo_root=REPO_ROOT,
     )
-    assert report["status"] == "ready"
-    assert report["broad_gpcr_family_claim_safe"] is True
-    assert report["phase3_exit_gate"]["failed_criteria"] == []
+    assert report["status"] == "locked"
+    assert report["broad_gpcr_family_claim_safe"] is False
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "raw_hard_decoy_rows_actual_closure"
+    ]
 
 
 def test_blocks_missing_required_targets_unless_allowed(tmp_path: Path) -> None:

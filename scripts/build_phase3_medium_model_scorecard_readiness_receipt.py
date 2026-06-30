@@ -244,6 +244,257 @@ def _pass_review_evidence_row(row: dict[str, Any], *, current: int, required: in
     return enriched
 
 
+def _missing_evidence_breakdown(
+    evidence_rows: list[dict[str, Any]],
+    *,
+    required_medium_model_count: int,
+    current_scorecard_count: int,
+    pass_or_approved_review_count: int,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for row in evidence_rows:
+        if row.get("contract_pass") is True:
+            continue
+        row_id = str(row.get("id") or "")
+        item: dict[str, Any] = {
+            "id": row_id,
+            "status": str(row.get("status") or "missing"),
+            "blocker": str(row.get("blocker") or ""),
+            "required": str(row.get("required") or ""),
+            "evidence_type": "operator_attached",
+        }
+        if row_id == "license_approval":
+            item.update(
+                {
+                    "evidence_type": "product_legal_review",
+                    "source_license_receipt_path": SOURCE_LICENSE_RECEIPT.as_posix(),
+                    "license_review_status": str(row.get("license_review_status") or ""),
+                    "spdx": str(row.get("spdx") or ""),
+                }
+            )
+        elif row_id == "reference_outputs":
+            item.update(
+                {
+                    "required_case_count": required_medium_model_count,
+                    "current_case_count": 0,
+                    "remaining_case_count": required_medium_model_count,
+                    "required_artifacts": [
+                        "reference displacement/reaction/member/modal outputs",
+                        "reference output checksum per selected case",
+                        "approved REVIEW baseline when exact reference output is unavailable",
+                    ],
+                }
+            )
+        elif row_id == "canonical_normalization":
+            item.update(
+                {
+                    "required_case_count": required_medium_model_count,
+                    "current_case_count": 0,
+                    "remaining_case_count": required_medium_model_count,
+                    "required_artifacts": [
+                        "canonical units and coordinate mapping",
+                        "node/member mapping coverage",
+                        "normalization receipt per selected case",
+                    ],
+                }
+            )
+        elif row_id == "scorecard_execution":
+            item.update(
+                {
+                    "required_case_count": required_medium_model_count,
+                    "current_case_count": current_scorecard_count,
+                    "remaining_case_count": max(required_medium_model_count - current_scorecard_count, 0),
+                    "runner_command_template": RUNNER_COMMAND_TEMPLATE,
+                    "receipt_directory": MEDIUM_RECEIPT_DIR.as_posix(),
+                }
+            )
+        elif row_id == "pass_or_approved_review":
+            item.update(
+                {
+                    "required_case_count": required_medium_model_count,
+                    "current_case_count": pass_or_approved_review_count,
+                    "remaining_case_count": max(
+                        required_medium_model_count - pass_or_approved_review_count,
+                        0,
+                    ),
+                    "accepted_decisions": ["PASS", "APPROVED_REVIEW"],
+                }
+            )
+        rows.append(item)
+    return rows
+
+
+def _operator_next_actions(
+    blockers: list[str],
+    *,
+    required_medium_model_count: int,
+    current_scorecard_count: int,
+    pass_or_approved_review_count: int,
+) -> list[dict[str, Any]]:
+    blocker_set = set(blockers)
+    actions: list[dict[str, Any]] = []
+    if "license_review_pending" in blocker_set:
+        actions.append(
+            {
+                "id": "complete_product_legal_license_review",
+                "owner": "product_legal",
+                "action": (
+                    "Update the OpenSees medium source license receipt with approved "
+                    "redistribution and commercial-use boundaries."
+                ),
+                "clears_blockers": ["license_review_pending"],
+                "evidence_artifacts": [SOURCE_LICENSE_RECEIPT.as_posix()],
+                "validation_commands": [
+                    "python3 scripts/build_phase3_opensees_source_license_receipt.py --check",
+                    "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                ],
+            }
+        )
+    if "reference_outputs_missing" in blocker_set:
+        actions.append(
+            {
+                "id": "attach_medium_reference_outputs",
+                "owner": "benchmark_operator",
+                "action": (
+                    "Attach reference outputs or approved REVIEW baselines for the five "
+                    "selected medium structural models."
+                ),
+                "clears_blockers": ["reference_outputs_missing"],
+                "remaining_case_count": required_medium_model_count,
+                "evidence_artifacts": [
+                    "OPERATOR_ATTACHED_REFERENCE_OUTPUTS",
+                    "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256_PER_CASE",
+                ],
+                "validation_commands": [
+                    "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                ],
+            }
+        )
+    if "normalization_not_implemented" in blocker_set:
+        actions.append(
+            {
+                "id": "record_medium_canonical_normalization",
+                "owner": "benchmark_operator",
+                "action": (
+                    "Record units, coordinate transforms, node/member mapping coverage, "
+                    "and normalization receipt paths for all selected medium cases."
+                ),
+                "clears_blockers": ["normalization_not_implemented"],
+                "remaining_case_count": required_medium_model_count,
+                "evidence_artifacts": ["OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"],
+                "validation_commands": [
+                    "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                ],
+            }
+        )
+    if "opensees_medium_scorecard_execution_missing" in blocker_set:
+        actions.append(
+            {
+                "id": "run_medium_scorecard_receipts",
+                "owner": "benchmark_operator",
+                "action": (
+                    "Run the medium scorecard receipt command for each selected case and "
+                    "retain receipt, result, and validation report artifacts."
+                ),
+                "clears_blockers": ["opensees_medium_scorecard_execution_missing"],
+                "remaining_case_count": max(required_medium_model_count - current_scorecard_count, 0),
+                "receipt_directory": MEDIUM_RECEIPT_DIR.as_posix(),
+                "runner_command_template": RUNNER_COMMAND_TEMPLATE,
+                "validation_commands": [
+                    "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                    "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                    "python3 scripts/build_developer_preview_rc_status.py --check",
+                ],
+            }
+        )
+    if "medium_model_pass_or_review_missing" in blocker_set:
+        actions.append(
+            {
+                "id": "attach_medium_pass_or_approved_review_decisions",
+                "owner": "benchmark_reviewer",
+                "action": (
+                    "Attach per-case PASS decisions or explicit pre-approved REVIEW records "
+                    "referenced by each scorecard receipt."
+                ),
+                "clears_blockers": ["medium_model_pass_or_review_missing"],
+                "remaining_case_count": max(
+                    required_medium_model_count - pass_or_approved_review_count,
+                    0,
+                ),
+                "accepted_decisions": ["PASS", "APPROVED_REVIEW"],
+                "validation_commands": [
+                    "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                    "python3 scripts/build_developer_preview_rc_status.py --check",
+                ],
+            }
+        )
+    return actions
+
+
+def _case_input_requirements(
+    *,
+    required_medium_model_count: int,
+    current_scorecard_count: int,
+) -> dict[str, Any]:
+    return {
+        "schema_version": "phase3-medium-model-scorecard-case-inputs.v1",
+        "required_case_count": required_medium_model_count,
+        "current_valid_scorecard_case_count": current_scorecard_count,
+        "remaining_case_count": max(required_medium_model_count - current_scorecard_count, 0),
+        "case_fields": [
+            {
+                "field": "model",
+                "runner_argument": "--model",
+                "required_artifact": "operator-attached normalized structural model JSON",
+            },
+            {
+                "field": "source_id",
+                "runner_argument": "--source-id",
+                "required_artifact": "stable source identifier tied to the source/license receipt",
+            },
+            {
+                "field": "case_id",
+                "runner_argument": "--case-id",
+                "required_artifact": "unique selected medium case id",
+            },
+            {
+                "field": "source_sha256",
+                "runner_argument": "--source-sha256",
+                "required_artifact": "checksum of the attached source/model input",
+            },
+            {
+                "field": "scorecard_or_review_path",
+                "runner_argument": "--scorecard-or-review",
+                "required_artifact": "PASS scorecard or pre-approved REVIEW record",
+            },
+            {
+                "field": "reference_output_sha256",
+                "runner_argument": "receipt_field",
+                "required_artifact": "reference output checksum or approved REVIEW baseline",
+            },
+            {
+                "field": "normalization_receipt",
+                "runner_argument": "receipt_field",
+                "required_artifact": "units/coordinates/mapping normalization receipt",
+            },
+        ],
+        "per_case_outputs": [
+            "medium_model_scorecard_receipts/CASE_ID.scorecard_receipt.json",
+            "medium_model_scorecard_receipts/CASE_ID.result.json",
+            "medium_model_scorecard_receipts/CASE_ID.validation_report.json",
+        ],
+        "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+            "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check",
+        ],
+        "claim_boundary": (
+            "These inputs describe the operator handoff contract only. They do not "
+            "create model evidence, approve licenses, or close medium benchmark gates."
+        ),
+    }
+
+
 def _authoritative_source_evidence_row(
     row: dict[str, Any],
     *,
@@ -399,6 +650,12 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
     )
     blockers = sorted({str(row["blocker"]) for row in evidence_rows if str(row.get("blocker", ""))})
     evidence_pass_count = sum(1 for row in evidence_rows if row["contract_pass"] is True)
+    missing_evidence = _missing_evidence_breakdown(
+        evidence_rows,
+        required_medium_model_count=required_medium_model_count,
+        current_scorecard_count=current_scorecard_count,
+        pass_or_approved_review_count=pass_or_approved_review_count,
+    )
     return {
         "schema_version": "phase3-medium-model-scorecard-readiness-receipt.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -463,6 +720,17 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
             "decision": "PASS|APPROVED_REVIEW",
             "contract_pass": False,
         },
+        "missing_evidence_breakdown": missing_evidence,
+        "operator_next_actions": _operator_next_actions(
+            blockers,
+            required_medium_model_count=required_medium_model_count,
+            current_scorecard_count=current_scorecard_count,
+            pass_or_approved_review_count=pass_or_approved_review_count,
+        ),
+        "case_input_requirements": _case_input_requirements(
+            required_medium_model_count=required_medium_model_count,
+            current_scorecard_count=current_scorecard_count,
+        ),
         "blocked_by": blockers,
         "blockers": blockers,
         "owner_action": (
@@ -472,7 +740,8 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         ),
         "summary_line": (
             "Phase 3 OpenSees medium scorecard readiness: BLOCKED | "
-            f"scorecards=0/5 | evidence={evidence_pass_count}/{len(evidence_rows)}"
+            f"scorecards={current_scorecard_count}/{required_medium_model_count} | "
+            f"evidence={evidence_pass_count}/{len(evidence_rows)}"
         ),
         "claim_boundary": (
             "This receipt records the evidence contract for OpenSees medium scorecards. "

@@ -525,6 +525,102 @@ def build_structural_product_development_roadmap(
         if row["blockers"]:
             primary_blocker = str(row["blockers"][0])
             break
+    recommended_next_slice_details = [
+        {
+            "id": "land_ci_license_ux_release_area_evidence",
+            "stage_ids": ["pm_release_gate"],
+            "current_position": {
+                "pm_release_areas": f"{release_area_pass}/{release_area_total}",
+                "pm_milestones": f"{milestone_pass}/{milestone_total}",
+                "ci_pr_consecutive_pass_count": _as_int(ci_streak.get("pr_consecutive_pass_count")),
+                "ci_nightly_consecutive_pass_count": _as_int(
+                    ci_streak.get("nightly_consecutive_pass_count")
+                ),
+                "license_status": str(license_status.get("status") or ""),
+                "human_ux_blocker_count": _as_int(human_ux.get("blocker_count")),
+            },
+            "exit_conditions": [
+                "30 consecutive PR CI passes recorded",
+                "30 consecutive nightly CI passes recorded",
+                "product license approval receipt attached",
+                "30-minute human new-user UX observation passes",
+                "PM release areas reach 16/16",
+            ],
+            "external_dependency": True,
+            "evidence_artifacts": [str(PM_RELEASE_GATE), str(PRODUCT_READINESS)],
+        },
+        {
+            "id": "close_developer_preview_medium_large_and_parity_gates",
+            "stage_ids": ["developer_preview_rc"],
+            "current_position": {
+                "developer_preview_final_gates": f"{dp_pass}/{dp_total}",
+                "status": str(dp_report.get("status") or ""),
+            },
+            "exit_conditions": [
+                "five selected medium models have PASS or approved REVIEW receipts",
+                "two large models have crash/OOM-free execution plus scorecard or approved REVIEW",
+                "Linux and Windows replay receipts are attached",
+                "new-user workflow human observation passes",
+            ],
+            "external_dependency": True,
+            "evidence_artifacts": [str(DEVELOPER_PREVIEW_RC)],
+        },
+        {
+            "id": "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path",
+            "stage_ids": ["g1_solver_closure"],
+            "current_position": {
+                "direct_residual_terminal_gate_ready": g1_direct_ready,
+                "full_load_hip_newton_lane_ready": g1_full_ready,
+                "recommended_g1_next_direction": g1_recommended_next_lane,
+                "row_only_correction_loop_stopped": _as_bool(
+                    g1_cause_decision.get(
+                        "stop_row_only_support_or_elastic_link_correction_loop"
+                    )
+                    or g1_cause_signals.get(
+                        "row_only_correction_loop_stopped_by_global_connectivity"
+                    )
+                    or g1_global_decision.get("row_only_correction_loop_stopped")
+                ),
+            },
+            "exit_conditions": [
+                "full-load 1.0 checkpoint passes residual and increment gates",
+                "full-mesh nonlinear equilibrium is demonstrated",
+                "production ROCm/HIP residual/JVP residency is proven",
+                "material Newton breadth closes without row-only correction promotion",
+            ],
+            "external_dependency": False,
+            "evidence_artifacts": [
+                str(G1_DIRECT_RESIDUAL),
+                str(G1_FULL_LOAD_HIP),
+                str(G1_GLOBAL_CONNECTIVITY),
+                str(G1_F2G_F2H_CAUSE_NARROWING),
+            ],
+        },
+        {
+            "id": "collect_customer_shadow_and_external_benchmark_terminal_receipts",
+            "stage_ids": ["paid_pilot_readiness", "commercial_solver_claim_upgrade"],
+            "current_position": {
+                "completed_shadow_case_count": completed_shadow,
+                "required_shadow_case_count": required_shadow,
+                "external_receipt_attached_count": _as_int(external_receipts.get("attached_count")),
+                "external_receipt_queue_count": _as_int(external_receipts.get("queue_count")),
+                "paid_pilot_ready": _as_bool(snapshot.get("paid_pilot_ready")),
+                "limited_commercial_ready": _as_bool(snapshot.get("limited_commercial_ready")),
+            },
+            "exit_conditions": [
+                "three customer shadow cases have reviewed terminal rows",
+                "four external benchmark terminal receipts are attached",
+                "paid-pilot scope guard is refreshed after receipts",
+                "limited commercial claim remains blocked until solver-product gates close",
+            ],
+            "external_dependency": True,
+            "evidence_artifacts": [
+                str(CUSTOMER_SHADOW),
+                str(EXTERNAL_BENCHMARK_SUBMISSION),
+                str(PRODUCT_READINESS),
+            ],
+        },
+    ]
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -567,6 +663,7 @@ def build_structural_product_development_roadmap(
             "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path",
             "collect_customer_shadow_and_external_benchmark_terminal_receipts",
         ],
+        "recommended_next_slice_details": recommended_next_slice_details,
         "summary_line": (
             "Structural product roadmap: BLOCKED | "
             f"evidence_progress={_pct(total_passed, total_required)}% | "
@@ -609,6 +706,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         next_actions = _as_list(row.get("next_actions"))
         if next_actions:
             lines.append(f"  - next action: `{next_actions[0]}`")
+    details = _as_list(payload.get("recommended_next_slice_details"))
+    if details:
+        lines.extend(["", "## Recommended Next Slices", ""])
+        for detail in details:
+            if not isinstance(detail, dict):
+                continue
+            lines.append(f"- `{detail.get('id')}`")
+            exit_conditions = _as_list(detail.get("exit_conditions"))
+            if exit_conditions:
+                lines.append(f"  - exit condition: {exit_conditions[0]}")
+            current_position = _as_dict(detail.get("current_position"))
+            if current_position:
+                first_key = sorted(current_position)[0]
+                lines.append(f"  - current `{first_key}`: `{current_position[first_key]}`")
     lines.extend(["", "## Claim Boundary", "", str(payload.get("claim_boundary") or ""), ""])
     return "\n".join(lines)
 

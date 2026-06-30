@@ -218,17 +218,17 @@ def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None
     payload = module.build_pocketmd_lite_operator_intake_from_rows(
         rows_path=rows,
         repo_root=REPO_ROOT,
-        source_id="fixture",
-        source_url="https://example.invalid/pocketmd-lite-rows.csv",
-        source_license="fixture-license",
+        source_id="operator_attached_pocketmd_lite_rows_csv",
+        source_url="https://zenodo.org/records/7654321",
+        source_license="CC-BY-4.0",
     )
 
     assert payload["schema_version"] == "pocketmd-lite-operator-intake.v1"
     assert payload["operator_input_source"]["mode"] == "raw_top_k_refinement_rows"
     assert payload["operator_input_source"]["source_url"] == (
-        "https://example.invalid/pocketmd-lite-rows.csv"
+        "https://zenodo.org/records/7654321"
     )
-    assert payload["operator_input_source"]["source_license"] == "fixture-license"
+    assert payload["operator_input_source"]["source_license"] == "CC-BY-4.0"
     assert payload["operator_input_source"]["row_count"] == 6
     assert payload["operator_input_source"]["case_count"] == 3
     assert payload["operator_input_source"]["top_k_candidate_count"] == 6
@@ -373,9 +373,9 @@ def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:
     payload = module.build_pocketmd_lite_operator_intake_from_rows(
         rows_path=rows,
         repo_root=REPO_ROOT,
-        source_id="fixture-ndjson",
-        source_url="https://example.invalid/pocketmd-lite-rows.ndjson",
-        source_license="fixture-license",
+        source_id="operator_attached_pocketmd_lite_rows_ndjson",
+        source_url="https://zenodo.org/records/7654321",
+        source_license="CC-BY-4.0",
     )
 
     assert payload["operator_input_source"]["supported_source_formats"] == [
@@ -451,11 +451,17 @@ def test_cli_writes_operator_intake(tmp_path: Path) -> None:
                 "--out",
                 str(out),
                 "--source-id",
-                "fixture",
+                "operator_attached_pocketmd_lite_rows_cli",
+                "--source-url",
+                "https://zenodo.org/records/7654321",
+                "--source-license",
+                "CC-BY-4.0",
             ]
         )
         == 0
     )
     payload = json.loads(out.read_text(encoding="utf-8"))
-    assert payload["operator_input_source"]["source_id"] == "fixture"
+    assert payload["operator_input_source"]["source_id"] == (
+        "operator_attached_pocketmd_lite_rows_cli"
+    )
     assert len(payload["cases"]) == 6

@@ -179,6 +179,28 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     assert payload["stage_count"] == 7
     assert payload["ready_stage_count"] == 1
     assert payload["primary_blocker"] == "ux::human_observation_missing"
+    assert payload["recommended_next_slice"] == [
+        "land_ci_license_ux_release_area_evidence",
+        "close_developer_preview_medium_large_and_parity_gates",
+        "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path",
+        "collect_customer_shadow_and_external_benchmark_terminal_receipts",
+    ]
+    details = {row["id"]: row for row in payload["recommended_next_slice_details"]}
+    assert details["land_ci_license_ux_release_area_evidence"]["current_position"][
+        "pm_release_areas"
+    ] == "1/2"
+    assert details[
+        "close_developer_preview_medium_large_and_parity_gates"
+    ]["current_position"]["developer_preview_final_gates"] == "1/2"
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["recommended_g1_next_direction"]
+        == "consistent_residual_jacobian_newton_rocm_worker"
+    )
+    assert details[
+        "collect_customer_shadow_and_external_benchmark_terminal_receipts"
+    ]["current_position"]["completed_shadow_case_count"] == 1
 
     stages = {row["stage_id"]: row for row in payload["roadmap_stages"]}
     assert stages["evidence_freshness_and_snapshot_integrity"]["status"] == "ready"

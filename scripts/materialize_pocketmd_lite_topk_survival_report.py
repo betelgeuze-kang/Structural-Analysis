@@ -82,6 +82,25 @@ TOPK_ROW_QUALITY_CRITERIA = {
     "min_total_top_k_candidate_count": 6,
 }
 SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
+PLACEHOLDER_SOURCE_TEXT_MARKERS = (
+    "fixture",
+    "synthetic",
+    "mock",
+    "placeholder",
+    "dummy",
+    "example",
+    "unit-test",
+    "test-only",
+)
+PLACEHOLDER_SOURCE_URL_MARKERS = (
+    "://example.",
+    ".example/",
+    ".invalid",
+    ".test/",
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -456,6 +475,8 @@ def _operator_input_source_receipt(
             if not source_artifact_sha256_matches:
                 blockers.append("operator_input_source_source_artifact_sha256_mismatch")
 
+    actuality_blockers = _source_actuality_blockers(source) if source else []
+    blockers.extend(actuality_blockers)
     blockers = sorted(dict.fromkeys(blockers))
     return {
         "status": "pass" if not blockers else "blocked",
@@ -468,6 +489,14 @@ def _operator_input_source_receipt(
         "source_id_present": bool(_string(source.get("source_id"))),
         "source_url_present": bool(_string(source.get("source_url"))),
         "source_license_present": bool(_string(source.get("source_license"))),
+        "source_actuality_check": {
+            "contract_pass": not actuality_blockers,
+            "blockers": actuality_blockers,
+            "blocked_marker_policy": {
+                "text_markers": list(PLACEHOLDER_SOURCE_TEXT_MARKERS),
+                "url_markers": list(PLACEHOLDER_SOURCE_URL_MARKERS),
+            },
+        },
         "blockers": blockers,
         "claim_boundary": (
             "Actual PocketMD Lite top-k refinement closure requires operator rows "
@@ -475,6 +504,28 @@ def _operator_input_source_receipt(
             "rows without source metadata remain non-promoting."
         ),
     }
+
+
+def _contains_marker(value: str, markers: tuple[str, ...]) -> bool:
+    lowered = value.lower()
+    return any(marker in lowered for marker in markers)
+
+
+def _source_actuality_blockers(source: dict[str, Any]) -> list[str]:
+    blockers: list[str] = []
+    source_id = _string(source.get("source_id"))
+    source_license = _string(source.get("source_license"))
+    source_url = _string(source.get("source_url"))
+    if source_id and _contains_marker(source_id, PLACEHOLDER_SOURCE_TEXT_MARKERS):
+        blockers.append("operator_input_source_source_id_placeholder")
+    if source_license and _contains_marker(source_license, PLACEHOLDER_SOURCE_TEXT_MARKERS):
+        blockers.append("operator_input_source_source_license_placeholder")
+    if source_url and (
+        _contains_marker(source_url, PLACEHOLDER_SOURCE_URL_MARKERS)
+        or _contains_marker(source_url, PLACEHOLDER_SOURCE_TEXT_MARKERS)
+    ):
+        blockers.append("operator_input_source_source_url_placeholder")
+    return blockers
 
 
 def build_operator_input_source_receipt(

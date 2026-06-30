@@ -244,9 +244,9 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
         pocketmd_report_out=tmp_path / "pocketmd_report.json",
         pocketmd_surface_out=tmp_path / "pocketmd_surface.json",
         pocketmd_contract_path=pocketmd_contract,
-        source_id="unit-test-actual-closure-rows",
-        source_url="https://example.invalid/science-actual-closure-rows",
-        source_license="fixture-only",
+        source_id="operator_attached_science_actual_closure_rows",
+        source_url="https://zenodo.org/records/2468135",
+        source_license="CC-BY-4.0",
     )
 
     assert audit["status"] == "ready"

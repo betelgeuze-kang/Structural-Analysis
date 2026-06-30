@@ -1156,6 +1156,21 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                 if isinstance(medium_model_scorecard.get("scorecard_receipt_template"), dict)
                 else {}
             ),
+            "missing_evidence_breakdown": (
+                medium_model_scorecard.get("missing_evidence_breakdown")
+                if isinstance(medium_model_scorecard.get("missing_evidence_breakdown"), list)
+                else []
+            ),
+            "operator_next_actions": (
+                medium_model_scorecard.get("operator_next_actions")
+                if isinstance(medium_model_scorecard.get("operator_next_actions"), list)
+                else []
+            ),
+            "case_input_requirements": (
+                medium_model_scorecard.get("case_input_requirements")
+                if isinstance(medium_model_scorecard.get("case_input_requirements"), dict)
+                else {}
+            ),
             "owner_action": str(medium_model_scorecard.get("owner_action", "")),
             "claim_boundary": str(medium_model_scorecard.get("claim_boundary", "")),
         },

@@ -91,6 +91,33 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["scorecard_receipt_template"]["crashed"] is False
     assert payload["scorecard_receipt_template"]["oom"] is False
     assert payload["scorecard_receipt_template"]["contract_pass"] is False
+    assert [row["id"] for row in payload["missing_evidence_breakdown"]] == [
+        "license_approval",
+        "reference_outputs",
+        "canonical_normalization",
+        "scorecard_execution",
+        "pass_or_approved_review",
+    ]
+    scorecard_gap = {
+        row["id"]: row for row in payload["missing_evidence_breakdown"]
+    }["scorecard_execution"]
+    assert scorecard_gap["remaining_case_count"] == 5
+    assert scorecard_gap["receipt_directory"].endswith("medium_model_scorecard_receipts")
+    assert [row["id"] for row in payload["operator_next_actions"]] == [
+        "complete_product_legal_license_review",
+        "attach_medium_reference_outputs",
+        "record_medium_canonical_normalization",
+        "run_medium_scorecard_receipts",
+        "attach_medium_pass_or_approved_review_decisions",
+    ]
+    assert payload["case_input_requirements"]["remaining_case_count"] == 5
+    assert "case_id" in {
+        row["field"] for row in payload["case_input_requirements"]["case_fields"]
+    }
+    assert any(
+        "build_developer_preview_rc_status.py --check" in command
+        for command in payload["case_input_requirements"]["validation_commands"]
+    )
     assert "operator scorecard runner command" in payload["claim_boundary"]
 
 
@@ -121,6 +148,10 @@ def test_medium_model_scorecard_readiness_counts_operator_scorecard_receipts(tmp
     assert payload["pass_or_approved_review_count"] == 5
     assert payload["scorecard_receipt_inventory"]["valid_scorecard_case_count"] == 5
     assert payload["required_evidence_pass_count"] == 5
+    assert "scorecard_execution" not in {
+        row["id"] for row in payload["missing_evidence_breakdown"]
+    }
+    assert payload["case_input_requirements"]["remaining_case_count"] == 0
     assert "opensees_medium_scorecard_execution_missing" not in payload["blockers"]
     assert "medium_model_pass_or_review_missing" not in payload["blockers"]
     assert "source_url_verification_pending" in payload["blockers"]
