@@ -301,7 +301,7 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         "contract_pass": all(row["contract_pass"] for row in platform_rows),
     }
     blockers = []
-    if missing_platforms:
+    if len(missing_platforms) == len(REQUIRED_PLATFORMS):
         blockers.append("linux_windows_parity_receipts_missing")
     blockers.extend(
         blocker for row in platform_rows for blocker in row["blockers"] if row["blockers"]

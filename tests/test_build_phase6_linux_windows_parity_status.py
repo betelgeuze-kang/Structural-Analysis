@@ -71,7 +71,8 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
     assert rows["windows"]["contract_pass"] is False
     assert rows["linux"]["blockers"] == []
     assert "platform_replay_receipt_missing:windows" in rows["windows"]["blockers"]
-    assert "linux_windows_parity_receipts_missing" in payload["blocked_by"]
+    assert "linux_windows_parity_receipts_missing" not in payload["blocked_by"]
+    assert payload["blocked_by"] == ["platform_replay_receipt_missing:windows"]
     assert "git_clean_clone_reproduction_not_passed" not in payload["blocked_by"]
     assert "platform_replay_receipt_not_passed:linux" not in payload["blocked_by"]
     assert "platform_replay_receipt_missing:linux" not in payload["blocked_by"]
@@ -79,7 +80,7 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
     assert grouping["schema_version"] == "phase6-linux-windows-parity-blocker-groups.v1"
     assert grouping["blocker_count"] == len(payload["blocked_by"])
     assert grouping["unassigned_blockers"] == []
-    assert "linux_windows_parity_receipts_missing" in grouping["groups"][
+    assert "linux_windows_parity_receipts_missing" not in grouping["groups"][
         "platform_receipt_presence"
     ]["blockers"]
     assert "platform_replay_receipt_missing:windows" in grouping["groups"][

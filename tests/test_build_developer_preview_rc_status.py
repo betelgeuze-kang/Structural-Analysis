@@ -188,7 +188,6 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     )
     assert final_gates["residual_and_convergence_history_present"]["blockers"] == []
     assert final_gates["linux_windows_reproducibility_confirmed"]["blockers"] == [
-        "linux_windows_parity_receipts_missing",
         "platform_replay_receipt_missing:windows",
     ]
     parity_gate_grouping = final_gates["linux_windows_reproducibility_confirmed"][
@@ -679,14 +678,14 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "manifest" in parity_contract["checksum_keys"]
     assert "scorecard" in parity_contract["checksum_keys"]
     assert "case_count" in parity_contract["scorecard_identity_fields"]
-    assert "linux_windows_parity_receipts_missing" in parity_handoff["blocked_by"]
+    assert parity_handoff["blocked_by"] == ["platform_replay_receipt_missing:windows"]
     assert parity_handoff["parity_blocker_grouping"]["schema_version"] == (
         "phase6-linux-windows-parity-blocker-groups.v1"
     )
     assert parity_handoff["parity_blocker_grouping"]["groups"][
         "git_clean_clone_spillover"
     ]["blockers"] == []
-    assert parity_handoff["parity_gate_blocker_grouping"]["blocker_count"] == 2
+    assert parity_handoff["parity_gate_blocker_grouping"]["blocker_count"] == 1
     assert parity_handoff["parity_gate_blocker_grouping"]["groups"][
         "git_clean_clone_spillover"
     ]["blockers"] == []
