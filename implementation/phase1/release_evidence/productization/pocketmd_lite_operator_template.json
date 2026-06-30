@@ -3,9 +3,9 @@
   "claim_boundary": "This is a fillable operator template seed for bounded PocketMD Lite top-k refinement rows. It is not refinement evidence and does not unlock broad all-atom MD, FEP, long-timescale dynamics, or de novo binding claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T01:30:28.704991+00:00",
+  "generated_at": "2026-06-30T03:13:41.905894+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:90d26cbbd440886bc14e60e57a778f77e32c4f3c4954f704c5f73016e7b4d2bc",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:03fb8ce9a43a88d1f0470b49d02e144a873ab646a358fcadf968f533b907c234",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "intake_artifact": "<operator-pocketmd-lite-intake.json>",
@@ -33,7 +33,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-operator-template.v1",
   "slot_id": "top_k_refinement_rows",
-  "source_commit_sha": "9eb7edaf52a38ce1d287fba839cc167c9d8afe83",
+  "source_commit_sha": "06ae09fd429dbd9dad64cfbc4e6730ed6e0055a7",
   "status": "operator_template_seed",
   "template": {
     "cases": [
