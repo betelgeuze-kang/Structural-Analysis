@@ -23,7 +23,7 @@
     "global_frame_shell_tangent_integration_ready": false,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-06-30T06:38:46.137769+00:00",
+  "generated_at": "2026-06-30T06:45:43.952770+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -80,7 +80,7 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:cf553013426c1233aa129b6021b72ca931d1be74e7544b12f54c92eb546001db",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:1004752e94afd6fd94d856de813757f909f03cef1acde3556036778117b87851",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:25f909882d1c172b002e9c6a845cd2c4e3fa2c4cb32b40e413b08ba4288afeaa",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:cb672e5a3ac1b0d0aa6e95d74e9ef52b25cc33ed13cdc8a4b37c94f7f146f34a",
     "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:3f40c558cc0fae4dbe7e048070e5ec62979e372062b93ed71a109cd56a9a2bbb"
   },
@@ -96,7 +96,7 @@
   "reuse_policy": "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice",
   "reused_evidence": true,
   "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
-  "source_commit_sha": "5dfd6afd6119f488537644e4666e47bf9ff73a09",
+  "source_commit_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
   "status": "ready",
   "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=global_connectivity_consistent_newton_rocm_lane"
 }

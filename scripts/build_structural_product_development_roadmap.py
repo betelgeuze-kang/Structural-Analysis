@@ -28,6 +28,7 @@ DEVELOPER_PREVIEW_RC = PRODUCTIZATION / "developer_preview_rc_status.json"
 RELEASE_FRESHNESS = PRODUCTIZATION / "release_evidence_freshness_report.json"
 G1_DIRECT_RESIDUAL = PRODUCTIZATION / "mgt_g1_direct_residual_terminal_gate_report.json"
 G1_FULL_LOAD_HIP = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
+G1_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
 G1_F2G_F2H_CAUSE_NARROWING = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
 CUSTOMER_SHADOW = Path("implementation/phase1/customer_shadow_evidence_status.json")
 EXTERNAL_BENCHMARK_SUBMISSION = Path(
@@ -154,6 +155,7 @@ def _source_paths() -> list[Path]:
         RELEASE_FRESHNESS,
         G1_DIRECT_RESIDUAL,
         G1_FULL_LOAD_HIP,
+        G1_GLOBAL_CONNECTIVITY,
         G1_F2G_F2H_CAUSE_NARROWING,
         CUSTOMER_SHADOW,
         EXTERNAL_BENCHMARK_SUBMISSION,
@@ -199,6 +201,7 @@ def build_structural_product_development_roadmap(
     freshness = _load_json(repo_root, RELEASE_FRESHNESS)
     g1_direct = _load_json(repo_root, G1_DIRECT_RESIDUAL)
     g1_full_load = _load_json(repo_root, G1_FULL_LOAD_HIP)
+    g1_global_connectivity = _load_json(repo_root, G1_GLOBAL_CONNECTIVITY)
     g1_cause_narrowing = _load_json(repo_root, G1_F2G_F2H_CAUSE_NARROWING)
     customer_shadow = _load_json(repo_root, CUSTOMER_SHADOW)
     external_submission = _load_json(repo_root, EXTERNAL_BENCHMARK_SUBMISSION)
@@ -231,6 +234,7 @@ def build_structural_product_development_roadmap(
     g1_full_ready = g1_full_load.get("contract_pass") is True
     g1_numerator = int(g1_direct_ready) + int(g1_full_ready)
     g1_blockers = [str(row) for row in _as_list(g1_full_load.get("blockers"))]
+    g1_global_summary = _as_dict(g1_global_connectivity.get("summary"))
     g1_cause_signals = _as_dict(g1_cause_narrowing.get("evidence_signals"))
 
     shadow_summary = _as_dict(customer_shadow.get("summary"))
@@ -358,7 +362,12 @@ def build_structural_product_development_roadmap(
                 "prove_full_load_1_0_checkpoint",
                 "prove_production_rocm_hip_residual_jacobian_lane",
             ],
-            evidence_artifacts=[G1_DIRECT_RESIDUAL, G1_FULL_LOAD_HIP, G1_F2G_F2H_CAUSE_NARROWING],
+            evidence_artifacts=[
+                G1_DIRECT_RESIDUAL,
+                G1_FULL_LOAD_HIP,
+                G1_GLOBAL_CONNECTIVITY,
+                G1_F2G_F2H_CAUSE_NARROWING,
+            ],
             claim_boundary="Direct residual closure is only one G1 axis; full-load HIP/Newton closure remains required.",
             summary={
                 "direct_residual_terminal_gate_ready": g1_direct_ready,
@@ -367,6 +376,20 @@ def build_structural_product_development_roadmap(
                     "full_load_hip_newton_lane_observed_load_scale"
                 ),
                 "f2g_f2h_cause_narrowing_status": str(g1_cause_narrowing.get("status") or "missing"),
+                "global_connectivity_load_path_audit_status": str(
+                    g1_global_connectivity.get("status") or "missing"
+                ),
+                "global_connectivity_classification": str(
+                    g1_global_summary.get("global_connectivity_classification")
+                    or g1_cause_signals.get("global_connectivity_classification")
+                    or "not_audited"
+                ),
+                "dominant_nodes_element_reachable_to_support_count": _as_int(
+                    g1_global_summary.get("dominant_nodes_element_reachable_to_support_count")
+                ),
+                "dominant_nodes_without_element_path_to_support_count": _as_int(
+                    g1_global_summary.get("dominant_nodes_without_element_path_to_support_count")
+                ),
                 "support_or_link_row_gap_disfavored": _as_bool(
                     g1_cause_signals.get("support_or_link_row_gap_disfavored")
                 ),

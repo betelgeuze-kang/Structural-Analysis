@@ -116,6 +116,17 @@ def _write_minimal_inputs(repo_root: Path) -> None:
         {"contract_pass": False, "blockers": ["full_load_hip_newton_not_closed"]},
     )
     _write_json(
+        productization / "g1_global_connectivity_load_path_audit.json",
+        {
+            "status": "ready",
+            "summary": {
+                "global_connectivity_classification": "element_graph_connects_dominant_modes_to_supports",
+                "dominant_nodes_element_reachable_to_support_count": 8,
+                "dominant_nodes_without_element_path_to_support_count": 0,
+            },
+        },
+    )
+    _write_json(
         productization / "g1_f2g_f2h_cause_narrowing_status.json",
         {
             "status": "ready",
@@ -162,8 +173,26 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         == "ready"
     )
     assert (
+        stages["g1_solver_closure"]["summary"]["global_connectivity_load_path_audit_status"]
+        == "ready"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"]["global_connectivity_classification"]
+        == "element_graph_connects_dominant_modes_to_supports"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "dominant_nodes_element_reachable_to_support_count"
+        ]
+        == 8
+    )
+    assert (
         stages["g1_solver_closure"]["summary"]["recommended_g1_next_direction"]
         == "global_connectivity_consistent_newton_rocm_lane"
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json"
+        in stages["g1_solver_closure"]["evidence_artifacts"]
     )
     assert (
         "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json"

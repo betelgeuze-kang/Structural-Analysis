@@ -19,7 +19,7 @@
     "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
     "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
   },
-  "generated_at": "2026-06-30T06:43:48.578107+00:00",
+  "generated_at": "2026-06-30T06:45:45.738076+00:00",
   "input_checksums": {
     "scripts/build_pocketmd_lite_product_surface.py": "sha256:8b1110f6c577187dcc08b3fba9cf426c53807c8108d9796ef1aebc55aeb39ff4",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:1a65430ba11b2c5c42ffd1ec80b41ab0671b3e50387b6e42e743ffda4de44ad4"
@@ -85,6 +85,6 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/handoff",
   "schema_version": "pocketmd-lite-delivery-handoff.v1",
-  "source_commit_sha": "f01278bb8a90f32a06d2648b31e9d64a524384a6",
+  "source_commit_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
   "status": "handoff_ready_operator_evidence_required"
 }

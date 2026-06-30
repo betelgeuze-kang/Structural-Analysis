@@ -26,6 +26,7 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
     f2g = tmp_path / "f2g.local.json"
     f2h = tmp_path / "f2h.local.json"
     g1 = tmp_path / "g1.json"
+    global_connectivity = tmp_path / "g1_global_connectivity.json"
     script = tmp_path / "scripts/build_g1_f2g_f2h_cause_narrowing_status.py"
     _write_json(
         f2g,
@@ -69,6 +70,19 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
             ],
         },
     )
+    _write_json(
+        global_connectivity,
+        {
+            "status": "ready",
+            "summary": {
+                "dominant_node_count": 8,
+                "dominant_nodes_element_reachable_to_support_count": 8,
+                "dominant_nodes_without_element_path_to_support_count": 0,
+                "element_graph_connectivity_gap_detected": False,
+                "global_connectivity_classification": "element_graph_connects_dominant_modes_to_supports",
+            },
+        },
+    )
     script.parent.mkdir(parents=True, exist_ok=True)
     script.write_text("# fixture\n", encoding="utf-8")
 
@@ -77,14 +91,21 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         f2g_audit_path=f2g,
         f2h_status_path=f2h,
         g1_full_load_path=g1,
+        global_connectivity_path=global_connectivity,
     )
 
     assert payload["status"] == "ready"
     assert payload["promotes_g1_closure"] is False
     assert payload["evidence_signals"]["support_or_link_row_gap_disfavored"] is True
+    assert payload["evidence_signals"]["full_structural_graph_audit_status"] == "ready"
+    assert payload["evidence_signals"]["global_connectivity_classification"] == (
+        "element_graph_connects_dominant_modes_to_supports"
+    )
+    assert payload["evidence_signals"]["dominant_nodes_without_element_path_to_support_count"] == 0
     assert payload["evidence_signals"]["f2h_lightweight_0p1_0p2_0p4_ready"] is True
     assert payload["hypothesis_rank"][0]["hypothesis"] == "direct_support_or_elastic_link_row_missing"
     assert payload["hypothesis_rank"][0]["classification"] == "deprioritized"
+    assert payload["hypothesis_rank"][1]["classification"] == "load_path_transfer_or_tangent_gap"
     assert "stop_row_only_support_or_elastic_link_correction_loop" in payload["next_actions"]
 
 

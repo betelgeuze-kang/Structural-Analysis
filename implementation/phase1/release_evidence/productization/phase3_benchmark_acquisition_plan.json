@@ -42,7 +42,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T06:38:43.186601+00:00",
+  "generated_at": "2026-06-30T06:45:45.098047+00:00",
   "ifc_import_case_requirement": {
     "blocker": "phase3_ifc_import_case_quantity_credit_missing",
     "claim_boundary": "The Phase 3 roadmap requires at least 10 clean/dirty IFC import cases. Current acquisition evidence contains two clean buildingSMART expected import-health contracts and eight dirty/negative expected block contracts, but zero quantity-credit-ready IFC cases.",
@@ -466,7 +466,7 @@
     "writes_default_artifact_command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py"
   },
   "schema_version": "phase3-benchmark-acquisition-plan.v1",
-  "source_commit_sha": "5dfd6afd6119f488537644e4666e47bf9ff73a09",
+  "source_commit_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
   "source_license_receipt_source_count": 4,
   "status": "blocked",
   "topology_receipt_source_count": 6

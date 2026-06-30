@@ -22,6 +22,7 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_F2G_AUDIT = PRODUCTIZATION / "g1_support_elastic_link_reconciliation_audit.local.json"
 DEFAULT_F2H_STATUS = PRODUCTIZATION / "f2h_lightweight_continuation_status.local.json"
 DEFAULT_G1_FULL_LOAD = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
+DEFAULT_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
 DEFAULT_OUT = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
 SCHEMA_VERSION = "g1-f2g-f2h-cause-narrowing-status.v1"
 REUSE_POLICY = "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice"
@@ -102,11 +103,13 @@ def build_status(
     f2g_audit_path: Path = DEFAULT_F2G_AUDIT,
     f2h_status_path: Path = DEFAULT_F2H_STATUS,
     g1_full_load_path: Path = DEFAULT_G1_FULL_LOAD,
+    global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     f2g_audit = _load_json(repo_root, f2g_audit_path)
     f2h_status = _load_json(repo_root, f2h_status_path)
     g1_full_load = _load_json(repo_root, g1_full_load_path)
+    global_connectivity = _load_json(repo_root, global_connectivity_path)
 
     blockers: list[str] = []
     if not f2g_audit:
@@ -122,12 +125,25 @@ def build_status(
 
     f2g_summary = _as_dict(f2g_audit.get("summary"))
     f2h_summary = _as_dict(f2h_status.get("summary"))
+    global_summary = _as_dict(global_connectivity.get("summary"))
     finding_ids = _finding_ids(f2g_audit)
     dominant_rows = _as_int(f2g_summary.get("dominant_dof_row_count"))
     direct_support = _as_int(f2g_summary.get("direct_support_member_count"))
     direct_link = _as_int(f2g_summary.get("direct_elastic_link_endpoint_count"))
     reachable = _as_int(f2g_summary.get("elastic_link_reachable_to_support_count"))
     global_tangent_ready = f2g_summary.get("global_frame_shell_tangent_integration_ready") is True
+    global_connectivity_status = str(global_connectivity.get("status") or "missing")
+    global_connectivity_classification = str(
+        global_summary.get("global_connectivity_classification") or "not_audited"
+    )
+    dominant_node_count = _as_int(global_summary.get("dominant_node_count"))
+    element_reachable_nodes = _as_int(
+        global_summary.get("dominant_nodes_element_reachable_to_support_count")
+    )
+    element_unreachable_nodes = _as_int(
+        global_summary.get("dominant_nodes_without_element_path_to_support_count")
+    )
+    element_graph_gap_detected = global_summary.get("element_graph_connectivity_gap_detected") is True
 
     direct_row_gap_disfavored = bool(dominant_rows > 0 and direct_support == 0 and direct_link == 0)
     elastic_link_transfer_disfavored = bool(dominant_rows > 0 and reachable == 0)
@@ -151,6 +167,11 @@ def build_status(
         "global_frame_shell_tangent_integration_ready": global_tangent_ready,
         "boundary_subsystem_not_full_global_tangent": boundary_not_global,
         "distributed_translation_rotation_packet_present": distributed_modes,
+        "full_structural_graph_audit_status": global_connectivity_status,
+        "global_connectivity_classification": global_connectivity_classification,
+        "dominant_nodes_element_reachable_to_support_count": element_reachable_nodes,
+        "dominant_nodes_without_element_path_to_support_count": element_unreachable_nodes,
+        "element_graph_connectivity_gap_detected": element_graph_gap_detected,
         "f2h_lightweight_0p1_0p2_0p4_ready": f2h_sequence_ready,
         "f2h_residual_trend_across_increasing_load": f2h_residual_trend,
         "f2h_residual_growth_factor_0p1_to_0p4": residual_growth,
@@ -169,13 +190,28 @@ def build_status(
         },
         {
             "hypothesis": "global_connectivity_or_load_path_transfer_gap",
-            "classification": "primary_next_slice",
+            "classification": (
+                "primary_blocker"
+                if element_graph_gap_detected
+                else "load_path_transfer_or_tangent_gap"
+                if global_connectivity_status == "ready"
+                else "primary_next_slice"
+            ),
             "evidence": [
                 "dominant near-null rows are not support members or elastic-link endpoints",
                 "elastic-link graph does not reach authored supports for dominant rows",
                 "boundary spring context is not full global frame/shell tangent integration",
+                f"full_structural_graph_audit_status={global_connectivity_status}",
+                f"global_connectivity_classification={global_connectivity_classification}",
+                f"element_graph_reachable_nodes={element_reachable_nodes}/{dominant_node_count}",
             ],
-            "next_action": "audit_full_structural_connectivity_and_load_path_transfer_before_more_row_corrections",
+            "next_action": (
+                "inspect_disconnected_structural_components_and_load_path_mapping"
+                if element_graph_gap_detected
+                else "shift_from_connectivity_inventory_to_consistent_residual_jacobian_newton"
+                if global_connectivity_status == "ready"
+                else "audit_full_structural_connectivity_and_load_path_transfer_before_more_row_corrections"
+            ),
         },
         {
             "hypothesis": "weak_restraint_or_geometric_softening",
@@ -216,6 +252,7 @@ def build_status(
                 f2g_audit_path,
                 f2h_status_path,
                 g1_full_load_path,
+                global_connectivity_path,
             ],
             reused_evidence=True,
             reuse_policy=REUSE_POLICY,
@@ -261,6 +298,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--f2g-audit-json", type=Path, default=DEFAULT_F2G_AUDIT)
     parser.add_argument("--f2h-status-json", type=Path, default=DEFAULT_F2H_STATUS)
     parser.add_argument("--g1-full-load-json", type=Path, default=DEFAULT_G1_FULL_LOAD)
+    parser.add_argument("--global-connectivity-json", type=Path, default=DEFAULT_GLOBAL_CONNECTIVITY)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     return parser.parse_args(argv)
 
@@ -272,6 +310,7 @@ def main(argv: list[str] | None = None) -> int:
         f2g_audit_path=args.f2g_audit_json,
         f2h_status_path=args.f2h_status_json,
         g1_full_load_path=args.g1_full_load_json,
+        global_connectivity_path=args.global_connectivity_json,
     )
     output = args.out if args.out.is_absolute() else args.repo_root / args.out
     output.parent.mkdir(parents=True, exist_ok=True)

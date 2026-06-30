@@ -12,12 +12,12 @@
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
-    "feature_push": "git push origin main:codex/create-architecture-definition-document-for-hybrid-ai",
+    "feature_push": "git push origin HEAD:codex/create-architecture-definition-document-for-hybrid-ai",
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-06-30T06:39:49.047466+00:00",
+  "generated_at": "2026-06-30T06:45:04.151304+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -35,16 +35,16 @@
   "remote_sync_needed": false,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
-    "branch": "main",
+    "branch": "HEAD",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "72e9b1f415eb0ab0c21cbcd64dabd46a2cc699af",
+    "local_head_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
-    "remote_feature_sha": "72e9b1f415eb0ab0c21cbcd64dabd46a2cc699af",
+    "remote_feature_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "72e9b1f415eb0ab0c21cbcd64dabd46a2cc699af",
+    "remote_main_sha": "6cb09c034d3a92c0be4b83bbeeb1d787214e3572",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
