@@ -253,7 +253,7 @@ Acceptance criteria:
 - Explicit R4 approval phrase received: `feature push + main fast-forward 승인`
 - `check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`
 - `github_sync` absent from `release_area_blockers` after PM release gate regeneration
-- `origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD
+- `origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD
 
 Evidence artifact paths:
 - `github_development_sync_preflight`: `<live-git-state>`
@@ -289,7 +289,7 @@ Acceptance criteria:
 - Explicit R4 approval phrase received: `feature push + main fast-forward 승인`
 - `check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`
 - `github_sync` absent from `release_area_blockers` after PM release gate regeneration
-- `origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD
+- `origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD
 
 Evidence artifact paths:
 - `github_development_sync_preflight`: `<live-git-state>`
@@ -325,7 +325,7 @@ Acceptance criteria:
 - Explicit R4 approval phrase received: `feature push + main fast-forward 승인`
 - `check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`
 - `github_sync` absent from `release_area_blockers` after PM release gate regeneration
-- `origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD
+- `origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD
 
 Evidence artifact paths:
 - `github_development_sync_preflight`: `<live-git-state>`

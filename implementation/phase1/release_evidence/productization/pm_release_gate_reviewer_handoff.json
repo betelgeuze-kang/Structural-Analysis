@@ -18,7 +18,7 @@
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-30T14:29:57.030804+00:00",
+  "generated_at": "2026-06-30T18:28:13.887761+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -334,7 +334,7 @@
         "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
         "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
         "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-        "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
       ],
       "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
@@ -373,7 +373,7 @@
         "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
         "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
         "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-        "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
       ],
       "blocker_id": "github_sync::github_sync_remote_sync_pending",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
@@ -412,7 +412,7 @@
         "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
         "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
         "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-        "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
       ],
       "blocker_id": "github_sync::github_sync_preflight_not_synced",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
