@@ -18,6 +18,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from validate_public_benchmark_subset_manifest import (  # noqa: E402
     LOCAL_SOURCE_FILE_FIELDS,
+    REQUIRED_POSE_SUCCESS_METRIC,
     REQUIRED_CASE_FIELDS,
     validate_subset_manifest,
 )
@@ -93,6 +94,8 @@ def _case_row_template() -> dict[str, Any]:
         "source_license_or_accession": "",
         "source_checksum": "",
         "provenance_ref": "",
+        "pose_success_metric": REQUIRED_POSE_SUCCESS_METRIC,
+        "rmsd_threshold_angstrom": 2.0,
     }
 
 

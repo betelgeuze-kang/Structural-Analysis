@@ -38,6 +38,8 @@ def _complete_row(case_id: str) -> dict[str, object]:
         "source_license_or_accession": "operator-attached-accession",
         "source_checksum": source_checksum,
         "provenance_ref": "operator://casf-pdbbind/case",
+        "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+        "rmsd_threshold_angstrom": 2.0,
         "source_file_checksums": {
             f"benchmarks/{case_id}/protein.pdb": "sha256:" + "b" * 64,
             f"benchmarks/{case_id}/ligand_ref.sdf": "sha256:" + "c" * 64,
@@ -123,6 +125,36 @@ def test_validate_manifest_rejects_invalid_source_checksum() -> None:
 
     assert result["public_benchmark_ready"] is False
     assert result["blockers"] == ["case_row_0:source_checksum_invalid"]
+
+
+def test_validate_manifest_requires_symmetry_aware_pose_success_metric() -> None:
+    row = _complete_row("case_a")
+    row["pose_success_metric"] = "raw_ligand_rmsd_angstrom"
+
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "case_rows": [row],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert result["blockers"] == ["case_row_0:pose_success_metric_invalid"]
+
+
+def test_validate_manifest_rejects_nonpositive_rmsd_threshold() -> None:
+    row = _complete_row("case_a")
+    row["rmsd_threshold_angstrom"] = 0.0
+
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "case_rows": [row],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert result["blockers"] == ["case_row_0:rmsd_threshold_angstrom_invalid"]
 
 
 def test_validate_manifest_requires_source_file_checksums() -> None:

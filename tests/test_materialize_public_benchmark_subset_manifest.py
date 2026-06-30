@@ -49,6 +49,8 @@ def _case_descriptor(root: Path, case_id: str) -> dict[str, object]:
         },
         "source_license_or_accession": "operator-attached-casf-pdbbind-accession",
         "provenance_ref": f"operator://casf-pdbbind/{case_id}",
+        "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+        "rmsd_threshold_angstrom": 2.0,
     }
 
 
@@ -68,6 +70,8 @@ def test_materializer_builds_ready_subset_manifest_from_local_intake(tmp_path: P
     assert manifest["materialized_case_count"] == 1
     row = manifest["case_rows"][0]
     assert row["source_checksum"].startswith("sha256:")
+    assert row["pose_success_metric"] == "symmetry_aware_ligand_rmsd_angstrom"
+    assert row["rmsd_threshold_angstrom"] == 2.0
     assert len(row["source_file_checksums"]) == 3
     assert all(value.startswith("sha256:") for value in row["source_file_checksums"].values())
     report = manifest["materialization_report"]

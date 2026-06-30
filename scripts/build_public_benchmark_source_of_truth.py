@@ -167,6 +167,8 @@ def _operator_slot(
             "source_license_or_accession",
             "source_checksum",
             "provenance_ref",
+            "pose_success_metric",
+            "rmsd_threshold_angstrom",
         ],
         "blockers": [
             "public_source_files_not_attached",

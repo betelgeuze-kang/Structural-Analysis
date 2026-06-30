@@ -11,6 +11,7 @@ from typing import Any
 
 
 SCHEMA_VERSION = "public-benchmark-subset-manifest-validation.v1"
+REQUIRED_POSE_SUCCESS_METRIC = "symmetry_aware_ligand_rmsd_angstrom"
 LOCAL_SOURCE_FILE_FIELDS = (
     "protein_structure_path",
     "reference_ligand_path",
@@ -28,6 +29,8 @@ REQUIRED_CASE_FIELDS = (
     "source_license_or_accession",
     "source_checksum",
     "provenance_ref",
+    "pose_success_metric",
+    "rmsd_threshold_angstrom",
 )
 
 
@@ -52,6 +55,15 @@ def _validate_case_row(row: dict[str, Any], *, index: int) -> list[str]:
     source_checksum = str(row.get("source_checksum") or "").strip()
     if source_checksum and not _is_sha256_ref(source_checksum):
         blockers.append(f"case_row_{index}:source_checksum_invalid")
+    if str(row.get("pose_success_metric") or "").strip() != REQUIRED_POSE_SUCCESS_METRIC:
+        blockers.append(f"case_row_{index}:pose_success_metric_invalid")
+    try:
+        rmsd_threshold = float(row.get("rmsd_threshold_angstrom"))
+    except (TypeError, ValueError):
+        blockers.append(f"case_row_{index}:rmsd_threshold_angstrom_invalid")
+    else:
+        if rmsd_threshold <= 0:
+            blockers.append(f"case_row_{index}:rmsd_threshold_angstrom_invalid")
     source_file_checksums = row.get("source_file_checksums")
     if not isinstance(source_file_checksums, dict) or not source_file_checksums:
         blockers.append(f"case_row_{index}:source_file_checksums_missing")

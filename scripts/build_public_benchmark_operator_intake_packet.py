@@ -163,6 +163,8 @@ def _subset_case_template() -> dict[str, Any]:
         "source_license_or_accession": "operator_supplied_accession_or_license_ref",
         "source_checksum": "sha256:operator_supplied_source_bundle_checksum",
         "provenance_ref": "operator_supplied_subset_preparation_receipt",
+        "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+        "rmsd_threshold_angstrom": 2.0,
     }
 
 
@@ -515,6 +517,7 @@ def build_public_benchmark_operator_intake_packet(
                 "attach protein, reference ligand, and predicted pose or docking-run files",
                 "declare license or accession references without redistributing restricted source data",
                 "declare ligand atom order and symmetry permutations for every case",
+                "declare pose_success_metric=symmetry_aware_ligand_rmsd_angstrom and a positive RMSD threshold",
                 "run the subset materializer with --fail-blocked",
             ],
             validation_command=subset_validation,

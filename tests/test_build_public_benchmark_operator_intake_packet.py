@@ -104,10 +104,17 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "source_license_or_accession",
         "source_checksum",
         "provenance_ref",
+        "pose_success_metric",
+        "rmsd_threshold_angstrom",
         "ligand_atom_order_contract.atom_count",
         "ligand_atom_order_contract.atom_ids",
         "symmetry_permutation_contract.permutations",
     ]
+    assert (
+        subset["template"]["cases"][0]["pose_success_metric"]
+        == "symmetry_aware_ligand_rmsd_angstrom"
+    )
+    assert subset["template"]["cases"][0]["rmsd_threshold_angstrom"] == 2.0
     assert subset["local_source_file_fields"] == [
         "protein_structure_path",
         "reference_ligand_path",

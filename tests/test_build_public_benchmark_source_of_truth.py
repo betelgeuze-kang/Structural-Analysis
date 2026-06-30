@@ -327,6 +327,8 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "source_license_or_accession",
             "source_checksum",
             "provenance_ref",
+            "pose_success_metric",
+            "rmsd_threshold_angstrom",
         ],
         "local_source_file_fields": [
             "protein_structure_path",
@@ -578,6 +580,8 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "source_license_or_accession",
         "source_checksum",
         "provenance_ref",
+        "pose_success_metric",
+        "rmsd_threshold_angstrom",
     ]
     assert subset["case_row_schema"]["template"]["source_family"] == "CASF/PDBBind"
     assert (
