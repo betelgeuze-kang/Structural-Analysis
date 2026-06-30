@@ -4,13 +4,20 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 5,
+  "blocker_count": 12,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
-    "human_ux::observation_file_missing"
+    "human_ux::observation_file_missing",
+    "pm_release::M5::pm_blocker_closure_board_count_mismatch",
+    "pm_release::evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+    "pm_release::report::commercial_packaging_milestone_not_green",
+    "pm_release::support::pm_blocker_closure_board_count_mismatch",
+    "stale_or_inconsistent:open_blocker_count_conflict",
+    "stale_or_inconsistent:release_area_count_conflict",
+    "stale_or_inconsistent:worktree_dirty"
   ],
   "categories": {
     "benchmark": {
@@ -65,9 +72,16 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 1,
+      "blocker_count": 8,
       "blockers": [
-        "human_ux::observation_file_missing"
+        "human_ux::observation_file_missing",
+        "pm_release::M5::pm_blocker_closure_board_count_mismatch",
+        "pm_release::evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+        "pm_release::report::commercial_packaging_milestone_not_green",
+        "pm_release::support::pm_blocker_closure_board_count_mismatch",
+        "stale_or_inconsistent:open_blocker_count_conflict",
+        "stale_or_inconsistent:release_area_count_conflict",
+        "stale_or_inconsistent:worktree_dirty"
       ]
     }
   },
@@ -188,7 +202,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T01:30:32.494070+00:00",
+  "generated_at": "2026-06-30T01:47:41.556253+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -199,30 +213,30 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:5a5cb2f0ce3a48ad8589d0b9736edf3ec4bc89df532b9677dbb64313aac800eb",
+      "input_checksum": "sha256:10ed5139e7f3a7c665045c499a72d79f014afddac26d7873abd636ee82b089b9",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "9eb7edaf52a38ce1d287fba839cc167c9d8afe83",
+      "source_commit_sha": "f9173f7b5928c0dfe6a295eb7c0d08b965e895bd",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:efd02e86684e2f58d0bc57b6cf8ead64e48c367fd60a010fbcd32493466aa8e0",
+      "input_checksum": "sha256:4f687ce08353dfca0558b1ecd76ccc88518646d5536951bedabc0f9497f66c44",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "898430df078e2eae38b455d2a6ead7ad79da959b",
-      "status": "blocked"
+      "source_commit_sha": "f9173f7b5928c0dfe6a295eb7c0d08b965e895bd",
+      "status": "stale_or_inconsistent"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:5a5cb2f0ce3a48ad8589d0b9736edf3ec4bc89df532b9677dbb64313aac800eb",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:efd02e86684e2f58d0bc57b6cf8ead64e48c367fd60a010fbcd32493466aa8e0"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:10ed5139e7f3a7c665045c499a72d79f014afddac26d7873abd636ee82b089b9",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:4f687ce08353dfca0558b1ecd76ccc88518646d5536951bedabc0f9497f66c44"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
-  "product_snapshot_status": "blocked",
+  "product_snapshot_status": "stale_or_inconsistent",
   "reason_code": "ERR_DEVELOPER_PREVIEW_BLOCKED",
   "reuse_policy": "derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence",
   "reused_evidence": false,
@@ -1727,31 +1741,25 @@
       ]
     },
     "phase3_release_control_cleanup_plan": {
-      "candidate_release_control_commit_set_count": 14,
+      "candidate_release_control_commit_set_count": 0,
       "candidate_set_scope": "Phase 3 seed git-clean-clone reproduction required-input set only; it is not an exhaustive current-worktree dirty-path inventory.",
       "candidate_set_source": "phase3_benchmark_factory_seed_git_clean_clone_reproduction.release_control_cleanup_plan",
       "claim_boundary": "This receipt organizes local Git cleanup needed for Phase 3 seed git-clean-clone replay. Its candidate set is not an exhaustive current-worktree dirty-path inventory; the product readiness snapshot carries the current-worktree diagnostic separately. It does not commit, push, release, promote Developer Preview readiness, or close Phase 3. Dirty tracked paths require owner review before they are bundled with the release-control evidence set.",
       "codex_commit_or_push_performed": false,
-      "contract_pass": false,
+      "contract_pass": true,
       "current_worktree_diagnostic_source": "product_readiness_snapshot.state_consistency.worktree",
       "current_worktree_diagnostics_included": false,
-      "human_git_action_required": true,
-      "human_handoff_next_action": "owner_review_then_track_or_commit_required_inputs",
+      "human_git_action_required": false,
+      "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
       "human_handoff_push_or_release_command_included": false,
-      "human_handoff_status": "blocked_until_human_git_action",
-      "human_handoff_suggested_command_count": 6,
+      "human_handoff_status": "ready",
+      "human_handoff_suggested_command_count": 3,
       "path": "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json",
-      "path_role_counts": {
-        "generated_productization_evidence": 13,
-        "source_input_report": 1
-      },
-      "recommended_action_counts": {
-        "resolve_or_commit_dirty_tracked_input": 13,
-        "track_source_input_or_report": 1
-      },
-      "resolve_or_commit_dirty_tracked_path_count": 13,
-      "status": "blocked",
-      "track_or_add_required_path_count": 1
+      "path_role_counts": {},
+      "recommended_action_counts": {},
+      "resolve_or_commit_dirty_tracked_path_count": 0,
+      "status": "ready",
+      "track_or_add_required_path_count": 0
     },
     "product_snapshot_root_blockers": {
       "CI runner/streak": {
@@ -1830,9 +1838,17 @@
         ]
       },
       "release freshness/sync": {
-        "blocked": false,
-        "blocker_count": 0,
-        "blockers": []
+        "blocked": true,
+        "blocker_count": 7,
+        "blockers": [
+          "pm_release::M5::pm_blocker_closure_board_count_mismatch",
+          "pm_release::evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+          "pm_release::report::commercial_packaging_milestone_not_green",
+          "pm_release::support::pm_blocker_closure_board_count_mismatch",
+          "stale_or_inconsistent:open_blocker_count_conflict",
+          "stale_or_inconsistent:release_area_count_conflict",
+          "stale_or_inconsistent:worktree_dirty"
+        ]
       }
     }
   },
@@ -2028,6 +2044,6 @@
       }
     }
   },
-  "source_commit_sha": "9eb7edaf52a38ce1d287fba839cc167c9d8afe83",
+  "source_commit_sha": "f9173f7b5928c0dfe6a295eb7c0d08b965e895bd",
   "status": "blocked"
 }
