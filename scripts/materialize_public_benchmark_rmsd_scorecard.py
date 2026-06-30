@@ -84,8 +84,10 @@ def materialize_rmsd_scorecard(
         1 for row in cases if _case_source_family(row) in {"synthetic", "dry_run"}
     )
     real_benchmark_case_count = max(len(cases) - dry_run_case_count, 0)
+    if cases and real_benchmark_case_count == 0:
+        blockers.append("real_benchmark_rmsd_cases_missing")
     pose_success_count = sum(1 for row in rows if row["score"]["pose_success"])
-    scorecard_ready = bool(rows and not blockers)
+    scorecard_ready = bool(rows and real_benchmark_case_count > 0 and not blockers)
     input_paths = [
         Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
         Path("scripts/score_symmetry_aware_ligand_rmsd.py"),

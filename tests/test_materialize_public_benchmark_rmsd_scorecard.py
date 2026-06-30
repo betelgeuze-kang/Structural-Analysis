@@ -96,6 +96,23 @@ def test_rmsd_scorecard_materializer_blocks_invalid_pose_validity_input() -> Non
     ]
 
 
+def test_rmsd_scorecard_materializer_blocks_dry_run_only_input() -> None:
+    dry_run_case = _pose_case("dry_run_case")
+    dry_run_case["source_family"] = "synthetic"
+
+    scorecard = module.materialize_rmsd_scorecard(
+        {"pose_validity_ready": True, "cases": [dry_run_case]},
+        repo_root=REPO_ROOT,
+    )
+
+    assert scorecard["scorecard_ready"] is False
+    assert scorecard["status"] == "rmsd_materialization_required"
+    assert scorecard["real_benchmark_case_count"] == 0
+    assert scorecard["dry_run_case_count"] == 1
+    assert scorecard["blockers"] == ["real_benchmark_rmsd_cases_missing"]
+    assert scorecard["materialization_report"]["scorecard_ready"] is False
+
+
 def test_rmsd_scorecard_materializer_cli_writes_scorecard_and_report(
     tmp_path: Path,
 ) -> None:
