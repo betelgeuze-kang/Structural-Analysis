@@ -12,7 +12,7 @@
     "local_pr_report_count": 2,
     "release_streak_source_policy": "github_actions_required"
   },
-  "generated_at": "2026-06-30T19:14:02.926973+00:00",
+  "generated_at": "2026-06-30T19:29:34.707198+00:00",
   "lanes": {
     "nightly": {
       "blockers": [
@@ -1669,7 +1669,7 @@
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
-      "github_actions_filtered_run_count": 76,
+      "github_actions_filtered_run_count": 74,
       "github_actions_ignored_event_names": [
         "push"
       ],

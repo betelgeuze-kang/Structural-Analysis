@@ -11,7 +11,7 @@
     "nightly:github_actions_lane_streak_below_threshold",
     "nightly:github_actions_filtered_run_count_below_threshold"
   ],
-  "generated_at": "2026-06-30T19:14:02.959022+00:00",
+  "generated_at": "2026-06-30T19:29:34.739767+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -23,7 +23,7 @@
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
-      "github_actions_filtered_run_count": 76,
+      "github_actions_filtered_run_count": 74,
       "github_actions_ignored_event_names": [
         "push"
       ],
@@ -109,7 +109,7 @@
   "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 0.025,
+    "age_hours": 0.005,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -119,7 +119,7 @@
     ],
     "contract_pass": false,
     "freshness_pass": true,
-    "generated_at": "2026-06-30T19:12:32.441602+00:00",
+    "generated_at": "2026-06-30T19:29:15.816686+00:00",
     "lanes": {
       "nightly": {
         "blockers": [
@@ -181,7 +181,7 @@
         "source_consecutive_pass_count": 0,
         "source_lane_present": true,
         "source_release_credit_pass": false,
-        "source_run_count": 76,
+        "source_run_count": 74,
         "source_threshold": 30,
         "source_threshold_pass": false,
         "threshold": 30,
@@ -217,9 +217,9 @@
     "pr_missing_consecutive_pass_count": 30,
     "pr_pull_request_run_source_present": true,
     "pr_source_threshold_pass": false,
-    "source_evidence_age_hours": 0.025,
+    "source_evidence_age_hours": 0.005,
     "source_evidence_freshness_pass": true,
-    "source_evidence_generated_at": "2026-06-30T19:12:32.441602+00:00",
+    "source_evidence_generated_at": "2026-06-30T19:29:15.816686+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
     "threshold": 30
