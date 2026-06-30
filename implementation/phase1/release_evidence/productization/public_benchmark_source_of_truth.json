@@ -692,11 +692,11 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-06-30T11:09:32.324193+00:00",
+  "generated_at": "2026-06-30T11:15:37.132143+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:857c221b40194f42612640c49d6c13480bd5feb01a3ef50d101d917807f66dc5",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:c04f2ac5649a68cf440882c8d57dfaeac92cc9bc7ae8b39dcfc3ae2365893308",
-    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:e2ba8c2a4175e981717602a51b9eaafa03da82aaf18e7b88e8ca3f70e614ff03",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:b09155a4411e2f0de83463418fd8726b863de69d7a5d2bfe1209fe9e332c0578",
+    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:edd2e1f2c560695f83e4f6dc30489379d16fe7a798541e82179cb5b933a6bf72",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d0105e3fca20c9072fca8571a0d3ba417302b35c3c8196d2c5c9d36f32ac19a0",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:d965fae24ace310a8dac00208f8c4d8ff2b2ea356a21254da7b03966ced9678e",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:d18e8cc8f99d1c8f565340e6a622cd99667b2a837d7c584edfec69a30c9d9037",
@@ -913,6 +913,11 @@
         "materialize_enrichment_scorecard"
       ],
       "minimum_evidence": {
+        "family_coverage_fields": [
+          "benchmark_family_target_counts",
+          "covered_supported_family_count",
+          "missing_supported_families"
+        ],
         "ready_target_count": 1,
         "receipt_fields": [
           "source_license_or_accession",
@@ -1303,6 +1308,11 @@
         "materialize_enrichment_scorecard"
       ],
       "minimum_evidence": {
+        "family_coverage_fields": [
+          "benchmark_family_target_counts",
+          "covered_supported_family_count",
+          "missing_supported_families"
+        ],
         "ready_target_count": 1,
         "receipt_fields": [
           "source_license_or_accession",
@@ -1495,6 +1505,11 @@
         "materialize_enrichment_scorecard"
       ],
       "minimum_evidence": {
+        "family_coverage_fields": [
+          "benchmark_family_target_counts",
+          "covered_supported_family_count",
+          "missing_supported_families"
+        ],
         "ready_target_count": 1,
         "receipt_fields": [
           "source_license_or_accession",
@@ -1668,6 +1683,11 @@
         "materialize_enrichment_scorecard"
       ],
       "minimum_evidence": {
+        "family_coverage_fields": [
+          "benchmark_family_target_counts",
+          "covered_supported_family_count",
+          "missing_supported_families"
+        ],
         "ready_target_count": 1,
         "receipt_fields": [
           "source_license_or_accession",
@@ -2045,6 +2065,11 @@
           "materialize_enrichment_scorecard"
         ],
         "minimum_evidence": {
+          "family_coverage_fields": [
+            "benchmark_family_target_counts",
+            "covered_supported_family_count",
+            "missing_supported_families"
+          ],
           "ready_target_count": 1,
           "receipt_fields": [
             "source_license_or_accession",
@@ -2443,7 +2468,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "2e90557986790c1022a3ef0ad6ce97d1ed49c2d2",
+  "source_commit_sha": "20af762cf053790354a18d1787a399ef293a1422",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

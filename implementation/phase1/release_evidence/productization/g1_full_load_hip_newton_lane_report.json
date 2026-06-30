@@ -1428,11 +1428,12 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T11:09:30.328237+00:00",
+  "generated_at": "2026-06-30T11:15:35.121771+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       "scripts/build_public_benchmark_operator_intake_packet.py",
       "scripts/build_public_benchmark_source_of_truth.py",
+      "scripts/materialize_public_benchmark_enrichment_scorecard.py",
       "scripts/materialize_public_benchmark_pose_validity_input.py",
       "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
       "scripts/materialize_public_benchmark_rmsd_scorecard.py",
@@ -1442,6 +1443,7 @@
       "scripts/validate_public_benchmark_subset_manifest.py",
       "tests/test_build_public_benchmark_operator_intake_packet.py",
       "tests/test_build_public_benchmark_source_of_truth.py",
+      "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
       "tests/test_materialize_public_benchmark_pose_validity_input.py",
       "tests/test_materialize_public_benchmark_posebusters_validity_packet.py",
       "tests/test_materialize_public_benchmark_rmsd_scorecard.py",
@@ -1490,6 +1492,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "2e90557986790c1022a3ef0ad6ce97d1ed49c2d2",
+  "source_commit_sha": "20af762cf053790354a18d1787a399ef293a1422",
   "status": "blocked"
 }
