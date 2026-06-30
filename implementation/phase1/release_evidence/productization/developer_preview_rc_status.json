@@ -513,12 +513,12 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T12:34:28.661774+00:00",
+  "generated_at": "2026-06-30T12:36:38.542265+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:ff2c7b26a570533c2b7cd0b58d90915f969b54d0c96fbac64a844c5ca7a7c6d7",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:f7c1080ac4c241e69f840e2be394fdfccb83b3111c8c7400458582a6dfc1ad40",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:33e6a892b53716542b3c4c05f0d4c62b24818bfbdfd16b4afe308035695ba136",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:3da8694ec13b5dfaebafa88ee0ba6278f946c7a345e5254e7848d68fd5e482f7",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:92d884f5b253ec405de792a2038aa208d27a6c3df130a9d1fa766ebf71af21a4",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:dff2829648b76a278d1901289e94471a7bfd044faafd17c5a0f6838bae7af19a",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:454e267e61d56ea59a7e59d5eabaeb56c61cb2199343dd1ff7ee6053a4eb961d",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:b4702b9194bbf4426c7cf7c856213bdd5d0312b67ce4a1ff6b17fee86580f3d8",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
@@ -1074,13 +1074,28 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 5,
+    "developer_preview_blocker_count": 21,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "human_ux::observation_file_missing"
+      "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+      "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+      "human_ux::observation_file_missing",
+      "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+      "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+      "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+      "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+      "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+      "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+      "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+      "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+      "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+      "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+      "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+      "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+      "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -2429,6 +2444,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
+  "source_commit_sha": "d2304c869b06e40e2695dbed4ac820954ffd41a9",
   "status": "blocked"
 }

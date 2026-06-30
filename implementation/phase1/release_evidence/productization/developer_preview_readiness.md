@@ -5,7 +5,7 @@
 - `commercial_release_ready`: `False`
 - `blocker_count`: `21`
 - `future_commercial_blocker_count`: `29`
-- `source_commit_sha`: `db51ce253e601628058ed2530d87dabcc8db68e9`
+- `source_commit_sha`: `d2304c869b06e40e2695dbed4ac820954ffd41a9`
 - `reuse_policy`: `derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence`
 - `input_checksum_policy`: `product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata`
 
