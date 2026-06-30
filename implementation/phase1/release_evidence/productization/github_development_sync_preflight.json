@@ -20,7 +20,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-30T22:45:53.580067+00:00",
+  "generated_at": "2026-06-30T22:48:13.086429+00:00",
   "pending_remote_updates": [
     {
       "action": "push current HEAD to feature",
@@ -56,11 +56,11 @@
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
-    "feature_ahead_count": 10,
+    "feature_ahead_count": 12,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-    "local_head_sha": "7b88b07c61a432105868156606c2251eda3537ff",
-    "main_ahead_count": 209,
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+    "local_head_sha": "2d535f1d7414741901af1c7701eb73b23996dcb8",
+    "main_ahead_count": 211,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
     "remote_feature_sha": "abedaa9cbb5de07b1916fc9f409af8c22810ca15",
@@ -79,7 +79,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
   },
   "status": "approval_required"
 }
