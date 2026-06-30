@@ -701,6 +701,28 @@
       "source_file_checksums"
     ],
     "schema_version": "public-benchmark-external-receipt-validation.v1",
+    "source_actuality_policy": {
+      "placeholder_markers_rejected": [
+        "<operator",
+        "dry-run",
+        "dummy",
+        "example.invalid",
+        "example://",
+        "fake",
+        "fixture",
+        "mock",
+        "operator_supplied",
+        "placeholder",
+        "synthetic",
+        "test-accession",
+        "todo",
+        "unit-test"
+      ],
+      "placeholder_provenance_prefixes_rejected": [
+        "operator://"
+      ],
+      "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+    },
     "status": "operator_receipts_required"
   },
   "external_receipts_validator": {
@@ -1124,7 +1146,7 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-06-30T22:57:58.200688+00:00",
+  "generated_at": "2026-06-30T23:10:57.474568+00:00",
   "harness_bundle_index": {
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
     "artifact_index_command": "python3 scripts/materialize_public_benchmark_harness_bundle.py --out implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
@@ -1146,7 +1168,7 @@
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:84a2321c26221def7d4fca2ce98dc42832053c40bd464a3a32e2e49e3f44fee0",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:39f2c71e97ac0579ad9504429a63c5478378b939a11675d937eba475e2222bd4",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
-    "scripts/validate_public_benchmark_external_receipts.py": "sha256:282daac16328284d858b1b76830d6cd9666a9b01d67cf9e8259fbac8dc1f571f",
+    "scripts/validate_public_benchmark_external_receipts.py": "sha256:bb8527ea376cb99a854cb625917778d6ae1c6d3ea3afa550ace0225cb9f05c92",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:51c107c5d5c56aaa3fdb63b91f76c515109b86d664effe8fb65922e5c628a3d1",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:92c904fe51679ae70fa88471c611c53f98559b8e2894592cb96f75dbfa15003e"
   },
@@ -3045,7 +3067,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "3deb2e6154334d23c582a0dff8879f57748a137d",
+  "source_commit_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

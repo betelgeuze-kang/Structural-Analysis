@@ -8,7 +8,7 @@
   "claim_boundary": "This seed defines the DUD-E/LIT-PCBA enrichment scorecard shape and materializer command. With zero operator-attached target rows it is intentionally blocked and cannot support an enrichment claim.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T22:57:58.191806+00:00",
+  "generated_at": "2026-06-30T23:10:57.465728+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:987c65882b572a415c1dcd4941fc8adfc055b2e673d114bbe90caa5b02f777d8",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:b8ffd0d2b46dcd1803b3ed07aae28dd038706ab0ffce26dd7d8d7e7a786347c6",
@@ -22,7 +22,7 @@
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:84a2321c26221def7d4fca2ce98dc42832053c40bd464a3a32e2e49e3f44fee0",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:39f2c71e97ac0579ad9504429a63c5478378b939a11675d937eba475e2222bd4",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
-    "scripts/validate_public_benchmark_external_receipts.py": "sha256:282daac16328284d858b1b76830d6cd9666a9b01d67cf9e8259fbac8dc1f571f",
+    "scripts/validate_public_benchmark_external_receipts.py": "sha256:bb8527ea376cb99a854cb625917778d6ae1c6d3ea3afa550ace0225cb9f05c92",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:51c107c5d5c56aaa3fdb63b91f76c515109b86d664effe8fb65922e5c628a3d1",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:92c904fe51679ae70fa88471c611c53f98559b8e2894592cb96f75dbfa15003e"
   },
@@ -65,7 +65,7 @@
   "reuse_policy": "public_benchmark_enrichment_scorecard_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-enrichment-scorecard.v1",
-  "source_commit_sha": "3deb2e6154334d23c582a0dff8879f57748a137d",
+  "source_commit_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
   "status": "operator_evidence_required",
   "summary": {
     "active_count": 0,

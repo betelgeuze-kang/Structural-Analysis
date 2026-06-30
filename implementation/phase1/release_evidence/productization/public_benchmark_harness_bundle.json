@@ -258,15 +258,15 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T22:58:13.704103+00:00",
+  "generated_at": "2026-06-30T23:10:57.581067+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:548ff2f48d025a836021e8d09830f17c0c7aa03ebb17968443831c39b55114ac",
-    "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:6af494c6000a42853b1905281e155930010add2ae572e8620bc8f6dc54aefaf7",
-    "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json": "sha256:f91a276c626db494951879f57e7e69f9732228d5064686f533203d60e22479d2",
-    "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json": "sha256:2f249db3cc5ad7e5a66f72281a397a0ab5c8726721aa542599315a92ae075a65",
-    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:32f5e25566598b12de0ff43513481c6653e92de82e239db82c3e5ef6b31ca536",
-    "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json": "sha256:b1006b7c7e7ebf82e95a7dc74f55870a99195126a13788dd5256f7e4a3a332c5",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json": "sha256:2308a63e035d653b556719f8b0451d5dcc7fa679a0fa57f6495a6c6cecdc42ed",
+    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:2bbc10ac99905a79e94dfcb287939225e5aea7d20aeaef9b41e52552889bc902",
+    "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:f4247bc74bc0b7ef2f948ba8aeb1c180bb6ab73ee3d2a1f1f5e04f6661e99857",
+    "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json": "sha256:fffb2728be2881458cc4dbb739e1cb36b1f39c9f8b45c6d32c91b78e54af8a0c",
+    "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json": "sha256:3aee38104eaa2cb32bd20514b86eb1c2f3c4e1ac75448ccc1e53efe4e472d5f9",
+    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:573357e9faaa6ef93b6ed2800bd06bdddf0a9f5d69111d00886ec46a9d2fdb9c",
+    "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json": "sha256:3c0b0ca0703a244a08dd31d1dc8c1697d2913ee80c45e07d1705d85da4e42589",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json": "sha256:661519422e6946650176827a3a69f16b040b9b10f97fdfe6410ac5388cf2e70f",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:b85dc6b3a1c8b0d6ad5232b47628719f0e0c979b218cf51e730f91d4d0e3cd80"
   },
   "materialization_report": {
@@ -448,6 +448,6 @@
   "reuse_policy": "public_benchmark_harness_bundle_from_materialized_local_artifacts",
   "reused_evidence": false,
   "schema_version": "public-benchmark-harness-bundle.v1",
-  "source_commit_sha": "3deb2e6154334d23c582a0dff8879f57748a137d",
+  "source_commit_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
   "status": "artifact_bundle_incomplete"
 }

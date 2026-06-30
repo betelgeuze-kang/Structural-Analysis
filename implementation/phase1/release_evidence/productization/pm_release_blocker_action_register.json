@@ -27,11 +27,11 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T22:48:24.493720+00:00",
+  "generated_at": "2026-06-30T23:11:11.393743+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:38f478ac610cd7689cdffe5d38a38a368713393ae1e470586a96bd137192e707",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:7e5570eb8de695f0d709357940fe9acc57c87e8ec601dbe15f5572ae399bd5f4",
-    "scripts/build_pm_release_blocker_action_register.py": "sha256:c36d2008f233572c0afd1facfcff1ac299e485f3aaa95293d7d3e91bf69388bb"
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fca437c272fe9a0a954ee4f6d4499bce7faab9e5e1f31c02b8f028797d0ba896",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:01b1bde18e5057913104041293dc3b0a95a52c071698cb6e7e93c4b0493dce73",
+    "scripts/build_pm_release_blocker_action_register.py": "sha256:0543425a3c5da8ce86a3710d9cdba728ebd8a6ac985db8d9cb97b693316114ce"
   },
   "next_actions": [
     "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
@@ -39,9 +39,9 @@
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
-    "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
-    "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
-    "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+    "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+    "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+    "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
     "Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence.",
     "Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence.",
     "Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release.",
@@ -768,11 +768,19 @@
       },
       "evidence_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "2d535f1d7414741901af1c7701eb73b23996dcb8",
-        "feature_ahead_count": 12,
-        "main_ahead_count": 211,
-        "pending_remote_update_count": 2,
-        "preflight_local_head_sha": "2d535f1d7414741901af1c7701eb73b23996dcb8",
+        "current_head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
+        "feature_ahead_count": 0,
+        "feature_synced_to_head": true,
+        "main_ahead_count": 220,
+        "main_synced_to_head": false,
+        "pending_remote_update_actions": [
+          "fast-forward push current HEAD to main"
+        ],
+        "pending_remote_update_count": 1,
+        "pending_remote_update_targets": [
+          "origin/main"
+        ],
+        "preflight_local_head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
         "preflight_source_state_kind": "exact",
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -785,11 +793,19 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 12,
+        "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 211,
+        "feature_synced_to_head": true,
+        "main_ahead_count": 220,
         "main_fast_forward_possible": true,
-        "pending_remote_update_count": 2,
+        "main_synced_to_head": false,
+        "pending_remote_update_actions": [
+          "fast-forward push current HEAD to main"
+        ],
+        "pending_remote_update_count": 1,
+        "pending_remote_update_targets": [
+          "origin/main"
+        ],
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
         "remote_main_ref": "origin/main",
@@ -818,9 +834,9 @@
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
       "namespace": "github_sync",
-      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner": "release_owner",
-      "owner_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -853,11 +869,19 @@
       },
       "evidence_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "2d535f1d7414741901af1c7701eb73b23996dcb8",
-        "feature_ahead_count": 12,
-        "main_ahead_count": 211,
-        "pending_remote_update_count": 2,
-        "preflight_local_head_sha": "2d535f1d7414741901af1c7701eb73b23996dcb8",
+        "current_head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
+        "feature_ahead_count": 0,
+        "feature_synced_to_head": true,
+        "main_ahead_count": 220,
+        "main_synced_to_head": false,
+        "pending_remote_update_actions": [
+          "fast-forward push current HEAD to main"
+        ],
+        "pending_remote_update_count": 1,
+        "pending_remote_update_targets": [
+          "origin/main"
+        ],
+        "preflight_local_head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
         "preflight_source_state_kind": "exact",
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -870,11 +894,19 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 12,
+        "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 211,
+        "feature_synced_to_head": true,
+        "main_ahead_count": 220,
         "main_fast_forward_possible": true,
-        "pending_remote_update_count": 2,
+        "main_synced_to_head": false,
+        "pending_remote_update_actions": [
+          "fast-forward push current HEAD to main"
+        ],
+        "pending_remote_update_count": 1,
+        "pending_remote_update_targets": [
+          "origin/main"
+        ],
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
         "remote_main_ref": "origin/main",
@@ -903,9 +935,9 @@
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
       "namespace": "github_sync",
-      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner": "release_owner",
-      "owner_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -938,11 +970,19 @@
       },
       "evidence_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "2d535f1d7414741901af1c7701eb73b23996dcb8",
-        "feature_ahead_count": 12,
-        "main_ahead_count": 211,
-        "pending_remote_update_count": 2,
-        "preflight_local_head_sha": "2d535f1d7414741901af1c7701eb73b23996dcb8",
+        "current_head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
+        "feature_ahead_count": 0,
+        "feature_synced_to_head": true,
+        "main_ahead_count": 220,
+        "main_synced_to_head": false,
+        "pending_remote_update_actions": [
+          "fast-forward push current HEAD to main"
+        ],
+        "pending_remote_update_count": 1,
+        "pending_remote_update_targets": [
+          "origin/main"
+        ],
+        "preflight_local_head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
         "preflight_source_state_kind": "exact",
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -955,11 +995,19 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 12,
+        "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 211,
+        "feature_synced_to_head": true,
+        "main_ahead_count": 220,
         "main_fast_forward_possible": true,
-        "pending_remote_update_count": 2,
+        "main_synced_to_head": false,
+        "pending_remote_update_actions": [
+          "fast-forward push current HEAD to main"
+        ],
+        "pending_remote_update_count": 1,
+        "pending_remote_update_targets": [
+          "origin/main"
+        ],
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
         "remote_main_ref": "origin/main",
@@ -988,9 +1036,9 @@
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
       "namespace": "github_sync",
-      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner": "release_owner",
-      "owner_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -1250,7 +1298,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "2d535f1d7414741901af1c7701eb73b23996dcb8",
+  "source_commit_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 12,

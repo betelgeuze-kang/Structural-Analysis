@@ -19,7 +19,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-06-30T18:28:13.922226+00:00",
+  "generated_at": "2026-06-30T23:11:11.539457+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -52,12 +52,11 @@
         {
           "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
           "contract_pass": false,
-          "current_blocker_count": 8,
+          "current_blocker_count": 7,
           "current_blockers": [
             "pr:pr_ci_30_consecutive_pass_evidence_missing",
             "pr:github_actions_lane_threshold_not_pass",
             "pr:github_actions_lane_streak_below_threshold",
-            "pr:github_actions_filtered_run_count_below_threshold",
             "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
             "nightly:github_actions_lane_threshold_not_pass",
             "nightly:github_actions_lane_streak_below_threshold",
@@ -71,8 +70,7 @@
               "blockers": [
                 "pr_ci_30_consecutive_pass_evidence_missing",
                 "github_actions_lane_threshold_not_pass",
-                "github_actions_lane_streak_below_threshold",
-                "github_actions_filtered_run_count_below_threshold"
+                "github_actions_lane_streak_below_threshold"
               ],
               "consecutive_pass_count": 0,
               "github_actions_consecutive_pass_count": 0,
@@ -130,16 +128,16 @@
             "nightly_local_workflow_present": true,
             "nightly_missing_consecutive_pass_count": 30,
             "nightly_source_threshold_pass": false,
-            "open_blocker_count": 8,
+            "open_blocker_count": 7,
             "pr_github_actions_workflow_registered": true,
             "pr_github_actions_workflow_state": "active",
             "pr_local_required_trigger_present": true,
             "pr_missing_consecutive_pass_count": 30,
             "pr_pull_request_run_source_present": true,
             "pr_source_threshold_pass": false,
-            "source_evidence_age_hours": 0.796,
+            "source_evidence_age_hours": 0.005,
             "source_evidence_freshness_pass": true,
-            "source_evidence_generated_at": "2026-06-30T13:10:25.744238+00:00",
+            "source_evidence_generated_at": "2026-06-30T19:29:15.816686+00:00",
             "source_evidence_pass": false,
             "source_evidence_schema_pass": true,
             "threshold": 30
@@ -156,7 +154,6 @@
         "pr:pr_ci_30_consecutive_pass_evidence_missing",
         "pr:github_actions_lane_threshold_not_pass",
         "pr:github_actions_lane_streak_below_threshold",
-        "pr:github_actions_filtered_run_count_below_threshold",
         "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
         "nightly:github_actions_lane_threshold_not_pass",
         "nightly:github_actions_lane_streak_below_threshold",
@@ -168,8 +165,7 @@
           "blockers": [
             "pr_ci_30_consecutive_pass_evidence_missing",
             "github_actions_lane_threshold_not_pass",
-            "github_actions_lane_streak_below_threshold",
-            "github_actions_filtered_run_count_below_threshold"
+            "github_actions_lane_streak_below_threshold"
           ],
           "consecutive_pass_count": 0,
           "github_actions_consecutive_pass_count": 0,
@@ -253,12 +249,11 @@
           "expected_intake_detail": {
             "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
             "contract_pass": false,
-            "current_blocker_count": 8,
+            "current_blocker_count": 7,
             "current_blockers": [
               "pr:pr_ci_30_consecutive_pass_evidence_missing",
               "pr:github_actions_lane_threshold_not_pass",
               "pr:github_actions_lane_streak_below_threshold",
-              "pr:github_actions_filtered_run_count_below_threshold",
               "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
               "nightly:github_actions_lane_threshold_not_pass",
               "nightly:github_actions_lane_streak_below_threshold",
@@ -272,8 +267,7 @@
                 "blockers": [
                   "pr_ci_30_consecutive_pass_evidence_missing",
                   "github_actions_lane_threshold_not_pass",
-                  "github_actions_lane_streak_below_threshold",
-                  "github_actions_filtered_run_count_below_threshold"
+                  "github_actions_lane_streak_below_threshold"
                 ],
                 "consecutive_pass_count": 0,
                 "github_actions_consecutive_pass_count": 0,
@@ -331,16 +325,16 @@
               "nightly_local_workflow_present": true,
               "nightly_missing_consecutive_pass_count": 30,
               "nightly_source_threshold_pass": false,
-              "open_blocker_count": 8,
+              "open_blocker_count": 7,
               "pr_github_actions_workflow_registered": true,
               "pr_github_actions_workflow_state": "active",
               "pr_local_required_trigger_present": true,
               "pr_missing_consecutive_pass_count": 30,
               "pr_pull_request_run_source_present": true,
               "pr_source_threshold_pass": false,
-              "source_evidence_age_hours": 0.796,
+              "source_evidence_age_hours": 0.005,
               "source_evidence_freshness_pass": true,
-              "source_evidence_generated_at": "2026-06-30T13:10:25.744238+00:00",
+              "source_evidence_generated_at": "2026-06-30T19:29:15.816686+00:00",
               "source_evidence_pass": false,
               "source_evidence_schema_pass": true,
               "threshold": 30
@@ -393,12 +387,11 @@
           "expected_intake_detail": {
             "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
             "contract_pass": false,
-            "current_blocker_count": 8,
+            "current_blocker_count": 7,
             "current_blockers": [
               "pr:pr_ci_30_consecutive_pass_evidence_missing",
               "pr:github_actions_lane_threshold_not_pass",
               "pr:github_actions_lane_streak_below_threshold",
-              "pr:github_actions_filtered_run_count_below_threshold",
               "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
               "nightly:github_actions_lane_threshold_not_pass",
               "nightly:github_actions_lane_streak_below_threshold",
@@ -412,8 +405,7 @@
                 "blockers": [
                   "pr_ci_30_consecutive_pass_evidence_missing",
                   "github_actions_lane_threshold_not_pass",
-                  "github_actions_lane_streak_below_threshold",
-                  "github_actions_filtered_run_count_below_threshold"
+                  "github_actions_lane_streak_below_threshold"
                 ],
                 "consecutive_pass_count": 0,
                 "github_actions_consecutive_pass_count": 0,
@@ -471,16 +463,16 @@
               "nightly_local_workflow_present": true,
               "nightly_missing_consecutive_pass_count": 30,
               "nightly_source_threshold_pass": false,
-              "open_blocker_count": 8,
+              "open_blocker_count": 7,
               "pr_github_actions_workflow_registered": true,
               "pr_github_actions_workflow_state": "active",
               "pr_local_required_trigger_present": true,
               "pr_missing_consecutive_pass_count": 30,
               "pr_pull_request_run_source_present": true,
               "pr_source_threshold_pass": false,
-              "source_evidence_age_hours": 0.796,
+              "source_evidence_age_hours": 0.005,
               "source_evidence_freshness_pass": true,
-              "source_evidence_generated_at": "2026-06-30T13:10:25.744238+00:00",
+              "source_evidence_generated_at": "2026-06-30T19:29:15.816686+00:00",
               "source_evidence_pass": false,
               "source_evidence_schema_pass": true,
               "threshold": 30
@@ -1866,7 +1858,7 @@
       "intake_lane_request_rows": [],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`."
+        "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`."
       ],
       "owner": "release_owner",
       "owner_input_required": true,
@@ -1890,7 +1882,7 @@
           "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
           "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
           "evidence_artifacts": {
-            "github_development_sync_preflight": "<live-git-state>",
+            "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
           "evidence_state": "approval_required",
@@ -1900,7 +1892,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -1929,7 +1921,7 @@
           "blocker_id": "github_sync::github_sync_remote_sync_pending",
           "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
           "evidence_artifacts": {
-            "github_development_sync_preflight": "<live-git-state>",
+            "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
           "evidence_state": "approval_required",
@@ -1939,7 +1931,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -1968,7 +1960,7 @@
           "blocker_id": "github_sync::github_sync_preflight_not_synced",
           "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
           "evidence_artifacts": {
-            "github_development_sync_preflight": "<live-git-state>",
+            "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
           "evidence_state": "approval_required",
@@ -1978,7 +1970,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+          "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -2891,7 +2883,7 @@
     "expected_intake_count": 5,
     "expected_intake_field_request_count": 24,
     "expected_intake_lane_request_count": 2,
-    "expected_intake_open_blocker_count": 33,
+    "expected_intake_open_blocker_count": 32,
     "expected_intake_signoff_request_count": 3,
     "external_input_required_count": 12,
     "full_release_gate_ready": false,

@@ -18,7 +18,7 @@
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-30T18:28:13.887761+00:00",
+  "generated_at": "2026-06-30T23:11:11.504899+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -340,13 +340,13 @@
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
       "evidence_artifact_paths": {
-        "github_development_sync_preflight": "<live-git-state>",
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_state": "approval_required",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
@@ -360,7 +360,7 @@
         "`release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`github_sync::github_sync_preflight::remote_mutation_approval_required` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `github_sync_preflight_clean`"
+        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`"
       ],
       "verification_commands": [
         "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -379,13 +379,13 @@
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
       "evidence_artifact_paths": {
-        "github_development_sync_preflight": "<live-git-state>",
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_state": "approval_required",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
@@ -399,7 +399,7 @@
         "`release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`github_sync::github_sync_remote_sync_pending` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `github_sync_preflight_clean`"
+        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`"
       ],
       "verification_commands": [
         "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
@@ -418,13 +418,13 @@
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
       "evidence_artifact_paths": {
-        "github_development_sync_preflight": "<live-git-state>",
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_state": "approval_required",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner": "release_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.github_sync",
@@ -438,7 +438,7 @@
         "`release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`github_sync::github_sync_preflight_not_synced` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `github_sync_preflight_clean`"
+        "Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`"
       ],
       "verification_commands": [
         "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
