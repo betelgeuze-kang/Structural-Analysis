@@ -1125,6 +1125,72 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
     return queue
 
 
+def _operator_evidence_handoff_slot_queue(
+    roadmap_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    blocked_rows = [row for row in roadmap_rows if row["state"] != "ready"]
+    queue: list[dict[str, Any]] = []
+    for phase_index, row in enumerate(blocked_rows, start=1):
+        summary = _as_dict(row.get("summary"))
+        slot_rows = [
+            _as_dict(slot)
+            for slot in _as_list(
+                summary.get("operator_handoff_queue")
+                or summary.get("operator_evidence_gap_register")
+            )
+            if isinstance(slot, dict)
+        ]
+        if not slot_rows:
+            first_gap = _as_dict(summary.get("first_operator_evidence_gap"))
+            if first_gap:
+                slot_rows = [first_gap]
+        for slot_index, slot in enumerate(slot_rows, start=1):
+            blocked_criteria = (
+                _as_list(slot.get("blocked_tier_beta_criteria"))
+                or _as_list(slot.get("blocked_phase3_criteria"))
+                or _as_list(slot.get("blocked_phase4_criteria"))
+                or _as_list(slot.get("blocked_criteria"))
+            )
+            queue.append(
+                {
+                    "queue_priority": len(queue) + 1,
+                    "phase_queue_priority": phase_index,
+                    "slot_queue_priority": slot_index,
+                    "phase_id": str(row.get("phase_id") or ""),
+                    "phase_label": str(row.get("phase_label") or ""),
+                    "roadmap_item": str(row.get("roadmap_item") or ""),
+                    "bottleneck": str(row.get("bottleneck") or ""),
+                    "first_blocker": str(row.get("first_blocker") or ""),
+                    "first_blocked_target": str(row.get("first_blocked_target") or ""),
+                    "root_cause_tags": [
+                        str(tag) for tag in _as_list(row.get("root_cause_tags"))
+                    ],
+                    "handoff_id": str(slot.get("handoff_id") or ""),
+                    "slot_id": str(slot.get("slot_id") or ""),
+                    "target_id": str(slot.get("target_id") or ""),
+                    "status": str(slot.get("status") or ""),
+                    "blocked_criteria": [str(item) for item in blocked_criteria],
+                    "first_next_action": str(slot.get("first_next_action") or ""),
+                    "template_artifact": str(slot.get("template_artifact") or ""),
+                    "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
+                    "materialization_steps": [
+                        str(step) for step in _as_list(slot.get("materialization_steps"))
+                    ],
+                    "materialization_command": str(
+                        slot.get("materialization_command") or ""
+                    ),
+                    "validation_command": str(slot.get("validation_command") or ""),
+                    "evidence_artifacts": [
+                        str(path) for path in _as_list(row.get("evidence_artifacts"))
+                    ],
+                    "linked_routes": [
+                        str(route) for route in _as_list(row.get("linked_routes"))
+                    ],
+                }
+            )
+    return queue
+
+
 def _human_ux_release_gate_briefing(
     *,
     human_ux_blockers: list[str],
@@ -1323,6 +1389,7 @@ def _non_expert_release_briefing(
     action_register: dict[str, Any],
     roadmap_rows: list[dict[str, Any]],
     operator_evidence_handoff_queue: list[dict[str, Any]],
+    operator_evidence_handoff_slot_queue: list[dict[str, Any]],
     primary_bottleneck_row: dict[str, Any],
     ux_observation_report: dict[str, Any],
     ux_observation_intake_packet: dict[str, Any],
@@ -1399,6 +1466,12 @@ def _non_expert_release_briefing(
         "first_operator_handoff": (
             operator_evidence_handoff_queue[0]
             if operator_evidence_handoff_queue
+            else {}
+        ),
+        "next_owner_handoff_slot_count": len(operator_evidence_handoff_slot_queue),
+        "first_operator_handoff_slot": (
+            operator_evidence_handoff_slot_queue[0]
+            if operator_evidence_handoff_slot_queue
             else {}
         ),
         "claim_boundaries": [
@@ -1536,6 +1609,9 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         ),
     }
     operator_evidence_handoff_queue = _operator_evidence_handoff_queue(roadmap_rows)
+    operator_evidence_handoff_slot_queue = _operator_evidence_handoff_slot_queue(
+        roadmap_rows
+    )
     release_decision_operator_actions = _release_decision_operator_actions(
         decision=decision,
         action_register=action_register,
@@ -1548,6 +1624,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         action_register=action_register,
         roadmap_rows=roadmap_rows,
         operator_evidence_handoff_queue=operator_evidence_handoff_queue,
+        operator_evidence_handoff_slot_queue=operator_evidence_handoff_slot_queue,
         primary_bottleneck_row=primary_bottleneck_row,
         ux_observation_report=ux_observation_report,
         ux_observation_intake_packet=ux_observation_intake_packet,
@@ -1599,6 +1676,16 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             else {}
         ),
         "operator_evidence_handoff_queue": operator_evidence_handoff_queue,
+        "operator_evidence_handoff_slot_scope": "all_blocked_operator_slots_per_blocked_phase",
+        "operator_evidence_handoff_slot_count": len(
+            operator_evidence_handoff_slot_queue
+        ),
+        "first_operator_evidence_handoff_slot": (
+            operator_evidence_handoff_slot_queue[0]
+            if operator_evidence_handoff_slot_queue
+            else {}
+        ),
+        "operator_evidence_handoff_slot_queue": operator_evidence_handoff_slot_queue,
         "non_expert_release_briefing_ready": True,
         "non_expert_release_briefing": non_expert_release_briefing,
         "release_decision_operator_actions": release_decision_operator_actions,

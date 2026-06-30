@@ -71,7 +71,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
 
     kpis = surface["release_decision_kpis"]
     assert kpis == {
-        "approval_token_count": 4,
+        "approval_token_count": 7,
         "blocked_release_count": 8,
         "broad_gpcr_family_claim_safe": False,
         "evidence_surface_count": 12,
@@ -209,6 +209,13 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert briefing["first_operator_handoff"]["phase_id"] == (
         "phase_2_public_benchmark_harness"
     )
+    assert briefing["next_owner_handoff_slot_count"] == 8
+    assert briefing["first_operator_handoff_slot"]["phase_id"] == (
+        "phase_2_public_benchmark_harness"
+    )
+    assert briefing["first_operator_handoff_slot"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
     assert briefing["claim_boundaries"] == [
         "do_not_claim_limited_commercial_release_until_release_allowed_true",
         "do_not_claim_tier_beta_until_public_benchmark_ready_true",
@@ -239,6 +246,28 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "phase_3_gpcr_hard_decoy_closure",
         "phase_4_pocketmd_lite",
     ]
+    assert surface["operator_evidence_handoff_slot_scope"] == (
+        "all_blocked_operator_slots_per_blocked_phase"
+    )
+    assert surface["operator_evidence_handoff_slot_count"] == 8
+    assert [
+        row["slot_id"] for row in surface["operator_evidence_handoff_slot_queue"]
+    ] == [
+        "casf_pdbbind_subset_intake",
+        "pose_coordinate_intake",
+        "dud_e_lit_pcba_enrichment_intake",
+        "vina_gnina_comparison_intake",
+        "drd2_hard_decoy_metrics",
+        "htr2a_hard_decoy_metrics",
+        "oprm1_hard_decoy_metrics",
+        "top_k_refinement_rows",
+    ]
+    assert surface["first_operator_evidence_handoff_slot"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert surface["operator_evidence_handoff_slot_queue"][1][
+        "materialization_command"
+    ].startswith("python3 scripts/materialize_public_benchmark_pose_validity_input.py")
 
 
 def test_goal_bottleneck_roadmap_surface_promotes_stale_refresh_operator_action(
