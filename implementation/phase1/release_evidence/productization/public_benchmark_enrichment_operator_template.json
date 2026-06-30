@@ -4,9 +4,9 @@
   "contract_pass": true,
   "depends_on": [],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:34:43.131049+00:00",
+  "generated_at": "2026-06-30T06:36:12.611397+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:07938df57c411ea6c3fd756cf72ff005eb68e64e575fd8e90bb9f59aa18ad729",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:d1b5eb50ece3e78d11fe496f26b391852bdc6323a2b142d82814eefe3ebe7f32",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:8826a9d99b7355d6333ca1863ef65460303c22baff3357d367a312a66c3e9dcb",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:147b3fd1bbd0a5edce98ab1657763b0bf79cddbd362da968a591c1a25d107a55",
@@ -58,7 +58,7 @@
   "reused_evidence": true,
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "dud_e_lit_pcba_enrichment_intake",
-  "source_commit_sha": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+  "source_commit_sha": "70a35957a172010e2bbb11349dd48bd3d07d34bd",
   "status": "operator_template_seed",
   "template": {
     "targets": [

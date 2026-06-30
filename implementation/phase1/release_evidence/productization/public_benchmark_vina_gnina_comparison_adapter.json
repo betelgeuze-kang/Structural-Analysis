@@ -24,7 +24,7 @@
     }
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:34:43.116418+00:00",
+  "generated_at": "2026-06-30T06:36:12.597513+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:8826a9d99b7355d6333ca1863ef65460303c22baff3357d367a312a66c3e9dcb",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:23aa9f0b15a76fc44725f0e47dbc3526363ae28bff3f810e91c31598994f7e51",
@@ -111,7 +111,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_comparison_adapter_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-  "source_commit_sha": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+  "source_commit_sha": "70a35957a172010e2bbb11349dd48bd3d07d34bd",
   "status": "operator_evidence_required",
   "summary": {
     "blocker_count": 3,

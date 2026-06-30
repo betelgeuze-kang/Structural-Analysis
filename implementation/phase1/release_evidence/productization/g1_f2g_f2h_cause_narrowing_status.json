@@ -23,7 +23,7 @@
     "global_frame_shell_tangent_integration_ready": false,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-06-30T06:34:43.024382+00:00",
+  "generated_at": "2026-06-30T06:36:06.479746+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -96,7 +96,7 @@
   "reuse_policy": "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice",
   "reused_evidence": true,
   "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
-  "source_commit_sha": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+  "source_commit_sha": "70a35957a172010e2bbb11349dd48bd3d07d34bd",
   "status": "ready",
   "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=global_connectivity_consistent_newton_rocm_lane"
 }

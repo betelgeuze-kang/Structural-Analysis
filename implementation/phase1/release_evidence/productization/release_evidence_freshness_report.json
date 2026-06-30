@@ -2,9 +2,9 @@
   "blockers": [],
   "claim_boundary": "Freshness audit records whether release evidence exposes source commit, engine version, input checksum, reuse marker, generated_at, producer dependency mtime, and declared input-checksum file dependency mtime. It does not rerun heavy validation by itself.",
   "contract_pass": true,
-  "current_source_commit_sha": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+  "current_source_commit_sha": "70a35957a172010e2bbb11349dd48bd3d07d34bd",
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T06:34:32.287961+00:00",
+  "generated_at": "2026-06-30T06:36:15.061871+00:00",
   "input_checksums": {
     "implementation/phase1/check_customer_shadow_evidence_status.py": "sha256:818c1670c8df8f30abc1528d67055bb5605f67b45af309e2c2cc931383b6e058",
     "implementation/phase1/check_real_project_corpus_measured_status.py": "sha256:74dce5a5860f524b18a5099ee5affb1533fde25849dce720d6eb4a7de7c73c3d",
@@ -14,15 +14,15 @@
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
     "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json": "sha256:b602bfb26592cdad12453797e483cd09c3718dc70caddf108401870ee668aaaf",
     "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json": "sha256:df0f62aeb3365c26847c8f5b44f131a09e173cbc10ae1530b254a3b55fd1e0e7",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:f0d24a62dfebe8eb90438baac9ebc9d5083ce8877ceb67582113c1e587957e15",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:ee3c668acd0a49073ddc09a6beaca8787af35ba98c3596d285fc29105703594f",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:f24f619c0f762ae48db263b39f0305eff0e9bcb42256f041b74cdd88505b9f68",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:cbd1df3d8de9007dc688dda0e2e8a5c7de19e0cabf9d3f7d6645e94fd4430bba",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:0b67439dc4f387d8065ed0ea914d11649a9dc6074bf2bb6de79a37705eb6bb6c",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:f7ce406d8b4cf3e791547bb1dfa8e4b1bf11e0e89760c8ee9eeb52d40084c0c5",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:71f4fa6d2cbe3c148776ed5f367158425777ae17e1f28f36d669bc52809c8ca0",
     "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:92b693d88117cf344c6f459ad91cf0cca661f49a59a56abbc502d406a5b92931",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:99895c4b5191122fe1e2f98e774ef5b7fc21a0f0ba44c864ed6c7f10ebaa8a56",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:37f42949871e62eea4a84d94ba20df930652d8d664faf2145a078ff64da33246",
     "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:d66b811a097d2dc3b563a852acd1f8b5a1c4eee9f9f06d5ee70fda1d2022d9a7",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a0db6b959e67e12378b2afc9698f95dfe7cfbbcde9d5b0e532c2657482d7d927",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:d1b5eb50ece3e78d11fe496f26b391852bdc6323a2b142d82814eefe3ebe7f32",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/run_real_accuracy_validation.py": "sha256:c15100493ea0ff1e07795fe5e37d6dee58f6a84f1e707b37e192c36174ed4e80",
     "scripts/build_ai_engine_productization_contracts.py": "sha256:9bc61510ffda7c006813745cb7f7764d7cb5314619c498271129201058dbc2a0",
@@ -161,7 +161,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 0.1581845317013889,
+      "generated_age_days": 0.15937407943287038,
       "generated_at": "2026-06-30T02:46:45.059660+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -240,7 +240,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 0.15818117583333333,
+      "generated_age_days": 0.1593707235648148,
       "generated_at": "2026-06-30T02:46:45.349607+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -263,7 +263,7 @@
     {
       "artifact_exists": true,
       "artifact_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
-      "artifact_sha256": "99895c4b5191122fe1e2f98e774ef5b7fc21a0f0ba44c864ed6c7f10ebaa8a56",
+      "artifact_sha256": "37f42949871e62eea4a84d94ba20df930652d8d664faf2145a078ff64da33246",
       "blockers": [],
       "changed_paths_since_source_commit": [],
       "dependency_mtime_details": [
@@ -361,8 +361,8 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 3.952349537037037e-06,
-      "generated_at": "2026-06-30T06:34:31.861716+00:00",
+      "generated_age_days": 0.00010190550925925927,
+      "generated_at": "2026-06-30T06:36:06.175487+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
         "/home/betelgeuze/건축구조분석/implementation/phase1/commercial_readiness_report.json",
@@ -386,7 +386,7 @@
       "producer_exists": true,
       "producer_path": "/home/betelgeuze/건축구조분석/scripts/check_p1_benchmark_breadth_status.py",
       "reuse_marker_present": true,
-      "source_commit": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+      "source_commit": "70a35957a172010e2bbb11349dd48bd3d07d34bd",
       "source_commit_exact_match": true,
       "source_commit_match": true
     },
@@ -419,7 +419,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 10.445699848912037,
+      "generated_age_days": 10.446889396643519,
       "generated_at": "2026-06-19T19:52:43.736253+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -471,7 +471,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 0.008974016666666668,
+      "generated_age_days": 0.010163564398148148,
       "generated_at": "2026-06-30T06:21:36.848159+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -524,7 +524,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 0.008973612743055555,
+      "generated_age_days": 0.010163160474537037,
       "generated_at": "2026-06-30T06:21:36.883058+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -631,7 +631,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 0.008962286539351851,
+      "generated_age_days": 0.010151834270833333,
       "generated_at": "2026-06-30T06:21:37.861642+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -681,7 +681,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 6.5905334302893515,
+      "generated_age_days": 6.591722978020833,
       "generated_at": "2026-06-23T16:24:10.114822+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -732,7 +732,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 0.008960736886574075,
+      "generated_age_days": 0.010150284618055555,
       "generated_at": "2026-06-30T06:21:37.995532+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -1265,7 +1265,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 5.354668187071759,
+      "generated_age_days": 5.355857734803241,
       "generated_at": "2026-06-24T22:03:48.871836+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -1366,7 +1366,7 @@
     {
       "artifact_exists": true,
       "artifact_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
-      "artifact_sha256": "ee3c668acd0a49073ddc09a6beaca8787af35ba98c3596d285fc29105703594f",
+      "artifact_sha256": "cbd1df3d8de9007dc688dda0e2e8a5c7de19e0cabf9d3f7d6645e94fd4430bba",
       "blockers": [],
       "changed_paths_since_source_commit": [],
       "dependency_mtime_details": [
@@ -1414,7 +1414,7 @@
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1782801271.8635638,
+          "dependency_mtime": 1782801366.175003,
           "dependency_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
           "newer_than_artifact": false
         },
@@ -1428,8 +1428,8 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 3.4882638888888887e-06,
-      "generated_at": "2026-06-30T06:34:31.901813+00:00",
+      "generated_age_days": 0.00010146212962962962,
+      "generated_at": "2026-06-30T06:36:06.213795+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
         "/home/betelgeuze/건축구조분석/README.md",
@@ -1447,14 +1447,14 @@
       "producer_exists": true,
       "producer_path": "/home/betelgeuze/건축구조분석/scripts/build_evidence_console_scope_status.py",
       "reuse_marker_present": true,
-      "source_commit": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+      "source_commit": "70a35957a172010e2bbb11349dd48bd3d07d34bd",
       "source_commit_exact_match": true,
       "source_commit_match": true
     },
     {
       "artifact_exists": true,
       "artifact_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-      "artifact_sha256": "f0d24a62dfebe8eb90438baac9ebc9d5083ce8877ceb67582113c1e587957e15",
+      "artifact_sha256": "f24f619c0f762ae48db263b39f0305eff0e9bcb42256f041b74cdd88505b9f68",
       "blockers": [],
       "changed_paths_since_source_commit": [],
       "dependency_mtime_details": [
@@ -1472,13 +1472,13 @@
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1782801272.0715716,
+          "dependency_mtime": 1782801366.3830106,
           "dependency_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
           "newer_than_artifact": false
         },
         {
           "dependency_kind": "input_checksum",
-          "dependency_mtime": 1782801271.9035654,
+          "dependency_mtime": 1782801366.2150044,
           "dependency_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
           "newer_than_artifact": false
         },
@@ -1630,8 +1630,8 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 8.64537037037037e-07,
-      "generated_at": "2026-06-30T06:34:32.128503+00:00",
+      "generated_age_days": 9.884811342592592e-05,
+      "generated_at": "2026-06-30T06:36:06.439646+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
         "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json",
@@ -1668,14 +1668,14 @@
       "producer_exists": true,
       "producer_path": "/home/betelgeuze/건축구조분석/scripts/build_developer_preview_rc_status.py",
       "reuse_marker_present": true,
-      "source_commit": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+      "source_commit": "70a35957a172010e2bbb11349dd48bd3d07d34bd",
       "source_commit_exact_match": true,
       "source_commit_match": true
     },
     {
       "artifact_exists": true,
       "artifact_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-      "artifact_sha256": "a0db6b959e67e12378b2afc9698f95dfe7cfbbcde9d5b0e532c2657482d7d927",
+      "artifact_sha256": "d1b5eb50ece3e78d11fe496f26b391852bdc6323a2b142d82814eefe3ebe7f32",
       "blockers": [],
       "changed_paths_since_source_commit": [],
       "dependency_mtime_details": [
@@ -1761,8 +1761,8 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 7.369039351851851e-06,
-      "generated_at": "2026-06-30T06:34:31.566514+00:00",
+      "generated_age_days": 2.7524467592592592e-05,
+      "generated_at": "2026-06-30T06:36:12.602009+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
         "/home/betelgeuze/건축구조분석/scripts/build_public_benchmark_operator_intake_packet.py",
@@ -1784,7 +1784,7 @@
       "producer_exists": true,
       "producer_path": "/home/betelgeuze/건축구조분석/scripts/build_public_benchmark_source_of_truth.py",
       "reuse_marker_present": true,
-      "source_commit": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+      "source_commit": "70a35957a172010e2bbb11349dd48bd3d07d34bd",
       "source_commit_exact_match": true,
       "source_commit_match": true
     },
@@ -1841,7 +1841,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 0.7068322645023148,
+      "generated_age_days": 0.7080218122337963,
       "generated_at": "2026-06-29T13:36:41.895546+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -1933,7 +1933,7 @@
       "dependency_mtime_pass": true,
       "engine_version": "structural-optimization-workbench@1.0.0",
       "engine_version_present": true,
-      "generated_age_days": 0.738645030451389,
+      "generated_age_days": 0.7398345781828704,
       "generated_at": "2026-06-29T12:50:53.272568+00:00",
       "input_checksum_present": true,
       "input_dependency_paths": [
@@ -1959,7 +1959,7 @@
     }
   ],
   "schema_version": "release-evidence-freshness-report.v1",
-  "source_commit_sha": "e34ee126ba459b5d51cb8c9c60a4825534ff8799",
+  "source_commit_sha": "70a35957a172010e2bbb11349dd48bd3d07d34bd",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
