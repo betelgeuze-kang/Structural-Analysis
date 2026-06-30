@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react'
 import { workbenchSections, sectionGroupLabel, type SectionGroup } from '../model/workbenchSections'
+import { t, type Locale } from '../model/i18n'
 
 /**
  * Left navigation for the commercial workbench layout. Items are in-page anchors
@@ -7,7 +8,7 @@ import { workbenchSections, sectionGroupLabel, type SectionGroup } from '../mode
  * IntersectionObserver. Grouped so the model->analysis->results flow reads as the
  * primary surface and evidence/benchmarks sit in a verification layer below.
  */
-export function WorkbenchNav(): ReactElement {
+export function WorkbenchNav({ locale = 'en' }: { locale?: Locale } = {}): ReactElement {
   const [active, setActive] = useState<string>(workbenchSections[0]?.id ?? '')
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export function WorkbenchNav(): ReactElement {
     <nav className="wb2-nav" aria-label="Workbench sections" data-wb2-nav>
       {groups.map((group) => (
         <div key={group} className="wb2-nav-group">
-          <p className="wb2-nav-group__label">{sectionGroupLabel[group]}</p>
+          <p className="wb2-nav-group__label">{t(`nav.${group}`, locale)}</p>
           <ul className="wb2-nav-list">
             {workbenchSections
               .filter((s) => s.group === group)
@@ -48,7 +49,7 @@ export function WorkbenchNav(): ReactElement {
                     aria-current={active === s.id ? 'true' : undefined}
                     data-wb2-nav-link={s.id}
                   >
-                    {s.label}
+                    {t(`nav.${s.i18nKey}`, locale)}
                   </a>
                 </li>
               ))}
