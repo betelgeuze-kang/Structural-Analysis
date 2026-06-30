@@ -176,7 +176,7 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
     assert public_benchmark["summary"]["minimum_subset_case_count"] == 12
     assert public_benchmark["summary"]["tier_beta_gate_status"] == "blocked"
-    assert public_benchmark["summary"]["tier_beta_failed_criterion_count"] == 7
+    assert public_benchmark["summary"]["tier_beta_failed_criterion_count"] == 8
     assert [
         row["criterion_id"]
         for row in public_benchmark["summary"]["tier_beta_gate_criteria"]
@@ -185,6 +185,7 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
         "dud_e_lit_pcba_enrichment_ready",
         "vina_gnina_comparison_ready",
         "external_receipts_attached",
@@ -225,6 +226,7 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
         "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready",
     ]
     assert gap_register["casf_pdbbind_subset_intake"]["first_next_action"] == (
         "attach at least 12 local CASF/PDBBind case descriptors"
@@ -401,12 +403,13 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gpcr["summary"]["minimum_target_count"] == 3
     assert gpcr["summary"]["minimum_metric_field_count_per_target"] == 4
     assert gpcr["summary"]["phase3_exit_gate_status"] == "blocked"
-    assert gpcr["summary"]["phase3_failed_criterion_count"] == 4
+    assert gpcr["summary"]["phase3_failed_criterion_count"] == 5
     assert gpcr["summary"]["phase3_failed_criteria"] == [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     assert [
         row["criterion_id"] for row in gpcr["summary"]["phase3_exit_gate_criteria"]
@@ -415,6 +418,7 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     assert gpcr["summary"]["phase3_exit_gate_criteria"][0][
         "current_by_target"
@@ -451,6 +455,7 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"][
         "top20_hit_rate"

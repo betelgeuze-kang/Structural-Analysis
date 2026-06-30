@@ -9,22 +9,28 @@
   "targets": [
     {
       "decoys_above_positive_count": null,
+      "hard_decoy_rows": null,
       "positive_out_anchored_by_top_decoys": null,
       "ranking_pr_auc_ci_low": null,
+      "score_direction": null,
       "target_id": "DRD2",
       "top20_hit_rate": null
     },
     {
       "decoys_above_positive_count": null,
+      "hard_decoy_rows": null,
       "positive_out_anchored_by_top_decoys": null,
       "ranking_pr_auc_ci_low": null,
+      "score_direction": null,
       "target_id": "HTR2A",
       "top20_hit_rate": null
     },
     {
       "decoys_above_positive_count": null,
+      "hard_decoy_rows": null,
       "positive_out_anchored_by_top_decoys": null,
       "ranking_pr_auc_ci_low": null,
+      "score_direction": null,
       "target_id": "OPRM1",
       "top20_hit_rate": null
     }

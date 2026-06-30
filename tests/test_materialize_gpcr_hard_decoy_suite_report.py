@@ -59,7 +59,13 @@ def _passing_target_from_rows(target_id: str) -> dict[str, object]:
 
 def test_gpcr_hard_decoy_suite_passes_required_targets() -> None:
     report = module.materialize_gpcr_hard_decoy_suite_report(
-        {"targets": [_passing_target("DRD2"), _passing_target("HTR2A"), _passing_target("OPRM1")]},
+        {
+            "targets": [
+                _passing_target_from_rows("DRD2"),
+                _passing_target_from_rows("HTR2A"),
+                _passing_target_from_rows("OPRM1"),
+            ]
+        },
         repo_root=REPO_ROOT,
     )
 
@@ -85,7 +91,37 @@ def test_gpcr_hard_decoy_suite_passes_required_targets() -> None:
         "top20_hit_rate_min": True,
         "decoys_above_positive_count_max": True,
         "no_positive_out_anchored_by_top_decoys": True,
+        "raw_hard_decoy_rows_actual_closure": True,
     }
+
+
+def test_gpcr_hard_decoy_suite_blocks_summary_metrics_without_raw_rows() -> None:
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        {
+            "targets": [
+                _passing_target("DRD2"),
+                _passing_target("HTR2A"),
+                _passing_target("OPRM1"),
+            ]
+        },
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["broad_gpcr_family_claim_safe"] is False
+    assert report["target_pass_count"] == 0
+    assert report["root_cause_tags"] == ["hard_decoy_rows_required"]
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "raw_hard_decoy_rows_actual_closure"
+    ]
+    raw_gate = report["phase3_exit_gate"]["criteria"][-1]
+    assert raw_gate["failed_targets"] == ["DRD2", "HTR2A", "OPRM1"]
+    assert raw_gate["required"] == "computed_from_raw_hard_decoy_rows"
+    assert report["blockers"] == [
+        "DRD2:hard_decoy_rows_required_for_actual_closure",
+        "HTR2A:hard_decoy_rows_required_for_actual_closure",
+        "OPRM1:hard_decoy_rows_required_for_actual_closure",
+    ]
 
 
 def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows() -> None:
@@ -168,6 +204,7 @@ def test_gpcr_hard_decoy_suite_blocks_missing_operator_values() -> None:
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     assert report["operator_handoff_summary"]["first_blocker"] == (
         "DRD2:operator_metrics_required"
@@ -179,12 +216,13 @@ def test_gpcr_hard_decoy_suite_blocks_missing_operator_values() -> None:
     assert report["operator_handoff_summary"]["blocked_operator_slot_count"] == 3
     assert report["operator_handoff_summary"]["minimum_evidence"]["target_id"] == "DRD2"
     assert report["phase3_exit_gate"]["status"] == "blocked"
-    assert report["phase3_exit_gate"]["failed_criterion_count"] == 4
+    assert report["phase3_exit_gate"]["failed_criterion_count"] == 5
     assert report["phase3_exit_gate"]["failed_criteria"] == [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     ranking_gate = report["phase3_exit_gate"]["criteria"][0]
     assert ranking_gate["failed_targets"] == ["DRD2", "HTR2A", "OPRM1"]
@@ -202,8 +240,8 @@ def test_gpcr_hard_decoy_suite_reports_threshold_root_causes() -> None:
                     "decoys_above_positive_count": 1,
                     "positive_out_anchored_by_top_decoys": True,
                 },
-                _passing_target("HTR2A"),
-                _passing_target("OPRM1"),
+                _passing_target_from_rows("HTR2A"),
+                _passing_target_from_rows("OPRM1"),
             ]
         },
         repo_root=REPO_ROOT,
@@ -211,6 +249,7 @@ def test_gpcr_hard_decoy_suite_reports_threshold_root_causes() -> None:
 
     assert report["first_blocked_target"] == "DRD2"
     assert report["root_cause_tags"] == [
+        "hard_decoy_rows_required",
         "ranking_pr_auc_ci_low_below_threshold",
         "top20_hit_rate_below_threshold",
         "decoy_rank_leakage",
@@ -219,6 +258,7 @@ def test_gpcr_hard_decoy_suite_reports_threshold_root_causes() -> None:
     drd2 = report["target_rows"][0]
     assert drd2["status"] == "blocked"
     assert drd2["blockers"] == [
+        "DRD2:hard_decoy_rows_required_for_actual_closure",
         "DRD2:ranking_pr_auc_ci_low_below_threshold",
         "DRD2:top20_hit_rate_below_threshold",
         "DRD2:decoys_above_positive_count_above_limit",
@@ -229,6 +269,7 @@ def test_gpcr_hard_decoy_suite_reports_threshold_root_causes() -> None:
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     assert report["phase3_exit_gate"]["criteria"][0]["failed_targets"] == ["DRD2"]
 
@@ -264,7 +305,7 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
     assert surface["first_blocker"] == "DRD2:operator_metrics_required"
     assert surface["root_cause_tags"] == ["operator_values_required"]
     assert surface["phase3_exit_gate"]["status"] == "blocked"
-    assert surface["phase3_exit_gate"]["failed_criterion_count"] == 4
+    assert surface["phase3_exit_gate"]["failed_criterion_count"] == 5
     assert surface["operator_intake_route"] == (
         "/product/gpcr-hard-decoy-suite-report/operator-intake"
     )
@@ -279,6 +320,7 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     assert surface["operator_handoff_summary"] == {
         "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
@@ -301,12 +343,21 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                 "top20_hit_rate",
                 "decoys_above_positive_count",
                 "positive_out_anchored_by_top_decoys",
+                "score_direction",
+                "hard_decoy_rows",
+            ],
+            "required_hard_decoy_row_fields": [
+                "molecule_id",
+                "score",
+                "is_positive",
+                "is_decoy",
             ],
             "thresholds": {
                 "ranking_pr_auc_ci_low": ">=0.45",
                 "top20_hit_rate": ">=0.2",
                 "decoys_above_positive_count": "<=0",
                 "positive_out_anchored_by_top_decoys": False,
+                "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
             },
             "criterion_by_field": {
                 "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
@@ -315,10 +366,12 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                 "positive_out_anchored_by_top_decoys": (
                     "no_positive_out_anchored_by_top_decoys"
                 ),
+                "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
             },
             "accepted_input_modes": [
                 {
                     "mode": "summary_metrics",
+                    "closure_scope": "preflight_only",
                     "required_fields": [
                         "target_id",
                         "ranking_pr_auc_ci_low",
@@ -329,6 +382,7 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                 },
                 {
                     "mode": "raw_hard_decoy_rows",
+                    "closure_scope": "actual_phase3_closure",
                     "required_fields": [
                         "target_id",
                         "score_direction",
@@ -348,6 +402,7 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                     ],
                 },
             ],
+            "actual_closure_required_mode": "raw_hard_decoy_rows",
         },
         "materialization_steps": [
             "materialize_gpcr_hard_decoy_suite_report",

@@ -839,7 +839,7 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-06-30T16:28:55.108243+00:00",
+  "generated_at": "2026-06-30T16:39:36.961210+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:ce11879a90dd7891402ac544c54c4e07c9a13e92e0947286afa31739bc622ad5",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:7128199efb24530483b5758c1019a38e21b5d161c05021072d2397aa4f6292fa",
@@ -1799,7 +1799,7 @@
   ],
   "route": "/product/public-benchmark/operator-intake",
   "schema_version": "public-benchmark-operator-intake-packet.v1",
-  "source_commit_sha": "81a7e98ddfb0b43d5b3d51dd5b53395e574a3237",
+  "source_commit_sha": "8a32bee6b937b3cfd2f60ed0e88ed84741434e8f",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {

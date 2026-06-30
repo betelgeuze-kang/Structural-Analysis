@@ -78,6 +78,8 @@ def _required_fields_from_template(template: dict[str, Any]) -> list[str]:
                 "top20_hit_rate",
                 "decoys_above_positive_count",
                 "positive_out_anchored_by_top_decoys",
+                "score_direction",
+                "hard_decoy_rows",
             )
             if key in targets[0]
         ]
@@ -87,6 +89,8 @@ def _required_fields_from_template(template: dict[str, Any]) -> list[str]:
         "top20_hit_rate",
         "decoys_above_positive_count",
         "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows",
     ]
 
 

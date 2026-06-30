@@ -8,25 +8,25 @@
 
 | Target | Status | Required Fields |
 |---|---|---|
-| `DRD2` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys` |
-| `HTR2A` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys` |
-| `OPRM1` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys` |
+| `DRD2` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys, score_direction, hard_decoy_rows` |
+| `HTR2A` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys, score_direction, hard_decoy_rows` |
+| `OPRM1` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys, score_direction, hard_decoy_rows` |
 
 ## Gate Unblock Plan
 
 | Target | Criteria | Minimum Evidence |
 |---|---|---|
-| `DRD2` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys"], "target_id": "DRD2", "thresholds": {"decoys_above_positive_count": "<=0", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
-| `HTR2A` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys"], "target_id": "HTR2A", "thresholds": {"decoys_above_positive_count": "<=0", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
-| `OPRM1` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys"], "target_id": "OPRM1", "thresholds": {"decoys_above_positive_count": "<=0", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
+| `DRD2` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys`, `raw_hard_decoy_rows_actual_closure` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_hard_decoy_row_fields": ["molecule_id", "score", "is_positive", "is_decoy"], "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys", "score_direction", "hard_decoy_rows"], "target_id": "DRD2", "thresholds": {"decoys_above_positive_count": "<=0", "hard_decoy_rows": "computed_from_raw_hard_decoy_rows", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
+| `HTR2A` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys`, `raw_hard_decoy_rows_actual_closure` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_hard_decoy_row_fields": ["molecule_id", "score", "is_positive", "is_decoy"], "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys", "score_direction", "hard_decoy_rows"], "target_id": "HTR2A", "thresholds": {"decoys_above_positive_count": "<=0", "hard_decoy_rows": "computed_from_raw_hard_decoy_rows", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
+| `OPRM1` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys`, `raw_hard_decoy_rows_actual_closure` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_hard_decoy_row_fields": ["molecule_id", "score", "is_positive", "is_decoy"], "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys", "score_direction", "hard_decoy_rows"], "target_id": "OPRM1", "thresholds": {"decoys_above_positive_count": "<=0", "hard_decoy_rows": "computed_from_raw_hard_decoy_rows", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
 
 ## Target Execution Preflight
 
 | Target | Ready | Missing Fields | First Blocker |
 |---|---|---|---|
-| `DRD2` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys` | `DRD2:ranking_pr_auc_ci_low_required` |
-| `HTR2A` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys` | `HTR2A:ranking_pr_auc_ci_low_required` |
-| `OPRM1` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys` | `OPRM1:ranking_pr_auc_ci_low_required` |
+| `DRD2` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `DRD2:hard_decoy_rows_required_for_actual_closure` |
+| `HTR2A` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `HTR2A:hard_decoy_rows_required_for_actual_closure` |
+| `OPRM1` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `OPRM1:hard_decoy_rows_required_for_actual_closure` |
 
 ## Materialization Sequence
 
@@ -41,5 +41,6 @@
 - `gpcr_hard_decoy_suite_report.target_pass_count == 3`
 - `gpcr_hard_decoy_suite_report.broad_gpcr_family_claim_safe == true`
 - `gpcr_hard_decoy_suite_report.blockers == []`
+- `gpcr_hard_decoy_suite_report.phase3_exit_gate.raw_hard_decoy_rows_actual_closure == pass`
 - `gpcr_hard_decoy_product_report.science_claim_status == ready`
 - `gpcr_hard_decoy_evidence_surface.locked == false`

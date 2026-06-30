@@ -47,6 +47,7 @@ EXIT_CRITERIA = {
     "decoys_above_positive_count_max": 0,
     "positive_out_anchored_by_top_decoys_allowed": False,
 }
+ACTUAL_CLOSURE_CRITERION_ID = "raw_hard_decoy_rows_actual_closure"
 PHASE3_MATERIALIZATION_STEPS = [
     "materialize_gpcr_hard_decoy_suite_report",
     "refresh_gpcr_hard_decoy_product_report",
@@ -71,12 +72,16 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
             "top20_hit_rate",
             "decoys_above_positive_count",
             "positive_out_anchored_by_top_decoys",
+            "score_direction",
+            "hard_decoy_rows",
         ],
+        "required_hard_decoy_row_fields": list(RAW_RANKING_ROW_FIELDS),
         "thresholds": {
             "ranking_pr_auc_ci_low": ">=0.45",
             "top20_hit_rate": ">=0.2",
             "decoys_above_positive_count": "<=0",
             "positive_out_anchored_by_top_decoys": False,
+            "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
         },
         "criterion_by_field": {
             "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
@@ -85,10 +90,12 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
             "positive_out_anchored_by_top_decoys": (
                 "no_positive_out_anchored_by_top_decoys"
             ),
+            "hard_decoy_rows": ACTUAL_CLOSURE_CRITERION_ID,
         },
         "accepted_input_modes": [
             {
                 "mode": "summary_metrics",
+                "closure_scope": "preflight_only",
                 "required_fields": [
                     "target_id",
                     "ranking_pr_auc_ci_low",
@@ -99,6 +106,7 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
             },
             {
                 "mode": "raw_hard_decoy_rows",
+                "closure_scope": "actual_phase3_closure",
                 "required_fields": ["target_id", "score_direction", "hard_decoy_rows"],
                 "required_row_fields": list(RAW_RANKING_ROW_FIELDS),
                 "computed_fields": [
@@ -109,6 +117,7 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
                 ],
             },
         ],
+        "actual_closure_required_mode": "raw_hard_decoy_rows",
     }
 
 
@@ -149,6 +158,7 @@ def _operator_evidence_gap_register(report: dict[str, Any]) -> list[dict[str, An
                 "top20_hit_rate_min",
                 "decoys_above_positive_count_max",
                 "no_positive_out_anchored_by_top_decoys",
+                ACTUAL_CLOSURE_CRITERION_ID,
             ]
         rows.append(
             {
@@ -541,6 +551,7 @@ def _missing_target_row(target_id: str) -> dict[str, Any]:
         f"{target_id}:top20_hit_rate_required",
         f"{target_id}:decoys_above_positive_count_required",
         f"{target_id}:positive_out_anchored_by_top_decoys_required",
+        f"{target_id}:hard_decoy_rows_required_for_actual_closure",
     ]
     return {
         "target_id": target_id,
@@ -550,6 +561,7 @@ def _missing_target_row(target_id: str) -> dict[str, Any]:
         "top20_hit_rate": None,
         "decoys_above_positive_count": None,
         "positive_out_anchored_by_top_decoys": None,
+        "computed_hard_decoy_metrics": {"calculation_status": "missing"},
         "criteria": EXIT_CRITERIA,
         "root_cause_tags": ["operator_values_required"],
         "blockers": blockers,
@@ -580,6 +592,9 @@ def _target_result(target_id: str, row: dict[str, Any]) -> dict[str, Any]:
     )
     blockers.extend(consistency_blockers)
     root_cause_tags.extend(consistency_root_causes)
+    if not _raw_hard_decoy_rows(row):
+        blockers.append(f"{target_id}:hard_decoy_rows_required_for_actual_closure")
+        root_cause_tags.append("hard_decoy_rows_required")
 
     if ranking is None:
         blockers.append(f"{target_id}:ranking_pr_auc_ci_low_required")
@@ -714,6 +729,34 @@ def _boolean_gate(
     }
 
 
+def _actual_hard_decoy_rows_gate(*, target_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    failed_targets: list[str] = []
+    blockers: list[str] = []
+    current_by_target: dict[str, str] = {}
+    for row in target_rows:
+        target_id = str(row.get("target_id") or "")
+        computed_metrics = _as_dict(row.get("computed_hard_decoy_metrics"))
+        status = str(computed_metrics.get("calculation_status") or "")
+        current_by_target[target_id] = status or "missing"
+        if status != "computed":
+            failed_targets.append(target_id)
+            blockers.extend(
+                str(blocker)
+                for blocker in _as_list(row.get("blockers"))
+                if "hard_decoy_rows" in str(blocker)
+                or "positive_rows_missing" in str(blocker)
+                or "decoy_rows_missing" in str(blocker)
+            )
+    return {
+        "criterion_id": ACTUAL_CLOSURE_CRITERION_ID,
+        "pass": not failed_targets,
+        "current_by_target": current_by_target,
+        "required": "computed_from_raw_hard_decoy_rows",
+        "failed_targets": failed_targets,
+        "blockers": blockers,
+    }
+
+
 def _phase3_exit_gate(
     *,
     target_rows: list[dict[str, Any]],
@@ -746,6 +789,7 @@ def _phase3_exit_gate(
             field_name="positive_out_anchored_by_top_decoys",
             required=bool(EXIT_CRITERIA["positive_out_anchored_by_top_decoys_allowed"]),
         ),
+        _actual_hard_decoy_rows_gate(target_rows=target_rows),
     ]
     failed_criteria = [
         str(row["criterion_id"]) for row in criteria if not bool(row["pass"])

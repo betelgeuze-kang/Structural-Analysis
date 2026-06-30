@@ -679,9 +679,9 @@ def _gpcr_row(
     root_cause_tags = [
         str(row)
         for row in _as_list(
-            action.get("root_cause_tags")
-            or gpcr_product_report.get("root_cause_tags")
+            gpcr_product_report.get("root_cause_tags")
             or gpcr_surface.get("root_cause_tags")
+            or action.get("root_cause_tags")
         )
     ]
     phase3_exit_gate = _as_dict(
@@ -689,9 +689,10 @@ def _gpcr_row(
         or gpcr_surface.get("phase3_exit_gate")
     )
     first_blocker = str(
-        action.get("first_blocker")
-        or _first_gate_blocker(phase3_exit_gate)
+        gpcr_product_report.get("first_blocker")
         or _first_str([str(row) for row in _as_list(gpcr_surface.get("blockers"))])
+        or _first_gate_blocker(phase3_exit_gate)
+        or action.get("first_blocker")
     )
     phase3_gate_criteria = [
         {

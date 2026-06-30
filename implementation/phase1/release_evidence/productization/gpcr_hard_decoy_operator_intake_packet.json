@@ -3,6 +3,7 @@
     "gpcr_hard_decoy_suite_report.target_pass_count == 3",
     "gpcr_hard_decoy_suite_report.broad_gpcr_family_claim_safe == true",
     "gpcr_hard_decoy_suite_report.blockers == []",
+    "gpcr_hard_decoy_suite_report.phase3_exit_gate.raw_hard_decoy_rows_actual_closure == pass",
     "gpcr_hard_decoy_product_report.science_claim_status == ready",
     "gpcr_hard_decoy_evidence_surface.locked == false"
   ],
@@ -11,9 +12,10 @@
   "contract_pass": true,
   "current_suite_status": {
     "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
-    "blocker_count": 12,
+    "blocker_count": 15,
     "first_blocked_target": "DRD2",
     "root_cause_tags": [
+      "hard_decoy_rows_required",
       "operator_values_required"
     ],
     "schema_version": "gpcr-hard-decoy-suite-report.v1",
@@ -33,9 +35,11 @@
       "ranking_pr_auc_ci_low_min",
       "top20_hit_rate_min",
       "decoys_above_positive_count_max",
-      "no_positive_out_anchored_by_top_decoys"
+      "no_positive_out_anchored_by_top_decoys",
+      "raw_hard_decoy_rows_actual_closure"
     ],
     "blockers": [
+      "DRD2:hard_decoy_rows_required_for_actual_closure",
       "DRD2:ranking_pr_auc_ci_low_required",
       "DRD2:top20_hit_rate_required",
       "DRD2:decoys_above_positive_count_required",
@@ -45,29 +49,41 @@
     "current_ready": false,
     "current_values": {
       "decoys_above_positive_count": null,
+      "hard_decoy_rows": null,
       "positive_out_anchored_by_top_decoys": null,
       "ranking_pr_auc_ci_low": null,
+      "score_direction": null,
       "top20_hit_rate": null
     },
-    "first_blocker": "DRD2:ranking_pr_auc_ci_low_required",
+    "first_blocker": "DRD2:hard_decoy_rows_required_for_actual_closure",
     "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
     "minimum_evidence": {
       "criterion_by_field": {
         "decoys_above_positive_count": "decoys_above_positive_count_max",
+        "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
         "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
         "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
         "top20_hit_rate": "top20_hit_rate_min"
       },
+      "required_hard_decoy_row_fields": [
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy"
+      ],
       "required_operator_fields": [
         "target_id",
         "ranking_pr_auc_ci_low",
         "top20_hit_rate",
         "decoys_above_positive_count",
-        "positive_out_anchored_by_top_decoys"
+        "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows"
       ],
       "target_id": "DRD2",
       "thresholds": {
         "decoys_above_positive_count": "<=0",
+        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
         "positive_out_anchored_by_top_decoys": false,
         "ranking_pr_auc_ci_low": ">=0.45",
         "top20_hit_rate": ">=0.2"
@@ -77,10 +93,13 @@
       "ranking_pr_auc_ci_low",
       "top20_hit_rate",
       "decoys_above_positive_count",
-      "positive_out_anchored_by_top_decoys"
+      "positive_out_anchored_by_top_decoys",
+      "score_direction",
+      "hard_decoy_rows"
     ],
     "phase3_blocked": true,
     "root_cause_tags": [
+      "hard_decoy_rows_required",
       "operator_values_required"
     ],
     "slot_id": "drd2_hard_decoy_metrics",
@@ -103,20 +122,30 @@
       "minimum_evidence": {
         "criterion_by_field": {
           "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
           "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "required_hard_decoy_row_fields": [
+          "molecule_id",
+          "score",
+          "is_positive",
+          "is_decoy"
+        ],
         "required_operator_fields": [
           "target_id",
           "ranking_pr_auc_ci_low",
           "top20_hit_rate",
           "decoys_above_positive_count",
-          "positive_out_anchored_by_top_decoys"
+          "positive_out_anchored_by_top_decoys",
+          "score_direction",
+          "hard_decoy_rows"
         ],
         "target_id": "DRD2",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -130,7 +159,8 @@
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys"
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
       ],
       "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
     },
@@ -145,20 +175,30 @@
       "minimum_evidence": {
         "criterion_by_field": {
           "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
           "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "required_hard_decoy_row_fields": [
+          "molecule_id",
+          "score",
+          "is_positive",
+          "is_decoy"
+        ],
         "required_operator_fields": [
           "target_id",
           "ranking_pr_auc_ci_low",
           "top20_hit_rate",
           "decoys_above_positive_count",
-          "positive_out_anchored_by_top_decoys"
+          "positive_out_anchored_by_top_decoys",
+          "score_direction",
+          "hard_decoy_rows"
         ],
         "target_id": "HTR2A",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -172,7 +212,8 @@
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys"
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
       ],
       "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
     },
@@ -187,20 +228,30 @@
       "minimum_evidence": {
         "criterion_by_field": {
           "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
           "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "required_hard_decoy_row_fields": [
+          "molecule_id",
+          "score",
+          "is_positive",
+          "is_decoy"
+        ],
         "required_operator_fields": [
           "target_id",
           "ranking_pr_auc_ci_low",
           "top20_hit_rate",
           "decoys_above_positive_count",
-          "positive_out_anchored_by_top_decoys"
+          "positive_out_anchored_by_top_decoys",
+          "score_direction",
+          "hard_decoy_rows"
         ],
         "target_id": "OPRM1",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -214,19 +265,20 @@
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys"
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
       ],
       "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-06-30T15:09:40.572652+00:00",
+  "generated_at": "2026-06-30T16:44:16.347335+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1d1cf9fbbeac7a55ea0ab43180eef1291cc254a2c9ffbca44bb3dc08a4e48144",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:78cbc442178fdaa4957d754095a7ac465833f004aa3a0d4dd993eff90c5a373d",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:684fd393da74bd39a7727cff70ee4c698910626b12e59603a6996249904c636d",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:ffff585c3520c2aa2044ea092422c9d18a714814e9fc19d7d7d5b359b4cc7e97",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:1dcea6e32ec68fe342d6285bc380f584553133e151a007d1cd650691f0233109"
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:b999c6ba2aa0efbc176bb14e1803445e13c3af337e7a3a61848a86f68162ffde",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:92c15880827776fb21635a4d9074510099e6009ae1131aa19704c9b67045bc42",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:88460e1f94b973cb50c90284e830e9e21ccc9466eb28be6e1ec8987efefcf67a",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:325f46359a31a11fd1c447ac7c0f06b86c4f7047f570aad2aec538b2f5808de9"
   },
   "linked_artifacts": {
     "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -268,6 +320,12 @@
     }
   ],
   "minimum_metric_field_count_per_target": 4,
+  "minimum_raw_hard_decoy_row_fields": [
+    "molecule_id",
+    "score",
+    "is_positive",
+    "is_decoy"
+  ],
   "minimum_target_count": 3,
   "next_actions": [
     "fill_gpcr_hard_decoy_operator_intake_packet",
@@ -305,7 +363,9 @@
     "ranking_pr_auc_ci_low",
     "top20_hit_rate",
     "decoys_above_positive_count",
-    "positive_out_anchored_by_top_decoys"
+    "positive_out_anchored_by_top_decoys",
+    "score_direction",
+    "hard_decoy_rows"
   ],
   "required_slot_count": 3,
   "required_targets": [
@@ -317,13 +377,13 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "cb1de521ab97b5df2bdd8551d48b50b22a697412",
+  "source_commit_sha": "8a32bee6b937b3cfd2f60ed0e88ed84741434e8f",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
-    "current_blocker_count": 12,
+    "current_blocker_count": 15,
     "first_blocked_target": "DRD2",
-    "first_target_execution_preflight_blocker": "DRD2:ranking_pr_auc_ci_low_required",
+    "first_target_execution_preflight_blocker": "DRD2:hard_decoy_rows_required_for_actual_closure",
     "first_target_execution_preflight_target": "DRD2",
     "gate_unblock_plan_count": 3,
     "minimum_metric_field_count_per_target": 4,
@@ -338,9 +398,11 @@
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys"
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
       ],
       "blockers": [
+        "DRD2:hard_decoy_rows_required_for_actual_closure",
         "DRD2:ranking_pr_auc_ci_low_required",
         "DRD2:top20_hit_rate_required",
         "DRD2:decoys_above_positive_count_required",
@@ -350,29 +412,41 @@
       "current_ready": false,
       "current_values": {
         "decoys_above_positive_count": null,
+        "hard_decoy_rows": null,
         "positive_out_anchored_by_top_decoys": null,
         "ranking_pr_auc_ci_low": null,
+        "score_direction": null,
         "top20_hit_rate": null
       },
-      "first_blocker": "DRD2:ranking_pr_auc_ci_low_required",
+      "first_blocker": "DRD2:hard_decoy_rows_required_for_actual_closure",
       "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
       "minimum_evidence": {
         "criterion_by_field": {
           "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
           "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "required_hard_decoy_row_fields": [
+          "molecule_id",
+          "score",
+          "is_positive",
+          "is_decoy"
+        ],
         "required_operator_fields": [
           "target_id",
           "ranking_pr_auc_ci_low",
           "top20_hit_rate",
           "decoys_above_positive_count",
-          "positive_out_anchored_by_top_decoys"
+          "positive_out_anchored_by_top_decoys",
+          "score_direction",
+          "hard_decoy_rows"
         ],
         "target_id": "DRD2",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -382,10 +456,13 @@
         "ranking_pr_auc_ci_low",
         "top20_hit_rate",
         "decoys_above_positive_count",
-        "positive_out_anchored_by_top_decoys"
+        "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows"
       ],
       "phase3_blocked": true,
       "root_cause_tags": [
+        "hard_decoy_rows_required",
         "operator_values_required"
       ],
       "slot_id": "drd2_hard_decoy_metrics",
@@ -401,9 +478,11 @@
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys"
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
       ],
       "blockers": [
+        "HTR2A:hard_decoy_rows_required_for_actual_closure",
         "HTR2A:ranking_pr_auc_ci_low_required",
         "HTR2A:top20_hit_rate_required",
         "HTR2A:decoys_above_positive_count_required",
@@ -413,29 +492,41 @@
       "current_ready": false,
       "current_values": {
         "decoys_above_positive_count": null,
+        "hard_decoy_rows": null,
         "positive_out_anchored_by_top_decoys": null,
         "ranking_pr_auc_ci_low": null,
+        "score_direction": null,
         "top20_hit_rate": null
       },
-      "first_blocker": "HTR2A:ranking_pr_auc_ci_low_required",
+      "first_blocker": "HTR2A:hard_decoy_rows_required_for_actual_closure",
       "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
       "minimum_evidence": {
         "criterion_by_field": {
           "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
           "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "required_hard_decoy_row_fields": [
+          "molecule_id",
+          "score",
+          "is_positive",
+          "is_decoy"
+        ],
         "required_operator_fields": [
           "target_id",
           "ranking_pr_auc_ci_low",
           "top20_hit_rate",
           "decoys_above_positive_count",
-          "positive_out_anchored_by_top_decoys"
+          "positive_out_anchored_by_top_decoys",
+          "score_direction",
+          "hard_decoy_rows"
         ],
         "target_id": "HTR2A",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -445,10 +536,13 @@
         "ranking_pr_auc_ci_low",
         "top20_hit_rate",
         "decoys_above_positive_count",
-        "positive_out_anchored_by_top_decoys"
+        "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows"
       ],
       "phase3_blocked": true,
       "root_cause_tags": [
+        "hard_decoy_rows_required",
         "operator_values_required"
       ],
       "slot_id": "htr2a_hard_decoy_metrics",
@@ -464,9 +558,11 @@
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys"
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
       ],
       "blockers": [
+        "OPRM1:hard_decoy_rows_required_for_actual_closure",
         "OPRM1:ranking_pr_auc_ci_low_required",
         "OPRM1:top20_hit_rate_required",
         "OPRM1:decoys_above_positive_count_required",
@@ -476,29 +572,41 @@
       "current_ready": false,
       "current_values": {
         "decoys_above_positive_count": null,
+        "hard_decoy_rows": null,
         "positive_out_anchored_by_top_decoys": null,
         "ranking_pr_auc_ci_low": null,
+        "score_direction": null,
         "top20_hit_rate": null
       },
-      "first_blocker": "OPRM1:ranking_pr_auc_ci_low_required",
+      "first_blocker": "OPRM1:hard_decoy_rows_required_for_actual_closure",
       "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
       "minimum_evidence": {
         "criterion_by_field": {
           "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
           "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
+        "required_hard_decoy_row_fields": [
+          "molecule_id",
+          "score",
+          "is_positive",
+          "is_decoy"
+        ],
         "required_operator_fields": [
           "target_id",
           "ranking_pr_auc_ci_low",
           "top20_hit_rate",
           "decoys_above_positive_count",
-          "positive_out_anchored_by_top_decoys"
+          "positive_out_anchored_by_top_decoys",
+          "score_direction",
+          "hard_decoy_rows"
         ],
         "target_id": "OPRM1",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
+          "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
           "positive_out_anchored_by_top_decoys": false,
           "ranking_pr_auc_ci_low": ">=0.45",
           "top20_hit_rate": ">=0.2"
@@ -508,10 +616,13 @@
         "ranking_pr_auc_ci_low",
         "top20_hit_rate",
         "decoys_above_positive_count",
-        "positive_out_anchored_by_top_decoys"
+        "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows"
       ],
       "phase3_blocked": true,
       "root_cause_tags": [
+        "hard_decoy_rows_required",
         "operator_values_required"
       ],
       "slot_id": "oprm1_hard_decoy_metrics",
@@ -545,15 +656,32 @@
         "ranking_pr_auc_ci_low",
         "top20_hit_rate",
         "decoys_above_positive_count",
-        "positive_out_anchored_by_top_decoys"
+        "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows"
       ],
       "slot_id": "drd2_hard_decoy_metrics",
       "status": "operator_input_required",
       "target_id": "DRD2",
       "template": {
         "decoys_above_positive_count": null,
+        "hard_decoy_rows": [
+          {
+            "is_decoy": false,
+            "is_positive": true,
+            "molecule_id": "positive_001",
+            "score": null
+          },
+          {
+            "is_decoy": true,
+            "is_positive": false,
+            "molecule_id": "decoy_001",
+            "score": null
+          }
+        ],
         "positive_out_anchored_by_top_decoys": null,
         "ranking_pr_auc_ci_low": null,
+        "score_direction": "higher_is_better",
         "target_id": "DRD2",
         "top20_hit_rate": null
       },
@@ -579,15 +707,32 @@
         "ranking_pr_auc_ci_low",
         "top20_hit_rate",
         "decoys_above_positive_count",
-        "positive_out_anchored_by_top_decoys"
+        "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows"
       ],
       "slot_id": "htr2a_hard_decoy_metrics",
       "status": "operator_input_required",
       "target_id": "HTR2A",
       "template": {
         "decoys_above_positive_count": null,
+        "hard_decoy_rows": [
+          {
+            "is_decoy": false,
+            "is_positive": true,
+            "molecule_id": "positive_001",
+            "score": null
+          },
+          {
+            "is_decoy": true,
+            "is_positive": false,
+            "molecule_id": "decoy_001",
+            "score": null
+          }
+        ],
         "positive_out_anchored_by_top_decoys": null,
         "ranking_pr_auc_ci_low": null,
+        "score_direction": "higher_is_better",
         "target_id": "HTR2A",
         "top20_hit_rate": null
       },
@@ -613,15 +758,32 @@
         "ranking_pr_auc_ci_low",
         "top20_hit_rate",
         "decoys_above_positive_count",
-        "positive_out_anchored_by_top_decoys"
+        "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows"
       ],
       "slot_id": "oprm1_hard_decoy_metrics",
       "status": "operator_input_required",
       "target_id": "OPRM1",
       "template": {
         "decoys_above_positive_count": null,
+        "hard_decoy_rows": [
+          {
+            "is_decoy": false,
+            "is_positive": true,
+            "molecule_id": "positive_001",
+            "score": null
+          },
+          {
+            "is_decoy": true,
+            "is_positive": false,
+            "molecule_id": "decoy_001",
+            "score": null
+          }
+        ],
         "positive_out_anchored_by_top_decoys": null,
         "ranking_pr_auc_ci_low": null,
+        "score_direction": "higher_is_better",
         "target_id": "OPRM1",
         "top20_hit_rate": null
       },

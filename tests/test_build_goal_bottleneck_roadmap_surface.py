@@ -555,9 +555,12 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     phase_3 = rows["phase_3_gpcr_hard_decoy_closure"]
     assert phase_3["state"] == "blocked"
     assert phase_3["bottleneck"] == "broad_gpcr_family_claim_locked"
-    assert phase_3["first_blocker"] == "DRD2:ranking_pr_auc_ci_low_required"
+    assert phase_3["first_blocker"] == "DRD2:hard_decoy_rows_required_for_actual_closure"
     assert phase_3["first_blocked_target"] == "DRD2"
-    assert phase_3["root_cause_tags"] == ["operator_values_required"]
+    assert phase_3["root_cause_tags"] == [
+        "hard_decoy_rows_required",
+        "operator_values_required",
+    ]
     assert phase_3["linked_routes"] == [
         "/product/gpcr-hard-decoy-suite-report",
         "/product/gpcr-hard-decoy-suite-report/operator-intake",
@@ -593,19 +596,21 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     assert phase_3["summary"]["first_operator_evidence_gap"][
         "first_next_action"
     ] == "fill DRD2 hard-decoy metrics in the GPCR operator intake packet"
     assert phase_3["summary"]["phase3_exit_gate_status"] == "blocked"
-    assert phase_3["summary"]["phase3_failed_criterion_count"] == 4
+    assert phase_3["summary"]["phase3_failed_criterion_count"] == 5
     assert phase_3["summary"]["phase3_failed_criteria"] == [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
-    assert phase_3["blocked_criteria_count"] == 4
+    assert phase_3["blocked_criteria_count"] == 5
     assert phase_3["blocked_criteria"] == phase_3["summary"][
         "phase3_failed_criteria"
     ]
@@ -616,6 +621,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     assert phase_3["summary"]["phase3_exit_gate_criteria"][0][
         "current_by_target"
@@ -660,6 +666,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
     assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"][
         "decoys_above_positive_count"

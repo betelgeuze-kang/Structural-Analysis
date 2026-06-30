@@ -16,6 +16,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from materialize_gpcr_hard_decoy_suite_report import (  # noqa: E402
+    ACTUAL_CLOSURE_CRITERION_ID,
     EXIT_CRITERIA,
     REQUIRED_TARGETS,
     SCHEMA_VERSION as SUITE_REPORT_SCHEMA_VERSION,
@@ -43,13 +44,17 @@ REQUIRED_OPERATOR_FIELDS = (
     "top20_hit_rate",
     "decoys_above_positive_count",
     "positive_out_anchored_by_top_decoys",
+    "score_direction",
+    "hard_decoy_rows",
 )
 PHASE3_EXIT_CRITERIA_BY_FIELD = {
     "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
     "top20_hit_rate": "top20_hit_rate_min",
     "decoys_above_positive_count": "decoys_above_positive_count_max",
     "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+    "hard_decoy_rows": ACTUAL_CLOSURE_CRITERION_ID,
 }
+RAW_HARD_DECOY_ROW_FIELDS = ("molecule_id", "score", "is_positive", "is_decoy")
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -92,6 +97,21 @@ def _target_template(target_id: str) -> dict[str, Any]:
         "top20_hit_rate": None,
         "decoys_above_positive_count": None,
         "positive_out_anchored_by_top_decoys": None,
+        "score_direction": "higher_is_better",
+        "hard_decoy_rows": [
+            {
+                "molecule_id": "positive_001",
+                "score": None,
+                "is_positive": True,
+                "is_decoy": False,
+            },
+            {
+                "molecule_id": "decoy_001",
+                "score": None,
+                "is_positive": False,
+                "is_decoy": True,
+            },
+        ],
     }
 
 
@@ -217,6 +237,7 @@ def _target_execution_preflight_checklist(
                 "minimum_evidence": {
                     "target_id": target_id,
                     "required_operator_fields": list(REQUIRED_OPERATOR_FIELDS),
+                    "required_hard_decoy_row_fields": list(RAW_HARD_DECOY_ROW_FIELDS),
                     "criterion_by_field": dict(PHASE3_EXIT_CRITERIA_BY_FIELD),
                     "thresholds": {
                         "ranking_pr_auc_ci_low": f">={EXIT_CRITERIA['ranking_pr_auc_ci_low_min']}",
@@ -225,6 +246,7 @@ def _target_execution_preflight_checklist(
                         "positive_out_anchored_by_top_decoys": EXIT_CRITERIA[
                             "positive_out_anchored_by_top_decoys_allowed"
                         ],
+                        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
                     },
                 },
                 "materialization_command": materialize_command,
@@ -250,6 +272,7 @@ def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
             "minimum_evidence": {
                 "target_id": target_id,
                 "required_operator_fields": list(REQUIRED_OPERATOR_FIELDS),
+                "required_hard_decoy_row_fields": list(RAW_HARD_DECOY_ROW_FIELDS),
                 "criterion_by_field": dict(PHASE3_EXIT_CRITERIA_BY_FIELD),
                 "thresholds": {
                     "ranking_pr_auc_ci_low": f">={EXIT_CRITERIA['ranking_pr_auc_ci_low_min']}",
@@ -258,6 +281,7 @@ def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
                     "positive_out_anchored_by_top_decoys": EXIT_CRITERIA[
                         "positive_out_anchored_by_top_decoys_allowed"
                     ],
+                    "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
                 },
             },
             "materialization_steps": [
@@ -348,7 +372,8 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "target_execution_preflight_count": len(target_execution_preflight),
         "first_target_execution_preflight_blocker": first_target_preflight_blocker,
         "minimum_target_count": len(REQUIRED_TARGETS),
-        "minimum_metric_field_count_per_target": len(REQUIRED_OPERATOR_FIELDS) - 1,
+        "minimum_metric_field_count_per_target": 4,
+        "minimum_raw_hard_decoy_row_fields": list(RAW_HARD_DECOY_ROW_FIELDS),
         "operator_template": {
             "artifact": str(DEFAULT_OPERATOR_TEMPLATE),
             "schema_version": str(template.get("schema_version") or "gpcr-hard-decoy-operator-intake.v1"),
@@ -401,6 +426,10 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             "gpcr_hard_decoy_suite_report.target_pass_count == 3",
             "gpcr_hard_decoy_suite_report.broad_gpcr_family_claim_safe == true",
             "gpcr_hard_decoy_suite_report.blockers == []",
+            (
+                "gpcr_hard_decoy_suite_report.phase3_exit_gate."
+                "raw_hard_decoy_rows_actual_closure == pass"
+            ),
             "gpcr_hard_decoy_product_report.science_claim_status == ready",
             "gpcr_hard_decoy_evidence_surface.locked == false",
         ],
@@ -424,7 +453,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             "required_slot_count": len(REQUIRED_TARGETS),
             "gate_unblock_plan_count": len(gate_unblock_plan),
             "minimum_target_count": len(REQUIRED_TARGETS),
-            "minimum_metric_field_count_per_target": len(REQUIRED_OPERATOR_FIELDS) - 1,
+            "minimum_metric_field_count_per_target": 4,
             "current_blocker_count": len(blockers),
             "first_blocked_target": first_blocked_target,
             "target_execution_preflight_count": len(target_execution_preflight),

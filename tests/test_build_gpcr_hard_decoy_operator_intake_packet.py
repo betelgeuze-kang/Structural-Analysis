@@ -51,6 +51,8 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "top20_hit_rate",
         "decoys_above_positive_count",
         "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows",
     ]
     assert packet["exit_criteria"] == {
         "decoys_above_positive_count_max": 0,
@@ -67,7 +69,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     assert packet["target_execution_preflight_count"] == 3
     assert packet["first_target_execution_preflight_blocker"]["target_id"] == "DRD2"
     assert packet["first_target_execution_preflight_blocker"]["first_blocker"] == (
-        "DRD2:ranking_pr_auc_ci_low_required"
+        "DRD2:hard_decoy_rows_required_for_actual_closure"
     )
     assert packet["minimum_target_count"] == 3
     assert packet["minimum_metric_field_count_per_target"] == 4
@@ -81,11 +83,15 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "top20_hit_rate",
         "decoys_above_positive_count",
         "positive_out_anchored_by_top_decoys",
+        "score_direction",
+        "hard_decoy_rows",
     ]
     assert preflight["DRD2"]["current_values"] == {
         "decoys_above_positive_count": None,
+        "hard_decoy_rows": None,
         "positive_out_anchored_by_top_decoys": None,
         "ranking_pr_auc_ci_low": None,
+        "score_direction": None,
         "top20_hit_rate": None,
     }
     assert preflight["DRD2"]["blocked_phase3_criteria"] == [
@@ -93,8 +99,12 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
     ]
-    assert preflight["DRD2"]["root_cause_tags"] == ["operator_values_required"]
+    assert preflight["DRD2"]["root_cause_tags"] == [
+        "hard_decoy_rows_required",
+        "operator_values_required",
+    ]
     assert (
         "materialize_gpcr_hard_decoy_suite_report.py"
         in preflight["DRD2"]["materialization_command"]
@@ -107,15 +117,24 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
+    ]
+    assert gate_plan["DRD2"]["minimum_evidence"]["required_hard_decoy_row_fields"] == [
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
     ]
     assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"] == {
         "decoys_above_positive_count": "<=0",
+        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows",
         "positive_out_anchored_by_top_decoys": False,
         "ranking_pr_auc_ci_low": ">=0.45",
         "top20_hit_rate": ">=0.2",
     }
     assert gate_plan["DRD2"]["minimum_evidence"]["criterion_by_field"] == {
         "decoys_above_positive_count": "decoys_above_positive_count_max",
+        "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
         "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
         "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
         "top20_hit_rate": "top20_hit_rate_min",
@@ -134,11 +153,11 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "materialization_command"
     ]
     assert packet["current_suite_status"]["first_blocked_target"] == "DRD2"
-    assert packet["current_suite_status"]["blocker_count"] == 12
+    assert packet["current_suite_status"]["blocker_count"] == 15
     assert packet["summary"]["target_execution_preflight_count"] == 3
     assert packet["summary"]["first_target_execution_preflight_target"] == "DRD2"
     assert packet["summary"]["first_target_execution_preflight_blocker"] == (
-        "DRD2:ranking_pr_auc_ci_low_required"
+        "DRD2:hard_decoy_rows_required_for_actual_closure"
     )
 
 
@@ -156,6 +175,10 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "gpcr_hard_decoy_suite_report.target_pass_count == 3",
         "gpcr_hard_decoy_suite_report.broad_gpcr_family_claim_safe == true",
         "gpcr_hard_decoy_suite_report.blockers == []",
+        (
+            "gpcr_hard_decoy_suite_report.phase3_exit_gate."
+            "raw_hard_decoy_rows_actual_closure == pass"
+        ),
         "gpcr_hard_decoy_product_report.science_claim_status == ready",
         "gpcr_hard_decoy_evidence_surface.locked == false",
     ]
