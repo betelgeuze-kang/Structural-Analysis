@@ -1,5 +1,49 @@
 {
   "blocked_operator_slot_count": 4,
+  "blocked_slices": [
+    {
+      "blockers": [
+        "casf_pdbbind_source_material_not_attached",
+        "casf_pdbbind_case_checksums_missing",
+        "casf_pdbbind_ligand_symmetry_contracts_missing"
+      ],
+      "current": 0,
+      "required": 12,
+      "slice_id": "casf_pdbbind_subset_materialization",
+      "status": "operator_source_material_required"
+    },
+    {
+      "blockers": [
+        "public_benchmark_real_pose_predictions_missing"
+      ],
+      "current": 0,
+      "required": 12,
+      "slice_id": "real_pose_coordinate_materialization",
+      "status": "operator_pose_coordinates_required"
+    },
+    {
+      "blockers": [
+        "dud_e_lit_pcba_enrichment_targets_missing",
+        "dud_e_lit_pcba_scored_molecules_missing",
+        "dud_e_lit_pcba_active_decoy_labels_missing"
+      ],
+      "current": 0,
+      "required": ">=1_ready_target_with_active_decoy_labels",
+      "slice_id": "dud_e_lit_pcba_enrichment_materialization",
+      "status": "operator_enrichment_rows_required"
+    },
+    {
+      "blockers": [
+        "vina_gnina_comparison_cases_missing",
+        "vina_gnina_engine_runs_missing",
+        "vina_gnina_external_receipts_missing"
+      ],
+      "current": 0,
+      "required": ">=1_case_with_vina_and_gnina_engine_runs",
+      "slice_id": "vina_gnina_comparison_materialization",
+      "status": "operator_engine_comparison_rows_required"
+    }
+  ],
   "blocker_count": 5,
   "blockers": [
     "casf_pdbbind_source_material_not_attached",
@@ -77,6 +121,46 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "claim_boundary": "This is the Phase 2 public benchmark harness seed. It closes source-of-truth shape, subset contract, RMSD scorer dry-run, and pose-validity packet shape. It does not close Tier beta, public benchmark results, Vina/GNINA comparison, or DUD-E/LIT-PCBA enrichment results.",
+  "completed_slices": [
+    {
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+      "evidence": [
+        "schema_version",
+        "tier_beta_gate",
+        "operator_handoff_queue",
+        "source_tracking"
+      ],
+      "slice_id": "public_benchmark_source_of_truth_spec",
+      "status": "contract_ready"
+    },
+    {
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "materialized_case_count": 0,
+      "slice_id": "casf_pdbbind_subset_manifest_contract",
+      "status": "contract_ready",
+      "target_subset_case_count": 12
+    },
+    {
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+      "dry_run_case_count": 1,
+      "real_benchmark_case_count": 0,
+      "slice_id": "symmetry_aware_rmsd_scorer_dry_run",
+      "status": "dry_run_ready"
+    },
+    {
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+      "check_count": 6,
+      "real_benchmark_case_count": 0,
+      "slice_id": "posebusters_style_validity_packet_shape",
+      "status": "dry_run_ready"
+    },
+    {
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+      "required_slot_count": 4,
+      "slice_id": "operator_intake_handoff_packet",
+      "status": "ready_for_operator_input"
+    }
+  ],
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "enrichment_scorecard_materializer": {
@@ -350,10 +434,10 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-06-30T01:30:28.613117+00:00",
+  "generated_at": "2026-06-30T03:45:36.903487+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:4bdd70f42a9171857713ca310d4e547eed1fab19fc95290cde2b312cd69fc68a",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:c77518041004856a87db0d043eb4b88315dbc8c469f8be5eb490f8c906fe1754",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:4f40955950b8383a87dd7b07d017055a5cd334f8b27ef0ec487420636f0b9ea8",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -363,6 +447,19 @@
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:364d355cd4e6d67500b02dd47a32582df7486ea125045b2f38be7be3bf5b5161"
+  },
+  "materialization_progress": {
+    "blocked_slice_count": 4,
+    "claim_boundary": "Completed slices are repo-local contracts or synthetic dry-runs. Blocked slices require operator-attached public benchmark rows and external receipts before Tier beta can be claimed.",
+    "completed_slice_count": 5,
+    "materialized_subset_case_count": 0,
+    "next_unblock_slice_id": "casf_pdbbind_subset_materialization",
+    "real_enrichment_target_count": 0,
+    "real_pose_case_count": 0,
+    "real_rmsd_case_count": 0,
+    "real_vina_gnina_comparison_case_count": 0,
+    "target_subset_case_count": 12,
+    "tier_beta_failed_criterion_count": 7
   },
   "next_actions": [
     "fill_public_benchmark_operator_intake_packet",
@@ -1517,7 +1614,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "9eb7edaf52a38ce1d287fba839cc167c9d8afe83",
+  "source_commit_sha": "4fe3cd5ee87ba49a8ad2528503235e763f5ec55d",
   "source_families": [
     {
       "family_id": "casf_pdbbind",
@@ -1540,6 +1637,27 @@
       "role": "docking_engine_comparison_adapter"
     }
   ],
+  "source_tracking": {
+    "claim_boundary": "This source-of-truth seed is generated from local builder and validator code only. Checksums cover those direct source artifacts, not external CASF/PDBBind, DUD-E, LIT-PCBA, Vina, or GNINA benchmark data.",
+    "input_checksum_count": 11,
+    "missing_source_artifact_count": 0,
+    "missing_source_artifacts": [],
+    "mode": "direct_builder_source_tracking",
+    "source_artifact_count": 11,
+    "source_artifacts": [
+      "scripts/build_public_benchmark_source_of_truth.py",
+      "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
+      "scripts/materialize_public_benchmark_pose_validity_input.py",
+      "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+      "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+      "scripts/materialize_public_benchmark_rmsd_scorecard.py",
+      "scripts/materialize_public_benchmark_subset_manifest.py",
+      "scripts/build_public_benchmark_operator_intake_packet.py",
+      "scripts/score_symmetry_aware_ligand_rmsd.py",
+      "scripts/validate_public_benchmark_pose_validity.py",
+      "scripts/validate_public_benchmark_subset_manifest.py"
+    ]
+  },
   "status": "seed_ready_materialization_blocked",
   "subset_manifest_summary": {
     "blockers": [
@@ -1599,6 +1717,7 @@
     "schema_version": "public-benchmark-subset-materialization.v1",
     "status": "ready_for_operator_intake"
   },
+  "summary_line": "Public benchmark source-of-truth: BLOCKED | completed_slices=5 | blocked_slices=4 | first_blocker=casf_pdbbind_source_material_not_attached",
   "symmetry_rmsd_scorecard_summary": {
     "dry_run_case_count": 1,
     "dry_run_pose_success": true,

@@ -676,6 +676,146 @@ def _operator_evidence_gap_register(
     return rows
 
 
+def _source_tracking_contract(
+    *, metadata: dict[str, Any], source_paths: list[Path]
+) -> dict[str, Any]:
+    input_checksums = metadata.get("input_checksums")
+    if not isinstance(input_checksums, dict):
+        input_checksums = {}
+    source_artifacts = [path.as_posix() for path in source_paths]
+    missing_source_artifacts = [
+        path for path in source_artifacts if input_checksums.get(path) == "missing"
+    ]
+    return {
+        "mode": "direct_builder_source_tracking",
+        "source_artifact_count": len(source_artifacts),
+        "source_artifacts": source_artifacts,
+        "input_checksum_count": len(input_checksums),
+        "missing_source_artifact_count": len(missing_source_artifacts),
+        "missing_source_artifacts": missing_source_artifacts,
+        "claim_boundary": (
+            "This source-of-truth seed is generated from local builder and validator "
+            "code only. Checksums cover those direct source artifacts, not external "
+            "CASF/PDBBind, DUD-E, LIT-PCBA, Vina, or GNINA benchmark data."
+        ),
+    }
+
+
+def _phase2_slice_progress(
+    *,
+    subset_manifest: dict[str, Any],
+    pose_validity_packet: dict[str, Any],
+    rmsd_scorecard: dict[str, Any],
+    enrichment_scorecard: dict[str, Any],
+    vina_gnina_comparison_adapter: dict[str, Any],
+    operator_intake_packet: dict[str, Any],
+    tier_beta_gate: dict[str, Any],
+) -> dict[str, Any]:
+    target_subset_case_count = int(subset_manifest["target_subset_case_count"])
+    subset_materialized_count = int(subset_manifest["materialized_case_count"])
+    pose_real_case_count = int(
+        pose_validity_packet["dry_run_validation"]["real_benchmark_case_count"]
+    )
+    rmsd_real_case_count = int(rmsd_scorecard["real_benchmark_case_count"])
+    enrichment_target_count = int(enrichment_scorecard["real_enrichment_target_count"])
+    vina_gnina_case_count = int(
+        vina_gnina_comparison_adapter["real_comparison_case_count"]
+    )
+    completed_slices = [
+        {
+            "slice_id": "public_benchmark_source_of_truth_spec",
+            "status": "contract_ready",
+            "artifact": str(DEFAULT_SOURCE_OF_TRUTH_OUT),
+            "evidence": [
+                "schema_version",
+                "tier_beta_gate",
+                "operator_handoff_queue",
+                "source_tracking",
+            ],
+        },
+        {
+            "slice_id": "casf_pdbbind_subset_manifest_contract",
+            "status": "contract_ready",
+            "artifact": str(DEFAULT_SUBSET_MANIFEST_OUT),
+            "target_subset_case_count": target_subset_case_count,
+            "materialized_case_count": subset_materialized_count,
+        },
+        {
+            "slice_id": "symmetry_aware_rmsd_scorer_dry_run",
+            "status": "dry_run_ready",
+            "artifact": str(DEFAULT_RMSD_SCORECARD_OUT),
+            "dry_run_case_count": int(rmsd_scorecard["dry_run_case_count"]),
+            "real_benchmark_case_count": rmsd_real_case_count,
+        },
+        {
+            "slice_id": "posebusters_style_validity_packet_shape",
+            "status": "dry_run_ready",
+            "artifact": str(DEFAULT_POSE_VALIDITY_PACKET_OUT),
+            "check_count": len(pose_validity_packet["checks"]),
+            "real_benchmark_case_count": pose_real_case_count,
+        },
+        {
+            "slice_id": "operator_intake_handoff_packet",
+            "status": "ready_for_operator_input",
+            "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
+            "required_slot_count": int(operator_intake_packet["required_slot_count"]),
+        },
+    ]
+    blocked_slices = [
+        {
+            "slice_id": "casf_pdbbind_subset_materialization",
+            "status": "operator_source_material_required",
+            "current": subset_materialized_count,
+            "required": target_subset_case_count,
+            "blockers": list(subset_manifest["blockers"]),
+        },
+        {
+            "slice_id": "real_pose_coordinate_materialization",
+            "status": "operator_pose_coordinates_required",
+            "current": pose_real_case_count,
+            "required": target_subset_case_count,
+            "blockers": ["public_benchmark_real_pose_predictions_missing"],
+        },
+        {
+            "slice_id": "dud_e_lit_pcba_enrichment_materialization",
+            "status": "operator_enrichment_rows_required",
+            "current": enrichment_target_count,
+            "required": ">=1_ready_target_with_active_decoy_labels",
+            "blockers": list(enrichment_scorecard["blockers"]),
+        },
+        {
+            "slice_id": "vina_gnina_comparison_materialization",
+            "status": "operator_engine_comparison_rows_required",
+            "current": vina_gnina_case_count,
+            "required": ">=1_case_with_vina_and_gnina_engine_runs",
+            "blockers": list(vina_gnina_comparison_adapter["blockers"]),
+        },
+    ]
+    return {
+        "completed_slices": completed_slices,
+        "blocked_slices": blocked_slices,
+        "materialization_progress": {
+            "completed_slice_count": len(completed_slices),
+            "blocked_slice_count": len(blocked_slices),
+            "target_subset_case_count": target_subset_case_count,
+            "materialized_subset_case_count": subset_materialized_count,
+            "real_pose_case_count": pose_real_case_count,
+            "real_rmsd_case_count": rmsd_real_case_count,
+            "real_enrichment_target_count": enrichment_target_count,
+            "real_vina_gnina_comparison_case_count": vina_gnina_case_count,
+            "tier_beta_failed_criterion_count": int(
+                tier_beta_gate["failed_criterion_count"]
+            ),
+            "next_unblock_slice_id": blocked_slices[0]["slice_id"],
+            "claim_boundary": (
+                "Completed slices are repo-local contracts or synthetic dry-runs. "
+                "Blocked slices require operator-attached public benchmark rows and "
+                "external receipts before Tier beta can be claimed."
+            ),
+        },
+    }
+
+
 def build_source_of_truth(
     *,
     subset_manifest: dict[str, Any],
@@ -866,15 +1006,36 @@ def build_source_of_truth(
         for row in operator_evidence_gap_register
         if row.get("tier_beta_blocked")
     ]
+    source_input_paths = _source_input_paths()
+    metadata = release_evidence_metadata(
+        input_paths=source_input_paths,
+        reused_evidence=False,
+        reuse_policy="public_benchmark_contract_generated_from_repo_code",
+        repo_root=repo_root,
+    )
+    source_tracking = _source_tracking_contract(
+        metadata=metadata,
+        source_paths=source_input_paths,
+    )
+    slice_progress = _phase2_slice_progress(
+        subset_manifest=subset_manifest,
+        pose_validity_packet=pose_validity_packet,
+        rmsd_scorecard=rmsd_scorecard,
+        enrichment_scorecard=enrichment_scorecard,
+        vina_gnina_comparison_adapter=vina_gnina_comparison_adapter,
+        operator_intake_packet=operator_intake_packet,
+        tier_beta_gate=tier_beta_gate,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
-        **release_evidence_metadata(
-            input_paths=_source_input_paths(),
-            reused_evidence=False,
-            reuse_policy="public_benchmark_contract_generated_from_repo_code",
-            repo_root=repo_root,
-        ),
+        **metadata,
         "status": "seed_ready_materialization_blocked",
+        "summary_line": (
+            "Public benchmark source-of-truth: BLOCKED | "
+            f"completed_slices={slice_progress['materialization_progress']['completed_slice_count']} | "
+            f"blocked_slices={slice_progress['materialization_progress']['blocked_slice_count']} | "
+            f"first_blocker={blockers[0] if blockers else 'none'}"
+        ),
         "contract_pass": True,
         "read_model_ready": True,
         "route": PUBLIC_BENCHMARK_ROUTE,
@@ -909,6 +1070,10 @@ def build_source_of_truth(
         ),
         "blocked_operator_slot_count": blocked_operator_slot_count,
         "root_cause_tags": root_cause_tags,
+        "source_tracking": source_tracking,
+        "completed_slices": slice_progress["completed_slices"],
+        "blocked_slices": slice_progress["blocked_slices"],
+        "materialization_progress": slice_progress["materialization_progress"],
         "operator_handoff_summary": operator_handoff_summary,
         "operator_handoff_queue_count": len(operator_handoff_queue),
         "first_operator_handoff": (

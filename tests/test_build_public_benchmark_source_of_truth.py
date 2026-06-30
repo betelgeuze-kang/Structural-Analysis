@@ -77,6 +77,54 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "operator_source_material_required",
         "operator_receipts_required",
     ]
+    assert source["summary_line"] == (
+        "Public benchmark source-of-truth: BLOCKED | completed_slices=5 | "
+        "blocked_slices=4 | first_blocker=casf_pdbbind_source_material_not_attached"
+    )
+    assert source["source_tracking"]["mode"] == "direct_builder_source_tracking"
+    assert source["source_tracking"]["missing_source_artifact_count"] == 0
+    assert (
+        source["source_tracking"]["input_checksum_count"]
+        == source["source_tracking"]["source_artifact_count"]
+    )
+    assert (
+        "scripts/build_public_benchmark_source_of_truth.py"
+        in source["source_tracking"]["source_artifacts"]
+    )
+    assert {
+        row["slice_id"]: row["status"] for row in source["completed_slices"]
+    } == {
+        "public_benchmark_source_of_truth_spec": "contract_ready",
+        "casf_pdbbind_subset_manifest_contract": "contract_ready",
+        "symmetry_aware_rmsd_scorer_dry_run": "dry_run_ready",
+        "posebusters_style_validity_packet_shape": "dry_run_ready",
+        "operator_intake_handoff_packet": "ready_for_operator_input",
+    }
+    assert {
+        row["slice_id"]: row["status"] for row in source["blocked_slices"]
+    } == {
+        "casf_pdbbind_subset_materialization": "operator_source_material_required",
+        "real_pose_coordinate_materialization": "operator_pose_coordinates_required",
+        "dud_e_lit_pcba_enrichment_materialization": "operator_enrichment_rows_required",
+        "vina_gnina_comparison_materialization": "operator_engine_comparison_rows_required",
+    }
+    assert source["materialization_progress"] == {
+        "completed_slice_count": 5,
+        "blocked_slice_count": 4,
+        "target_subset_case_count": 12,
+        "materialized_subset_case_count": 0,
+        "real_pose_case_count": 0,
+        "real_rmsd_case_count": 0,
+        "real_enrichment_target_count": 0,
+        "real_vina_gnina_comparison_case_count": 0,
+        "tier_beta_failed_criterion_count": 7,
+        "next_unblock_slice_id": "casf_pdbbind_subset_materialization",
+        "claim_boundary": (
+            "Completed slices are repo-local contracts or synthetic dry-runs. "
+            "Blocked slices require operator-attached public benchmark rows and "
+            "external receipts before Tier beta can be claimed."
+        ),
+    }
     assert source["operator_handoff_queue_count"] == 4
     assert source["first_operator_handoff"]["handoff_id"] == (
         "public_benchmark::casf_pdbbind_subset_intake"
