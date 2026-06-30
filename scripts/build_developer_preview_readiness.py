@@ -1128,11 +1128,24 @@ def _markdown(payload: dict[str, Any]) -> str:
 
 def _strip_volatile(payload: Any, path: tuple[str, ...] = ()) -> Any:
     if isinstance(payload, dict):
+        product_snapshot_input_artifact_path = (
+            path == ("input_artifacts", "product_readiness_snapshot")
+        )
+        input_checksums_path = path == ("input_checksums",)
+        product_snapshot_checksum_key = PRODUCT_READINESS_SNAPSHOT.as_posix()
         return {
             key: _strip_volatile(value, (*path, key))
             for key, value in payload.items()
             if key not in {"generated_at"}
             and not (path == () and key == "source_commit_sha")
+            and not (
+                product_snapshot_input_artifact_path
+                and key in {"input_checksum", "source_commit_sha"}
+            )
+            and not (
+                input_checksums_path
+                and key == product_snapshot_checksum_key
+            )
         }
     if isinstance(payload, list):
         return [_strip_volatile(item, path) for item in payload]
