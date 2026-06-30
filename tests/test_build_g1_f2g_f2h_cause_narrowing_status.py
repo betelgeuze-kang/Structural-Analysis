@@ -81,6 +81,15 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
                 "element_graph_connectivity_gap_detected": False,
                 "global_connectivity_classification": "element_graph_connects_dominant_modes_to_supports",
             },
+            "decision_record": {
+                "schema_version": "g1-global-connectivity-decision-record.v1",
+                "row_only_correction_loop_stopped": True,
+                "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+                "required_next_receipts": [
+                    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+                    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+                ],
+            },
         },
     )
     script.parent.mkdir(parents=True, exist_ok=True)
@@ -102,11 +111,27 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         "element_graph_connects_dominant_modes_to_supports"
     )
     assert payload["evidence_signals"]["dominant_nodes_without_element_path_to_support_count"] == 0
+    assert payload["evidence_signals"]["global_connectivity_decision_record_present"] is True
+    assert (
+        payload["evidence_signals"]["row_only_correction_loop_stopped_by_global_connectivity"]
+        is True
+    )
+    assert payload["evidence_signals"]["global_connectivity_primary_next_lane"] == (
+        "consistent_residual_jacobian_newton_rocm_worker"
+    )
     assert payload["evidence_signals"]["f2h_lightweight_0p1_0p2_0p4_ready"] is True
+    assert payload["decision_record"]["stop_row_only_support_or_elastic_link_correction_loop"] is True
+    assert payload["decision_record"]["primary_next_lane"] == (
+        "consistent_residual_jacobian_newton_rocm_worker"
+    )
     assert payload["hypothesis_rank"][0]["hypothesis"] == "direct_support_or_elastic_link_row_missing"
     assert payload["hypothesis_rank"][0]["classification"] == "deprioritized"
     assert payload["hypothesis_rank"][1]["classification"] == "load_path_transfer_or_tangent_gap"
     assert "stop_row_only_support_or_elastic_link_correction_loop" in payload["next_actions"]
+    assert (
+        "execute_consistent_residual_jacobian_newton_rocm_worker_lane"
+        in payload["next_actions"]
+    )
 
 
 def test_cause_narrowing_blocks_when_f2h_is_not_ready(tmp_path: Path) -> None:

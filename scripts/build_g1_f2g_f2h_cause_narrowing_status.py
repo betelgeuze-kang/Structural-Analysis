@@ -126,6 +126,7 @@ def build_status(
     f2g_summary = _as_dict(f2g_audit.get("summary"))
     f2h_summary = _as_dict(f2h_status.get("summary"))
     global_summary = _as_dict(global_connectivity.get("summary"))
+    global_decision = _as_dict(global_connectivity.get("decision_record"))
     finding_ids = _finding_ids(f2g_audit)
     dominant_rows = _as_int(f2g_summary.get("dominant_dof_row_count"))
     direct_support = _as_int(f2g_summary.get("direct_support_member_count"))
@@ -144,6 +145,16 @@ def build_status(
         global_summary.get("dominant_nodes_without_element_path_to_support_count")
     )
     element_graph_gap_detected = global_summary.get("element_graph_connectivity_gap_detected") is True
+    global_decision_present = bool(global_decision.get("schema_version"))
+    row_only_loop_stopped_by_global = (
+        global_decision.get("row_only_correction_loop_stopped") is True
+    )
+    global_primary_next_lane = str(global_decision.get("primary_next_lane") or "")
+    global_required_next_receipts = [
+        str(item)
+        for item in _as_list(global_decision.get("required_next_receipts"))
+        if str(item)
+    ]
 
     direct_row_gap_disfavored = bool(dominant_rows > 0 and direct_support == 0 and direct_link == 0)
     elastic_link_transfer_disfavored = bool(dominant_rows > 0 and reachable == 0)
@@ -172,9 +183,57 @@ def build_status(
         "dominant_nodes_element_reachable_to_support_count": element_reachable_nodes,
         "dominant_nodes_without_element_path_to_support_count": element_unreachable_nodes,
         "element_graph_connectivity_gap_detected": element_graph_gap_detected,
+        "global_connectivity_decision_record_present": global_decision_present,
+        "row_only_correction_loop_stopped_by_global_connectivity": (
+            row_only_loop_stopped_by_global
+        ),
+        "global_connectivity_primary_next_lane": (
+            global_primary_next_lane or "not_recorded"
+        ),
+        "global_connectivity_required_next_receipts": global_required_next_receipts,
         "f2h_lightweight_0p1_0p2_0p4_ready": f2h_sequence_ready,
         "f2h_residual_trend_across_increasing_load": f2h_residual_trend,
         "f2h_residual_growth_factor_0p1_to_0p4": residual_growth,
+    }
+    primary_next_lane = (
+        global_primary_next_lane
+        or (
+            "structural_connectivity_load_path_mapping"
+            if element_graph_gap_detected
+            else "consistent_residual_jacobian_newton_rocm_worker"
+            if global_connectivity_status == "ready"
+            else "global_connectivity_consistent_newton_rocm_lane"
+        )
+    )
+    required_next_receipts = global_required_next_receipts or [
+        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+    ]
+    decision_record = {
+        "schema_version": "g1-f2g-f2h-next-lane-decision.v1",
+        "global_connectivity_decision_record_present": global_decision_present,
+        "stop_row_only_support_or_elastic_link_correction_loop": bool(
+            row_only_loop_stopped_by_global or direct_row_gap_disfavored
+        ),
+        "stop_row_only_correction_supported_by": [
+            item
+            for item in [
+                "f2g_direct_support_and_elastic_link_rows"
+                if direct_row_gap_disfavored
+                else "",
+                "global_element_connectivity_decision_record"
+                if row_only_loop_stopped_by_global
+                else "",
+            ]
+            if item
+        ],
+        "primary_next_lane": primary_next_lane,
+        "required_next_receipts": required_next_receipts,
+        "claim_boundary": (
+            "This decision routes the next G1 diagnostic slice only. It does not "
+            "close G1, prove full-load 1.0 equilibrium, or prove production "
+            "ROCm/HIP residency."
+        ),
     }
 
     hypotheses = [
@@ -271,13 +330,18 @@ def build_status(
             f"{'READY' if ready else 'BLOCKED'} | "
             f"support_or_link_row_gap_disfavored={direct_row_gap_disfavored} | "
             f"f2h_0p4_ready={f2h_sequence_ready} | "
-            "next=global_connectivity_consistent_newton_rocm_lane"
+            f"next={primary_next_lane}"
         ),
         "evidence_signals": evidence_signals,
+        "decision_record": decision_record,
         "hypothesis_rank": hypotheses,
         "next_actions": [
-            "stop_row_only_support_or_elastic_link_correction_loop",
-            "audit_full_structural_graph_connectivity_and_load_path_transfer",
+            "stop_row_only_support_or_elastic_link_correction_loop"
+            if decision_record["stop_row_only_support_or_elastic_link_correction_loop"]
+            else "audit_full_structural_graph_connectivity_and_load_path_transfer",
+            "execute_consistent_residual_jacobian_newton_rocm_worker_lane"
+            if primary_next_lane == "consistent_residual_jacobian_newton_rocm_worker"
+            else "audit_full_structural_graph_connectivity_and_load_path_transfer",
             "compare_load_dependent_near_null_and_geometric_stiffness_at_0p2_0p4",
             "continue_consistent_residual_jacobian_newton_path",
             "build_production_rocm_hip_residual_jvp_worker_when_runtime_available",

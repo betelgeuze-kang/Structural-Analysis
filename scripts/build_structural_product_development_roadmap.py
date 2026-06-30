@@ -235,7 +235,18 @@ def build_structural_product_development_roadmap(
     g1_numerator = int(g1_direct_ready) + int(g1_full_ready)
     g1_blockers = [str(row) for row in _as_list(g1_full_load.get("blockers"))]
     g1_global_summary = _as_dict(g1_global_connectivity.get("summary"))
+    g1_global_decision = _as_dict(g1_global_connectivity.get("decision_record"))
     g1_cause_signals = _as_dict(g1_cause_narrowing.get("evidence_signals"))
+    g1_cause_decision = _as_dict(g1_cause_narrowing.get("decision_record"))
+    g1_recommended_next_lane = str(
+        g1_cause_decision.get("primary_next_lane")
+        or g1_global_decision.get("primary_next_lane")
+        or (
+            "global_connectivity_consistent_newton_rocm_lane"
+            if g1_cause_narrowing.get("contract_pass") is True
+            else "refresh_f2g_f2h_cause_narrowing_receipt"
+        )
+    )
 
     shadow_summary = _as_dict(customer_shadow.get("summary"))
     completed_shadow = _as_int(shadow_summary.get("completed_shadow_case_count"))
@@ -393,14 +404,19 @@ def build_structural_product_development_roadmap(
                 "support_or_link_row_gap_disfavored": _as_bool(
                     g1_cause_signals.get("support_or_link_row_gap_disfavored")
                 ),
+                "row_only_correction_loop_stopped": _as_bool(
+                    g1_cause_decision.get(
+                        "stop_row_only_support_or_elastic_link_correction_loop"
+                    )
+                    or g1_cause_signals.get(
+                        "row_only_correction_loop_stopped_by_global_connectivity"
+                    )
+                    or g1_global_decision.get("row_only_correction_loop_stopped")
+                ),
                 "f2h_lightweight_0p1_0p2_0p4_ready": _as_bool(
                     g1_cause_signals.get("f2h_lightweight_0p1_0p2_0p4_ready")
                 ),
-                "recommended_g1_next_direction": (
-                    "global_connectivity_consistent_newton_rocm_lane"
-                    if g1_cause_narrowing.get("contract_pass") is True
-                    else "refresh_f2g_f2h_cause_narrowing_receipt"
-                ),
+                "recommended_g1_next_direction": g1_recommended_next_lane,
             },
         ),
         _stage_row(

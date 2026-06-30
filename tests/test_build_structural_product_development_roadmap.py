@@ -124,6 +124,11 @@ def _write_minimal_inputs(repo_root: Path) -> None:
                 "dominant_nodes_element_reachable_to_support_count": 8,
                 "dominant_nodes_without_element_path_to_support_count": 0,
             },
+            "decision_record": {
+                "schema_version": "g1-global-connectivity-decision-record.v1",
+                "row_only_correction_loop_stopped": True,
+                "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+            },
         },
     )
     _write_json(
@@ -133,7 +138,13 @@ def _write_minimal_inputs(repo_root: Path) -> None:
             "contract_pass": True,
             "evidence_signals": {
                 "support_or_link_row_gap_disfavored": True,
+                "row_only_correction_loop_stopped_by_global_connectivity": True,
                 "f2h_lightweight_0p1_0p2_0p4_ready": True,
+            },
+            "decision_record": {
+                "schema_version": "g1-f2g-f2h-next-lane-decision.v1",
+                "stop_row_only_support_or_elastic_link_correction_loop": True,
+                "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
             },
         },
     )
@@ -188,7 +199,11 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     )
     assert (
         stages["g1_solver_closure"]["summary"]["recommended_g1_next_direction"]
-        == "global_connectivity_consistent_newton_rocm_lane"
+        == "consistent_residual_jacobian_newton_rocm_worker"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"]["row_only_correction_loop_stopped"]
+        is True
     )
     assert (
         "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json"
