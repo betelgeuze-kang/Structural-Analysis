@@ -472,6 +472,10 @@ def test_missing_hip_worker_contract_blocks_lane_promotion(
         "status": None,
         "worker_id": None,
         "blockers": [],
+        "residual_jvp_worker_path_ready": None,
+        "residual_jvp_worker_path_blockers": [],
+        "g1_closure_gate_ready": None,
+        "g1_closure_gate_blockers": [],
     }
     assert payload["child_exit_code"] is None
     assert not child.exists()
@@ -737,6 +741,7 @@ def _write_hip_consistency_proof(
     production_hip_residual_jacobian_path: bool = True,
     blockers: list[str] | None = None,
     runtime_blockers: list[str] | None = None,
+    worker_contract: dict[str, Any] | None = None,
 ) -> None:
     worker_ready = bool(
         gate_passed
@@ -745,7 +750,16 @@ def _write_hip_consistency_proof(
         and not blockers
         and not runtime_blockers
     )
-    worker_blockers = [] if worker_ready else ["fixture_worker_not_ready"]
+    default_worker_contract = {
+        "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
+        "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
+        "ready": worker_ready,
+        "status": "ready" if worker_ready else "blocked",
+        "blockers": [] if worker_ready else ["fixture_worker_not_ready"],
+        "required_for_g1_closure": True,
+        "promotes_g1_closure": False,
+        "cpu_fallback_allowed": False,
+    }
     payload: dict[str, Any] = {
         "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
         "source_commit_sha": source_commit_sha,
@@ -759,16 +773,9 @@ def _write_hip_consistency_proof(
         "cpu_diagnostic_assembler_used": cpu_diagnostic_assembler_used,
         "production_hip_residual_jacobian_path": production_hip_residual_jacobian_path,
         "consistent_residual_jacobian_newton_gate_passed": gate_passed,
-        "production_rocm_hip_residual_jvp_worker": {
-            "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
-            "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-            "ready": worker_ready,
-            "status": "ready" if worker_ready else "blocked",
-            "blockers": worker_blockers,
-            "required_for_g1_closure": True,
-            "promotes_g1_closure": False,
-            "cpu_fallback_allowed": False,
-        },
+        "production_rocm_hip_residual_jvp_worker": (
+            worker_contract if worker_contract is not None else default_worker_contract
+        ),
         "blockers": blockers or [],
     }
     if runtime_blockers is not None:
@@ -817,6 +824,48 @@ def test_hip_proof_receipt_only_source_commit_is_fresh(
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
     ]
+
+
+def test_hip_proof_partitions_worker_path_from_g1_closure_gate(
+    tmp_path: Path,
+) -> None:
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=False,
+        blockers=["consistent_residual_jacobian_newton_not_proven"],
+        worker_contract={
+            "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
+            "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
+            "ready": False,
+            "status": "blocked",
+            "blockers": ["consistent_residual_jacobian_newton_gate_not_passed"],
+            "residual_jvp_worker_path_ready": True,
+            "residual_jvp_worker_path_blockers": [],
+            "g1_closure_gate_ready": False,
+            "g1_closure_gate_blockers": [
+                "consistent_residual_jacobian_newton_gate_not_passed"
+            ],
+            "required_for_g1_closure": True,
+            "promotes_g1_closure": False,
+            "cpu_fallback_allowed": False,
+        },
+    )
+
+    summary, blockers = run_g1_full_load_hip_newton_lane._hip_consistency_proof_assessment(
+        proof_json=proof,
+        lane_source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    worker = summary["production_rocm_hip_residual_jvp_worker"]
+    assert worker["residual_jvp_worker_path_ready"] is True
+    assert worker["g1_closure_gate_ready"] is False
+    assert "hip_consistency_proof_worker_g1_closure_gate_not_ready" in blockers
+    assert (
+        "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready"
+        not in blockers
+    )
 
 
 def test_hip_proof_non_receipt_source_commit_still_blocks(
@@ -886,6 +935,44 @@ def test_hip_proof_unrelated_release_helpers_do_not_stale_g1_lane(
     assert "hip_consistency_proof_source_commit_sha_mismatch" not in blockers
     assert "hip_consistency_proof_gate_not_passed" in blockers
     assert "hip_consistency_proof_has_blockers" in blockers
+    assert summary["source_state_fresh"] is True
+    assert summary["source_state_kind"] == "non_g1_hip_paths_changed"
+    assert summary["changed_paths_since_source_commit"] == changed_paths
+
+
+def test_hip_proof_g1_status_builders_do_not_stale_numeric_proof(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha="proof-commit",
+        gate_passed=False,
+        blockers=["consistent_residual_jacobian_newton_not_proven"],
+    )
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_rev_parse",
+        lambda ref: {"proof-commit": "proof-sha", "lane-commit": "lane-sha"}.get(ref, ""),
+    )
+    changed_paths = [
+        "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
+        "scripts/build_g1_global_connectivity_load_path_audit.py",
+        "scripts/build_g1_support_elastic_link_reconciliation_audit.py",
+    ]
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane,
+        "_git_diff_name_only",
+        lambda base, head: changed_paths,
+    )
+
+    summary, blockers = run_g1_full_load_hip_newton_lane._hip_consistency_proof_assessment(
+        proof_json=proof,
+        lane_source_commit_sha="lane-commit",
+    )
+
+    assert "hip_consistency_proof_source_commit_sha_mismatch" not in blockers
     assert summary["source_state_fresh"] is True
     assert summary["source_state_kind"] == "non_g1_hip_paths_changed"
     assert summary["changed_paths_since_source_commit"] == changed_paths

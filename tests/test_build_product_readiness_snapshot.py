@@ -4020,6 +4020,19 @@ def test_snapshot_blocks_g1_lane_when_hip_path_wired_but_gate_not_closed(
     proof["execution_mode"] = "hip_required_direct_probe_no_cpu_fallback"
     proof["production_hip_residual_jacobian_path"] = True
     proof["consistent_residual_jacobian_newton_gate_passed"] = False
+    proof["production_rocm_hip_residual_jvp_worker"] = {
+        "present": True,
+        "ready": False,
+        "status": "blocked",
+        "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
+        "blockers": ["consistent_residual_jacobian_newton_gate_not_passed"],
+        "residual_jvp_worker_path_ready": True,
+        "residual_jvp_worker_path_blockers": [],
+        "g1_closure_gate_ready": False,
+        "g1_closure_gate_blockers": [
+            "consistent_residual_jacobian_newton_gate_not_passed"
+        ],
+    }
     proof["receipt_blockers"] = ["consistent_residual_jacobian_not_closed"]
     proof["runtime_blockers"] = []
     g1_lane["hip_consistency_proof"] = proof
@@ -4039,11 +4052,24 @@ def test_snapshot_blocks_g1_lane_when_hip_path_wired_but_gate_not_closed(
     ]
     assert proof_summary["production_hip_residual_jacobian_path"] is True
     assert proof_summary["consistent_residual_jacobian_newton_gate_passed"] is False
+    worker = proof_summary["production_rocm_hip_residual_jvp_worker"]
+    assert worker["residual_jvp_worker_path_ready"] is True
+    assert worker["g1_closure_gate_ready"] is False
     assert proof_summary["ready"] is False
     assert (
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed"
         in _g1_detail_blockers(payload)
     )
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready"
+        in _g1_detail_blockers(payload)
+    )
+    grouping = payload["components"]["g1"]["blocker_grouping_metadata"][
+        "detail_blocker_represented_by_root_group"
+    ]
+    assert grouping[
+        "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready"
+    ] == "g1::material_newton_breadth_not_closed"
     assert (
         "g1_full_load_lane::hip_consistency_proof_has_blockers"
         in _g1_detail_blockers(payload)

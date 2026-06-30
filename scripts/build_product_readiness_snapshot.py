@@ -805,6 +805,14 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
     ]
     receipt_blockers = [str(item) for item in _as_list(proof.get("receipt_blockers"))]
     runtime_blockers = [str(item) for item in _as_list(proof.get("runtime_blockers"))]
+    worker = _as_dict(proof.get("production_rocm_hip_residual_jvp_worker"))
+    worker_blockers = [str(item) for item in _as_list(worker.get("blockers"))]
+    worker_residual_path_blockers = [
+        str(item) for item in _as_list(worker.get("residual_jvp_worker_path_blockers"))
+    ]
+    worker_g1_closure_gate_blockers = [
+        str(item) for item in _as_list(worker.get("g1_closure_gate_blockers"))
+    ]
     blockers = [str(item) for item in _as_list(lane_payload.get("blockers"))]
     proof_blockers = [
         item for item in blockers if item.startswith("hip_consistency_proof")
@@ -829,6 +837,23 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
         proof_blockers.append("hip_consistency_proof_production_hip_path_not_proven")
     if proof.get("consistent_residual_jacobian_newton_gate_passed") is not True:
         proof_blockers.append("hip_consistency_proof_gate_not_passed")
+    if worker:
+        if worker.get("residual_jvp_worker_path_ready") is False or worker_residual_path_blockers:
+            proof_blockers.append(
+                "hip_consistency_proof_residual_jvp_worker_path_not_ready"
+            )
+        elif (
+            worker.get("residual_jvp_worker_path_ready") is not True
+            and worker.get("ready") is not True
+        ):
+            proof_blockers.append(
+                "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready"
+            )
+        if worker.get("g1_closure_gate_ready") is False or worker_g1_closure_gate_blockers:
+            proof_blockers.append("hip_consistency_proof_worker_g1_closure_gate_not_ready")
+        proof_blockers.extend(
+            f"hip_consistency_proof_worker::{item}" for item in worker_blockers
+        )
     if receipt_blockers:
         proof_blockers.append("hip_consistency_proof_has_blockers")
     proof_blockers.extend(
@@ -864,6 +889,19 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
         "consistent_residual_jacobian_newton_gate_passed": proof.get(
             "consistent_residual_jacobian_newton_gate_passed"
         ),
+        "production_rocm_hip_residual_jvp_worker": {
+            "present": bool(worker),
+            "ready": worker.get("ready") is True,
+            "status": str(worker.get("status", "")),
+            "worker_id": str(worker.get("worker_id", "")),
+            "blockers": worker_blockers,
+            "residual_jvp_worker_path_ready": worker.get(
+                "residual_jvp_worker_path_ready"
+            ),
+            "residual_jvp_worker_path_blockers": worker_residual_path_blockers,
+            "g1_closure_gate_ready": worker.get("g1_closure_gate_ready"),
+            "g1_closure_gate_blockers": worker_g1_closure_gate_blockers,
+        },
         "receipt_blockers": receipt_blockers,
         "runtime_blockers": runtime_blockers,
     }
@@ -903,6 +941,9 @@ def _g1_blocker_grouping_metadata(
                 "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
                 "g1_full_load_lane::child_material_newton_breadth_not_proven",
                 "g1_full_load_lane::child_fallback_zero_not_proven",
+                "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
+                "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready",
+                "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
             ),
         },
         {
@@ -997,6 +1038,20 @@ def _g1_closure_boundary_metadata(
             "child_cpu_gate_ready": g1_lane_child_gate_ready,
             "hip_consistency_proof_ready": bool(
                 g1_lane_hip_consistency_proof.get("ready")
+            ),
+            "hip_residual_jvp_worker_path_ready": bool(
+                _as_dict(
+                    g1_lane_hip_consistency_proof.get(
+                        "production_rocm_hip_residual_jvp_worker"
+                    )
+                ).get("residual_jvp_worker_path_ready")
+            ),
+            "hip_worker_g1_closure_gate_ready": bool(
+                _as_dict(
+                    g1_lane_hip_consistency_proof.get(
+                        "production_rocm_hip_residual_jvp_worker"
+                    )
+                ).get("g1_closure_gate_ready")
             ),
         },
     }

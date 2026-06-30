@@ -144,6 +144,13 @@ def _g1_hip_freshness_relevant_path(path: str) -> bool:
     }
     if path in relevant_exact_paths:
         return True
+    status_builder_paths = {
+        "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
+        "scripts/build_g1_global_connectivity_load_path_audit.py",
+        "scripts/build_g1_support_elastic_link_reconciliation_audit.py",
+    }
+    if path in status_builder_paths:
+        return False
     unrelated_prefixes = (
         "src/structural_analysis/benchmark/",
     )
@@ -703,6 +710,12 @@ def _load_json_payload(path: Path) -> dict[str, Any]:
     return loaded if isinstance(loaded, dict) else {}
 
 
+def _string_list(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, str) and item]
+
+
 def _frontier_non_promoting_evidence_context(
     evidence_sources: tuple[Path, ...],
 ) -> dict[str, Any]:
@@ -826,15 +839,31 @@ def _hip_consistency_proof_assessment(
     worker_contract = worker_contract if isinstance(worker_contract, dict) else {}
     if not worker_contract:
         blockers.append("hip_consistency_proof_worker_contract_missing")
-    elif worker_contract.get("ready") is not True:
-        blockers.append(
-            "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready"
+    else:
+        worker_blockers = _string_list(worker_contract.get("blockers"))
+        residual_path_ready = worker_contract.get("residual_jvp_worker_path_ready")
+        residual_path_blockers = _string_list(
+            worker_contract.get("residual_jvp_worker_path_blockers")
         )
-        worker_blockers = worker_contract.get("blockers")
-        if isinstance(worker_blockers, list):
-            for blocker in worker_blockers:
-                if isinstance(blocker, str) and blocker:
-                    blockers.append(f"hip_consistency_proof_worker::{blocker}")
+        g1_closure_gate_ready = worker_contract.get("g1_closure_gate_ready")
+        g1_closure_gate_blockers = _string_list(
+            worker_contract.get("g1_closure_gate_blockers")
+        )
+        if residual_path_ready is False or residual_path_blockers:
+            blockers.append(
+                "hip_consistency_proof_residual_jvp_worker_path_not_ready"
+            )
+        elif (
+            residual_path_ready is not True
+            and worker_contract.get("ready") is not True
+        ):
+            blockers.append(
+                "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready"
+            )
+        if g1_closure_gate_ready is False or g1_closure_gate_blockers:
+            blockers.append("hip_consistency_proof_worker_g1_closure_gate_not_ready")
+        for blocker in worker_blockers:
+            blockers.append(f"hip_consistency_proof_worker::{blocker}")
     proof_blockers = payload.get("blockers")
     if isinstance(proof_blockers, list) and proof_blockers:
         blockers.append("hip_consistency_proof_has_blockers")
@@ -871,10 +900,16 @@ def _hip_consistency_proof_assessment(
             "ready": worker_contract.get("ready") is True,
             "status": worker_contract.get("status"),
             "worker_id": worker_contract.get("worker_id"),
-            "blockers": (
-                worker_contract.get("blockers")
-                if isinstance(worker_contract.get("blockers"), list)
-                else []
+            "blockers": _string_list(worker_contract.get("blockers")),
+            "residual_jvp_worker_path_ready": worker_contract.get(
+                "residual_jvp_worker_path_ready"
+            ),
+            "residual_jvp_worker_path_blockers": _string_list(
+                worker_contract.get("residual_jvp_worker_path_blockers")
+            ),
+            "g1_closure_gate_ready": worker_contract.get("g1_closure_gate_ready"),
+            "g1_closure_gate_blockers": _string_list(
+                worker_contract.get("g1_closure_gate_blockers")
             ),
         },
         "receipt_blockers": proof_blockers if isinstance(proof_blockers, list) else [],
