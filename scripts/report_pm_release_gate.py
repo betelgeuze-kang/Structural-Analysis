@@ -1215,6 +1215,8 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
             "remote_sync_needed": remote_sync_needed,
             "remote_mutation_approval_pending": remote_mutation_approval_required,
             "remote_mutation_approved": bool(payload.get("remote_mutation_approved", False)) if artifact_present else False,
+            "remote_feature_ref": str(state.get("remote_feature_ref", "") or ""),
+            "remote_main_ref": str(state.get("remote_main_ref", "") or ""),
             "feature_ahead_count": _as_int(state.get("feature_ahead_count"), 0),
             "main_ahead_count": _as_int(state.get("main_ahead_count"), 0),
             "pending_remote_update_count": len(pending_remote_updates),

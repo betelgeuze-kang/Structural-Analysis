@@ -393,11 +393,13 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
             f"`{blocker_id}` absent from `release_area_blockers`",
         ]
     if namespace == "github_sync":
+        feature_ref = str(summary.get("remote_feature_ref", "") or "remote feature ref")
+        main_ref = str(summary.get("remote_main_ref", "") or "origin/main")
         return [
             f"Explicit R4 approval phrase received: `{GITHUB_SYNC_APPROVAL_PHRASE}`",
             "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
             "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-            "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD",
+            f"`{feature_ref}` and `{main_ref}` match local release HEAD",
         ]
     if namespace == "customer_shadow":
         return [
@@ -777,6 +779,8 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
                 summary.get("remote_mutation_approval_pending", False)
             ),
             "remote_mutation_approved": bool(summary.get("remote_mutation_approved", False)),
+            "remote_feature_ref": str(summary.get("remote_feature_ref", "") or ""),
+            "remote_main_ref": str(summary.get("remote_main_ref", "") or ""),
             "feature_ahead_count": summary.get("feature_ahead_count"),
             "main_ahead_count": summary.get("main_ahead_count"),
             "pending_remote_update_count": summary.get("pending_remote_update_count"),

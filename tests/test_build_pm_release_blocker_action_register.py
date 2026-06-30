@@ -433,6 +433,8 @@ def test_build_register_guides_github_sync_r4_blocker(tmp_path: Path) -> None:
                         "remote_sync_needed": True,
                         "remote_mutation_approval_pending": True,
                         "remote_mutation_approved": False,
+                        "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
+                        "remote_main_ref": "origin/main",
                         "feature_ahead_count": 11,
                         "main_ahead_count": 59,
                         "pending_remote_update_count": 2,
@@ -460,11 +462,16 @@ def test_build_register_guides_github_sync_r4_blocker(tmp_path: Path) -> None:
     assert "feature push + main fast-forward 승인" in row["owner_action"]
     assert any("check_github_development_sync_preflight.py --fetch --json" in command for command in row["reproduction_commands"])
     assert any("remote_sync_needed == false" in item for item in row["acceptance_criteria"])
-    assert any("origin/main" in item for item in row["acceptance_criteria"])
+    assert any(
+        "origin/codex/seed-pr-ci-source-evidence" in item and "origin/main" in item
+        for item in row["acceptance_criteria"]
+    )
     assert row["claim_boundary"] == "The GitHub development sync preflight is read-only."
     assert row["evidence_status"]["state"] == "approval_required"
     assert row["evidence_status"]["remote_sync_needed"] is True
     assert row["evidence_status"]["remote_mutation_approval_pending"] is True
+    assert row["evidence_status"]["remote_feature_ref"] == "origin/codex/seed-pr-ci-source-evidence"
+    assert row["evidence_status"]["remote_main_ref"] == "origin/main"
     assert row["evidence_status"]["feature_ahead_count"] == 11
     assert row["evidence_status"]["main_ahead_count"] == 59
     assert row["evidence_status"]["approval_phrase"] == "feature push + main fast-forward 승인"
