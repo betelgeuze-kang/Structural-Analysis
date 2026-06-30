@@ -50,7 +50,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-06-30T12:33:43.350196+00:00",
+  "generated_at": "2026-06-30T18:47:59.028203+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -109,10 +109,10 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:4f72a8fc36405ae4cbc65647f97b94adb6537dcc5b343fa9ee9a796037cab2e0",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:18ea166e1c77d7eaa73eb0136356fe819868f60cdc1b5f8c008bd3509621db58",
-    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:a30303823f7d68004048af9964229211d83c99d08c1ef88a3d00f47eb2e5fe67",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c34ff5d4f32d72483e5b37bbfa8f07dd7567e8cfe0bbe3af6b747ba9cd484abf",
+    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:850ebe4c2a26151813761d5ff05f7f28afbedae4efcf3adec2cb9b83ffab83f8",
-    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:a6bf5c0361464b751e81f8c060c41f7c808fa7c29cc39eb4bacb24b931c7bbcb"
+    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:6db718bfb082e714daecccb998ea9ce82dad286025aac13fa39207b044e1da69"
   },
   "next_actions": [
     "stop_row_only_support_or_elastic_link_correction_loop",
@@ -125,8 +125,57 @@
   "reason_code": "PASS",
   "reuse_policy": "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice",
   "reused_evidence": true,
+  "root_cause_classification": {
+    "consistent_residual_jacobian_newton": "required_for_closure",
+    "global_connectivity_or_load_path_transfer": "load_path_transfer_or_tangent_gap",
+    "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+    "production_rocm_hip_residual_jvp": "required_for_production_residency",
+    "row_only_support_or_elastic_link_correction_decision": "stop",
+    "support_or_elastic_link_row_gap": "deprioritized",
+    "weak_restraint_or_geometric_softening": "active_secondary"
+  },
   "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
-  "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
+  "signals": {
+    "boundary_subsystem_not_full_global_tangent": true,
+    "direct_elastic_link_endpoint_count": 0,
+    "direct_support_member_count": 0,
+    "distributed_translation_rotation_packet_present": true,
+    "dominant_near_null_rows": 64,
+    "dominant_nodes_element_reachable_to_support_count": 8,
+    "dominant_nodes_without_element_path_to_support_count": 0,
+    "elastic_link_graph_transfer_disfavored": true,
+    "elastic_link_reachable_to_support_count": 0,
+    "element_graph_connectivity_gap_detected": false,
+    "f2h_lightweight_0p1_0p2_0p4_ready": true,
+    "f2h_residual_growth_factor_0p1_to_0p4": 4.7992763502884115,
+    "f2h_residual_trend_across_increasing_load": "nondecreasing",
+    "full_structural_graph_audit_status": "ready",
+    "global_connectivity_classification": "element_graph_connects_dominant_modes_to_supports",
+    "global_connectivity_decision_record_present": true,
+    "global_connectivity_primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+    "global_connectivity_required_next_receipts": [
+      "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+      "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
+    ],
+    "global_frame_shell_tangent_integration_ready": false,
+    "row_only_correction_loop_stopped_by_global_connectivity": true,
+    "support_or_link_row_gap_disfavored": true
+  },
+  "source_commit_sha": "76e24283dfa56e9776eae11273d4c3486e7a4fc1",
   "status": "ready",
+  "summary": {
+    "dominant_near_null_rows": 64,
+    "dominant_node_count": 8,
+    "dominant_nodes_element_reachable_to_support_count": 8,
+    "element_graph_connects_dominant_modes_to_supports": true,
+    "f2h_lightweight_0p1_0p2_0p4_ready": true,
+    "f2h_max_converged_load_scale": 0.4,
+    "f2h_residual_trend_across_increasing_load": "nondecreasing",
+    "global_frame_shell_tangent_integration_ready": false,
+    "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+    "promotes_g1_closure": false,
+    "required_next_receipt_count": 2,
+    "support_or_link_row_gap_disfavored": true
+  },
   "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=consistent_residual_jacobian_newton_rocm_worker"
 }

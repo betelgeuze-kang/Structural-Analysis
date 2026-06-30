@@ -105,7 +105,22 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
 
     assert payload["status"] == "ready"
     assert payload["promotes_g1_closure"] is False
+    assert payload["summary"]["support_or_link_row_gap_disfavored"] is True
+    assert payload["summary"]["element_graph_connects_dominant_modes_to_supports"] is True
+    assert payload["summary"]["primary_next_lane"] == (
+        "consistent_residual_jacobian_newton_rocm_worker"
+    )
+    assert payload["root_cause_classification"] == {
+        "support_or_elastic_link_row_gap": "deprioritized",
+        "global_connectivity_or_load_path_transfer": "load_path_transfer_or_tangent_gap",
+        "weak_restraint_or_geometric_softening": "active_secondary",
+        "consistent_residual_jacobian_newton": "required_for_closure",
+        "production_rocm_hip_residual_jvp": "required_for_production_residency",
+        "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+        "row_only_support_or_elastic_link_correction_decision": "stop",
+    }
     assert payload["evidence_signals"]["support_or_link_row_gap_disfavored"] is True
+    assert payload["signals"] == payload["evidence_signals"]
     assert payload["evidence_signals"]["full_structural_graph_audit_status"] == "ready"
     assert payload["evidence_signals"]["global_connectivity_classification"] == (
         "element_graph_connects_dominant_modes_to_supports"

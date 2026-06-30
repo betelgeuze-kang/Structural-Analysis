@@ -303,6 +303,54 @@ def build_status(
     ]
 
     ready = bool(not blockers and direct_row_gap_disfavored and f2h_sequence_ready)
+    element_graph_connects_dominant_modes = bool(
+        global_connectivity_status == "ready"
+        and not element_graph_gap_detected
+        and dominant_node_count > 0
+        and element_reachable_nodes == dominant_node_count
+    )
+    hypothesis_classifications = {
+        str(row["hypothesis"]): str(row["classification"])
+        for row in hypotheses
+        if isinstance(row, dict)
+    }
+    root_cause_classification = {
+        "support_or_elastic_link_row_gap": hypothesis_classifications[
+            "direct_support_or_elastic_link_row_missing"
+        ],
+        "global_connectivity_or_load_path_transfer": hypothesis_classifications[
+            "global_connectivity_or_load_path_transfer_gap"
+        ],
+        "weak_restraint_or_geometric_softening": hypothesis_classifications[
+            "weak_restraint_or_geometric_softening"
+        ],
+        "consistent_residual_jacobian_newton": hypothesis_classifications[
+            "consistent_residual_jacobian_newton_gap"
+        ],
+        "production_rocm_hip_residual_jvp": hypothesis_classifications[
+            "production_rocm_hip_residual_jvp_lane_gap"
+        ],
+        "primary_next_lane": primary_next_lane,
+        "row_only_support_or_elastic_link_correction_decision": (
+            "stop"
+            if decision_record["stop_row_only_support_or_elastic_link_correction_loop"]
+            else "continue_audit_before_correction"
+        ),
+    }
+    summary = {
+        "dominant_near_null_rows": dominant_rows,
+        "support_or_link_row_gap_disfavored": direct_row_gap_disfavored,
+        "element_graph_connects_dominant_modes_to_supports": element_graph_connects_dominant_modes,
+        "dominant_nodes_element_reachable_to_support_count": element_reachable_nodes,
+        "dominant_node_count": dominant_node_count,
+        "global_frame_shell_tangent_integration_ready": global_tangent_ready,
+        "f2h_lightweight_0p1_0p2_0p4_ready": f2h_sequence_ready,
+        "f2h_max_converged_load_scale": _as_float(f2h_summary.get("max_converged_load_scale")),
+        "f2h_residual_trend_across_increasing_load": f2h_residual_trend,
+        "primary_next_lane": primary_next_lane,
+        "required_next_receipt_count": len(required_next_receipts),
+        "promotes_g1_closure": False,
+    }
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -332,7 +380,10 @@ def build_status(
             f"f2h_0p4_ready={f2h_sequence_ready} | "
             f"next={primary_next_lane}"
         ),
+        "summary": summary,
+        "root_cause_classification": root_cause_classification,
         "evidence_signals": evidence_signals,
+        "signals": evidence_signals,
         "decision_record": decision_record,
         "hypothesis_rank": hypotheses,
         "next_actions": [
