@@ -4,13 +4,30 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 5,
+  "blocker_count": 22,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
-    "human_ux::observation_file_missing"
+    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+    "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+    "human_ux::observation_file_missing",
+    "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+    "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+    "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+    "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+    "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+    "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+    "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+    "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+    "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+    "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+    "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
+    "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+    "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
   ],
   "categories": {
     "benchmark": {
@@ -55,19 +72,36 @@
     },
     "numerical": {
       "blocked": true,
-      "blocker_count": 4,
+      "blocker_count": 6,
       "blockers": [
         "g1::full_load_gate_not_closed",
         "g1::full_mesh_nonlinear_equilibrium_not_closed",
         "g1::material_newton_breadth_not_closed",
-        "g1::production_rocm_hip_residency_not_closed"
+        "g1::production_rocm_hip_residency_not_closed",
+        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report"
       ]
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 1,
+      "blocker_count": 16,
       "blockers": [
-        "human_ux::observation_file_missing"
+        "human_ux::observation_file_missing",
+        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
+        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
       ]
     }
   },
@@ -188,7 +222,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T09:04:08.589899+00:00",
+  "generated_at": "2026-06-30T09:20:54.479517+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -199,30 +233,30 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:a9ddf57b18887cbeaf1d1b9d9954e65097981daeb9b2b5e9aff7315da4d47931",
+      "input_checksum": "sha256:78fa47300273bbd82c398cc92aac4458bca7f0550cac91419150a99ae03fb815",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "b38d45af0b5d7354f8a59b775146262d80a0a3d6",
+      "source_commit_sha": "94599d70a42bf366e509228d842b66d1941fd694",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:6b45fd3e14c3e1631ac879607e41b545917a9c9cebe9ade119876dc44f7715b7",
+      "input_checksum": "sha256:bee63bd80a58ccb7c7aed73219bf1587a15a5234a10acb18c7aed78b956d543a",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "7237fbe34da36e20924b9b0be9fa9519cd17971d",
-      "status": "blocked"
+      "source_commit_sha": "94599d70a42bf366e509228d842b66d1941fd694",
+      "status": "stale_or_inconsistent"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:a9ddf57b18887cbeaf1d1b9d9954e65097981daeb9b2b5e9aff7315da4d47931",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:6b45fd3e14c3e1631ac879607e41b545917a9c9cebe9ade119876dc44f7715b7"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:78fa47300273bbd82c398cc92aac4458bca7f0550cac91419150a99ae03fb815",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:bee63bd80a58ccb7c7aed73219bf1587a15a5234a10acb18c7aed78b956d543a"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
-  "product_snapshot_status": "blocked",
+  "product_snapshot_status": "stale_or_inconsistent",
   "reason_code": "ERR_DEVELOPER_PREVIEW_BLOCKED",
   "reuse_policy": "derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence",
   "reused_evidence": false,
@@ -363,7 +397,6 @@
           "g1_full_load_lane::full_load_input_not_pass": "g1::full_load_gate_not_closed",
           "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::full_load_gate_not_closed",
           "g1_full_mesh_full_load_not_closed": "g1::full_mesh_nonlinear_equilibrium_not_closed"
@@ -394,11 +427,11 @@
           {
             "active": true,
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
-            "represented_detail_blocker_count": 7,
+            "represented_detail_blocker_count": 6,
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 20,
+        "suppressed_detail_blocker_count": 19,
         "unmatched_detail_blockers": [
           "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate"
         ]
@@ -447,7 +480,6 @@
         "g1_full_load_lane::full_load_input_not_pass": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::*",
-        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::*",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::*",
         "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::*",
         "g1_full_mesh_full_load_not_closed": "g1::*"
@@ -1651,8 +1683,44 @@
       "full_load_hip_newton_hip_consistency_proof": {
         "blockers": [
           "hip_consistency_proof_gate_not_passed",
-          "hip_consistency_proof_has_blockers",
-          "hip_consistency_proof_source_commit_sha_mismatch"
+          "hip_consistency_proof_has_blockers"
+        ],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/customer_shadow_evidence_status.json",
+          "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+          "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+          "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
+          "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
+          "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+          "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+          "implementation/phase1/release_evidence/productization/gap_closure_status.json",
+          "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json",
+          "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+          "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+          "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+          "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md",
+          "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+          "implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+          "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
+          "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+          "implementation/phase1/release_evidence/productization/non_expert_release_briefing_report.json",
+          "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
+          "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
+          "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+          "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+          "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+          "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+          "implementation/phase1/workstation_delivery_readiness.json"
         ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
@@ -1680,7 +1748,9 @@
         "reused_evidence": false,
         "rocm_hip_required": true,
         "runtime_blockers": [],
-        "source_commit_sha": "bf26c5ab90a19d63344ba8612e26894dd744ba62",
+        "source_commit_sha": "dfd6a81df264e1dd4c42f95721ebf0d9094a917a",
+        "source_state_fresh": true,
+        "source_state_kind": "receipt_only_commit",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -1691,7 +1761,7 @@
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 20,
+      "suppressed_detail_blocker_count": 19,
       "suppressed_detail_blockers": [
         "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
         "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate",
@@ -1709,7 +1779,6 @@
         "g1_full_load_lane::full_load_input_not_pass",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_has_blockers",
-        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
         "g1_full_load_lane::observed_load_scale_below_required_full_load",
         "g1_full_mesh_full_load_not_closed"
@@ -1819,9 +1888,29 @@
         ]
       },
       "release freshness/sync": {
-        "blocked": false,
-        "blocker_count": 0,
-        "blockers": []
+        "blocked": true,
+        "blocker_count": 19,
+        "blockers": [
+          "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+          "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+          "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
+          "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
+          "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+          "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+          "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+          "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+          "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+          "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+          "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+          "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+          "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+          "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+          "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+          "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+          "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
+          "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+          "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+        ]
       }
     }
   },
@@ -2017,6 +2106,6 @@
       }
     }
   },
-  "source_commit_sha": "b38d45af0b5d7354f8a59b775146262d80a0a3d6",
+  "source_commit_sha": "94599d70a42bf366e509228d842b66d1941fd694",
   "status": "blocked"
 }
