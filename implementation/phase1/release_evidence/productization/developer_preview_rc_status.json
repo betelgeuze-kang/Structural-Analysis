@@ -527,11 +527,11 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T06:01:45.923567+00:00",
+  "generated_at": "2026-06-30T06:05:00.483339+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:d64e7441cad453a21902e15d4516082069f1e839f2af00cf8e9837075c5d5bba",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:84f9f2fd7953ccf82124f603a4587688dbf31bdcf7c1bb2a85d1a6e6e9956c9e",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:ffeeafa63027849a296d8081e77832f9492caf10ab18892e1bfe01f8be00d2a1",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:0ee1fed0aed26e0a071ac0821c20923e3601788a61a4e98f47953a015df9d826",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:942e3862be01beaabbbb5c8758deed19156523e56f776459338e889125c282cd",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:1a9a35f11b8be9766c19f48514bfc01e9a4c01b942d273107ec9643d60475202",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:979979a4aa72da743ee90b6169865390cf07dc326e5c9708b44561b4cd1ebb97",
@@ -1097,13 +1097,14 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 7,
+    "developer_preview_blocker_count": 8,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
       "human_ux::observation_file_missing",
+      "pm_release::evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact",
       "stale_or_inconsistent:open_blocker_count_conflict",
       "stale_or_inconsistent:release_area_count_conflict"
     ],
@@ -2421,6 +2422,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "ef729a761231bd194e7e975db95702b8d8687310",
+  "source_commit_sha": "0ef8f5d6181f1fff98e21724e8172923dabc0325",
   "status": "blocked"
 }
