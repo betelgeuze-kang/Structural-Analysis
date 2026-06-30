@@ -303,10 +303,10 @@ def build_report(
             "evidence_ref_present_pass": bool(evidence_ref),
             "evidence_ref_resolvable_pass": bool(evidence_ref_resolution["resolvable"]),
             "evidence_ref_not_self_reference_pass": bool(
-                not evidence_ref or not evidence_ref_resolution["resolvable"] or not evidence_ref_self_reference
+                evidence_ref and evidence_ref_resolution["resolvable"] and not evidence_ref_self_reference
             ),
             "evidence_ref_not_template_reference_pass": bool(
-                not evidence_ref or not evidence_ref_resolution["resolvable"] or not evidence_ref_template_reference
+                evidence_ref and evidence_ref_resolution["resolvable"] and not evidence_ref_template_reference
             ),
             "product_scope_present_pass": _scope_count(product_scope) > 0,
             "product_scope_boundary_pass": bool(REQUIRED_PRODUCT_SCOPE.issubset(_scope_values(product_scope))),

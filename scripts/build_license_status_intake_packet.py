@@ -112,6 +112,18 @@ DERIVED_CHECK_SPECS = (
         "closure_check": "provenance_complete_pass",
         "owner_note": "Derived check for complete legal/product approval provenance.",
     },
+    {
+        "field": "evidence_ref_not_self_reference",
+        "required_value": "evidence_ref must not point back to license_status.json",
+        "closure_check": "evidence_ref_not_self_reference_pass",
+        "owner_note": "The license status record cannot serve as its own approval evidence artifact.",
+    },
+    {
+        "field": "evidence_ref_not_template_reference",
+        "required_value": "evidence_ref must not point to the license status template",
+        "closure_check": "evidence_ref_not_template_reference_pass",
+        "owner_note": "Templates are owner input aids, not product/legal approval evidence.",
+    },
 )
 
 
@@ -161,6 +173,8 @@ def _derived_current_value(field: str, closure_summary: dict[str, Any]) -> str:
             f"evidence_ref={closure_summary.get('evidence_ref', '')}; "
             f"evidence_kind={closure_summary.get('evidence_ref_kind', '')}"
         )
+    if field in {"evidence_ref_not_self_reference", "evidence_ref_not_template_reference"}:
+        return str(closure_summary.get("evidence_ref_resolved_path", ""))
     return ""
 
 

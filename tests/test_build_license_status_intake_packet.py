@@ -51,6 +51,8 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
                 "approval_reference_present_pass": False,
                 "approved_at_not_future_pass": False,
                 "evidence_ref_resolvable_pass": False,
+                "evidence_ref_not_self_reference_pass": False,
+                "evidence_ref_not_template_reference_pass": False,
                 "product_scope_boundary_pass": False,
                 "expiry_valid_pass": False,
                 "approval_timeline_pass": False,
@@ -67,6 +69,7 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
                 "approver_role": "",
                 "evidence_ref": "",
                 "evidence_ref_kind": "",
+                "evidence_ref_resolved_path": "",
             },
         },
     )
@@ -95,6 +98,8 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
     ]
     assert rows["approval_timeline"]["closure_check"] == "approval_timeline_pass"
     assert rows["provenance_complete"]["closure_check_pass"] is False
+    assert rows["evidence_ref_not_self_reference"]["closure_check"] == "evidence_ref_not_self_reference_pass"
+    assert rows["evidence_ref_not_template_reference"]["closure_check"] == "evidence_ref_not_template_reference_pass"
     assert any("build_license_status_closure_report.py" in command for command in payload["validation_commands"])
 
 
@@ -135,6 +140,8 @@ def test_license_status_intake_packet_passes_through_closed_report(tmp_path: Pat
                 "approval_reference_present_pass": True,
                 "approved_at_not_future_pass": True,
                 "evidence_ref_resolvable_pass": True,
+                "evidence_ref_not_self_reference_pass": True,
+                "evidence_ref_not_template_reference_pass": True,
                 "product_scope_boundary_pass": True,
                 "expiry_valid_pass": True,
                 "approval_timeline_pass": True,
@@ -151,6 +158,7 @@ def test_license_status_intake_packet_passes_through_closed_report(tmp_path: Pat
                 "approver_role": "legal_counsel",
                 "evidence_ref": "ticket:LEGAL-1",
                 "evidence_ref_kind": "external_reference",
+                "evidence_ref_resolved_path": "",
             },
         },
     )
@@ -163,7 +171,7 @@ def test_license_status_intake_packet_passes_through_closed_report(tmp_path: Pat
 
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
-    assert payload["summary"]["field_pass_count"] == 13
+    assert payload["summary"]["field_pass_count"] == 15
     assert payload["summary"]["provenance_complete_pass"] is True
     assert payload["current_blockers"] == []
 
