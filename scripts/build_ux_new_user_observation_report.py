@@ -10,6 +10,7 @@ from pathlib import Path
 import subprocess
 import sys
 from typing import Any
+from urllib.parse import urlparse
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -24,8 +25,10 @@ REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_OBSERVATION = Path("implementation/phase1/release_evidence/productization/ux_new_user_observation.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_TEMPLATE = Path("docs/templates/ux_new_user_observation.template.json")
 DEFAULT_TIMESTAMP_TOLERANCE_MINUTES = 1.0
 ACCEPTED_DECISIONS = {"accepted", "approved", "pass", "signed", "approved_for_release"}
+EXTERNAL_REFERENCE_PREFIXES = ("ticket:", "jira:", "ux:", "user-study:")
 PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "OWNER_INPUT_REQUIRED")
 PLACEHOLDER_TOKENS = {
     "SAMPLE-PROJECT-ID",
@@ -187,12 +190,49 @@ def _parse_datetime(value: Any) -> datetime | None:
     return parsed.astimezone(timezone.utc)
 
 
+def _evidence_ref_resolution(
+    reference: Any,
+    *,
+    observation_path: Path,
+    repo_root: Path,
+) -> dict[str, Any]:
+    if not isinstance(reference, str):
+        return {"kind": "missing", "resolvable": False, "resolved_path": ""}
+    text = reference.strip()
+    if not text:
+        return {"kind": "missing", "resolvable": False, "resolved_path": ""}
+    if text.lower().startswith(EXTERNAL_REFERENCE_PREFIXES):
+        suffix = text.split(":", 1)[1].strip()
+        return {"kind": "external_reference", "resolvable": bool(suffix), "resolved_path": ""}
+    parsed = urlparse(text)
+    if parsed.scheme:
+        if parsed.scheme == "https" and bool(parsed.netloc):
+            return {"kind": "https_url", "resolvable": True, "resolved_path": ""}
+        return {"kind": "unsupported_url", "resolvable": False, "resolved_path": ""}
+    path = Path(text).expanduser()
+    candidates = [path] if path.is_absolute() else [repo_root / path, observation_path.parent / path]
+    for candidate in candidates:
+        if candidate.exists():
+            return {"kind": "local_path", "resolvable": True, "resolved_path": str(candidate)}
+    return {"kind": "local_path_missing", "resolvable": False, "resolved_path": ""}
+
+
+def _same_resolved_path(first: Path, second: Path) -> bool:
+    try:
+        return first.resolve() == second.resolve()
+    except Exception:
+        return False
+
+
 def build_report(
     *,
     observation_path: Path = DEFAULT_OBSERVATION,
     max_completion_minutes: float = 30.0,
     timestamp_tolerance_minutes: float = DEFAULT_TIMESTAMP_TOLERANCE_MINUTES,
+    template_path: Path = DEFAULT_TEMPLATE,
+    repo_root: Path = REPO_ROOT,
 ) -> dict[str, Any]:
+    repo_root = repo_root.resolve()
     observation = _load_json(observation_path)
     missing_fields = [field for field in REQUIRED_FIELDS if not _field_present(observation, field)]
     placeholder_fields = [field for field in REQUIRED_FIELDS if _looks_placeholder(observation.get(field))]
@@ -211,6 +251,19 @@ def build_report(
     participant_role = str(observation.get("participant_role", "")).strip().lower()
     new_to_product = observation.get("new_to_product") is True
     blocker_count = _as_int(observation.get("blocker_count"), 1)
+    evidence_ref = observation.get("evidence_ref")
+    evidence_ref_resolution = _evidence_ref_resolution(
+        evidence_ref,
+        observation_path=observation_path,
+        repo_root=repo_root,
+    )
+    resolved_evidence_path = str(evidence_ref_resolution.get("resolved_path", "") or "")
+    evidence_ref_self_reference = bool(
+        resolved_evidence_path and _same_resolved_path(Path(resolved_evidence_path), observation_path)
+    )
+    evidence_ref_template_reference = bool(
+        resolved_evidence_path and _same_resolved_path(Path(resolved_evidence_path), repo_root / template_path)
+    )
     template_only = observation.get("template_only") is True
     template_note_present = _looks_placeholder(observation.get("note"))
     workflow_rows = _workflow_step_rows(observation)
@@ -255,6 +308,18 @@ def build_report(
             not missing_workflow_steps and not not_passed_workflow_steps and workflow_step_pass_count == len(required_step_ids)
         ),
         "blocker_count_zero_pass": blocker_count == 0,
+        "evidence_ref_present_pass": _field_present(observation, "evidence_ref"),
+        "evidence_ref_resolvable_pass": bool(evidence_ref_resolution["resolvable"]),
+        "evidence_ref_not_self_reference_pass": bool(
+            not _field_present(observation, "evidence_ref")
+            or not evidence_ref_resolution["resolvable"]
+            or not evidence_ref_self_reference
+        ),
+        "evidence_ref_not_template_reference_pass": bool(
+            not _field_present(observation, "evidence_ref")
+            or not evidence_ref_resolution["resolvable"]
+            or not evidence_ref_template_reference
+        ),
         "approval_decision_pass": decision in ACCEPTED_DECISIONS,
     }
     blockers = [
@@ -289,6 +354,10 @@ def build_report(
         *(["required_workflow_steps_missing"] if not checks["all_required_workflow_steps_observed"] else []),
         *(["required_workflow_step_not_passed"] if not checks["all_required_workflow_steps_passed"] else []),
         *(["blocking_usability_issue_present"] if not checks["blocker_count_zero_pass"] else []),
+        *(["evidence_ref_missing"] if not checks["evidence_ref_present_pass"] else []),
+        *(["evidence_ref_unresolvable"] if checks["evidence_ref_present_pass"] and not checks["evidence_ref_resolvable_pass"] else []),
+        *(["evidence_ref_self_reference"] if evidence_ref_self_reference else []),
+        *(["evidence_ref_template_reference"] if evidence_ref_template_reference else []),
         *(["approval_decision_not_accepted"] if not checks["approval_decision_pass"] else []),
     ]
     contract_pass = not blockers
@@ -297,7 +366,10 @@ def build_report(
         "generated_at": _now_utc_iso(),
         "source_commit_sha": _git_head(),
         "engine_version": ENGINE_VERSION,
-        "input_checksums": input_checksums([observation_path], repo_root=REPO_ROOT),
+        "input_checksums": input_checksums(
+            [observation_path, *( [Path(resolved_evidence_path)] if resolved_evidence_path else [] )],
+            repo_root=repo_root,
+        ),
         "reused_evidence": False,
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
@@ -325,6 +397,9 @@ def build_report(
             "reported_blocker_count": blocker_count,
             "release_blocker_count": len(blockers),
             "approval_decision": decision,
+            "evidence_ref": evidence_ref if isinstance(evidence_ref, str) else "",
+            "evidence_ref_kind": str(evidence_ref_resolution["kind"]),
+            "evidence_ref_resolved_path": resolved_evidence_path,
             "missing_fields": missing_fields,
             "placeholder_fields": placeholder_fields,
             "template_only": template_only,

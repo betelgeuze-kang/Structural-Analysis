@@ -38,7 +38,7 @@ def _passing_observation() -> dict[str, object]:
         "completed_at_utc": "2026-06-16T09:24:00+00:00",
         "completion_minutes": 24.0,
         "blocker_count": 0,
-        "evidence_ref": "ux-observation-001",
+        "evidence_ref": "ticket:UX-OBS-001",
         "approval_decision": "accepted",
     }
 
@@ -94,6 +94,8 @@ def test_ux_new_user_observation_passes_with_human_record(tmp_path: Path) -> Non
     assert payload["summary"]["timestamp_tolerance_minutes"] == 1.0
     assert payload["checks"]["all_required_workflow_steps_observed"] is True
     assert payload["checks"]["all_required_workflow_steps_passed"] is True
+    assert payload["checks"]["evidence_ref_resolvable_pass"] is True
+    assert payload["summary"]["evidence_ref_kind"] == "external_reference"
     assert payload["summary"]["workflow_step_pass_count"] == 5
     assert payload["summary"]["missing_workflow_steps"] == []
 
@@ -248,6 +250,45 @@ def test_ux_new_user_observation_rejects_legacy_template_tokens(tmp_path: Path) 
     assert "template_only_observation_source" in payload["blockers"]
     assert "sample_project_id" in payload["summary"]["placeholder_fields"]
     assert "evidence_ref" in payload["summary"]["placeholder_fields"]
+
+
+def test_ux_new_user_observation_rejects_unresolvable_evidence_ref(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["evidence_ref"] = "ux-observation-001"
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "evidence_ref_unresolvable" in payload["blockers"]
+    assert payload["checks"]["evidence_ref_resolvable_pass"] is False
+    assert payload["summary"]["evidence_ref_kind"] == "local_path_missing"
+
+
+def test_ux_new_user_observation_rejects_self_referenced_evidence_ref(tmp_path: Path) -> None:
+    observation = tmp_path / "ux_observation.json"
+    record = _passing_observation()
+    record["evidence_ref"] = str(observation)
+    _write_json(observation, record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "evidence_ref_self_reference" in payload["blockers"]
+    assert payload["checks"]["evidence_ref_not_self_reference_pass"] is False
+
+
+def test_ux_new_user_observation_rejects_template_evidence_ref(tmp_path: Path) -> None:
+    template = Path("docs/templates/ux_new_user_observation.template.json").resolve()
+    record = _passing_observation()
+    record["evidence_ref"] = str(template)
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "evidence_ref_template_reference" in payload["blockers"]
+    assert payload["checks"]["evidence_ref_not_template_reference_pass"] is False
 
 
 def test_ux_new_user_observation_rejects_placeholder_and_slow_completion(tmp_path: Path) -> None:

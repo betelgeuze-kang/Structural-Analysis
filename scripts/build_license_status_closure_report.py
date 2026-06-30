@@ -154,6 +154,13 @@ def _evidence_ref_resolution(reference: str, *, license_status_path: Path, repo_
     return {"kind": "local_path_missing", "resolvable": False, "resolved_path": ""}
 
 
+def _same_resolved_path(first: Path, second: Path) -> bool:
+    try:
+        return first.resolve() == second.resolve()
+    except Exception:
+        return False
+
+
 def build_report(
     *,
     license_status_path: Path,
@@ -178,6 +185,13 @@ def build_report(
         evidence_ref,
         license_status_path=license_status_path,
         repo_root=repo_root,
+    )
+    resolved_evidence_path = str(evidence_ref_resolution.get("resolved_path", "") or "")
+    evidence_ref_self_reference = bool(
+        resolved_evidence_path and _same_resolved_path(Path(resolved_evidence_path), license_status_path)
+    )
+    evidence_ref_template_reference = bool(
+        resolved_evidence_path and _same_resolved_path(Path(resolved_evidence_path), repo_root / template_path)
     )
     product_scope = payload.get("product_scope", payload.get("scope", payload.get("features")))
     expires_at = _text(payload, "expires_at_utc", "expires_at", "valid_until")
@@ -216,6 +230,10 @@ def build_report(
         blockers.append("license_evidence_ref_missing")
     elif not bool(evidence_ref_resolution["resolvable"]):
         blockers.append("license_evidence_ref_unresolvable")
+    elif evidence_ref_self_reference:
+        blockers.append("license_evidence_ref_self_reference")
+    elif evidence_ref_template_reference:
+        blockers.append("license_evidence_ref_template_reference")
     if _scope_count(product_scope) == 0:
         blockers.append("license_product_scope_missing")
     elif not REQUIRED_PRODUCT_SCOPE.issubset(_scope_values(product_scope)):
@@ -253,7 +271,6 @@ def build_report(
         blocker.endswith("_placeholder") or blocker == "license_status_template_only" for blocker in blockers
     )
     checksum_inputs = [license_status_path, template_path]
-    resolved_evidence_path = str(evidence_ref_resolution.get("resolved_path", "") or "")
     if resolved_evidence_path:
         checksum_inputs.append(Path(resolved_evidence_path))
 
@@ -285,6 +302,12 @@ def build_report(
             "approval_timeline_pass": approval_timeline_pass,
             "evidence_ref_present_pass": bool(evidence_ref),
             "evidence_ref_resolvable_pass": bool(evidence_ref_resolution["resolvable"]),
+            "evidence_ref_not_self_reference_pass": bool(
+                not evidence_ref or not evidence_ref_resolution["resolvable"] or not evidence_ref_self_reference
+            ),
+            "evidence_ref_not_template_reference_pass": bool(
+                not evidence_ref or not evidence_ref_resolution["resolvable"] or not evidence_ref_template_reference
+            ),
             "product_scope_present_pass": _scope_count(product_scope) > 0,
             "product_scope_boundary_pass": bool(REQUIRED_PRODUCT_SCOPE.issubset(_scope_values(product_scope))),
             "placeholder_values_absent_pass": placeholder_values_absent_pass,
@@ -294,6 +317,8 @@ def build_report(
                 and parsed_approved_at is not None
                 and parsed_approved_at <= now
                 and evidence_ref_resolution["resolvable"]
+                and not evidence_ref_self_reference
+                and not evidence_ref_template_reference
                 and approval_ref
                 and license_id
                 and approval_ref.lower() != license_id.lower()
