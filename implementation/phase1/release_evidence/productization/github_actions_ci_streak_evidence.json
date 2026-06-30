@@ -1,10 +1,11 @@
 {
-  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit.",
+  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit. Local workflow trigger metadata is parsed from the current checkout and does not refresh or replace GitHub Actions run-history evidence.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T05:50:40.120489+00:00",
+  "generated_at": "2026-06-30T05:58:55.197138+00:00",
   "input_checksums": {
-    ".github/workflows": "dir-sha256:8acb8a126ead40b2ce6a7ce24dbb8569bfdb9d927ed74296b6bc740c056936e3"
+    ".github/workflows": "dir-sha256:8acb8a126ead40b2ce6a7ce24dbb8569bfdb9d927ed74296b6bc740c056936e3",
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:f7e8df3cc274cee623dc9680bed950181916bd69f77af96e00b68417df38f988"
   },
   "lanes": {
     "nightly": {
@@ -1193,9 +1194,9 @@
   "limit": 500,
   "reason_code": "ERR_CI_STREAK_INCOMPLETE",
   "repo": "betelgeuze-kang/Structural-Analysis",
-  "reused_evidence": false,
+  "reused_evidence": true,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "c792bfac657294434479b70ae6ac075d461e070b",
+  "source_commit_sha": "ef729a761231bd194e7e975db95702b8d8687310",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 0,
@@ -1213,6 +1214,7 @@
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 8,
+    "local_workflow_metadata_generated_at": "2026-06-30T06:00:15.069581+00:00",
     "local_workflows": [
       {
         "exists": true,
