@@ -2383,6 +2383,58 @@ def test_snapshot_allows_dirty_receipt_only_worktree_as_refresh_boundary(
     assert payload["evidence_fresh"] is True
 
 
+def test_snapshot_allows_product_capabilities_surface_as_receipt_boundary(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_json(
+        tmp_path / "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+        {
+            "schema_version": "product-capabilities-surface.v1",
+            "generated_at": "2026-06-21T00:00:01+00:00",
+            "source_commit_sha": source_commit,
+            "input_checksums": {"capability_input": "sha256:abc123"},
+            "reused_evidence": False,
+            "contract_pass": True,
+            "status": "ready",
+        },
+    )
+    surface_commit = _commit_all(tmp_path, "product capabilities surface")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["source_commit_sha"] == surface_commit
+    assert payload["schema_valid"] is True
+    assert payload["evidence_fresh"] is True
+    assert payload["status"] == "ready"
+    assert metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "receipt_only_commit"
+    )
+    assert (
+        "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        in metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"]
+    )
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
 def test_snapshot_blocks_stale_workstation_and_independent_inputs(tmp_path: Path) -> None:
     commit = "abc123"
     _write_text(
