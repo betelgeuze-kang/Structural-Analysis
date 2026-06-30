@@ -2230,3 +2230,114 @@ def test_pm_release_gate_github_sync_area_passes_when_preflight_is_synced(
     )
     assert blocked_payload["release_area_gate_ready"] is False
     assert blocked_payload["full_release_gate_ready"] is False
+
+
+def test_pm_release_gate_cli_defaults_to_tracked_github_sync_preflight() -> None:
+    args = report_pm_release_gate.build_parser().parse_args([])
+
+    assert (
+        args.github_sync_preflight
+        == report_pm_release_gate.DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT
+    )
+    assert args.github_sync_live_state is False
+
+
+def test_pm_release_gate_github_sync_blocks_stale_preflight_head(
+    tmp_path: Path,
+) -> None:
+    stale_preflight = _write(
+        tmp_path / "stale_preflight.json",
+        {
+            "schema_version": "github-development-sync-preflight.v1",
+            "status": "synced",
+            "contract_pass": True,
+            "preflight_pass": True,
+            "remote_mutation_approved": False,
+            "remote_sync_needed": False,
+            "reason_code": "PASS",
+            "blockers": [],
+            "state": {
+                "local_head_sha": "not-the-current-head",
+                "remote_feature_ref": "origin/feature",
+                "remote_main_ref": "origin/main",
+                "feature_ahead_count": 0,
+                "main_ahead_count": 0,
+            },
+            "checks": {
+                "worktree_clean": True,
+                "remote_safety_ok": True,
+                "feature_fast_forward_possible": True,
+                "main_fast_forward_possible": True,
+                "feature_synced_to_head": True,
+                "main_synced_to_head": True,
+                "explicit_remote_mutation_approval": False,
+            },
+            "pending_remote_updates": [],
+            "r4_disclosure": {"risk": "No remote mutation remains."},
+            "claim_boundary": "read-only",
+        },
+    )
+
+    area = report_pm_release_gate._github_sync_area(stale_preflight)
+
+    assert area["ok"] is False
+    assert area["status"] == "blocked"
+    assert area["checks"]["github_sync_preflight_head_matches_current"] is False
+    assert area["checks"]["github_sync_preflight_source_state_fresh"] is False
+    assert "github_sync_preflight::local_head_mismatch" in area["blockers"]
+    assert area["summary"]["preflight_local_head_sha"] == "not-the-current-head"
+    assert area["summary"]["current_head_sha"] == report_pm_release_gate._git_head()
+    assert area["summary"]["preflight_source_state_kind"] == "unresolved_preflight_head"
+
+
+def test_github_sync_preflight_source_state_allows_evidence_only_delta(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        report_pm_release_gate,
+        "_git_rev_parse",
+        lambda value: {"old": "old-sha", "new": "new-sha"}.get(value, ""),
+    )
+    monkeypatch.setattr(
+        report_pm_release_gate,
+        "_git_diff_name_only",
+        lambda source, current: [
+            "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        ],
+    )
+
+    fresh, kind, changed_paths = report_pm_release_gate._github_sync_preflight_source_state(
+        "old", "new"
+    )
+
+    assert fresh is True
+    assert kind == "evidence_only_delta"
+    assert changed_paths == [
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+    ]
+
+
+def test_github_sync_preflight_source_state_blocks_source_delta(monkeypatch) -> None:
+    monkeypatch.setattr(
+        report_pm_release_gate,
+        "_git_rev_parse",
+        lambda value: {"old": "old-sha", "new": "new-sha"}.get(value, ""),
+    )
+    monkeypatch.setattr(
+        report_pm_release_gate,
+        "_git_diff_name_only",
+        lambda source, current: [
+            "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "scripts/report_pm_release_gate.py",
+        ],
+    )
+
+    fresh, kind, changed_paths = report_pm_release_gate._github_sync_preflight_source_state(
+        "old", "new"
+    )
+
+    assert fresh is False
+    assert kind == "source_delta"
+    assert changed_paths == ["scripts/report_pm_release_gate.py"]

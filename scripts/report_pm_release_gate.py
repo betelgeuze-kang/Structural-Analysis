@@ -101,7 +101,10 @@ DEFAULT_LICENSE_STATUS_CLOSURE = Path(
 DEFAULT_AI_ORCHESTRATION_PREFLIGHT = Path(
     "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
 )
-DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT: Path | None = None
+DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "github_development_sync_preflight.json"
+)
 DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS = Path(
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
 )
@@ -170,6 +173,58 @@ def _git_head() -> str:
         ).strip()
     except Exception:
         return ""
+
+
+def _git_rev_parse(value: str) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--verify", text],
+            cwd=Path(__file__).resolve().parent.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _git_diff_name_only(source_commit: str, current_commit: str) -> list[str]:
+    if not source_commit or not current_commit:
+        return []
+    try:
+        output = subprocess.check_output(
+            ["git", "diff", "--name-only", f"{source_commit}..{current_commit}"],
+            cwd=Path(__file__).resolve().parent.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return []
+    return [line.strip() for line in output.splitlines() if line.strip()]
+
+
+def _github_sync_preflight_source_state(
+    preflight_head: str, current_head: str
+) -> tuple[bool, str, list[str]]:
+    if not preflight_head or not current_head:
+        return True, "unknown", []
+    if current_head.startswith(preflight_head) or preflight_head.startswith(current_head):
+        return True, "exact", []
+    source = _git_rev_parse(preflight_head)
+    current = _git_rev_parse(current_head)
+    if not source or not current:
+        return False, "unresolved_preflight_head", []
+    changed_paths = _git_diff_name_only(source, current)
+    non_evidence_paths = [
+        path
+        for path in changed_paths
+        if not path.startswith("implementation/phase1/release_evidence/productization/")
+    ]
+    if non_evidence_paths:
+        return False, "source_delta", non_evidence_paths
+    return True, "evidence_only_delta", changed_paths
 
 
 def _sha256(path: Path) -> str:
@@ -1168,8 +1223,20 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
     preflight_blockers = [
         str(item) for item in _as_list(payload.get("blockers")) if str(item).strip()
     ]
-    remote_mutation_approval_required = "remote_mutation_approval_required" in preflight_blockers
     artifact_present = bool(payload)
+    current_head = _git_head()
+    preflight_head = str(state.get("local_head_sha", "") or "").strip()
+    (
+        preflight_source_state_fresh,
+        preflight_source_state_kind,
+        preflight_changed_paths,
+    ) = _github_sync_preflight_source_state(
+        preflight_head if artifact_present else "",
+        current_head if artifact_present else "",
+    )
+    if not preflight_source_state_fresh:
+        preflight_blockers.append("local_head_mismatch")
+    remote_mutation_approval_required = "remote_mutation_approval_required" in preflight_blockers
     status = str(payload.get("status", "")).strip().lower() if artifact_present else ""
     worktree_clean = bool(checks.get("worktree_clean", False))
     remote_safety_ok = bool(checks.get("remote_safety_ok", False))
@@ -1196,6 +1263,8 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
         "github_sync_main_fast_forward_possible": main_ff,
         "github_sync_remote_mutation_approval_pending": remote_mutation_approval_required,
         "github_sync_remote_sync_needed": remote_sync_needed,
+        "github_sync_preflight_head_matches_current": preflight_source_state_kind == "exact",
+        "github_sync_preflight_source_state_fresh": preflight_source_state_fresh,
     }
     area_blockers = [
         *(["github_sync_preflight_report_missing"] if not artifact_present else []),
@@ -1217,6 +1286,10 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
             "remote_mutation_approved": bool(payload.get("remote_mutation_approved", False)) if artifact_present else False,
             "remote_feature_ref": str(state.get("remote_feature_ref", "") or ""),
             "remote_main_ref": str(state.get("remote_main_ref", "") or ""),
+            "preflight_local_head_sha": preflight_head,
+            "current_head_sha": current_head,
+            "preflight_source_state_kind": preflight_source_state_kind,
+            "changed_paths_since_preflight_head": preflight_changed_paths,
             "feature_ahead_count": _as_int(state.get("feature_ahead_count"), 0),
             "main_ahead_count": _as_int(state.get("main_ahead_count"), 0),
             "pending_remote_update_count": len(pending_remote_updates),
@@ -3266,7 +3339,7 @@ def build_report(
     fresh_full_validation_lane_status: Path = DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
-    github_sync_preflight: Path | None = DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT,
+    github_sync_preflight: Path | None = None,
     cpu_only_product_mode: bool = False,
     ci_pass_streak_threshold: int = 30,
     core_p95_error_pct_limit: float = 5.0,
@@ -3801,8 +3874,17 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT,
         help=(
-            "Optional pre-generated GitHub development sync preflight JSON. "
-            "Defaults to live local git-state evaluation without fetch or remote mutation."
+            "Pre-generated GitHub development sync preflight JSON. "
+            "Defaults to the tracked release evidence receipt."
+        ),
+    )
+    parser.add_argument(
+        "--github-sync-live-state",
+        action="store_true",
+        help=(
+            "Evaluate GitHub sync from live local git state instead of the tracked "
+            "preflight receipt. This is useful for ad-hoc diagnostics but can record "
+            "work-in-progress dirty state in generated PM evidence."
         ),
     )
     parser.add_argument("--cpu-only-product-mode", action="store_true")
@@ -3884,7 +3966,9 @@ def main(argv: list[str] | None = None) -> int:
         fresh_full_validation_lane_status=args.fresh_full_validation_lane_status,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,
-        github_sync_preflight=args.github_sync_preflight,
+        github_sync_preflight=(
+            None if args.github_sync_live_state else args.github_sync_preflight
+        ),
         cpu_only_product_mode=args.cpu_only_product_mode,
         ci_pass_streak_threshold=args.ci_pass_streak_threshold,
         core_p95_error_pct_limit=args.core_p95_error_pct_limit,
