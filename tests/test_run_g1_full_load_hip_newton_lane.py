@@ -2298,6 +2298,7 @@ def test_cli_writes_blocked_receipt_and_fails_when_requested(tmp_path: Path) -> 
             str(checkpoint),
             "--out",
             str(out),
+            "--skip-workspace-checkpoint-inventory",
             "--fail-blocked",
         ]
     )
@@ -2342,6 +2343,7 @@ def test_cli_dry_run_receipt_keeps_child_hip_evidence_contract(
             "--out",
             str(out),
             "--dry-run",
+            "--skip-workspace-checkpoint-inventory",
         ]
     )
 
@@ -2356,6 +2358,44 @@ def test_cli_dry_run_receipt_keeps_child_hip_evidence_contract(
     assert (
         "child_current_tangent_residual_row_component_missing"
         in evidence["blockers"]
+    )
+
+
+def test_cli_writes_workspace_checkpoint_inventory_by_default(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=0.75)
+    workspace_root = tmp_path / "productization"
+    _checkpoint(workspace_root / "frontier.npz", load_scale=0.656)
+    _checkpoint(workspace_root / "higher_sub.npz", load_scale=0.82)
+    out = tmp_path / "lane.json"
+
+    exit_code = run_g1_full_load_hip_newton_lane.main(
+        [
+            "--checkpoint-npz",
+            str(checkpoint),
+            "--workspace-checkpoint-scan-root",
+            str(workspace_root),
+            "--out",
+            str(out),
+            "--fail-blocked",
+        ]
+    )
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert exit_code == 1
+    inventory = payload["workspace_checkpoint_inventory"]
+    assert inventory["enabled"] is True
+    assert inventory["candidate_count"] == 2
+    assert inventory["loadable_count"] == 2
+    assert inventory["full_load_candidate_count"] == 0
+    assert inventory["highest_observed_load_scale"] == 0.82
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    assert (
+        next_actions["generate_full_load_1p0_checkpoint_candidate"][
+            "workspace_highest_observed_load_scale"
+        ]
+        == 0.82
     )
 
 
@@ -2649,6 +2689,47 @@ def test_auto_select_picks_highest_sub_full_load_candidate(tmp_path: Path) -> No
     )
 
 
+def test_workspace_checkpoint_inventory_reports_no_full_load_candidate(
+    tmp_path: Path,
+) -> None:
+    workspace_root = tmp_path / "productization"
+    frontier = _checkpoint(workspace_root / "frontier.npz", load_scale=0.656)
+    higher_sub = _checkpoint(workspace_root / "higher_sub.npz", load_scale=0.8)
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=frontier,
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+        hip_consistency_proof_json=proof,
+        workspace_checkpoint_scan_root=workspace_root,
+    )
+
+    assert exit_code == 1
+    inventory = payload["workspace_checkpoint_inventory"]
+    assert inventory["schema_version"] == "g1-workspace-checkpoint-inventory.v1"
+    assert inventory["enabled"] is True
+    assert inventory["scan_root"] == str(workspace_root)
+    assert inventory["scan_root_exists"] is True
+    assert inventory["candidate_count"] == 2
+    assert inventory["loadable_count"] == 2
+    assert inventory["full_load_candidate_count"] == 0
+    assert inventory["highest_observed_load_scale"] == 0.8
+    assert abs(inventory["highest_observed_gap_to_required_load_scale"] - 0.2) < 1e-12
+    assert inventory["top_loadable_candidates"][0]["path"] == str(higher_sub)
+    assert inventory["top_loadable_candidates"][0]["load_scale"] == 0.8
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    action = next_actions["generate_full_load_1p0_checkpoint_candidate"]
+    assert action["workspace_scan_root"] == str(workspace_root)
+    assert action["workspace_candidate_count"] == 2
+    assert action["workspace_full_load_candidate_count"] == 0
+    assert action["workspace_highest_observed_load_scale"] == 0.8
+
+
 def test_explicit_checkpoint_overrides_auto_selection(tmp_path: Path) -> None:
     explicit = _checkpoint(tmp_path / "explicit.npz", load_scale=0.656)
     full = _checkpoint(tmp_path / "full.npz", load_scale=1.0)
@@ -2757,9 +2838,22 @@ def test_cli_auto_select_default_and_auto_arg_use_evidence_scan(tmp_path: Path) 
         ["--dry-run", "--out", str(out)]
     )
     assert default_args.checkpoint_npz is None
+    assert (
+        default_args.workspace_checkpoint_scan_root
+        == run_g1_full_load_hip_newton_lane.PRODUCTIZATION
+    )
+    assert default_args.skip_workspace_checkpoint_inventory is False
 
     args = run_g1_full_load_hip_newton_lane.build_parser().parse_args(
-        ["--checkpoint-npz", "auto", "--dry-run", "--out", str(out)]
+        [
+            "--checkpoint-npz",
+            "auto",
+            "--dry-run",
+            "--out",
+            str(out),
+            "--skip-workspace-checkpoint-inventory",
+        ]
     )
     assert args.checkpoint_npz is None
     assert args.dry_run is True
+    assert args.skip_workspace_checkpoint_inventory is True

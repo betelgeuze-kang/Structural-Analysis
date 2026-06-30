@@ -660,6 +660,96 @@ def _checkpoint_resolution_gate(
     }, blockers
 
 
+def _workspace_checkpoint_inventory(
+    *,
+    scan_root: Path | None,
+    required_load_scale: float,
+    full_load_tolerance: float,
+    sample_limit: int = 12,
+) -> dict[str, Any]:
+    if scan_root is None:
+        return {
+            "schema_version": "g1-workspace-checkpoint-inventory.v1",
+            "enabled": False,
+            "scan_root": None,
+            "candidate_count": 0,
+            "loadable_count": 0,
+            "full_load_candidate_count": 0,
+            "highest_observed_load_scale": None,
+            "highest_observed_gap_to_required_load_scale": None,
+            "top_loadable_candidates": [],
+            "claim_boundary": (
+                "Workspace checkpoint inventory was not requested for this in-process "
+                "build_lane_report call."
+            ),
+        }
+    root = scan_root if scan_root.is_absolute() else ROOT / scan_root
+    if not root.exists():
+        return {
+            "schema_version": "g1-workspace-checkpoint-inventory.v1",
+            "enabled": True,
+            "scan_root": str(scan_root),
+            "scan_root_exists": False,
+            "candidate_count": 0,
+            "loadable_count": 0,
+            "full_load_candidate_count": 0,
+            "highest_observed_load_scale": None,
+            "highest_observed_gap_to_required_load_scale": None,
+            "top_loadable_candidates": [],
+            "claim_boundary": (
+                "The requested workspace checkpoint scan root does not exist; no "
+                "full-load checkpoint can be inferred from this inventory."
+            ),
+        }
+    observed: list[dict[str, Any]] = []
+    candidate_count = 0
+    for path in sorted(root.rglob("*.npz")):
+        candidate_count += 1
+        try:
+            rel_path = path.relative_to(ROOT)
+        except ValueError:
+            rel_path = path
+        meta, blockers = _load_checkpoint_meta(path)
+        load_scale = _float_or_none(meta.get("load_scale"))
+        if load_scale is None:
+            continue
+        observed.append(
+            {
+                "path": str(rel_path),
+                "load_scale": load_scale,
+                "schema": meta.get("schema", ""),
+                "dof_count": meta.get("dof_count"),
+                "blockers": blockers,
+            }
+        )
+    threshold = float(required_load_scale) - float(full_load_tolerance)
+    observed.sort(key=lambda row: float(row["load_scale"]), reverse=True)
+    full_load_candidates = [
+        row for row in observed if float(row["load_scale"]) >= threshold
+    ]
+    highest = float(observed[0]["load_scale"]) if observed else None
+    return {
+        "schema_version": "g1-workspace-checkpoint-inventory.v1",
+        "enabled": True,
+        "scan_root": str(scan_root),
+        "scan_root_exists": True,
+        "candidate_count": candidate_count,
+        "loadable_count": len(observed),
+        "full_load_candidate_count": len(full_load_candidates),
+        "highest_observed_load_scale": highest,
+        "highest_observed_gap_to_required_load_scale": (
+            float(required_load_scale) - highest if highest is not None else None
+        ),
+        "top_loadable_candidates": observed[:sample_limit],
+        "claim_boundary": (
+            "This inventory scans local productization NPZ checkpoints for load-scale "
+            "metadata. It can prove that no local full-load candidate is visible in "
+            "the scanned workspace, but it does not prove residual, increment, "
+            "material Newton, HIP residency, or G1 closure."
+        ),
+    }
+
+
 def _g1_lane_blocker_partition(
     *,
     checkpoint_resolution_gate: dict[str, Any],
@@ -747,6 +837,7 @@ def _g1_lane_blocker_partition(
 def _g1_lane_next_actions(
     *,
     checkpoint_resolution_gate: dict[str, Any],
+    workspace_checkpoint_inventory: dict[str, Any] | None = None,
     hip_consistency_proof: dict[str, Any],
     child_gate_evidence: dict[str, Any],
     child_hip_residual_refresh_evidence: dict[str, Any],
@@ -754,31 +845,57 @@ def _g1_lane_next_actions(
 ) -> list[dict[str, Any]]:
     actions: list[dict[str, Any]] = []
     if checkpoint_resolution_gate.get("passed") is not True:
+        workspace_inventory = (
+            workspace_checkpoint_inventory
+            if isinstance(workspace_checkpoint_inventory, dict)
+            else {}
+        )
+        action = {
+            "id": "generate_full_load_1p0_checkpoint_candidate",
+            "reason": "checkpoint_resolution_no_full_load_candidate",
+            "required_load_scale": checkpoint_resolution_gate.get(
+                "required_load_scale"
+            ),
+            "highest_observed_load_scale": checkpoint_resolution_gate.get(
+                "highest_observed_load_scale"
+            ),
+            "highest_observed_gap_to_required_load_scale": (
+                checkpoint_resolution_gate.get(
+                    "highest_observed_gap_to_required_load_scale"
+                )
+            ),
+            "acceptance_receipt": (
+                "a loadable mgt-direct-residual-newton-state.v1 checkpoint with "
+                "load_scale >= required_load_scale and no load-path provenance "
+                "contradiction"
+            ),
+            "rerun_command": (
+                "python3 scripts/run_g1_full_load_hip_newton_lane.py "
+                "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
+            ),
+        }
+        if workspace_inventory.get("enabled") is True:
+            action.update(
+                {
+                    "workspace_scan_root": workspace_inventory.get("scan_root"),
+                    "workspace_candidate_count": workspace_inventory.get(
+                        "candidate_count"
+                    ),
+                    "workspace_full_load_candidate_count": (
+                        workspace_inventory.get("full_load_candidate_count")
+                    ),
+                    "workspace_highest_observed_load_scale": (
+                        workspace_inventory.get("highest_observed_load_scale")
+                    ),
+                    "workspace_highest_observed_gap_to_required_load_scale": (
+                        workspace_inventory.get(
+                            "highest_observed_gap_to_required_load_scale"
+                        )
+                    ),
+                }
+            )
         actions.append(
-            {
-                "id": "generate_full_load_1p0_checkpoint_candidate",
-                "reason": "checkpoint_resolution_no_full_load_candidate",
-                "required_load_scale": checkpoint_resolution_gate.get(
-                    "required_load_scale"
-                ),
-                "highest_observed_load_scale": checkpoint_resolution_gate.get(
-                    "highest_observed_load_scale"
-                ),
-                "highest_observed_gap_to_required_load_scale": (
-                    checkpoint_resolution_gate.get(
-                        "highest_observed_gap_to_required_load_scale"
-                    )
-                ),
-                "acceptance_receipt": (
-                    "a loadable mgt-direct-residual-newton-state.v1 checkpoint with "
-                    "load_scale >= required_load_scale and no load-path provenance "
-                    "contradiction"
-                ),
-                "rerun_command": (
-                    "python3 scripts/run_g1_full_load_hip_newton_lane.py "
-                    "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
-                ),
-            }
+            action
         )
     worker = hip_consistency_proof.get("production_rocm_hip_residual_jvp_worker")
     worker = worker if isinstance(worker, dict) else {}
@@ -1113,6 +1230,7 @@ def build_lane_report(
     dry_run: bool = False,
     evidence_sources: tuple[Path, ...] = CHECKPOINT_EVIDENCE_SOURCES,
     hip_consistency_proof_json: Path = DEFAULT_HIP_CONSISTENCY_PROOF,
+    workspace_checkpoint_scan_root: Path | None = None,
 ) -> tuple[dict[str, Any], int]:
     generated_at = _now_utc_iso()
     resolved_checkpoint, checkpoint_resolution = _resolve_checkpoint(
@@ -1171,6 +1289,11 @@ def build_lane_report(
         proof_json=hip_consistency_proof_json,
         lane_source_commit_sha=source_commit_sha,
     )
+    workspace_checkpoint_inventory = _workspace_checkpoint_inventory(
+        scan_root=workspace_checkpoint_scan_root,
+        required_load_scale=float(required_load_scale),
+        full_load_tolerance=float(full_load_tolerance),
+    )
     frontier_non_promoting_context = _frontier_non_promoting_evidence_context(
         evidence_sources
     )
@@ -1200,6 +1323,7 @@ def build_lane_report(
     )
     lane_next_actions = _g1_lane_next_actions(
         checkpoint_resolution_gate=checkpoint_resolution_gate,
+        workspace_checkpoint_inventory=workspace_checkpoint_inventory,
         hip_consistency_proof=hip_consistency_proof,
         child_gate_evidence=initial_child_gate_evidence,
         child_hip_residual_refresh_evidence=initial_child_hip_residual_refresh_evidence,
@@ -1220,6 +1344,7 @@ def build_lane_report(
         "full_load_input_pass": full_load_input_pass,
         "load_path_provenance": load_path_provenance,
         "load_path_provenance_pass": load_path_provenance_pass,
+        "workspace_checkpoint_inventory": workspace_checkpoint_inventory,
         "frontier_non_promoting_evidence": frontier_non_promoting_context,
         "dry_run": bool(dry_run),
         "command": command,
@@ -1333,6 +1458,7 @@ def build_lane_report(
     )
     final_lane_next_actions = _g1_lane_next_actions(
         checkpoint_resolution_gate=checkpoint_resolution_gate,
+        workspace_checkpoint_inventory=workspace_checkpoint_inventory,
         hip_consistency_proof=hip_consistency_proof,
         child_gate_evidence=child_gate_evidence,
         child_hip_residual_refresh_evidence=child_hip_residual_refresh_evidence,
@@ -1665,6 +1791,20 @@ def build_parser() -> argparse.ArgumentParser:
             "the G1 lane can be promoted."
         ),
     )
+    parser.add_argument(
+        "--workspace-checkpoint-scan-root",
+        type=Path,
+        default=PRODUCTIZATION,
+        help=(
+            "Directory scanned for diagnostic local .npz checkpoint load-scale "
+            "inventory. The scan is non-promoting and does not affect G1 closure."
+        ),
+    )
+    parser.add_argument(
+        "--skip-workspace-checkpoint-inventory",
+        action="store_true",
+        help="Disable the diagnostic workspace checkpoint inventory scan.",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -1681,6 +1821,11 @@ def main(argv: list[str] | None = None) -> int:
         full_load_tolerance=args.full_load_tolerance,
         dry_run=args.dry_run,
         hip_consistency_proof_json=args.hip_consistency_proof_json,
+        workspace_checkpoint_scan_root=(
+            None
+            if args.skip_workspace_checkpoint_inventory
+            else args.workspace_checkpoint_scan_root
+        ),
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(
