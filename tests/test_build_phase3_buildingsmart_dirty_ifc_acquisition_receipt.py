@@ -79,6 +79,12 @@ def test_dirty_ifc_acquisition_receipt_authors_negative_contracts_without_credit
     assert contract["text_scan_only"] is True
     assert contract["phase3_quantity_credit_claim"] is False
     assert "ifc_geometry_not_canonicalized" in contract["required_blocked_fields"]
+    assert "ifc_load_model_missing" in contract["required_blocked_fields"]
+
+    electrical = rows["buildingsmart_community_duplex_electrical"]
+    electrical_contract = electrical["expected_negative_import_contract"]
+    assert "ifc_structural_entities_missing" in electrical_contract["required_blocked_fields"]
+    assert "ifc_geometry_not_canonicalized" not in electrical_contract["required_blocked_fields"]
 
 
 def test_dirty_ifc_acquisition_receipt_attaches_local_source_checksums(tmp_path: Path) -> None:

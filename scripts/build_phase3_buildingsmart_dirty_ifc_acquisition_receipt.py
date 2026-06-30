@@ -158,6 +158,13 @@ def _source_url(folder: str, filename: str) -> str:
     return f"{COMMUNITY_DOWNLOAD_BASE}/{quote(folder, safe='/')}/{quote(filename)}"
 
 
+def _required_blocked_fields(row: dict[str, Any]) -> list[str]:
+    signals = set(row["expected_negative_signals"])
+    if "structural_entities_may_be_sparse" in signals:
+        return ["ifc_structural_entities_missing", "ifc_load_model_missing"]
+    return ["ifc_geometry_not_canonicalized", "ifc_load_model_missing"]
+
+
 def _selected_file(row: dict[str, Any]) -> dict[str, Any]:
     case_id = str(row["case_id"])
     filename = str(row["filename"])
@@ -217,7 +224,7 @@ def _selected_file(row: dict[str, Any]) -> dict[str, Any]:
                 "load_related_entity_count",
             ],
             "required_blocked_fields": [
-                "ifc_geometry_not_canonicalized",
+                *_required_blocked_fields(row),
             ],
             "expected_negative_signals": list(row["expected_negative_signals"]),
             "silent_data_loss_policy": "fail_until_warnings_blocks_and_entity_counts_are_receipt_visible",

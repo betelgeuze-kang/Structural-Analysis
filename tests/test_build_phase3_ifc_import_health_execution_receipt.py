@@ -21,8 +21,8 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def test_ifc_import_health_execution_blocks_until_local_files_exist() -> None:
-    payload = module.build_phase3_ifc_import_health_execution_receipt(repo_root=REPO_ROOT)
+def test_ifc_import_health_execution_blocks_until_local_files_exist(tmp_path: Path) -> None:
+    payload = module.build_phase3_ifc_import_health_execution_receipt(repo_root=tmp_path)
 
     assert payload["schema_version"] == "phase3-ifc-import-health-execution-receipt.v1"
     assert payload["status"] == "blocked"
