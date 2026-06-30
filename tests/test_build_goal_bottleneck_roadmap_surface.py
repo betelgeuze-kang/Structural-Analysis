@@ -133,6 +133,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "github_sync::github_sync_preflight_not_synced",
     }
     optional_release_area_handoffs = {
+        "github_sync::github_sync_preflight::local_head_mismatch",
         "github_sync::github_sync_preflight::worktree_not_clean",
     }
     assert required_release_area_handoffs.issubset(release_area_handoffs)
