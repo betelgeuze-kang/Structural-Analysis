@@ -59,7 +59,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-30T20:09:26.139618+00:00",
+  "generated_at": "2026-06-30T20:12:00.783801+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -101,13 +101,13 @@
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:dc94fc1a7e4ea9a0f135847a7183595bda1c3b36da6a203e6a87fb4707f2ccaa",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:25d4d25d9703b5e28cc90afedcf41290186442bc5e8e67b1b1cc13ee25c156db",
     "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json": "sha256:a09a6f069955dc132241f1cf62a09410fa22e829cdce922ea88ca69bc0cd5b6c",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:60ca751a24b9fad59096a7a6db6317412f7c7299de1f05606148f54700918a74",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:cdefa9814ec7047100936fe77d3bd9f2293028922b48e5bdc6a07ce009962de5",
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json": "sha256:60766fe101aaac8fe37a5228f7f31dfd193b1320a9844f5d9996a8afb710c364",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:a6b3d48b8c42fa27650cb9951ff56ba8ee294b5d6da1f2e10bbfa80b9005408c",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:9ae17e0a3681b660aca1b363e3af69b6ed945da270333dfd681f8ec44a6e178a",
-    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:1e6e6bfca025a8b5a79dae8fee309e85fe1a31ec759c2ebc723528e644994e7e",
+    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:2c6156ab6ebd32ba6694d9122891cba8c286a3722f56519d22308c619e7b2372",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:3a6c40a1693fd4c34c4ca137709d444e54a8dffd5ef81f484a6753025b903ccf",
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
@@ -119,7 +119,7 @@
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:82e1c5e67af6dc75747c74c4eb0e686c7e3dd6f32211ba19fc68ae8590002140",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:f2887b20cf0f5b9dbfca58214f154a3451af0c98fa99913dd04e40b7967fe112",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6225b37578d41552574f9bc60c9e634f9b08cfaf90ee2284dc50c124c0febecc",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -521,7 +521,7 @@
       "summary": {
         "artifact_count": 16,
         "blocker_count": 0,
-        "current_source_commit_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
+        "current_source_commit_sha": "5f1c96b0e86d1b7b12b67edfccbe7b937d2f2991",
         "max_age_days": 30.0,
         "pass_count": 16
       },
@@ -952,11 +952,11 @@
       "status": "blocked",
       "summary": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
+        "current_head_sha": "5f1c96b0e86d1b7b12b67edfccbe7b937d2f2991",
         "feature_ahead_count": 0,
-        "main_ahead_count": 149,
+        "main_ahead_count": 151,
         "pending_remote_update_count": 1,
-        "preflight_local_head_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
+        "preflight_local_head_sha": "5f1c96b0e86d1b7b12b67edfccbe7b937d2f2991",
         "preflight_source_state_kind": "exact",
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -1577,6 +1577,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "1aa90e477aca9869fe7ac1e10f5548ac827ce5f9",
+  "source_commit_sha": "5f1c96b0e86d1b7b12b67edfccbe7b937d2f2991",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
