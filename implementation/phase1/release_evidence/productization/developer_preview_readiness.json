@@ -188,7 +188,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T09:47:41.275357+00:00",
+  "generated_at": "2026-06-30T09:53:08.024547+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -207,11 +207,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:04e5e777d45e179c424cc0340dd94827977cd605dfeea9dc998596c584c758a7",
+      "input_checksum": "sha256:a95032c227b5b1e8cd90da8bbea1e1dc18ab1f077bec09771246bc3c427746cf",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "ff8accdf3cfd32a50ad33e58d47690ae8a606851",
+      "source_commit_sha": "12d1729856210bfe58e519409e2c1bfe26215ed6",
       "status": "blocked"
     }
   },
@@ -219,7 +219,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:b7731bf169b3d3244bace73fbe15d3a9cbf6af29bf3736f9c1bd93a49f06c91c",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:04e5e777d45e179c424cc0340dd94827977cd605dfeea9dc998596c584c758a7"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:a95032c227b5b1e8cd90da8bbea1e1dc18ab1f077bec09771246bc3c427746cf"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -1657,7 +1657,6 @@
         "changed_paths_since_source_commit": [
           "scripts/build_phase3_large_model_runner_readiness_receipt.py",
           "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase3_large_model_runner_readiness_receipt.py",
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py"
         ],
@@ -2019,6 +2018,6 @@
       }
     }
   },
-  "source_commit_sha": "12d1729856210bfe58e519409e2c1bfe26215ed6",
+  "source_commit_sha": "6c535bfb2262e5ff6e1cbd09af62b9120ebe26c2",
   "status": "blocked"
 }

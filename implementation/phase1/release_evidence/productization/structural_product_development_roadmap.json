@@ -17,13 +17,13 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 64.6,
-  "generated_at": "2026-06-30T09:50:43.127364+00:00",
+  "generated_at": "2026-06-30T09:53:15.791920+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:2dff2fec72b68738dcd8ee0bd506ac7e325cc887a93d8ca9f6819f443842fb71",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:48d6dc369e80e105b427f675fce1b2db279aa40681578528c984ffaf0299b5fb",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:717cf62caaa25334b2cef04bbdd39b6ac7977d8ccd5c35cf7fc48ea593ee83d8",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:fb52481c6bc956db2445757a3cc4fb7c9cb951fcdaf638f795833a2cf88aa2c3",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:6caee58d15f1f3c8c045cc24c542fc24b01b9b5140981cf2674561914d815ae2",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:8f8fd9211417b76fe4399cbdd385861c1490538623dafcae4165a19e1ee46873",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:1e9b35c37188f31d2f61e83ea51769c75dee070bdcbf1a20ba27d162cdf32194",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:78cd05d9459407ee2a694c4ad846d40df5b50c2602db67a986280e01052170f1",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:e1ee651f8f3af5e917fe83daeae671c3521df26f1170d00a903c780ebc365f28",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fe0ff9d761ab520847d1019c7a9fc3b881a25e504978f0c20ef2fbf4c446cb78",
@@ -136,7 +136,6 @@
       "blockers": [
         "checkpoint_load_scale_below_required_full_load",
         "checkpoint_resolution_no_full_load_candidate",
-        "hip_consistency_proof_source_commit_sha_mismatch",
         "hip_consistency_proof_gate_not_passed",
         "hip_consistency_proof_has_blockers"
       ],
@@ -269,7 +268,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "12d1729856210bfe58e519409e2c1bfe26215ed6",
+  "source_commit_sha": "6c535bfb2262e5ff6e1cbd09af62b9120ebe26c2",
   "stage_average_progress_percent": 54.5,
   "stage_count": 7,
   "status": "blocked",
