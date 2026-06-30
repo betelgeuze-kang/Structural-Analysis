@@ -11,7 +11,6 @@
     "ifc_query_gui_task_execution_missing",
     "import_health_execution_missing",
     "large_model_execution_receipt_missing",
-    "large_model_runner_not_implemented",
     "large_model_scorecard_or_review_missing",
     "license_or_customer_permission_missing",
     "license_review_pending",
@@ -43,7 +42,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T00:19:32.233932+00:00",
+  "generated_at": "2026-06-30T05:49:34.955794+00:00",
   "ifc_import_case_requirement": {
     "blocker": "phase3_ifc_import_case_quantity_credit_missing",
     "claim_boundary": "The Phase 3 roadmap requires at least 10 clean/dirty IFC import cases. Current acquisition evidence contains two clean buildingSMART expected import-health contracts and eight dirty/negative expected block contracts, but zero quantity-credit-ready IFC cases.",
@@ -62,18 +61,18 @@
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "scripts/build_phase3_benchmark_acquisition_artifacts.py": "sha256:fb9eb8acfa53f410eec7959f767a328bee5705888066aa568dd2e2b21430c69b",
-    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:812de49775e5e2bbef5c7ce56937afcb507bb6f352a1ead65b595a6917178ecf",
-    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:26dd5f0c966de200428b095d64882890a7597706b038cea473170b458f0eb48a",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:fa2599e305d75fc385bded48680b0fe1139ed08755f8ae567e317e262a67e36f",
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:54555de9e2e83f8ab8bda0757338207e44a86935684fec668d7ba4f72df68684",
     "scripts/build_phase3_ifc_query_gui_readiness_receipt.py": "sha256:b6c47721aa4d13ad865c2d6232f64d8e5907f749623492f6a6925927ccf75d99",
-    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:1194ff0fd1f968978fc9540a18c2b92435ab401df93c50c483a797e888df8a59",
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:6a83ed03152c4a7a7390d53ac5018f83468e54211ec325dfa1e348e8bdbed170",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:a7a6f6f415f00b6cd49f68a13f888e29ba32c40f18191340716d7fba367924e4",
     "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:e4ae1d205217a7eab994d1cfbf00579b55a386fbf7e2bec8cf6a1b7bdf608eda",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:1f7e307b69037e4587b9cdf776762e4d4d2cafc6e97e41c795ba74e34c5014e1",
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
     "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py": "sha256:500bbc5fe5a32797e47d6887e42b08f18213907f6ae07e2cadbf77cdb8f910db",
     "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
     "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:77b7a381e438ca48ef3143a1002e585d67aef10717507c1a5568a3f52dfe7065"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:b4dfa3539086d8a2f997457e7b11288e0245e549aa5f3cb8086fd9a4f457f66a"
   },
   "lanes": [
     "buildingsmart-clean-ifc",
@@ -174,22 +173,22 @@
         "license_review_pending",
         "checksum_missing",
         "reference_outputs_missing",
-        "large_model_runner_not_implemented",
         "nightly_lane_not_configured",
         "large_model_execution_receipt_missing",
         "large_model_scorecard_or_review_missing"
       ],
       "checksum_status": "missing_until_source_acquired",
-      "claim_boundary": "OpenSees mega-tall/large-model policy only; this is not a large-model execution, memory, runtime, or accuracy receipt.",
+      "claim_boundary": "OpenSees mega-tall/large-model policy only. A local operator receipt runner exists, but this row is not a large-model execution, memory, runtime, or accuracy receipt.",
       "commercial_use_allowed": false,
       "existing_receipts": [
         {
-          "claim_boundary": "Large-model runner readiness contract only; no acquired source, license approval, checksum, reference output, normalized model, execution, crash/OOM-free result, or scorecard evidence.",
+          "claim_boundary": "Large-model runner readiness contract only; runner command and resource envelope exist, but there is still no acquired source, license approval, checksum, reference output, normalized model, execution, crash/OOM-free result, or scorecard evidence.",
           "contract_pass": false,
           "crash_oom_free_execution_count": 0,
           "current_large_model_execution_receipt_count": 0,
           "path": "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json",
           "required_large_model_count": 2,
+          "runner_command_ready": true,
           "scorecard_or_review_count": 0,
           "status": "blocked"
         }
@@ -435,7 +434,6 @@
       "ifc_query_gui_task_execution_missing",
       "import_health_execution_missing",
       "large_model_execution_receipt_missing",
-      "large_model_runner_not_implemented",
       "large_model_scorecard_or_review_missing",
       "license_or_customer_permission_missing",
       "license_review_pending",
@@ -468,7 +466,7 @@
     "writes_default_artifact_command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py"
   },
   "schema_version": "phase3-benchmark-acquisition-plan.v1",
-  "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
+  "source_commit_sha": "c792bfac657294434479b70ae6ac075d461e070b",
   "source_license_receipt_source_count": 4,
   "status": "blocked",
   "topology_receipt_source_count": 6

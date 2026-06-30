@@ -2,10 +2,8 @@
   "blocked_by": [
     "checksum_missing",
     "large_model_execution_receipt_missing",
-    "large_model_runner_not_implemented",
     "large_model_scorecard_or_review_missing",
     "license_review_pending",
-    "nightly_lane_not_configured",
     "normalization_not_implemented",
     "reference_outputs_missing",
     "source_url_verification_pending"
@@ -13,32 +11,31 @@
   "blockers": [
     "checksum_missing",
     "large_model_execution_receipt_missing",
-    "large_model_runner_not_implemented",
     "large_model_scorecard_or_review_missing",
     "license_review_pending",
-    "nightly_lane_not_configured",
     "normalization_not_implemented",
     "reference_outputs_missing",
     "source_url_verification_pending"
   ],
-  "claim_boundary": "This receipt is a readiness contract for large-model execution evidence. It does not acquire sources, approve licenses, run mega-tall models, prove crash/OOM-free behavior, create scorecards, or close Phase 3/Developer Preview RC.",
+  "claim_boundary": "This receipt is a readiness contract for large-model execution evidence. The runner command and resource envelope are implemented, but this does not acquire sources, approve licenses, run mega-tall models, prove crash/OOM-free behavior, create scorecards, satisfy 2/2 large executions, or close Phase 3/Developer Preview RC.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": false,
   "crash_oom_free_execution_count": 0,
   "current_large_model_execution_receipt_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-22T18:31:52.053976+00:00",
+  "generated_at": "2026-06-30T05:49:34.786779+00:00",
   "input_checksums": {
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:6a83ed03152c4a7a7390d53ac5018f83468e54211ec325dfa1e348e8bdbed170",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:bde370b0efc49e87e704be4c190879c62b932c1416c93a6fe75095a1be185944"
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:a7a6f6f415f00b6cd49f68a13f888e29ba32c40f18191340716d7fba367924e4",
+    "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:b4dfa3539086d8a2f997457e7b11288e0245e549aa5f3cb8086fd9a4f457f66a"
   },
   "lanes": [
     "opensees-megatall",
     "large-model-performance"
   ],
   "large_model_execution_claim": false,
-  "owner_action": "Acquire two licensed large OpenSees/reference models, attach checksums and reference outputs, normalize them into the canonical model, configure the nightly/workstation runner, then attach crash/OOM-free execution receipts and scorecard or approved REVIEW evidence.",
+  "owner_action": "Acquire two licensed large OpenSees/reference models, attach checksums and reference outputs, normalize them into the canonical model, run the operator execution receipt command for each model, then attach crash/OOM-free execution receipts and scorecard or approved REVIEW evidence.",
   "phase3_closure_claim": false,
   "required_evidence": [
     {
@@ -77,20 +74,6 @@
       "status": "missing"
     },
     {
-      "blocker": "large_model_runner_not_implemented",
-      "contract_pass": false,
-      "id": "runner_command",
-      "required": "Repeatable large-model runner command with selected model inputs and output paths.",
-      "status": "missing"
-    },
-    {
-      "blocker": "nightly_lane_not_configured",
-      "contract_pass": false,
-      "id": "resource_envelope",
-      "required": "Declared workstation/nightly CPU, memory, timeout, and artifact retention limits.",
-      "status": "missing"
-    },
-    {
       "blocker": "large_model_execution_receipt_missing",
       "contract_pass": false,
       "id": "execution_receipt",
@@ -103,11 +86,41 @@
       "id": "scorecard_or_review",
       "required": "Large-model scorecard pass or explicit approved REVIEW decision.",
       "status": "missing"
+    },
+    {
+      "blocker": "",
+      "contract_pass": true,
+      "id": "runner_command",
+      "required": "Repeatable large-model runner command with selected model inputs and output paths.",
+      "runner_command_template": "python3 scripts/run_phase3_large_model_execution_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/large_model_execution_receipts/OPERATOR_ATTACHED_CASE_ID.execution_receipt.json --result-out implementation/phase1/release_evidence/productization/large_model_execution_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/large_model_execution_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "runner_script": "scripts/run_phase3_large_model_execution_receipt.py",
+      "status": "ready"
+    },
+    {
+      "blocker": "",
+      "contract_pass": true,
+      "id": "resource_envelope",
+      "required": "Declared workstation/nightly CPU, memory, timeout, and artifact retention limits.",
+      "resource_envelope": {
+        "artifact_retention_policy": "operator_attached_execution_receipt_result_and_validation_report",
+        "default_memory_limit_gb": 64.0,
+        "default_timeout_seconds": 7200,
+        "execution_scope": "operator_workstation_or_scheduled_self_hosted_runner"
+      },
+      "status": "ready"
     }
   ],
   "required_evidence_count": 9,
-  "required_evidence_pass_count": 0,
+  "required_evidence_pass_count": 2,
   "required_large_model_count": 2,
+  "resource_envelope": {
+    "artifact_retention_policy": "operator_attached_execution_receipt_result_and_validation_report",
+    "default_memory_limit_gb": 64.0,
+    "default_timeout_seconds": 7200,
+    "execution_scope": "operator_workstation_or_scheduled_self_hosted_runner"
+  },
+  "runner_command_ready": true,
+  "runner_command_template": "python3 scripts/run_phase3_large_model_execution_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/large_model_execution_receipts/OPERATOR_ATTACHED_CASE_ID.execution_receipt.json --result-out implementation/phase1/release_evidence/productization/large_model_execution_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/large_model_execution_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
   "runner_receipt_template": {
     "case_id": "OPERATOR_ATTACHED_CASE_ID",
     "contract_pass": false,
@@ -128,8 +141,8 @@
   },
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "c792bfac657294434479b70ae6ac075d461e070b",
   "source_id": "opensees_megatall_model_2_large",
   "status": "blocked",
-  "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | evidence=0/9"
+  "summary_line": "Phase 3 large-model runner readiness: BLOCKED | executions=0/2 | evidence=2/9"
 }
