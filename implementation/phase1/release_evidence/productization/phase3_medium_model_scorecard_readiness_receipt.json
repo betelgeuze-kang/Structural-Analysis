@@ -19,12 +19,12 @@
   "current_medium_model_scorecard_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T15:12:10.516629+00:00",
+  "generated_at": "2026-06-30T15:18:47.916654+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
-    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:7bfd18f36aeac9514e79a2f3fc8bf3e6ab6598dd7cf70171c0a0761abf07a70b",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:c3aa9b261fc2f6d90b71898399db38fc0c31650a29dae5645b2bacb2f1379975",
     "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:cc8564b22b2721f405f37fd08b6073bbdb506c57c216a36d5d84658a2c89ab69",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
     "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
@@ -183,7 +183,7 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "cb1de521ab97b5df2bdd8551d48b50b22a697412",
+  "source_commit_sha": "95db1987c1f4e94d919e87aa1d2ccedea3a835fd",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
   "source_url_verified": true,

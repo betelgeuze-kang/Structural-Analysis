@@ -27,9 +27,9 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T14:56:39.678055+00:00",
+  "generated_at": "2026-06-30T15:19:20.292833+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c41f223011772ae4c7eb9adea7ef8db8eee1a9f480e01d97cbf6e8e3b9f39e4f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8b387bcdabce5c0bab0f25d77d34447f83c6bf36bebe850cef093df51fcdb426",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:1f7892e97cf48463be34d701bef93ddc0ffb046aa03824b5401d9231dd62083a",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:c36d2008f233572c0afd1facfcff1ac299e485f3aaa95293d7d3e91bf69388bb"
   },
@@ -756,12 +756,12 @@
       "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "evidence_artifacts": {
-        "github_development_sync_preflight": "/tmp/github_sync_preflight.clean.json",
+        "github_development_sync_preflight": "<live-git-state>",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
         "feature_ahead_count": 2,
-        "main_ahead_count": 43,
+        "main_ahead_count": 49,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -776,7 +776,7 @@
         "approval_phrase": "feature push + main fast-forward 승인",
         "feature_ahead_count": 2,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 43,
+        "main_ahead_count": 49,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -837,12 +837,12 @@
       "blocker_id": "github_sync::github_sync_remote_sync_pending",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "evidence_artifacts": {
-        "github_development_sync_preflight": "/tmp/github_sync_preflight.clean.json",
+        "github_development_sync_preflight": "<live-git-state>",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
         "feature_ahead_count": 2,
-        "main_ahead_count": 43,
+        "main_ahead_count": 49,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -857,7 +857,7 @@
         "approval_phrase": "feature push + main fast-forward 승인",
         "feature_ahead_count": 2,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 43,
+        "main_ahead_count": 49,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -918,12 +918,12 @@
       "blocker_id": "github_sync::github_sync_preflight_not_synced",
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "evidence_artifacts": {
-        "github_development_sync_preflight": "/tmp/github_sync_preflight.clean.json",
+        "github_development_sync_preflight": "<live-git-state>",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
         "feature_ahead_count": 2,
-        "main_ahead_count": 43,
+        "main_ahead_count": 49,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -938,7 +938,7 @@
         "approval_phrase": "feature push + main fast-forward 승인",
         "feature_ahead_count": 2,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 43,
+        "main_ahead_count": 49,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -1231,7 +1231,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "f775668ad48308bab9e6dc328fc1deeffd6e521e",
+  "source_commit_sha": "95db1987c1f4e94d919e87aa1d2ccedea3a835fd",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 12,

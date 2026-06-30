@@ -28,10 +28,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T14:56:39.717737+00:00",
+  "generated_at": "2026-06-30T15:19:20.466217+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7f39549f949d731e55fe69f1de9363c2c7b63e83e350023af6f31906ba761359",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c41f223011772ae4c7eb9adea7ef8db8eee1a9f480e01d97cbf6e8e3b9f39e4f",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:dc6151f10f9703b91c037472a4f614108b1f8236eb8ba03882cdead8b1ae65e2",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8b387bcdabce5c0bab0f25d77d34447f83c6bf36bebe850cef093df51fcdb426",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:c1d51c93e91a69095fab5303dfe3d4331003c783b636386a2b9f26fa03b1d8e0"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -254,7 +254,7 @@
       "owner": "release_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
-        "github_development_sync_preflight": "/tmp/github_sync_preflight.clean.json",
+        "github_development_sync_preflight": "<live-git-state>",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
@@ -288,7 +288,7 @@
       "owner": "release_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
-        "github_development_sync_preflight": "/tmp/github_sync_preflight.clean.json",
+        "github_development_sync_preflight": "<live-git-state>",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
@@ -322,7 +322,7 @@
       "owner": "release_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
-        "github_development_sync_preflight": "/tmp/github_sync_preflight.clean.json",
+        "github_development_sync_preflight": "<live-git-state>",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
@@ -478,7 +478,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "f775668ad48308bab9e6dc328fc1deeffd6e521e",
+  "source_commit_sha": "95db1987c1f4e94d919e87aa1d2ccedea3a835fd",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
