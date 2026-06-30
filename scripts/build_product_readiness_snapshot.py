@@ -468,6 +468,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/build_gpcr_hard_decoy_product_report.py",
             "scripts/build_phase3_large_model_runner_readiness_receipt.py",
             "scripts/build_phase6_benchmark_scale_status.py",
+            "scripts/build_phase6_linux_windows_parity_status.py",
             "scripts/build_pocketmd_lite_product_surface.py",
             "scripts/build_product_capabilities_surface.py",
             "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
@@ -484,6 +485,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/build_public_benchmark_source_of_truth.py",
             "scripts/materialize_public_benchmark_harness_bundle.py",
             "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
+            "scripts/materialize_public_benchmark_phase2_from_rows.py",
         },
         "ux_new_user_observation_report": {
             "scripts/build_ux_new_user_observation_report.py",
