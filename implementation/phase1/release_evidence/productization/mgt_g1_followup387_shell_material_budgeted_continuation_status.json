@@ -2285,7 +2285,7 @@
   "frontier_chain_monotonic_nonincreasing": true,
   "frontier_improvement_inf_n": 17.660102320633595,
   "frontier_relative_improvement": 0.9309818708904479,
-  "generated_at": "2026-06-30T08:44:25.499404+00:00",
+  "generated_at": "2026-06-30T08:53:47.968511+00:00",
   "hip_residual_row_backend": {
     "claim_boundary": "HIP row backend receipts are live descent/saturation evidence only; they do not close G1 unless residual gates and production in-process ROCm/HIP residency are both proven.",
     "contract_pass": false,
@@ -3698,7 +3698,7 @@
   "same_operator_repetition_exhausted": true,
   "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v3",
   "shell_material_tangent_applied": true,
-  "source_commit_sha": "bf26c5ab90a19d63344ba8612e26894dd744ba62",
+  "source_commit_sha": "1454a30b9574a3be9f921cd2187c34e31ca68688",
   "status": "partial",
   "storage_policy": {
     "checkpoint_compactness_unknown_count": 1,
