@@ -272,14 +272,14 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-06-30T16:55:31.301125+00:00",
+  "generated_at": "2026-06-30T16:58:35.564489+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:b999c6ba2aa0efbc176bb14e1803445e13c3af337e7a3a61848a86f68162ffde",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:92c15880827776fb21635a4d9074510099e6009ae1131aa19704c9b67045bc42",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:fd2e1ce0d395751d944c92520f355ed74fead4a17ef1bf20e34b31dba961edd2",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:c610de914991d4ed7b39302c32dd62b1a822011772574efd293a4df5d58e0bbc",
     "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:a5fd06dd1080c4aa37072e7007f8e2c95ab440d5a4047ab9bf3cc6f7087e3860",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:4f392c85a218e41517a062ea18249aa561a457d4749bf5ca0e9673b14e4fa359",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:325f46359a31a11fd1c447ac7c0f06b86c4f7047f570aad2aec538b2f5808de9"
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:f0ef037ce680518fdb13a8ae4ba50c289f4ff9ea604f6d77c3bd45fa6dda81d9"
   },
   "linked_artifacts": {
     "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -413,7 +413,7 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "532085ee8a99b585511c8495eb9e18ce33407b9a",
+  "source_commit_sha": "49cb04ed197d3e7f71cc7774d2110b4307dffade",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
