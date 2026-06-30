@@ -9,6 +9,7 @@
     "required_fields": [
       "case_id",
       "source_family",
+      "benchmark_split",
       "complex_id",
       "protein_structure_path",
       "reference_ligand_path",
@@ -21,7 +22,14 @@
       "pose_success_metric",
       "rmsd_threshold_angstrom"
     ],
+    "supported_benchmark_splits": [
+      "CASF-core",
+      "PDBBind-core",
+      "PDBBind-refined",
+      "PDBBind-general"
+    ],
     "template": {
+      "benchmark_split": "CASF-core",
       "case_id": "casf_pdbbind_subset_001",
       "complex_id": "",
       "ligand_atom_order_contract": {
@@ -49,20 +57,20 @@
   "claim_boundary": "This manifest is a Tier beta source-of-truth seed. It defines the minimum CASF/PDBBind subset contract, operator slots, case-row schema, and validation command, but it does not attach or redistribute public benchmark source files and does not claim benchmark results.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T10:28:24.662618+00:00",
+  "generated_at": "2026-06-30T10:41:26.596470+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:f1dcb245ae52604ca43b5fcc2bce64e9f225adf999334641e74bfa3c371af6eb",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:4f6c70a458fc5ae5ad54967a6009831cad04baac6742863fcb0cdc0322d09ce7",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:f50e05de1631f7edd4df0a4a9e0d8fb579c96400930fc38305fc6814704373d4",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:c7dafeee05237d596817058631ee47991751f921399bf6ea89b87b456dee9c6c",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:be7096a43e4c648a638a1376959c64b5f037383d5c59f545ae671a54e95d86b6",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:147b3fd1bbd0a5edce98ab1657763b0bf79cddbd362da968a591c1a25d107a55",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:031c17195862f073c2d17cdc71bf99e9d6c06517092ae8255dc26f8767d05d2e",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:388a1fc34b73e3dd22c7f1f0c9f7d78bfa71c0bc160ea5b4e55b2292d92c25d0",
-    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:417e27de7f26dd9b87cbe1017630694c9a3c513eb03ce475853f1cde8fd23640",
+    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:6b5cb3f5598d99f62d9eb757b2926febfb9b3899c5ad4d72ea1645cc6da41c7b",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:5d4df26f2457a692c2ee89eb4022c522d57bf2b8a071544e720ec87107b66a79",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:ec73966664649b87554511609cf481a4109f863a462f453c3c261e26cfd72caf",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:eab5faa0e1f3acf11e7779bcd25ccdaa9066092e1fb3754b8e38d1bedb33098d",
-    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:c3b37ea81879e7e477b2de6c646c0afbb5e60300c128dfbf250406487e8ac8bc"
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:29952cfd4fa87521656da83c518c0d860b4f3bf0d7c500d88d15879c57e43616"
   },
   "materialized_case_count": 0,
   "public_benchmark_ready": false,
@@ -81,6 +89,7 @@
       "required_case_count": 6,
       "required_fields": [
         "complex_id",
+        "benchmark_split",
         "protein_structure_path",
         "reference_ligand_path",
         "predicted_ligand_path_or_docking_run_id",
@@ -108,6 +117,7 @@
       "required_case_count": 6,
       "required_fields": [
         "complex_id",
+        "benchmark_split",
         "protein_structure_path",
         "reference_ligand_path",
         "predicted_ligand_path_or_docking_run_id",
@@ -125,7 +135,7 @@
       "status": "source_material_required"
     }
   ],
-  "source_commit_sha": "09767241b73712a55237037fc8b12022d03d0944",
+  "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
   "source_families": [
     "CASF/PDBBind"
   ],

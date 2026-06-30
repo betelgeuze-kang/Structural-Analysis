@@ -24,10 +24,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T10:28:24.947501+00:00",
+  "generated_at": "2026-06-30T10:41:26.875292+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e5d401b17227ab48ac7aa25681f0545bd79ff3228f67e3987dbcd9d07bb898aa",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:23df1458ee4083a3f0e4b9ec5a4785571c085d7ee5a4aba7d98763f0d820b0a0",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:dbc55b3b28002b7d637544de7ad74aa8e0ee2cedbffa1f314ad15106d2fe5b3b",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:05c09271c46d4a1f65602c98e18ca7a2b03c976a8f348f8afb10316977e7fd12",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -196,6 +196,12 @@
             "provenance_ref"
           ],
           "source_family": "CASF/PDBBind",
+          "supported_benchmark_splits": [
+            "CASF-core",
+            "PDBBind-core",
+            "PDBBind-refined",
+            "PDBBind-general"
+          ],
           "symmetry_permutation_contract_fields": [
             "permutations"
           ]
@@ -230,6 +236,12 @@
           "provenance_ref"
         ],
         "source_family": "CASF/PDBBind",
+        "supported_benchmark_splits": [
+          "CASF-core",
+          "PDBBind-core",
+          "PDBBind-refined",
+          "PDBBind-general"
+        ],
         "symmetry_permutation_contract_fields": [
           "permutations"
         ]
@@ -970,7 +982,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "09767241b73712a55237037fc8b12022d03d0944",
+  "source_commit_sha": "b437499780a4611c8f1c6763511312c6b44fc233",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
