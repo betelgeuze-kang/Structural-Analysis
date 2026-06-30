@@ -83,14 +83,14 @@
     "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
     "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
   },
-  "generated_at": "2026-06-30T13:58:09.990501+00:00",
+  "generated_at": "2026-06-30T20:49:26.989255+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
-    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:b5701fe501c7f9b12e4b2f84355014429406e83876c428c8c294d9d962dc0bf9",
+    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:8d1c78df9727d214853891281ab90450012ea2ee9b01413cecbe2e3ac02ba89d",
     "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json": "missing",
-    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:1d0d4e426748f38891d376fa75aeee9fde33c6d7a8a6f1d1760b9834deb1bc53"
+    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:f0164cc4c239addf120dc84466043b77b66d69fc16178e118bbc46b53b429244"
   },
   "linux_local_replay_receipt_source": {
     "claim_boundary": "Linux local replay evidence is limited to the isolated minimal worktree-copy clean-checkout receipt and does not satisfy Windows parity or the git clean-clone gate.",
@@ -99,6 +99,97 @@
     "receipt": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
     "status": "pass"
   },
+  "missing_platform_receipt_handoff": [
+    {
+      "claim_boundary": "This handoff is an operator checklist for the missing platform receipt. It is not a platform replay receipt and cannot close Linux/Windows parity until the receipt exists and passes the parity status check.",
+      "comparison_requirements": [
+        "same source_commit_sha or explicit commit mapping",
+        "same expected_scorecard.case_count",
+        "same expected_scorecard.pass_count",
+        "same expected_scorecard.lane_case_counts",
+        "same residual_formula",
+        "stable manifest and scorecard SHA256 values",
+        "working_tree_clean=true and local_dirty_inputs=[]"
+      ],
+      "contract_pass": false,
+      "expected_scorecard": {
+        "case_count": 30,
+        "expected_output_comparison_count": 88,
+        "expected_output_comparison_pass_count": 88,
+        "expected_output_contract_pass": true,
+        "fallback_used": false,
+        "lane_case_counts": {
+          "analytic-small": 20,
+          "element-patch": 6,
+          "nonlinear-material-mesh": 4
+        },
+        "lanes": [
+          "analytic-small",
+          "element-patch",
+          "nonlinear-material-mesh"
+        ],
+        "pass_count": 30,
+        "regularization_used": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "status": "pass"
+      },
+      "forbidden_shortcuts": [
+        "do_not_copy_linux_receipt_as_windows_receipt",
+        "do_not_set_contract_pass_true_without_command_return_code_zero",
+        "do_not_omit_stable_artifact_checksums",
+        "do_not_attach_dirty_worktree_receipt"
+      ],
+      "platform": "windows",
+      "receipt_path": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+      "required_receipt_fields": [
+        "commands",
+        "contract_pass",
+        "expected_scorecard",
+        "local_dirty_inputs",
+        "node_version",
+        "os_name",
+        "os_version",
+        "platform",
+        "python_version",
+        "schema_version",
+        "source_commit_sha",
+        "stable_artifact_checksums",
+        "working_tree_clean"
+      ],
+      "required_replay_commands": [
+        {
+          "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+          "return_code": 0
+        },
+        {
+          "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+          "return_code": 0
+        }
+      ],
+      "required_source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
+      "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+      "stable_artifact_checksums": {
+        "acquisition_plan": "sha256:2c982cafb73081f84d1919c4fbef14d14a751d3db05537cea73080a9366c7605",
+        "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:dd8ad8cc5bade75c330325f2d29e321d92740689276801a590457b6c5cd19e78",
+        "buildingsmart_ifc_acquisition_receipt": "sha256:910cfd845f209a4c0c03b3c6dd1565d21380b7df8789a0a330ec84e88853d23c",
+        "commercial_comparison_import_template": "sha256:98a365cc85d8470885b63542126f787b60c4dd3dd227d943d6422dc8a1c81545",
+        "commercial_operator_reference_contract": "sha256:f27071cf289f79af09a03f36f53352cad7b54aabfe8ee612a6056020d371be0f",
+        "commercial_operator_reference_ingest_validator": "sha256:efca0f0ebf5fa8b12c9f17965811d1033f88f208ad93b9737aa8fbc4d127cf61",
+        "ifc_import_health_execution_receipt": "sha256:ebf219b0177c66942bfcec2322b9fe96e2cdceb421b9230ae829b19e4dd0efe5",
+        "ifc_source_license_receipt": "sha256:bf2042aa8e5713e7c8f9d08813e6cd96b761d8c092577639d483432807838d3a",
+        "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+        "opensees_source_license_receipt": "sha256:926605c8f6cfc93ee2b5efa0a5df1fc37fb3a6b0a002696e7d276cf74773bc51",
+        "phase4_analytic_physical_fallback_scorecard": "sha256:573aa7d043f5fe297fead2d6f016d03a58a690d5e1e4817e33bdb80f84e5ee57",
+        "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+        "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
+      },
+      "status": "operator_receipt_required",
+      "validation_commands_after_attachment": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    }
+  ],
   "missing_platform_receipts": [
     "windows"
   ],
@@ -236,7 +327,7 @@
   "reuse_policy": "phase6_parity_status_aggregates_phase3_seed_replay_expectations",
   "reused_evidence": true,
   "schema_version": "phase6-linux-windows-parity-status.v1",
-  "source_commit_sha": "cde7573e4c67f5e33dce7d06c76a823bae7b6d3e",
+  "source_commit_sha": "720f798d7dec5c0c32dc1cb19a37f0c89d94c3f2",
   "status": "blocked",
   "summary_line": "Phase 6 Linux/Windows parity: BLOCKED | receipts=1/2 | missing=windows"
 }

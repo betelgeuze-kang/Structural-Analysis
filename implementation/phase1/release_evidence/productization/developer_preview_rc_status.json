@@ -505,11 +505,11 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-06-30T20:31:43.481852+00:00",
+  "generated_at": "2026-06-30T20:49:46.876200+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:5b366080328b499aa619fee868dec897b0692ecb6a6a4d7a34a85d857bf49063",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:ac976331b98aed1add680e83e2026d05ec38434d804913902293e76d489ac6cc",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f52345fe6b6cd6fe0cbb2fa78c0c8ee1f02174dcdf5a14e98dd57043b734a3b1",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:5b9bcd27c9b93c425c1b2c839864d154285405aeadde999b9f2424ab29967452",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:69d1d2cc6e3db8fee4c4857c2e703e34db981fe807af5479766b179b36e010e6",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4d1d5489b9c5dd4f2b89948337c509f2d4199014270972a3bf9c826278b65f3e",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:55d2922f91d04c9ed411d98e4d710442f1774749795f76eb103203ecd87e6ee1",
@@ -527,7 +527,7 @@
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
     "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:384b6ec2fa0fbb31930c762c5da948929e53603cb3c48e1b53e699574b95da9c",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
-    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:dff6c1cef6ccb521873edff9bb46d1d9de3c6cb173bed47cc46144133f8cbeb3",
+    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:8c456eec13f2b3a47efa4e17d1fc838d0e3deb093bfe93fca5eae62d0d7ce7d1",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:cc5edab07c763d44c75f7005eca66f235afb0d81ef4bc21115f60bfea8459790",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:29a089f90646c75733a4eb5900ae0d1129ebedc13b6990c894915c2958c30be1",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
@@ -1604,6 +1604,97 @@
         "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
       },
       "git_clean_clone_receipt": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
+      "missing_platform_receipt_handoff": [
+        {
+          "claim_boundary": "This handoff is an operator checklist for the missing platform receipt. It is not a platform replay receipt and cannot close Linux/Windows parity until the receipt exists and passes the parity status check.",
+          "comparison_requirements": [
+            "same source_commit_sha or explicit commit mapping",
+            "same expected_scorecard.case_count",
+            "same expected_scorecard.pass_count",
+            "same expected_scorecard.lane_case_counts",
+            "same residual_formula",
+            "stable manifest and scorecard SHA256 values",
+            "working_tree_clean=true and local_dirty_inputs=[]"
+          ],
+          "contract_pass": false,
+          "expected_scorecard": {
+            "case_count": 30,
+            "expected_output_comparison_count": 88,
+            "expected_output_comparison_pass_count": 88,
+            "expected_output_contract_pass": true,
+            "fallback_used": false,
+            "lane_case_counts": {
+              "analytic-small": 20,
+              "element-patch": 6,
+              "nonlinear-material-mesh": 4
+            },
+            "lanes": [
+              "analytic-small",
+              "element-patch",
+              "nonlinear-material-mesh"
+            ],
+            "pass_count": 30,
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "status": "pass"
+          },
+          "forbidden_shortcuts": [
+            "do_not_copy_linux_receipt_as_windows_receipt",
+            "do_not_set_contract_pass_true_without_command_return_code_zero",
+            "do_not_omit_stable_artifact_checksums",
+            "do_not_attach_dirty_worktree_receipt"
+          ],
+          "platform": "windows",
+          "receipt_path": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+          "required_receipt_fields": [
+            "commands",
+            "contract_pass",
+            "expected_scorecard",
+            "local_dirty_inputs",
+            "node_version",
+            "os_name",
+            "os_version",
+            "platform",
+            "python_version",
+            "schema_version",
+            "source_commit_sha",
+            "stable_artifact_checksums",
+            "working_tree_clean"
+          ],
+          "required_replay_commands": [
+            {
+              "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+              "return_code": 0
+            },
+            {
+              "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+              "return_code": 0
+            }
+          ],
+          "required_source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
+          "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+          "stable_artifact_checksums": {
+            "acquisition_plan": "sha256:2c982cafb73081f84d1919c4fbef14d14a751d3db05537cea73080a9366c7605",
+            "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:dd8ad8cc5bade75c330325f2d29e321d92740689276801a590457b6c5cd19e78",
+            "buildingsmart_ifc_acquisition_receipt": "sha256:910cfd845f209a4c0c03b3c6dd1565d21380b7df8789a0a330ec84e88853d23c",
+            "commercial_comparison_import_template": "sha256:98a365cc85d8470885b63542126f787b60c4dd3dd227d943d6422dc8a1c81545",
+            "commercial_operator_reference_contract": "sha256:f27071cf289f79af09a03f36f53352cad7b54aabfe8ee612a6056020d371be0f",
+            "commercial_operator_reference_ingest_validator": "sha256:efca0f0ebf5fa8b12c9f17965811d1033f88f208ad93b9737aa8fbc4d127cf61",
+            "ifc_import_health_execution_receipt": "sha256:ebf219b0177c66942bfcec2322b9fe96e2cdceb421b9230ae829b19e4dd0efe5",
+            "ifc_source_license_receipt": "sha256:bf2042aa8e5713e7c8f9d08813e6cd96b761d8c092577639d483432807838d3a",
+            "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+            "opensees_source_license_receipt": "sha256:926605c8f6cfc93ee2b5efa0a5df1fc37fb3a6b0a002696e7d276cf74773bc51",
+            "phase4_analytic_physical_fallback_scorecard": "sha256:573aa7d043f5fe297fead2d6f016d03a58a690d5e1e4817e33bdb80f84e5ee57",
+            "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+            "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
+          },
+          "status": "operator_receipt_required",
+          "validation_commands_after_attachment": [
+            "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check"
+          ]
+        }
+      ],
       "missing_platform_receipts": [
         "windows"
       ],
@@ -2398,6 +2489,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "dab0a39284c52aa731224f66d92a0becdc54149f",
+  "source_commit_sha": "720f798d7dec5c0c32dc1cb19a37f0c89d94c3f2",
   "status": "blocked"
 }

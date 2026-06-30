@@ -2,7 +2,7 @@
 
 - `contract_pass`: `True`
 - `reason_code`: `PASS`
-- `current_source_commit_sha`: `dab0a39284c52aa731224f66d92a0becdc54149f`
+- `current_source_commit_sha`: `720f798d7dec5c0c32dc1cb19a37f0c89d94c3f2`
 - `blockers`: `none`
 
 | Artifact | Status | Blockers | Newer Dependencies |
@@ -21,6 +21,7 @@
 | `developer_preview_rc_status` | `pass` | `none` | none |
 | `public_benchmark_source_of_truth` | `pass` | `none` | none |
 | `public_benchmark_harness_bundle` | `pass` | `none` | none |
+| `public_benchmark_phase2_row_audit` | `pass` | `none` | none |
 | `accuracy_parity_scorecard` | `pass` | `none` | none |
 | `product_production_ai_checkpoint_readiness` | `pass` | `none` | none |
 | `science_actual_closure_row_audit` | `pass` | `none` | none |

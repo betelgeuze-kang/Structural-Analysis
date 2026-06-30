@@ -1,0 +1,182 @@
+{
+  "blockers": [
+    "casf_pdbbind_pose_success_harness::subset_rows_not_provided",
+    "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
+    "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
+    "posebusters_style_pose_validity::pose_rows_not_provided",
+    "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+    "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+  ],
+  "claim_boundary": "This runner only materializes operator-attached public benchmark row files through the existing Public Benchmark harness materializers. It does not download CASF/PDBBind, DUD-E, or LIT-PCBA data, approve licenses, run docking engines, infer chemistry, or treat fixture/proxy rows as actual Phase 2 evidence.",
+  "component_count": 5,
+  "component_ready_count": 0,
+  "components": [
+    {
+      "blockers": [
+        "subset_rows_not_provided",
+        "pose_rows_not_provided"
+      ],
+      "component_id": "casf_pdbbind_pose_success_harness",
+      "contract_pass": false,
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "materialized": false,
+      "missing_row_inputs": [
+        "subset_rows",
+        "pose_rows"
+      ],
+      "outputs": {},
+      "ready": false,
+      "required_row_inputs": [
+        "subset_rows",
+        "pose_rows"
+      ],
+      "status": "operator_evidence_required"
+    },
+    {
+      "blockers": [
+        "pose_rows_not_provided"
+      ],
+      "component_id": "symmetry_aware_ligand_rmsd",
+      "contract_pass": false,
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "materialized": false,
+      "missing_row_inputs": [
+        "pose_rows"
+      ],
+      "outputs": {},
+      "ready": false,
+      "required_row_inputs": [
+        "pose_rows"
+      ],
+      "status": "operator_evidence_required"
+    },
+    {
+      "blockers": [
+        "pose_rows_not_provided"
+      ],
+      "component_id": "posebusters_style_pose_validity",
+      "contract_pass": false,
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "materialized": false,
+      "missing_row_inputs": [
+        "pose_rows"
+      ],
+      "outputs": {},
+      "ready": false,
+      "required_row_inputs": [
+        "pose_rows"
+      ],
+      "status": "operator_evidence_required"
+    },
+    {
+      "blockers": [
+        "vina_gnina_rows_not_provided"
+      ],
+      "component_id": "vina_gnina_comparison_adapter",
+      "contract_pass": false,
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "materialized": false,
+      "missing_row_inputs": [
+        "vina_gnina_rows"
+      ],
+      "outputs": {},
+      "ready": false,
+      "required_row_inputs": [
+        "vina_gnina_rows"
+      ],
+      "status": "operator_evidence_required"
+    },
+    {
+      "blockers": [
+        "enrichment_rows_not_provided"
+      ],
+      "component_id": "dud_e_or_lit_pcba_enrichment",
+      "contract_pass": false,
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "materialized": false,
+      "missing_row_inputs": [
+        "enrichment_rows"
+      ],
+      "outputs": {},
+      "ready": false,
+      "required_row_inputs": [
+        "enrichment_rows"
+      ],
+      "status": "operator_evidence_required"
+    }
+  ],
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-30T20:49:34.368202+00:00",
+  "input_checksums": {
+    "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:76211b24aecd3975d2ce64329d585d53fd7f2294e21bfa6dd80c5b5a58292684",
+    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:90625fca52b30ddc76459bc9b7116b3a8d2b99ebc9f4ac0c023433700b1b8c93",
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:8336e68c70d4b50879e8e83a970fe85fa2530d3ce2655d1c7d889156acc141cd"
+  },
+  "missing_row_inputs": [
+    "subset_rows",
+    "pose_rows",
+    "enrichment_rows",
+    "vina_gnina_rows"
+  ],
+  "outputs": {},
+  "phase2_ready": false,
+  "required_phase2_components": [
+    {
+      "artifact_role": "pose_success_harness",
+      "component_id": "casf_pdbbind_pose_success_harness",
+      "count_field": "real_benchmark_case_count",
+      "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+      "ready_field": "pose_success_harness_ready",
+      "required_minimum_count": 1,
+      "requirement": "CASF/PDBBind pose-success harness"
+    },
+    {
+      "artifact_role": "rmsd_scorecard",
+      "component_id": "symmetry_aware_ligand_rmsd",
+      "count_field": "real_benchmark_case_count",
+      "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+      "ready_field": "scorecard_ready",
+      "required_minimum_count": 1,
+      "requirement": "Symmetry-aware ligand RMSD scorecard"
+    },
+    {
+      "artifact_role": "pose_validity_packet",
+      "component_id": "posebusters_style_pose_validity",
+      "count_field": "real_benchmark_case_count",
+      "criterion_id": "posebusters_style_pose_validity_ready",
+      "ready_field": "posebusters_validity_ready",
+      "required_minimum_count": 1,
+      "requirement": "PoseBusters-style pose validity packet"
+    },
+    {
+      "artifact_role": "vina_gnina_comparison_adapter",
+      "component_id": "vina_gnina_comparison_adapter",
+      "count_field": "real_comparison_case_count",
+      "criterion_id": "vina_gnina_comparison_ready",
+      "ready_field": "public_benchmark_engine_comparison_ready",
+      "required_minimum_count": 1,
+      "requirement": "Vina/GNINA comparison adapter"
+    },
+    {
+      "artifact_role": "enrichment_scorecard",
+      "component_id": "dud_e_or_lit_pcba_enrichment",
+      "count_field": "real_enrichment_target_count",
+      "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+      "ready_field": "public_benchmark_enrichment_ready",
+      "required_minimum_count": 1,
+      "requirement": "DUD-E or LIT-PCBA enrichment scorecard"
+    }
+  ],
+  "reuse_policy": "public_benchmark_phase2_row_audit_from_operator_rows",
+  "reused_evidence": false,
+  "row_input_contract": {
+    "enrichment_rows": "DUD-E/LIT-PCBA enrichment rows",
+    "pose_rows": "CASF/PDBBind pose-coordinate rows",
+    "subset_rows": "CASF/PDBBind subset rows",
+    "vina_gnina_rows": "Vina/GNINA engine comparison rows"
+  },
+  "schema_version": "public-benchmark-phase2-row-audit.v1",
+  "source_commit_sha": "720f798d7dec5c0c32dc1cb19a37f0c89d94c3f2",
+  "status": "operator_evidence_required"
+}
