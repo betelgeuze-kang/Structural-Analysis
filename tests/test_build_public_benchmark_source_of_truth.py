@@ -765,10 +765,17 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert enrichment["contract_pass"] is False
     assert enrichment["public_benchmark_enrichment_ready"] is False
     assert enrichment["real_enrichment_target_count"] == 0
+    assert enrichment["benchmark_family_target_counts"] == {}
     assert enrichment["target_rows"] == []
+    assert enrichment["summary"]["missing_supported_families"] == ["DUD-E", "LIT-PCBA"]
     assert enrichment["materializer"]["schema_version"] == (
         "public-benchmark-enrichment-materialization.v1"
     )
+    assert enrichment["materializer"]["family_coverage_fields"] == [
+        "benchmark_family_target_counts",
+        "covered_supported_family_count",
+        "missing_supported_families",
+    ]
     assert enrichment["materializer"]["source_checksum_policy"] == {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
         "required_receipt_field": "source_checksum",

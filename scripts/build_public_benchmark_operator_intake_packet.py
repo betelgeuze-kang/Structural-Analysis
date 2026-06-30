@@ -869,6 +869,11 @@ def build_public_benchmark_operator_intake_packet(
             minimum_evidence={
                 "ready_target_count": 1,
                 "supported_families": list(SUPPORTED_FAMILIES),
+                "family_coverage_fields": [
+                    "benchmark_family_target_counts",
+                    "covered_supported_family_count",
+                    "missing_supported_families",
+                ],
                 "required_molecule_fields": list(REQUIRED_MOLECULE_FIELDS),
                 "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
                 "receipt_fields": [

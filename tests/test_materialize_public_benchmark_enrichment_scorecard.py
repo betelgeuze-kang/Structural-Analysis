@@ -86,15 +86,19 @@ def test_public_benchmark_enrichment_materializer_scores_targets() -> None:
     assert scorecard["contract_pass"] is True
     assert scorecard["public_benchmark_enrichment_ready"] is True
     assert scorecard["real_enrichment_target_count"] == 2
+    assert scorecard["benchmark_family_target_counts"] == {"DUD-E": 1, "LIT-PCBA": 1}
     assert scorecard["blockers"] == []
     assert scorecard["summary"] == {
         "active_count": 3,
         "benchmark_families": ["DUD-E", "LIT-PCBA"],
         "benchmark_family_count": 2,
+        "benchmark_family_target_counts": {"DUD-E": 1, "LIT-PCBA": 1},
         "blocker_count": 0,
+        "covered_supported_family_count": 2,
         "decoy_count": 5,
         "enrichment_factor_1pct_median": 3.0,
         "enrichment_factor_5pct_median": 3.0,
+        "missing_supported_families": [],
         "molecule_count": 8,
         "ready_target_count": 2,
         "roc_auc_median": 1.0,

@@ -203,6 +203,11 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     ]
     assert packet["supported_enrichment_families"] == ["DUD-E", "LIT-PCBA"]
     assert packet["required_molecule_fields"] == ["molecule_id", "is_active", "score"]
+    assert enrichment["minimum_evidence"]["family_coverage_fields"] == [
+        "benchmark_family_target_counts",
+        "covered_supported_family_count",
+        "missing_supported_families",
+    ]
     assert enrichment["minimum_evidence"]["source_checksum_policy"] == {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
         "required_receipt_field": "source_checksum",

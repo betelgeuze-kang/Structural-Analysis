@@ -98,6 +98,16 @@ def _median(values: list[float]) -> float | None:
     return (ordered[midpoint - 1] + ordered[midpoint]) / 2.0
 
 
+def _counts_by_key(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        value = _string(row.get(key))
+        if not value:
+            continue
+        counts[value] = counts.get(value, 0) + 1
+    return dict(sorted(counts.items()))
+
+
 def _roc_auc(
     *,
     active_scores: list[float],
@@ -295,9 +305,18 @@ def _score_target(row: dict[str, Any], *, index: int) -> dict[str, Any]:
 
 def _summary(rows: list[dict[str, Any]], blockers: list[str]) -> dict[str, Any]:
     families = sorted({row["benchmark_family"] for row in rows if row["benchmark_family"]})
+    family_target_counts = _counts_by_key(rows, "benchmark_family")
+    missing_supported_families = [
+        family for family in SUPPORTED_FAMILIES if family not in family_target_counts
+    ]
     return {
         "benchmark_family_count": len(families),
         "benchmark_families": families,
+        "benchmark_family_target_counts": family_target_counts,
+        "covered_supported_family_count": len(
+            [family for family in SUPPORTED_FAMILIES if family in family_target_counts]
+        ),
+        "missing_supported_families": missing_supported_families,
         "target_count": len(rows),
         "ready_target_count": sum(1 for row in rows if row["contract_pass"]),
         "molecule_count": sum(int(row.get("molecule_count") or 0) for row in rows),
@@ -356,6 +375,7 @@ def materialize_enrichment_scorecard(
         "contract_pass": enrichment_ready,
         "public_benchmark_enrichment_ready": enrichment_ready,
         "real_enrichment_target_count": len(rows),
+        "benchmark_family_target_counts": summary["benchmark_family_target_counts"],
         "target_rows": rows,
         "summary": summary,
         "required_target_fields": list(REQUIRED_TARGET_FIELDS),
@@ -369,6 +389,7 @@ def materialize_enrichment_scorecard(
             "operator_target_count": len(raw_targets),
             "materialized_target_count": len(rows),
             "ready_target_count": summary["ready_target_count"],
+            "benchmark_family_target_counts": summary["benchmark_family_target_counts"],
             "blocker_count": len(blockers),
             "public_benchmark_enrichment_ready": enrichment_ready,
         },

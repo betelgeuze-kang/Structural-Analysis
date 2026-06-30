@@ -48,6 +48,7 @@ from materialize_public_benchmark_rmsd_scorecard import (  # noqa: E402
 )
 from materialize_public_benchmark_enrichment_scorecard import (  # noqa: E402
     SCHEMA_VERSION as ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
+    SUPPORTED_FAMILIES,
 )
 from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa: E402
     ADAPTER_SCHEMA_VERSION as VINA_GNINA_ADAPTER_SCHEMA_VERSION,
@@ -479,10 +480,14 @@ def build_enrichment_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "contract_pass": False,
         "public_benchmark_enrichment_ready": False,
         "real_enrichment_target_count": 0,
+        "benchmark_family_target_counts": {},
         "target_rows": [],
         "summary": {
             "benchmark_family_count": 0,
             "benchmark_families": [],
+            "benchmark_family_target_counts": {},
+            "covered_supported_family_count": 0,
+            "missing_supported_families": list(SUPPORTED_FAMILIES),
             "target_count": 0,
             "ready_target_count": 0,
             "molecule_count": 0,
@@ -507,6 +512,12 @@ def build_enrichment_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "provenance_ref",
             ],
             "required_molecule_fields": ["molecule_id", "is_active", "score"],
+            "supported_families": list(SUPPORTED_FAMILIES),
+            "family_coverage_fields": [
+                "benchmark_family_target_counts",
+                "covered_supported_family_count",
+                "missing_supported_families",
+            ],
             "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             "materialization_command": (
                 "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py "
