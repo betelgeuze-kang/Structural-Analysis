@@ -133,6 +133,24 @@ DERIVED_CHECK_SPECS = (
         "check": "workflow_step_placeholders_absent",
         "owner_note": "Template workflow step placeholders must be replaced with real observed outcomes.",
     },
+    {
+        "field": "evidence_ref_resolvable",
+        "required_value": "https URL, ticket/jira/ux/user-study reference, or existing local evidence path",
+        "check": "evidence_ref_resolvable_pass",
+        "owner_note": "The 30-minute sample must point to a retrievable note, ticket, recording, or signed bundle.",
+    },
+    {
+        "field": "evidence_ref_not_self_reference",
+        "required_value": "evidence_ref must not point back to the observation JSON itself",
+        "check": "evidence_ref_not_self_reference_pass",
+        "owner_note": "Self-references do not prove that separate human-observation evidence exists.",
+    },
+    {
+        "field": "evidence_ref_not_template_reference",
+        "required_value": "evidence_ref must not point to the UX observation template",
+        "check": "evidence_ref_not_template_reference_pass",
+        "owner_note": "Templates are owner input aids, not human observation evidence.",
+    },
 )
 
 
@@ -205,6 +223,16 @@ def _current_value(field: str, observation: dict[str, Any], summary: dict[str, A
         )
     if field == "workflow_step_placeholders":
         return summary.get("placeholder_workflow_steps")
+    if field == "evidence_ref_resolvable":
+        return (
+            f"ref={summary.get('evidence_ref', '')}; "
+            f"kind={summary.get('evidence_ref_kind', '')}; "
+            f"resolved={summary.get('evidence_ref_resolved_path', '')}"
+        )
+    if field == "evidence_ref_not_self_reference":
+        return summary.get("evidence_ref_resolved_path", "")
+    if field == "evidence_ref_not_template_reference":
+        return summary.get("evidence_ref_resolved_path", "")
     return observation.get(field)
 
 
@@ -279,6 +307,9 @@ def build_packet(
             "missing_workflow_steps": summary.get("missing_workflow_steps", []),
             "not_passed_workflow_steps": summary.get("not_passed_workflow_steps", []),
             "placeholder_workflow_steps": summary.get("placeholder_workflow_steps", []),
+            "evidence_ref": summary.get("evidence_ref", ""),
+            "evidence_ref_kind": summary.get("evidence_ref_kind", ""),
+            "evidence_ref_resolved_path": summary.get("evidence_ref_resolved_path", ""),
         },
         "field_rows": field_rows,
         "current_blockers": blockers,
