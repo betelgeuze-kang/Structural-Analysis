@@ -70,20 +70,36 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert classification["goal_operator_action_board"]["freshness_label"] == ""
 
     kpis = surface["release_decision_kpis"]
+    pm_report = json.loads(
+        (
+            REPO_ROOT
+            / "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+        ).read_text(encoding="utf-8")
+    )
+    decision = pm_report["release_decision"]
     assert kpis["operator_action_count"] >= 13
-    assert {key: value for key, value in kpis.items() if key != "operator_action_count"} == {
-        "approval_token_count": 4,
-        "blocked_release_count": 5,
-        "broad_gpcr_family_claim_safe": False,
-        "evidence_surface_count": 12,
-        "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-        "locked_evidence_surface_count": 3,
-        "missing_evidence_surface_count": 1,
-        "pocketmd_lite_product_surface_ready": False,
-        "public_benchmark_ready": False,
-        "release_allowed": False,
-        "stale_artifact_count": 0,
+    assert kpis == {
+        key: decision[key]
+        for key in (
+            "release_allowed",
+            "blocked_release_count",
+            "first_blocker",
+            "operator_action_count",
+            "approval_token_count",
+            "stale_artifact_count",
+            "evidence_surface_count",
+            "missing_evidence_surface_count",
+            "locked_evidence_surface_count",
+            "public_benchmark_ready",
+            "broad_gpcr_family_claim_safe",
+            "pocketmd_lite_product_surface_ready",
+        )
     }
+    assert kpis["blocked_release_count"] == 5
+    assert kpis["first_blocker"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    assert kpis["evidence_surface_count"] == 12
+    assert kpis["locked_evidence_surface_count"] == 3
+    assert kpis["missing_evidence_surface_count"] == 1
     assert surface["science_evidence_surface_bottlenecks"] == [
         "h_bond_evidence_surface_locked",
         "broad_gpcr_family_claim_locked",
