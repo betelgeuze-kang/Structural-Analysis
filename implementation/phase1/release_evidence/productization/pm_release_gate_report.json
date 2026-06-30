@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-30T12:21:17.566153+00:00",
+  "generated_at": "2026-06-30T12:30:50.589206+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -104,18 +104,19 @@
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:864872e93c228870192774dac70e68203ceba94ec233611315fe34d30a2a7bfd",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:110efb7e3ff7194a2fd29c995f7551f89f3b8206aa513d758adf164ceb0dc924",
+    "implementation/phase1/release_evidence/productization/github_development_sync_preflight_report.json": "sha256:1f2524a31ad2d631a223abd182ca37a458e690bb35b080462ab8becd34b913fc",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:276ec135e789575bd4d715300f08db8439ef62fc1468c2b12d2fef894988c16e",
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
-    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:a54a039c62ea7d3bafef16ce4d23279884b8330c70c8bcc594b3d8157dbd72c3",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:9748264769cd11e961c38f1ac3e50a4eec100b5c80913fca4d49614cdb5b1327",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:371ba4640a423545b70fc4ff3283a49be16c9a5d1640c5ed7e253fbffbbd2e75",
+    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:9ce3e7868e74f6e87c1c79955d2350c9fa474e654349fb7ab833d5856bc895bb",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:dec98baee9fb0bb84559de7911bd72f82a68be4a6ee71cad43ef3b6bc2f5735e",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:491141ad24c4b7cdb99d2f9239788d5151c825c340022e316adadcd89c901763",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:3f79df66b36a7a48c649b95ca9438b40cc697eb471079191cd81f0a790d6cc1d",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:76490f85bb173f527bae634e350614f5579930f014f79430a80992d85f4f4b5b",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d10958716840eb61004bb44d650150c08ca3898432abff8a1d31f706eeabc6f1",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:5fdd70d8fd594296119525b1d084ee680c2ac8d158d3a9df0961eb24fd073dcd",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:2079ed18be6d49f6c97e6c64e609b5bd0c0a3b0aa08ce4297417bb58e27eb7c7",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -129,7 +130,7 @@
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:0d57c89df5c33d8fba0557d7f8cf421c301ed4bfe754a95b892df3abecaca0ed",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:856c8f6f594f19ceb28cb24fd8fd87c4c008ccf11e9ac9dd87aca35c209f1adc",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:f570ae386e18f9c1898960f241f201abac05149d6f026affeee8e3e70bceac66",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:59bdd1681def4ab265fa78c175c140670570803b0e86680947e5d1b33e173273",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
@@ -337,13 +338,13 @@
         ],
         "pm_blocker_closure_board_external_owner_input_ready_count": 9,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
-        "pm_blocker_closure_board_handoff_ready_count": 9,
-        "pm_blocker_closure_board_open_blocker_count": 9,
+        "pm_blocker_closure_board_handoff_ready_count": 10,
+        "pm_blocker_closure_board_open_blocker_count": 10,
         "pm_blocker_register_external_owner_input_ready_count": 9,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 9,
-        "pm_blocker_register_open_blocker_count": 9,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 10,
+        "pm_blocker_register_open_blocker_count": 10,
+        "pm_blocker_register_release_area_blocker_count": 6,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
         "pm_release_reproduction_command_audit_command_count": 320,
         "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=320 | violations=0",
@@ -514,7 +515,7 @@
       "summary": {
         "artifact_count": 15,
         "blocker_count": 0,
-        "current_source_commit_sha": "d183d78fbf1cc5edfc4dd95c79e471d72da30b84",
+        "current_source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
         "max_age_days": 30.0,
         "pass_count": 15
       },
@@ -839,13 +840,13 @@
         "one_click_failure_bundle_archive_sha256": "f91e91271f7059a5f91b522c2633ceccb83f00336b6d11cf8c2bbc3e2895ba14",
         "pm_blocker_closure_board_external_owner_input_ready_count": 9,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
-        "pm_blocker_closure_board_handoff_ready_count": 9,
-        "pm_blocker_closure_board_open_blocker_count": 9,
+        "pm_blocker_closure_board_handoff_ready_count": 10,
+        "pm_blocker_closure_board_open_blocker_count": 10,
         "pm_blocker_register_external_owner_input_ready_count": 9,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 9,
-        "pm_blocker_register_open_blocker_count": 9,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 10,
+        "pm_blocker_register_open_blocker_count": 10,
+        "pm_blocker_register_release_area_blocker_count": 6,
         "pm_failure_bundle_coverage_index": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "pm_failure_bundle_coverage_index_sha256": "ebc78da813bcb84360fdcb1ba4c8475a8b6fe78a562b65fdd72b2d0d9f970bec",
         "pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
@@ -920,7 +921,7 @@
     {
       "area": "github_sync",
       "artifacts": {
-        "github_development_sync_preflight": "<live-git-state>"
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight_report.json"
       },
       "blockers": [],
       "checks": {
@@ -1165,7 +1166,7 @@
     "h_bond_evidence_surface_present": true,
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 1,
-    "operator_action_count": 14,
+    "operator_action_count": 15,
     "operator_actions": [
       {
         "action_id": "attach_missing_evidence_surfaces",
@@ -1544,6 +1545,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "e1fa1c2967aff792912a0e098cfe979af9c389c6",
+  "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }

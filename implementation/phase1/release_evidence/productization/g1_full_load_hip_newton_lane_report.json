@@ -2,7 +2,6 @@
   "blockers": [
     "checkpoint_load_scale_below_required_full_load",
     "checkpoint_resolution_no_full_load_candidate",
-    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready",
     "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -1430,13 +1429,9 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-30T12:18:39.896818+00:00",
+  "generated_at": "2026-06-30T12:33:43.184761+00:00",
   "hip_consistency_proof": {
-    "changed_paths_since_source_commit": [
-      "scripts/materialize_gpcr_hard_decoy_suite_report.py",
-      "tests/test_build_goal_bottleneck_roadmap_surface.py",
-      "tests/test_materialize_gpcr_hard_decoy_suite_report.py"
-    ],
+    "changed_paths_since_source_commit": [],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
     "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
@@ -1465,15 +1460,15 @@
     "reused_evidence": false,
     "rocm_hip_required": true,
     "runtime_blockers": [],
-    "source_commit_sha": "ee89bc8fffd891d558711eca54fc7d2c0cc4e350",
-    "source_state_fresh": false,
-    "source_state_kind": "non_receipt_paths_changed",
+    "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
+    "source_state_fresh": true,
+    "source_state_kind": "exact",
     "status": "partial"
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:8433e06604e735f9dcf803c08d68f553060057b0d668e1128d575b2b265df01d",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:c21f34b5e0dab64074d0ebb7e58e3785520890e4b8bbe9b34053797c434b10af",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:4c793192ff37f209f153119b1f6d0025c7ad18e0cd84c4e734ef99ef7c0bb119",
     "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz": "sha256:e3a48e50edfb68648d1d7c5d720faec45f632de667061be71b30a57a042d1235",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:26231b6d8aea08199264cb3ee4e5f24417d58265664a18c88aa74c579a2ab5e3"
   },
@@ -1487,6 +1482,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "f4def5a0d8edcee59c0b05374f0e6a5cd8c13db4",
+  "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
   "status": "blocked"
 }

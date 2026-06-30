@@ -2,7 +2,7 @@
   "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T12:18:38.708262+00:00",
+  "generated_at": "2026-06-30T12:33:34.151834+00:00",
   "input_checksums": {
     ".github/workflows": "dir-sha256:8acb8a126ead40b2ce6a7ce24dbb8569bfdb9d927ed74296b6bc740c056936e3"
   },
@@ -1195,7 +1195,7 @@
   "repo": "betelgeuze-kang/Structural-Analysis",
   "reused_evidence": false,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "f4def5a0d8edcee59c0b05374f0e6a5cd8c13db4",
+  "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 0,

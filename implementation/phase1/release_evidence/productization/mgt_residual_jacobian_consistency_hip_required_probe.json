@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-06-30T11:51:36.557359+00:00",
-  "source_commit_sha": "ee89bc8fffd891d558711eca54fc7d2c0cc4e350",
+  "generated_at": "2026-06-30T12:30:22.237300+00:00",
+  "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -13,7 +13,7 @@
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-06-30T11:51:36.559063+00:00",
+    "checked_at": "2026-06-30T12:30:22.239056+00:00",
     "hip_available": true,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -83,7 +83,7 @@
   "production_rocm_hip_residual_jvp_worker": {
     "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "source_commit_sha": "ee89bc8fffd891d558711eca54fc7d2c0cc4e350",
+    "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
     "ready": false,
     "status": "blocked",
     "blockers": [
@@ -147,7 +147,7 @@
   },
   "component_only": false,
   "checkpoint": {
-    "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz"
+    "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz"
   },
   "load_scale": 0.656,
   "shell_pressure_load_path_policy": "all_components",
@@ -155,8 +155,8 @@
     "schema_version": "mgt-residual-jacobian-consistency-hip-direct-proof.v1",
     "executed": true,
     "execution_error": null,
-    "elapsed_seconds": 191.03172166700824,
-    "source_commit_sha": "fc693902f98395fc71aa5463c2bf272185c9e6e5",
+    "elapsed_seconds": 168.9893489630049,
+    "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
     "status": "partial",
     "direct_residual_newton_ready": false,
     "production_hip_residual_jacobian_path": true,
@@ -254,7 +254,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 192.10456363599224
+    "total_seconds": 170.0645936519868
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
   "blockers": [
