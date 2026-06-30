@@ -423,7 +423,10 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
             {
                 "check_id": "symmetry_permutation_contract",
                 "required": True,
-                "description": "allowed symmetry permutations are explicit zero-based atom-index maps",
+                "description": (
+                    "allowed symmetry permutations are explicit zero-based atom-index maps "
+                    "and include the identity atom order"
+                ),
             },
             {
                 "check_id": "symmetry_aware_ligand_rmsd_angstrom",

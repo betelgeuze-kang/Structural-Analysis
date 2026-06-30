@@ -280,8 +280,10 @@ def _casf_pdbbind_subset_manifest_contract(
             {
                 "field": "symmetry_permutation_contract",
                 "required_fields": ["permutations"],
+                "identity_permutation_required": True,
                 "validation_rules": [
                     "permutations is non-empty",
+                    "identity permutation list(range(atom_count)) is included",
                     "each permutation is zero-based over ligand_atom_order_contract.atom_ids",
                     "sorted(permutation) == list(range(atom_count))",
                 ],

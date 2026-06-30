@@ -117,6 +117,8 @@ def _validate_case_row(row: dict[str, Any], *, index: int) -> list[str]:
                     blockers.append(
                         f"case_row_{index}:symmetry_permutation_{permutation_index}_invalid"
                     )
+            if atom_count > 0 and expected not in permutations:
+                blockers.append(f"case_row_{index}:symmetry_identity_permutation_missing")
     return blockers
 
 
@@ -150,9 +152,9 @@ def validate_subset_manifest(payload: dict[str, Any]) -> dict[str, Any]:
         "blockers": blockers,
         "claim_boundary": (
             "This validator checks the local subset manifest structure, required case-row "
-            "fields, atom-order contracts, and explicit symmetry permutations. It does not "
-            "download public benchmark files, verify redistribution rights beyond declared "
-            "fields, or claim benchmark performance."
+            "fields, atom-order contracts, explicit symmetry permutations, and identity "
+            "permutation coverage. It does not download public benchmark files, verify "
+            "redistribution rights beyond declared fields, or claim benchmark performance."
         ),
     }
 

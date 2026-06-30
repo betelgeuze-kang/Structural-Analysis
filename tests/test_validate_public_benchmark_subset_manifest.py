@@ -193,6 +193,23 @@ def test_validate_manifest_requires_checksum_for_each_declared_source_file() -> 
     ]
 
 
+def test_validate_manifest_requires_identity_symmetry_permutation() -> None:
+    row = _complete_row("case_a")
+    row["symmetry_permutation_contract"] = {
+        "permutations": [[0, 2, 1]],
+    }
+
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "case_rows": [row],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert result["blockers"] == ["case_row_0:symmetry_identity_permutation_missing"]
+
+
 def test_validate_manifest_cli_writes_result(tmp_path: Path) -> None:
     manifest = tmp_path / "manifest.json"
     manifest.write_text(
