@@ -22,6 +22,14 @@ assert spec.loader is not None
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
+PHASE2_COMPONENT_IDS = {
+    "casf_pdbbind_pose_success_harness",
+    "symmetry_aware_ligand_rmsd",
+    "posebusters_style_pose_validity",
+    "vina_gnina_comparison_adapter",
+    "dud_e_or_lit_pcba_enrichment",
+}
+
 
 def _checksum(seed: str) -> str:
     return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
@@ -180,6 +188,14 @@ def test_public_benchmark_harness_bundle_materializes_tier_beta_ready_artifacts(
     ]
     assert report["phase2_blocked_component_count"] == 0
     assert report["phase2_exit_gate"]["failed_criteria"] == []
+    assert report["phase2_exit_gate"]["status"] == "ready"
+    assert {row["component_id"] for row in report["required_components"]} == (
+        PHASE2_COMPONENT_IDS
+    )
+    assert {row["component_id"] for row in report["components"]} == (
+        PHASE2_COMPONENT_IDS
+    )
+    assert all(row["ready"] for row in report["components"])
     assert report["ready_artifact_count"] == len(report["artifact_summaries"])
     for artifact in report["artifact_outputs"].values():
         assert (tmp_path / artifact).exists()
@@ -199,9 +215,54 @@ def test_public_benchmark_harness_bundle_blocks_empty_bundle(tmp_path: Path) -> 
     assert report["blocked_artifact_count"] > 0
     assert report["blocker_count"] > 0
     assert report["phase2_ready"] is False
+    assert report["phase2_exit_gate"]["status"] == "blocked"
     assert report["phase2_exit_gate"]["failed_criterion_count"] > 0
     assert report["phase2_blocked_component_count"] > 0
     assert any("subset_manifest:" in blocker for blocker in report["blockers"])
+
+
+def test_public_benchmark_harness_artifact_bundle_indexes_phase2_gate(
+    tmp_path: Path,
+) -> None:
+    bundle_path = tmp_path / "operator_bundle.json"
+    payload = _bundle(tmp_path)
+    bundle_path.write_text(json.dumps(payload), encoding="utf-8")
+    out_dir = tmp_path / "out"
+
+    module.materialize_public_benchmark_harness_bundle(
+        payload,
+        repo_root=tmp_path,
+        bundle_path=bundle_path,
+        out_dir=out_dir,
+    )
+    artifact_paths = [
+        out_dir / "public_benchmark_subset_manifest.json",
+        out_dir / "public_benchmark_pose_validity_packet.json",
+        out_dir / "public_benchmark_symmetry_rmsd_scorecard.json",
+        out_dir / "public_benchmark_pose_success_harness.json",
+        out_dir / "public_benchmark_enrichment_scorecard.json",
+        out_dir / "public_benchmark_vina_gnina_comparison_adapter.json",
+        out_dir / "public_benchmark_external_receipts_validation.json",
+    ]
+
+    bundle = module.materialize_public_benchmark_artifact_bundle(
+        artifact_paths,
+        repo_root=tmp_path,
+    )
+
+    assert bundle["schema_version"] == "public-benchmark-harness-bundle.v1"
+    assert bundle["status"] == "ready"
+    assert bundle["contract_pass"] is True
+    assert bundle["phase2_ready"] is True
+    assert bundle["phase2_exit_gate"]["status"] == "ready"
+    assert bundle["phase2_exit_gate"]["failed_criteria"] == []
+    assert {row["component_id"] for row in bundle["required_components"]} == (
+        PHASE2_COMPONENT_IDS
+    )
+    assert {row["component_id"] for row in bundle["components"]} == (
+        PHASE2_COMPONENT_IDS
+    )
+    assert all(row["ready"] for row in bundle["components"])
 
 
 def test_public_benchmark_harness_bundle_cli_writes_report(tmp_path: Path) -> None:
@@ -228,4 +289,6 @@ def test_public_benchmark_harness_bundle_cli_writes_report(tmp_path: Path) -> No
     )
     report = json.loads(out_report.read_text(encoding="utf-8"))
     assert report["tier_beta_ready"] is True
+    assert report["phase2_ready"] is True
+    assert report["phase2_exit_gate"]["status"] == "ready"
     assert (out_dir / "public_benchmark_source_of_truth.json").exists()
