@@ -103,7 +103,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T12:55:43.530056+00:00",
+  "generated_at": "2026-06-30T12:59:11.405035+00:00",
   "human_ux_summary": {
     "evidence_artifacts": {
       "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -203,6 +203,6 @@
   "source_artifacts": {
     "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
   },
-  "source_commit_sha": "0030f691d269f9b1a97d702da6299575e691447a",
+  "source_commit_sha": "cc4c55c76ac9cb98280fc16b00e91d6a3846b1f8",
   "status": "ready_release_blocked"
 }
