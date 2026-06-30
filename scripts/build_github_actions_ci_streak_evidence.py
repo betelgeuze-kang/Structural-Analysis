@@ -26,6 +26,7 @@ REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json")
 DEFAULT_REPO = "betelgeuze-kang/Structural-Analysis"
 DEFAULT_LOCAL_WORKFLOW_DIR = Path(".github/workflows")
+DEFAULT_LIMIT = 500
 GH_FIELDS = "databaseId,event,conclusion,status,headSha,headBranch,createdAt,updatedAt,url,name"
 GH_DEBUG_LINE = re.compile(r"^\* Request(?:\s|$)")
 MAX_JOB_START_BLOCKER_RUNS = 5
@@ -655,7 +656,7 @@ def refresh_local_workflow_metadata(
         return build_evidence(
             repo=DEFAULT_REPO,
             threshold=30,
-            limit=100,
+            limit=DEFAULT_LIMIT,
             pr_workflow="CI",
             nightly_workflow="Nightly Full Quality",
             registered_workflows=[],
@@ -714,7 +715,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default=DEFAULT_REPO)
     parser.add_argument("--threshold", type=int, default=30)
-    parser.add_argument("--limit", type=int, default=100)
+    parser.add_argument("--limit", type=int, default=DEFAULT_LIMIT)
     parser.add_argument("--pr-workflow", default="CI")
     parser.add_argument("--nightly-workflow", default="Nightly Full Quality")
     parser.add_argument("--local-workflow-dir", type=Path, default=DEFAULT_LOCAL_WORKFLOW_DIR)

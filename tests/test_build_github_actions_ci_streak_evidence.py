@@ -96,6 +96,14 @@ def test_build_evidence_filters_pr_and_nightly_events_for_streaks() -> None:
     assert payload["summary"]["nightly_local_required_trigger_present"] is True
 
 
+def test_cli_default_limit_retains_pr_runs_when_push_runs_are_dense() -> None:
+    parser = build_github_actions_ci_streak_evidence.build_parser()
+    args = parser.parse_args([])
+
+    assert args.limit == build_github_actions_ci_streak_evidence.DEFAULT_LIMIT
+    assert args.limit >= 500
+
+
 def test_build_evidence_flags_missing_pull_request_run_source_when_only_push_events() -> None:
     base = datetime(2026, 6, 16, tzinfo=timezone.utc)
     pr_rows = [_run(i, "push", "success", base - timedelta(minutes=i)) for i in range(3)]
