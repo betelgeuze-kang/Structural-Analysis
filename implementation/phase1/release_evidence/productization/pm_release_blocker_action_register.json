@@ -24,9 +24,9 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T07:41:09.788441+00:00",
+  "generated_at": "2026-06-30T07:41:47.304818+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a7af7f11159f0a2951211fcbd3adcbcded85f4769617f70f0791d933151a8ee4",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f00f4df1995bfc0aa8cb5f79b6be84f1316506c4cd961750b0812256e339af61",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:51e2f66216eb83843eda24b032955ffb48fe523ade2c7f498e3344926bc566d1",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
@@ -962,7 +962,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "8b0e8b6219fa2522079894f5bc2b5895e054775e",
+  "source_commit_sha": "99bab02827b34d002954b2c269d53bb2320f4112",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
