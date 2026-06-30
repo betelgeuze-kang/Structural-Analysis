@@ -1,9 +1,9 @@
 # Release Evidence Freshness
 
-- `contract_pass`: `False`
-- `reason_code`: `ERR_RELEASE_EVIDENCE_FRESHNESS`
-- `current_source_commit_sha`: `8f69fefef1ae3701b7be19e6175a4fa407d51e6d`
-- `blockers`: `developer_preview_rc_status::input_dependency_newer_than_artifact`
+- `contract_pass`: `True`
+- `reason_code`: `PASS`
+- `current_source_commit_sha`: `f6b71dfa19c66207cc2baab918486dad8479bd40`
+- `blockers`: `none`
 
 | Artifact | Status | Blockers | Newer Dependencies |
 |---|---|---|---|
@@ -18,7 +18,7 @@
 | `g1_direct_residual_terminal_gate_report` | `pass` | `none` | none |
 | `g1_shell_material_budgeted_continuation_status` | `pass` | `none` | none |
 | `evidence_console_scope_status` | `pass` | `none` | none |
-| `developer_preview_rc_status` | `blocked` | `input_dependency_newer_than_artifact` | `/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/evidence_console_scope_status.json` |
+| `developer_preview_rc_status` | `pass` | `none` | none |
 | `public_benchmark_source_of_truth` | `pass` | `none` | none |
 | `accuracy_parity_scorecard` | `pass` | `none` | none |
 | `product_production_ai_checkpoint_readiness` | `pass` | `none` | none |
