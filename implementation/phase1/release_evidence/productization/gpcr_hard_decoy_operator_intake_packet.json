@@ -8,7 +8,7 @@
     "gpcr_hard_decoy_evidence_surface.locked == false"
   ],
   "broad_gpcr_family_claim_safe": false,
-  "claim_boundary": "This packet is an owner-facing intake contract for GPCR hard-decoy metrics. It does not generate docking results, infer missing values, or promote broad GPCR claims. DRD2, HTR2A, and OPRM1 must all pass the numeric exit criteria.",
+  "claim_boundary": "This packet is an owner-facing intake contract for GPCR hard-decoy metrics. It does not generate docking results, infer missing values, or promote broad GPCR claims. DRD2, HTR2A, and OPRM1 must all provide raw hard-decoy rows and pass the numeric exit criteria.",
   "contract_pass": true,
   "current_suite_status": {
     "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
@@ -272,12 +272,13 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-06-30T16:44:16.347335+00:00",
+  "generated_at": "2026-06-30T16:55:31.301125+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:b999c6ba2aa0efbc176bb14e1803445e13c3af337e7a3a61848a86f68162ffde",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:92c15880827776fb21635a4d9074510099e6009ae1131aa19704c9b67045bc42",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:88460e1f94b973cb50c90284e830e9e21ccc9466eb28be6e1ec8987efefcf67a",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:a5fd06dd1080c4aa37072e7007f8e2c95ab440d5a4047ab9bf3cc6f7087e3860",
+    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:4f392c85a218e41517a062ea18249aa561a457d4749bf5ca0e9673b14e4fa359",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:325f46359a31a11fd1c447ac7c0f06b86c4f7047f570aad2aec538b2f5808de9"
   },
   "linked_artifacts": {
@@ -290,9 +291,9 @@
   },
   "materialization_sequence": [
     {
-      "command": "edit implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+      "command": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
       "produces": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
-      "step_id": "fill_gpcr_hard_decoy_operator_template"
+      "step_id": "materialize_gpcr_hard_decoy_operator_template_from_rows"
     },
     {
       "command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
@@ -328,6 +329,8 @@
   ],
   "minimum_target_count": 3,
   "next_actions": [
+    "attach_gpcr_hard_decoy_raw_row_file",
+    "materialize_gpcr_hard_decoy_operator_template_from_rows",
     "fill_gpcr_hard_decoy_operator_intake_packet",
     "fill_drd2_htr2a_oprm1_operator_template_values",
     "run_gpcr_hard_decoy_materializer",
@@ -347,6 +350,39 @@
   },
   "owner_input_required": true,
   "packet_id": "gpcr_hard_decoy_operator_intake_packet",
+  "raw_row_import": {
+    "accepted_formats": [
+      "csv",
+      "tsv",
+      "json"
+    ],
+    "claim_boundary": "This import step only groups operator-attached raw ranking rows into the template. The suite materializer still computes all metrics and keeps Phase 3 locked unless every target passes.",
+    "command": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+    "default_score_direction": "higher_is_better",
+    "optional_row_fields": [
+      "score_direction"
+    ],
+    "produces": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+    "required_flat_row_fields": [
+      "target_id",
+      "molecule_id",
+      "score",
+      "is_positive",
+      "is_decoy"
+    ],
+    "required_row_fields": [
+      "molecule_id",
+      "score",
+      "is_positive",
+      "is_decoy"
+    ],
+    "required_targets": [
+      "DRD2",
+      "HTR2A",
+      "OPRM1"
+    ],
+    "step_id": "materialize_gpcr_hard_decoy_operator_template_from_rows"
+  },
   "read_model": {
     "alternate_routes": [
       "/product/gpcr-hard-decoy-suite-report",
@@ -377,7 +413,7 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "8a32bee6b937b3cfd2f60ed0e88ed84741434e8f",
+  "source_commit_sha": "532085ee8a99b585511c8495eb9e18ce33407b9a",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,

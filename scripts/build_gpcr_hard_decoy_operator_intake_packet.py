@@ -27,6 +27,9 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
 
 DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "gpcr_hard_decoy_operator_template.json"
+DEFAULT_OPERATOR_TEMPLATE_IMPORTER = Path(
+    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py"
+)
 DEFAULT_SUITE_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_suite_report.json"
 DEFAULT_EVIDENCE_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_PRODUCT_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
@@ -84,6 +87,7 @@ def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_gpcr_hard_decoy_operator_intake_packet.py"),
         Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),
+        DEFAULT_OPERATOR_TEMPLATE_IMPORTER,
         DEFAULT_OPERATOR_TEMPLATE,
         DEFAULT_SUITE_REPORT,
         DEFAULT_EVIDENCE_SURFACE,
@@ -316,6 +320,11 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         f"--out-report {DEFAULT_SUITE_REPORT} "
         f"--out-surface {DEFAULT_EVIDENCE_SURFACE} --fail-blocked"
     )
+    import_template_command = (
+        f"python3 {DEFAULT_OPERATOR_TEMPLATE_IMPORTER} "
+        "--rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> "
+        f"--out {DEFAULT_OPERATOR_TEMPLATE}"
+    )
     refresh_product_report_command = (
         "python3 scripts/build_gpcr_hard_decoy_product_report.py "
         f"--out {DEFAULT_PRODUCT_REPORT}"
@@ -381,6 +390,25 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             or list(REQUIRED_TARGETS),
             "targets_json_pointer": "/targets",
         },
+        "raw_row_import": {
+            "step_id": "materialize_gpcr_hard_decoy_operator_template_from_rows",
+            "command": import_template_command,
+            "produces": str(DEFAULT_OPERATOR_TEMPLATE),
+            "accepted_formats": ["csv", "tsv", "json"],
+            "required_row_fields": list(RAW_HARD_DECOY_ROW_FIELDS),
+            "required_flat_row_fields": [
+                "target_id",
+                *RAW_HARD_DECOY_ROW_FIELDS,
+            ],
+            "optional_row_fields": ["score_direction"],
+            "required_targets": list(REQUIRED_TARGETS),
+            "default_score_direction": "higher_is_better",
+            "claim_boundary": (
+                "This import step only groups operator-attached raw ranking rows into "
+                "the template. The suite materializer still computes all metrics and "
+                "keeps Phase 3 locked unless every target passes."
+            ),
+        },
         "current_suite_status": {
             "artifact": str(DEFAULT_SUITE_REPORT),
             "schema_version": str(suite.get("schema_version") or SUITE_REPORT_SCHEMA_VERSION),
@@ -393,8 +421,8 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         },
         "materialization_sequence": [
             {
-                "step_id": "fill_gpcr_hard_decoy_operator_template",
-                "command": f"edit {DEFAULT_OPERATOR_TEMPLATE}",
+                "step_id": "materialize_gpcr_hard_decoy_operator_template_from_rows",
+                "command": import_template_command,
                 "produces": str(DEFAULT_OPERATOR_TEMPLATE),
             },
             {
@@ -442,6 +470,8 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             "goal_bottleneck_roadmap_surface": str(DEFAULT_GOAL_BOTTLENECK),
         },
         "next_actions": [
+            "attach_gpcr_hard_decoy_raw_row_file",
+            "materialize_gpcr_hard_decoy_operator_template_from_rows",
             "fill_gpcr_hard_decoy_operator_intake_packet",
             "fill_drd2_htr2a_oprm1_operator_template_values",
             "run_gpcr_hard_decoy_materializer",
@@ -472,7 +502,8 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "claim_boundary": (
             "This packet is an owner-facing intake contract for GPCR hard-decoy metrics. "
             "It does not generate docking results, infer missing values, or promote broad "
-            "GPCR claims. DRD2, HTR2A, and OPRM1 must all pass the numeric exit criteria."
+            "GPCR claims. DRD2, HTR2A, and OPRM1 must all provide raw hard-decoy rows "
+            "and pass the numeric exit criteria."
         ),
     }
 
@@ -503,6 +534,16 @@ def _markdown(payload: dict[str, Any]) -> str:
         )
         minimum = json.dumps(row["minimum_evidence"], ensure_ascii=False, sort_keys=True)
         lines.append(f"| `{row['target_id']}` | {criteria} | `{minimum}` |")
+    lines.extend(
+        [
+            "",
+            "## Raw Row Import",
+            "",
+            f"- `command`: `{payload['raw_row_import']['command']}`",
+            f"- `required_flat_row_fields`: `"
+            f"{', '.join(payload['raw_row_import']['required_flat_row_fields'])}`",
+        ]
+    )
     lines.extend(
         [
             "",

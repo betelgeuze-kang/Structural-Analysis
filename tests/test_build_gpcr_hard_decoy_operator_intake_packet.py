@@ -165,7 +165,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
     packet = module.build_gpcr_hard_decoy_operator_intake_packet(repo_root=REPO_ROOT)
 
     assert [step["step_id"] for step in packet["materialization_sequence"]] == [
-        "fill_gpcr_hard_decoy_operator_template",
+        "materialize_gpcr_hard_decoy_operator_template_from_rows",
         "materialize_gpcr_hard_decoy_suite_report",
         "refresh_gpcr_hard_decoy_product_report",
         "refresh_product_capabilities_surface",
@@ -182,7 +182,18 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "gpcr_hard_decoy_product_report.science_claim_status == ready",
         "gpcr_hard_decoy_evidence_surface.locked == false",
     ]
-    assert packet["next_actions"][0] == "fill_gpcr_hard_decoy_operator_intake_packet"
+    assert packet["raw_row_import"]["required_flat_row_fields"] == [
+        "target_id",
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
+    ]
+    assert packet["next_actions"][:3] == [
+        "attach_gpcr_hard_decoy_raw_row_file",
+        "materialize_gpcr_hard_decoy_operator_template_from_rows",
+        "fill_gpcr_hard_decoy_operator_intake_packet",
+    ]
     assert packet["linked_artifacts"]["operator_template"] == (
         "implementation/phase1/release_evidence/productization/"
         "gpcr_hard_decoy_operator_template.json"
@@ -213,5 +224,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_cli_writes_json_and_markdown(
     assert payload["packet_id"] == "gpcr_hard_decoy_operator_intake_packet"
     assert "# GPCR Hard-Decoy Operator Intake Packet" in markdown
     assert "## Gate Unblock Plan" in markdown
+    assert "## Raw Row Import" in markdown
     assert "## Target Execution Preflight" in markdown
+    assert "materialize_gpcr_hard_decoy_operator_template_from_rows" in markdown
     assert "materialize_gpcr_hard_decoy_suite_report" in markdown

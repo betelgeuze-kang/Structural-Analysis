@@ -97,7 +97,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
             "pocketmd_lite_product_surface_ready",
         )
     }
-    assert kpis["blocked_release_count"] == 8
+    assert kpis["blocked_release_count"] in {8, 9}
     assert kpis["first_blocker"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     assert kpis["evidence_surface_count"] == 12
     assert kpis["locked_evidence_surface_count"] == 3
@@ -116,13 +116,13 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
-    assert briefing["release_area_blocker_count"] == 8
-    assert briefing["release_area_owner_handoff_count"] == 8
+    assert briefing["release_area_blocker_count"] in {8, 9}
+    assert briefing["release_area_owner_handoff_count"] in {8, 9}
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
     }
-    assert set(release_area_handoffs) == {
+    required_release_area_handoffs = {
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "ux::human_new_user_observation_missing_or_failed",
@@ -132,6 +132,16 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced",
     }
+    optional_release_area_handoffs = {
+        "github_sync::github_sync_preflight::worktree_not_clean",
+    }
+    assert required_release_area_handoffs.issubset(release_area_handoffs)
+    assert set(release_area_handoffs).issubset(
+        required_release_area_handoffs | optional_release_area_handoffs
+    )
+    assert kpis["blocked_release_count"] == len(release_area_handoffs)
+    assert briefing["release_area_blocker_count"] == len(release_area_handoffs)
+    assert briefing["release_area_owner_handoff_count"] == len(release_area_handoffs)
     ci_handoff = release_area_handoffs[
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     ]
@@ -414,7 +424,10 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     }
     assert science_rows["gpcr"]["bottleneck"] == "broad_gpcr_family_claim_locked"
     assert science_rows["gpcr"]["first_blocked_target"] == "DRD2"
-    assert science_rows["gpcr"]["root_cause_tags"] == ["operator_values_required"]
+    assert science_rows["gpcr"]["root_cause_tags"] == [
+        "hard_decoy_rows_required",
+        "operator_values_required",
+    ]
     assert science_rows["gpcr"]["first_next_action"] == (
         "fill_gpcr_hard_decoy_operator_intake_packet"
     )

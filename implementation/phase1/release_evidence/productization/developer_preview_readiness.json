@@ -15,8 +15,8 @@
     "human_ux::observation_file_missing",
     "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
     "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-    "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
     "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
     "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
     "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
@@ -35,7 +35,7 @@
     },
     "future commercial": {
       "blocked": true,
-      "blocker_count": 32,
+      "blocker_count": 33,
       "blockers": [
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
         "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -65,6 +65,7 @@
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
         "pm_release::github_sync::github_sync_preflight_not_synced",
         "pm_release::github_sync::github_sync_remote_sync_pending",
         "pm_release::security::license_status_not_configured",
@@ -90,8 +91,8 @@
         "human_ux::observation_file_missing",
         "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
         "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
         "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
         "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
         "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
@@ -115,7 +116,7 @@
   },
   "developer_preview_ready": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "future_commercial_blocker_count": 32,
+  "future_commercial_blocker_count": 33,
   "future_commercial_blockers": [
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
     "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -145,6 +146,7 @@
     "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+    "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
     "pm_release::github_sync::github_sync_preflight_not_synced",
     "pm_release::github_sync::github_sync_remote_sync_pending",
     "pm_release::security::license_status_not_configured",
@@ -224,7 +226,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-30T16:16:15.503015+00:00",
+  "generated_at": "2026-06-30T16:53:18.486849+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -243,11 +245,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:b54c34eb717c8d787977364a6413b22b3cc66b3f4949ebb6dc593769b389eba2",
+      "input_checksum": "sha256:f3a006370803284ab4f04da6700277740880a4cc23dd3d028fe76486f3d4b4ba",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "a7b3fded3fb76ccc92546eef2f80128295aa02b3",
+      "source_commit_sha": "532085ee8a99b585511c8495eb9e18ce33407b9a",
       "status": "stale_or_inconsistent"
     }
   },
@@ -255,7 +257,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4d1d5489b9c5dd4f2b89948337c509f2d4199014270972a3bf9c826278b65f3e",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:b54c34eb717c8d787977364a6413b22b3cc66b3f4949ebb6dc593769b389eba2"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:f3a006370803284ab4f04da6700277740880a4cc23dd3d028fe76486f3d4b4ba"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "stale_or_inconsistent",
@@ -1901,13 +1903,13 @@
         "blocker_count": 19,
         "blockers": [
           "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+          "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
           "pm_release::github_sync::github_sync_preflight_not_synced",
           "pm_release::github_sync::github_sync_remote_sync_pending",
           "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
           "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-          "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
+          "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
           "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-          "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
           "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
           "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
           "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
@@ -2115,6 +2117,6 @@
       }
     }
   },
-  "source_commit_sha": "efc752c79910c03c22bd0388a5b4f5a5375566c5",
+  "source_commit_sha": "532085ee8a99b585511c8495eb9e18ce33407b9a",
   "status": "blocked"
 }
