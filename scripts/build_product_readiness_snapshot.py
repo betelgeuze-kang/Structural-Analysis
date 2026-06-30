@@ -349,15 +349,67 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
     if path in snapshot_only_paths:
         return False
     artifact_specific_paths = {
+        "commercial_gap_ledger_status": {
+            "scripts/report_commercial_gap_ledger_status.py",
+            "implementation/phase1/commercial_gap_ledger_status.py",
+        },
+        "customer_shadow_evidence_status": {
+            "scripts/check_customer_shadow_evidence_status.py",
+        },
+        "developer_preview_rc_status": {
+            "scripts/build_developer_preview_rc_status.py",
+        },
+        "developer_preview_readiness": {
+            "scripts/build_developer_preview_readiness.py",
+        },
+        "external_benchmark_submission_readiness": {
+            "implementation/phase1/generate_external_benchmark_submission_readiness.py",
+        },
+        "external_benchmark_submission_updates": {
+            "scripts/build_p1_evidence_sidecar_updates.py",
+        },
+        "fresh_full_validation_lane_status": {
+            "scripts/build_fresh_full_validation_lane_status.py",
+        },
         "g1_full_load_hip_newton_lane_report": {
             "scripts/run_g1_full_load_hip_newton_lane.py",
+        },
+        "gap_closure_status": {
+            "scripts/report_gap_closure_status.py",
+        },
+        "gap_ledger_evidence_audit": {
+            "scripts/build_gap_ledger_evidence_audit.py",
+        },
+        "github_actions_ci_streak_evidence": {
+            "scripts/build_github_actions_ci_streak_evidence.py",
+        },
+        "license_status_closure_report": {
+            "scripts/build_license_status_closure_report.py",
+        },
+        "mgt_g1_direct_residual_terminal_gate_report": {
+            "scripts/build_mgt_g1_direct_residual_terminal_gate_report.py",
+        },
+        "paid_pilot_scope_guard_report": {
+            "scripts/build_paid_pilot_scope_guard_report.py",
+        },
+        "phase1_core_api_contract": {
+            "scripts/build_phase1_core_api_contract_artifacts.py",
         },
         "pm_release_gate_report": {
             "scripts/check_github_development_sync_preflight.py",
             "scripts/report_pm_release_gate.py",
         },
-        "developer_preview_rc_status": {
-            "scripts/build_developer_preview_rc_status.py",
+        "public_benchmark_source_of_truth": {
+            "scripts/build_public_benchmark_operator_intake_packet.py",
+            "scripts/build_public_benchmark_source_of_truth.py",
+            "scripts/materialize_public_benchmark_harness_bundle.py",
+            "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
+        },
+        "ux_new_user_observation_report": {
+            "scripts/build_ux_new_user_observation_report.py",
+        },
+        "workstation_delivery_readiness": {
+            "scripts/check_workstation_delivery_readiness.py",
         },
     }
     ignored_test_prefixes = ("tests/",)
