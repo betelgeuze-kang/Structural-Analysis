@@ -141,3 +141,23 @@ def test_phase6_linux_windows_parity_status_check_detects_drift(tmp_path: Path) 
 
     assert ok is False
     assert message == "phase6_linux_windows_parity_status_mismatch"
+
+
+def test_phase6_linux_windows_parity_status_check_ignores_wrapper_metadata(tmp_path: Path) -> None:
+    out = tmp_path / "parity.json"
+    module.write_phase6_linux_windows_parity_status(repo_root=REPO_ROOT, out_path=out)
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["generated_at"] = "2026-06-30T00:00:00+00:00"
+    payload["source_commit_sha"] = "receipt-only-refresh"
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message = module.check_phase6_linux_windows_parity_status(
+        repo_root=REPO_ROOT,
+        out_path=out,
+    )
+
+    assert ok is True
+    assert message == "phase6_linux_windows_parity_status_consistent"
