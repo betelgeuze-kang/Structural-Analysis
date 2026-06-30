@@ -1,23 +1,20 @@
 # PM Release Blocker Closure Board
 
-- `summary_line`: `PM release blocker closure board: BLOCKED | open=12 | external_owner_ready=9 | handoff_not_ready=0`
-- `pm_summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=4/5 | release_areas_green=11/16 | measured_cases=304`
+- `summary_line`: `PM release blocker closure board: BLOCKED | open=9 | external_owner_ready=9 | handoff_not_ready=0`
+- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
 - `contract_pass`: `False`
-- `open_blocker_count`: `12`
-- `release_area_summary`: `11/16`
-- `release_area_blocker_count`: `7`
+- `open_blocker_count`: `9`
+- `release_area_summary`: `13/16`
+- `release_area_blocker_count`: `5`
 - `all_open_blockers_have_handoff`: `True`
 - `action_register_matches_pm_report`: `True`
 
 | Blocker | Owner | Closure State | Evidence State | Next Action |
 |---|---|---|---|---|
-| `M5::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `pm_blocker_closure_board_count_mismatch` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence. |
 | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `missing_tracked_ci_streak_evidence` | Collect 18 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff. |
 | `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `missing_tracked_ci_streak_evidence` | Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff. |
-| `report::commercial_packaging_milestone_not_green` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `commercial_packaging_milestone_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence. |
 | `ux::human_new_user_observation_missing_or_failed` | `ux_research_owner` | `external_owner_input_ready` | `missing_human_new_user_observation` | Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `missing_human_new_user_completion_evidence` | Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
-| `support::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence. |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `not_configured` | Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass. |
 | `independent_vv_missing` | `independent_vv_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence. |
 | `family_validation_manual_signoff_missing` | `validation_manual_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence. |
