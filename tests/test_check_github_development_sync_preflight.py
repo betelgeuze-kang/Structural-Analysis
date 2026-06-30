@@ -79,6 +79,52 @@ def test_sync_preflight_requires_r4_approval_for_ready_remote_mutation() -> None
     assert "read-only" in payload["claim_boundary"]
 
 
+def test_sync_preflight_feature_push_command_uses_remote_feature_ref() -> None:
+    payload = sync_preflight.build_report(
+        _state(
+            branch="codex/seed-pr-ci-source-evidence",
+            remote_feature_ref="origin/codex/seed-pr-ci-source-evidence",
+        )
+    )
+
+    assert payload["pending_remote_updates"][0]["target"] == (
+        "origin/codex/seed-pr-ci-source-evidence"
+    )
+    assert payload["pending_remote_updates"][0]["command"] == (
+        "git push origin "
+        "codex/seed-pr-ci-source-evidence:codex/seed-pr-ci-source-evidence"
+    )
+
+
+def test_collect_git_state_defaults_to_current_upstream(monkeypatch) -> None:
+    def fake_git_output(args, *, cwd=Path(".")):
+        command = tuple(args)
+        if command == ("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"):
+            return "origin/codex/seed-pr-ci-source-evidence"
+        if command == ("rev-parse", "--abbrev-ref", "HEAD"):
+            return "codex/seed-pr-ci-source-evidence"
+        if command == ("rev-parse", "HEAD"):
+            return "head-sha"
+        if command == ("rev-parse", "origin/codex/seed-pr-ci-source-evidence"):
+            return "feature-sha"
+        if command == ("rev-parse", "origin/main"):
+            return "main-sha"
+        if command == ("remote", "-v"):
+            return "origin\thttps://github.com/betelgeuze-kang/Structural-Analysis.git (fetch)"
+        if command == ("status", "--short"):
+            return ""
+        raise AssertionError(command)
+
+    monkeypatch.setattr(sync_preflight, "_git_output", fake_git_output)
+    monkeypatch.setattr(sync_preflight, "_ahead_count", lambda ref, *, cwd=Path("."): 0)
+    monkeypatch.setattr(sync_preflight, "_git_success", lambda args, *, cwd=Path("."): True)
+
+    state = sync_preflight.collect_git_state()
+
+    assert state["remote_feature_ref"] == "origin/codex/seed-pr-ci-source-evidence"
+    assert state["branch"] == "codex/seed-pr-ci-source-evidence"
+
+
 def test_sync_preflight_passes_when_already_synced_without_remote_mutation() -> None:
     payload = sync_preflight.build_report(
         _state(

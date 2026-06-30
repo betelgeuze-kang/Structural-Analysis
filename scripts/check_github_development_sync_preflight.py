@@ -56,27 +56,42 @@ def _ahead_count(base_ref: str, *, cwd: Path = Path(".")) -> int:
     return int(text)
 
 
+def _current_upstream_ref(*, cwd: Path = Path(".")) -> str:
+    try:
+        return _git_output(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], cwd=cwd)
+    except Exception:
+        return DEFAULT_FEATURE_REF
+
+
+def _remote_branch_name(remote_ref: str, *, remote: str = DEFAULT_FETCH_REMOTE) -> str:
+    prefix = f"{remote}/"
+    if remote_ref.startswith(prefix):
+        return remote_ref[len(prefix):]
+    return remote_ref
+
+
 def collect_git_state(
     *,
     cwd: Path = Path("."),
-    feature_ref: str = DEFAULT_FEATURE_REF,
+    feature_ref: str | None = None,
     main_ref: str = DEFAULT_MAIN_REF,
 ) -> dict[str, Any]:
+    resolved_feature_ref = feature_ref or _current_upstream_ref(cwd=cwd)
     return {
         "branch": _git_output(["rev-parse", "--abbrev-ref", "HEAD"], cwd=cwd),
         "local_head_sha": _git_output(["rev-parse", "HEAD"], cwd=cwd),
-        "remote_feature_ref": feature_ref,
-        "remote_feature_sha": _git_output(["rev-parse", feature_ref], cwd=cwd),
+        "remote_feature_ref": resolved_feature_ref,
+        "remote_feature_sha": _git_output(["rev-parse", resolved_feature_ref], cwd=cwd),
         "remote_main_ref": main_ref,
         "remote_main_sha": _git_output(["rev-parse", main_ref], cwd=cwd),
         "remote_safety": check_git_remote_safety.build_report(
             _git_output(["remote", "-v"], cwd=cwd)
         ),
         "worktree_status_short": _git_output(["status", "--short"], cwd=cwd),
-        "feature_ahead_count": _ahead_count(feature_ref, cwd=cwd),
+        "feature_ahead_count": _ahead_count(resolved_feature_ref, cwd=cwd),
         "main_ahead_count": _ahead_count(main_ref, cwd=cwd),
         "feature_fast_forward_possible": _git_success(
-            ["merge-base", "--is-ancestor", feature_ref, "HEAD"], cwd=cwd
+            ["merge-base", "--is-ancestor", resolved_feature_ref, "HEAD"], cwd=cwd
         ),
         "main_fast_forward_possible": _git_success(
             ["merge-base", "--is-ancestor", main_ref, "HEAD"], cwd=cwd
@@ -101,13 +116,15 @@ def build_report(
     local_head = str(state.get("local_head_sha", "") or "")
     remote_feature = str(state.get("remote_feature_sha", "") or "")
     remote_main = str(state.get("remote_main_sha", "") or "")
+    remote_feature_ref = str(state.get("remote_feature_ref", "") or DEFAULT_FEATURE_REF)
+    feature_branch = _remote_branch_name(remote_feature_ref)
     feature_synced = local_head == remote_feature
     main_synced = local_head == remote_main
     remote_sync_needed = bool(feature_ahead_count or main_ahead_count or not feature_synced or not main_synced)
     feature_push_command = (
         "git push origin "
         f"{str(state.get('branch', '') or 'HEAD')}:"
-        "codex/create-architecture-definition-document-for-hybrid-ai"
+        f"{feature_branch}"
     )
     main_push_command = "git push origin HEAD:main"
     pending_remote_updates: list[dict[str, str]] = []
@@ -221,7 +238,7 @@ def build_report(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--feature-ref", default=DEFAULT_FEATURE_REF)
+    parser.add_argument("--feature-ref", default=None)
     parser.add_argument("--main-ref", default=DEFAULT_MAIN_REF)
     parser.add_argument("--fetch", action="store_true")
     parser.add_argument("--fetch-remote", default=DEFAULT_FETCH_REMOTE)
