@@ -586,10 +586,10 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T06:36:59.679929+00:00",
+  "generated_at": "2026-07-01T06:55:58.307384+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:f38f01e52f00f6d514616b761a5ae2e206b3ec9e5aa07e1ce5f37b011cac953c",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:ab4d8500bc6b9214a10a5c588e5b659d03f27a94f6a95245a3b7c7b5279d3e80",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8e20830c6f997a0e1da07217233c8cdd90f6fbe0bfc20894cea44ae39f0c70d9",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:901204e8a2c4f20693a6ec22d288f8333aee72c373fdce5fe07ca75d3a882048",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:b849c3ca45e7e840e8c778f251b0ed613400adb0982d507d50092583a93ac6a9",
     "scripts/materialize_science_actual_closure_from_rows.py": "sha256:82d6eab34534fb5e8edf5c8aa082191688f7984e13d54a8f38e204aecf0ffdc8"
@@ -869,7 +869,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "a42a913582607f8746c80b4b67033a6c72171738",
+  "source_commit_sha": "064fd0b110a99e3d91f2aead7561c2dd03fc33ee",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,

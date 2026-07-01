@@ -460,6 +460,31 @@ def _rank_rows(rows: list[dict[str, Any]], *, score_direction: str) -> list[dict
     )
 
 
+def _score_is_better(left: float, right: float, *, score_direction: str) -> bool:
+    if score_direction == "lower_is_better":
+        return left < right
+    return left > right
+
+
+def _score_is_at_least_as_good(
+    left: float,
+    right: float,
+    *,
+    score_direction: str,
+) -> bool:
+    if score_direction == "lower_is_better":
+        return left <= right
+    return left >= right
+
+
+def _best_score(scores: list[float], *, score_direction: str) -> float:
+    return min(scores) if score_direction == "lower_is_better" else max(scores)
+
+
+def _worst_score(scores: list[float], *, score_direction: str) -> float:
+    return max(scores) if score_direction == "lower_is_better" else min(scores)
+
+
 def _bootstrap_average_precision_ci_low(
     *,
     target_id: str,
@@ -584,14 +609,14 @@ def _computed_hard_decoy_metrics(
         {**ranked_row, "rank": index}
         for index, ranked_row in enumerate(ranked_rows, start=1)
     ]
-    positive_ranks = [
-        int(ranked_row["rank"])
-        for ranked_row in ranked_with_positions
+    positive_scores = [
+        float(ranked_row["score"])
+        for ranked_row in normalized_rows
         if ranked_row["is_positive"]
     ]
-    decoy_ranks = [
-        int(ranked_row["rank"])
-        for ranked_row in ranked_with_positions
+    decoy_scores = [
+        float(ranked_row["score"])
+        for ranked_row in normalized_rows
         if ranked_row["is_decoy"]
     ]
     top20_rows = ranked_with_positions[: min(20, len(ranked_with_positions))]
@@ -600,13 +625,25 @@ def _computed_hard_decoy_metrics(
         if top20_rows
         else None
     )
-    first_positive_rank = min(positive_ranks) if positive_ranks else math.inf
-    best_decoy_rank = min(decoy_ranks) if decoy_ranks else math.inf
+    best_positive_score = _best_score(positive_scores, score_direction=score_direction)
+    worst_positive_score = _worst_score(positive_scores, score_direction=score_direction)
+    best_decoy_score = _best_score(decoy_scores, score_direction=score_direction)
     decoys_above_positive_count = sum(
-        1 for rank in decoy_ranks if rank < first_positive_rank
+        1
+        for score in decoy_scores
+        if _score_is_better(score, best_positive_score, score_direction=score_direction)
+    )
+    out_anchored_positive_count = sum(
+        1
+        for score in positive_scores
+        if _score_is_at_least_as_good(
+            best_decoy_score,
+            score,
+            score_direction=score_direction,
+        )
     )
     positive_out_anchored_by_top_decoys = bool(
-        decoy_ranks and any(rank > best_decoy_rank for rank in positive_ranks)
+        decoy_scores and out_anchored_positive_count > 0
     )
     average_precision = _average_precision(ranked_with_positions, positive_count)
     average_precision_ci_low = _bootstrap_average_precision_ci_low(
@@ -645,11 +682,19 @@ def _computed_hard_decoy_metrics(
         "top20_hit_rate": top20_hit_rate,
         "decoys_above_positive_count": decoys_above_positive_count,
         "positive_out_anchored_by_top_decoys": positive_out_anchored_by_top_decoys,
+        "out_anchored_positive_count": out_anchored_positive_count,
+        "best_positive_score": best_positive_score,
+        "worst_positive_score": worst_positive_score,
+        "best_decoy_score": best_decoy_score,
+        "top_decoy_anchor_policy": (
+            "score_direction_aware; top decoy tied with or better than any positive blocks"
+        ),
         "calculation_method": (
             "ranking_pr_auc_ci_low=deterministic_stratified_bootstrap_average_precision; "
             "top20_hit_rate=positive_fraction_in_top_min_20_rows; "
-            "decoys_above_positive_count=decoys_before_best_positive; "
-            "positive_out_anchored_by_top_decoys=any_positive_ranked_below_best_decoy"
+            "decoys_above_positive_count=decoys_strictly_better_than_best_positive; "
+            "positive_out_anchored_by_top_decoys="
+            "top_decoy_tied_with_or_better_than_any_positive"
         ),
         "hard_decoy_row_quality": {
             "contract_pass": not quality_blockers,

@@ -80,6 +80,14 @@ def _decoy_first_hard_decoy_rows() -> list[dict[str, object]]:
     ]
 
 
+def _top_decoy_tied_hard_decoy_rows() -> list[dict[str, object]]:
+    rows = _positive_first_hard_decoy_rows()
+    for row in rows:
+        if row["molecule_id"] == "decoy_1":
+            row["score"] = 0.96
+    return rows
+
+
 def _fixture_sized_hard_decoy_rows() -> list[dict[str, object]]:
     return [
         {"molecule_id": "positive_1", "score": 0.95, "is_positive": True, "is_decoy": False},
@@ -433,6 +441,45 @@ def test_gpcr_hard_decoy_suite_derives_metrics_from_raw_hard_decoy_rows(
         "deterministic_stratified_bootstrap_average_precision"
     )
     assert first_row["computed_hard_decoy_metrics"]["calculation_status"] == "computed"
+
+
+def test_gpcr_hard_decoy_suite_blocks_top_decoy_score_tied_with_positive(
+    tmp_path: Path,
+) -> None:
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        _with_source_receipt(
+            {
+                "targets": [
+                    {
+                        "target_id": "DRD2",
+                        "score_direction": "higher_is_better",
+                        "hard_decoy_rows": _top_decoy_tied_hard_decoy_rows(),
+                    },
+                    _passing_target_from_rows("HTR2A"),
+                    _passing_target_from_rows("OPRM1"),
+                ]
+            },
+            tmp_path,
+        ),
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["first_blocked_target"] == "DRD2"
+    drd2 = report["target_rows"][0]
+    assert drd2["top20_hit_rate"] == 0.2
+    assert drd2["decoys_above_positive_count"] == 0
+    assert drd2["positive_out_anchored_by_top_decoys"] is True
+    assert drd2["computed_hard_decoy_metrics"]["best_decoy_score"] == 0.96
+    assert drd2["computed_hard_decoy_metrics"]["worst_positive_score"] == 0.96
+    assert drd2["computed_hard_decoy_metrics"]["out_anchored_positive_count"] == 1
+    assert drd2["blockers"] == ["DRD2:positive_out_anchored_by_top_decoys"]
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "no_positive_out_anchored_by_top_decoys"
+    ]
+    out_anchor_gate = report["phase3_exit_gate"]["criteria"][3]
+    assert out_anchor_gate["criterion_id"] == "no_positive_out_anchored_by_top_decoys"
+    assert out_anchor_gate["failed_targets"] == ["DRD2"]
 
 
 def test_gpcr_hard_decoy_suite_blocks_metrics_that_conflict_with_raw_rows(
