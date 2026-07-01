@@ -336,7 +336,11 @@ def _path_key_for_receipt(path: Path) -> str:
 def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
     if path in allowed_paths:
         return True
-    if path in {"README.md", "docs/commercialization-gap-current-state.md"}:
+    if path in {
+        "README.md",
+        "docs/commercialization-gap-current-state.md",
+        "docs/pm-release-gate-milestones.md",
+    }:
         return True
     if path == "docs/developer_preview_final_gate_action_register.md":
         return True
