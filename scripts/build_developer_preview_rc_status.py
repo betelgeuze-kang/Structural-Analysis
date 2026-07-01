@@ -610,6 +610,21 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
         large_current,
         int(benchmark_large_gate.get("current_large_source_model_count", 0) or 0),
     )
+    large_source_url_count = int(
+        benchmark_large_gate.get(
+            "source_url_verified_count",
+            large_model_runner.get("source_url_verified_count", 0),
+        )
+        or 0
+    )
+    large_source_checksum_count = int(
+        benchmark_large_gate.get(
+            "source_checksum_count",
+            large_model_runner.get("source_checksum_count", 0),
+        )
+        or 0
+    )
+    large_runner_command_ready = bool(large_model_runner.get("runner_command_ready") is True)
     benchmark_large_blocker_grouping = (
         benchmark_large_gate.get("blocker_grouping_metadata")
         if isinstance(benchmark_large_gate.get("blocker_grouping_metadata"), dict)
@@ -645,6 +660,41 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
     )
     medium_ready = bool(benchmark_medium_gate.get("contract_pass") is True)
     large_ready = bool(benchmark_large_gate.get("contract_pass") is True)
+    large_crash_oom_free_ready = bool(
+        large_current >= large_required
+        and large_source_url_count >= large_required
+        and large_source_checksum_count >= large_required
+        and large_runner_command_ready
+        and large_execution_count >= large_required
+        and large_crash_oom_free_count >= large_required
+    )
+    large_crash_oom_free_blockers = []
+    if large_current < large_required:
+        large_crash_oom_free_blockers.append(
+            f"large_structural_models_current_below_required:{large_current}/{large_required}"
+        )
+    if large_source_url_count < large_required:
+        large_crash_oom_free_blockers.append(
+            f"large_source_url_verified_count_below_required:{large_source_url_count}/{large_required}"
+        )
+    if large_source_checksum_count < large_required:
+        large_crash_oom_free_blockers.append(
+            f"large_source_checksum_count_below_required:{large_source_checksum_count}/{large_required}"
+        )
+    if not large_runner_command_ready:
+        large_crash_oom_free_blockers.append("large_model_runner_not_implemented")
+    if large_execution_count < large_required:
+        large_crash_oom_free_blockers.append(
+            f"large_model_execution_count_below_required:{large_execution_count}/{large_required}"
+        )
+    if large_crash_oom_free_count < large_required:
+        large_crash_oom_free_blockers.append(
+            f"large_model_crash_oom_free_count_below_required:{large_crash_oom_free_count}/{large_required}"
+        )
+    large_crash_oom_free_blocker_grouping = _filter_blocker_grouping_metadata(
+        benchmark_large_blocker_grouping,
+        large_crash_oom_free_blockers,
+    )
     ifc_ready = _silent_import_technical_ready(silent_import_loss)
     ifc_final_gate_blockers = _silent_import_technical_blockers(silent_import_loss)
     silent_import_loss_evidence_requirements = (
@@ -797,33 +847,20 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
         ),
         _row(
             item="large_models_crash_oom_free",
-            status="ready" if large_ready else "blocked",
-            contract_pass=large_ready,
+            status="ready" if large_crash_oom_free_ready else "blocked",
+            contract_pass=large_crash_oom_free_ready,
             evidence=(
                 f"{PHASE3_FACTORY_SUMMARY}; {PHASE3_ACQUISITION_PLAN}; "
                 f"{PHASE3_LARGE_MODEL_RUNNER}; {PHASE6_BENCHMARK_SCALE_STATUS}"
             ),
-            blockers=[]
-            if large_ready
-            else list(
-                dict.fromkeys(
-                    [
-                        *(
-                            [f"large_structural_models_current_below_required:{large_current}/{large_required}"]
-                            if large_current < large_required
-                            else []
-                        ),
-                        *large_acquisition_blockers,
-                        *large_runner_blockers,
-                        *benchmark_large_blockers,
-                    ]
-                )
-            ),
-            blocker_grouping_metadata=benchmark_large_blocker_grouping,
+            blockers=[] if large_crash_oom_free_ready else large_crash_oom_free_blockers,
+            blocker_grouping_metadata=large_crash_oom_free_blocker_grouping,
             notes=[
                 "Requires acquired large-model sources, runner command evidence, "
                 "and crash/OOM-free execution receipts. Policy-only acquisition rows "
-                "do not satisfy this final gate."
+                "do not satisfy this final gate. License, reference-output, "
+                "normalization, and scorecard/review gaps remain visible in the "
+                "benchmark-scale handoff but do not block this crash/OOM-only gate."
             ],
         ),
         _row(

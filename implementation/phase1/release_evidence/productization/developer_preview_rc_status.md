@@ -3,7 +3,7 @@
 - `status`: `blocked`
 - `developer_preview_release_candidate_ready`: `False`
 - `deliverables`: `10/10`
-- `final_gates`: `5/9`
+- `final_gates`: `6/9`
 
 ## Deliverables
 
@@ -26,7 +26,7 @@
 |---|---|---|
 | `analytic_component_benchmark_all_pass` | `ready` | `True` |
 | `selected_medium_models_pass_or_approved_review` | `blocked` | `False` |
-| `large_models_crash_oom_free` | `blocked` | `False` |
+| `large_models_crash_oom_free` | `ready` | `True` |
 | `silent_import_loss_zero` | `ready` | `True` |
 | `residual_and_convergence_history_present` | `ready` | `True` |
 | `unsupported_features_explicitly_blocked` | `ready` | `True` |
@@ -65,7 +65,6 @@ This is a visibility summary for existing gap-ledger closure requirements. It do
 ## Blockers
 
 - `final_gate_blocked:selected_medium_models_pass_or_approved_review`
-- `final_gate_blocked:large_models_crash_oom_free`
 - `final_gate_blocked:linux_windows_reproducibility_confirmed`
 - `final_gate_blocked:new_user_core_workflow_observation_passed`
 

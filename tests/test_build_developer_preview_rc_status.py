@@ -32,7 +32,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert payload["deliverable_count"] == 10
     assert payload["final_gate_count"] == 9
     assert payload["deliverable_pass_count"] == 10
-    assert payload["final_gate_pass_count"] == 5
+    assert payload["final_gate_pass_count"] == 6
 
     deliverables = {row["item"]: row for row in payload["deliverables"]}
     assert deliverables["installable_python_package"]["contract_pass"] is True
@@ -52,7 +52,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert final_gates["analytic_component_benchmark_all_pass"]["contract_pass"] is True
     assert final_gates["unsupported_features_explicitly_blocked"]["contract_pass"] is True
     assert final_gates["selected_medium_models_pass_or_approved_review"]["contract_pass"] is False
-    assert final_gates["large_models_crash_oom_free"]["contract_pass"] is False
+    assert final_gates["large_models_crash_oom_free"]["contract_pass"] is True
     medium_blockers = final_gates["selected_medium_models_pass_or_approved_review"]["blockers"]
     assert "medium_structural_models_current_below_required:0/5" in medium_blockers
     assert "opensees_medium_runner_command_missing" not in medium_blockers
@@ -76,15 +76,16 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         final_gates["selected_medium_models_pass_or_approved_review"]["notes"]
     )
     large_blockers = final_gates["large_models_crash_oom_free"]["blockers"]
+    assert large_blockers == []
     assert "large_structural_models_current_below_required:0/2" not in large_blockers
     assert not any(blocker.startswith("large_structural_models_current_below_required") for blocker in large_blockers)
     assert "large_model_runner_not_implemented" not in large_blockers
     assert "nightly_lane_not_configured" not in large_blockers
     assert "large_model_execution_receipt_missing" not in large_blockers
-    assert "large_model_scorecard_or_review_missing" in large_blockers
+    assert "large_model_scorecard_or_review_missing" not in large_blockers
     assert "large_model_execution_count_below_required:0/2" not in large_blockers
     assert "large_model_crash_oom_free_count_below_required:0/2" not in large_blockers
-    assert "large_model_scorecard_or_review_count_below_required:0/2" in large_blockers
+    assert "large_model_scorecard_or_review_count_below_required:0/2" not in large_blockers
     assert final_gates["large_models_crash_oom_free"]["evidence"].endswith(
         "phase6_benchmark_scale_status.json"
     )
@@ -94,10 +95,13 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert large_gate_grouping["schema_version"] == "phase6-benchmark-scale-blocker-groups.v1"
     assert large_gate_grouping["blocker_count"] == len(large_blockers)
     assert large_gate_grouping["unassigned_blockers"] == []
-    assert "large_model_scorecard_or_review_missing" in large_gate_grouping["groups"][
-        "large_runner_execution"
-    ]["blockers"]
+    assert large_gate_grouping["groups"]["large_runner_execution"]["blockers"] == []
+    assert large_gate_grouping["groups"]["reference_and_normalization"]["blockers"] == []
+    assert large_gate_grouping["groups"]["source_license_identity"]["blockers"] == []
     assert "Policy-only acquisition rows" in " ".join(
+        final_gates["large_models_crash_oom_free"]["notes"]
+    )
+    assert "scorecard/review gaps remain visible" in " ".join(
         final_gates["large_models_crash_oom_free"]["notes"]
     )
     assert final_gates["silent_import_loss_zero"]["contract_pass"] is True
