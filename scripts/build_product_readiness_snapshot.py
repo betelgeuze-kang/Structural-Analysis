@@ -463,6 +463,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
         "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
         "scripts/build_support_bundle.py",
+        "scripts/build_license_status_intake_packet.py",
         "scripts/build_structural_scope_owner_decision_application_plan.py",
         "scripts/build_structural_scope_owner_review_packet.py",
     }
