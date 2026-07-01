@@ -14,15 +14,15 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-01T20:37:44.132331+00:00",
+  "generated_at": "2026-07-01T20:56:49.529113+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8e8263d47d889f63e8ab1c76f750c538f9587c253ae1ae9946e79f4dd7da0b0c",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:17bb3fd0ff37c979e87c6ea69a6a196e8fb7a7cde2c9e08f32d7d7e6a46bb076",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:1f29bc76149986c99a57e1d655ed1203d6305a7b930763a2019d986962d63a8e",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:653f958559fde10c3fd755e63050e57ca5268395930053529ff523c1a54831c8",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6932084dfe505170186b91e5177b5ad44b8887e1e576cd1072f95ac6d5af9358",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:2d8b3ff07849e743f8a21ab11cf4f8de610f026ff9bd3a03061fb595bc50d242",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:bb47e5d1d69ed17a4d80cbff9924fee9264ea2d38e3e806e51d9bb5be102e8d7",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:af7f5171db08b818d01b7aa3c2ca68379e4f650c8801205c5d28539959f3e602",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:3149db5e586d1c69801459866eb06e8ac19fcd864207ca8f797adf2f424bc8d9"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:8050868db685a7aab8c9ddd678c0b65933e6e91782d6f84d17bd4175d0d5da8c"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -290,13 +290,13 @@
   "read_model_ready": true,
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
-    "approval_token_count": 5,
+    "approval_token_count": 4,
     "blocked_release_count": 5,
     "evidence_surface_count": 8,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 10,
+    "operator_action_count": 9,
     "public_benchmark_ready": true,
     "release_allowed": false,
     "stale_artifact_count": 0
@@ -419,10 +419,10 @@
       "state": "blocked",
       "summary": {
         "action_register_contract_pass": false,
-        "approval_token_count": 5,
+        "approval_token_count": 4,
         "blocked_capability_count": 0,
         "blocked_release_count": 5,
-        "operator_action_count": 10,
+        "operator_action_count": 9,
         "product_capability_count": 1,
         "release_allowed": false
       }
@@ -432,7 +432,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "d61b43dd8e64e6be44d9f6c9162d2fdd24433a09",
+  "source_commit_sha": "9ce427c37e9140220de0226659d1d16db8eedca3",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
