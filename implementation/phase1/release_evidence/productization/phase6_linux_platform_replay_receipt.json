@@ -195,11 +195,11 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-07-01T19:30:25.778289+00:00",
+  "generated_at": "2026-07-01T20:47:41.525909+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:fd123502c0ba1dbe040509aed3e042a11fe7bf91bac52c52152e8fa18801db28",
-    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:47b8bf86533ae2ed35a7e9deee164baf4761b922fb57823902f988a8b043ed37"
+    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:48a8df4349f6b68d56b773326503a4b3e41bc4cb997924f1bf2d9ffd2482f627"
   },
   "local_dirty_inputs": [],
   "local_dirty_inputs_scope": "isolated_replay_checkout",
@@ -207,6 +207,16 @@
   "os_name": "Linux",
   "os_version": "local_clean_checkout_replay_receipt",
   "platform": "linux",
+  "platform_identity": {
+    "commands_return_code_zero": true,
+    "os_name": "Linux",
+    "os_version": "local_clean_checkout_replay_receipt",
+    "platform": "linux",
+    "python_version": "recorded_by_phase3_clean_checkout_command_results",
+    "receipt_origin": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+    "replay_environment": "isolated_minimal_worktree_copy",
+    "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d"
+  },
   "python_version": "recorded_by_phase3_clean_checkout_command_results",
   "reuse_policy": "phase6_linux_platform_replay_receipt_from_phase3_local_clean_checkout",
   "reused_evidence": true,

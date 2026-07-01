@@ -483,7 +483,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-01T20:37:44.079036+00:00",
+  "generated_at": "2026-07-01T20:47:48.139403+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:03f3beb6fd151ba5e3c49b4562b90a7a796bd6bf9e53247612c9f99224090021",
@@ -505,7 +505,7 @@
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
     "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:eb69f39419b3bb2af9f3a9e1cb80c22e3ba4bdbad5cd1bb2551d5f4d55917aa8",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:9e61ef1db0ab2e01a3917d1e410a9677e8e5170aa5b9fb7ccc344bc98ee30cdd",
-    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:c7f3786ffb452bf05200fdb694c16b0914479fda91a60c635271d15710359887",
+    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:488361e49fe5163b558148eef3f1ff064287913638ea7fc8d7df175dbf5b0e5f",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:170d2b4fa8fc0fe606258580623263e9b52a041b9cef84293d2279c348e81775",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:d3d304e829539b150dd0977e9fc648cf60b883085e3e3f88b831a6f7590b1a41",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:2d8b3ff07849e743f8a21ab11cf4f8de610f026ff9bd3a03061fb595bc50d242",
@@ -1866,6 +1866,9 @@
       "clean_clone_blockers_tracked_elsewhere": [],
       "comparison_requirements": [
         "same source_commit_sha or explicit commit mapping",
+        "same platform_identity.source_commit_sha",
+        "platform_identity.commands_return_code_zero=true",
+        "all replay command return_code values are 0",
         "same expected_scorecard.case_count",
         "same expected_scorecard.pass_count",
         "same expected_scorecard.lane_case_counts",
@@ -1918,6 +1921,9 @@
           "claim_boundary": "This handoff is an operator checklist for the missing platform receipt. It is not a platform replay receipt and cannot close Linux/Windows parity until the receipt exists and passes the parity status check.",
           "comparison_requirements": [
             "same source_commit_sha or explicit commit mapping",
+            "same platform_identity.source_commit_sha",
+            "platform_identity.commands_return_code_zero=true",
+            "all replay command return_code values are 0",
             "same expected_scorecard.case_count",
             "same expected_scorecard.pass_count",
             "same expected_scorecard.lane_case_counts",
@@ -1964,6 +1970,7 @@
             "os_name",
             "os_version",
             "platform",
+            "platform_identity",
             "python_version",
             "schema_version",
             "source_commit_sha",
@@ -2053,6 +2060,18 @@
           "phase4_analytic_physical_fallback_scorecard",
           "scorecard",
           "summary"
+        ],
+        "comparison_requirements": [
+          "same source_commit_sha or explicit commit mapping",
+          "same platform_identity.source_commit_sha",
+          "platform_identity.commands_return_code_zero=true",
+          "all replay command return_code values are 0",
+          "same expected_scorecard.case_count",
+          "same expected_scorecard.pass_count",
+          "same expected_scorecard.lane_case_counts",
+          "same residual_formula",
+          "stable manifest and scorecard SHA256 values",
+          "working_tree_clean=true and local_dirty_inputs=[]"
         ],
         "contract_pass": false,
         "current_platform_receipt_count": 1,
@@ -2144,6 +2163,16 @@
         "os_name": "OPERATOR_RECORDED_OS_NAME",
         "os_version": "OPERATOR_RECORDED_OS_VERSION",
         "platform": "linux|windows",
+        "platform_identity": {
+          "commands_return_code_zero": false,
+          "os_name": "OPERATOR_RECORDED_OS_NAME",
+          "os_version": "OPERATOR_RECORDED_OS_VERSION",
+          "platform": "linux|windows",
+          "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
+          "receipt_origin": "OPERATOR_RECORDED_RECEIPT_ORIGIN",
+          "replay_environment": "OPERATOR_RECORDED_REPLAY_ENVIRONMENT",
+          "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d"
+        },
         "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
         "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
         "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
@@ -3177,6 +3206,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "d61b43dd8e64e6be44d9f6c9162d2fdd24433a09",
+  "source_commit_sha": "7af210a00fe861fe77552c9f3d8929709cbd1455",
   "status": "blocked"
 }

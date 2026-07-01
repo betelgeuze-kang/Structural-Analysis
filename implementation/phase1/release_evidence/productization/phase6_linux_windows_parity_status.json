@@ -37,6 +37,9 @@
   "claim_boundary": "This receipt defines and checks the Linux/Windows platform replay evidence required for the Developer Preview RC parity gate. It does not prove parity until independent passing Linux and Windows receipts are attached, and it does not replace the separate git clean-clone reproduction gate.",
   "comparison_requirements": [
     "same source_commit_sha or explicit commit mapping",
+    "same platform_identity.source_commit_sha",
+    "platform_identity.commands_return_code_zero=true",
+    "all replay command return_code values are 0",
     "same expected_scorecard.case_count",
     "same expected_scorecard.pass_count",
     "same expected_scorecard.lane_case_counts",
@@ -97,6 +100,7 @@
       "minimum_evidence": [
         "receipt exists at the required artifact path",
         "receipt platform matches the required platform",
+        "platform_identity records platform, OS, Python, replay environment, receipt origin, and source commit",
         "contract_pass=true only after replay commands return zero",
         "working_tree_clean=true and local_dirty_inputs=[]",
         "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
@@ -136,14 +140,14 @@
     }
   ],
   "gate_unblock_plan_count": 2,
-  "generated_at": "2026-07-01T19:30:25.781539+00:00",
+  "generated_at": "2026-07-01T20:47:41.528959+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:fd123502c0ba1dbe040509aed3e042a11fe7bf91bac52c52152e8fa18801db28",
-    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:d881e4631af012413b6896f3c3fc8e946cd3bae5a40856233a535814c3875d83",
+    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:59bc5f7f011bd4fa73f967e7b1922424d6a8d31c7c90fc69904b179314e09316",
     "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json": "missing",
-    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:47b8bf86533ae2ed35a7e9deee164baf4761b922fb57823902f988a8b043ed37"
+    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:48a8df4349f6b68d56b773326503a4b3e41bc4cb997924f1bf2d9ffd2482f627"
   },
   "linux_local_replay_receipt_source": {
     "claim_boundary": "Linux local replay evidence is limited to the isolated minimal worktree-copy clean-checkout receipt and does not satisfy Windows parity or the git clean-clone gate.",
@@ -157,6 +161,9 @@
       "claim_boundary": "This handoff is an operator checklist for the missing platform receipt. It is not a platform replay receipt and cannot close Linux/Windows parity until the receipt exists and passes the parity status check.",
       "comparison_requirements": [
         "same source_commit_sha or explicit commit mapping",
+        "same platform_identity.source_commit_sha",
+        "platform_identity.commands_return_code_zero=true",
+        "all replay command return_code values are 0",
         "same expected_scorecard.case_count",
         "same expected_scorecard.pass_count",
         "same expected_scorecard.lane_case_counts",
@@ -203,6 +210,7 @@
         "os_name",
         "os_version",
         "platform",
+        "platform_identity",
         "python_version",
         "schema_version",
         "source_commit_sha",
@@ -261,6 +269,7 @@
       "minimum_evidence": [
         "receipt exists at the required artifact path",
         "receipt platform matches the required platform",
+        "platform_identity records platform, OS, Python, replay environment, receipt origin, and source commit",
         "contract_pass=true only after replay commands return zero",
         "working_tree_clean=true and local_dirty_inputs=[]",
         "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
@@ -316,6 +325,18 @@
       "phase4_analytic_physical_fallback_scorecard",
       "scorecard",
       "summary"
+    ],
+    "comparison_requirements": [
+      "same source_commit_sha or explicit commit mapping",
+      "same platform_identity.source_commit_sha",
+      "platform_identity.commands_return_code_zero=true",
+      "all replay command return_code values are 0",
+      "same expected_scorecard.case_count",
+      "same expected_scorecard.pass_count",
+      "same expected_scorecard.lane_case_counts",
+      "same residual_formula",
+      "stable manifest and scorecard SHA256 values",
+      "working_tree_clean=true and local_dirty_inputs=[]"
     ],
     "contract_pass": false,
     "current_platform_receipt_count": 1,
@@ -379,6 +400,16 @@
     "os_name": "OPERATOR_RECORDED_OS_NAME",
     "os_version": "OPERATOR_RECORDED_OS_VERSION",
     "platform": "linux|windows",
+    "platform_identity": {
+      "commands_return_code_zero": false,
+      "os_name": "OPERATOR_RECORDED_OS_NAME",
+      "os_version": "OPERATOR_RECORDED_OS_VERSION",
+      "platform": "linux|windows",
+      "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
+      "receipt_origin": "OPERATOR_RECORDED_RECEIPT_ORIGIN",
+      "replay_environment": "OPERATOR_RECORDED_REPLAY_ENVIRONMENT",
+      "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d"
+    },
     "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
     "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
     "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
@@ -430,6 +461,7 @@
       "minimum_evidence": [
         "receipt exists at the required artifact path",
         "receipt platform matches the required platform",
+        "platform_identity records platform, OS, Python, replay environment, receipt origin, and source commit",
         "contract_pass=true only after replay commands return zero",
         "working_tree_clean=true and local_dirty_inputs=[]",
         "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
@@ -482,7 +514,7 @@
   "reuse_policy": "phase6_parity_status_aggregates_phase3_seed_replay_expectations",
   "reused_evidence": true,
   "schema_version": "phase6-linux-windows-parity-status.v1",
-  "source_commit_sha": "938989a898402f845d38e0fbce279820893488ff",
+  "source_commit_sha": "7af210a00fe861fe77552c9f3d8929709cbd1455",
   "status": "blocked",
   "summary": {
     "blocked_platforms": [],

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 from pathlib import Path
@@ -30,6 +31,19 @@ def test_phase6_linux_platform_replay_receipt_uses_local_clean_checkout_only() -
     assert receipt["working_tree_clean"] is True
     assert receipt["working_tree_clean_scope"] == "isolated_minimal_worktree_copy"
     assert receipt["local_dirty_inputs"] == []
+    assert receipt["platform_identity"] == {
+        "platform": "linux",
+        "os_name": "Linux",
+        "os_version": "local_clean_checkout_replay_receipt",
+        "python_version": "recorded_by_phase3_clean_checkout_command_results",
+        "replay_environment": "isolated_minimal_worktree_copy",
+        "receipt_origin": (
+            "implementation/phase1/release_evidence/productization/"
+            "phase3_benchmark_factory_seed_clean_checkout_reproduction.json"
+        ),
+        "source_commit_sha": receipt["source_commit_sha"],
+        "commands_return_code_zero": True,
+    }
     assert receipt["source_clean_checkout_status"] == "pass"
     assert receipt["source_clean_checkout_contract_pass"] is True
     assert receipt["source_clean_checkout_execution_mode"] == "isolated_minimal_worktree_copy"
@@ -118,6 +132,9 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
     template = payload["platform_receipt_template"]
     assert template["schema_version"] == "phase6-linux-windows-platform-replay-receipt.v1"
     assert template["platform"] == "linux|windows"
+    assert template["platform_identity"]["platform"] == "linux|windows"
+    assert template["platform_identity"]["source_commit_sha"] == template["source_commit_sha"]
+    assert template["platform_identity"]["commands_return_code_zero"] is False
     assert template["working_tree_clean"] is True
     assert template["local_dirty_inputs"] == []
     assert template["contract_pass"] is False
@@ -141,6 +158,7 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
         == payload["expected_stable_artifact_checksums"]
     )
     assert "platform" in windows_handoff["required_receipt_fields"]
+    assert "platform_identity" in windows_handoff["required_receipt_fields"]
     assert "working_tree_clean" in windows_handoff["required_receipt_fields"]
     assert any(
         "structural_analysis.benchmark.cli" in row["command"]
@@ -159,6 +177,12 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
     assert comparison["current_platform_receipt_count"] == 1
     assert comparison["missing_platforms"] == ["windows"]
     assert comparison["local_dirty_inputs_allowed"] is False
+    assert "same platform_identity.source_commit_sha" in comparison[
+        "comparison_requirements"
+    ]
+    assert "all replay command return_code values are 0" in comparison[
+        "comparison_requirements"
+    ]
     assert comparison["contract_pass"] is False
     assert "manifest" in comparison["checksum_keys"]
     assert "scorecard" in comparison["checksum_keys"]
@@ -173,6 +197,39 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
         for command in payload["required_commands"]
     )
     assert "does not prove parity" in payload["claim_boundary"]
+
+
+def test_platform_receipt_contract_requires_identity_and_zero_return_codes() -> None:
+    payload = module.build_phase6_linux_windows_parity_status(repo_root=REPO_ROOT)
+    receipt = module.build_phase6_linux_platform_replay_receipt(repo_root=REPO_ROOT)
+
+    assert module._receipt_contract_pass(
+        receipt,
+        platform="linux",
+        expected_source_commit_sha=receipt["source_commit_sha"],
+        expected_scorecard=payload["expected_scorecard"],
+        stable_artifact_checksums=payload["expected_stable_artifact_checksums"],
+    )
+
+    nonzero = copy.deepcopy(receipt)
+    nonzero["commands"][0]["return_code"] = 1
+    assert not module._receipt_contract_pass(
+        nonzero,
+        platform="linux",
+        expected_source_commit_sha=receipt["source_commit_sha"],
+        expected_scorecard=payload["expected_scorecard"],
+        stable_artifact_checksums=payload["expected_stable_artifact_checksums"],
+    )
+
+    wrong_identity = copy.deepcopy(receipt)
+    wrong_identity["platform_identity"]["platform"] = "windows"
+    assert not module._receipt_contract_pass(
+        wrong_identity,
+        platform="linux",
+        expected_source_commit_sha=receipt["source_commit_sha"],
+        expected_scorecard=payload["expected_scorecard"],
+        stable_artifact_checksums=payload["expected_stable_artifact_checksums"],
+    )
 
 
 def test_phase6_linux_windows_parity_status_check_detects_missing_output(tmp_path: Path) -> None:

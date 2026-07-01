@@ -27,6 +27,15 @@ WINDOWS_PLATFORM_RECEIPT = PRODUCTIZATION / "phase6_windows_platform_replay_rece
 SCHEMA_VERSION = "phase6-linux-windows-parity-status.v1"
 PLATFORM_RECEIPT_SCHEMA = "phase6-linux-windows-platform-replay-receipt.v1"
 REQUIRED_PLATFORMS = ["linux", "windows"]
+PLATFORM_IDENTITY_FIELDS = (
+    "platform",
+    "os_name",
+    "os_version",
+    "python_version",
+    "replay_environment",
+    "receipt_origin",
+    "source_commit_sha",
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -77,10 +86,48 @@ def _phase3_expectations(repro_bundle: dict[str, Any]) -> tuple[dict[str, Any], 
     return expected_scorecard, stable_artifact_checksums
 
 
+def _text_present(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _commands_return_code_zero(commands: Any) -> bool:
+    if not isinstance(commands, list) or not commands:
+        return False
+    for row in commands:
+        if not isinstance(row, dict):
+            return False
+        try:
+            return_code = int(row.get("return_code"))
+        except Exception:
+            return False
+        if return_code != 0:
+            return False
+    return True
+
+
+def _platform_identity_contract_pass(
+    receipt: dict[str, Any],
+    *,
+    platform: str,
+    expected_source_commit_sha: str,
+) -> bool:
+    identity = receipt.get("platform_identity")
+    if not isinstance(identity, dict):
+        return False
+    if any(not _text_present(identity.get(field)) for field in PLATFORM_IDENTITY_FIELDS):
+        return False
+    return bool(
+        identity.get("platform") == platform
+        and identity.get("source_commit_sha") == expected_source_commit_sha
+        and identity.get("commands_return_code_zero") is True
+    )
+
+
 def _receipt_contract_pass(
     receipt: dict[str, Any],
     *,
     platform: str,
+    expected_source_commit_sha: str,
     expected_scorecard: dict[str, Any],
     stable_artifact_checksums: dict[str, Any],
 ) -> bool:
@@ -89,8 +136,15 @@ def _receipt_contract_pass(
         and receipt.get("schema_version") == PLATFORM_RECEIPT_SCHEMA
         and receipt.get("platform") == platform
         and receipt.get("contract_pass") is True
+        and receipt.get("source_commit_sha") == expected_source_commit_sha
         and receipt.get("working_tree_clean") is True
         and receipt.get("local_dirty_inputs") == []
+        and _commands_return_code_zero(receipt.get("commands"))
+        and _platform_identity_contract_pass(
+            receipt,
+            platform=platform,
+            expected_source_commit_sha=expected_source_commit_sha,
+        )
         and receipt.get("expected_scorecard") == expected_scorecard
         and receipt.get("stable_artifact_checksums") == stable_artifact_checksums
     )
@@ -255,6 +309,7 @@ def _gate_unblock_plan(
                 "minimum_evidence": [
                     "receipt exists at the required artifact path",
                     "receipt platform matches the required platform",
+                    "platform_identity records platform, OS, Python, replay environment, receipt origin, and source commit",
                     "contract_pass=true only after replay commands return zero",
                     "working_tree_clean=true and local_dirty_inputs=[]",
                     "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle",
@@ -327,6 +382,10 @@ def build_phase6_linux_platform_replay_receipt(*, repo_root: Path = ROOT) -> dic
         blockers.append("phase3_clean_checkout_expected_checksum_mismatch")
     if generated_clean_checksums != stable_artifact_checksums:
         blockers.append("phase3_clean_checkout_generated_checksum_mismatch")
+    commands = list(clean_checkout.get("command_results", []))
+    commands_return_code_zero = _commands_return_code_zero(commands)
+    if not commands_return_code_zero:
+        blockers.append("phase3_clean_checkout_command_return_code_nonzero")
     contract_pass = not blockers
     return {
         "schema_version": PLATFORM_RECEIPT_SCHEMA,
@@ -346,11 +405,21 @@ def build_phase6_linux_platform_replay_receipt(*, repo_root: Path = ROOT) -> dic
         "python_version": "recorded_by_phase3_clean_checkout_command_results",
         "node_version": "not_required_for_phase3_seed_replay_contract",
         "source_commit_sha": source_commit_sha,
+        "platform_identity": {
+            "platform": "linux",
+            "os_name": "Linux",
+            "os_version": "local_clean_checkout_replay_receipt",
+            "python_version": "recorded_by_phase3_clean_checkout_command_results",
+            "replay_environment": "isolated_minimal_worktree_copy",
+            "receipt_origin": PHASE3_CLEAN_CHECKOUT.as_posix(),
+            "source_commit_sha": source_commit_sha,
+            "commands_return_code_zero": commands_return_code_zero,
+        },
         "working_tree_clean": contract_pass,
         "working_tree_clean_scope": "isolated_minimal_worktree_copy",
         "local_dirty_inputs": [],
         "local_dirty_inputs_scope": "isolated_replay_checkout",
-        "commands": list(clean_checkout.get("command_results", [])),
+        "commands": commands,
         "stable_artifact_checksums": stable_artifact_checksums,
         "expected_scorecard": expected_scorecard,
         "source_clean_checkout_receipt": PHASE3_CLEAN_CHECKOUT.as_posix(),
@@ -390,6 +459,7 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         contract_pass = _receipt_contract_pass(
             receipt,
             platform=platform,
+            expected_source_commit_sha=str(repro_bundle.get("source_commit_sha", "")),
             expected_scorecard=expected_scorecard,
             stable_artifact_checksums=stable_artifact_checksums,
         )
@@ -452,6 +522,16 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
         "node_version": "OPERATOR_RECORDED_NODE_VERSION",
         "source_commit_sha": str(repro_bundle.get("source_commit_sha", "")),
+        "platform_identity": {
+            "platform": "linux|windows",
+            "os_name": "OPERATOR_RECORDED_OS_NAME",
+            "os_version": "OPERATOR_RECORDED_OS_VERSION",
+            "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
+            "replay_environment": "OPERATOR_RECORDED_REPLAY_ENVIRONMENT",
+            "receipt_origin": "OPERATOR_RECORDED_RECEIPT_ORIGIN",
+            "source_commit_sha": str(repro_bundle.get("source_commit_sha", "")),
+            "commands_return_code_zero": False,
+        },
         "working_tree_clean": True,
         "local_dirty_inputs": [],
         "commands": [
@@ -475,6 +555,9 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
     }
     comparison_requirements = [
         "same source_commit_sha or explicit commit mapping",
+        "same platform_identity.source_commit_sha",
+        "platform_identity.commands_return_code_zero=true",
+        "all replay command return_code values are 0",
         "same expected_scorecard.case_count",
         "same expected_scorecard.pass_count",
         "same expected_scorecard.lane_case_counts",
@@ -482,6 +565,7 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         "stable manifest and scorecard SHA256 values",
         "working_tree_clean=true and local_dirty_inputs=[]",
     ]
+    parity_comparison_contract["comparison_requirements"] = comparison_requirements
     missing_platform_handoff = _missing_platform_receipt_handoff(
         missing_platforms=missing_platforms,
         receipt_paths=receipt_paths,
