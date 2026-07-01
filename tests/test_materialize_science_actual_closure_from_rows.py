@@ -32,6 +32,13 @@ def _provenance_ref(case_id: str, candidate_id: str) -> str:
     )
 
 
+def _upstream_top_k_provenance_ref(case_id: str, candidate_id: str) -> str:
+    return (
+        "https://zenodo.org/records/2468135/files/"
+        f"pocketmd-lite-upstream-topk-{case_id}-{candidate_id}.json#row"
+    )
+
+
 def _write_gpcr_rows(path: Path) -> None:
     fieldnames = [
         "target_id",
@@ -111,6 +118,13 @@ def _pocketmd_row(
         "uncertainty_low": -0.2 + rank / 10,
         "uncertainty_high": 0.2 + rank / 10,
         "uncertainty_unit": "energy_proxy_delta",
+        "upstream_top_k_provenance_ref": _upstream_top_k_provenance_ref(
+            case_id,
+            candidate_id,
+        ),
+        "upstream_top_k_source_checksum": _sha(
+            f"upstream-topk:{case_id}:{candidate_id}"
+        ),
         "provenance_ref": _provenance_ref(case_id, candidate_id),
         "source_checksum": _sha(f"{case_id}:{candidate_id}"),
     }

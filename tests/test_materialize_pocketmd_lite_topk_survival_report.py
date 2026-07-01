@@ -38,6 +38,13 @@ def _provenance_ref(case_id: str, candidate_id: str) -> str:
     )
 
 
+def _upstream_top_k_provenance_ref(case_id: str, candidate_id: str) -> str:
+    return (
+        "https://zenodo.org/records/7654321/files/"
+        f"pocketmd-lite-upstream-topk-{case_id}-{candidate_id}.json#row"
+    )
+
+
 def _valid_case(
     *,
     case_id: str,
@@ -56,6 +63,13 @@ def _valid_case(
         "source_family": "CASF/PDBBind operator intake",
         "top_k_rank": top_k_rank,
         "candidate_id": candidate_id,
+        "upstream_top_k_provenance_ref": _upstream_top_k_provenance_ref(
+            case_id,
+            candidate_id,
+        ),
+        "upstream_top_k_source_checksum": _checksum(
+            f"upstream-topk:{case_id}:{candidate_id}"
+        ),
         "pre_refinement_energy_proxy": -8.0 + top_k_rank,
         "post_refinement_energy_proxy": -8.5 + top_k_rank,
         "local_min_survived": local_min_survived,
@@ -208,6 +222,8 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary(
     assert report["real_refinement_case_count"] == 3
     assert report["top_k_candidate_count"] == 6
     assert report["blockers"] == []
+    assert "upstream_top_k_provenance_ref" in report["required_case_fields"]
+    assert "upstream_top_k_source_checksum" in report["required_case_fields"]
     assert report["summary"] == {
         "blocker_count": 0,
         "clash_relief_rate": 0.5,
@@ -404,6 +420,57 @@ def test_pocketmd_lite_materializer_blocks_placeholder_row_receipts(
     assert "case_a:provenance_ref_placeholder" in report["blockers"]
     assert "case_a:source_checksum_placeholder_digest" in report["blockers"]
     assert "operator_receipts_required" in report["root_cause_tags"]
+
+
+def test_pocketmd_lite_materializer_blocks_missing_upstream_topk_receipts(
+    tmp_path: Path,
+) -> None:
+    intake = _with_source_receipt(_valid_intake(), tmp_path)
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    first_case.pop("upstream_top_k_source_checksum")
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["product_surface_ready"] is False
+    assert report["first_blocked_target"] == "case_a"
+    assert "case_a:upstream_top_k_source_checksum_missing" in report["blockers"]
+    assert "top_k_candidate_scope_receipt_required" in report["root_cause_tags"]
+
+
+def test_pocketmd_lite_materializer_blocks_placeholder_upstream_topk_receipts(
+    tmp_path: Path,
+) -> None:
+    intake = _with_source_receipt(_valid_intake(), tmp_path)
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    first_case["upstream_top_k_provenance_ref"] = "local-evidence://topk/case_a/pose_1"
+    first_case["upstream_top_k_source_checksum"] = "sha256:" + "b" * 64
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["product_surface_ready"] is False
+    assert report["first_blocked_target"] == "case_a"
+    assert "case_a:upstream_top_k_provenance_ref_placeholder" in report["blockers"]
+    assert (
+        "case_a:upstream_top_k_source_checksum_placeholder_digest"
+        in report["blockers"]
+    )
+    assert "top_k_candidate_scope_receipt_required" in report["root_cause_tags"]
 
 
 def test_pocketmd_lite_materializer_blocks_placeholder_row_identifiers(

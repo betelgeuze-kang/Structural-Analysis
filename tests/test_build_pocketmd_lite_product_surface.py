@@ -154,6 +154,12 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                     "uncertainty_interval or uncertainty_low/high must parse to finite "
                     "numbers with high >= low and a nonblank unit."
                 ),
+                "upstream_top_k_receipt_policy": (
+                    "Each refinement row must include upstream_top_k_provenance_ref and "
+                    "upstream_top_k_source_checksum proving the candidate came from the "
+                    "upstream ranked top-k set; local, fixture, mock, synthetic, "
+                    "placeholder, test, and file-only provenance are rejected."
+                ),
             },
             "source_receipt_requirements": {
                 "mode": "raw_top_k_refinement_rows",
@@ -592,6 +598,8 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "source_family",
                 "top_k_rank",
                 "candidate_id",
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
                 "pre_refinement_energy_proxy",
                 "post_refinement_energy_proxy",
                 "local_min_survived",
@@ -604,6 +612,8 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "source_checksum",
             ],
             "receipt_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
                 "provenance_ref",
                 "source_checksum",
                 "operator_input_source.source_artifact",
@@ -612,6 +622,14 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "operator_input_source.source_url",
                 "operator_input_source.source_license",
             ],
+            "upstream_top_k_receipt_fields": [
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
+            ],
+            "upstream_top_k_receipt_policy": (
+                "Rows must prove the candidate came from the upstream ranked top-k "
+                "set before Lite refinement."
+            ),
             "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum",

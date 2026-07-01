@@ -37,6 +37,8 @@ REQUIRED_CASE_FIELDS = (
     "source_family",
     "top_k_rank",
     "candidate_id",
+    "upstream_top_k_provenance_ref",
+    "upstream_top_k_source_checksum",
     "pre_refinement_energy_proxy",
     "post_refinement_energy_proxy",
     "local_min_survived",
@@ -47,6 +49,10 @@ REQUIRED_CASE_FIELDS = (
     "uncertainty_interval",
     "provenance_ref",
     "source_checksum",
+)
+UPSTREAM_TOP_K_RECEIPT_FIELDS = (
+    "upstream_top_k_provenance_ref",
+    "upstream_top_k_source_checksum",
 )
 REQUIRED_METRICS = (
     "local_min_survival_rate",
@@ -235,11 +241,16 @@ def _normalize_candidate_row(row: dict[str, Any], index: int) -> dict[str, Any]:
     for field in REQUIRED_CASE_FIELDS:
         if field not in row:
             blockers.append(f"{row_key}:{field}_missing")
-            root_cause_tags.append("operator_values_required")
+            if field in UPSTREAM_TOP_K_RECEIPT_FIELDS:
+                root_cause_tags.append("top_k_candidate_scope_receipt_required")
+            else:
+                root_cause_tags.append("operator_values_required")
 
     case_id = _string(row.get("case_id"))
     source_family = _string(row.get("source_family"))
     candidate_id = _string(row.get("candidate_id"))
+    upstream_top_k_provenance_ref = _string(row.get("upstream_top_k_provenance_ref"))
+    upstream_top_k_source_checksum = _string(row.get("upstream_top_k_source_checksum"))
     provenance_ref = _string(row.get("provenance_ref"))
     source_checksum = _string(row.get("source_checksum"))
     top_k_rank = _integer(row.get("top_k_rank"))
@@ -256,13 +267,18 @@ def _normalize_candidate_row(row: dict[str, Any], index: int) -> dict[str, Any]:
         "case_id": case_id,
         "source_family": source_family,
         "candidate_id": candidate_id,
+        "upstream_top_k_provenance_ref": upstream_top_k_provenance_ref,
+        "upstream_top_k_source_checksum": upstream_top_k_source_checksum,
         "provenance_ref": provenance_ref,
         "source_checksum": source_checksum,
     }
     for field, value in string_fields.items():
         if field in row and not value:
             blockers.append(f"{row_key}:{field}_blank")
-            root_cause_tags.append("operator_values_required")
+            if field in UPSTREAM_TOP_K_RECEIPT_FIELDS:
+                root_cause_tags.append("top_k_candidate_scope_receipt_required")
+            else:
+                root_cause_tags.append("operator_values_required")
         elif (
             field in row
             and field in {"case_id", "source_family", "candidate_id"}
@@ -271,6 +287,35 @@ def _normalize_candidate_row(row: dict[str, Any], index: int) -> dict[str, Any]:
         ):
             blockers.append(f"{row_key}:{field}_placeholder")
             root_cause_tags.append("operator_values_required")
+    if (
+        "upstream_top_k_source_checksum" in row
+        and upstream_top_k_source_checksum
+        and not _is_sha256_ref(upstream_top_k_source_checksum)
+    ):
+        blockers.append(f"{row_key}:upstream_top_k_source_checksum_invalid")
+        root_cause_tags.append("top_k_candidate_scope_receipt_required")
+    elif (
+        "upstream_top_k_source_checksum" in row
+        and upstream_top_k_source_checksum
+        and _is_repeated_placeholder_checksum(upstream_top_k_source_checksum)
+    ):
+        blockers.append(
+            f"{row_key}:upstream_top_k_source_checksum_placeholder_digest"
+        )
+        root_cause_tags.append("top_k_candidate_scope_receipt_required")
+    if (
+        "upstream_top_k_provenance_ref" in row
+        and upstream_top_k_provenance_ref
+        and (
+            _has_placeholder_provenance_prefix(upstream_top_k_provenance_ref)
+            or _contains_marker(
+                upstream_top_k_provenance_ref,
+                PLACEHOLDER_SOURCE_TEXT_MARKERS,
+            )
+        )
+    ):
+        blockers.append(f"{row_key}:upstream_top_k_provenance_ref_placeholder")
+        root_cause_tags.append("top_k_candidate_scope_receipt_required")
     if (
         "source_checksum" in row
         and source_checksum
@@ -341,6 +386,8 @@ def _normalize_candidate_row(row: dict[str, Any], index: int) -> dict[str, Any]:
         "source_family": source_family,
         "top_k_rank": top_k_rank,
         "candidate_id": candidate_id,
+        "upstream_top_k_provenance_ref": upstream_top_k_provenance_ref,
+        "upstream_top_k_source_checksum": upstream_top_k_source_checksum,
         "pre_refinement_energy_proxy": pre_energy,
         "post_refinement_energy_proxy": post_energy,
         "energy_proxy_delta": (

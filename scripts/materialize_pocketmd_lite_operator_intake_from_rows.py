@@ -26,6 +26,7 @@ from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
     TOP_K_RANK_PREFIX_POLICY,
     TOP_K_SCOPE_POLICY,
     TOPK_ROW_QUALITY_CRITERIA,
+    UPSTREAM_TOP_K_RECEIPT_FIELDS,
 )
 from release_evidence_metadata import file_sha256, release_evidence_metadata  # noqa: E402
 
@@ -94,6 +95,12 @@ def row_value_contract(*, max_top_k: int) -> dict[str, Any]:
         "row_receipt_policy": (
             "provenance_ref must be non-placeholder and source_checksum must be a "
             "non-placeholder sha256:<hex> row receipt."
+        ),
+        "upstream_top_k_receipt_policy": (
+            "Each refinement row must include upstream_top_k_provenance_ref and "
+            "upstream_top_k_source_checksum proving the candidate came from the "
+            "upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, "
+            "test, and file-only provenance are rejected."
         ),
     }
 
@@ -334,15 +341,44 @@ def _normalize_row(
             raise ValueError(f"row_{row_index}:{case_id}:{field_name}_placeholder")
     provenance_ref = _required_string(raw_row, field="provenance_ref", row_index=row_index)
     source_checksum = _required_string(raw_row, field="source_checksum", row_index=row_index)
+    upstream_top_k_provenance_ref = _required_string(
+        raw_row,
+        field="upstream_top_k_provenance_ref",
+        row_index=row_index,
+    )
+    upstream_top_k_source_checksum = _required_string(
+        raw_row,
+        field="upstream_top_k_source_checksum",
+        row_index=row_index,
+    )
     if not SOURCE_CHECKSUM_PATTERN.fullmatch(source_checksum):
         raise ValueError(f"row_{row_index}:{case_id}:source_checksum_invalid")
     if _is_repeated_placeholder_checksum(source_checksum):
         raise ValueError(f"row_{row_index}:{case_id}:source_checksum_placeholder_digest")
+    if not SOURCE_CHECKSUM_PATTERN.fullmatch(upstream_top_k_source_checksum):
+        raise ValueError(
+            f"row_{row_index}:{case_id}:upstream_top_k_source_checksum_invalid"
+        )
+    if _is_repeated_placeholder_checksum(upstream_top_k_source_checksum):
+        raise ValueError(
+            f"row_{row_index}:{case_id}:"
+            "upstream_top_k_source_checksum_placeholder_digest"
+        )
     if (
         _has_placeholder_provenance_prefix(provenance_ref)
         or _contains_marker(provenance_ref, PLACEHOLDER_SOURCE_TEXT_MARKERS)
     ):
         raise ValueError(f"row_{row_index}:{case_id}:provenance_ref_placeholder")
+    if (
+        _has_placeholder_provenance_prefix(upstream_top_k_provenance_ref)
+        or _contains_marker(
+            upstream_top_k_provenance_ref,
+            PLACEHOLDER_SOURCE_TEXT_MARKERS,
+        )
+    ):
+        raise ValueError(
+            f"row_{row_index}:{case_id}:upstream_top_k_provenance_ref_placeholder"
+        )
 
     top_k_rank = _required_integer(
         raw_row,
@@ -373,6 +409,8 @@ def _normalize_row(
         "source_family": source_family,
         "top_k_rank": top_k_rank,
         "candidate_id": candidate_id,
+        "upstream_top_k_provenance_ref": upstream_top_k_provenance_ref,
+        "upstream_top_k_source_checksum": upstream_top_k_source_checksum,
         "pre_refinement_energy_proxy": _required_number(
             raw_row,
             field="pre_refinement_energy_proxy",
@@ -491,6 +529,7 @@ def build_pocketmd_lite_operator_intake_from_rows(
             "source_version": source_version,
             "supported_source_formats": list(SUPPORTED_ROW_FORMATS),
             "required_case_fields": list(REQUIRED_CASE_FIELDS),
+            "upstream_top_k_receipt_fields": list(UPSTREAM_TOP_K_RECEIPT_FIELDS),
             "flat_uncertainty_fields": list(UNCERTAINTY_FLAT_FIELDS),
             "row_count": len(flat_rows),
             "case_count": len(case_ids),

@@ -16,8 +16,10 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
+    REQUIRED_CASE_FIELDS,
     TOP_K_RANK_PREFIX_POLICY,
     TOPK_ROW_QUALITY_CRITERIA,
+    UPSTREAM_TOP_K_RECEIPT_FIELDS,
     build_operator_input_source_receipt,
     build_phase4_exit_gate,
 )
@@ -213,26 +215,17 @@ def _raw_row_importer_contract() -> dict[str, Any]:
 def _operator_intake_schema() -> dict[str, Any]:
     return {
         "case_key": "cases",
-        "required_case_fields": [
-            "case_id",
-            "source_family",
-            "top_k_rank",
-            "candidate_id",
-            "pre_refinement_energy_proxy",
-            "post_refinement_energy_proxy",
-            "local_min_survived",
-            "contact_persistence_rate",
-            "h_bond_persistence_rate",
-            "clash_count_before",
-            "clash_count_after",
-            "uncertainty_interval",
-            "provenance_ref",
-            "source_checksum",
-        ],
+        "required_case_fields": list(REQUIRED_CASE_FIELDS),
         "top_k_only_policy": (
             "Only candidates selected in the upstream top-k pose or design ranking may be "
             "included. Broad all-atom rescoring, long MD, FEP, and de novo docking claims "
             "remain out of scope."
+        ),
+        "upstream_top_k_receipt_fields": list(UPSTREAM_TOP_K_RECEIPT_FIELDS),
+        "upstream_top_k_receipt_policy": (
+            "Each refinement row must carry upstream top-k provenance and checksum "
+            "for the ranked candidate set that selected the candidate before Lite "
+            "refinement."
         ),
         "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
         "top_k_scope_policy": (
@@ -250,6 +243,8 @@ def _operator_intake_schema() -> dict[str, Any]:
             "source_family": "CASF/PDBBind or GPCR operator intake",
             "top_k_rank": 1,
             "candidate_id": "",
+            "upstream_top_k_provenance_ref": "",
+            "upstream_top_k_source_checksum": "",
             "pre_refinement_energy_proxy": None,
             "post_refinement_energy_proxy": None,
             "local_min_survived": None,
@@ -302,6 +297,8 @@ def _operator_gate_unblock_plan(
                 "candidate_scope": "upstream_ranked_top_k_candidates_only",
                 "required_case_fields": required_case_fields,
                 "receipt_fields": [
+                    "upstream_top_k_provenance_ref",
+                    "upstream_top_k_source_checksum",
                     "provenance_ref",
                     "source_checksum",
                     "operator_input_source.source_artifact",
@@ -310,6 +307,11 @@ def _operator_gate_unblock_plan(
                     "operator_input_source.source_url",
                     "operator_input_source.source_license",
                 ],
+                "upstream_top_k_receipt_fields": list(UPSTREAM_TOP_K_RECEIPT_FIELDS),
+                "upstream_top_k_receipt_policy": (
+                    "Rows must prove the candidate came from the upstream ranked top-k "
+                    "set before Lite refinement."
+                ),
                 "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
                 "row_value_contract": raw_row_importer["row_value_contract"],
                 "source_receipt_requirements": raw_row_importer[
@@ -855,6 +857,7 @@ def build_operator_intake_packet(
                     "fill contact_persistence_rate and h_bond_persistence_rate as fractions",
                     "fill clash_count_before and clash_count_after as non-negative integers",
                     "fill uncertainty_interval with low, high, and unit",
+                    "keep upstream_top_k_provenance_ref and upstream_top_k_source_checksum tied to the upstream ranked top-k set",
                     "keep source_checksum and provenance_ref tied to local operator evidence",
                     "keep operator_input_source source_artifact/source_artifact_sha256/source_id/source_url/source_license populated",
                 ],

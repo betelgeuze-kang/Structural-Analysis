@@ -45,6 +45,13 @@ def _provenance_ref(case_id: str, candidate_id: str) -> str:
     )
 
 
+def _upstream_top_k_provenance_ref(case_id: str, candidate_id: str) -> str:
+    return (
+        "https://zenodo.org/records/7654321/files/"
+        f"pocketmd-lite-upstream-topk-{case_id}-{candidate_id}.json#row"
+    )
+
+
 def _row(
     *,
     case_id: str,
@@ -61,6 +68,13 @@ def _row(
         "source_family": "CASF/PDBBind operator intake",
         "top_k_rank": top_k_rank,
         "candidate_id": candidate_id,
+        "upstream_top_k_provenance_ref": _upstream_top_k_provenance_ref(
+            case_id,
+            candidate_id,
+        ),
+        "upstream_top_k_source_checksum": _checksum(
+            f"upstream-topk:{case_id}:{candidate_id}"
+        ),
         "pre_refinement_energy_proxy": -8.0 + top_k_rank,
         "post_refinement_energy_proxy": -8.5 + top_k_rank,
         "local_min_survived": local_min_survived,
@@ -84,6 +98,8 @@ def _write_csv(path: Path) -> None:
         "source_family",
         "top_k_rank",
         "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
         "pre_refinement_energy_proxy",
         "post_refinement_energy_proxy",
         "local_min_survived",
@@ -103,6 +119,8 @@ def _write_csv(path: Path) -> None:
             "CASF/PDBBind operator intake",
             "1",
             "pose_1",
+            _upstream_top_k_provenance_ref("case_a", "pose_1"),
+            _checksum("upstream-topk:case_a:pose_1"),
             "-8.0",
             "-8.5",
             "true",
@@ -121,6 +139,8 @@ def _write_csv(path: Path) -> None:
             "CASF/PDBBind operator intake",
             "2",
             "pose_2",
+            _upstream_top_k_provenance_ref("case_a", "pose_2"),
+            _checksum("upstream-topk:case_a:pose_2"),
             "-7.0",
             "-7.5",
             "false",
@@ -139,6 +159,8 @@ def _write_csv(path: Path) -> None:
             "CASF/PDBBind operator intake",
             "1",
             "pose_1",
+            _upstream_top_k_provenance_ref("case_b", "pose_1"),
+            _checksum("upstream-topk:case_b:pose_1"),
             "-9.0",
             "-9.2",
             "true",
@@ -157,6 +179,8 @@ def _write_csv(path: Path) -> None:
             "CASF/PDBBind operator intake",
             "2",
             "pose_2",
+            _upstream_top_k_provenance_ref("case_b", "pose_2"),
+            _checksum("upstream-topk:case_b:pose_2"),
             "-7.0",
             "-7.5",
             "false",
@@ -175,6 +199,8 @@ def _write_csv(path: Path) -> None:
             "CASF/PDBBind operator intake",
             "1",
             "pose_1",
+            _upstream_top_k_provenance_ref("case_c", "pose_1"),
+            _checksum("upstream-topk:case_c:pose_1"),
             "-8.0",
             "-8.5",
             "true",
@@ -193,6 +219,8 @@ def _write_csv(path: Path) -> None:
             "CASF/PDBBind operator intake",
             "2",
             "pose_2",
+            _upstream_top_k_provenance_ref("case_c", "pose_2"),
+            _checksum("upstream-topk:case_c:pose_2"),
             "-7.0",
             "-7.5",
             "false",
@@ -256,6 +284,10 @@ def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None
         "case_b": [1, 2],
         "case_c": [1, 2],
     }
+    assert payload["operator_input_source"]["upstream_top_k_receipt_fields"] == [
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+    ]
     assert payload["operator_input_source"]["top_k_row_quality_minimums"] == {
         "min_candidate_count_per_case": 2,
         "min_real_refinement_case_count": 3,
@@ -273,6 +305,9 @@ def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None
     assert row_contract["uncertainty_interval_policy"].startswith(
         "uncertainty_interval or uncertainty_low/high must parse to finite numbers"
     )
+    assert row_contract["upstream_top_k_receipt_policy"].startswith(
+        "Each refinement row must include upstream_top_k_provenance_ref"
+    )
     assert payload["operator_input_source"]["source_receipt_requirements"][
         "required_fields"
     ] == [
@@ -283,6 +318,12 @@ def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None
         "source_artifact_sha256",
     ]
     assert payload["cases"][0]["top_k_rank"] == 1
+    assert payload["cases"][0]["upstream_top_k_provenance_ref"] == (
+        _upstream_top_k_provenance_ref("case_a", "pose_1")
+    )
+    assert payload["cases"][0]["upstream_top_k_source_checksum"] == _checksum(
+        "upstream-topk:case_a:pose_1"
+    )
     assert payload["cases"][0]["local_min_survived"] is True
     assert payload["cases"][0]["uncertainty_interval"] == {
         "low": -0.2,
@@ -685,6 +726,51 @@ def test_blocks_placeholder_row_receipts(tmp_path: Path) -> None:
         assert str(exc) == "row_1:case_bad:source_checksum_placeholder_digest"
     else:
         raise AssertionError("expected placeholder checksum error")
+
+
+def test_blocks_placeholder_upstream_topk_receipts(tmp_path: Path) -> None:
+    rows = tmp_path / "pocketmd_lite_rows.json"
+    bad_row = _row(
+        case_id="case_bad",
+        candidate_id="pose_bad",
+        top_k_rank=1,
+        local_min_survived=True,
+        contact_rate=0.9,
+        h_bond_rate=0.5,
+        clash_before=3,
+        clash_after=1,
+    )
+    bad_row["upstream_top_k_provenance_ref"] = "operator://case_bad/topk/pose_bad"
+    rows.write_text(json.dumps([bad_row]), encoding="utf-8")
+
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "row_1:case_bad:upstream_top_k_provenance_ref_placeholder"
+    else:
+        raise AssertionError("expected placeholder upstream top-k provenance error")
+
+    bad_row["upstream_top_k_provenance_ref"] = _upstream_top_k_provenance_ref(
+        "case_bad",
+        "pose_bad",
+    )
+    bad_row["upstream_top_k_source_checksum"] = "sha256:" + "b" * 64
+    rows.write_text(json.dumps([bad_row]), encoding="utf-8")
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == (
+            "row_1:case_bad:"
+            "upstream_top_k_source_checksum_placeholder_digest"
+        )
+    else:
+        raise AssertionError("expected placeholder upstream top-k checksum error")
 
 
 def test_cli_writes_operator_intake(tmp_path: Path) -> None:
