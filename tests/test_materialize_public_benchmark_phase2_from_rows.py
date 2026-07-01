@@ -307,6 +307,53 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     assert missing_requirement["casf_pdbbind_pose_success_harness"][
         "missing_row_inputs"
     ] == ["subset_rows", "pose_rows"]
+    component_summaries = {
+        row["component_id"]: row["requirement_summary"]
+        for row in audit["components"]
+    }
+    assert audit["component_requirement_summaries"] == [
+        component_summaries[row["component_id"]]
+        for row in audit["components"]
+    ]
+    assert component_summaries["casf_pdbbind_pose_success_harness"] == {
+        "component_id": "casf_pdbbind_pose_success_harness",
+        "requirement_count": 1,
+        "ready_requirement_count": 0,
+        "blocked_requirement_count": 1,
+        "failed_criteria": ["casf_pdbbind_pose_success_harness_ready"],
+        "failed_criterion_count": 1,
+        "blocker_count": 2,
+        "required_row_inputs": ["subset_rows", "pose_rows"],
+        "missing_row_inputs": ["subset_rows", "pose_rows"],
+        "missing_row_input_count": 2,
+        "phase2_component_ready": False,
+    }
+    assert component_summaries["symmetry_aware_ligand_rmsd"] == {
+        "component_id": "symmetry_aware_ligand_rmsd",
+        "requirement_count": 1,
+        "ready_requirement_count": 0,
+        "blocked_requirement_count": 1,
+        "failed_criteria": ["symmetry_aware_ligand_rmsd_ready"],
+        "failed_criterion_count": 1,
+        "blocker_count": 1,
+        "required_row_inputs": ["pose_rows"],
+        "missing_row_inputs": ["pose_rows"],
+        "missing_row_input_count": 1,
+        "phase2_component_ready": False,
+    }
+    assert component_summaries["posebusters_style_pose_validity"][
+        "failed_criteria"
+    ] == ["posebusters_style_pose_validity_ready"]
+    assert component_summaries["vina_gnina_comparison_adapter"][
+        "failed_criteria"
+    ] == ["vina_gnina_comparison_ready"]
+    assert component_summaries["dud_e_or_lit_pcba_enrichment"][
+        "failed_criteria"
+    ] == ["dud_e_or_lit_pcba_enrichment_ready"]
+    assert audit["components"][0]["phase2_component_ready"] is False
+    assert audit["components"][0]["failed_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready"
+    ]
     contracts = audit["row_intake_contracts"]
     subset_contract = contracts["subset_rows"]
     assert subset_contract["supported_source_families"] == ["CASF/PDBBind"]
@@ -399,6 +446,25 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     assert audit["summary"]["phase2_failed_criteria"] == []
     assert audit["summary"]["blocker_count"] == 0
     assert all(row["ready"] for row in audit["phase2_requirements"])
+    assert all(row["phase2_component_ready"] for row in audit["components"])
+    assert all(row["failed_criteria"] == [] for row in audit["components"])
+    assert audit["component_requirement_summaries"] == [
+        row["requirement_summary"] for row in audit["components"]
+    ]
+    assert {
+        row["component_id"]: row["requirement_summary"]["ready_requirement_count"]
+        for row in audit["components"]
+    } == {
+        "casf_pdbbind_pose_success_harness": 1,
+        "symmetry_aware_ligand_rmsd": 1,
+        "posebusters_style_pose_validity": 1,
+        "vina_gnina_comparison_adapter": 1,
+        "dud_e_or_lit_pcba_enrichment": 1,
+    }
+    assert all(
+        row["requirement_summary"]["blocker_count"] == 0
+        for row in audit["components"]
+    )
     assert audit["row_intake_contracts"]["phase2_outputs"]["operator_bundle"] == (
         str(tmp_path / "operator_bundle.json")
     )
@@ -483,6 +549,32 @@ def test_public_benchmark_phase2_row_audit_blocks_one_case_smoke_rows(
         "casf_pdbbind_pose_success_harness": "phase2_count_incomplete",
         "symmetry_aware_ligand_rmsd": "phase2_count_incomplete",
         "posebusters_style_pose_validity": "phase2_count_incomplete",
+    }
+    assert {
+        component_id: row["failed_criteria"]
+        for component_id, row in blocked_components.items()
+    } == {
+        "casf_pdbbind_pose_success_harness": [
+            "casf_pdbbind_pose_success_harness_ready"
+        ],
+        "symmetry_aware_ligand_rmsd": ["symmetry_aware_ligand_rmsd_ready"],
+        "posebusters_style_pose_validity": [
+            "posebusters_style_pose_validity_ready"
+        ],
+    }
+    assert all(
+        row["requirement_summary"]["blocked_requirement_count"] == 1
+        for row in blocked_components.values()
+    )
+    assert {
+        row["component_id"]: row["requirement_summary"]["phase2_component_ready"]
+        for row in audit["components"]
+    } == {
+        "casf_pdbbind_pose_success_harness": False,
+        "symmetry_aware_ligand_rmsd": False,
+        "posebusters_style_pose_validity": False,
+        "vina_gnina_comparison_adapter": True,
+        "dud_e_or_lit_pcba_enrichment": True,
     }
     assert "phase2_exit_gate::casf_pdbbind_pose_success_harness_ready" in audit[
         "blockers"

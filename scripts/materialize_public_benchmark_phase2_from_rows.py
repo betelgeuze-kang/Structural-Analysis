@@ -391,6 +391,79 @@ def _phase2_audit_summary(
     }
 
 
+def _component_requirement_summary(
+    requirements: list[dict[str, Any]],
+    *,
+    component_id: str,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for row in requirements
+        if str(row.get("component_id") or "") == component_id
+    ]
+    failed_criteria = [
+        str(row.get("criterion_id") or "")
+        for row in rows
+        if not bool(row.get("ready"))
+    ]
+    missing_row_inputs = list(
+        dict.fromkeys(
+            str(input_id)
+            for row in rows
+            for input_id in row.get("missing_row_inputs", [])
+            if str(input_id)
+        )
+    )
+    required_row_inputs = list(
+        dict.fromkeys(
+            str(input_id)
+            for row in rows
+            for input_id in row.get("required_row_inputs", [])
+            if str(input_id)
+        )
+    )
+    blocker_count = sum(
+        len([blocker for blocker in row.get("blockers", []) if str(blocker)])
+        for row in rows
+    )
+    return {
+        "component_id": component_id,
+        "requirement_count": len(rows),
+        "ready_requirement_count": sum(1 for row in rows if bool(row.get("ready"))),
+        "blocked_requirement_count": len(failed_criteria),
+        "failed_criteria": failed_criteria,
+        "failed_criterion_count": len(failed_criteria),
+        "blocker_count": blocker_count,
+        "required_row_inputs": required_row_inputs,
+        "missing_row_inputs": missing_row_inputs,
+        "missing_row_input_count": len(missing_row_inputs),
+        "phase2_component_ready": bool(rows) and not failed_criteria,
+    }
+
+
+def _attach_component_requirement_summaries(
+    components: list[dict[str, Any]],
+    requirements: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    enriched: list[dict[str, Any]] = []
+    for component in components:
+        component_id = str(component.get("component_id") or "")
+        summary = _component_requirement_summary(
+            requirements,
+            component_id=component_id,
+        )
+        enriched.append(
+            {
+                **component,
+                "phase2_component_ready": bool(summary["requirement_count"])
+                and not summary["failed_criteria"],
+                "failed_criteria": list(summary["failed_criteria"]),
+                "requirement_summary": summary,
+            }
+        )
+    return enriched
+
+
 def build_public_benchmark_phase2_row_audit(
     *,
     repo_root: Path = ROOT,
@@ -432,6 +505,10 @@ def build_public_benchmark_phase2_row_audit(
         phase2_requirements = harness_bundle.build_phase2_requirement_rows(
             components
         )
+        components = _attach_component_requirement_summaries(
+            components,
+            phase2_requirements,
+        )
         phase2_requirement_summary = (
             harness_bundle.build_phase2_requirement_summary(phase2_requirements)
         )
@@ -470,6 +547,9 @@ def build_public_benchmark_phase2_row_audit(
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
+            "component_requirement_summaries": [
+                component["requirement_summary"] for component in components
+            ],
             "components": components,
             "phase2_exit_gate": phase2_exit_gate,
             "phase2_requirements": phase2_requirements,
@@ -517,6 +597,10 @@ def build_public_benchmark_phase2_row_audit(
         phase2_requirements = harness_bundle.build_phase2_requirement_rows(
             components
         )
+        components = _attach_component_requirement_summaries(
+            components,
+            phase2_requirements,
+        )
         phase2_requirement_summary = (
             harness_bundle.build_phase2_requirement_summary(phase2_requirements)
         )
@@ -554,6 +638,9 @@ def build_public_benchmark_phase2_row_audit(
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
+            "component_requirement_summaries": [
+                component["requirement_summary"] for component in components
+            ],
             "components": components,
             "phase2_exit_gate": phase2_exit_gate,
             "phase2_requirements": phase2_requirements,
@@ -567,6 +654,10 @@ def build_public_benchmark_phase2_row_audit(
 
     components = _components_from_report(materialization_report)
     phase2_requirements = harness_bundle.build_phase2_requirement_rows(components)
+    components = _attach_component_requirement_summaries(
+        components,
+        phase2_requirements,
+    )
     phase2_requirement_summary = harness_bundle.build_phase2_requirement_summary(
         phase2_requirements
     )
@@ -641,6 +732,9 @@ def build_public_benchmark_phase2_row_audit(
         "blockers": blockers,
         "component_count": len(components),
         "component_ready_count": sum(1 for component in components if component["ready"]),
+        "component_requirement_summaries": [
+            component["requirement_summary"] for component in components
+        ],
         "components": components,
         "phase2_requirements": phase2_requirements,
         "phase2_requirement_summary": phase2_requirement_summary,
