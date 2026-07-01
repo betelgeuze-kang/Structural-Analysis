@@ -2,6 +2,7 @@
 
 - `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/22 | blockers=12`
 - `contract_pass`: `False`
+- `gate_unblock_plan_count`: `5`
 - `observation_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
 - `template_path`: `docs/templates/ux_new_user_observation.template.json`
 - `owner_action`: Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
@@ -30,6 +31,14 @@
 | `evidence_ref_not_self_reference` | `` | `derived from observation timestamps` | evidence_ref must not point back to the observation JSON itself | `evidence_ref_not_self_reference_pass` = `False` |
 | `evidence_ref_not_template_reference` | `` | `derived from observation timestamps` | evidence_ref must not point to the UX observation template | `evidence_ref_not_template_reference_pass` = `False` |
 | `evidence_ref_not_template_artifact` | `` | `derived from observation timestamps` | evidence_ref must not point to docs/templates or a .template.* artifact | `evidence_ref_not_template_artifact_pass` = `False` |
+
+## Gate Unblock Plan
+
+- `attach_observation_record`
+- `observe_required_workflow_steps`
+- `prove_30_minute_timing`
+- `attach_separate_evidence_reference`
+- `regenerate_release_gate_evidence`
 
 ## Validation Commands
 

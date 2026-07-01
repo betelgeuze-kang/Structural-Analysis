@@ -3,6 +3,8 @@
 - `summary_line`: `UX new-user observation: BLOCKED | completion=missing/30.0 min | elapsed=missing/30.0 min | workflow=0/5 | blockers=12`
 - `contract_pass`: `False`
 - `observation_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
+- `template_path`: `docs/templates/ux_new_user_observation.template.json`
+- `gate_unblock_plan_count`: `5`
 
 ## Timing Checks
 
@@ -36,6 +38,14 @@
 - `blocker_count`
 - `evidence_ref`
 - `approval_decision`
+
+## Gate Unblock Plan
+
+- `attach_observation_record`
+- `observe_required_workflow_steps`
+- `prove_30_minute_timing`
+- `attach_separate_evidence_reference`
+- `regenerate_release_gate_evidence`
 
 ## Validation Commands
 

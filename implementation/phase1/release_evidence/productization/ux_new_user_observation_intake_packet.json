@@ -259,11 +259,94 @@
       "template_value": "derived from observation timestamps"
     }
   ],
-  "generated_at": "2026-07-01T17:47:36.269521+00:00",
+  "gate_unblock_plan": [
+    {
+      "minimum_evidence": [
+        "participant_role is new_user, first_time_user, or pilot_user",
+        "new_to_product=true",
+        "observer is a human observer or UX research owner",
+        "contract_pass=true in the observation record"
+      ],
+      "required_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
+      "slot_id": "attach_observation_record",
+      "template_artifact": "docs/templates/ux_new_user_observation.template.json"
+    },
+    {
+      "minimum_evidence": [
+        "Import pass",
+        "Model Health pass",
+        "Analysis Setup pass",
+        "Run & Monitor pass",
+        "Compare & Report pass"
+      ],
+      "required_workflow_steps": [
+        {
+          "id": "import",
+          "label": "Import"
+        },
+        {
+          "id": "model_health",
+          "label": "Model Health"
+        },
+        {
+          "id": "analysis_setup",
+          "label": "Analysis Setup"
+        },
+        {
+          "id": "run_monitor",
+          "label": "Run & Monitor"
+        },
+        {
+          "id": "compare_report",
+          "label": "Compare & Report"
+        }
+      ],
+      "slot_id": "observe_required_workflow_steps"
+    },
+    {
+      "minimum_evidence": [
+        "started_at_utc is timezone-aware",
+        "completed_at_utc is timezone-aware and not before start",
+        "completion_minutes <= 30.0",
+        "declared completion minutes matches elapsed minutes within tolerance"
+      ],
+      "slot_id": "prove_30_minute_timing"
+    },
+    {
+      "minimum_evidence": [
+        "evidence_ref is a ticket/jira/ux/user-study reference, https URL, or existing local evidence path",
+        "evidence_ref is not the observation JSON itself",
+        "evidence_ref is not docs/templates or a .template artifact",
+        "approval_decision is accepted, approved, pass, signed, or approved_for_release"
+      ],
+      "slot_id": "attach_separate_evidence_reference"
+    },
+    {
+      "minimum_evidence": [
+        "ux_new_user_observation_report.json contract_pass=true",
+        "ux_new_user_observation_intake_packet.json contract_pass=true",
+        "developer_preview_rc_status no longer blocks new_user_core_workflow_observation_passed"
+      ],
+      "slot_id": "regenerate_release_gate_evidence",
+      "validation_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    }
+  ],
+  "gate_unblock_plan_count": 5,
+  "generated_at": "2026-07-01T19:09:24.969290+00:00",
+  "next_actions": [
+    "fill_ux_new_user_observation_record_from_template",
+    "run_30_minute_human_new_user_core_workflow_observation",
+    "rerun_ux_observation_validation_chain"
+  ],
   "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
   "observation_report_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
   "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
   "schema_version": "ux-new-user-observation-intake-packet.v1",
+  "status": "blocked",
   "summary": {
     "completion_minutes": null,
     "declared_completion_minutes": null,
