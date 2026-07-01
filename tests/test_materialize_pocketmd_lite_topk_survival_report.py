@@ -224,8 +224,10 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary(
                 "case_b": [1, 2],
                 "case_c": [1, 2],
             },
+            "case_rank_exceeds_max": {},
             "case_rank_prefix_gaps": {},
             "contract_pass": True,
+            "max_top_k_rank": 20,
             "minimums": {
                 "min_candidate_count_per_case": 2,
                 "min_real_refinement_case_count": 3,
@@ -239,6 +241,10 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary(
             "top_k_rank_prefix_policy": (
                 "For each case, supplied ranks must form a contiguous prefix starting "
                 "at rank 1; cherry-picked gaps are not valid top-k refinement input."
+            ),
+            "top_k_scope_policy": (
+                "PocketMD Lite refinement rows are bounded to upstream top-k candidates "
+                "only; top_k_rank must be between 1 and 20."
             ),
         },
         "uncertainty_width_median": 0.3,
@@ -522,6 +528,48 @@ def test_pocketmd_lite_materializer_blocks_non_contiguous_topk_rank_prefix(
     assert "case_a:top_k_rank_prefix_gap:2" in report["blockers"]
     assert "top_k_refinement_case_coverage" in report["phase4_exit_gate"][
         "failed_criteria"
+    ]
+
+
+def test_pocketmd_lite_materializer_blocks_rank_outside_top_k_scope(
+    tmp_path: Path,
+) -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    for rank in range(3, 22):
+        cases.append(
+            _valid_case(
+                case_id="case_a",
+                candidate_id=f"pose_{rank}",
+                top_k_rank=rank,
+                local_min_survived=True,
+                contact_rate=0.9,
+                h_bond_rate=0.7,
+                clash_before=2,
+                clash_after=0,
+                uncertainty_low=-0.1,
+                uncertainty_high=0.2,
+            )
+        )
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        _with_source_receipt(intake, tmp_path),
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["top_k_row_quality"]["contract_pass"] is False
+    assert report["top_k_row_quality"]["case_rank_prefix_gaps"] == {}
+    assert report["top_k_row_quality"]["case_rank_exceeds_max"] == {
+        "case_a": [21]
+    }
+    assert "case_a:top_k_rank_exceeds_max:20" in report["blockers"]
+    assert "top_k_scope_required" in report["root_cause_tags"]
+    assert report["phase4_exit_gate"]["failed_criteria"] == [
+        "top_k_refinement_case_coverage",
+        "report_blockers_resolved",
     ]
 
 

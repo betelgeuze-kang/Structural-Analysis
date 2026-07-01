@@ -81,9 +81,14 @@ TOPK_ROW_QUALITY_CRITERIA = {
     "min_top_k_rank_coverage_per_case": 2,
     "min_total_top_k_candidate_count": 6,
 }
+MAX_TOP_K_RANK = 20
 TOP_K_RANK_PREFIX_POLICY = (
     "For each case, supplied ranks must form a contiguous prefix starting at "
     "rank 1; cherry-picked gaps are not valid top-k refinement input."
+)
+TOP_K_SCOPE_POLICY = (
+    "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; "
+    f"top_k_rank must be between 1 and {MAX_TOP_K_RANK}."
 )
 SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 PLACEHOLDER_SOURCE_TEXT_MARKERS = (
@@ -292,6 +297,9 @@ def _normalize_candidate_row(row: dict[str, Any], index: int) -> dict[str, Any]:
     if "top_k_rank" in row and (top_k_rank is None or top_k_rank < 1):
         blockers.append(f"{row_key}:top_k_rank_invalid")
         root_cause_tags.append("top_k_rank_invalid")
+    elif "top_k_rank" in row and top_k_rank is not None and top_k_rank > MAX_TOP_K_RANK:
+        blockers.append(f"{row_key}:top_k_rank_exceeds_max:{MAX_TOP_K_RANK}")
+        root_cause_tags.append("top_k_scope_required")
     if "pre_refinement_energy_proxy" in row and pre_energy is None:
         blockers.append(f"{row_key}:pre_refinement_energy_proxy_invalid")
         root_cause_tags.append("operator_values_required")
@@ -393,6 +401,11 @@ def _topk_row_quality(rows: list[dict[str, Any]]) -> dict[str, Any]:
         for case_id, ranks in case_rank_coverage.items()
         if ranks
     }
+    case_rank_exceeds_max = {
+        case_id: [rank for rank in ranks if rank > MAX_TOP_K_RANK]
+        for case_id, ranks in case_rank_coverage.items()
+        if any(rank > MAX_TOP_K_RANK for rank in ranks)
+    }
 
     blockers: list[str] = []
     if rows:
@@ -411,13 +424,17 @@ def _topk_row_quality(rows: list[dict[str, Any]]) -> dict[str, Any]:
                     str(rank) for rank in case_rank_prefix_gaps[case_id]
                 )
                 blockers.append(f"{case_id}:top_k_rank_prefix_gap:{missing}")
+            if case_rank_exceeds_max.get(case_id):
+                blockers.append(f"{case_id}:top_k_rank_exceeds_max:{MAX_TOP_K_RANK}")
 
     blockers = list(dict.fromkeys(blockers))
     return {
         "contract_pass": bool(rows and not blockers),
         "minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+        "max_top_k_rank": MAX_TOP_K_RANK,
         "required_rank_span_per_case": required_ranks,
         "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
+        "top_k_scope_policy": TOP_K_SCOPE_POLICY,
         "real_refinement_case_count": len(rows_by_case),
         "top_k_candidate_count": len(rows),
         "case_candidate_counts": case_candidate_counts,
@@ -426,6 +443,10 @@ def _topk_row_quality(rows: list[dict[str, Any]]) -> dict[str, Any]:
             case_id: gaps
             for case_id, gaps in sorted(case_rank_prefix_gaps.items())
             if gaps
+        },
+        "case_rank_exceeds_max": {
+            case_id: ranks
+            for case_id, ranks in sorted(case_rank_exceeds_max.items())
         },
         "blockers": blockers,
         "root_cause_tags": (
@@ -795,6 +816,7 @@ def build_phase4_exit_gate(
                 "top_k_candidate_count",
                 "top_k_rank_coverage",
                 "top_k_rank_prefix_gap",
+                "top_k_rank_exceeds_max",
                 "candidate_rows",
                 "topk_candidate",
             ),
