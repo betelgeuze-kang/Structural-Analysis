@@ -182,7 +182,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T03:50:34.500038+00:00",
+  "generated_at": "2026-07-01T03:51:45.131740+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:014c798a693c620e1e7e9e534d27d6fe0503ced1438813612204c490ce9d3dd1",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:bd56e693994082c699cbb47be1649806b14d30a9827fdd04be0815bacb8a44b9",
@@ -202,7 +202,7 @@
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:d6e06e17ebc306700c81a93500356a29f23829a7f45514f6ab03caf31996213f",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:637d723c86510fc39208e75eba6a5fd4809b86e2e4656c73533dd0ddb15a7d6b",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:ce1833b7b08e6ab7657775b499f8c19d8660359663a4567fb743726e63112f37",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:565a9d8b64c8a38b99ccc50cc8eb42a38af934a4e5286239a9d02efae3905171",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:06c904248a481f65f1270579fe67bdbd92c89a95915839f5d10b311f4e3fdaaf",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:7d72cc4d56752323369e605f144f839ce9c2265133b7472c241452117bd4b5e5"
   },
   "mutation_allowed": false,
@@ -1884,31 +1884,58 @@
             "candidate": "accuracy_parity_scorecard",
             "classification": "fix",
             "freshness_label": "accuracy_parity_scorecard",
-            "freshness_policy": "direct_leaf_row"
+            "freshness_policy": "direct_leaf_row",
+            "validation_basis": [
+              "leaf_artifact_in_default_freshness_rows",
+              "science_scorecard_overall_pass_field",
+              "benchmark_contract_and_kpi_fields",
+              "public_hf_and_source_family_checks",
+              "stability_suite_pass_field"
+            ]
           },
           {
             "candidate": "product_production_ai_checkpoint_readiness",
             "classification": "fix",
             "freshness_label": "product_production_ai_checkpoint_readiness",
-            "freshness_policy": "direct_leaf_row"
+            "freshness_policy": "direct_leaf_row",
+            "validation_basis": [
+              "leaf_artifact_in_default_freshness_rows",
+              "checkpoint_contract_aggregate",
+              "ml_status_and_checkpoint_receipt_inputs"
+            ]
           },
           {
             "candidate": "goal_readiness_rollup",
             "classification": "aggregator-review",
             "freshness_label": "",
-            "freshness_policy": "aggregator_source_tracking_only"
+            "freshness_policy": "aggregator_source_tracking_only",
+            "validation_basis": [
+              "aggregates_upstream_release_readiness_inputs",
+              "excluded_from_leaf_freshness_rows",
+              "snapshot_stale_or_inconsistent_policy_remains_authoritative"
+            ]
           },
           {
             "candidate": "product_goal_completion_audit",
             "classification": "aggregator-review",
             "freshness_label": "",
-            "freshness_policy": "aggregator_source_tracking_only"
+            "freshness_policy": "aggregator_source_tracking_only",
+            "validation_basis": [
+              "aggregates_pm_report_and_closure_board",
+              "excluded_from_leaf_freshness_rows",
+              "does_not_rerun_heavy_validation"
+            ]
           },
           {
             "candidate": "goal_operator_action_board",
             "classification": "aggregator-review",
             "freshness_label": "",
-            "freshness_policy": "aggregator_source_tracking_only"
+            "freshness_policy": "aggregator_source_tracking_only",
+            "validation_basis": [
+              "operator_handoff_rollup",
+              "excluded_from_leaf_freshness_rows",
+              "not_closure_evidence_without_owner_receipts"
+            ]
           }
         ],
         "fix_count": 2,
@@ -4269,7 +4296,7 @@
       ]
     }
   },
-  "source_commit_sha": "c5a4dd85f2384f2b682287f22c0787e9760859be",
+  "source_commit_sha": "534ae15875507795ce0bbe7d4a7fccf039194ee3",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
@@ -4277,7 +4304,14 @@
       "current_repo_match": "implementation/phase1/real_accuracy_validation_report.json",
       "decision": "Direct science scorecard receipt with freshness source tracking; the artifact itself carries overall_pass, benchmark contract/KPI pass, direct-metric/source-family/public-HF checks, and stability-suite pass.",
       "freshness_label": "accuracy_parity_scorecard",
-      "freshness_policy": "direct_leaf_row"
+      "freshness_policy": "direct_leaf_row",
+      "validation_basis": [
+        "leaf_artifact_in_default_freshness_rows",
+        "science_scorecard_overall_pass_field",
+        "benchmark_contract_and_kpi_fields",
+        "public_hf_and_source_family_checks",
+        "stability_suite_pass_field"
+      ]
     },
     {
       "candidate": "product_production_ai_checkpoint_readiness",
@@ -4285,7 +4319,12 @@
       "current_repo_match": "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json",
       "decision": "Direct productization receipt with checkpoint source tracking in freshness audit; the artifact aggregates ML status and checkpoint receipt inputs.",
       "freshness_label": "product_production_ai_checkpoint_readiness",
-      "freshness_policy": "direct_leaf_row"
+      "freshness_policy": "direct_leaf_row",
+      "validation_basis": [
+        "leaf_artifact_in_default_freshness_rows",
+        "checkpoint_contract_aggregate",
+        "ml_status_and_checkpoint_receipt_inputs"
+      ]
     },
     {
       "candidate": "goal_readiness_rollup",
@@ -4293,7 +4332,12 @@
       "current_repo_match": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "decision": "Keep snapshot-level upstream stale/inconsistent policy instead of a leaf row.",
       "freshness_label": "",
-      "freshness_policy": "aggregator_source_tracking_only"
+      "freshness_policy": "aggregator_source_tracking_only",
+      "validation_basis": [
+        "aggregates_upstream_release_readiness_inputs",
+        "excluded_from_leaf_freshness_rows",
+        "snapshot_stale_or_inconsistent_policy_remains_authoritative"
+      ]
     },
     {
       "candidate": "product_goal_completion_audit",
@@ -4301,7 +4345,12 @@
       "current_repo_match": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
       "decision": "Track PM report and closure-board inputs rather than treating the audit as heavy evidence.",
       "freshness_label": "",
-      "freshness_policy": "aggregator_source_tracking_only"
+      "freshness_policy": "aggregator_source_tracking_only",
+      "validation_basis": [
+        "aggregates_pm_report_and_closure_board",
+        "excluded_from_leaf_freshness_rows",
+        "does_not_rerun_heavy_validation"
+      ]
     },
     {
       "candidate": "goal_operator_action_board",
@@ -4309,7 +4358,12 @@
       "current_repo_match": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json; implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
       "decision": "Keep operator boards as sourced rollups of PM/freshness inputs, not closure evidence.",
       "freshness_label": "",
-      "freshness_policy": "aggregator_source_tracking_only"
+      "freshness_policy": "aggregator_source_tracking_only",
+      "validation_basis": [
+        "operator_handoff_rollup",
+        "excluded_from_leaf_freshness_rows",
+        "not_closure_evidence_without_owner_receipts"
+      ]
     }
   ],
   "source_of_truth_gap_summary": {
