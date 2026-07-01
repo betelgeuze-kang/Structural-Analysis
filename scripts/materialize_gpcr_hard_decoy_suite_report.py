@@ -38,6 +38,7 @@ DEFAULT_SUITE_REPORT = Path(
     "implementation/phase1/release_evidence/productization/"
     "gpcr_hard_decoy_suite_report.json"
 )
+DEFAULT_SUITE_REPORT_MD = DEFAULT_SUITE_REPORT.with_suffix(".md")
 DEFAULT_EVIDENCE_SURFACE = Path(
     "implementation/phase1/release_evidence/surface/"
     "gpcr_hard_decoy_evidence_surface.json"
@@ -292,6 +293,11 @@ def _operator_handoff_summary(
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _comma_join(values: list[Any]) -> str:
+    rendered = [str(item) for item in values if str(item)]
+    return ", ".join(rendered) if rendered else "none"
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -1118,6 +1124,86 @@ def _phase3_exit_gate(
     }
 
 
+def _markdown_value(value: Any) -> str:
+    if value is None:
+        return "missing"
+    if isinstance(value, bool):
+        return str(value)
+    return str(value)
+
+
+def _markdown(payload: dict[str, Any]) -> str:
+    gate = _as_dict(payload.get("phase3_exit_gate"))
+    lines = [
+        "# GPCR Hard-Decoy Suite Report",
+        "",
+        f"- `status`: `{payload.get('status', '')}`",
+        f"- `contract_pass`: `{payload.get('contract_pass', False)}`",
+        f"- `broad_gpcr_family_claim_safe`: `{payload.get('broad_gpcr_family_claim_safe', False)}`",
+        f"- `target_pass_count`: `{payload.get('target_pass_count', 0)}/{payload.get('target_count', 0)}`",
+        f"- `phase3_exit_gate`: `{gate.get('status', '')}`",
+        f"- `failed_criteria`: `{_comma_join(_as_list(gate.get('failed_criteria')))}`",
+        f"- `first_blocked_target`: `{payload.get('first_blocked_target') or 'none'}`",
+        f"- `first_blocker`: `{payload.get('first_blocker') or 'none'}`",
+        "",
+        "| Criterion | Pass | Required | Failed Targets | Blocker Count |",
+        "|---|---|---|---|---|",
+    ]
+    for criterion in _as_list(gate.get("criteria")):
+        if not isinstance(criterion, dict):
+            continue
+        blockers = _as_list(criterion.get("blockers"))
+        lines.append(
+            "| "
+            f"`{criterion.get('criterion_id', '')}` | "
+            f"`{criterion.get('pass', False)}` | "
+            f"`{criterion.get('required', '')}` | "
+            f"`{_comma_join(_as_list(criterion.get('failed_targets')))}` | "
+            f"`{len(blockers)}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "| Target | Status | PR AUC CI Low | Top-20 Hit Rate | Decoys Above Positive | Positive Out-Anchored | Blockers |",
+            "|---|---|---|---|---|---|---|",
+        ]
+    )
+    for row in _as_list(payload.get("target_rows")):
+        if not isinstance(row, dict):
+            continue
+        lines.append(
+            "| "
+            f"`{row.get('target_id', '')}` | "
+            f"`{row.get('status', '')}` | "
+            f"`{_markdown_value(row.get('ranking_pr_auc_ci_low'))}` | "
+            f"`{_markdown_value(row.get('top20_hit_rate'))}` | "
+            f"`{_markdown_value(row.get('decoys_above_positive_count'))}` | "
+            f"`{_markdown_value(row.get('positive_out_anchored_by_top_decoys'))}` | "
+            f"`{_comma_join(_as_list(row.get('blockers')))}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Operator Next Actions",
+            "",
+        ]
+    )
+    for gap in _as_list(payload.get("operator_evidence_gap_register")):
+        if not isinstance(gap, dict):
+            continue
+        lines.append(
+            "- "
+            f"`{gap.get('slot_id', '')}`: "
+            f"{gap.get('first_next_action', 'review GPCR hard-decoy operator evidence')}"
+        )
+    lines.extend(["", str(payload.get("claim_boundary", "")), ""])
+    return "\n".join(lines)
+
+
+def _resolve_out_md(out_report: Path, out_md: Path | None) -> Path:
+    return out_report.with_suffix(".md") if out_md is None else out_md
+
+
 def materialize_gpcr_hard_decoy_suite_report(
     intake: dict[str, Any],
     *,
@@ -1313,6 +1399,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--intake", type=Path, required=True)
     parser.add_argument("--out-report", type=Path, required=True)
+    parser.add_argument("--out-md", type=Path)
     parser.add_argument("--out-surface", type=Path)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
     parser.add_argument("--fail-blocked", action="store_true")
@@ -1329,6 +1416,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     args.out_report.parent.mkdir(parents=True, exist_ok=True)
     args.out_report.write_text(_json_text(report), encoding="utf-8")
+    out_md = _resolve_out_md(args.out_report, args.out_md)
+    out_md.parent.mkdir(parents=True, exist_ok=True)
+    out_md.write_text(_markdown(report), encoding="utf-8")
     if args.out_surface is not None:
         surface = build_gpcr_evidence_surface(
             report,

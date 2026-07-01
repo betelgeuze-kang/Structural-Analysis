@@ -736,6 +736,7 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
     intake = tmp_path / "gpcr_intake.json"
     intake.write_text(json.dumps({"targets": []}), encoding="utf-8")
     out_report = tmp_path / "gpcr_report.json"
+    out_md = tmp_path / "gpcr_report.md"
     out_surface = tmp_path / "gpcr_surface.json"
 
     assert (
@@ -745,6 +746,8 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                 str(intake),
                 "--out-report",
                 str(out_report),
+                "--out-md",
+                str(out_md),
                 "--out-surface",
                 str(out_surface),
                 "--repo-root",
@@ -755,8 +758,20 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
     )
 
     report = json.loads(out_report.read_text(encoding="utf-8"))
+    markdown = out_md.read_text(encoding="utf-8")
     surface = json.loads(out_surface.read_text(encoding="utf-8"))
     assert report["status"] == "locked"
+    assert "# GPCR Hard-Decoy Suite Report" in markdown
+    assert "`target_pass_count`: `0/3`" in markdown
+    assert "`ranking_pr_auc_ci_low_min`" in markdown
+    assert "`top20_hit_rate_min`" in markdown
+    assert "`decoys_above_positive_count_max`" in markdown
+    assert "`no_positive_out_anchored_by_top_decoys`" in markdown
+    assert "`raw_hard_decoy_rows_actual_closure`" in markdown
+    assert "`DRD2`" in markdown
+    assert "`HTR2A`" in markdown
+    assert "`OPRM1`" in markdown
+    assert "fill DRD2 hard-decoy metrics in the GPCR operator intake packet" in markdown
     assert surface["surface_id"] == "gpcr_hard_decoy_evidence_surface"
     assert surface["locked"] is True
     assert surface["first_blocked_target"] == "DRD2"
