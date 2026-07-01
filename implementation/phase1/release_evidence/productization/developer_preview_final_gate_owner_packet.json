@@ -1,0 +1,339 @@
+{
+  "artifacts": {
+    "developer_preview_final_gate_action_register": "docs/developer_preview_final_gate_action_register.md",
+    "developer_preview_rc_status": "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
+  },
+  "blocked_final_gate_count": 3,
+  "blocked_gate_items": [
+    "selected_medium_models_pass_or_approved_review",
+    "linux_windows_reproducibility_confirmed",
+    "new_user_core_workflow_observation_passed"
+  ],
+  "blockers": [],
+  "claim_boundary": "This packet is a Developer Preview owner-evidence handoff for blocked RC final gates. It does not create benchmark, Windows, or human UX evidence; does not promote Developer Preview readiness; and does not close Commercial Release, G1, customer shadow, external benchmark, license, SLA, or GitHub CI streak gates.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_closure_pass": false,
+  "final_gate_count": 9,
+  "final_gate_pass_count": 6,
+  "generated_at": "2026-07-01T16:23:21.639066+00:00",
+  "input_checksums": {
+    "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:abe00a3c11377025adbd1ddec784713ae2fa5acd549735dc3d940ca23f2abe3f",
+    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:fd7d577263f59534e060bab64de3a6dd665d49be4e6cb5f8df01d006b4b5622c"
+  },
+  "owner_packet_count": 3,
+  "owner_packets": [
+    {
+      "blocker_grouping_metadata": {
+        "blocker_count": 7,
+        "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
+        "groups": {
+          "large_quantity_shortfall": {
+            "blocker_count": 0,
+            "blockers": [],
+            "description": "Large-model execution, crash/OOM-free, and scorecard/review count gaps.",
+            "scope": "large_model_quantity_gate"
+          },
+          "large_runner_execution": {
+            "blocker_count": 0,
+            "blockers": [],
+            "description": "Large-model runner, execution receipt, and review gaps.",
+            "scope": "large_model_execution_lane"
+          },
+          "medium_quantity_shortfall": {
+            "blocker_count": 2,
+            "blockers": [
+              "medium_model_pass_or_review_below_required:0/5",
+              "medium_structural_models_current_below_required:0/5"
+            ],
+            "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
+            "scope": "medium_model_quantity_gate"
+          },
+          "medium_scorecard_execution": {
+            "blocker_count": 2,
+            "blockers": [
+              "medium_model_pass_or_review_missing",
+              "opensees_medium_scorecard_execution_missing"
+            ],
+            "description": "OpenSees medium runner and PASS/REVIEW scorecard evidence gaps.",
+            "scope": "medium_model_scorecard_execution"
+          },
+          "reference_and_normalization": {
+            "blocker_count": 2,
+            "blockers": [
+              "normalization_receipts_missing",
+              "reference_outputs_missing"
+            ],
+            "description": "Reference output and canonical-normalization prerequisites.",
+            "scope": "benchmark_model_preparation"
+          },
+          "source_license_identity": {
+            "blocker_count": 1,
+            "blockers": [
+              "license_review_pending"
+            ],
+            "description": "Source authority, license, URL, and checksum prerequisites.",
+            "scope": "source_acquisition_prerequisite"
+          }
+        },
+        "schema_version": "phase6-benchmark-scale-blocker-groups.v1",
+        "unassigned_blocker_count": 0,
+        "unassigned_blockers": []
+      },
+      "closure_decision_required": "five_PASS_or_explicit_APPROVED_REVIEW_rows",
+      "contract_pass": false,
+      "current_blockers": [
+        "medium_structural_models_current_below_required:0/5",
+        "license_review_pending",
+        "medium_model_pass_or_review_missing",
+        "normalization_receipts_missing",
+        "opensees_medium_scorecard_execution_missing",
+        "reference_outputs_missing",
+        "medium_model_pass_or_review_below_required:0/5"
+      ],
+      "current_evidence_refs": [
+        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+        "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+        "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json"
+      ],
+      "gate": "selected_medium_models_pass_or_approved_review",
+      "notes": [
+        "Requires passing or pre-approved REVIEW evidence for selected medium OpenSees/reference models. Local topology/parser evidence does not count as medium-model benchmark pass evidence."
+      ],
+      "owner": "benchmark_validation_owner",
+      "owner_action": "Attach product/legal source approval, five selected medium structural model cases, reference outputs or approved REVIEW baselines, normalization receipts, and per-case scorecard receipts.",
+      "prohibited_substitutes": [
+        "parser_only_medium_topology_evidence",
+        "candidate_case_count_without_scorecard_receipts",
+        "license_pending_rows_used_as_pass_evidence"
+      ],
+      "required_owner_evidence": [
+        "product_legal_source_license_approval",
+        "five_selected_medium_structural_model_case_receipts",
+        "reference_outputs_or_approved_review_baselines",
+        "per_case_normalization_receipts",
+        "per_case_scorecard_receipts_with_PASS_or_APPROVED_REVIEW"
+      ],
+      "status": "blocked",
+      "verification_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "blocker_grouping_metadata": {
+        "blocker_count": 1,
+        "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
+        "groups": {
+          "git_clean_clone_spillover": {
+            "blocker_count": 0,
+            "blockers": [],
+            "description": "Git clean-clone replay blocker tracked by the separate clean-checkout RC final gate.",
+            "scope": "tracked_elsewhere_clean_checkout_gate"
+          },
+          "platform_receipt_contract": {
+            "blocker_count": 0,
+            "blockers": [],
+            "description": "Present platform replay receipts that do not satisfy the contract.",
+            "scope": "direct_linux_windows_parity_gate"
+          },
+          "platform_receipt_presence": {
+            "blocker_count": 1,
+            "blockers": [
+              "platform_replay_receipt_missing:windows"
+            ],
+            "description": "Missing required Linux/Windows replay receipts.",
+            "scope": "direct_linux_windows_parity_gate"
+          }
+        },
+        "schema_version": "phase6-linux-windows-parity-blocker-groups.v1",
+        "unassigned_blocker_count": 0,
+        "unassigned_blockers": []
+      },
+      "closure_decision_required": "direct_windows_replay_receipt_passes",
+      "contract_pass": false,
+      "current_blockers": [
+        "platform_replay_receipt_missing:windows"
+      ],
+      "current_evidence_refs": [
+        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
+        "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json"
+      ],
+      "gate": "linux_windows_reproducibility_confirmed",
+      "notes": [
+        "Requires independent Linux and Windows receipts that replay the same seed benchmark commands and compare stable output checksums. Git clean-clone blockers are tracked under benchmark_results_clean_checkout_regenerated so this gate remains scoped to missing Linux/Windows parity evidence."
+      ],
+      "owner": "release_reproducibility_owner",
+      "owner_action": "Attach a Windows platform replay receipt from the same tracked source state, with platform metadata, commands, return codes, and stable output checksums matching the Linux replay contract.",
+      "prohibited_substitutes": [
+        "linux_only_replay_copied_as_windows_parity",
+        "git_clean_clone_receipt_counted_twice",
+        "manual_platform_claim_without_replay_receipt"
+      ],
+      "required_owner_evidence": [
+        "phase6_windows_platform_replay_receipt_json",
+        "same_source_commit_as_linux_replay",
+        "clean_worktree_platform_metadata",
+        "required_replay_commands_return_0",
+        "stable_output_checksum_comparison"
+      ],
+      "status": "blocked",
+      "verification_commands": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "blocker_grouping_metadata": {
+        "blocker_count": 18,
+        "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
+        "groups": {
+          "duplicate_source_detail": {
+            "blocker_count": 1,
+            "blockers": [
+              "phase5_gui_workflow:human_new_user_observation_not_passed"
+            ],
+            "description": "Source-detail blockers already represented by a direct RC UX gate blocker.",
+            "scope": "duplicate_source_detail"
+          },
+          "environment_spillover": {
+            "blocker_count": 0,
+            "blockers": [],
+            "description": "Local browser execution environment blockers that prevent rehearsal evidence but do not by themselves close or fail the human observation.",
+            "scope": "local_environment_blocker"
+          },
+          "human_observation_report_detail": {
+            "blocker_count": 12,
+            "blockers": [
+              "observation_report:approval_decision_not_accepted",
+              "observation_report:blocking_usability_issue_present",
+              "observation_report:completion_minutes_missing",
+              "observation_report:contract_signal_not_pass",
+              "observation_report:evidence_ref_missing",
+              "observation_report:new_to_product_not_confirmed",
+              "observation_report:observation_file_missing",
+              "observation_report:participant_not_new_user",
+              "observation_report:required_fields_missing",
+              "observation_report:required_workflow_step_not_passed",
+              "observation_report:required_workflow_steps_missing",
+              "observation_report:workflow_steps_missing"
+            ],
+            "description": "Detailed validation failures from the human new-user observation report.",
+            "scope": "human_observation_receipt_detail"
+          },
+          "human_observation_root": {
+            "blocker_count": 3,
+            "blockers": [
+              "human_new_user_observation_not_passed",
+              "human_observation_required_workflow_steps_missing:5",
+              "human_observation_workflow_step_pass_count_below_required:0/5"
+            ],
+            "description": "Human new-user observation evidence required to close the RC UX final gate.",
+            "scope": "direct_rc_ux_gate"
+          },
+          "intake_packet_handoff": {
+            "blocker_count": 1,
+            "blockers": [
+              "ux_observation_intake_packet_not_passed"
+            ],
+            "description": "Owner intake checklist evidence that supports handoff but cannot replace the human observation record.",
+            "scope": "owner_handoff_not_gate_closure"
+          },
+          "phase5_execution_detail": {
+            "blocker_count": 0,
+            "blockers": [],
+            "description": "Per-step GUI workflow execution blockers from the Phase 5 receipt.",
+            "scope": "phase5_execution_step_detail"
+          },
+          "phase5_execution_root": {
+            "blocker_count": 1,
+            "blockers": [
+              "phase5_gui_workflow_readiness_not_passed"
+            ],
+            "description": "Aggregate GUI execution and browser-test pass/fail blockers for the five-step workflow.",
+            "scope": "phase5_execution_aggregate"
+          }
+        },
+        "schema_version": "phase6-ux-observation-blocker-groups.v1",
+        "unassigned_blocker_count": 0,
+        "unassigned_blockers": []
+      },
+      "closure_decision_required": "accepted_human_new_user_observation",
+      "contract_pass": false,
+      "current_blockers": [
+        "human_new_user_observation_not_passed",
+        "human_observation_required_workflow_steps_missing:5",
+        "human_observation_workflow_step_pass_count_below_required:0/5",
+        "observation_report:approval_decision_not_accepted",
+        "observation_report:blocking_usability_issue_present",
+        "observation_report:completion_minutes_missing",
+        "observation_report:contract_signal_not_pass",
+        "observation_report:evidence_ref_missing",
+        "observation_report:new_to_product_not_confirmed",
+        "observation_report:observation_file_missing",
+        "observation_report:participant_not_new_user",
+        "observation_report:required_fields_missing",
+        "observation_report:required_workflow_step_not_passed",
+        "observation_report:required_workflow_steps_missing",
+        "observation_report:workflow_steps_missing",
+        "phase5_gui_workflow:human_new_user_observation_not_passed",
+        "phase5_gui_workflow_readiness_not_passed",
+        "ux_observation_intake_packet_not_passed"
+      ],
+      "current_evidence_refs": [
+        "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json"
+      ],
+      "gate": "new_user_core_workflow_observation_passed",
+      "notes": [
+        "This gate requires a passing human new-user observation report. The intake packet is an owner handoff checklist only, automated browser/task evidence does not replace human observation, and visible workflow shell coverage does not satisfy the gate by itself."
+      ],
+      "owner": "ux_research_owner",
+      "owner_action": "Attach a real human new-user observation record for the five-step sample workflow with timezone-aware timestamps, completion minutes <= 30, blocker_count=0, evidence reference, and accepted decision.",
+      "prohibited_substitutes": [
+        "automated_browser_smoke_without_human_observation",
+        "template_ux_observation_json",
+        "self_referential_or_placeholder_evidence_refs",
+        "gui_shell_coverage_without_user_observation"
+      ],
+      "required_owner_evidence": [
+        "non_template_human_new_user_observation_record",
+        "participant_confirmed_new_to_product",
+        "all_five_workflow_steps_passed",
+        "timezone_aware_start_and_end_timestamps",
+        "completion_minutes_lte_30",
+        "blocker_count_zero",
+        "non_placeholder_evidence_ref",
+        "accepted_release_decision"
+      ],
+      "status": "blocked",
+      "verification_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+        "python3 scripts/build_phase6_ux_observation_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    }
+  ],
+  "owner_review_required": true,
+  "ready_gate_items": [
+    "analytic_component_benchmark_all_pass",
+    "large_models_crash_oom_free",
+    "silent_import_loss_zero",
+    "residual_and_convergence_history_present",
+    "unsupported_features_explicitly_blocked",
+    "benchmark_results_clean_checkout_regenerated"
+  ],
+  "required_closure_evidence_policy": "Each blocked final gate must attach the named owner evidence and pass its verification commands before Developer Preview RC closure. Handoff packets, templates, Linux-only replays, parser-only rows, and automated smoke tests do not substitute for the missing receipts.",
+  "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
+  "reused_evidence": false,
+  "schema_version": "developer-preview-final-gate-owner-packet.v1",
+  "source_commit_sha": "dd09ee48341d2245cb0cb3557df5c48695726908",
+  "status": "ready_for_owner_review",
+  "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
+}
