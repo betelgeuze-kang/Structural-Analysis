@@ -2610,7 +2610,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T16:51:36.747524+00:00",
+  "generated_at": "2026-07-01T17:04:24.751209+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2643,7 +2643,7 @@
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:0a039b00834ed75b02dedf493240f56d9f8d8262cd1b1191ad1e73b07ea1e2e5",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:acd82958847f4c0a2462d4551d8506ef76f019c5b95d7b793db40bbc3e30d217"
+    "scripts/build_product_readiness_snapshot.py": "sha256:80faa206a0bd43f88b3cb813227b640884e19e8f02ff82f6f95192ed406e1db5"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -2882,7 +2882,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "d45274fd54813f4d199978a539b92f279911d4df",
+  "source_commit_sha": "8b9d771cd4970f1995b8ca4d0ecbb9f491439fef",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2972,6 +2972,7 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -2983,6 +2984,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_build_support_bundle.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:01:02.185882+00:00",
@@ -3018,11 +3020,15 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_structural_product_development_roadmap.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:31:26.937934+00:00",
         "input_checksum_present": true,
@@ -3078,6 +3084,7 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3089,6 +3096,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_build_support_bundle.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:08:36.326724+00:00",
@@ -3103,12 +3111,15 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:23:21.595955+00:00",
@@ -3123,12 +3134,15 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:23:21.434311+00:00",
@@ -3164,11 +3178,15 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_structural_product_development_roadmap.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:31:25.950050+00:00",
         "input_checksum_present": true,
@@ -3245,6 +3263,7 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_goal_bottleneck_roadmap_surface.py",
@@ -3277,6 +3296,7 @@
           "tests/test_build_support_bundle.py",
           "tests/test_check_structural_scope_contamination.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_report_release_evidence_freshness.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
@@ -3396,12 +3416,15 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:22:23.261852+00:00",
@@ -3416,12 +3439,15 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:23:20.464222+00:00",
@@ -3436,12 +3462,15 @@
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:23:21.639066+00:00",

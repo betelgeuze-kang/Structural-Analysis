@@ -1246,11 +1246,22 @@ def test_hip_proof_partitions_worker_path_from_g1_closure_gate(
                     "fallback_zero_passed": True,
                 },
                 "next_action": {
-                    "id": "generate_full_load_1p0_checkpoint_candidate",
+                    "id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
                     "blockers": [
+                        "consistent_residual_jacobian_newton_gate_not_passed",
                         "full_load_checkpoint_candidate_missing",
                         "full_load_closure_gate_not_passed",
                     ],
+                    "preferred_candidate_generator": (
+                        "consistent_residual_jacobian_newton_rocm_full_load_candidate"
+                    ),
+                    "disallowed_retry_action_ids": [
+                        "repeat_largest_rows_target128_support8_row_only_retuning"
+                    ],
+                    "rerun_command": (
+                        "python3 scripts/run_g1_full_load_hip_newton_lane.py "
+                        "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
+                    ),
                 },
             },
         },
@@ -1266,7 +1277,7 @@ def test_hip_proof_partitions_worker_path_from_g1_closure_gate(
     assert worker["g1_closure_gate_ready"] is False
     assert (
         worker["terminal_gate_partition"]["next_action"]["id"]
-        == "generate_full_load_1p0_checkpoint_candidate"
+        == "build_consistent_newton_full_load_checkpoint_candidate_runner"
     )
     assert "hip_consistency_proof_worker_g1_closure_gate_not_ready" in blockers
     assert (

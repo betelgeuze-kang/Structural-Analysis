@@ -43,6 +43,15 @@ from run_mgt_surface_shell_bending_tangent import _triangle_shell_bending_stiffn
 
 SCHEMA_VERSION = "mgt-residual-jacobian-consistency-probe.v1"
 DEFAULT_OUT = PRODUCTIZATION / "mgt_residual_jacobian_consistency_probe.json"
+CONSISTENT_NEWTON_FULL_LOAD_RUNNER_ID = (
+    "build_consistent_newton_full_load_checkpoint_candidate_runner"
+)
+CONSISTENT_NEWTON_FULL_LOAD_GENERATOR_ID = (
+    "consistent_residual_jacobian_newton_rocm_full_load_candidate"
+)
+DISALLOWED_ROW_ONLY_RETRY_ACTION_IDS = [
+    "repeat_largest_rows_target128_support8_row_only_retuning",
+]
 
 
 def _write_json_payload(output_json: Path | None, payload: dict[str, Any]) -> None:
@@ -398,12 +407,16 @@ def _worker_terminal_gate_partition(
         next_action = "repair_production_rocm_hip_residual_jvp_worker_path"
         next_action_blockers = list(residual_jvp_worker_path_blockers)
     elif not full_load_candidate or not full_load_closure_passed:
-        next_action = "generate_full_load_1p0_checkpoint_candidate"
+        next_action = CONSISTENT_NEWTON_FULL_LOAD_RUNNER_ID
         next_action_blockers = []
         if not full_load_candidate:
             next_action_blockers.append("full_load_checkpoint_candidate_missing")
         if not full_load_closure_passed:
             next_action_blockers.append("full_load_closure_gate_not_passed")
+        if not consistent_gate_passed:
+            next_action_blockers.append(
+                "consistent_residual_jacobian_newton_gate_not_passed"
+            )
     elif not direct_residual_gate_passed:
         next_action = "close_direct_residual_gate_on_full_load_checkpoint"
         next_action_blockers = ["direct_residual_gate_not_passed"]
@@ -445,6 +458,22 @@ def _worker_terminal_gate_partition(
         "next_action": {
             "id": next_action,
             "blockers": sorted(dict.fromkeys(next_action_blockers)),
+            "preferred_candidate_generator": (
+                CONSISTENT_NEWTON_FULL_LOAD_GENERATOR_ID
+                if next_action == CONSISTENT_NEWTON_FULL_LOAD_RUNNER_ID
+                else None
+            ),
+            "disallowed_retry_action_ids": (
+                list(DISALLOWED_ROW_ONLY_RETRY_ACTION_IDS)
+                if next_action == CONSISTENT_NEWTON_FULL_LOAD_RUNNER_ID
+                else []
+            ),
+            "rerun_command": (
+                "python3 scripts/run_g1_full_load_hip_newton_lane.py "
+                "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
+                if next_action == CONSISTENT_NEWTON_FULL_LOAD_RUNNER_ID
+                else ""
+            ),
         },
         "claim_boundary": (
             "Partition only: this separates the HIP residual/JVP worker path "

@@ -1058,8 +1058,18 @@ def test_hip_required_probe_separates_worker_path_from_consistent_newton_gate(
     assert partition["checkpoint_gate"]["gap_to_full_load"] == pytest.approx(0.344)
     assert partition["checkpoint_gate"]["full_load_closure_passed"] is False
     assert partition["direct_residual_gate"]["passed"] is False
-    assert partition["next_action"]["id"] == "generate_full_load_1p0_checkpoint_candidate"
+    assert (
+        partition["next_action"]["id"]
+        == "build_consistent_newton_full_load_checkpoint_candidate_runner"
+    )
+    assert partition["next_action"]["preferred_candidate_generator"] == (
+        "consistent_residual_jacobian_newton_rocm_full_load_candidate"
+    )
+    assert partition["next_action"]["disallowed_retry_action_ids"] == [
+        "repeat_largest_rows_target128_support8_row_only_retuning"
+    ]
     assert partition["next_action"]["blockers"] == [
+        "consistent_residual_jacobian_newton_gate_not_passed",
         "full_load_checkpoint_candidate_missing",
         "full_load_closure_gate_not_passed",
     ]
