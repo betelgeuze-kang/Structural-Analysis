@@ -174,6 +174,50 @@ def test_application_plan_routes_delete_and_extract_decisions(tmp_path: Path) ->
     ]
 
 
+def test_application_plan_accepts_owner_decision_csv(tmp_path: Path) -> None:
+    audit, manifest = _write_inputs(tmp_path)
+    decisions = tmp_path / "owner_decisions.csv"
+    decisions.write_text(
+        "\n".join(
+            [
+                ",".join(application_plan.owner_review.OWNER_DECISION_COLUMNS),
+                (
+                    "row-1,implementation/phase1/md3bead_soa.py,"
+                    "implementation_phase1,molecular_dynamics,md3bead,"
+                    "extract_to_molecular_or_science_repository_or_delete_if_obsolete,"
+                    "extract_to_molecular_or_science_repository,scope-owner,"
+                    "product_owner,2026-07-02T00:00:00Z,"
+                    "owner-review://scope-cleanup/001"
+                ),
+                (
+                    "row-2,"
+                    "implementation/phase1/release_evidence/productization/"
+                    "gpcr_hard_decoy_product_report.json,productization_evidence,"
+                    "molecular_docking,gpcr,"
+                    "delete_from_structural_repository_or_extract_only_if_owner_requires_history,"
+                    "delete_from_structural_repository,scope-owner,product_owner,"
+                    "2026-07-02T00:00:00Z,"
+                    "owner-review://scope-cleanup/002"
+                ),
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    payload = application_plan.build_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=decisions,
+    )
+
+    assert payload["status"] == "ready_for_cleanup_application"
+    assert payload["application_ready"] is True
+    assert payload["owner_decision_pending_count"] == 0
+    assert payload["post_decision_cleanup_pending_count"] == 2
+
+
 def test_application_plan_closes_retain_exception_decisions(tmp_path: Path) -> None:
     audit, manifest = _write_inputs(tmp_path)
     decisions = tmp_path / "owner_decisions.json"

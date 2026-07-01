@@ -194,7 +194,8 @@ def build_application_plan(
             row for row in rows if row["owner_decision_valid"] is False
         ],
         "suggested_sequence": [
-            "fill structural_scope_owner_decisions.json from structural_scope_owner_decisions.template.json",
+            "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
+            "when using CSV, pass it with --owner-decisions <filled-owner-decisions.csv>",
             "rerun this application plan",
             "for delete decisions, remove paths from this structural repository after owner confirmation",
             "for extract decisions, preserve history/evidence externally before removing paths here",

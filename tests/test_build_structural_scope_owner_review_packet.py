@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import csv
 import json
 from pathlib import Path
 import sys
@@ -276,6 +277,7 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     packet_md = tmp_path / "packet.md"
     template = tmp_path / "owner_decisions.template.json"
     template_md = tmp_path / "owner_decisions.template.md"
+    template_csv = tmp_path / "owner_decisions.template.csv"
     _write_json(audit, _audit_payload())
     _write_json(manifest, _manifest_payload())
     owner_review.write_owner_review_packet(
@@ -291,6 +293,7 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
         owner_review_packet_path=packet,
         out=template,
         out_md=template_md,
+        out_csv=template_csv,
     )
 
     assert payload["schema_version"] == owner_review.DECISION_SCHEMA_VERSION
@@ -306,3 +309,94 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     markdown = template_md.read_text(encoding="utf-8")
     assert "# Structural Scope Owner Decision Template" in markdown
     assert "implementation/phase1/md3bead_soa.py" in markdown
+    csv_rows = list(csv.DictReader(template_csv.read_text(encoding="utf-8").splitlines()))
+    assert csv_rows[0]["path"] == "implementation/phase1/md3bead_soa.py"
+    assert csv_rows[0]["owner_decision"] == ""
+    assert csv_rows[0]["recommended_owner_decision"] == (
+        "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
+    )
+
+
+def test_owner_review_packet_accepts_owner_decision_csv(tmp_path: Path) -> None:
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.csv"
+    _write_json(audit, _audit_payload())
+    _write_json(manifest, _manifest_payload())
+    decisions.write_text(
+        "\n".join(
+            [
+                ",".join(owner_review.OWNER_DECISION_COLUMNS),
+                (
+                    "row-1,implementation/phase1/md3bead_soa.py,"
+                    "implementation_phase1,molecular_dynamics,md3bead,"
+                    "extract_to_molecular_or_science_repository_or_delete_if_obsolete,"
+                    "extract_to_molecular_or_science_repository,scope-owner,"
+                    "product_owner,2026-07-02T00:00:00Z,"
+                    "owner-review://scope-cleanup/001"
+                ),
+                (
+                    "row-2,"
+                    "implementation/phase1/release_evidence/productization/"
+                    "gpcr_hard_decoy_product_report.json,productization_evidence,"
+                    "molecular_docking,gpcr,"
+                    "delete_from_structural_repository_or_extract_only_if_owner_requires_history,"
+                    "delete_from_structural_repository,scope-owner,product_owner,"
+                    "2026-07-02T00:00:00Z,"
+                    "owner-review://scope-cleanup/002"
+                ),
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    payload = owner_review.build_owner_review_packet(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=decisions,
+    )
+
+    assert payload["status"] == "ready_for_post_decision_cleanup"
+    assert payload["owner_decisions"]["decision_format"] == "csv"
+    assert payload["owner_decisions"]["blockers"] == []
+    assert payload["owner_decision_pending_count"] == 0
+    assert payload["post_decision_cleanup_pending_count"] == 2
+
+
+def test_owner_review_packet_blocks_extra_and_duplicate_decision_paths(
+    tmp_path: Path,
+) -> None:
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(audit, _audit_payload())
+    _write_json(manifest, _manifest_payload())
+    payload = _decision_payload("retain_quarantined_with_signed_owner_exception")
+    payload["decision_rows"].append(dict(payload["decision_rows"][0]))
+    payload["decision_rows"].append(
+        {
+            "path": "scripts/not_in_quarantine.py",
+            "owner_decision": "retain_quarantined_with_signed_owner_exception",
+            "owner_identity": "scope-owner",
+            "owner_role": "product_owner",
+            "decision_timestamp_utc": "2026-07-02T00:00:00Z",
+            "evidence_reference": "owner-review://scope-cleanup/extra",
+        }
+    )
+    _write_json(decisions, payload)
+
+    result = owner_review.build_owner_review_packet(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=decisions,
+    )
+
+    assert result["status"] == "owner_decision_evidence_invalid"
+    assert "owner_decisions_extra_path_count=1" in result["closure_blockers"]
+    assert "owner_decisions_duplicate_path_count=1" in result["closure_blockers"]
+    assert result["owner_decisions"]["decision_duplicate_paths"] == [
+        "implementation/phase1/md3bead_soa.py"
+    ]

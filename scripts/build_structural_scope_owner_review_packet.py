@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+from io import StringIO
 import json
 from pathlib import Path
 import sys
@@ -27,6 +29,7 @@ DEFAULT_OWNER_DECISION_TEMPLATE = (
     PRODUCTIZATION / "structural_scope_owner_decisions.template.json"
 )
 DEFAULT_OWNER_DECISION_TEMPLATE_MD = DEFAULT_OWNER_DECISION_TEMPLATE.with_suffix(".md")
+DEFAULT_OWNER_DECISION_TEMPLATE_CSV = DEFAULT_OWNER_DECISION_TEMPLATE.with_suffix(".csv")
 DEFAULT_OUT = PRODUCTIZATION / "structural_scope_owner_review_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 ALLOWED_OWNER_DECISIONS = (
@@ -40,6 +43,27 @@ REQUIRED_CLOSURE_EVIDENCE = (
     "per_path_decision",
     "evidence_reference",
     "post_decision_structural_scope_audit",
+)
+OWNER_DECISION_COLUMNS = (
+    "row_id",
+    "path",
+    "path_area",
+    "families",
+    "matched_tokens",
+    "recommended_owner_decision",
+    "owner_decision",
+    "owner_identity",
+    "owner_role",
+    "decision_timestamp_utc",
+    "evidence_reference",
+)
+OWNER_DECISION_REQUIRED_COLUMNS = (
+    "path",
+    "owner_decision",
+    "owner_identity",
+    "owner_role",
+    "decision_timestamp_utc",
+    "evidence_reference",
 )
 
 
@@ -57,6 +81,31 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
         return {}
     payload = json.loads(resolved.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
+
+
+def _load_owner_decisions(repo_root: Path, path: Path) -> dict[str, Any]:
+    resolved = _resolve(repo_root, path)
+    if not resolved.exists():
+        return {}
+    if resolved.suffix.lower() != ".csv":
+        return _load_json(repo_root, path)
+
+    with resolved.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = [dict(row) for row in reader]
+        columns = list(reader.fieldnames or [])
+    blockers = [
+        f"owner_decisions_csv_column_missing:{column}"
+        for column in OWNER_DECISION_REQUIRED_COLUMNS
+        if column not in columns
+    ]
+    return {
+        "schema_version": DECISION_SCHEMA_VERSION,
+        "decision_format": "csv",
+        "decision_columns": columns,
+        "decision_rows": rows,
+        "blockers": blockers,
+    }
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -171,6 +220,41 @@ def _decision_row_by_path(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
         if path and path not in rows_by_path:
             rows_by_path[path] = row
     return rows_by_path
+
+
+def _duplicate_decision_paths(payload: dict[str, Any]) -> list[str]:
+    seen: set[str] = set()
+    duplicates: set[str] = set()
+    for row in _decision_rows(payload):
+        path = _text(row.get("path"))
+        if not path:
+            continue
+        if path in seen:
+            duplicates.add(path)
+        seen.add(path)
+    return sorted(duplicates)
+
+
+def _csv_text(rows: list[dict[str, Any]]) -> str:
+    output = StringIO()
+    writer = csv.DictWriter(
+        output,
+        fieldnames=list(OWNER_DECISION_COLUMNS),
+        lineterminator="\n",
+    )
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(
+            {
+                column: (
+                    ";".join(str(item) for item in row[column])
+                    if isinstance(row.get(column), list)
+                    else str(row.get(column, ""))
+                )
+                for column in OWNER_DECISION_COLUMNS
+            }
+        )
+    return output.getvalue()
 
 
 def _owner_decision_overlay(
@@ -321,9 +405,10 @@ def build_owner_review_packet(
     audit = _load_json(repo_root, audit_path)
     manifest = _load_json(repo_root, quarantine_manifest_path)
     owner_decisions_resolved = _resolve(repo_root, owner_decisions_path)
-    owner_decisions = _load_json(repo_root, owner_decisions_path)
+    owner_decisions = _load_owner_decisions(repo_root, owner_decisions_path)
     owner_decisions_present = owner_decisions_resolved.exists()
     owner_decision_by_path = _decision_row_by_path(owner_decisions)
+    duplicate_decision_paths = _duplicate_decision_paths(owner_decisions)
     manifest_paths = _manifest_paths(manifest)
     rows = [
         row
@@ -364,7 +449,9 @@ def build_owner_review_packet(
         not owner_decisions_present
         or owner_decisions.get("schema_version") == DECISION_SCHEMA_VERSION
     )
-    decision_blockers: list[str] = []
+    decision_blockers: list[str] = [
+        str(item) for item in _as_list(owner_decisions.get("blockers")) if str(item)
+    ]
     if owner_decisions_present and not decision_schema_valid:
         decision_blockers.append("owner_decisions_schema_version_mismatch")
     if owner_decisions_present and "decision_rows" not in owner_decisions:
@@ -372,6 +459,14 @@ def build_owner_review_packet(
     decision_extra_path_count = len(
         set(owner_decision_by_path) - {row["path"] for row in review_rows}
     )
+    if decision_extra_path_count:
+        decision_blockers.append(
+            f"owner_decisions_extra_path_count={decision_extra_path_count}"
+        )
+    if duplicate_decision_paths:
+        decision_blockers.append(
+            f"owner_decisions_duplicate_path_count={len(duplicate_decision_paths)}"
+        )
     owner_decision_recorded_count = sum(
         1 for row in review_rows if row.get("owner_decision_valid") is True
     )
@@ -429,9 +524,12 @@ def build_owner_review_packet(
             "path": owner_decisions_path.as_posix(),
             "present": owner_decisions_present,
             "schema_version": str(owner_decisions.get("schema_version", "")),
+            "decision_format": str(owner_decisions.get("decision_format", "json")),
             "schema_valid": decision_schema_valid,
             "decision_row_count": len(_decision_rows(owner_decisions)),
             "decision_extra_path_count": decision_extra_path_count,
+            "decision_duplicate_path_count": len(duplicate_decision_paths),
+            "decision_duplicate_paths": duplicate_decision_paths,
             "decision_recorded_count": owner_decision_recorded_count,
             "decision_pending_count": owner_decision_pending_count,
             "post_decision_cleanup_pending_count": post_decision_cleanup_pending_count,
@@ -592,6 +690,7 @@ def write_owner_decision_template(
     owner_review_packet_path: Path = DEFAULT_OUT,
     out: Path = DEFAULT_OWNER_DECISION_TEMPLATE,
     out_md: Path = DEFAULT_OWNER_DECISION_TEMPLATE_MD,
+    out_csv: Path = DEFAULT_OWNER_DECISION_TEMPLATE_CSV,
 ) -> dict[str, Any]:
     payload = build_owner_decision_template(
         repo_root=repo_root,
@@ -599,10 +698,13 @@ def write_owner_decision_template(
     )
     resolved_out = _resolve(repo_root, out)
     resolved_out_md = _resolve(repo_root, out_md)
+    resolved_out_csv = _resolve(repo_root, out_csv)
     resolved_out.parent.mkdir(parents=True, exist_ok=True)
     resolved_out.write_text(_json_text(payload), encoding="utf-8")
     resolved_out_md.parent.mkdir(parents=True, exist_ok=True)
     resolved_out_md.write_text(_decision_template_markdown(payload), encoding="utf-8")
+    resolved_out_csv.parent.mkdir(parents=True, exist_ok=True)
+    resolved_out_csv.write_text(_csv_text(payload["decision_rows"]), encoding="utf-8")
     return payload
 
 
@@ -629,6 +731,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_OWNER_DECISION_TEMPLATE_MD,
     )
+    parser.add_argument(
+        "--decision-template-out-csv",
+        type=Path,
+        default=DEFAULT_OWNER_DECISION_TEMPLATE_CSV,
+    )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
@@ -651,12 +758,14 @@ def main(argv: list[str] | None = None) -> int:
             owner_review_packet_path=args.out,
             out=args.decision_template_out,
             out_md=args.decision_template_out_md,
+            out_csv=args.decision_template_out_csv,
         )
     if args.json:
         output_payload = dict(payload)
         if template_payload is not None:
             output_payload["owner_decision_template"] = {
                 "path": args.decision_template_out.as_posix(),
+                "csv_path": args.decision_template_out_csv.as_posix(),
                 "decision_pending_count": template_payload["decision_pending_count"],
                 "contract_pass": template_payload["contract_pass"],
             }
@@ -667,6 +776,7 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 "Owner decision template: "
                 f"{args.decision_template_out.as_posix()} "
+                f"and {args.decision_template_out_csv.as_posix()} "
                 f"(pending={template_payload['decision_pending_count']})"
             )
     return 1 if args.fail_blocked and not payload["evidence_closure_pass"] else 0
