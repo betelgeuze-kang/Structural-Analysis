@@ -197,7 +197,7 @@
       "python3 scripts/build_developer_preview_rc_status.py --check"
     ]
   },
-  "generated_at": "2026-07-01T23:27:06.963102+00:00",
+  "generated_at": "2026-07-01T23:29:01.143991+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -399,7 +399,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "e91f6c143f6237ebb85819ff87b120ddf3d3759d",
+  "source_commit_sha": "2f0465f6a8baa77d6023050395b83b02aa13021b",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=5/5 | browser=True"
 }
