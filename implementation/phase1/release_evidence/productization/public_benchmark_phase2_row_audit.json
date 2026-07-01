@@ -323,11 +323,11 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T09:01:17.576444+00:00",
+  "generated_at": "2026-07-01T09:23:49.998352+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:8fcd3dd11225cc788bac2278acf53cb77be5d230dfe2d8202eda5df8e5d05a22",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:a5b9025b1b6d6bba7de310c832bd17b0c5e883912c7b63ef9cc338ff70f88aa9"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:1c1948f2c37c39321207d7e1ccce4bfd32c385ad2d62e80a33e06b9577f5903c"
   },
   "missing_row_inputs": [
     "subset_rows",
@@ -739,7 +739,13 @@
         "targets_with_scored_molecules",
         "flat_target_molecule_rows"
       ],
+      "active_decoy_policy": {
+        "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+      },
       "auto_detection_policy": "When --enrichment-rows is omitted, the runner uses the first existing default row path candidate and records it in row_input_resolution.",
+      "boolean_label_policy": {
+        "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+      },
       "computed_metrics": [
         "roc_auc",
         "enrichment_factor_1pct",
@@ -775,6 +781,9 @@
           "real_comparison_case_count": 1
         }
       },
+      "numeric_value_policy": {
+        "score": "must parse to a finite float; NaN and Infinity are rejected"
+      },
       "required_molecule_fields": [
         "molecule_id",
         "is_active",
@@ -790,6 +799,37 @@
         "provenance_ref"
       ],
       "row_input_id": "enrichment_rows",
+      "row_integrity_policy": {
+        "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+        "required_unique_row_keys": {
+          "target_scored_molecules": [
+            "molecule_id"
+          ],
+          "targets": [
+            "target_id"
+          ]
+        }
+      },
+      "score_direction_policy": {
+        "accepted_aliases": {
+          "higher_is_better": [
+            "higher",
+            "higher_is_better",
+            "descending"
+          ],
+          "lower_is_better": [
+            "lower",
+            "lower_is_better",
+            "ascending"
+          ]
+        },
+        "accepted_values": [
+          "higher_is_better",
+          "lower_is_better"
+        ],
+        "blank_values": "rejected; no implicit default is applied",
+        "required": true
+      },
       "source_actuality_policy": {
         "placeholder_markers_rejected": [
           "<operator",
@@ -1127,6 +1167,9 @@
         "flat_case_engine_run_rows"
       ],
       "auto_detection_policy": "When --vina-gnina-rows is omitted, the runner uses the first existing default row path candidate and records it in row_input_resolution.",
+      "boolean_value_policy": {
+        "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+      },
       "computed_comparison_fields": [
         "case_count",
         "engine_case_counts",
@@ -1141,6 +1184,14 @@
         "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
       ],
       "description": "Vina/GNINA engine comparison rows",
+      "engine_pair_policy": {
+        "duplicate_docking_run_ids_rejected": true,
+        "duplicate_engine_ids_rejected": true,
+        "per_case_required_engines": [
+          "vina",
+          "gnina"
+        ]
+      },
       "feeds_components": [
         "vina_gnina_comparison_adapter"
       ],
@@ -1164,6 +1215,15 @@
           "real_comparison_case_count": 1
         }
       },
+      "numeric_value_policy": {
+        "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+        "score": "must parse to a finite float; NaN and Infinity are rejected",
+        "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+      },
+      "pose_success_policy": {
+        "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+        "threshold_default_angstrom": 2.0
+      },
       "required_case_fields": [
         "case_id",
         "source_family",
@@ -1185,6 +1245,38 @@
         "score_direction"
       ],
       "row_input_id": "vina_gnina_rows",
+      "row_integrity_policy": {
+        "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+        "required_unique_row_keys": {
+          "case_engine_runs": [
+            "engine_id",
+            "docking_run_id"
+          ],
+          "cases": [
+            "case_id"
+          ]
+        }
+      },
+      "score_direction_policy": {
+        "accepted_aliases": {
+          "higher_is_better": [
+            "higher",
+            "higher_is_better",
+            "descending"
+          ],
+          "lower_is_better": [
+            "lower",
+            "lower_is_better",
+            "ascending"
+          ]
+        },
+        "accepted_values": [
+          "higher_is_better",
+          "lower_is_better"
+        ],
+        "blank_values": "rejected; no implicit default is applied",
+        "required": true
+      },
       "source_actuality_policy": {
         "placeholder_markers_rejected": [
           "<operator",
@@ -1250,7 +1342,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "382dfd6b730a02ffbd6afa86af286e6d55baeb7b",
+  "source_commit_sha": "828b9e20f5d6aaca0ebc5830089fe531cf97b945",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
