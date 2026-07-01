@@ -138,6 +138,12 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
     assert payload["owner_decision_pending_count"] == 2
     assert payload["post_decision_cleanup_pending_count"] == 0
     assert payload["plan_blockers"] == ["owner_decision_pending_count=2"]
+    assert payload["blockers"] == payload["plan_blockers"]
+    assert payload["cleanup_required_count"] == 0
+    assert payload["cleanup_command_manifest"]["manual_application_required"] is False
+    assert payload["next_actions"][0].startswith(
+        "fill structural_scope_owner_decisions"
+    )
     assert len(payload["pending_owner_decision_rows"]) == 2
 
 
@@ -170,9 +176,33 @@ def test_application_plan_routes_delete_and_extract_decisions(tmp_path: Path) ->
     assert payload["owner_decision_validation_blockers"] == []
     assert payload["owner_decision_pending_count"] == 0
     assert payload["post_decision_cleanup_pending_count"] == 2
+    assert payload["cleanup_required_count"] == 2
+    assert payload["cleanup_path_area_counts"] == {
+        "implementation_phase1": 1,
+        "productization_evidence": 1,
+    }
+    assert payload["cleanup_family_counts"] == {
+        "molecular_docking": 1,
+        "molecular_dynamics": 1,
+    }
     assert payload["delete_decision_count"] == 1
     assert payload["extract_decision_count"] == 1
     assert len(payload["cleanup_rows"]) == 2
+    manifest = payload["cleanup_command_manifest"]
+    assert manifest["safe_to_auto_apply"] is False
+    assert manifest["manual_application_required"] is True
+    assert manifest["delete_from_structural_repository"]["batched_git_rm_args"] == [
+        "git",
+        "rm",
+        "--",
+        (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_product_report.json"
+        ),
+    ]
+    assert manifest["extract_to_molecular_or_science_repository"][
+        "post_extract_batched_git_rm_args"
+    ] == ["git", "rm", "--", "implementation/phase1/md3bead_soa.py"]
     rows = {row["path"]: row for row in payload["cleanup_rows"]}
     assert rows["implementation/phase1/md3bead_soa.py"]["required_action"] == (
         "extract_elsewhere_then_remove_from_structural_repository"
@@ -239,6 +269,71 @@ def test_application_plan_accepts_owner_decision_csv(tmp_path: Path) -> None:
     assert payload["post_decision_cleanup_pending_count"] == 2
 
 
+def test_application_plan_prioritizes_release_surface_cleanup_commands(
+    tmp_path: Path,
+) -> None:
+    audit = _audit_payload()
+    manifest = _manifest_payload()
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "pocketmd_lite_science_product_surface.json"
+    )
+    audit["quarantined_non_structural_rows"].append(
+        {
+            "path": release_surface_path,
+            "git_state": "tracked",
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "quarantine_status": "quarantined",
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    manifest["paths"].append(
+        {
+            "path": release_surface_path,
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(audit_path, audit)
+    _write_json(manifest_path, manifest)
+    _write_json(
+        decisions,
+        _decision_payload(
+            (
+                "implementation/phase1/md3bead_soa.py",
+                "extract_to_molecular_or_science_repository",
+            ),
+            (
+                "implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_product_report.json",
+                "delete_from_structural_repository",
+            ),
+            (release_surface_path, "delete_from_structural_repository"),
+        ),
+    )
+
+    payload = application_plan.build_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit_path,
+        quarantine_manifest_path=manifest_path,
+        owner_decisions_path=decisions,
+    )
+
+    assert payload["cleanup_required_count"] == 3
+    assert payload["release_surface_cleanup_required_count"] == 1
+    assert payload["release_surface_cleanup_paths"] == [release_surface_path]
+    assert payload["cleanup_command_manifest"]["release_surface_first_paths"] == [
+        release_surface_path
+    ]
+    assert release_surface_path in payload["cleanup_command_manifest"][
+        "delete_from_structural_repository"
+    ]["paths"]
+
+
 def test_application_plan_closes_retain_exception_decisions(tmp_path: Path) -> None:
     audit, manifest = _write_inputs(tmp_path)
     decisions = tmp_path / "owner_decisions.json"
@@ -272,6 +367,8 @@ def test_application_plan_closes_retain_exception_decisions(tmp_path: Path) -> N
     assert payload["owner_decision_pending_count"] == 0
     assert payload["post_decision_cleanup_pending_count"] == 0
     assert payload["retain_quarantined_exception_count"] == 2
+    assert payload["cleanup_required_count"] == 0
+    assert payload["next_actions"] == []
     assert payload["cleanup_rows"] == []
     assert len(payload["retain_exception_rows"]) == 2
 
@@ -313,6 +410,8 @@ def test_application_plan_closes_after_delete_extract_cleanup_applied(
     assert payload["owner_decision_pending_count"] == 0
     assert payload["post_decision_cleanup_pending_count"] == 0
     assert payload["post_decision_cleanup_applied_count"] == 2
+    assert payload["cleanup_required_count"] == 0
+    assert payload["next_actions"] == []
     assert payload["cleanup_rows"] == []
     assert len(payload["post_decision_cleanup_applied_rows"]) == 2
 
@@ -338,6 +437,8 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
     markdown = out_md.read_text(encoding="utf-8")
     assert "# Structural Scope Owner Decision Application Plan" in markdown
     assert "owner_decision_validation_pass" in markdown
+    assert "cleanup_required_count" in markdown
+    assert "Cleanup Command Manifest" in markdown
     assert "owner_decision_pending_count=2" in markdown
 
 

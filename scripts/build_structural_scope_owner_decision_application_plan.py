@@ -43,6 +43,33 @@ def _text(value: Any) -> str:
     return str(value or "").strip()
 
 
+def _increment(counter: dict[str, int], key: str) -> None:
+    counter[key] = counter.get(key, 0) + 1
+
+
+def _counts_by_key(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        value = _text(row.get(key))
+        if value:
+            _increment(counts, value)
+    return dict(sorted(counts.items()))
+
+
+def _family_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        for family in _as_list(row.get("families")):
+            value = _text(family)
+            if value:
+                _increment(counts, value)
+    return dict(sorted(counts.items()))
+
+
+def _git_rm_args(paths: list[str]) -> list[str]:
+    return ["git", "rm", "--", *paths] if paths else []
+
+
 def _action_for_decision(row: dict[str, Any]) -> dict[str, Any]:
     path = _text(row.get("path"))
     decision = _text(row.get("owner_decision"))
@@ -100,6 +127,58 @@ def _plan_row(row: dict[str, Any]) -> dict[str, Any]:
         "owner_review_state": _text(row.get("owner_review_state")),
         "post_decision_cleanup_pending": bool(row.get("post_decision_cleanup_pending")),
         **action,
+    }
+
+
+def _cleanup_command_manifest(cleanup_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    delete_paths = [
+        row["path"]
+        for row in cleanup_rows
+        if row["owner_decision"] == "delete_from_structural_repository"
+    ]
+    extract_paths = [
+        row["path"]
+        for row in cleanup_rows
+        if row["owner_decision"] == "extract_to_molecular_or_science_repository"
+    ]
+    release_surface_first_paths = [
+        row["path"] for row in cleanup_rows if row["path_area"] == "release_surface"
+    ]
+    return {
+        "safe_to_auto_apply": False,
+        "manual_application_required": bool(cleanup_rows),
+        "release_surface_first_paths": release_surface_first_paths,
+        "delete_from_structural_repository": {
+            "path_count": len(delete_paths),
+            "paths": delete_paths,
+            "batched_git_rm_args": _git_rm_args(delete_paths),
+            "preconditions": [
+                "owner_decision_validation_pass=true",
+                "human confirms deletion scope",
+            ],
+            "post_apply_verification": [
+                "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                "python3 scripts/build_structural_scope_owner_review_packet.py",
+                "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-blocked",
+                "python3 scripts/build_product_readiness_snapshot.py --check",
+            ],
+        },
+        "extract_to_molecular_or_science_repository": {
+            "path_count": len(extract_paths),
+            "paths": extract_paths,
+            "post_extract_batched_git_rm_args": _git_rm_args(extract_paths),
+            "preconditions": [
+                "owner_decision_validation_pass=true",
+                "external molecular/science repository or archive reference captured",
+                "human confirms extracted copy/history is sufficient",
+            ],
+            "post_apply_verification": [
+                "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                "python3 scripts/build_structural_scope_owner_review_packet.py",
+                "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-blocked",
+                "python3 scripts/build_product_readiness_snapshot.py --check",
+            ],
+        },
     }
 
 
@@ -174,6 +253,18 @@ def build_application_plan(
         *[str(item) for item in _as_list(packet.get("blockers"))],
         *[f"owner_decisions::{item}" for item in _as_list(owner_decisions.get("blockers"))],
     ]
+    cleanup_rows = [
+        row for row in rows if row["post_decision_cleanup_pending"] is True
+    ]
+    suggested_sequence = [
+        "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
+        "when using CSV, pass it with --owner-decisions <filled-owner-decisions.csv>",
+        "rerun this application plan",
+        "for delete decisions, remove paths from this structural repository after owner confirmation",
+        "for extract decisions, preserve history/evidence externally before removing paths here",
+        "rerun structural scope audit and owner review packet",
+        "refresh product readiness snapshot",
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -216,9 +307,19 @@ def build_application_plan(
         ),
         "closure_blockers": closure_blockers,
         "plan_blockers": plan_blockers,
-        "cleanup_rows": [
-            row for row in rows if row["post_decision_cleanup_pending"] is True
+        "blockers": plan_blockers,
+        "next_actions": [] if packet.get("evidence_closure_pass") else suggested_sequence,
+        "cleanup_required_count": len(cleanup_rows),
+        "cleanup_path_area_counts": _counts_by_key(cleanup_rows, "path_area"),
+        "cleanup_family_counts": _family_counts(cleanup_rows),
+        "release_surface_cleanup_required_count": sum(
+            1 for row in cleanup_rows if row["path_area"] == "release_surface"
+        ),
+        "release_surface_cleanup_paths": [
+            row["path"] for row in cleanup_rows if row["path_area"] == "release_surface"
         ],
+        "cleanup_command_manifest": _cleanup_command_manifest(cleanup_rows),
+        "cleanup_rows": cleanup_rows,
         "post_decision_cleanup_applied_rows": [
             row
             for row in _as_list(packet.get("post_decision_cleanup_applied_rows"))
@@ -228,15 +329,7 @@ def build_application_plan(
         "pending_owner_decision_rows": [
             row for row in rows if row["owner_decision_valid"] is False
         ],
-        "suggested_sequence": [
-            "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
-            "when using CSV, pass it with --owner-decisions <filled-owner-decisions.csv>",
-            "rerun this application plan",
-            "for delete decisions, remove paths from this structural repository after owner confirmation",
-            "for extract decisions, preserve history/evidence externally before removing paths here",
-            "rerun structural scope audit and owner review packet",
-            "refresh product readiness snapshot",
-        ],
+        "suggested_sequence": suggested_sequence,
         "claim_boundary": (
             "This application plan is non-mutating. It never deletes or extracts "
             "files. It only classifies owner decisions into manual follow-up "
@@ -259,6 +352,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `owner_decision_pending_count`: `{payload['owner_decision_pending_count']}`",
         f"- `post_decision_cleanup_pending_count`: `{payload['post_decision_cleanup_pending_count']}`",
         f"- `post_decision_cleanup_applied_count`: `{payload['post_decision_cleanup_applied_count']}`",
+        f"- `cleanup_required_count`: `{payload['cleanup_required_count']}`",
+        f"- `release_surface_cleanup_required_count`: `{payload['release_surface_cleanup_required_count']}`",
         f"- `delete_decision_count`: `{payload['delete_decision_count']}`",
         f"- `extract_decision_count`: `{payload['extract_decision_count']}`",
         f"- `retain_quarantined_exception_count`: `{payload['retain_quarantined_exception_count']}`",
@@ -280,6 +375,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"| `{row['path']}` | `{row['owner_decision']}` | `{row['required_action']}` |"
         )
+    lines.extend(["", "## Cleanup Command Manifest", ""])
+    manifest = payload["cleanup_command_manifest"]
+    lines.append(f"- `safe_to_auto_apply`: `{manifest['safe_to_auto_apply']}`")
+    lines.append(
+        f"- `manual_application_required`: `{manifest['manual_application_required']}`"
+    )
+    lines.append(
+        "- `delete_from_structural_repository.path_count`: "
+        f"`{manifest['delete_from_structural_repository']['path_count']}`"
+    )
+    lines.append(
+        "- `extract_to_molecular_or_science_repository.path_count`: "
+        f"`{manifest['extract_to_molecular_or_science_repository']['path_count']}`"
+    )
     lines.extend(["", "## Claim Boundary", "", str(payload["claim_boundary"]), ""])
     return "\n".join(lines)
 
