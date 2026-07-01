@@ -586,12 +586,12 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T02:01:23.828593+00:00",
+  "generated_at": "2026-07-01T02:37:17.730527+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:c1df25fb0f85f5640fe6ab5362ec14a05563a3db20ab4c08192910325a6d17ca",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:42c983c6f6d04c35648a16379ba814c9349ed2427c4251a2b7e2c55736d13111",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:7045af1876986e6e6ab0cad176841683ac369f0bc0eec6c7579770002bdd13e8",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:493daab9100f920c8f17ab7729ef31e8fee96e1d3b96dcf8840d218de7917817",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2469abdafaf8024df93a36c74532d0f7ae62b6738dfe95f6f8b751a6b98d0398",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:7d72cc4d56752323369e605f144f839ce9c2265133b7472c241452117bd4b5e5",
     "scripts/materialize_science_actual_closure_from_rows.py": "sha256:34190f477a888242bfe1aca97618a4ad3a31c5bd34d4a2580c5b3d555bd924e2"
   },
   "missing_row_inputs": [
@@ -699,7 +699,15 @@
           "test-only"
         ],
         "placeholder_provenance_prefixes_rejected": [
-          "operator://"
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://"
         ],
         "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
       },
@@ -755,7 +763,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "24c609863d473b09e17ad9627d94e8c99c5be162",
+  "source_commit_sha": "d9b66bf808cc4757f44691322aea1769ccce5be5",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,

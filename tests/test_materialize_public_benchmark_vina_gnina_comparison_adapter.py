@@ -27,6 +27,10 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
+def _provenance_ref(*parts: str) -> str:
+    return "https://zenodo.org/records/8642135/files/" + "/".join(parts)
+
+
 def _engine_run(
     engine_id: str,
     *,
@@ -38,7 +42,7 @@ def _engine_run(
         "engine_id": engine_id,
         "docking_run_id": f"{engine_id}_run_001",
         "predicted_ligand_path_or_pose_ref": (
-            f"local-evidence://public-benchmark/vina-gnina/{engine_id}.sdf"
+            _provenance_ref("public-benchmark", "vina-gnina", f"{engine_id}.sdf")
         ),
         "symmetry_aware_rmsd_angstrom": rmsd,
         "pose_success": pose_success,
@@ -64,7 +68,9 @@ def _case(case_id: str) -> dict[str, object]:
         ],
         "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_id}",
         "source_checksum": _checksum(case_id),
-        "provenance_ref": f"local-evidence://public-benchmark/vina-gnina/{case_id}",
+        "provenance_ref": _provenance_ref(
+            "public-benchmark", "vina-gnina", f"{case_id}.json"
+        ),
     }
 
 
@@ -232,6 +238,39 @@ def test_vina_gnina_comparison_adapter_blocks_placeholder_receipts() -> None:
     assert adapter["first_blocked_target"] == "case_a"
     assert "case_a:source_license_or_accession_placeholder" in adapter["blockers"]
     assert "case_a:source_checksum_placeholder_digest" in adapter["blockers"]
+    assert "case_a:provenance_ref_placeholder" in adapter["blockers"]
+    assert (
+        "case_a:engine_run_0:predicted_ligand_path_or_pose_ref_placeholder"
+        in adapter["blockers"]
+    )
+    assert "operator_receipts_required" in adapter["root_cause_tags"]
+
+
+def test_vina_gnina_comparison_adapter_blocks_local_proxy_receipts() -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    first_case["provenance_ref"] = (
+        "local-evidence://public-benchmark/vina-gnina/case_a"
+    )
+    engine_runs = first_case["engine_runs"]
+    assert isinstance(engine_runs, list)
+    first_run = engine_runs[0]
+    assert isinstance(first_run, dict)
+    first_run["predicted_ligand_path_or_pose_ref"] = (
+        "local-evidence://public-benchmark/vina-gnina/vina.sdf"
+    )
+
+    adapter = module.materialize_vina_gnina_comparison_adapter(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert adapter["status"] == "operator_evidence_required"
+    assert adapter["contract_pass"] is False
+    assert adapter["first_blocked_target"] == "case_a"
     assert "case_a:provenance_ref_placeholder" in adapter["blockers"]
     assert (
         "case_a:engine_run_0:predicted_ligand_path_or_pose_ref_placeholder"

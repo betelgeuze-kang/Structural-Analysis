@@ -45,6 +45,10 @@ def _checksum(seed: str) -> str:
     return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
+def _provenance_ref(*parts: str) -> str:
+    return "https://zenodo.org/records/2468024/files/" + "/".join(parts)
+
+
 def _write_json(path: Path, payload: object) -> None:
     path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
 
@@ -102,7 +106,9 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                     "symmetry_permutation_contract": symmetry_contract,
                     "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_id}",
                     "source_checksum": _checksum(f"PDBBind-CASF-2016-core:{case_id}"),
-                    "provenance_ref": f"local-evidence://public-benchmark/casf-pdbbind/{case_id}",
+                    "provenance_ref": _provenance_ref(
+                        "public-benchmark", "casf-pdbbind", f"{case_id}.json"
+                    ),
                     "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
                     "rmsd_threshold_angstrom": 2.0,
                 }
@@ -125,7 +131,9 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                     "protein_structure_path": f"benchmarks/{case_id}/protein.pdb",
                     "receptor_context": {
                         "binding_site_frame": "operator_supplied_receptor_frame",
-                        "provenance_ref": f"local-evidence://public-benchmark/pose/{case_id}",
+                        "provenance_ref": _provenance_ref(
+                            "public-benchmark", "pose", f"{case_id}.json"
+                        ),
                     },
                 }
                 for case_id in case_ids
@@ -142,7 +150,9 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                     "score_direction": "higher_is_better",
                     "source_license_or_accession": "DUD-E:AA2AR:release-2015",
                     "source_checksum": _checksum("DUD-E:AA2AR:release-2015"),
-                    "provenance_ref": "local-evidence://public-benchmark/dud-e/AA2AR",
+                    "provenance_ref": _provenance_ref(
+                        "public-benchmark", "dud-e", "AA2AR.json"
+                    ),
                     "scored_molecules": [
                         {"molecule_id": "active_1", "is_active": True, "score": 0.9},
                         {"molecule_id": "decoy_1", "is_active": False, "score": 0.1},
@@ -163,14 +173,20 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                     "reference_pose_id": f"{case_ids[0]}_reference",
                     "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_ids[0]}",
                     "source_checksum": _checksum("vina-gnina-case-a"),
-                    "provenance_ref": f"local-evidence://public-benchmark/vina-gnina/{case_ids[0]}",
+                    "provenance_ref": _provenance_ref(
+                        "public-benchmark", "vina-gnina", f"{case_ids[0]}.json"
+                    ),
                     "engine_runs": [
                         {
                             "engine_id": "vina",
                             "docking_run_id": f"{case_ids[0]}_vina",
                             "predicted_ligand_path_or_pose_ref": (
-                                "local-evidence://public-benchmark/vina-gnina/"
-                                f"{case_ids[0]}/vina.sdf"
+                                _provenance_ref(
+                                    "public-benchmark",
+                                    "vina-gnina",
+                                    case_ids[0],
+                                    "vina.sdf",
+                                )
                             ),
                             "symmetry_aware_rmsd_angstrom": 1.4,
                             "pose_success": True,
@@ -181,8 +197,12 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                             "engine_id": "gnina",
                             "docking_run_id": f"{case_ids[0]}_gnina",
                             "predicted_ligand_path_or_pose_ref": (
-                                "local-evidence://public-benchmark/vina-gnina/"
-                                f"{case_ids[0]}/gnina.sdf"
+                                _provenance_ref(
+                                    "public-benchmark",
+                                    "vina-gnina",
+                                    case_ids[0],
+                                    "gnina.sdf",
+                                )
                             ),
                             "symmetry_aware_rmsd_angstrom": 1.6,
                             "pose_success": True,
@@ -366,6 +386,20 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     assert "protein_structure_path" in (
         subset_contract["required_local_source_file_fields"]
     )
+    assert subset_contract["source_actuality_policy"][
+        "placeholder_provenance_prefixes_rejected"
+    ] == [
+        "operator://",
+        "local-evidence://",
+        "local://",
+        "fixture://",
+        "mock://",
+        "synthetic://",
+        "placeholder://",
+        "test://",
+        "unit-test://",
+        "file://",
+    ]
     pose_contract = contracts["pose_rows"]
     assert pose_contract["paired_row_inputs_required"] == ["subset_rows"]
     assert pose_contract["coordinate_payload_fields"] == [
@@ -373,6 +407,20 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         "predicted_atoms",
     ]
     assert pose_contract["default_rmsd_threshold_angstrom"] == 2.0
+    assert pose_contract["source_actuality_policy"][
+        "placeholder_provenance_prefixes_rejected"
+    ] == [
+        "operator://",
+        "local-evidence://",
+        "local://",
+        "fixture://",
+        "mock://",
+        "synthetic://",
+        "placeholder://",
+        "test://",
+        "unit-test://",
+        "file://",
+    ]
     assert subset_contract["minimum_phase2_component_counts"][
         "casf_pdbbind_pose_success_harness"
     ] == {

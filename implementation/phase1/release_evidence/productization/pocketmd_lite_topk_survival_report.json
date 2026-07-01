@@ -140,11 +140,11 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T22:26:47.285105+00:00",
+  "generated_at": "2026-07-01T02:39:48.485516+00:00",
   "input_checksums": {
     "scripts/build_pocketmd_lite_product_surface.py": "sha256:8fabf32dc8bf3b7962d1e38b7057695335b8542d8a9d996a519777da052fe9bc",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:64178f42968f6c8d8629ca8cbb812228dcd2d26241de49752be044f2a4622b79",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:0655d7535f5e97e4964a8ce44af48c0bdba4ef6c0901105c0b221ad1583d526d"
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:493daab9100f920c8f17ab7729ef31e8fee96e1d3b96dcf8840d218de7917817",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:7d72cc4d56752323369e605f144f839ce9c2265133b7472c241452117bd4b5e5"
   },
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -423,12 +423,14 @@
     "source_actuality_check": {
       "blocked_marker_policy": {
         "text_markers": [
+          "<operator",
           "fixture",
           "synthetic",
           "mock",
           "placeholder",
           "dummy",
           "example",
+          "operator_supplied",
           "unit-test",
           "test-only"
         ],
@@ -440,6 +442,18 @@
           "localhost",
           "127.0.0.1",
           "0.0.0.0"
+        ],
+        "url_prefixes": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
         ]
       },
       "blockers": [],
@@ -748,7 +762,7 @@
   ],
   "rows": [],
   "schema_version": "pocketmd-lite-topk-survival-report.v1",
-  "source_commit_sha": "cbbc83e9be543ac308eabf3544db6004f1843392",
+  "source_commit_sha": "d9b66bf808cc4757f44691322aea1769ccce5be5",
   "status": "operator_evidence_required",
   "summary": {
     "blocker_count": 6,

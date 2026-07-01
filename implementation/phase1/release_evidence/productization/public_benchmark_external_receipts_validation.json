@@ -99,7 +99,16 @@
       "unit-test"
     ],
     "placeholder_provenance_prefixes_rejected": [
-      "operator://"
+      "operator://",
+      "local-evidence://",
+      "local://",
+      "fixture://",
+      "mock://",
+      "synthetic://",
+      "placeholder://",
+      "test://",
+      "unit-test://",
+      "file://"
     ],
     "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
   },

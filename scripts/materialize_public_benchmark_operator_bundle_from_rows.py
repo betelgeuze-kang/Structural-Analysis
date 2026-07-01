@@ -74,7 +74,18 @@ PLACEHOLDER_SOURCE_TEXT_MARKERS = (
     "todo",
     "unit-test",
 )
-PLACEHOLDER_PROVENANCE_PREFIXES = ("operator://",)
+PLACEHOLDER_PROVENANCE_PREFIXES = (
+    "operator://",
+    "local-evidence://",
+    "local://",
+    "fixture://",
+    "mock://",
+    "synthetic://",
+    "placeholder://",
+    "test://",
+    "unit-test://",
+    "file://",
+)
 SOURCE_ACTUALITY_POLICY = {
     "required_source_receipt_fields": list(SOURCE_RECEIPT_FIELDS),
     "required_pose_source_receipt_fields": list(POSE_SOURCE_RECEIPT_FIELDS),
@@ -285,7 +296,7 @@ def _source_actuality_check(
         },
         "policy": SOURCE_ACTUALITY_POLICY,
         "claim_boundary": (
-            "This check rejects fixture, dry-run, placeholder, operator://, and repeated-digest "
+            "This check rejects fixture, dry-run, placeholder, local/proxy URI, and repeated-digest "
             "source receipts before Public Benchmark Phase 2 can be promoted as actual evidence. "
             "It does not independently verify external licenses or download public benchmark data."
         ),

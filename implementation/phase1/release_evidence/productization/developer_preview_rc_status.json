@@ -499,13 +499,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-01T01:23:39.958470+00:00",
+  "generated_at": "2026-07-01T02:49:50.589862+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:8ff9fd73cf8f0748c9af2f952db48c6a0918396952ff931589e934b16d1c31bc",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:6a73a58e4043971f91d7d2c79ea089a327b85113bbd4b54150fad63ba7b3b62e",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:cbaf117208c2583171d27672cbabae05a4c81550d51701b2b3398c013013e64d",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:43b81643d519ff5f5389f4b6686023dee7048da8fd5230225e41698846604015",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:86f8811bf93faa61a23035e0a64193b941d4a0568e5988d8c312e22b305fb47c",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:67aa9fe985ef4e72b24f83fc2a173268be4c42b43aab0dc146010315ac88b57c",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:433a84423e9d6452f2efb6e6c173b83d55cfc228fbacece8a7a3c9cb8d5c0422",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:f2895cf60a331919c8a1f9758db565c400e3ee2daa8d17879da29105095b0f9e",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:55d2922f91d04c9ed411d98e4d710442f1774749795f76eb103203ecd87e6ee1",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -523,9 +523,9 @@
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:4a13a4fba451fa683a494df53e712e31c76cf870e8b14def9479d3483097c4b3",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:8c456eec13f2b3a47efa4e17d1fc838d0e3deb093bfe93fca5eae62d0d7ce7d1",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:cc5edab07c763d44c75f7005eca66f235afb0d81ef4bc21115f60bfea8459790",
-    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:29a089f90646c75733a4eb5900ae0d1129ebedc13b6990c894915c2958c30be1",
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:ea08425a73c615bbadd2c0d6b0e0d60555cac8982c9e4482740d33372cb8b749",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f3f29ec0fdb04508b52ee5ac11967a1fdb3db51f11cd3a6bcad9568c896dac1b",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f4fd73d1d69af9925fc60709d05c8b1b51fd0b578b96daefe642ed91a42f3331",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
   },
@@ -1036,13 +1036,28 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 5,
+    "developer_preview_blocker_count": 21,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "human_ux::observation_file_missing"
+      "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+      "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
+      "human_ux::observation_file_missing",
+      "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+      "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
+      "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
+      "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+      "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+      "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+      "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
+      "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
+      "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
+      "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+      "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+      "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
+      "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -2665,6 +2680,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "d27ae8fb0ad8bab491ab48ce21060cf1844fa02c",
+  "source_commit_sha": "d9b66bf808cc4757f44691322aea1769ccce5be5",
   "status": "blocked"
 }

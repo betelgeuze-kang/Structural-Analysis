@@ -24,10 +24,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T02:26:39.446649+00:00",
+  "generated_at": "2026-07-01T02:51:50.805024+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:91bc66cbc04735a76de73203a7e8992a907f5d4ca53d3cfbfd7a1c46e65d4ca4",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:5280886888fea351a7181096d02a2a1599ed1c34be1ffc1fd85296a4ec88e6b6",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0fa8f28e7c1537663a2d41e628ab5cc486bed518fe73fda70b697711bbf00a1b",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:5ff433718691caad9305547c0d8ed1d03efd961eededa0800e14abf2e5358179",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:0543425a3c5da8ce86a3710d9cdba728ebd8a6ac985db8d9cb97b693316114ce"
   },
   "next_actions": [
@@ -99,9 +99,8 @@
       ],
       "operator_intake_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
       "operator_intake_route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
-      "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=hard_decoy_rows_required,operator_values_required",
+      "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=operator_values_required",
       "root_cause_tags": [
-        "hard_decoy_rows_required",
         "operator_values_required"
       ],
       "status": "science_evidence_required",
@@ -989,7 +988,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "cb73b273d029d4013eb8f4fbac991ee171a16e3d",
+  "source_commit_sha": "d9b66bf808cc4757f44691322aea1769ccce5be5",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,

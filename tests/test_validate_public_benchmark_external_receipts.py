@@ -26,12 +26,16 @@ def _sha(seed: str) -> str:
     return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
+def _provenance_ref(*parts: str) -> str:
+    return "https://zenodo.org/records/8642135/files/" + "/".join(parts)
+
+
 def _subset_row(case_id: str) -> dict[str, object]:
     return {
         "case_id": case_id,
         "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_id}",
         "source_checksum": _sha(f"PDBBind-CASF-2016-core:{case_id}"),
-        "provenance_ref": f"local-evidence://public-benchmark/subset/{case_id}",
+        "provenance_ref": _provenance_ref("public-benchmark", "subset", f"{case_id}.json"),
         "source_file_checksums": {
             f"{case_id}/protein.pdb": _sha(f"{case_id}:protein"),
             f"{case_id}/ligand.sdf": _sha(f"{case_id}:ligand"),
@@ -71,7 +75,9 @@ def test_external_receipts_pass_for_complete_rows() -> None:
                     "target_id": "target_a",
                     "source_license_or_accession": "DUD-E:target_a:release-2015",
                     "source_checksum": _sha("DUD-E:target_a:release-2015"),
-                    "provenance_ref": "local-evidence://public-benchmark/enrichment/target_a",
+                    "provenance_ref": _provenance_ref(
+                        "public-benchmark", "enrichment", "target_a.json"
+                    ),
                 }
             ]
         },
@@ -81,7 +87,9 @@ def test_external_receipts_pass_for_complete_rows() -> None:
                     "case_id": "case_a",
                     "source_license_or_accession": "PDBBind-CASF-2016-core:case_a",
                     "source_checksum": _sha("vina-gnina:case_a"),
-                    "provenance_ref": "local-evidence://public-benchmark/vina-gnina/case_a",
+                    "provenance_ref": _provenance_ref(
+                        "public-benchmark", "vina-gnina", "case_a.json"
+                    ),
                 }
             ]
         },
@@ -153,8 +161,31 @@ def test_external_receipts_reject_placeholder_source_receipts() -> None:
     assert "subset_manifest:case_a:provenance_ref_placeholder" in result["blockers"]
     assert "subset_manifest:case_a:source_file_checksum_0_placeholder_digest" in result["blockers"]
     assert result["source_actuality_policy"]["placeholder_provenance_prefixes_rejected"] == [
-        "operator://"
+        "operator://",
+        "local-evidence://",
+        "local://",
+        "fixture://",
+        "mock://",
+        "synthetic://",
+        "placeholder://",
+        "test://",
+        "unit-test://",
+        "file://",
     ]
+
+
+def test_external_receipts_reject_local_proxy_provenance() -> None:
+    row = _subset_row("case_a")
+    row["provenance_ref"] = "local-evidence://public-benchmark/subset/case_a"
+
+    result = module.validate_external_receipts(
+        subset_manifest={"case_rows": [row]},
+        enrichment_scorecard={"target_rows": []},
+        vina_gnina_comparison_adapter={"case_rows": []},
+    )
+
+    assert result["public_benchmark_external_receipts_ready"] is False
+    assert "subset_manifest:case_a:provenance_ref_placeholder" in result["blockers"]
 
 
 def test_external_receipts_cli_writes_result(tmp_path: Path) -> None:

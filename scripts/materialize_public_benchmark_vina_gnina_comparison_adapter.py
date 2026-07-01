@@ -68,7 +68,18 @@ PLACEHOLDER_SOURCE_TEXT_MARKERS = (
     "todo",
     "unit-test",
 )
-PLACEHOLDER_PROVENANCE_PREFIXES = ("operator://",)
+PLACEHOLDER_PROVENANCE_PREFIXES = (
+    "operator://",
+    "local-evidence://",
+    "local://",
+    "fixture://",
+    "mock://",
+    "synthetic://",
+    "placeholder://",
+    "test://",
+    "unit-test://",
+    "file://",
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:

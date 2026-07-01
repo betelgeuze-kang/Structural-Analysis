@@ -46,7 +46,18 @@ PLACEHOLDER_SOURCE_TEXT_MARKERS = (
     "todo",
     "unit-test",
 )
-PLACEHOLDER_PROVENANCE_PREFIXES = ("operator://",)
+PLACEHOLDER_PROVENANCE_PREFIXES = (
+    "operator://",
+    "local-evidence://",
+    "local://",
+    "fixture://",
+    "mock://",
+    "synthetic://",
+    "placeholder://",
+    "test://",
+    "unit-test://",
+    "file://",
+)
 SOURCE_ACTUALITY_POLICY = {
     "placeholder_markers_rejected": list(PLACEHOLDER_SOURCE_TEXT_MARKERS),
     "placeholder_provenance_prefixes_rejected": list(PLACEHOLDER_PROVENANCE_PREFIXES),

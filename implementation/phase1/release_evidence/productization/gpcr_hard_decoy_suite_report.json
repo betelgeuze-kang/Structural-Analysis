@@ -1,20 +1,23 @@
 {
   "blockers": [
-    "DRD2:hard_decoy_rows_required_for_actual_closure",
+    "DRD2:operator_metrics_required",
     "DRD2:ranking_pr_auc_ci_low_required",
     "DRD2:top20_hit_rate_required",
     "DRD2:decoys_above_positive_count_required",
     "DRD2:positive_out_anchored_by_top_decoys_required",
-    "HTR2A:hard_decoy_rows_required_for_actual_closure",
+    "DRD2:hard_decoy_rows_required_for_actual_closure",
+    "HTR2A:operator_metrics_required",
     "HTR2A:ranking_pr_auc_ci_low_required",
     "HTR2A:top20_hit_rate_required",
     "HTR2A:decoys_above_positive_count_required",
     "HTR2A:positive_out_anchored_by_top_decoys_required",
-    "OPRM1:hard_decoy_rows_required_for_actual_closure",
+    "HTR2A:hard_decoy_rows_required_for_actual_closure",
+    "OPRM1:operator_metrics_required",
     "OPRM1:ranking_pr_auc_ci_low_required",
     "OPRM1:top20_hit_rate_required",
     "OPRM1:decoys_above_positive_count_required",
-    "OPRM1:positive_out_anchored_by_top_decoys_required"
+    "OPRM1:positive_out_anchored_by_top_decoys_required",
+    "OPRM1:hard_decoy_rows_required_for_actual_closure"
   ],
   "broad_gpcr_family_claim_safe": false,
   "claim_boundary": "This report evaluates operator-attached DRD2/HTR2A/OPRM1 hard-decoy metrics against the Phase 3 exit criteria. It does not infer target activity, generate docking results, or unlock broad GPCR claims without all required numeric receipts.",
@@ -27,7 +30,7 @@
     "top20_hit_rate_min": 0.2
   },
   "first_blocked_target": "DRD2",
-  "first_blocker": "DRD2:hard_decoy_rows_required_for_actual_closure",
+  "first_blocker": "DRD2:operator_metrics_required",
   "first_operator_evidence_gap": {
     "blocked_phase3_criteria": [
       "ranking_pr_auc_ci_low_min",
@@ -124,10 +127,10 @@
     "target_id": "DRD2",
     "validation_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked"
   },
-  "generated_at": "2026-06-30T22:26:34.341433+00:00",
+  "generated_at": "2026-07-01T02:37:08.567501+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:42c983c6f6d04c35648a16379ba814c9349ed2427c4251a2b7e2c55736d13111"
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:1b0953af454f73583229b6d8c711ff4274fab42ee88d4fdfc1310266b3ca38eb",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:7045af1876986e6e6ab0cad176841683ac369f0bc0eec6c7579770002bdd13e8"
   },
   "operator_evidence_gap_count": 3,
   "operator_evidence_gap_register": [
@@ -424,7 +427,7 @@
     "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
     "blocked_operator_slot_count": 3,
     "first_blocked_target": "DRD2",
-    "first_blocker": "DRD2:hard_decoy_rows_required_for_actual_closure",
+    "first_blocker": "DRD2:operator_metrics_required",
     "first_next_action": "fill DRD2 hard-decoy metrics in the GPCR operator intake packet",
     "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
     "materialization_steps": [
@@ -537,6 +540,18 @@
           "localhost",
           "127.0.0.1",
           "0.0.0.0"
+        ],
+        "url_prefixes": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
         ]
       },
       "blockers": [],
@@ -673,25 +688,27 @@
   "reuse_policy": "gpcr_hard_decoy_suite_report_materialized_from_operator_metrics",
   "reused_evidence": false,
   "root_cause_tags": [
-    "hard_decoy_rows_required",
     "operator_values_required"
   ],
   "schema_version": "gpcr-hard-decoy-suite-report.v1",
-  "source_commit_sha": "cbbc83e9be543ac308eabf3544db6004f1843392",
+  "source_commit_sha": "d9b66bf808cc4757f44691322aea1769ccce5be5",
   "status": "locked",
-  "summary_line": "GPCR hard-decoy suite: LOCKED | first_blocked_target=DRD2 | root_cause=hard_decoy_rows_required,operator_values_required",
+  "summary_line": "GPCR hard-decoy suite: LOCKED | first_blocked_target=DRD2 | root_cause=operator_values_required",
   "target_count": 3,
   "target_pass_count": 0,
   "target_rows": [
     {
       "blockers": [
-        "DRD2:hard_decoy_rows_required_for_actual_closure",
+        "DRD2:operator_metrics_required",
         "DRD2:ranking_pr_auc_ci_low_required",
         "DRD2:top20_hit_rate_required",
         "DRD2:decoys_above_positive_count_required",
-        "DRD2:positive_out_anchored_by_top_decoys_required"
+        "DRD2:positive_out_anchored_by_top_decoys_required",
+        "DRD2:hard_decoy_rows_required_for_actual_closure"
       ],
-      "computed_hard_decoy_metrics": {},
+      "computed_hard_decoy_metrics": {
+        "calculation_status": "missing"
+      },
       "contract_pass": false,
       "criteria": {
         "decoys_above_positive_count_max": 0,
@@ -703,7 +720,6 @@
       "positive_out_anchored_by_top_decoys": null,
       "ranking_pr_auc_ci_low": null,
       "root_cause_tags": [
-        "hard_decoy_rows_required",
         "operator_values_required"
       ],
       "status": "blocked",
@@ -712,13 +728,16 @@
     },
     {
       "blockers": [
-        "HTR2A:hard_decoy_rows_required_for_actual_closure",
+        "HTR2A:operator_metrics_required",
         "HTR2A:ranking_pr_auc_ci_low_required",
         "HTR2A:top20_hit_rate_required",
         "HTR2A:decoys_above_positive_count_required",
-        "HTR2A:positive_out_anchored_by_top_decoys_required"
+        "HTR2A:positive_out_anchored_by_top_decoys_required",
+        "HTR2A:hard_decoy_rows_required_for_actual_closure"
       ],
-      "computed_hard_decoy_metrics": {},
+      "computed_hard_decoy_metrics": {
+        "calculation_status": "missing"
+      },
       "contract_pass": false,
       "criteria": {
         "decoys_above_positive_count_max": 0,
@@ -730,7 +749,6 @@
       "positive_out_anchored_by_top_decoys": null,
       "ranking_pr_auc_ci_low": null,
       "root_cause_tags": [
-        "hard_decoy_rows_required",
         "operator_values_required"
       ],
       "status": "blocked",
@@ -739,13 +757,16 @@
     },
     {
       "blockers": [
-        "OPRM1:hard_decoy_rows_required_for_actual_closure",
+        "OPRM1:operator_metrics_required",
         "OPRM1:ranking_pr_auc_ci_low_required",
         "OPRM1:top20_hit_rate_required",
         "OPRM1:decoys_above_positive_count_required",
-        "OPRM1:positive_out_anchored_by_top_decoys_required"
+        "OPRM1:positive_out_anchored_by_top_decoys_required",
+        "OPRM1:hard_decoy_rows_required_for_actual_closure"
       ],
-      "computed_hard_decoy_metrics": {},
+      "computed_hard_decoy_metrics": {
+        "calculation_status": "missing"
+      },
       "contract_pass": false,
       "criteria": {
         "decoys_above_positive_count_max": 0,
@@ -757,7 +778,6 @@
       "positive_out_anchored_by_top_decoys": null,
       "ranking_pr_auc_ci_low": null,
       "root_cause_tags": [
-        "hard_decoy_rows_required",
         "operator_values_required"
       ],
       "status": "blocked",

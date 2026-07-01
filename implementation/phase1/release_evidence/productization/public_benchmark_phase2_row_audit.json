@@ -323,10 +323,10 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T02:25:16.538146+00:00",
+  "generated_at": "2026-07-01T02:50:31.579076+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
-    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:834f1805a04cfa443914f5c89aa595d9bf7f6212c6e8fdb30767f8df87db4887",
+    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:4bd5f69785cf7baa9ad2b567b1ba7c0d424ffd695f0f0440eec054ca2262b77d",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:ca222a08d28e7f93e4a25f88a6ef7db1c874851a3e2ab5e649742f9d2b2f7b32"
   },
   "missing_row_inputs": [
@@ -747,7 +747,16 @@
           "unit-test"
         ],
         "placeholder_provenance_prefixes_rejected": [
-          "operator://"
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
         ],
         "required_pose_source_receipt_fields": [
           "receptor_context.provenance_ref"
@@ -889,7 +898,16 @@
           "unit-test"
         ],
         "placeholder_provenance_prefixes_rejected": [
-          "operator://"
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
         ],
         "required_pose_source_receipt_fields": [
           "receptor_context.provenance_ref"
@@ -972,7 +990,16 @@
           "unit-test"
         ],
         "placeholder_provenance_prefixes_rejected": [
-          "operator://"
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
         ],
         "required_pose_source_receipt_fields": [
           "receptor_context.provenance_ref"
@@ -1087,7 +1114,16 @@
           "unit-test"
         ],
         "placeholder_provenance_prefixes_rejected": [
-          "operator://"
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
         ],
         "required_pose_source_receipt_fields": [
           "receptor_context.provenance_ref"
@@ -1124,7 +1160,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "cb73b273d029d4013eb8f4fbac991ee171a16e3d",
+  "source_commit_sha": "d9b66bf808cc4757f44691322aea1769ccce5be5",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
