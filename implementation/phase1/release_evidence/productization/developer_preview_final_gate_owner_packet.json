@@ -16,10 +16,10 @@
   "evidence_closure_pass": false,
   "final_gate_count": 9,
   "final_gate_pass_count": 6,
-  "generated_at": "2026-07-01T22:32:06.587125+00:00",
+  "generated_at": "2026-07-01T23:03:23.390372+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:3c029320d0da143d5bd5982b4013a535a15068112605331d55d68f19b57e001e",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:a41922125bc1fa4ea441b0d9a407d753812920cf64f5364ae18a09ff9906276a",
     "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:ff676eb35dd81e6456f067005cd13a20932ae19ce523b8508c15782abdbc08ff"
   },
   "owner_packet_count": 3,
@@ -45,7 +45,7 @@
             "blocker_count": 2,
             "blockers": [
               "medium_model_pass_or_review_below_required:0/5",
-              "medium_structural_models_current_below_required:0/5"
+              "medium_structural_models_current_below_required:2/5"
             ],
             "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
             "scope": "medium_model_quantity_gate"
@@ -84,7 +84,7 @@
       "closure_decision_required": "five_PASS_or_explicit_APPROVED_REVIEW_rows",
       "contract_pass": false,
       "current_blockers": [
-        "medium_structural_models_current_below_required:0/5",
+        "medium_structural_models_current_below_required:2/5",
         "license_review_pending",
         "medium_model_pass_or_review_missing",
         "normalization_receipts_missing",
@@ -348,7 +348,7 @@
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "3cdf1cb9cd031d9d4720fa24934a79d676cfddff",
+  "source_commit_sha": "9e906cb7861d92283965968ee81715658b2e541e",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
 }
