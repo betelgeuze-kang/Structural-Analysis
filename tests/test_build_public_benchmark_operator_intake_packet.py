@@ -213,6 +213,16 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
         "required_receipt_field": "source_checksum",
     }
+    assert enrichment["row_validation_policies"] == {
+        "score_direction_policy": module.ENRICHMENT_SCORE_DIRECTION_POLICY,
+        "boolean_label_policy": module.ENRICHMENT_BOOLEAN_LABEL_POLICY,
+        "numeric_value_policy": module.ENRICHMENT_NUMERIC_VALUE_POLICY,
+        "active_decoy_policy": module.ACTIVE_DECOY_POLICY,
+        "row_integrity_policy": module.ENRICHMENT_ROW_INTEGRITY_POLICY,
+    }
+    assert enrichment["minimum_evidence"]["row_validation_policies"] == (
+        enrichment["row_validation_policies"]
+    )
     assert (
         "materialize_public_benchmark_enrichment_scorecard.py"
         in enrichment["validation_command"]
@@ -261,6 +271,17 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
         "required_receipt_field": "source_checksum",
     }
+    assert comparison["row_validation_policies"] == {
+        "score_direction_policy": module.VINA_GNINA_SCORE_DIRECTION_POLICY,
+        "boolean_value_policy": module.VINA_GNINA_BOOLEAN_VALUE_POLICY,
+        "numeric_value_policy": module.VINA_GNINA_NUMERIC_VALUE_POLICY,
+        "pose_success_policy": module.POSE_SUCCESS_POLICY,
+        "engine_pair_policy": module.ENGINE_PAIR_POLICY,
+        "row_integrity_policy": module.VINA_GNINA_ROW_INTEGRITY_POLICY,
+    }
+    assert comparison["minimum_evidence"]["row_validation_policies"] == (
+        comparison["row_validation_policies"]
+    )
     assert packet["gate_unblock_plan_count"] == 4
     assert packet["minimum_subset_case_count"] == 12
     assert packet["execution_preflight_checklist_count"] == len(
@@ -363,6 +384,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
         "required_receipt_field": "source_checksum",
     }
+    assert gate_plan["dud_e_lit_pcba_enrichment_intake"][
+        "row_validation_policies"
+    ] == enrichment["row_validation_policies"]
     assert gate_plan["vina_gnina_comparison_intake"]["minimum_evidence"][
         "required_engines"
     ] == ["vina", "gnina"]
@@ -372,6 +396,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
         "required_receipt_field": "source_checksum",
     }
+    assert gate_plan["vina_gnina_comparison_intake"][
+        "row_validation_policies"
+    ] == comparison["row_validation_policies"]
 
     gap_register = {
         row["slot_id"]: row for row in packet["operator_evidence_gap_register"]
@@ -559,7 +586,19 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     payload = json.loads(out.read_text(encoding="utf-8"))
     markdown = out_md.read_text(encoding="utf-8")
     template_path = template_dir / "public_benchmark_casf_pdbbind_operator_template.json"
+    enrichment_template_path = (
+        template_dir / "public_benchmark_enrichment_operator_template.json"
+    )
+    vina_gnina_template_path = (
+        template_dir / "public_benchmark_vina_gnina_operator_template.json"
+    )
     template = json.loads(template_path.read_text(encoding="utf-8"))
+    enrichment_template = json.loads(
+        enrichment_template_path.read_text(encoding="utf-8")
+    )
+    vina_gnina_template = json.loads(
+        vina_gnina_template_path.read_text(encoding="utf-8")
+    )
     assert payload["input_checksums"][
         "scripts/build_public_benchmark_operator_intake_packet.py"
     ].startswith("sha256:")
@@ -567,6 +606,12 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     assert template["schema_version"] == "public-benchmark-operator-template.v1"
     assert template["status"] == "operator_template_seed"
     assert template["operator_values_filled"] is False
+    assert enrichment_template["row_validation_policies"][
+        "score_direction_policy"
+    ]["blank_values"] == "rejected; no implicit default is applied"
+    assert vina_gnina_template["row_validation_policies"][
+        "pose_success_policy"
+    ]["consistency_rule"].startswith("pose_success must equal")
     assert "# Public Benchmark Operator Intake Packet" in markdown
     assert "materialize_subset_manifest" in markdown
 

@@ -37,16 +37,27 @@ from materialize_public_benchmark_pose_success_harness import (  # noqa: E402
     SCHEMA_VERSION as POSE_SUCCESS_HARNESS_MATERIALIZER_SCHEMA_VERSION,
 )
 from materialize_public_benchmark_enrichment_scorecard import (  # noqa: E402
+    ACTIVE_DECOY_POLICY,
+    BOOLEAN_LABEL_POLICY as ENRICHMENT_BOOLEAN_LABEL_POLICY,
+    NUMERIC_VALUE_POLICY as ENRICHMENT_NUMERIC_VALUE_POLICY,
     REQUIRED_MOLECULE_FIELDS,
     REQUIRED_TARGET_FIELDS,
+    ROW_INTEGRITY_POLICY as ENRICHMENT_ROW_INTEGRITY_POLICY,
     SCHEMA_VERSION as ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
+    SCORE_DIRECTION_POLICY as ENRICHMENT_SCORE_DIRECTION_POLICY,
     SUPPORTED_FAMILIES,
 )
 from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa: E402
+    BOOLEAN_VALUE_POLICY as VINA_GNINA_BOOLEAN_VALUE_POLICY,
     DEFAULT_ADAPTER_OUT as DEFAULT_VINA_GNINA_COMPARISON_ADAPTER,
+    ENGINE_PAIR_POLICY,
+    NUMERIC_VALUE_POLICY as VINA_GNINA_NUMERIC_VALUE_POLICY,
+    POSE_SUCCESS_POLICY,
     REQUIRED_CASE_FIELDS as VINA_GNINA_REQUIRED_CASE_FIELDS,
     REQUIRED_ENGINE_RUN_FIELDS as VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS,
+    ROW_INTEGRITY_POLICY as VINA_GNINA_ROW_INTEGRITY_POLICY,
     SCHEMA_VERSION as VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
+    SCORE_DIRECTION_POLICY as VINA_GNINA_SCORE_DIRECTION_POLICY,
     SUPPORTED_BENCHMARK_SPLITS as VINA_GNINA_SUPPORTED_BENCHMARK_SPLITS,
     SUPPORTED_ENGINES as VINA_GNINA_SUPPORTED_ENGINES,
 )
@@ -385,6 +396,7 @@ def _slot(
     owner_actions: list[str] | None = None,
     unblocks_tier_beta_criteria: list[str] | None = None,
     minimum_evidence: dict[str, Any] | None = None,
+    row_validation_policies: dict[str, Any] | None = None,
     materialization_steps: list[str] | None = None,
     manifest_contract: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -402,6 +414,7 @@ def _slot(
         "owner_actions": owner_actions or [],
         "unblocks_tier_beta_criteria": unblocks_tier_beta_criteria or [],
         "minimum_evidence": minimum_evidence or {},
+        "row_validation_policies": row_validation_policies or {},
         "materialization_steps": materialization_steps or [],
         "manifest_contract": manifest_contract or {},
         "validation_command": validation_command,
@@ -422,6 +435,9 @@ def _gate_unblock_plan(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     slot["unblocks_tier_beta_criteria"]
                 ),
                 "minimum_evidence": dict(slot["minimum_evidence"]),
+                "row_validation_policies": _as_dict(
+                    slot.get("row_validation_policies")
+                ),
                 "template_artifact": str(slot.get("template_artifact") or ""),
                 "materialization_steps": list(slot["materialization_steps"]),
                 "manifest_contract_id": str(manifest_contract.get("contract_id") or ""),
@@ -958,11 +974,25 @@ def build_public_benchmark_operator_intake_packet(
                 ],
                 "required_molecule_fields": list(REQUIRED_MOLECULE_FIELDS),
                 "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+                "row_validation_policies": {
+                    "score_direction_policy": ENRICHMENT_SCORE_DIRECTION_POLICY,
+                    "boolean_label_policy": ENRICHMENT_BOOLEAN_LABEL_POLICY,
+                    "numeric_value_policy": ENRICHMENT_NUMERIC_VALUE_POLICY,
+                    "active_decoy_policy": ACTIVE_DECOY_POLICY,
+                    "row_integrity_policy": ENRICHMENT_ROW_INTEGRITY_POLICY,
+                },
                 "receipt_fields": [
                     "source_license_or_accession",
                     "source_checksum",
                     "provenance_ref",
                 ],
+            },
+            row_validation_policies={
+                "score_direction_policy": ENRICHMENT_SCORE_DIRECTION_POLICY,
+                "boolean_label_policy": ENRICHMENT_BOOLEAN_LABEL_POLICY,
+                "numeric_value_policy": ENRICHMENT_NUMERIC_VALUE_POLICY,
+                "active_decoy_policy": ACTIVE_DECOY_POLICY,
+                "row_integrity_policy": ENRICHMENT_ROW_INTEGRITY_POLICY,
             },
             materialization_steps=["materialize_enrichment_scorecard"],
         ),
@@ -998,11 +1028,27 @@ def build_public_benchmark_operator_intake_packet(
                     VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS
                 ),
                 "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+                "row_validation_policies": {
+                    "score_direction_policy": VINA_GNINA_SCORE_DIRECTION_POLICY,
+                    "boolean_value_policy": VINA_GNINA_BOOLEAN_VALUE_POLICY,
+                    "numeric_value_policy": VINA_GNINA_NUMERIC_VALUE_POLICY,
+                    "pose_success_policy": POSE_SUCCESS_POLICY,
+                    "engine_pair_policy": ENGINE_PAIR_POLICY,
+                    "row_integrity_policy": VINA_GNINA_ROW_INTEGRITY_POLICY,
+                },
                 "receipt_fields": [
                     "source_license_or_accession",
                     "source_checksum",
                     "provenance_ref",
                 ],
+            },
+            row_validation_policies={
+                "score_direction_policy": VINA_GNINA_SCORE_DIRECTION_POLICY,
+                "boolean_value_policy": VINA_GNINA_BOOLEAN_VALUE_POLICY,
+                "numeric_value_policy": VINA_GNINA_NUMERIC_VALUE_POLICY,
+                "pose_success_policy": POSE_SUCCESS_POLICY,
+                "engine_pair_policy": ENGINE_PAIR_POLICY,
+                "row_integrity_policy": VINA_GNINA_ROW_INTEGRITY_POLICY,
             },
             materialization_steps=["materialize_vina_gnina_comparison_adapter"],
         ),
@@ -1381,6 +1427,7 @@ def _operator_template_payload(
         ],
         "depends_on": [str(row) for row in _as_list(slot.get("depends_on"))],
         "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
+        "row_validation_policies": _as_dict(slot.get("row_validation_policies")),
         "template": template,
         "materialization_command": str(slot.get("materialization_command") or ""),
         "validation_command": str(slot.get("validation_command") or ""),
