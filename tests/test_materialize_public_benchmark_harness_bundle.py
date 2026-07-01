@@ -35,6 +35,10 @@ def _checksum(seed: str) -> str:
     return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
+def _provenance_ref(*parts: str) -> str:
+    return "https://zenodo.org/records/9753102/files/" + "/".join(parts)
+
+
 def _write_case_files(root: Path, case_id: str) -> dict[str, str]:
     case_dir = root / "benchmarks" / case_id
     case_dir.mkdir(parents=True, exist_ok=True)
@@ -72,7 +76,11 @@ def _case_payload(root: Path, case_id: str) -> tuple[dict[str, object], dict[str
         "symmetry_permutation_contract": symmetry_contract,
         "source_license_or_accession": f"PDBBind-CASF-2016-core:{case_id}",
         "source_checksum": _checksum(f"PDBBind-CASF-2016-core:{case_id}"),
-        "provenance_ref": f"local-evidence://public-benchmark/casf-pdbbind/{case_id}",
+        "provenance_ref": _provenance_ref(
+            "public-benchmark",
+            "casf-pdbbind",
+            case_id,
+        ),
         "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
         "rmsd_threshold_angstrom": 2.0,
     }
@@ -87,7 +95,7 @@ def _case_payload(root: Path, case_id: str) -> tuple[dict[str, object], dict[str
         "protein_structure_path": f"benchmarks/{case_id}/protein.pdb",
         "receptor_context": {
             "binding_site_frame": "operator_supplied_receptor_frame",
-            "provenance_ref": f"local-evidence://public-benchmark/pose/{case_id}",
+            "provenance_ref": _provenance_ref("public-benchmark", "pose", case_id),
         },
     }
     return subset_case, pose_case
@@ -120,7 +128,11 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                     ],
                     "source_license_or_accession": "DUD-E:AA2AR:release-2015",
                     "source_checksum": _checksum("DUD-E:AA2AR:release-2015"),
-                    "provenance_ref": "local-evidence://public-benchmark/dud-e/AA2AR",
+                    "provenance_ref": _provenance_ref(
+                        "public-benchmark",
+                        "dud-e",
+                        "AA2AR",
+                    ),
                 }
             ]
         },
@@ -136,9 +148,11 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                         {
                             "engine_id": "vina",
                             "docking_run_id": f"{first_case_id}_vina",
-                            "predicted_ligand_path_or_pose_ref": (
-                                "local-evidence://public-benchmark/vina-gnina/"
-                                f"{first_case_id}/vina.sdf"
+                            "predicted_ligand_path_or_pose_ref": _provenance_ref(
+                                "public-benchmark",
+                                "vina-gnina",
+                                first_case_id,
+                                "vina.sdf",
                             ),
                             "symmetry_aware_rmsd_angstrom": 1.4,
                             "pose_success": True,
@@ -148,9 +162,11 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                         {
                             "engine_id": "gnina",
                             "docking_run_id": f"{first_case_id}_gnina",
-                            "predicted_ligand_path_or_pose_ref": (
-                                "local-evidence://public-benchmark/vina-gnina/"
-                                f"{first_case_id}/gnina.sdf"
+                            "predicted_ligand_path_or_pose_ref": _provenance_ref(
+                                "public-benchmark",
+                                "vina-gnina",
+                                first_case_id,
+                                "gnina.sdf",
                             ),
                             "symmetry_aware_rmsd_angstrom": 1.6,
                             "pose_success": True,
@@ -162,9 +178,10 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                         f"PDBBind-CASF-2016-core:{first_case_id}"
                     ),
                     "source_checksum": _checksum("vina-gnina-case-a"),
-                    "provenance_ref": (
-                        "local-evidence://public-benchmark/vina-gnina/"
-                        f"{first_case_id}"
+                    "provenance_ref": _provenance_ref(
+                        "public-benchmark",
+                        "vina-gnina",
+                        first_case_id,
                     ),
                 }
             ]
