@@ -201,7 +201,7 @@
       "python3 scripts/build_developer_preview_rc_status.py --check"
     ]
   },
-  "generated_at": "2026-07-01T20:37:44.033325+00:00",
+  "generated_at": "2026-07-01T21:44:13.819687+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -234,8 +234,8 @@
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:2d8b3ff07849e743f8a21ab11cf4f8de610f026ff9bd3a03061fb595bc50d242",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:bb47e5d1d69ed17a4d80cbff9924fee9264ea2d38e3e806e51d9bb5be102e8d7",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:e423664aa4c0c1409c00b72e1dee18730aa9d249822b04cd7cdda849249fea29",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:d264bc14ae0f5134554d44b56998a20d101e9b7092b75d71c1eb8ba97fbfaf94",
     "scripts/build_phase6_ux_observation_status.py": "sha256:3bb47ea142d5d075c7f291c417bded5e135abf98b9f213b8a7a46069b784d1c5"
   },
   "intake_packet_gate": {
@@ -254,7 +254,7 @@
       "approval_decision_not_accepted"
     ],
     "contract_pass": false,
-    "field_count": 23,
+    "field_count": 24,
     "field_pass_count": 0,
     "receipt": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
     "status": "blocked",
@@ -400,7 +400,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "d61b43dd8e64e6be44d9f6c9162d2fdd24433a09",
+  "source_commit_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=5/5 | browser=True"
 }

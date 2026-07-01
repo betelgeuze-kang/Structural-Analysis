@@ -268,6 +268,17 @@
       "report_check_pass": false,
       "required_value": "evidence_ref must not point to docs/templates or a .template.* artifact",
       "template_value": "derived from observation timestamps"
+    },
+    {
+      "current_value": "",
+      "field": "evidence_ref_not_generated_gate_artifact",
+      "missing": false,
+      "owner_note": "Generated gate reports are validation outputs, not separate human-observation evidence.",
+      "placeholder": false,
+      "report_check": "evidence_ref_not_generated_gate_artifact_pass",
+      "report_check_pass": false,
+      "required_value": "evidence_ref must not point to generated UX report or intake artifacts",
+      "template_value": "derived from observation timestamps"
     }
   ],
   "gate_unblock_plan": [
@@ -329,6 +340,7 @@
         "evidence_ref is a ticket/jira/ux/user-study reference, https URL, or existing local evidence path",
         "evidence_ref is not the observation JSON itself",
         "evidence_ref is not docs/templates or a .template artifact",
+        "evidence_ref is not a generated UX report or intake artifact",
         "approval_decision is accepted, approved, pass, signed, or approved_for_release"
       ],
       "slot_id": "attach_separate_evidence_reference"
@@ -348,7 +360,7 @@
     }
   ],
   "gate_unblock_plan_count": 5,
-  "generated_at": "2026-07-01T20:32:06.178317+00:00",
+  "generated_at": "2026-07-01T21:44:07.235094+00:00",
   "next_actions": [
     "fill_ux_new_user_observation_record_from_template",
     "run_30_minute_human_new_user_core_workflow_observation",
@@ -366,7 +378,7 @@
     "evidence_ref": "",
     "evidence_ref_kind": "missing",
     "evidence_ref_resolved_path": "",
-    "field_count": 23,
+    "field_count": 24,
     "field_pass_count": 0,
     "max_completion_minutes": 30.0,
     "missing_workflow_steps": [
@@ -408,7 +420,7 @@
     "workflow_step_count": 0,
     "workflow_step_pass_count": 0
   },
-  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/23 | blockers=12",
+  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/24 | blockers=12",
   "template_path": "docs/templates/ux_new_user_observation.template.json",
   "validation_commands": [
     "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
