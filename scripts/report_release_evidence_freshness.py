@@ -149,13 +149,20 @@ DEFAULT_ARTIFACTS = (
     ),
 )
 
-SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
+SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, Any], ...] = (
     {
         "candidate": "accuracy_parity_scorecard",
         "classification": "fix",
         "freshness_policy": "direct_leaf_row",
         "freshness_label": "accuracy_parity_scorecard",
         "current_repo_match": "implementation/phase1/real_accuracy_validation_report.json",
+        "validation_basis": [
+            "leaf_artifact_in_default_freshness_rows",
+            "science_scorecard_overall_pass_field",
+            "benchmark_contract_and_kpi_fields",
+            "public_hf_and_source_family_checks",
+            "stability_suite_pass_field",
+        ],
         "decision": (
             "Direct science scorecard receipt with freshness source tracking; "
             "the artifact itself carries overall_pass, benchmark contract/KPI pass, "
@@ -171,6 +178,11 @@ SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
             "implementation/phase1/release_evidence/productization/"
             "ai_engine_productization_contracts.json"
         ),
+        "validation_basis": [
+            "leaf_artifact_in_default_freshness_rows",
+            "checkpoint_contract_aggregate",
+            "ml_status_and_checkpoint_receipt_inputs",
+        ],
         "decision": (
             "Direct productization receipt with checkpoint source tracking in freshness audit; "
             "the artifact aggregates ML status and checkpoint receipt inputs."
@@ -185,6 +197,11 @@ SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
             "implementation/phase1/release_evidence/productization/"
             "product_readiness_snapshot.json"
         ),
+        "validation_basis": [
+            "aggregates_upstream_release_readiness_inputs",
+            "excluded_from_leaf_freshness_rows",
+            "snapshot_stale_or_inconsistent_policy_remains_authoritative",
+        ],
         "decision": "Keep snapshot-level upstream stale/inconsistent policy instead of a leaf row.",
     },
     {
@@ -196,6 +213,11 @@ SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
             "implementation/phase1/release_evidence/productization/"
             "pm_release_gate_completion_audit.json"
         ),
+        "validation_basis": [
+            "aggregates_pm_report_and_closure_board",
+            "excluded_from_leaf_freshness_rows",
+            "does_not_rerun_heavy_validation",
+        ],
         "decision": "Track PM report and closure-board inputs rather than treating the audit as heavy evidence.",
     },
     {
@@ -209,6 +231,11 @@ SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
             "implementation/phase1/release_evidence/productization/"
             "pm_release_blocker_closure_board.json"
         ),
+        "validation_basis": [
+            "operator_handoff_rollup",
+            "excluded_from_leaf_freshness_rows",
+            "not_closure_evidence_without_owner_receipts",
+        ],
         "decision": "Keep operator boards as sourced rollups of PM/freshness inputs, not closure evidence.",
     },
 )

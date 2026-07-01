@@ -182,12 +182,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T03:38:05.713482+00:00",
+  "generated_at": "2026-07-01T03:50:34.500038+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:014c798a693c620e1e7e9e534d27d6fe0503ced1438813612204c490ce9d3dd1",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:bd56e693994082c699cbb47be1649806b14d30a9827fdd04be0815bacb8a44b9",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:14b1acdf68cee74bbd009be331a84fbefd1cb17739792be47684a58930358180",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f898414c6cfba9a310253f427afa0dd8837468b885cd4cca7540d0ea91cef5af",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:a0ffbe3c0d137817a061c867f962bb1451fede731b20dc29768d79a5f51aec87",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:aafeb0bdf91dfa5076d99b34b86849c8ace72b61234dd1c0aa005befcfad0626",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:64a656f74d9abb47b486fa11fc64f1e03907ee930e1b3288076943a3015cdbeb",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:8cc7371c637c6542331dc39dccc4a6bee4a5d02b3d02de40ef245f96d86b50ef",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:c3d084be87b8af31707e078d055cee46d33e928380dc51e689a31d355b916935",
@@ -196,9 +196,9 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:acea4fbbc14ddcef2c42eb574ee1ab5d46624205b73e4002f2a921d1c9f32c67",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:7d1885cb873852b788af730092ec7d5fafa3ae346d447155f09cc598c51e15b0",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:44ef9f84de69f4db4bc7c37e35a07a68aa34ce79f2e346a050256cccc9a7d6eb",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9352b9f4312eda8724eafee7f42d19afcf6a86de3535118d306220152697cfe3",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f4fd73d1d69af9925fc60709d05c8b1b51fd0b578b96daefe642ed91a42f3331",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:40bef318ad591446ee064bb6a674b0c5cbd1a15d3c66020cc99c4ba8d540979e",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:697ae03e3d11fe29fcff2e1388563a09b1156f12e7d126d42786248396c3b5a0",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:dfe313db134cab194ebfa216259e889507f5152a4860ceb426abda7f5e6ad8b8",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:d6e06e17ebc306700c81a93500356a29f23829a7f45514f6ab03caf31996213f",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:637d723c86510fc39208e75eba6a5fd4809b86e2e4656c73533dd0ddb15a7d6b",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:ce1833b7b08e6ab7657775b499f8c19d8660359663a4567fb743726e63112f37",
@@ -500,8 +500,8 @@
     "refresh_required_operator_action_count": 0,
     "refresh_required_operator_actions": [],
     "release_allowed": false,
-    "release_area_blocker_count": 5,
-    "release_area_owner_handoff_count": 5,
+    "release_area_blocker_count": 6,
+    "release_area_owner_handoff_count": 6,
     "release_area_owner_handoffs": [
       {
         "acceptance_criteria": [
@@ -628,6 +628,19 @@
         "owner": "product_legal_owner",
         "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
         "title": "Security"
+      },
+      {
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
+        "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
+        "namespace": "github_sync",
+        "owner": "",
+        "owner_action": "",
+        "title": ""
       }
     ]
   },
@@ -1591,7 +1604,7 @@
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
     "approval_token_count": 4,
-    "blocked_release_count": 5,
+    "blocked_release_count": 6,
     "broad_gpcr_family_claim_safe": false,
     "evidence_surface_count": 12,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -1933,7 +1946,7 @@
         "action_register_contract_pass": false,
         "approval_token_count": 4,
         "blocked_capability_count": 4,
-        "blocked_release_count": 5,
+        "blocked_release_count": 6,
         "first_locked_science_evidence_surface": {
           "bottleneck": "h_bond_evidence_surface_locked",
           "capability_blocker_count": 2,
@@ -4256,7 +4269,7 @@
       ]
     }
   },
-  "source_commit_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
+  "source_commit_sha": "c5a4dd85f2384f2b682287f22c0787e9760859be",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

@@ -12,6 +12,7 @@ SCRIPT_PATH = (
     / "scripts"
     / "report_release_evidence_freshness.py"
 )
+REPO_ROOT = Path(__file__).resolve().parent.parent
 SPEC = importlib.util.spec_from_file_location(
     "report_release_evidence_freshness", SCRIPT_PATH
 )
@@ -265,11 +266,18 @@ def test_source_of_truth_gap_classification_keeps_rollups_out_of_leaf_freshness(
         assert row["classification"] == "fix"
         assert row["freshness_policy"] == "direct_leaf_row"
         assert row["freshness_label"] in labels
+        assert "leaf_artifact_in_default_freshness_rows" in row["validation_basis"]
 
     accuracy_row = rows["accuracy_parity_scorecard"]
     assert "Direct science scorecard receipt" in accuracy_row["decision"]
     assert "overall_pass" in accuracy_row["decision"]
     assert "stability-suite pass" in accuracy_row["decision"]
+    assert {
+        "science_scorecard_overall_pass_field",
+        "benchmark_contract_and_kpi_fields",
+        "public_hf_and_source_family_checks",
+        "stability_suite_pass_field",
+    }.issubset(set(accuracy_row["validation_basis"]))
 
     for candidate in (
         "goal_readiness_rollup",
@@ -281,6 +289,28 @@ def test_source_of_truth_gap_classification_keeps_rollups_out_of_leaf_freshness(
         assert row["freshness_policy"] == "aggregator_source_tracking_only"
         assert row["freshness_label"] == ""
         assert candidate not in labels
+        assert "excluded_from_leaf_freshness_rows" in row["validation_basis"]
+
+
+def test_accuracy_parity_scorecard_fix_classification_matches_live_science_receipt() -> None:
+    rows = {
+        row["candidate"]: row
+        for row in freshness.SOURCE_OF_TRUTH_GAP_CLASSIFICATION
+    }
+    accuracy_row = rows["accuracy_parity_scorecard"]
+    scorecard_path = REPO_ROOT / accuracy_row["current_repo_match"]
+    payload = json.loads(scorecard_path.read_text(encoding="utf-8"))
+
+    assert accuracy_row["classification"] == "fix"
+    assert accuracy_row["freshness_label"] == "accuracy_parity_scorecard"
+    assert payload["overall_pass"] is True
+    assert payload["benchmark"]["contract_pass"] is True
+    assert payload["benchmark"]["kpi_pass"] is True
+    assert payload["checks"]["public_hf_case_count_pass"] is True
+    assert payload["checks"]["direct_metric_source_pass"] is True
+    assert payload["checks"]["source_family_pass"] is True
+    assert payload["stability_suite"]["suite_pass"] is True
+    assert payload["stability_suite"]["stability_pass"] is True
 
 
 def test_release_evidence_freshness_report_exposes_gap_classification_summary(

@@ -1493,7 +1493,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-01T02:42:58.685799+00:00",
+  "generated_at": "2026-07-01T03:47:00.894848+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       "docs/source-of-truth-gap-classification.md",
@@ -1503,6 +1503,7 @@
       "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.wind_test.json",
       "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_test.json",
       "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "scripts/build_ci_streak_intake_packet.py",
       "scripts/build_developer_preview_rc_status.py",
       "scripts/build_developer_preview_readiness.py",
       "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
@@ -1543,6 +1544,7 @@
       "scripts/run_g1_full_load_hip_newton_lane.py",
       "scripts/validate_public_benchmark_external_receipts.py",
       "src/structural_analysis/benchmark/acquisition.py",
+      "tests/test_build_ci_streak_intake_packet.py",
       "tests/test_build_developer_preview_rc_status.py",
       "tests/test_build_developer_preview_readiness.py",
       "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
@@ -1681,7 +1683,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "d9b66bf808cc4757f44691322aea1769ccce5be5",
+  "source_commit_sha": "c5a4dd85f2384f2b682287f22c0787e9760859be",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",

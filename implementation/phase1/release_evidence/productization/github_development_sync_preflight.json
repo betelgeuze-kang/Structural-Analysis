@@ -1,15 +1,17 @@
 {
-  "blockers": [],
+  "blockers": [
+    "worktree_not_clean"
+  ],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
     "feature_synced_to_head": true,
     "main_fast_forward_possible": true,
     "main_synced_to_head": true,
-    "remote_fetch_ok": null,
+    "remote_fetch_ok": true,
     "remote_safety_ok": true,
-    "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": true
+    "worktree_clean": false,
+    "worktree_only_ignored_evidence_dirty": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -17,10 +19,10 @@
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
-  "contract_pass": true,
-  "generated_at": "2026-07-01T03:36:24.286437+00:00",
+  "contract_pass": false,
+  "generated_at": "2026-07-01T03:48:08.948483+00:00",
   "pending_remote_updates": [],
-  "preflight_pass": true,
+  "preflight_pass": false,
   "r4_disclosure": {
     "action": "no remote mutation required",
     "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
@@ -29,25 +31,25 @@
     "target": [],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
-  "reason_code": "PASS",
-  "remote_fetch_attempted": false,
-  "remote_fetch_ok": null,
+  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
+  "remote_fetch_attempted": true,
+  "remote_fetch_ok": true,
   "remote_mutation_approved": false,
   "remote_sync_needed": false,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
-    "effective_worktree_status_short": "",
+    "effective_worktree_status_short": "M implementation/phase1/customer_shadow_evidence_status.json\n M implementation/phase1/workstation_delivery_readiness.json\n M scripts/report_release_evidence_freshness.py\n M tests/test_report_release_evidence_freshness.py",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-    "local_head_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
+    "ignored_worktree_status_short": " M implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json\n M implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json\n M implementation/phase1/release_evidence/productization/gap_closure_status.json\n M implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/license_status_closure_report.json\n M implementation/phase1/release_evidence/productization/license_status_intake_packet.json\n M implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+    "local_head_sha": "c5a4dd85f2384f2b682287f22c0787e9760859be",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
+    "remote_feature_sha": "c5a4dd85f2384f2b682287f22c0787e9760859be",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
+    "remote_main_sha": "c5a4dd85f2384f2b682287f22c0787e9760859be",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +63,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+    "worktree_status_short": "M implementation/phase1/customer_shadow_evidence_status.json\n M implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json\n M implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json\n M implementation/phase1/release_evidence/productization/gap_closure_status.json\n M implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/license_status_closure_report.json\n M implementation/phase1/release_evidence/productization/license_status_intake_packet.json\n M implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json\n M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json\n M implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json\n M implementation/phase1/workstation_delivery_readiness.json\n M scripts/report_release_evidence_freshness.py\n M tests/test_report_release_evidence_freshness.py"
   },
-  "status": "synced"
+  "status": "blocked"
 }
