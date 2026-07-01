@@ -49,7 +49,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "fresh_full_validation_ready": true,
-  "generated_at": "2026-07-01T00:46:47.901449+00:00",
+  "generated_at": "2026-07-01T00:49:40.183441+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
     "docs/commercialization-gap-current-state.md": "sha256:7dbd47a031c5306abc350ab4b0e6bf103c8692f04c01a1e7cc55104a1f3f7611",
@@ -62,7 +62,7 @@
     "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_smoke_report.json": "sha256:1bf89382ea13a179c00b67ca756a95ad4009456f43627bebe97b4c6750c6266c",
     "implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json": "sha256:52bee2fd112f2c2635f25a90c7691645e5d6da242174bb4252c5c590bf32082b",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
-    "implementation/phase1/release_evidence/surface": "dir-sha256:a53e9c87664a09190cb36fb3e8ab610704fed74e239d837b56af0975350c539a"
+    "implementation/phase1/release_evidence/surface": "dir-sha256:559605a7f33297f8988769345440bedca6e4487f83c524ac0f14d27da7391a6b"
   },
   "lane_boundary_metadata": {
     "gpu_hip_policy": "GPU/HIP validation remains a performance-track lane after CPU reference parity. Missing GPU/HIP fresh receipts must stay visible and must not be used to replace CPU full-load/full-mesh/material-Newton closure evidence.",
@@ -355,7 +355,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "86db681cbaab26085c972de5808b6e52c138f4b1",
+  "source_commit_sha": "2008fe7174f98b3f6a566b5fc6a3e0c5d93c4154",
   "status": "ready",
   "summary": {
     "blocker_count": 0,
