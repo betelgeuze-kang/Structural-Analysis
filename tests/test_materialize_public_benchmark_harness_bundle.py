@@ -154,6 +154,19 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                                 first_case_id,
                                 "vina.sdf",
                             ),
+                            "predicted_ligand_checksum": _checksum(
+                                f"{first_case_id}:vina.sdf"
+                            ),
+                            "engine_version": "VinaEngine 1.2.5",
+                            "engine_config_checksum": _checksum(
+                                f"{first_case_id}:vina-config"
+                            ),
+                            "engine_run_provenance_ref": _provenance_ref(
+                                "public-benchmark",
+                                "vina-gnina",
+                                first_case_id,
+                                "vina-run",
+                            ),
                             "symmetry_aware_rmsd_angstrom": 1.4,
                             "pose_success": True,
                             "score": -7.2,
@@ -167,6 +180,19 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
                                 "vina-gnina",
                                 first_case_id,
                                 "gnina.sdf",
+                            ),
+                            "predicted_ligand_checksum": _checksum(
+                                f"{first_case_id}:gnina.sdf"
+                            ),
+                            "engine_version": "GNINA 1.1",
+                            "engine_config_checksum": _checksum(
+                                f"{first_case_id}:gnina-config"
+                            ),
+                            "engine_run_provenance_ref": _provenance_ref(
+                                "public-benchmark",
+                                "vina-gnina",
+                                first_case_id,
+                                "gnina-run",
                             ),
                             "symmetry_aware_rmsd_angstrom": 1.6,
                             "pose_success": True,
