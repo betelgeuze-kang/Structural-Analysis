@@ -434,6 +434,21 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         ),
     }
     assert pose_contract["default_rmsd_threshold_angstrom"] == 2.0
+    assert pose_contract["posebusters_style_check_contract"][
+        "packet_schema_version"
+    ] == "public-benchmark-pose-validity-packet.v1"
+    assert pose_contract["posebusters_style_check_contract"][
+        "all_checks_required"
+    ] is True
+    assert pose_contract["posebusters_style_check_contract"]["required_check_ids"] == [
+        "coordinate_finiteness",
+        "atom_count_and_order_contract",
+        "pose_success_metric_contract",
+        "symmetry_permutation_contract",
+        "minimum_interatomic_distance_guard",
+        "receptor_ligand_context_present",
+        "symmetry_aware_ligand_rmsd_angstrom",
+    ]
     assert pose_contract["source_actuality_policy"][
         "placeholder_provenance_prefixes_rejected"
     ] == [

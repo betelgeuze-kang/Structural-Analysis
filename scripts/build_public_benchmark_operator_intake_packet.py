@@ -28,6 +28,8 @@ from materialize_public_benchmark_pose_validity_input import (  # noqa: E402
     SCHEMA_VERSION as POSE_INPUT_MATERIALIZER_SCHEMA_VERSION,
 )
 from materialize_public_benchmark_posebusters_validity_packet import (  # noqa: E402
+    CHECK_DEFINITIONS as POSEBUSTERS_CHECK_DEFINITIONS,
+    PACKET_SCHEMA_VERSION as POSEBUSTERS_PACKET_SCHEMA_VERSION,
     SCHEMA_VERSION as POSEBUSTERS_MATERIALIZER_SCHEMA_VERSION,
 )
 from materialize_public_benchmark_rmsd_scorecard import (  # noqa: E402
@@ -935,6 +937,34 @@ def build_public_benchmark_operator_intake_packet(
                 "coordinate_contract": (
                     "reference_atoms and predicted_atoms in the declared ligand atom order"
                 ),
+                "posebusters_style_check_contract": {
+                    "packet_schema_version": POSEBUSTERS_PACKET_SCHEMA_VERSION,
+                    "materializer_schema_version": POSEBUSTERS_MATERIALIZER_SCHEMA_VERSION,
+                    "required_check_ids": [
+                        str(row["check_id"])
+                        for row in POSEBUSTERS_CHECK_DEFINITIONS
+                        if bool(row.get("required"))
+                    ],
+                    "check_definitions": [
+                        dict(row) for row in POSEBUSTERS_CHECK_DEFINITIONS
+                    ],
+                    "all_checks_required": True,
+                },
+            },
+            row_validation_policies={
+                "posebusters_style_check_contract": {
+                    "packet_schema_version": POSEBUSTERS_PACKET_SCHEMA_VERSION,
+                    "materializer_schema_version": POSEBUSTERS_MATERIALIZER_SCHEMA_VERSION,
+                    "required_check_ids": [
+                        str(row["check_id"])
+                        for row in POSEBUSTERS_CHECK_DEFINITIONS
+                        if bool(row.get("required"))
+                    ],
+                    "check_definitions": [
+                        dict(row) for row in POSEBUSTERS_CHECK_DEFINITIONS
+                    ],
+                    "all_checks_required": True,
+                },
             },
             materialization_steps=[
                 "materialize_pose_validity_input",
