@@ -25,6 +25,18 @@
 - `next_owner_review_batch`: `release_surface_first` paths=`3` area=`release_surface`
 - `owner_review_priority_batches`: `5`
 
+## Next Batch Decision Template
+
+- `batch_id`: `release_surface_first`
+- `decision_pending_count`: `3`
+- `primary_delete_path_count`: `3`
+
+| Row | Path | Primary Decision |
+|---|---|---|
+| `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `delete_from_structural_repository` |
+| `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `delete_from_structural_repository` |
+| `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `delete_from_structural_repository` |
+
 ## Owner Decision Validation Blockers
 
 - `owner_decisions_missing`

@@ -133,6 +133,7 @@ def _plan_row(row: dict[str, Any]) -> dict[str, Any]:
         "path": _text(row.get("path")),
         "path_area": _text(row.get("path_area")),
         "families": [str(item) for item in _as_list(row.get("families"))],
+        "matched_tokens": [str(item) for item in _as_list(row.get("matched_tokens"))],
         "owner_decision": _text(row.get("owner_decision")),
         "owner_decision_valid": bool(row.get("owner_decision_valid")),
         "owner_review_state": _text(row.get("owner_review_state")),
@@ -261,6 +262,123 @@ def _owner_review_priority_batches(rows: list[dict[str, Any]]) -> list[dict[str,
     return batches
 
 
+def _decision_template_row(row: dict[str, Any], *, index: int, batch_id: str) -> dict[str, Any]:
+    recommended = _text(row.get("recommended_owner_decision"))
+    post_decision_required_action = (
+        "delete_or_extract_path_then_rerun_scope_audit"
+        if recommended.startswith(
+            (
+                "delete_from_structural_repository",
+                "extract_to_molecular_or_science_repository",
+            )
+        )
+        else "keep_quarantined_with_signed_owner_exception"
+    )
+    return {
+        "row_id": f"{batch_id}-{index + 1:03d}",
+        "path": _text(row.get("path")),
+        "path_area": _text(row.get("path_area")),
+        "families": [str(item) for item in _as_list(row.get("families"))],
+        "matched_tokens": [str(item) for item in _as_list(row.get("matched_tokens"))],
+        "current_release_action": _text(row.get("current_release_action")),
+        "recommended_owner_decision": recommended,
+        "recommended_owner_decision_primary": _text(
+            row.get("recommended_owner_decision_primary")
+        ),
+        "recommended_owner_decision_alternate": _text(
+            row.get("recommended_owner_decision_alternate")
+        ),
+        "allowed_owner_decisions": list(owner_review.ALLOWED_OWNER_DECISIONS),
+        "owner_decision": "",
+        "owner_identity": "",
+        "owner_role": "",
+        "decision_timestamp_utc": "",
+        "evidence_reference": "",
+        "signed_owner_exception_reference": "",
+        "external_archive_reference": "",
+        "post_decision_required_action": post_decision_required_action,
+    }
+
+
+def _next_batch_decision_template(
+    *,
+    pending_owner_decision_rows: list[dict[str, Any]],
+    next_batch: dict[str, Any],
+) -> dict[str, Any]:
+    if not next_batch:
+        return {}
+    batch_paths = set(str(path) for path in _as_list(next_batch.get("paths")))
+    batch_rows = [
+        row
+        for row in pending_owner_decision_rows
+        if row.get("path") in batch_paths
+    ]
+    batch_id = _text(next_batch.get("batch_id")) or "next_owner_review_batch"
+    decision_rows = [
+        _decision_template_row(row, index=index, batch_id=batch_id)
+        for index, row in enumerate(sorted(batch_rows, key=lambda item: item["path"]))
+    ]
+    primary_delete_paths = [
+        row["path"]
+        for row in decision_rows
+        if row["recommended_owner_decision_primary"]
+        == "delete_from_structural_repository"
+    ]
+    primary_extract_paths = [
+        row["path"]
+        for row in decision_rows
+        if row["recommended_owner_decision_primary"]
+        == "extract_to_molecular_or_science_repository"
+    ]
+    return {
+        "schema_version": owner_review.DECISION_SCHEMA_VERSION,
+        "batch_id": batch_id,
+        "path_area": _text(next_batch.get("path_area")),
+        "decision_pending_count": len(decision_rows),
+        "decision_rows": decision_rows,
+        "canonical_owner_decisions_path": DEFAULT_OWNER_DECISIONS.as_posix(),
+        "required_owner_fill_fields": [
+            "owner_decision",
+            "owner_identity",
+            "owner_role",
+            "decision_timestamp_utc",
+            "evidence_reference",
+        ],
+        "conditional_required_fields": [
+            "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
+            "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception",
+        ],
+        "primary_cleanup_preview": {
+            "safe_to_auto_apply": False,
+            "owner_decision_required": True,
+            "primary_delete_path_count": len(primary_delete_paths),
+            "primary_delete_paths": primary_delete_paths,
+            "primary_delete_git_rm_args": _git_rm_args(primary_delete_paths),
+            "primary_extract_path_count": len(primary_extract_paths),
+            "primary_extract_paths": primary_extract_paths,
+            "primary_extract_post_archive_git_rm_args": _git_rm_args(
+                primary_extract_paths
+            ),
+            "preconditions": [
+                "owner fills matching decision rows in structural_scope_owner_decisions.json or CSV",
+                "owner_decision_validation_pass=true for these rows",
+                "human confirms the batch cleanup scope",
+            ],
+        },
+        "post_batch_verification": [
+            "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+            "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+            "python3 scripts/build_product_readiness_snapshot.py --check",
+        ],
+        "claim_boundary": (
+            "This is a batch fill-in template and cleanup preview only. It is not "
+            "an owner decision, does not delete files, and does not close scope "
+            "cleanup without recorded owner evidence and refreshed audits."
+        ),
+    }
+
+
 def _status_from_packet(packet: dict[str, Any]) -> str:
     if not packet.get("contract_pass"):
         return "blocked_scope_cleanup"
@@ -340,6 +458,13 @@ def build_application_plan(
     ]
     owner_review_priority_batches = _owner_review_priority_batches(
         pending_owner_decision_rows
+    )
+    next_owner_review_batch = (
+        owner_review_priority_batches[0] if owner_review_priority_batches else {}
+    )
+    next_owner_review_batch_decision_template = _next_batch_decision_template(
+        pending_owner_decision_rows=pending_owner_decision_rows,
+        next_batch=next_owner_review_batch,
     )
     application_blockers = _deduped(
         [
@@ -433,8 +558,9 @@ def build_application_plan(
             pending_owner_decision_rows, "recommended_owner_decision_primary"
         ),
         "owner_review_priority_batches": owner_review_priority_batches,
-        "next_owner_review_batch": (
-            owner_review_priority_batches[0] if owner_review_priority_batches else {}
+        "next_owner_review_batch": next_owner_review_batch,
+        "next_owner_review_batch_decision_template": (
+            next_owner_review_batch_decision_template
         ),
         "release_surface_owner_decision_required_count": sum(
             1 for row in pending_owner_decision_rows if row["path_area"] == "release_surface"
@@ -526,6 +652,35 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{len(payload['owner_review_priority_batches'])}`"
         )
     lines.append("")
+    next_batch_template = payload.get("next_owner_review_batch_decision_template")
+    next_batch_template = (
+        next_batch_template if isinstance(next_batch_template, dict) else {}
+    )
+    if next_batch_template:
+        lines.extend(["## Next Batch Decision Template", ""])
+        lines.append(
+            "- `batch_id`: "
+            f"`{next_batch_template.get('batch_id')}`"
+        )
+        lines.append(
+            "- `decision_pending_count`: "
+            f"`{next_batch_template.get('decision_pending_count')}`"
+        )
+        preview = next_batch_template.get("primary_cleanup_preview")
+        preview = preview if isinstance(preview, dict) else {}
+        lines.append(
+            "- `primary_delete_path_count`: "
+            f"`{preview.get('primary_delete_path_count', 0)}`"
+        )
+        lines.extend(["", "| Row | Path | Primary Decision |", "|---|---|---|"])
+        for row in next_batch_template.get("decision_rows", []):
+            lines.append(
+                "| "
+                f"`{row['row_id']}` | "
+                f"`{row['path']}` | "
+                f"`{row['recommended_owner_decision_primary']}` |"
+            )
+        lines.append("")
     if payload["owner_decision_validation_blockers"]:
         lines.extend(["## Owner Decision Validation Blockers", ""])
         lines.extend(

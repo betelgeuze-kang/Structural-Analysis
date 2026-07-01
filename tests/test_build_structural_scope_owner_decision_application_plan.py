@@ -251,6 +251,67 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
     assert payload["next_owner_review_batch"]["batch_id"] == "release_surface_first"
     assert payload["next_owner_review_batch"]["priority"] == 1
     assert payload["next_owner_review_batch"]["paths"] == [release_surface_path]
+    batch_template = payload["next_owner_review_batch_decision_template"]
+    assert batch_template["schema_version"] == (
+        application_plan.owner_review.DECISION_SCHEMA_VERSION
+    )
+    assert batch_template["batch_id"] == "release_surface_first"
+    assert batch_template["path_area"] == "release_surface"
+    assert batch_template["decision_pending_count"] == 1
+    assert batch_template["canonical_owner_decisions_path"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "structural_scope_owner_decisions.json"
+    )
+    assert batch_template["decision_rows"] == [
+        {
+            "row_id": "release_surface_first-001",
+            "path": release_surface_path,
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "current_release_action": (
+                "keep_quarantined_until_owner_delete_or_extract_decision"
+            ),
+            "recommended_owner_decision": (
+                "delete_from_structural_repository_or_extract_only_if_owner_requires_history"
+            ),
+            "recommended_owner_decision_primary": "delete_from_structural_repository",
+            "recommended_owner_decision_alternate": (
+                "extract_to_molecular_or_science_repository"
+            ),
+            "allowed_owner_decisions": list(
+                application_plan.owner_review.ALLOWED_OWNER_DECISIONS
+            ),
+            "owner_decision": "",
+            "owner_identity": "",
+            "owner_role": "",
+            "decision_timestamp_utc": "",
+            "evidence_reference": "",
+            "signed_owner_exception_reference": "",
+            "external_archive_reference": "",
+            "post_decision_required_action": (
+                "delete_or_extract_path_then_rerun_scope_audit"
+            ),
+        }
+    ]
+    assert batch_template["primary_cleanup_preview"] == {
+        "safe_to_auto_apply": False,
+        "owner_decision_required": True,
+        "primary_delete_path_count": 1,
+        "primary_delete_paths": [release_surface_path],
+        "primary_delete_git_rm_args": ["git", "rm", "--", release_surface_path],
+        "primary_extract_path_count": 0,
+        "primary_extract_paths": [],
+        "primary_extract_post_archive_git_rm_args": [],
+        "preconditions": [
+            (
+                "owner fills matching decision rows in "
+                "structural_scope_owner_decisions.json or CSV"
+            ),
+            "owner_decision_validation_pass=true for these rows",
+            "human confirms the batch cleanup scope",
+        ],
+    }
     assert [
         row["batch_id"] for row in payload["owner_review_priority_batches"]
     ] == [
