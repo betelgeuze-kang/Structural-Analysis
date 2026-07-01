@@ -2923,7 +2923,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T11:43:40.022735+00:00",
+  "generated_at": "2026-07-01T11:46:30.834626+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -3604,7 +3604,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "598cc7e8d7858b6183b6ac98d5ba69470cfce2a9",
+  "source_commit_sha": "f58d2838e2b2a102093b7839193c6487f20eb737",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3800,9 +3800,11 @@
           "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_phase6_benchmark_scale_status.py",
           "scripts/build_pocketmd_lite_product_surface.py",
+          "scripts/report_release_evidence_freshness.py",
           "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_pocketmd_lite_product_surface.py"
+          "tests/test_build_pocketmd_lite_product_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-07-01T11:27:12.183612+00:00",
         "input_checksum_present": true,
@@ -3817,7 +3819,9 @@
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
-          "tests/test_build_pocketmd_lite_product_surface.py"
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_pocketmd_lite_product_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-07-01T11:39:21.911685+00:00",
         "input_checksum_present": true,
@@ -3836,11 +3840,13 @@
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/report_release_evidence_freshness.py",
           "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
-          "tests/test_materialize_public_benchmark_phase2_from_rows.py"
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-07-01T11:20:48.881595+00:00",
         "input_checksum_present": true,
@@ -4103,21 +4109,8 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
-        "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4142,21 +4135,8 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        " M implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
-        " M implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
-        " M implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
-        " M implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
-        " M implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
-        " M implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
-        " M implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        " M implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
-        " M implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
       ]
     }
   },
