@@ -508,7 +508,7 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-07-01T09:39:44.476985+00:00",
+  "generated_at": "2026-07-01T09:40:11.445592+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:30d2b6a86da1915602bc647de024eece488f243636888b685fcd601591e7660a",
@@ -721,7 +721,7 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "38c83e08301e16041a6584dde8d828ed382a256b",
+  "source_commit_sha": "e058551f9359ec23efc798819fdf874582883a89",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
