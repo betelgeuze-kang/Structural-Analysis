@@ -56,6 +56,17 @@ def _counts_by_key(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
     return dict(sorted(counts.items()))
 
 
+def _deduped(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if not item or item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
+
+
 def _family_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
     counts: dict[str, int] = {}
     for row in rows:
@@ -126,6 +137,14 @@ def _plan_row(row: dict[str, Any]) -> dict[str, Any]:
         "owner_decision_valid": bool(row.get("owner_decision_valid")),
         "owner_review_state": _text(row.get("owner_review_state")),
         "post_decision_cleanup_pending": bool(row.get("post_decision_cleanup_pending")),
+        "recommended_owner_decision": _text(row.get("recommended_owner_decision")),
+        "recommended_owner_decision_primary": _text(
+            row.get("recommended_owner_decision_primary")
+        ),
+        "recommended_owner_decision_alternate": _text(
+            row.get("recommended_owner_decision_alternate")
+        ),
+        "current_release_action": _text(row.get("current_release_action")),
         **action,
     }
 
@@ -256,6 +275,25 @@ def build_application_plan(
     cleanup_rows = [
         row for row in rows if row["post_decision_cleanup_pending"] is True
     ]
+    pending_owner_decision_rows = [
+        row for row in rows if row["owner_decision_valid"] is False
+    ]
+    application_blockers = _deduped(
+        [
+            *owner_decision_validation_blockers,
+            *plan_blockers,
+            *closure_blockers,
+        ]
+    )
+    summary_line = (
+        "Structural scope owner decision application plan: "
+        f"{status.upper()} | recorded={int(packet.get('owner_decision_recorded_count', 0) or 0)} | "
+        f"pending={int(packet.get('owner_decision_pending_count', 0) or 0)} | "
+        f"cleanup_pending={int(packet.get('post_decision_cleanup_pending_count', 0) or 0)} | "
+        f"delete={len(delete_rows)} | extract={len(extract_rows)} | "
+        f"retain={len(retain_rows)} | "
+        f"unquarantined={int(packet.get('unquarantined_non_structural_path_count', 0) or 0)}"
+    )
     suggested_sequence = [
         "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
         "when using CSV, pass it with --owner-decisions <filled-owner-decisions.csv>",
@@ -280,12 +318,18 @@ def build_application_plan(
             repo_root=repo_root,
         ),
         "status": status,
+        "summary_line": summary_line,
         "contract_pass": bool(packet.get("contract_pass") and not _as_list(owner_decisions.get("blockers"))),
         "application_ready": status == "ready_for_cleanup_application",
         "evidence_closure_pass": bool(packet.get("evidence_closure_pass")),
         "owner_decision_validation_pass": not owner_decision_validation_blockers,
         "owner_decision_validation_blockers": owner_decision_validation_blockers,
         "owner_decisions_path": owner_decisions_path.as_posix(),
+        "owner_decision_template_paths": {
+            "json": owner_review.DEFAULT_OWNER_DECISION_TEMPLATE.as_posix(),
+            "csv": owner_review.DEFAULT_OWNER_DECISION_TEMPLATE_CSV.as_posix(),
+            "markdown": owner_review.DEFAULT_OWNER_DECISION_TEMPLATE_MD.as_posix(),
+        },
         "owner_decisions_present": bool(owner_decisions.get("present")),
         "owner_decision_recorded_count": int(packet.get("owner_decision_recorded_count", 0) or 0),
         "owner_decision_pending_count": int(packet.get("owner_decision_pending_count", 0) or 0),
@@ -298,6 +342,9 @@ def build_application_plan(
         "delete_decision_count": len(delete_rows),
         "extract_decision_count": len(extract_rows),
         "retain_quarantined_exception_count": len(retain_rows),
+        "delete_path_count": len(delete_rows),
+        "extract_path_count": len(extract_rows),
+        "retain_quarantined_exception_path_count": len(retain_rows),
         "quarantined_path_count": int(packet.get("quarantined_path_count", 0) or 0),
         "release_surface_excluded_path_count": int(
             packet.get("release_surface_excluded_path_count", 0) or 0
@@ -307,8 +354,29 @@ def build_application_plan(
         ),
         "closure_blockers": closure_blockers,
         "plan_blockers": plan_blockers,
+        "application_blockers": application_blockers,
         "blockers": plan_blockers,
         "next_actions": [] if packet.get("evidence_closure_pass") else suggested_sequence,
+        "pending_owner_decision_path_area_counts": _counts_by_key(
+            pending_owner_decision_rows, "path_area"
+        ),
+        "pending_owner_decision_family_counts": _family_counts(
+            pending_owner_decision_rows
+        ),
+        "pending_owner_decision_recommended_owner_decision_counts": _counts_by_key(
+            pending_owner_decision_rows, "recommended_owner_decision"
+        ),
+        "pending_owner_decision_primary_counts": _counts_by_key(
+            pending_owner_decision_rows, "recommended_owner_decision_primary"
+        ),
+        "release_surface_owner_decision_required_count": sum(
+            1 for row in pending_owner_decision_rows if row["path_area"] == "release_surface"
+        ),
+        "release_surface_owner_decision_required_paths": [
+            row["path"]
+            for row in pending_owner_decision_rows
+            if row["path_area"] == "release_surface"
+        ],
         "cleanup_required_count": len(cleanup_rows),
         "cleanup_path_area_counts": _counts_by_key(cleanup_rows, "path_area"),
         "cleanup_family_counts": _family_counts(cleanup_rows),
@@ -326,9 +394,7 @@ def build_application_plan(
             if isinstance(row, dict)
         ],
         "retain_exception_rows": retain_rows,
-        "pending_owner_decision_rows": [
-            row for row in rows if row["owner_decision_valid"] is False
-        ],
+        "pending_owner_decision_rows": pending_owner_decision_rows,
         "suggested_sequence": suggested_sequence,
         "claim_boundary": (
             "This application plan is non-mutating. It never deletes or extracts "
@@ -344,6 +410,7 @@ def _markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# Structural Scope Owner Decision Application Plan",
         "",
+        f"- `summary_line`: `{payload['summary_line']}`",
         f"- `status`: `{payload['status']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `application_ready`: `{payload['application_ready']}`",
@@ -357,8 +424,27 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `delete_decision_count`: `{payload['delete_decision_count']}`",
         f"- `extract_decision_count`: `{payload['extract_decision_count']}`",
         f"- `retain_quarantined_exception_count`: `{payload['retain_quarantined_exception_count']}`",
+        f"- `release_surface_owner_decision_required_count`: `{payload['release_surface_owner_decision_required_count']}`",
         "",
     ]
+    lines.extend(["## Pending Owner Decision Buckets", ""])
+    lines.append(
+        "- `pending_owner_decision_path_area_counts`: "
+        f"`{payload['pending_owner_decision_path_area_counts']}`"
+    )
+    lines.append(
+        "- `pending_owner_decision_family_counts`: "
+        f"`{payload['pending_owner_decision_family_counts']}`"
+    )
+    lines.append(
+        "- `pending_owner_decision_recommended_owner_decision_counts`: "
+        f"`{payload['pending_owner_decision_recommended_owner_decision_counts']}`"
+    )
+    lines.append(
+        "- `pending_owner_decision_primary_counts`: "
+        f"`{payload['pending_owner_decision_primary_counts']}`"
+    )
+    lines.append("")
     if payload["owner_decision_validation_blockers"]:
         lines.extend(["## Owner Decision Validation Blockers", ""])
         lines.extend(

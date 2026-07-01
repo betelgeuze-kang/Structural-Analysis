@@ -127,6 +127,12 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
     )
 
     assert payload["status"] == "pending_owner_decisions"
+    assert payload["summary_line"] == (
+        "Structural scope owner decision application plan: "
+        "PENDING_OWNER_DECISIONS | recorded=0 | pending=2 | "
+        "cleanup_pending=0 | delete=0 | extract=0 | retain=0 | "
+        "unquarantined=0"
+    )
     assert payload["contract_pass"] is True
     assert payload["application_ready"] is False
     assert payload["evidence_closure_pass"] is False
@@ -138,7 +144,42 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
     assert payload["owner_decision_pending_count"] == 2
     assert payload["post_decision_cleanup_pending_count"] == 0
     assert payload["plan_blockers"] == ["owner_decision_pending_count=2"]
+    assert payload["application_blockers"] == [
+        "owner_decisions_missing",
+        "owner_decision_pending_count=2",
+    ]
     assert payload["blockers"] == payload["plan_blockers"]
+    assert payload["pending_owner_decision_path_area_counts"] == {
+        "implementation_phase1": 1,
+        "productization_evidence": 1,
+    }
+    assert payload["pending_owner_decision_family_counts"] == {
+        "molecular_docking": 1,
+        "molecular_dynamics": 1,
+    }
+    assert payload["pending_owner_decision_recommended_owner_decision_counts"] == {
+        "delete_from_structural_repository_or_extract_only_if_owner_requires_history": 1,
+        "extract_to_molecular_or_science_repository_or_delete_if_obsolete": 1,
+    }
+    assert payload["pending_owner_decision_primary_counts"] == {
+        "delete_from_structural_repository": 1,
+        "extract_to_molecular_or_science_repository": 1,
+    }
+    assert payload["release_surface_owner_decision_required_count"] == 0
+    assert payload["owner_decision_template_paths"] == {
+        "json": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.template.json"
+        ),
+        "csv": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.template.csv"
+        ),
+        "markdown": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.template.md"
+        ),
+    }
     assert payload["cleanup_required_count"] == 0
     assert payload["cleanup_command_manifest"]["manual_application_required"] is False
     assert payload["next_actions"][0].startswith(
@@ -187,6 +228,8 @@ def test_application_plan_routes_delete_and_extract_decisions(tmp_path: Path) ->
     }
     assert payload["delete_decision_count"] == 1
     assert payload["extract_decision_count"] == 1
+    assert payload["delete_path_count"] == 1
+    assert payload["extract_path_count"] == 1
     assert len(payload["cleanup_rows"]) == 2
     manifest = payload["cleanup_command_manifest"]
     assert manifest["safe_to_auto_apply"] is False
@@ -325,6 +368,7 @@ def test_application_plan_prioritizes_release_surface_cleanup_commands(
 
     assert payload["cleanup_required_count"] == 3
     assert payload["release_surface_cleanup_required_count"] == 1
+    assert payload["release_surface_owner_decision_required_count"] == 0
     assert payload["release_surface_cleanup_paths"] == [release_surface_path]
     assert payload["cleanup_command_manifest"]["release_surface_first_paths"] == [
         release_surface_path
@@ -436,6 +480,8 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
     )
     markdown = out_md.read_text(encoding="utf-8")
     assert "# Structural Scope Owner Decision Application Plan" in markdown
+    assert "summary_line" in markdown
+    assert "Pending Owner Decision Buckets" in markdown
     assert "owner_decision_validation_pass" in markdown
     assert "cleanup_required_count" in markdown
     assert "Cleanup Command Manifest" in markdown

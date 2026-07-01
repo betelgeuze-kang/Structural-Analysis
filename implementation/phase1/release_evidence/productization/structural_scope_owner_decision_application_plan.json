@@ -1,4 +1,8 @@
 {
+  "application_blockers": [
+    "owner_decisions_missing",
+    "owner_decision_pending_count=86"
+  ],
   "application_ready": false,
   "blockers": [
     "owner_decision_pending_count=86"
@@ -49,15 +53,17 @@
   ],
   "contract_pass": true,
   "delete_decision_count": 0,
+  "delete_path_count": 0,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
-  "generated_at": "2026-07-01T19:01:56.368055+00:00",
+  "extract_path_count": 0,
+  "generated_at": "2026-07-01T20:07:17.223850+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:dbed17452186f2be09d834518c6fa2fed2d7b07121ce93758f0627c4c01bfa98",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:a5366e9f82f020d6d276ba335af7c297815fafd658e00404d25d88103735c947",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:3503fc1fc7a411b25c20db770068491b2ba716289e343fe6cea5aa3a87f431d9",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:ccdd2451ff196c0cb65b75212104dd9559048c35b22696d89c70dba794ac2217",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:0474dc526bf32cfaa2da60f3eff4aba8d7de5fae2a8a63d523b1725ea3c7be5c",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:a1142b7560e544ad3e26e20d2511b157d833ce08be2af5ba65f6b0e58dfadac9"
   },
   "next_actions": [
@@ -71,6 +77,11 @@
   ],
   "owner_decision_pending_count": 86,
   "owner_decision_recorded_count": 0,
+  "owner_decision_template_paths": {
+    "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
+    "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+    "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.md"
+  },
   "owner_decision_validation_blockers": [
     "owner_decisions_missing",
     "owner_decision_pending_count=86"
@@ -78,8 +89,29 @@
   "owner_decision_validation_pass": false,
   "owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
   "owner_decisions_present": false,
+  "pending_owner_decision_family_counts": {
+    "molecular_docking": 48,
+    "molecular_dynamics": 25,
+    "molecular_science_evidence": 13
+  },
+  "pending_owner_decision_path_area_counts": {
+    "implementation_phase1": 9,
+    "productization_evidence": 36,
+    "release_surface": 3,
+    "script": 19,
+    "test": 19
+  },
+  "pending_owner_decision_primary_counts": {
+    "delete_from_structural_repository": 39,
+    "extract_to_molecular_or_science_repository": 47
+  },
+  "pending_owner_decision_recommended_owner_decision_counts": {
+    "delete_from_structural_repository_or_extract_only_if_owner_requires_history": 39,
+    "extract_to_molecular_or_science_repository_or_delete_if_obsolete": 47
+  },
   "pending_owner_decision_rows": [
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -94,10 +126,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -112,10 +148,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -130,10 +170,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -148,10 +192,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -166,10 +214,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -184,10 +236,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -202,10 +258,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -220,10 +280,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -238,10 +302,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -256,10 +324,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -274,10 +346,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -292,10 +368,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -310,10 +390,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -328,10 +412,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -346,10 +434,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -364,10 +456,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -382,10 +478,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -400,10 +500,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -418,10 +522,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -436,10 +544,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -454,10 +566,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -472,10 +588,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -490,10 +610,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -508,10 +632,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -526,10 +654,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -544,10 +676,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -562,10 +698,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -580,10 +720,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -598,10 +742,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -616,10 +764,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -634,10 +786,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -652,10 +808,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -670,10 +830,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -688,10 +852,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -706,10 +874,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -724,10 +896,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -742,10 +918,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -760,10 +940,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -778,10 +962,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -796,10 +984,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -814,10 +1006,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -832,10 +1028,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -850,10 +1050,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -868,10 +1072,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -886,10 +1094,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -904,10 +1116,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -922,10 +1138,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -940,10 +1160,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -958,10 +1182,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -976,10 +1204,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -994,10 +1226,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -1012,10 +1248,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1030,10 +1270,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1048,10 +1292,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1066,10 +1314,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -1084,10 +1336,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -1102,10 +1358,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1120,10 +1380,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1138,10 +1402,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1156,10 +1424,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1174,10 +1446,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1192,10 +1468,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1210,10 +1490,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1228,10 +1512,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1246,10 +1534,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1264,10 +1556,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1282,10 +1578,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1300,10 +1600,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1318,10 +1622,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1336,10 +1644,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -1354,10 +1666,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1372,10 +1688,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1390,10 +1710,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1408,10 +1732,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -1426,10 +1754,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_dynamics"
       ],
@@ -1444,10 +1776,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1462,10 +1798,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1480,10 +1820,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1498,10 +1842,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1516,10 +1864,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1534,10 +1886,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1552,10 +1908,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1570,10 +1930,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1588,10 +1952,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1606,10 +1974,14 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     },
     {
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "families": [
         "molecular_docking"
       ],
@@ -1624,6 +1996,9 @@
         "python3 scripts/build_structural_scope_owner_review_packet.py"
       ],
       "post_decision_cleanup_pending": false,
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "recommended_owner_decision_alternate": "delete_from_structural_repository",
+      "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
       "required_action": "owner_decision_required",
       "safe_to_auto_apply": false
     }
@@ -1638,12 +2013,19 @@
   "release_surface_cleanup_paths": [],
   "release_surface_cleanup_required_count": 0,
   "release_surface_excluded_path_count": 86,
+  "release_surface_owner_decision_required_count": 3,
+  "release_surface_owner_decision_required_paths": [
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+    "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+  ],
   "retain_exception_rows": [],
   "retain_quarantined_exception_count": 0,
+  "retain_quarantined_exception_path_count": 0,
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "24b53bae6d192ba2dd7809ae2eda5840351d488f",
+  "source_commit_sha": "6c147e77ad700ff02ea67add3a5ab08b7d189a10",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
@@ -1654,5 +2036,6 @@
     "rerun structural scope audit and owner review packet",
     "refresh product readiness snapshot"
   ],
+  "summary_line": "Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=86 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0",
   "unquarantined_non_structural_path_count": 0
 }

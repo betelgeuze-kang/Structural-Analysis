@@ -1,5 +1,6 @@
 # Structural Scope Owner Decision Application Plan
 
+- `summary_line`: `Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=86 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0`
 - `status`: `pending_owner_decisions`
 - `contract_pass`: `True`
 - `application_ready`: `False`
@@ -13,6 +14,14 @@
 - `delete_decision_count`: `0`
 - `extract_decision_count`: `0`
 - `retain_quarantined_exception_count`: `0`
+- `release_surface_owner_decision_required_count`: `3`
+
+## Pending Owner Decision Buckets
+
+- `pending_owner_decision_path_area_counts`: `{'implementation_phase1': 9, 'productization_evidence': 36, 'release_surface': 3, 'script': 19, 'test': 19}`
+- `pending_owner_decision_family_counts`: `{'molecular_docking': 48, 'molecular_dynamics': 25, 'molecular_science_evidence': 13}`
+- `pending_owner_decision_recommended_owner_decision_counts`: `{'delete_from_structural_repository_or_extract_only_if_owner_requires_history': 39, 'extract_to_molecular_or_science_repository_or_delete_if_obsolete': 47}`
+- `pending_owner_decision_primary_counts`: `{'delete_from_structural_repository': 39, 'extract_to_molecular_or_science_repository': 47}`
 
 ## Owner Decision Validation Blockers
 
