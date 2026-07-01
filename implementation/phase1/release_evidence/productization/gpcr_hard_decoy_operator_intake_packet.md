@@ -29,9 +29,9 @@
 
 | Target | Ready | Missing Fields | First Blocker |
 |---|---|---|---|
-| `DRD2` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `DRD2:operator_metrics_required` |
-| `HTR2A` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `HTR2A:operator_metrics_required` |
-| `OPRM1` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `OPRM1:operator_metrics_required` |
+| `DRD2` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `DRD2:hard_decoy_rows_required_for_actual_closure` |
+| `HTR2A` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `HTR2A:hard_decoy_rows_required_for_actual_closure` |
+| `OPRM1` | `False` | `ranking_pr_auc_ci_low`, `top20_hit_rate`, `decoys_above_positive_count`, `positive_out_anchored_by_top_decoys`, `score_direction`, `hard_decoy_rows` | `OPRM1:hard_decoy_rows_required_for_actual_closure` |
 
 ## Materialization Sequence
 
