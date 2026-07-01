@@ -1,6 +1,6 @@
 {
   "schema_version": "ai-decision-review-artifacts.v1",
-  "generated_at": "2026-07-01T10:33:04.315436+00:00",
+  "generated_at": "2026-07-01T11:04:49.463692+00:00",
   "status": "ready",
   "decision_trace_ready": true,
   "review_queue_ready": true,

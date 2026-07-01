@@ -1,10 +1,10 @@
 {
   "schema_version": "ml-surrogate-checkpoint-manifest.v1",
-  "generated_at": "2026-07-01T10:36:29.543432+00:00",
+  "generated_at": "2026-07-01T11:08:13.242188+00:00",
   "status": "ready",
   "checkpoint_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/checkpoint.pt",
-  "checkpoint_sha256": "bda6a7e7aee510a624ac72685ec49fa0a06d5f16120d20b703cd87f2108ed16f",
-  "checkpoint_payload_sha256": "4cae5ea0de83be066007a8b89c5e3337d9202f5e1b1b14be414a249929d5925d",
+  "checkpoint_sha256": "6549d900a9a00014329bdee4d5943915a3c0d4c4de57497bce12211beb730e42",
+  "checkpoint_payload_sha256": "675ebf9d99a6bac5a4dd31579ec3e1811a60f4c17ed118980bab7a2d2e410a20",
   "dataset_card_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/dataset_card.json",
   "model_card_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/model_card.json",
   "validation_receipt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/validation_receipt.json",

@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-surface-shell-bending-tangent.v1",
-  "generated_at": "2026-07-01T10:35:23.371862+00:00",
+  "generated_at": "2026-07-01T11:07:07.201933+00:00",
   "status": "ready",
   "surface_shell_bending_drilling_smoke_ready": true,
   "surface_shell_transverse_pressure_smoke_ready": true,
@@ -68,9 +68,9 @@
   },
   "runtime_metrics": {
     "backend": "scipy_sparse_spsolve_cpu_surface_shell_bending",
-    "assembly_seconds": 4.494075761002023,
-    "solve_seconds": 0.3397822339902632,
-    "total_seconds": 4.833857994992286
+    "assembly_seconds": 4.554808141983813,
+    "solve_seconds": 0.33987082200474106,
+    "total_seconds": 4.894678963988554
   },
   "claim_boundary": "Assembles Mindlin-type CST shell bending/shear plus drilling regularization for MGT PLATE rows and runs a deterministic transverse-pressure smoke solve with source MGT plate thickness where available. Mesh-quality calibrated shell benchmarks, coupled frame-shell full-load Newton, and material nonlinearity remain outside this artifact.",
   "anisotropy": {
