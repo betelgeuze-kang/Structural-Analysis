@@ -1,0 +1,3015 @@
+{
+  "allowed_owner_decisions": [
+    "delete_from_structural_repository",
+    "extract_to_molecular_or_science_repository",
+    "retain_quarantined_with_signed_owner_exception"
+  ],
+  "artifacts": {
+    "structural_scope_contamination_audit": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+    "structural_scope_quarantine_manifest": "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
+  },
+  "blockers": [],
+  "claim_boundary": "This packet is an owner handoff for quarantined non-structural molecular/GPCR/PocketMD/MD artifacts. It does not delete files, promote molecular evidence, or make quarantined rows eligible for building structural-analysis release claims. Closure requires a recorded owner decision per path followed by a refreshed structural scope contamination audit.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_closure_pass": false,
+  "family_counts": {
+    "molecular_docking": 48,
+    "molecular_dynamics": 25,
+    "molecular_science_evidence": 13
+  },
+  "generated_at": "2026-07-01T15:55:13.522309+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:efdd2babacbfe1d743ec2f5548dbd4a5f2c6aba61af9965a56f6c80ca3cbb7e2",
+    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:3503fc1fc7a411b25c20db770068491b2ba716289e343fe6cea5aa3a87f431d9",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:fed95eb4b59ec6729db4895405e35c622fce780ba93b92e685989498337eb36f"
+  },
+  "owner_decision_pending_count": 86,
+  "owner_review_required": true,
+  "path_area_counts": {
+    "implementation_phase1": 9,
+    "productization_evidence": 36,
+    "release_surface": 3,
+    "script": 19,
+    "test": 19
+  },
+  "quarantined_path_count": 86,
+  "release_surface_excluded_path_count": 86,
+  "required_closure_evidence": [
+    "owner_identity_and_role",
+    "decision_timestamp_utc",
+    "per_path_decision",
+    "evidence_reference",
+    "post_decision_structural_scope_audit"
+  ],
+  "reuse_policy": "structural_scope_owner_review_packet_from_quarantine_audit",
+  "reused_evidence": false,
+  "review_group_count": 13,
+  "review_groups": [
+    {
+      "family": "molecular_docking",
+      "path_area": "productization_evidence",
+      "path_count": 21,
+      "paths": [
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv"
+      ],
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history"
+    },
+    {
+      "family": "molecular_docking",
+      "path_area": "release_surface",
+      "path_count": 1,
+      "paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json"
+      ],
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history"
+    },
+    {
+      "family": "molecular_docking",
+      "path_area": "script",
+      "path_count": 13,
+      "paths": [
+        "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
+        "scripts/build_gpcr_hard_decoy_product_report.py",
+        "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+        "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+        "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+        "scripts/materialize_public_benchmark_pose_success_harness.py",
+        "scripts/materialize_public_benchmark_pose_validity_input.py",
+        "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
+        "scripts/materialize_public_benchmark_subset_manifest.py",
+        "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+        "scripts/score_symmetry_aware_ligand_rmsd.py",
+        "scripts/validate_public_benchmark_pose_validity.py",
+        "scripts/validate_public_benchmark_subset_manifest.py"
+      ],
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
+    },
+    {
+      "family": "molecular_docking",
+      "path_area": "test",
+      "path_count": 13,
+      "paths": [
+        "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
+        "tests/test_build_gpcr_hard_decoy_product_report.py",
+        "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+        "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
+        "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+        "tests/test_materialize_public_benchmark_pose_success_harness.py",
+        "tests/test_materialize_public_benchmark_pose_validity_input.py",
+        "tests/test_materialize_public_benchmark_posebusters_validity_packet.py",
+        "tests/test_materialize_public_benchmark_subset_manifest.py",
+        "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+        "tests/test_score_symmetry_aware_ligand_rmsd.py",
+        "tests/test_validate_public_benchmark_pose_validity.py",
+        "tests/test_validate_public_benchmark_subset_manifest.py"
+      ],
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
+    },
+    {
+      "family": "molecular_dynamics",
+      "path_area": "implementation_phase1",
+      "path_count": 9,
+      "paths": [
+        "implementation/phase1/md3bead_scientific_validity_report.md",
+        "implementation/phase1/md3bead_soa.py",
+        "implementation/phase1/rust_hip_md3bead_hook.py",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs",
+        "implementation/phase1/rust_md3bead_parity_report.json",
+        "implementation/phase1/validate_md3bead_rust_parity.py"
+      ],
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
+    },
+    {
+      "family": "molecular_dynamics",
+      "path_area": "productization_evidence",
+      "path_count": 9,
+      "paths": [
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md"
+      ],
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history"
+    },
+    {
+      "family": "molecular_dynamics",
+      "path_area": "release_surface",
+      "path_count": 1,
+      "paths": [
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history"
+    },
+    {
+      "family": "molecular_dynamics",
+      "path_area": "script",
+      "path_count": 3,
+      "paths": [
+        "scripts/build_pocketmd_lite_product_surface.py",
+        "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+        "scripts/materialize_pocketmd_lite_topk_survival_report.py"
+      ],
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
+    },
+    {
+      "family": "molecular_dynamics",
+      "path_area": "test",
+      "path_count": 3,
+      "paths": [
+        "tests/test_build_pocketmd_lite_product_surface.py",
+        "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
+        "tests/test_materialize_pocketmd_lite_topk_survival_report.py"
+      ],
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
+    },
+    {
+      "family": "molecular_science_evidence",
+      "path_area": "productization_evidence",
+      "path_count": 6,
+      "paths": [
+        "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.md",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.md"
+      ],
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history"
+    },
+    {
+      "family": "molecular_science_evidence",
+      "path_area": "release_surface",
+      "path_count": 1,
+      "paths": [
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json"
+      ],
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history"
+    },
+    {
+      "family": "molecular_science_evidence",
+      "path_area": "script",
+      "path_count": 3,
+      "paths": [
+        "scripts/build_h_bond_backmap_operator_intake_packet.py",
+        "scripts/build_science_actual_closure_operator_handoff.py",
+        "scripts/materialize_science_actual_closure_from_rows.py"
+      ],
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
+    },
+    {
+      "family": "molecular_science_evidence",
+      "path_area": "test",
+      "path_count": 3,
+      "paths": [
+        "tests/test_build_h_bond_backmap_operator_intake_packet.py",
+        "tests/test_build_science_actual_closure_operator_handoff.py",
+        "tests/test_materialize_science_actual_closure_from_rows.py"
+      ],
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
+    }
+  ],
+  "review_rows": [
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/md3bead_scientific_validity_report.md",
+      "path_area": "implementation_phase1",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/md3bead_soa.py",
+      "path_area": "implementation_phase1",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "casf_pdbbind",
+        "pdbbind"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "symmetry_rmsd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.md",
+      "path_area": "productization_evidence",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "path_area": "release_surface",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "path_area": "release_surface",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+      "path_area": "release_surface",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook.py",
+      "path_area": "implementation_phase1",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+      "path_area": "implementation_phase1",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+      "path_area": "implementation_phase1",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+      "path_area": "implementation_phase1",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/src/main.rs",
+      "path_area": "implementation_phase1",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_md3bead_parity_report.json",
+      "path_area": "implementation_phase1",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/validate_md3bead_rust_parity.py",
+      "path_area": "implementation_phase1",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_gpcr_hard_decoy_product_report.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_h_bond_backmap_operator_intake_packet.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_pocketmd_lite_product_surface.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_science_actual_closure_operator_handoff.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_pocketmd_lite_topk_survival_report.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_pose_success_harness.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_pose_validity_input.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "posebusters",
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_subset_manifest.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_science_actual_closure_from_rows.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "ligand",
+        "symmetry_aware_ligand"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/score_symmetry_aware_ligand_rmsd.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/validate_public_benchmark_pose_validity.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/validate_public_benchmark_subset_manifest.py",
+      "path_area": "script",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_gpcr_hard_decoy_product_report.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_h_bond_backmap_operator_intake_packet.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_pocketmd_lite_product_surface.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_science_actual_closure_operator_handoff.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_dynamics"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_pose_success_harness.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_pose_validity_input.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "posebusters",
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_posebusters_validity_packet.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_subset_manifest.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_science_actual_closure_from_rows.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "ligand",
+        "symmetry_aware_ligand"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_score_symmetry_aware_ligand_rmsd.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_validate_public_benchmark_pose_validity.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "closure_evidence_required": [
+        "owner_identity_and_role",
+        "decision_timestamp_utc",
+        "per_path_decision",
+        "evidence_reference",
+        "post_decision_structural_scope_audit"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "excluded_from_structural_release_surface": true,
+      "families": [
+        "molecular_docking"
+      ],
+      "git_state": "tracked",
+      "manifest_path_present": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision_required": true,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_validate_public_benchmark_subset_manifest.py",
+      "path_area": "test",
+      "quarantine_status": "quarantined",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "structural_release_claim_eligible": false,
+      "structural_release_surface_status": "excluded_quarantined_legacy_artifact"
+    }
+  ],
+  "schema_version": "structural-scope-owner-review-packet.v1",
+  "source_commit_sha": "ffcab59353f989be360546898b4492526701f79b",
+  "status": "ready_for_owner_review",
+  "summary_line": "Structural scope owner review: READY_FOR_OWNER_REVIEW | pending=86 | excluded=86/86 | unquarantined=0",
+  "unquarantined_non_structural_path_count": 0,
+  "unquarantined_rows": []
+}

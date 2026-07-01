@@ -10,13 +10,13 @@
   },
   "first_non_structural_path": "implementation/phase1/md3bead_scientific_validity_report.md",
   "first_unquarantined_non_structural_path": "",
-  "generated_at": "2026-07-01T14:43:39.226446+00:00",
+  "generated_at": "2026-07-01T15:55:13.484376+00:00",
   "git_state_counts": {
     "tracked": 86
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:04f41d77dfb4ffb144646ace105e3c28769cf50dc8d2d234ba551cc897975ecb",
-    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:ff031230a139eb7882bea4ffde4c8a2cab327cba45fb70d66d939a237b844b9f",
+    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:3503fc1fc7a411b25c20db770068491b2ba716289e343fe6cea5aa3a87f431d9",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:af7f5171db08b818d01b7aa3c2ca68379e4f650c8801205c5d28539959f3e602",
     "scripts/check_structural_scope_contamination.py": "sha256:d1cbfbb69753709c9667fb57be5d0175c7e4cfb7399da1628cbd91209285ed85"
   },
@@ -2863,9 +2863,9 @@
   "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths_with_release_surface_quarantine_manifest",
   "reused_evidence": false,
   "schema_version": "structural-scope-contamination-audit.v1",
-  "source_commit_sha": "b4356e98d9f37651974679f47a4544d1ba99b879",
+  "source_commit_sha": "ffcab59353f989be360546898b4492526701f79b",
   "status": "quarantined",
-  "tracked_path_count": 5719,
+  "tracked_path_count": 5722,
   "unquarantined_family_counts": {},
   "unquarantined_git_state_counts": {},
   "unquarantined_non_structural_path_count": 0,
