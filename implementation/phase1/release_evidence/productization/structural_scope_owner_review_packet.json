@@ -22,13 +22,14 @@
     "molecular_dynamics": 25,
     "molecular_science_evidence": 13
   },
-  "generated_at": "2026-07-01T18:47:11.835069+00:00",
+  "generated_at": "2026-07-01T18:53:10.275606+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:dbed17452186f2be09d834518c6fa2fed2d7b07121ce93758f0627c4c01bfa98",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:3503fc1fc7a411b25c20db770068491b2ba716289e343fe6cea5aa3a87f431d9",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:ebcb9545b159f81dd55da656fe87a9bad821faf3bea56b61d81706e734ea5559"
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:a1142b7560e544ad3e26e20d2511b157d833ce08be2af5ba65f6b0e58dfadac9"
   },
+  "manifest_absent_path_count": 0,
   "owner_decision_pending_count": 86,
   "owner_decision_recorded_count": 0,
   "owner_decisions": {
@@ -36,11 +37,13 @@
     "decision_duplicate_path_count": 0,
     "decision_duplicate_paths": [],
     "decision_extra_path_count": 0,
+    "decision_extra_paths": [],
     "decision_format": "json",
     "decision_pending_count": 86,
     "decision_recorded_count": 0,
     "decision_row_count": 0,
     "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+    "post_decision_cleanup_applied_count": 0,
     "post_decision_cleanup_pending_count": 0,
     "present": false,
     "schema_valid": true,
@@ -54,7 +57,15 @@
     "script": 19,
     "test": 19
   },
+  "post_decision_cleanup_applied_count": 0,
+  "post_decision_cleanup_applied_rows": [],
+  "post_decision_cleanup_invalid_owner_decision_count": 0,
+  "post_decision_cleanup_invalid_owner_decision_paths": [],
+  "post_decision_cleanup_missing_owner_decision_count": 0,
+  "post_decision_cleanup_missing_owner_decision_paths": [],
   "post_decision_cleanup_pending_count": 0,
+  "post_decision_cleanup_retained_absent_path_count": 0,
+  "post_decision_cleanup_retained_absent_paths": [],
   "quarantined_path_count": 86,
   "release_surface_excluded_path_count": 86,
   "required_closure_evidence": [
@@ -4233,7 +4244,7 @@
     }
   ],
   "schema_version": "structural-scope-owner-review-packet.v1",
-  "source_commit_sha": "9c1ac260faf9585ac71bb41ddfd3e9a0b417438f",
+  "source_commit_sha": "ca7f7fecc94683583580164b2edd22efcf337a27",
   "status": "ready_for_owner_review",
   "summary_line": "Structural scope owner review: READY_FOR_OWNER_REVIEW | pending=86 | cleanup_pending=0 | excluded=86/86 | unquarantined=0",
   "unquarantined_non_structural_path_count": 0,

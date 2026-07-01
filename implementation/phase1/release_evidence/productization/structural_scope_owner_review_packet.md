@@ -6,6 +6,8 @@
 - `owner_decision_recorded_count`: `0`
 - `owner_decision_pending_count`: `86`
 - `post_decision_cleanup_pending_count`: `0`
+- `post_decision_cleanup_applied_count`: `0`
+- `post_decision_cleanup_missing_owner_decision_count`: `0`
 - `release_surface_excluded_path_count`: `86`
 - `unquarantined_non_structural_path_count`: `0`
 - `owner_decisions_path`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json`

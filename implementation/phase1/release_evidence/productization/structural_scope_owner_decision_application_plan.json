@@ -10,13 +10,13 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
-  "generated_at": "2026-07-01T18:47:11.907806+00:00",
+  "generated_at": "2026-07-01T18:53:10.439416+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:dbed17452186f2be09d834518c6fa2fed2d7b07121ce93758f0627c4c01bfa98",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:3503fc1fc7a411b25c20db770068491b2ba716289e343fe6cea5aa3a87f431d9",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:35d64943d57e0b817628af2b4795feca15e3cc96b1bb5c13858046c8cff776f8",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:ebcb9545b159f81dd55da656fe87a9bad821faf3bea56b61d81706e734ea5559"
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:dbdac1756e7318fab924d86755f55714629bd61dcce2cf4e690dce60cae09009",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:a1142b7560e544ad3e26e20d2511b157d833ce08be2af5ba65f6b0e58dfadac9"
   },
   "owner_decision_pending_count": 86,
   "owner_decision_recorded_count": 0,
@@ -1580,6 +1580,8 @@
   "plan_blockers": [
     "owner_decision_pending_count=86"
   ],
+  "post_decision_cleanup_applied_count": 0,
+  "post_decision_cleanup_applied_rows": [],
   "post_decision_cleanup_pending_count": 0,
   "quarantined_path_count": 86,
   "release_surface_excluded_path_count": 86,
@@ -1588,7 +1590,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "9c1ac260faf9585ac71bb41ddfd3e9a0b417438f",
+  "source_commit_sha": "ca7f7fecc94683583580164b2edd22efcf337a27",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
