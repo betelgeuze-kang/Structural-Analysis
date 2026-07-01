@@ -4,29 +4,13 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 21,
+  "blocker_count": 5,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
-    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-    "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-    "human_ux::observation_file_missing",
-    "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-    "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
-    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-    "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
-    "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-    "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-    "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-    "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-    "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-    "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-    "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-    "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-    "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+    "human_ux::observation_file_missing"
   ],
   "categories": {
     "benchmark": {
@@ -73,35 +57,19 @@
     },
     "numerical": {
       "blocked": true,
-      "blocker_count": 6,
+      "blocker_count": 4,
       "blockers": [
         "g1::full_load_gate_not_closed",
         "g1::full_mesh_nonlinear_equilibrium_not_closed",
         "g1::material_newton_breadth_not_closed",
-        "g1::production_rocm_hip_residency_not_closed",
-        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report"
+        "g1::production_rocm_hip_residency_not_closed"
       ]
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 15,
+      "blocker_count": 1,
       "blockers": [
-        "human_ux::observation_file_missing",
-        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
-        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+        "human_ux::observation_file_missing"
       ]
     }
   },
@@ -224,7 +192,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-01T06:13:12.666305+00:00",
+  "generated_at": "2026-07-01T06:23:01.194834+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -243,22 +211,22 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:99534b0ad1f8f65d645893c3976dfd19a3135355e47f66a094b17504f1390f27",
+      "input_checksum": "sha256:11df2e3158cd1698589d33ac80d68c24987731d76fd6b6204bb8ad046dc3bcc6",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "2ea0b1e47d2f54b71dce571d0b6589bc069e0d7f",
-      "status": "stale_or_inconsistent"
+      "source_commit_sha": "0d8611d00aa52041fc80c23565ff455a5dd9e16c",
+      "status": "blocked"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:3e314f04e317b435ec8145ecf9f26ce1d9fcf76b36ae3ac50b75a99965e24bbd",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:99534b0ad1f8f65d645893c3976dfd19a3135355e47f66a094b17504f1390f27"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:11df2e3158cd1698589d33ac80d68c24987731d76fd6b6204bb8ad046dc3bcc6"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
-  "product_snapshot_status": "stale_or_inconsistent",
+  "product_snapshot_status": "blocked",
   "reason_code": "ERR_DEVELOPER_PREVIEW_BLOCKED",
   "reuse_policy": "derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence",
   "reused_evidence": false,
@@ -1701,10 +1669,13 @@
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
+          "scripts/materialize_public_benchmark_pose_validity_input.py",
           "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
           "scripts/materialize_public_benchmark_rmsd_scorecard.py",
+          "scripts/materialize_public_benchmark_subset_manifest.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
           "scripts/validate_public_benchmark_pose_validity.py",
+          "scripts/validate_public_benchmark_subset_manifest.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
@@ -1715,8 +1686,10 @@
           "tests/test_materialize_public_benchmark_pose_validity_input.py",
           "tests/test_materialize_public_benchmark_posebusters_validity_packet.py",
           "tests/test_materialize_public_benchmark_rmsd_scorecard.py",
+          "tests/test_materialize_public_benchmark_subset_manifest.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
-          "tests/test_validate_public_benchmark_pose_validity.py"
+          "tests/test_validate_public_benchmark_pose_validity.py",
+          "tests/test_validate_public_benchmark_subset_manifest.py"
         ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
@@ -1897,28 +1870,9 @@
         ]
       },
       "release freshness/sync": {
-        "blocked": true,
-        "blocker_count": 18,
-        "blockers": [
-          "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-          "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-          "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
-          "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-          "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
-          "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-          "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
-          "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-          "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-          "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-          "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-          "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-          "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-          "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-          "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-          "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-          "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-          "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
-        ]
+        "blocked": false,
+        "blocker_count": 0,
+        "blockers": []
       }
     }
   },
@@ -2114,6 +2068,6 @@
       }
     }
   },
-  "source_commit_sha": "2ea0b1e47d2f54b71dce571d0b6589bc069e0d7f",
+  "source_commit_sha": "0d8611d00aa52041fc80c23565ff455a5dd9e16c",
   "status": "blocked"
 }

@@ -83,12 +83,12 @@
     "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
     "summary": "sha256:5da9ee28375ecc85a23dc46027c75652a7bbc870720dbb358d43a7f6a0eae3b8"
   },
-  "generated_at": "2026-07-01T05:10:05.482794+00:00",
+  "generated_at": "2026-07-01T06:23:01.027291+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:e1059168a989415dd875239165c8ace4f749a5e69b0ef7f16e028eefccbee312",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:ec9aafe4650598e618c059110e12a1fd5fa23cb1915812108b075ab914c2ef98",
-    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:1acc359a08df470c9547989553e4d7878d446e602da31ff02525a8c73c0799d0",
+    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:87a7bc90d6f81b230d70683cd56a2f3bbd67c68dd7e6deec626ef89f32514ff4",
     "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json": "missing",
     "scripts/build_phase6_linux_windows_parity_status.py": "sha256:f0164cc4c239addf120dc84466043b77b66d69fc16178e118bbc46b53b429244"
   },
@@ -327,7 +327,7 @@
   "reuse_policy": "phase6_parity_status_aggregates_phase3_seed_replay_expectations",
   "reused_evidence": true,
   "schema_version": "phase6-linux-windows-parity-status.v1",
-  "source_commit_sha": "6f8dcef857484f46aa8ed80074f14b46368cea0d",
+  "source_commit_sha": "0d8611d00aa52041fc80c23565ff455a5dd9e16c",
   "status": "blocked",
   "summary_line": "Phase 6 Linux/Windows parity: BLOCKED | receipts=1/2 | missing=windows"
 }
