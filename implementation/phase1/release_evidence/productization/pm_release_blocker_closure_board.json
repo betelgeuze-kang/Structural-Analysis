@@ -28,10 +28,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T14:33:06.013780+00:00",
+  "generated_at": "2026-07-01T14:49:20.524108+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:263fd54fc7663fbfca56f83d01d0d99e0c46dd91c1b6b8a2b31bb44ed0389100",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:711b4ce52f8d4d9a4c26dd6f6a06c1ebfca47dc3309cc1a1e04cc575f572418c",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:57f321cb8c522a854deabe04e52e8ddc6c84639b0fe03792f397fc13584da7eb",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:aaf2321844c335f7196e092f6cdaa0e87ee5fdd1b67f98af1540a9790c0b22b7",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:c1d51c93e91a69095fab5303dfe3d4331003c783b636386a2b9f26fa03b1d8e0"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -250,7 +250,7 @@
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner": "release_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -284,7 +284,7 @@
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner": "release_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -318,7 +318,7 @@
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
       "owner": "release_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -478,7 +478,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "840b94bb9eae2378149a04f531d8f8efa0fc606e",
+  "source_commit_sha": "53aff0c652a58323e230f8c20a185ecd089e7457",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,

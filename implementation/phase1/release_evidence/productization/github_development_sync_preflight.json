@@ -5,7 +5,7 @@
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
-    "feature_synced_to_head": false,
+    "feature_synced_to_head": true,
     "main_fast_forward_possible": true,
     "main_synced_to_head": false,
     "remote_fetch_ok": null,
@@ -20,14 +20,8 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-07-01T14:32:28.122725+00:00",
+  "generated_at": "2026-07-01T14:48:38.464533+00:00",
   "pending_remote_updates": [
-    {
-      "action": "push current HEAD to feature",
-      "command": "git push origin codex/seed-pr-ci-source-evidence:codex/seed-pr-ci-source-evidence",
-      "rollback": "restore feature to previous remote SHA cbe06126a65f92a25dda68eabfdc2f294b337967 with an approved restore action",
-      "target": "origin/codex/seed-pr-ci-source-evidence"
-    },
     {
       "action": "fast-forward push current HEAD to main",
       "command": "git push origin HEAD:main",
@@ -37,12 +31,11 @@
   ],
   "preflight_pass": true,
   "r4_disclosure": {
-    "action": "push current HEAD to feature; fast-forward push current HEAD to main",
+    "action": "fast-forward push current HEAD to main",
     "impact": "GitHub pending refs become externally visible at the local development state.",
     "risk": "Main CI and external reviewers immediately see the current commits.",
-    "rollback": "restore feature to previous remote SHA cbe06126a65f92a25dda68eabfdc2f294b337967 with an approved restore action; restore main to previous remote SHA cbe06126a65f92a25dda68eabfdc2f294b337967 with an approved revert/restore action",
+    "rollback": "restore main to previous remote SHA cbe06126a65f92a25dda68eabfdc2f294b337967 with an approved revert/restore action",
     "target": [
-      "origin/codex/seed-pr-ci-source-evidence",
       "origin/main"
     ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
@@ -56,14 +49,14 @@
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
-    "feature_ahead_count": 28,
+    "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
     "ignored_worktree_status_short": "",
-    "local_head_sha": "840b94bb9eae2378149a04f531d8f8efa0fc606e",
-    "main_ahead_count": 28,
+    "local_head_sha": "53aff0c652a58323e230f8c20a185ecd089e7457",
+    "main_ahead_count": 32,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "cbe06126a65f92a25dda68eabfdc2f294b337967",
+    "remote_feature_sha": "53aff0c652a58323e230f8c20a185ecd089e7457",
     "remote_main_ref": "origin/main",
     "remote_main_sha": "cbe06126a65f92a25dda68eabfdc2f294b337967",
     "remote_safety": {
