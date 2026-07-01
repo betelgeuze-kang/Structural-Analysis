@@ -31,6 +31,9 @@
     "unassigned_blocker_count": 0,
     "unassigned_blockers": []
   },
+  "blockers": [
+    "platform_replay_receipt_missing:windows"
+  ],
   "claim_boundary": "This receipt defines and checks the Linux/Windows platform replay evidence required for the Developer Preview RC parity gate. It does not prove parity until independent passing Linux and Windows receipts are attached, and it does not replace the separate git clean-clone reproduction gate.",
   "comparison_requirements": [
     "same source_commit_sha or explicit commit mapping",
@@ -83,14 +86,64 @@
     "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
     "summary": "sha256:63d646ef138f5282fd6d902f7dba29e9701d6605fbdf4473056bdb5e5becb014"
   },
-  "generated_at": "2026-07-01T10:44:10.324087+00:00",
+  "gate_unblock_plan": [
+    {
+      "forbidden_shortcuts": [
+        "do_not_copy_linux_receipt_as_windows_receipt",
+        "do_not_set_contract_pass_true_without_command_return_code_zero",
+        "do_not_omit_stable_artifact_checksums",
+        "do_not_attach_dirty_worktree_receipt"
+      ],
+      "minimum_evidence": [
+        "receipt exists at the required artifact path",
+        "receipt platform matches the required platform",
+        "contract_pass=true only after replay commands return zero",
+        "working_tree_clean=true and local_dirty_inputs=[]",
+        "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
+      ],
+      "platform": "windows",
+      "required_artifact": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+      "required_replay_commands": [
+        {
+          "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+          "return_code": 0
+        },
+        {
+          "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+          "return_code": 0
+        }
+      ],
+      "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+      "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+      "slot_id": "attach_windows_platform_replay_receipt",
+      "validation_commands_after_attachment": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "minimum_evidence": [
+        "phase6_linux_windows_parity_status.json contract_pass=true",
+        "developer_preview_rc_status no longer blocks linux_windows_reproducibility_confirmed",
+        "product_readiness_snapshot remains semantically consistent"
+      ],
+      "slot_id": "rerun_linux_windows_parity_and_dp_rc_checks",
+      "validation_commands": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check"
+      ]
+    }
+  ],
+  "gate_unblock_plan_count": 2,
+  "generated_at": "2026-07-01T19:30:25.781539+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:fd123502c0ba1dbe040509aed3e042a11fe7bf91bac52c52152e8fa18801db28",
-    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:9349dc45a214e1e3fc97f205f61ae1c89fdb0511b02c1c82dcec6f1febbae8f8",
+    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "sha256:d881e4631af012413b6896f3c3fc8e946cd3bae5a40856233a535814c3875d83",
     "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json": "missing",
-    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:f0164cc4c239addf120dc84466043b77b66d69fc16178e118bbc46b53b429244"
+    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:47b8bf86533ae2ed35a7e9deee164baf4761b922fb57823902f988a8b043ed37"
   },
   "linux_local_replay_receipt_source": {
     "claim_boundary": "Linux local replay evidence is limited to the isolated minimal worktree-copy clean-checkout receipt and does not satisfy Windows parity or the git clean-clone gate.",
@@ -192,6 +245,59 @@
   ],
   "missing_platform_receipts": [
     "windows"
+  ],
+  "next_actions": [
+    "attach_windows_platform_replay_receipt",
+    "rerun_linux_windows_parity_and_dp_rc_checks"
+  ],
+  "operator_next_actions": [
+    {
+      "forbidden_shortcuts": [
+        "do_not_copy_linux_receipt_as_windows_receipt",
+        "do_not_set_contract_pass_true_without_command_return_code_zero",
+        "do_not_omit_stable_artifact_checksums",
+        "do_not_attach_dirty_worktree_receipt"
+      ],
+      "minimum_evidence": [
+        "receipt exists at the required artifact path",
+        "receipt platform matches the required platform",
+        "contract_pass=true only after replay commands return zero",
+        "working_tree_clean=true and local_dirty_inputs=[]",
+        "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
+      ],
+      "platform": "windows",
+      "required_artifact": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+      "required_replay_commands": [
+        {
+          "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+          "return_code": 0
+        },
+        {
+          "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+          "return_code": 0
+        }
+      ],
+      "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+      "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+      "slot_id": "attach_windows_platform_replay_receipt",
+      "validation_commands_after_attachment": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "minimum_evidence": [
+        "phase6_linux_windows_parity_status.json contract_pass=true",
+        "developer_preview_rc_status no longer blocks linux_windows_reproducibility_confirmed",
+        "product_readiness_snapshot remains semantically consistent"
+      ],
+      "slot_id": "rerun_linux_windows_parity_and_dp_rc_checks",
+      "validation_commands": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check"
+      ]
+    }
   ],
   "owner_action": "Attach passing Linux and Windows platform replay receipts from the same tracked source state, then rerun this parity status receipt before promoting the RC parity gate.",
   "parity_comparison_contract": {
@@ -313,6 +419,55 @@
       "status": "missing"
     }
   ],
+  "recommended_next_actions": [
+    {
+      "forbidden_shortcuts": [
+        "do_not_copy_linux_receipt_as_windows_receipt",
+        "do_not_set_contract_pass_true_without_command_return_code_zero",
+        "do_not_omit_stable_artifact_checksums",
+        "do_not_attach_dirty_worktree_receipt"
+      ],
+      "minimum_evidence": [
+        "receipt exists at the required artifact path",
+        "receipt platform matches the required platform",
+        "contract_pass=true only after replay commands return zero",
+        "working_tree_clean=true and local_dirty_inputs=[]",
+        "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
+      ],
+      "platform": "windows",
+      "required_artifact": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+      "required_replay_commands": [
+        {
+          "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+          "return_code": 0
+        },
+        {
+          "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+          "return_code": 0
+        }
+      ],
+      "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+      "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+      "slot_id": "attach_windows_platform_replay_receipt",
+      "validation_commands_after_attachment": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "minimum_evidence": [
+        "phase6_linux_windows_parity_status.json contract_pass=true",
+        "developer_preview_rc_status no longer blocks linux_windows_reproducibility_confirmed",
+        "product_readiness_snapshot remains semantically consistent"
+      ],
+      "slot_id": "rerun_linux_windows_parity_and_dp_rc_checks",
+      "validation_commands": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check"
+      ]
+    }
+  ],
   "required_commands": [
     "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
     "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
@@ -327,7 +482,31 @@
   "reuse_policy": "phase6_parity_status_aggregates_phase3_seed_replay_expectations",
   "reused_evidence": true,
   "schema_version": "phase6-linux-windows-parity-status.v1",
-  "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+  "source_commit_sha": "938989a898402f845d38e0fbce279820893488ff",
   "status": "blocked",
-  "summary_line": "Phase 6 Linux/Windows parity: BLOCKED | receipts=1/2 | missing=windows"
+  "summary": {
+    "blocked_platforms": [],
+    "current_platform_receipt_count": 1,
+    "developer_preview_release_candidate_claim": false,
+    "missing_platforms": [
+      "windows"
+    ],
+    "owner_action": "Attach passing Linux and Windows platform replay receipts from the same tracked source state, then rerun this parity status receipt before promoting the RC parity gate.",
+    "platform_receipt_paths": {
+      "linux": "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json",
+      "windows": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json"
+    },
+    "platform_receipt_schema": "phase6-linux-windows-platform-replay-receipt.v1",
+    "required_platform_receipt_count": 2,
+    "required_platforms": [
+      "linux",
+      "windows"
+    ]
+  },
+  "summary_line": "Phase 6 Linux/Windows parity: BLOCKED | receipts=1/2 | missing=windows",
+  "validation_commands": [
+    "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+    "python3 scripts/build_developer_preview_rc_status.py --check",
+    "python3 scripts/build_product_readiness_snapshot.py --check"
+  ]
 }

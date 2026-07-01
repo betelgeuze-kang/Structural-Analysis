@@ -9,7 +9,7 @@
     "remote_fetch_ok": null,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": true
+    "worktree_only_ignored_evidence_dirty": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-01T19:22:20.844304+00:00",
+  "generated_at": "2026-07-01T19:30:25.763300+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -40,14 +40,14 @@
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/license_status_closure_report.json\n M implementation/phase1/release_evidence/productization/license_status_intake_packet.json\n M implementation/phase1/release_evidence/productization/license_status_intake_packet.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-    "local_head_sha": "dd43b8caf7afed4bfd8bb1a75ab71aad79d09b48",
+    "ignored_worktree_status_short": "",
+    "local_head_sha": "938989a898402f845d38e0fbce279820893488ff",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "dd43b8caf7afed4bfd8bb1a75ab71aad79d09b48",
+    "remote_feature_sha": "938989a898402f845d38e0fbce279820893488ff",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "dd43b8caf7afed4bfd8bb1a75ab71aad79d09b48",
+    "remote_main_sha": "938989a898402f845d38e0fbce279820893488ff",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +61,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/license_status_closure_report.json\n M implementation/phase1/release_evidence/productization/license_status_intake_packet.json\n M implementation/phase1/release_evidence/productization/license_status_intake_packet.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+    "worktree_status_short": ""
   },
   "status": "synced"
 }
