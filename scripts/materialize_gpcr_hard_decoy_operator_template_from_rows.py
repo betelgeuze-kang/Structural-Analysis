@@ -18,8 +18,12 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from materialize_gpcr_hard_decoy_suite_report import (  # noqa: E402
     PLACEHOLDER_SOURCE_TEXT_MARKERS,
+    PLACEHOLDER_PROVENANCE_PREFIXES,
     RAW_RANKING_ROW_FIELDS,
+    RAW_RANKING_SOURCE_RECEIPT_FIELDS,
+    REQUIRED_ACTUAL_CLOSURE_RAW_ROW_FIELDS,
     REQUIRED_TARGETS,
+    SOURCE_CHECKSUM_PATTERN,
 )
 from release_evidence_metadata import file_sha256, release_evidence_metadata  # noqa: E402
 
@@ -48,6 +52,17 @@ NUMERIC_VALUE_POLICY = {
 ROW_INTEGRITY_POLICY = (
     "molecule_id must be nonblank, non-placeholder, and unique within each target."
 )
+ROW_SOURCE_RECEIPT_POLICY = {
+    "required_row_fields": list(RAW_RANKING_SOURCE_RECEIPT_FIELDS),
+    "source_checksum_policy": (
+        "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+    ),
+    "provenance_ref_policy": (
+        "provenance_ref must be nonblank and must not use local, fixture, mock, "
+        "synthetic, placeholder, test, or file-only provenance prefixes"
+    ),
+    "placeholder_provenance_prefixes_rejected": list(PLACEHOLDER_PROVENANCE_PREFIXES),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -101,6 +116,18 @@ def _score_direction(value: Any) -> str:
 def _contains_marker(value: str, markers: tuple[str, ...]) -> bool:
     lowered = value.lower()
     return any(marker in lowered for marker in markers)
+
+
+def _has_placeholder_provenance_prefix(value: str) -> bool:
+    lowered = value.lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_PROVENANCE_PREFIXES)
+
+
+def _is_repeated_placeholder_checksum(value: str) -> bool:
+    if not SOURCE_CHECKSUM_PATTERN.fullmatch(value):
+        return False
+    digest = value.split(":", 1)[1].lower()
+    return len(set(digest)) == 1
 
 
 def _raw_rows_from_target(row: dict[str, Any]) -> list[dict[str, Any]]:
@@ -180,7 +207,7 @@ def _normalize_flat_row(raw_row: dict[str, Any], *, row_index: int) -> tuple[str
     if not target_id:
         raise ValueError(f"row_{row_index}:target_id_required")
     missing = [
-        field for field in RAW_RANKING_ROW_FIELDS if field not in raw_row
+        field for field in REQUIRED_ACTUAL_CLOSURE_RAW_ROW_FIELDS if field not in raw_row
     ]
     if missing:
         raise ValueError(f"row_{row_index}:missing_required_fields:{','.join(missing)}")
@@ -200,6 +227,23 @@ def _normalize_flat_row(raw_row: dict[str, Any], *, row_index: int) -> tuple[str
         raise ValueError(f"row_{row_index}:{molecule_id}:is_decoy_invalid")
     if is_positive is is_decoy:
         raise ValueError(f"row_{row_index}:{molecule_id}:positive_decoy_label_invalid")
+    source_checksum = str(raw_row.get("source_checksum") or "").strip()
+    if not source_checksum:
+        raise ValueError(f"row_{row_index}:{molecule_id}:source_checksum_required")
+    if not SOURCE_CHECKSUM_PATTERN.fullmatch(source_checksum):
+        raise ValueError(f"row_{row_index}:{molecule_id}:source_checksum_invalid")
+    if _is_repeated_placeholder_checksum(source_checksum):
+        raise ValueError(
+            f"row_{row_index}:{molecule_id}:source_checksum_placeholder_digest"
+        )
+    provenance_ref = str(raw_row.get("provenance_ref") or "").strip()
+    if not provenance_ref:
+        raise ValueError(f"row_{row_index}:{molecule_id}:provenance_ref_required")
+    if (
+        _has_placeholder_provenance_prefix(provenance_ref)
+        or _contains_marker(provenance_ref, PLACEHOLDER_SOURCE_TEXT_MARKERS)
+    ):
+        raise ValueError(f"row_{row_index}:{molecule_id}:provenance_ref_placeholder")
     score_direction = _score_direction(raw_row.get("score_direction"))
     if score_direction not in {"higher_is_better", "lower_is_better"}:
         raise ValueError(f"row_{row_index}:{target_id}:score_direction_invalid")
@@ -208,6 +252,8 @@ def _normalize_flat_row(raw_row: dict[str, Any], *, row_index: int) -> tuple[str
         "score": score,
         "is_positive": is_positive,
         "is_decoy": is_decoy,
+        "source_checksum": source_checksum,
+        "provenance_ref": provenance_ref,
     }
 
 
@@ -301,7 +347,7 @@ def build_gpcr_hard_decoy_operator_template_from_rows(
             "source_license": source_license,
             "source_version": source_version,
             "supported_source_formats": list(SUPPORTED_ROW_FORMATS),
-            "required_row_fields": list(RAW_RANKING_ROW_FIELDS),
+            "required_row_fields": list(REQUIRED_ACTUAL_CLOSURE_RAW_ROW_FIELDS),
             "row_count": len(flat_rows),
             "accepted_target_row_count": sum(len(rows) for rows in rows_by_target.values()),
             "unexpected_targets": sorted(set(unexpected_targets)),
@@ -320,6 +366,7 @@ def build_gpcr_hard_decoy_operator_template_from_rows(
             "boolean_label_policy": BOOLEAN_LABEL_POLICY,
             "numeric_value_policy": dict(NUMERIC_VALUE_POLICY),
             "row_integrity_policy": ROW_INTEGRITY_POLICY,
+            "row_source_receipt_policy": dict(ROW_SOURCE_RECEIPT_POLICY),
         },
         "claim_boundary": (
             "Operator intake template materialized from raw hard-decoy ranking rows. "

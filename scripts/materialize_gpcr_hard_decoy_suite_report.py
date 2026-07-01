@@ -9,6 +9,7 @@ import json
 import math
 from pathlib import Path
 import random
+import re
 import sys
 from typing import Any
 
@@ -60,8 +61,14 @@ PHASE3_MATERIALIZATION_STEPS = [
     "refresh_goal_bottleneck_roadmap_surface",
 ]
 RAW_RANKING_ROW_FIELDS = ("molecule_id", "score", "is_positive", "is_decoy")
+RAW_RANKING_SOURCE_RECEIPT_FIELDS = ("source_checksum", "provenance_ref")
+REQUIRED_ACTUAL_CLOSURE_RAW_ROW_FIELDS = (
+    *RAW_RANKING_ROW_FIELDS,
+    *RAW_RANKING_SOURCE_RECEIPT_FIELDS,
+)
 RANKING_PR_AUC_CI_CONFIDENCE_LEVEL = 0.95
 RANKING_PR_AUC_BOOTSTRAP_REPLICATES = 512
+SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 PLACEHOLDER_SOURCE_TEXT_MARKERS = (
     "<operator",
     "fixture",
@@ -94,6 +101,18 @@ PLACEHOLDER_SOURCE_URL_PREFIXES = (
     "unit-test://",
     "file://",
 )
+PLACEHOLDER_PROVENANCE_PREFIXES = (
+    "operator://",
+    "local-evidence://",
+    "local://",
+    "fixture://",
+    "mock://",
+    "synthetic://",
+    "placeholder://",
+    "test://",
+    "unit-test://",
+    "file://",
+)
 
 
 def _slot_id_for_target(target_id: str) -> str:
@@ -112,7 +131,9 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
             "score_direction",
             "hard_decoy_rows",
         ],
-        "required_hard_decoy_row_fields": list(RAW_RANKING_ROW_FIELDS),
+        "required_hard_decoy_row_fields": list(
+            REQUIRED_ACTUAL_CLOSURE_RAW_ROW_FIELDS
+        ),
         "thresholds": {
             "ranking_pr_auc_ci_low": ">=0.45",
             "top20_hit_rate": ">=0.2",
@@ -148,7 +169,9 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
                 "mode": "raw_hard_decoy_rows",
                 "closure_scope": "actual_phase3_closure",
                 "required_fields": ["target_id", "score_direction", "hard_decoy_rows"],
-                "required_row_fields": list(RAW_RANKING_ROW_FIELDS),
+                "required_row_fields": list(
+                    REQUIRED_ACTUAL_CLOSURE_RAW_ROW_FIELDS
+                ),
                 "computed_fields": [
                     "ranking_pr_auc_ci_low",
                     "top20_hit_rate",
@@ -158,6 +181,17 @@ def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
                 ],
             },
         ],
+        "row_source_receipt_policy": {
+            "required_row_fields": list(RAW_RANKING_SOURCE_RECEIPT_FIELDS),
+            "source_checksum_policy": (
+                "source_checksum must be sha256:<64 hex> and not a repeated "
+                "placeholder digest"
+            ),
+            "provenance_ref_policy": (
+                "provenance_ref must be nonblank and must not use local, fixture, "
+                "mock, synthetic, placeholder, or file-only provenance prefixes"
+            ),
+        },
         "actual_closure_required_mode": "raw_hard_decoy_rows",
     }
 
@@ -376,6 +410,18 @@ def _has_placeholder_url_prefix(value: str) -> bool:
     return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_SOURCE_URL_PREFIXES)
 
 
+def _has_placeholder_provenance_prefix(value: str) -> bool:
+    lowered = value.lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_PROVENANCE_PREFIXES)
+
+
+def _is_repeated_placeholder_checksum(value: str) -> bool:
+    if not SOURCE_CHECKSUM_PATTERN.fullmatch(value):
+        return False
+    digest = value.split(":", 1)[1].lower()
+    return len(set(digest)) == 1
+
+
 def _source_actuality_blockers(source: dict[str, Any]) -> list[str]:
     blockers: list[str] = []
     source_id = str(source.get("source_id") or "").strip()
@@ -539,14 +585,19 @@ def _computed_hard_decoy_metrics(
 
     for index, raw_row in enumerate(raw_rows):
         row_key = str(raw_row.get("molecule_id") or f"row_{index + 1}").strip()
-        for field in RAW_RANKING_ROW_FIELDS:
+        for field in REQUIRED_ACTUAL_CLOSURE_RAW_ROW_FIELDS:
             if field not in raw_row:
                 blockers.append(f"{target_id}:{row_key}:{field}_missing")
-                root_cause_tags.append("operator_values_required")
+                if field in RAW_RANKING_SOURCE_RECEIPT_FIELDS:
+                    root_cause_tags.append("hard_decoy_row_actuality_required")
+                else:
+                    root_cause_tags.append("operator_values_required")
         molecule_id = str(raw_row.get("molecule_id") or "").strip()
         score = _number(raw_row.get("score"))
         is_positive = _boolean(raw_row.get("is_positive"))
         is_decoy = _boolean(raw_row.get("is_decoy"))
+        source_checksum = str(raw_row.get("source_checksum") or "").strip()
+        provenance_ref = str(raw_row.get("provenance_ref") or "").strip()
         if "molecule_id" in raw_row and not molecule_id:
             blockers.append(f"{target_id}:{row_key}:molecule_id_blank")
             root_cause_tags.append("operator_values_required")
@@ -570,6 +621,28 @@ def _computed_hard_decoy_metrics(
         if is_positive is not None and is_decoy is not None and is_positive is is_decoy:
             blockers.append(f"{target_id}:{row_key}:positive_decoy_label_invalid")
             root_cause_tags.append("operator_values_required")
+        if "source_checksum" in raw_row:
+            if not source_checksum:
+                blockers.append(f"{target_id}:{row_key}:source_checksum_blank")
+                root_cause_tags.append("hard_decoy_row_actuality_required")
+            elif not SOURCE_CHECKSUM_PATTERN.fullmatch(source_checksum):
+                blockers.append(f"{target_id}:{row_key}:source_checksum_invalid")
+                root_cause_tags.append("hard_decoy_row_actuality_required")
+            elif _is_repeated_placeholder_checksum(source_checksum):
+                blockers.append(
+                    f"{target_id}:{row_key}:source_checksum_placeholder_digest"
+                )
+                root_cause_tags.append("hard_decoy_row_actuality_required")
+        if "provenance_ref" in raw_row:
+            if not provenance_ref:
+                blockers.append(f"{target_id}:{row_key}:provenance_ref_blank")
+                root_cause_tags.append("hard_decoy_row_actuality_required")
+            elif (
+                _has_placeholder_provenance_prefix(provenance_ref)
+                or _contains_marker(provenance_ref, PLACEHOLDER_SOURCE_TEXT_MARKERS)
+            ):
+                blockers.append(f"{target_id}:{row_key}:provenance_ref_placeholder")
+                root_cause_tags.append("hard_decoy_row_actuality_required")
         if score is not None and is_positive is not None and is_decoy is not None:
             normalized_rows.append(
                 {

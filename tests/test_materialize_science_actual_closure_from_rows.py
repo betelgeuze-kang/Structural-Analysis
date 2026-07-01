@@ -40,29 +40,43 @@ def _write_gpcr_rows(path: Path) -> None:
         "score",
         "is_positive",
         "is_decoy",
+        "source_checksum",
+        "provenance_ref",
     ]
     rows = []
     for target_id in ("DRD2", "HTR2A", "OPRM1"):
         for index in range(1, 5):
+            molecule_id = f"{target_id}_positive_{index}"
             rows.append(
                 [
                     target_id,
                     "higher_is_better",
-                    f"{target_id}_positive_{index}",
+                    molecule_id,
                     f"{1.0 - index / 100:.2f}",
                     "true",
                     "false",
+                    _sha(f"{target_id}:{molecule_id}"),
+                    (
+                        "https://zenodo.org/records/2468135/files/"
+                        f"gpcr-hard-decoy-{target_id}-{molecule_id}.json#row"
+                    ),
                 ]
             )
         for index in range(1, 21):
+            molecule_id = f"{target_id}_decoy_{index}"
             rows.append(
                 [
                     target_id,
                     "higher_is_better",
-                    f"{target_id}_decoy_{index}",
+                    molecule_id,
                     f"{0.50 - index / 100:.2f}",
                     "false",
                     "true",
+                    _sha(f"{target_id}:{molecule_id}"),
+                    (
+                        "https://zenodo.org/records/2468135/files/"
+                        f"gpcr-hard-decoy-{target_id}-{molecule_id}.json#row"
+                    ),
                 ]
             )
     with path.open("w", encoding="utf-8", newline="") as handle:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -29,7 +30,28 @@ def _passing_target(target_id: str) -> dict[str, object]:
     }
 
 
-def _positive_first_hard_decoy_rows() -> list[dict[str, object]]:
+def _row_receipt(target_id: str, molecule_id: str) -> dict[str, str]:
+    digest = hashlib.sha256(f"{target_id}:{molecule_id}".encode("utf-8")).hexdigest()
+    return {
+        "source_checksum": f"sha256:{digest}",
+        "provenance_ref": f"https://zenodo.org/records/1234567/{target_id}/{molecule_id}",
+    }
+
+
+def _with_row_receipts(
+    target_id: str,
+    rows: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    return [
+        {
+            **row,
+            **_row_receipt(target_id, str(row["molecule_id"])),
+        }
+        for row in rows
+    ]
+
+
+def _positive_first_hard_decoy_rows(target_id: str = "DRD2") -> list[dict[str, object]]:
     positives = [
         {
             "molecule_id": f"positive_{index}",
@@ -48,11 +70,11 @@ def _positive_first_hard_decoy_rows() -> list[dict[str, object]]:
         }
         for index in range(1, 21)
     ]
-    return positives + decoys
+    return _with_row_receipts(target_id, positives + decoys)
 
 
-def _decoy_first_hard_decoy_rows() -> list[dict[str, object]]:
-    return [
+def _decoy_first_hard_decoy_rows(target_id: str = "DRD2") -> list[dict[str, object]]:
+    rows = [
         {
             "molecule_id": "decoy_1",
             "score": 0.99,
@@ -78,31 +100,32 @@ def _decoy_first_hard_decoy_rows() -> list[dict[str, object]]:
             for index in range(2, 21)
         ],
     ]
+    return _with_row_receipts(target_id, rows)
 
 
-def _top_decoy_tied_hard_decoy_rows() -> list[dict[str, object]]:
-    rows = _positive_first_hard_decoy_rows()
+def _top_decoy_tied_hard_decoy_rows(target_id: str = "DRD2") -> list[dict[str, object]]:
+    rows = _positive_first_hard_decoy_rows(target_id)
     for row in rows:
         if row["molecule_id"] == "decoy_1":
             row["score"] = 0.96
     return rows
 
 
-def _fixture_sized_hard_decoy_rows() -> list[dict[str, object]]:
-    return [
+def _fixture_sized_hard_decoy_rows(target_id: str = "DRD2") -> list[dict[str, object]]:
+    return _with_row_receipts(target_id, [
         {"molecule_id": "positive_1", "score": 0.95, "is_positive": True, "is_decoy": False},
         {"molecule_id": "positive_2", "score": 0.90, "is_positive": True, "is_decoy": False},
         {"molecule_id": "positive_3", "score": 0.85, "is_positive": True, "is_decoy": False},
         {"molecule_id": "decoy_1", "score": 0.40, "is_positive": False, "is_decoy": True},
         {"molecule_id": "decoy_2", "score": 0.10, "is_positive": False, "is_decoy": True},
-    ]
+    ])
 
 
 def _passing_target_from_rows(target_id: str) -> dict[str, object]:
     return {
         "target_id": target_id,
         "score_direction": "higher_is_better",
-        "hard_decoy_rows": _positive_first_hard_decoy_rows(),
+        "hard_decoy_rows": _positive_first_hard_decoy_rows(target_id),
     }
 
 
@@ -359,6 +382,70 @@ def test_gpcr_hard_decoy_suite_blocks_non_finite_raw_scores(
     ]
 
 
+def test_gpcr_hard_decoy_suite_blocks_rows_without_row_source_receipts(
+    tmp_path: Path,
+) -> None:
+    intake = _passing_intake(tmp_path)
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    drd2 = targets[0]
+    assert isinstance(drd2, dict)
+    rows = drd2["hard_decoy_rows"]
+    assert isinstance(rows, list)
+    first_row = rows[0]
+    assert isinstance(first_row, dict)
+    first_row.pop("source_checksum")
+
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["first_blocked_target"] == "DRD2"
+    assert "hard_decoy_row_actuality_required" in report["root_cause_tags"]
+    assert "DRD2:positive_1:source_checksum_missing" in report["blockers"]
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
+    ]
+
+
+def test_gpcr_hard_decoy_suite_blocks_placeholder_row_provenance(
+    tmp_path: Path,
+) -> None:
+    intake = _passing_intake(tmp_path)
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    drd2 = targets[0]
+    assert isinstance(drd2, dict)
+    rows = drd2["hard_decoy_rows"]
+    assert isinstance(rows, list)
+    first_row = rows[0]
+    assert isinstance(first_row, dict)
+    first_row["provenance_ref"] = "local-evidence://gpcr/positive_1"
+
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["first_blocked_target"] == "DRD2"
+    assert "hard_decoy_row_actuality_required" in report["root_cause_tags"]
+    assert "DRD2:positive_1:provenance_ref_placeholder" in report["blockers"]
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
+    ]
+
+
 def test_gpcr_hard_decoy_suite_blocks_local_source_url(
     tmp_path: Path,
 ) -> None:
@@ -392,7 +479,7 @@ def test_gpcr_hard_decoy_suite_blocks_fixture_sized_raw_rows(
                     {
                         "target_id": target_id,
                         "score_direction": "higher_is_better",
-                        "hard_decoy_rows": _fixture_sized_hard_decoy_rows(),
+                        "hard_decoy_rows": _fixture_sized_hard_decoy_rows(target_id),
                     }
                     for target_id in ("DRD2", "HTR2A", "OPRM1")
                 ]
@@ -722,6 +809,8 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                 "score",
                 "is_positive",
                 "is_decoy",
+                "source_checksum",
+                "provenance_ref",
             ],
             "thresholds": {
                 "ranking_pr_auc_ci_low": ">=0.45",
@@ -771,6 +860,8 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                         "score",
                         "is_positive",
                         "is_decoy",
+                        "source_checksum",
+                        "provenance_ref",
                     ],
                     "computed_fields": [
                         "ranking_pr_auc_ci_low",
@@ -781,6 +872,17 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
                     ],
                 },
             ],
+            "row_source_receipt_policy": {
+                "required_row_fields": ["source_checksum", "provenance_ref"],
+                "source_checksum_policy": (
+                    "source_checksum must be sha256:<64 hex> and not a repeated "
+                    "placeholder digest"
+                ),
+                "provenance_ref_policy": (
+                    "provenance_ref must be nonblank and must not use local, fixture, "
+                    "mock, synthetic, placeholder, or file-only provenance prefixes"
+                ),
+            },
             "actual_closure_required_mode": "raw_hard_decoy_rows",
         },
         "materialization_steps": [
