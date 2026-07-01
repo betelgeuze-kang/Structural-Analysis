@@ -1559,7 +1559,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-01T18:21:25.872780+00:00",
+  "generated_at": "2026-07-01T19:50:39.109137+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
@@ -1726,7 +1726,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "0ce1036034a7a6cc9a68991ebf1f9693a7218c6a",
+  "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",

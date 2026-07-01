@@ -30,6 +30,22 @@
 - `python3 scripts/build_phase6_ux_observation_status.py --check`
 - `python3 scripts/build_developer_preview_rc_status.py --check`
 
+## Release Surface Impacts
+
+### `selected_medium_models_pass_or_approved_review`
+- `developer_preview_rc::selected_medium_models_pass_or_approved_review`
+- `product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review`
+
+### `linux_windows_reproducibility_confirmed`
+- `developer_preview_rc::linux_windows_reproducibility_confirmed`
+- `product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed`
+
+### `new_user_core_workflow_observation_passed`
+- `developer_preview_rc::new_user_core_workflow_observation_passed`
+- `pm_release::ux::human_new_user_observation_missing_or_failed`
+- `pm_release::ux::human_new_user_30min_sample_evidence_missing`
+- `product_readiness_snapshot::human_ux::*`
+
 ## Claim Boundary
 
 This packet is a Developer Preview owner-evidence handoff for blocked RC final gates. It does not create benchmark, Windows, or human UX evidence; does not promote Developer Preview readiness; and does not close Commercial Release, G1, customer shadow, external benchmark, license, SLA, or GitHub CI streak gates.

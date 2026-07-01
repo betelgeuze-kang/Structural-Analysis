@@ -336,7 +336,7 @@
     }
   ],
   "gate_unblock_plan_count": 5,
-  "generated_at": "2026-07-01T19:09:24.969290+00:00",
+  "generated_at": "2026-07-01T19:51:42.508013+00:00",
   "next_actions": [
     "fill_ux_new_user_observation_record_from_template",
     "run_30_minute_human_new_user_core_workflow_observation",

@@ -16,11 +16,11 @@
   "evidence_closure_pass": false,
   "final_gate_count": 9,
   "final_gate_pass_count": 6,
-  "generated_at": "2026-07-01T16:23:21.639066+00:00",
+  "generated_at": "2026-07-01T19:51:54.639018+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:abe00a3c11377025adbd1ddec784713ae2fa5acd549735dc3d940ca23f2abe3f",
-    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:fd7d577263f59534e060bab64de3a6dd665d49be4e6cb5f8df01d006b4b5622c"
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:4920b71556dc68eb309c89d619f619df949b859c163aa88b42905c5f3619996c",
+    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:ff676eb35dd81e6456f067005cd13a20932ae19ce523b8508c15782abdbc08ff"
   },
   "owner_packet_count": 3,
   "owner_packets": [
@@ -109,6 +109,10 @@
         "candidate_case_count_without_scorecard_receipts",
         "license_pending_rows_used_as_pass_evidence"
       ],
+      "release_surface_impacts": [
+        "developer_preview_rc::selected_medium_models_pass_or_approved_review",
+        "product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review"
+      ],
       "required_owner_evidence": [
         "product_legal_source_license_approval",
         "five_selected_medium_structural_model_case_receipts",
@@ -173,6 +177,10 @@
         "linux_only_replay_copied_as_windows_parity",
         "git_clean_clone_receipt_counted_twice",
         "manual_platform_claim_without_replay_receipt"
+      ],
+      "release_surface_impacts": [
+        "developer_preview_rc::linux_windows_reproducibility_confirmed",
+        "product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed"
       ],
       "required_owner_evidence": [
         "phase6_windows_platform_replay_receipt_json",
@@ -301,6 +309,12 @@
         "self_referential_or_placeholder_evidence_refs",
         "gui_shell_coverage_without_user_observation"
       ],
+      "release_surface_impacts": [
+        "developer_preview_rc::new_user_core_workflow_observation_passed",
+        "pm_release::ux::human_new_user_observation_missing_or_failed",
+        "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+        "product_readiness_snapshot::human_ux::*"
+      ],
       "required_owner_evidence": [
         "non_template_human_new_user_observation_record",
         "participant_confirmed_new_to_product",
@@ -329,11 +343,12 @@
     "unsupported_features_explicitly_blocked",
     "benchmark_results_clean_checkout_regenerated"
   ],
+  "release_surface_impact_count": 8,
   "required_closure_evidence_policy": "Each blocked final gate must attach the named owner evidence and pass its verification commands before Developer Preview RC closure. Handoff packets, templates, Linux-only replays, parser-only rows, and automated smoke tests do not substitute for the missing receipts.",
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "dd09ee48341d2245cb0cb3557df5c48695726908",
+  "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
 }

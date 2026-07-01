@@ -119,7 +119,7 @@
     }
   ],
   "gate_unblock_plan_count": 6,
-  "generated_at": "2026-07-01T19:20:08.102995+00:00",
+  "generated_at": "2026-07-01T19:50:22.735187+00:00",
   "input_checksums": {
     "docs/templates/license_status.template.json": "sha256:bd5c741b071bb5cde08710ea641889fbd2be704e0c1de5afd8537a550f4154b7",
     "implementation/phase1/release/support_bundle/license_status.json": "sha256:147abf67f7c0fa71a4f60cb12470f38114e8e3075367b875f274df9a1755d03c"
@@ -135,7 +135,7 @@
   "reason_code": "ERR_LICENSE_STATUS_NOT_CLOSED",
   "reused_evidence": false,
   "schema_version": "license-status-closure-report.v1",
-  "source_commit_sha": "dd43b8caf7afed4bfd8bb1a75ab71aad79d09b48",
+  "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
   "status": "blocked",
   "summary": {
     "allowed_approver_roles": [
