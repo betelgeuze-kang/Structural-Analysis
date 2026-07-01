@@ -125,6 +125,21 @@ def _lane_next_action_ids(payload: dict[str, Any]) -> list[str]:
     return _unique_strings(action_ids)
 
 
+def _runner_next_action_ids(payload: dict[str, Any]) -> list[str]:
+    action_ids: list[str] = []
+    summary = _as_dict(payload.get("summary"))
+    action_ids.extend(
+        str(row).strip() for row in _as_list(summary.get("next_action_ids"))
+    )
+    for row in _as_list(payload.get("next_actions")):
+        if not isinstance(row, dict):
+            continue
+        action_id = str(row.get("id") or "").strip()
+        if action_id:
+            action_ids.append(action_id)
+    return _unique_strings(action_ids)
+
+
 def _count_pm_milestones(pm_report: dict[str, Any]) -> tuple[int, int]:
     rows = [row for row in _as_list(pm_report.get("milestones")) if isinstance(row, dict)]
     return (
@@ -405,6 +420,7 @@ def build_structural_product_development_roadmap(
             blockers=g1_blockers,
             next_actions=_unique_strings(
                 [
+                    *_runner_next_action_ids(g1_consistent_newton_runner),
                     *_lane_next_action_ids(g1_full_load),
                     "continue_from_global_connectivity_and_consistent_newton_path",
                     "stop_row_only_support_or_elastic_link_correction_loop",

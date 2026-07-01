@@ -139,6 +139,13 @@ def _write_minimal_inputs(repo_root: Path) -> None:
             "status": "ready_for_runner_implementation",
             "contract_pass": True,
             "evidence_closure_pass": False,
+            "summary": {
+                "next_action_ids": [
+                    "generate_full_load_1p0_checkpoint_candidate",
+                    "close_consistent_residual_jacobian_newton_gate",
+                    "prove_production_rocm_hip_residual_jvp_worker",
+                ]
+            },
             "runner_contract": {
                 "runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
                 "preferred_candidate_generator": (
