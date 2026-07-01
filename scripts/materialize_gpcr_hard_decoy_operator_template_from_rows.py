@@ -205,6 +205,9 @@ def build_gpcr_hard_decoy_operator_template_from_rows(
     flat_rows = _read_source_rows(resolved_rows_path)
     rows_by_target: dict[str, list[dict[str, Any]]] = {target_id: [] for target_id in REQUIRED_TARGETS}
     score_direction_by_target: dict[str, str] = {}
+    molecule_ids_by_target: dict[str, set[str]] = {
+        target_id: set() for target_id in REQUIRED_TARGETS
+    }
     unexpected_targets: list[str] = []
     for index, raw_row in enumerate(flat_rows, start=1):
         target_id, score_direction, normalized_row = _normalize_flat_row(
@@ -218,6 +221,10 @@ def build_gpcr_hard_decoy_operator_template_from_rows(
         if previous_direction and previous_direction != score_direction:
             raise ValueError(f"{target_id}:mixed_score_direction_values")
         score_direction_by_target[target_id] = score_direction
+        molecule_id = str(normalized_row["molecule_id"])
+        if molecule_id in molecule_ids_by_target[target_id]:
+            raise ValueError(f"{target_id}:{molecule_id}:molecule_id_duplicate")
+        molecule_ids_by_target[target_id].add(molecule_id)
         rows_by_target[target_id].append(normalized_row)
 
     missing_targets = [
