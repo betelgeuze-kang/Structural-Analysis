@@ -8,6 +8,8 @@
 - `owner_decision_pending_count`: `86`
 - `post_decision_cleanup_pending_count`: `0`
 - `post_decision_cleanup_applied_count`: `0`
+- `cleanup_required_count`: `0`
+- `release_surface_cleanup_required_count`: `0`
 - `delete_decision_count`: `0`
 - `extract_decision_count`: `0`
 - `retain_quarantined_exception_count`: `0`
@@ -25,6 +27,13 @@
 
 | Path | Decision | Required Action |
 |---|---|---|
+
+## Cleanup Command Manifest
+
+- `safe_to_auto_apply`: `False`
+- `manual_application_required`: `False`
+- `delete_from_structural_repository.path_count`: `0`
+- `extract_to_molecular_or_science_repository.path_count`: `0`
 
 ## Claim Boundary
 
