@@ -148,3 +148,39 @@ def test_medium_model_scorecard_receipt_blocks_invalid_review_payload(
     assert "scorecard_or_review_decision_not_accepted" in payload["blockers"]
     assert "scorecard_or_review_evidence_ref_missing" in payload["blockers"]
     assert "scorecard_or_review_reviewer_missing" in payload["blockers"]
+
+
+def test_medium_model_scorecard_receipt_blocks_self_referenced_review_evidence(
+    tmp_path: Path,
+) -> None:
+    model = tmp_path / "attached-medium-model.json"
+    review = tmp_path / "self-ref-review.json"
+    out = tmp_path / "receipt.json"
+    _write_model(model)
+    review.write_text(
+        json.dumps(
+            {
+                "decision": "APPROVED_REVIEW",
+                "evidence_ref": str(review),
+                "reviewer": "release_owner",
+            },
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    payload = module.build_medium_model_scorecard_receipt(
+        model_path=model,
+        source_id="operator_attached_medium_runner_smoke",
+        case_id="operator_attached_medium_runner_smoke_case",
+        source_sha256=module._sha256(model),
+        scorecard_or_review_path=review,
+        out_path=out,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["scorecard_or_review_status"]["contract_pass"] is False
+    assert "scorecard_or_review_evidence_ref_self_reference" in payload["blockers"]

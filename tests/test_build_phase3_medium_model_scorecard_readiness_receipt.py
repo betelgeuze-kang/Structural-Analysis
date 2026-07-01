@@ -336,6 +336,66 @@ def test_medium_model_scorecard_readiness_rejects_invalid_review_payloads(
     ]["blockers"]
 
 
+def test_medium_model_scorecard_readiness_rejects_review_generated_evidence_refs(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_medium_readiness_inputs(tmp_path)
+    receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
+    generated_gate_artifact = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "phase3_medium_model_scorecard_readiness_receipt.json"
+    )
+    _write_json(generated_gate_artifact, {"status": "blocked"})
+    self_ref_review = tmp_path / "self-ref-review.json"
+    generated_ref_review = tmp_path / "generated-ref-review.json"
+    _write_json(
+        self_ref_review,
+        {
+            "decision": "APPROVED_REVIEW",
+            "evidence_ref": str(self_ref_review),
+            "reviewer": "release_owner",
+        },
+    )
+    _write_json(
+        generated_ref_review,
+        {
+            "decision": "APPROVED_REVIEW",
+            "evidence_ref": str(generated_gate_artifact),
+            "reviewer": "release_owner",
+        },
+    )
+    for index, review in enumerate([self_ref_review, generated_ref_review]):
+        _write_json(
+            receipt_dir / f"medium-{index}.scorecard_receipt.json",
+            {
+                "schema_version": "phase3-medium-model-scorecard-receipt.v1",
+                "case_id": f"medium-{index}",
+                "contract_pass": True,
+                "validation_contract_pass": True,
+                "crashed": False,
+                "oom": False,
+                "scorecard_or_review_path": str(review),
+                "blockers": [],
+            },
+        )
+
+    payload = module.build_phase3_medium_model_scorecard_readiness_receipt(
+        repo_root=tmp_path,
+        source_commit_sha="test-sha",
+    )
+
+    assert payload["pass_or_approved_review_count"] == 0
+    statuses = [
+        row["scorecard_or_review_status"]
+        for row in payload["scorecard_receipt_inventory"]["receipts"]
+    ]
+    blockers = [blocker for status in statuses for blocker in status["blockers"]]
+    assert "scorecard_or_review_evidence_ref_self_reference" in blockers
+    assert "scorecard_or_review_evidence_ref_generated_gate_artifact" in blockers
+    assert all(status["contract_pass"] is False for status in statuses)
+
+
 def test_medium_model_scorecard_readiness_check_detects_missing_output(tmp_path: Path) -> None:
     ok, message = module.check_phase3_medium_model_scorecard_readiness_receipt(
         repo_root=REPO_ROOT,
