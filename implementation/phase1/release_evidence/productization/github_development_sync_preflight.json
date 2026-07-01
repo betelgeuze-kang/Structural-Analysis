@@ -9,7 +9,7 @@
     "remote_fetch_ok": null,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": true
+    "worktree_only_ignored_evidence_dirty": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-01T15:47:14.776537+00:00",
+  "generated_at": "2026-07-01T16:00:54.115860+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -40,14 +40,14 @@
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-    "local_head_sha": "b3139b4dffc6b7fc2cf71e61cb1c47d69ba8a1eb",
+    "ignored_worktree_status_short": "",
+    "local_head_sha": "93958377f7e0721282d744158a8eeff1d94e85aa",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "b3139b4dffc6b7fc2cf71e61cb1c47d69ba8a1eb",
+    "remote_feature_sha": "93958377f7e0721282d744158a8eeff1d94e85aa",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "b3139b4dffc6b7fc2cf71e61cb1c47d69ba8a1eb",
+    "remote_main_sha": "93958377f7e0721282d744158a8eeff1d94e85aa",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +61,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+    "worktree_status_short": ""
   },
   "status": "synced"
 }
