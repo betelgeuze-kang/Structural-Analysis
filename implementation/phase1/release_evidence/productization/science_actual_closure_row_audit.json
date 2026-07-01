@@ -469,39 +469,130 @@
   "claim_boundary": "This runner only materializes operator-attached raw rows through the existing GPCR and PocketMD Lite materializers. It does not generate docking scores, run MD, infer missing metrics, or treat fixture/proxy rows as actual science closure evidence.",
   "component_count": 2,
   "component_ready_count": 0,
+  "component_requirement_summaries": [
+    {
+      "actual_closure_ready": false,
+      "blocked_requirement_count": 5,
+      "blocker_count": 15,
+      "component_id": "gpcr_hard_decoy_actual_closure",
+      "failed_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
+      ],
+      "failed_criterion_count": 5,
+      "passing_requirement_count": 0,
+      "requirement_count": 5
+    },
+    {
+      "actual_closure_ready": false,
+      "blocked_requirement_count": 8,
+      "blocker_count": 13,
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "failed_criteria": [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved"
+      ],
+      "failed_criterion_count": 8,
+      "passing_requirement_count": 1,
+      "requirement_count": 9
+    }
+  ],
   "components": [
     {
+      "actual_closure_ready": false,
       "blockers": [
         "gpcr_hard_decoy_rows_not_provided"
       ],
       "component_id": "gpcr_hard_decoy_actual_closure",
       "contract_pass": false,
       "expected_rows_mode": "raw_hard_decoy_rows",
+      "failed_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
+      ],
       "materialized": false,
       "outputs": {},
+      "requirement_summary": {
+        "actual_closure_ready": false,
+        "blocked_requirement_count": 5,
+        "blocker_count": 15,
+        "component_id": "gpcr_hard_decoy_actual_closure",
+        "failed_criteria": [
+          "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate_min",
+          "decoys_above_positive_count_max",
+          "no_positive_out_anchored_by_top_decoys",
+          "raw_hard_decoy_rows_actual_closure"
+        ],
+        "failed_criterion_count": 5,
+        "passing_requirement_count": 0,
+        "requirement_count": 5
+      },
       "status": "operator_evidence_required"
     },
     {
+      "actual_closure_ready": false,
       "blockers": [
         "pocketmd_lite_topk_rows_not_provided"
       ],
       "component_id": "pocketmd_lite_topk_actual_closure",
       "contract_pass": false,
       "expected_rows_mode": "raw_top_k_refinement_rows",
+      "failed_criteria": [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved"
+      ],
       "materialized": false,
       "outputs": {},
+      "requirement_summary": {
+        "actual_closure_ready": false,
+        "blocked_requirement_count": 8,
+        "blocker_count": 13,
+        "component_id": "pocketmd_lite_topk_actual_closure",
+        "failed_criteria": [
+          "top_k_refinement_rows_present",
+          "top_k_refinement_case_coverage",
+          "local_min_survival_materialized",
+          "contact_persistence_materialized",
+          "h_bond_persistence_materialized",
+          "clash_relief_materialized",
+          "uncertainty_summary_materialized",
+          "report_blockers_resolved"
+        ],
+        "failed_criterion_count": 8,
+        "passing_requirement_count": 1,
+        "requirement_count": 9
+      },
       "status": "operator_evidence_required"
     }
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T01:22:58.886432+00:00",
+  "generated_at": "2026-07-01T02:01:23.828593+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:c1df25fb0f85f5640fe6ab5362ec14a05563a3db20ab4c08192910325a6d17ca",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:42c983c6f6d04c35648a16379ba814c9349ed2427c4251a2b7e2c55736d13111",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:493daab9100f920c8f17ab7729ef31e8fee96e1d3b96dcf8840d218de7917817",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2469abdafaf8024df93a36c74532d0f7ae62b6738dfe95f6f8b751a6b98d0398",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:c04e09d4b5078f6d7dfd7bb42d595dcb1f79a56c696c10b7c575c4c22d7f4a44"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:34190f477a888242bfe1aca97618a4ad3a31c5bd34d4a2580c5b3d555bd924e2"
   },
   "missing_row_inputs": [
     "gpcr_rows",
@@ -664,7 +755,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "d27ae8fb0ad8bab491ab48ce21060cf1844fa02c",
+  "source_commit_sha": "24c609863d473b09e17ad9627d94e8c99c5be162",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
