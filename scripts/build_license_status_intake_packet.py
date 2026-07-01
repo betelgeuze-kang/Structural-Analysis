@@ -124,6 +124,12 @@ DERIVED_CHECK_SPECS = (
         "closure_check": "evidence_ref_not_template_reference_pass",
         "owner_note": "Templates are owner input aids, not product/legal approval evidence.",
     },
+    {
+        "field": "evidence_ref_not_template_artifact",
+        "required_value": "evidence_ref must not point to docs/templates or a .template.* artifact",
+        "closure_check": "evidence_ref_not_template_artifact_pass",
+        "owner_note": "Any template-like file is rejected as product/legal approval evidence.",
+    },
 )
 
 
@@ -173,7 +179,11 @@ def _derived_current_value(field: str, closure_summary: dict[str, Any]) -> str:
             f"evidence_ref={closure_summary.get('evidence_ref', '')}; "
             f"evidence_kind={closure_summary.get('evidence_ref_kind', '')}"
         )
-    if field in {"evidence_ref_not_self_reference", "evidence_ref_not_template_reference"}:
+    if field in {
+        "evidence_ref_not_self_reference",
+        "evidence_ref_not_template_reference",
+        "evidence_ref_not_template_artifact",
+    }:
         return str(closure_summary.get("evidence_ref_resolved_path", ""))
     return ""
 

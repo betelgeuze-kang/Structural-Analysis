@@ -147,6 +147,43 @@ def test_license_status_closure_rejects_template_referenced_evidence(tmp_path: P
     assert payload["checks"]["provenance_complete_pass"] is False
 
 
+def test_license_status_closure_rejects_template_like_evidence_artifact(tmp_path: Path) -> None:
+    approval_template = _write(tmp_path / "docs" / "templates" / "legal_approval.json", {"template": True})
+    license_status = _write(
+        tmp_path / "license_status.json",
+        {
+            "status": "active",
+            "tier": "limited-commercial",
+            "license_id": "LIC-001",
+            "issuer": "product-owner",
+            "approver_role": "product_owner",
+            "approval_ref": "LEGAL-123",
+            "approved_at_utc": "2026-06-01T00:00:00+00:00",
+            "evidence_ref": str(approval_template),
+            "product_scope": [
+                "review-assist",
+                "specified-structure-families",
+                "specified-workflows",
+                "engine-and-reviewer-evidence-package",
+            ],
+            "expires_at_utc": "2027-01-01T00:00:00+00:00",
+        },
+    )
+
+    payload = build_license_status_closure_report.build_report(
+        license_status_path=license_status,
+        now=datetime(2026, 6, 16, tzinfo=timezone.utc),
+        repo_root=tmp_path,
+    )
+
+    assert payload["contract_pass"] is False
+    assert "license_evidence_ref_template_artifact" in payload["blockers"]
+    assert payload["checks"]["evidence_ref_resolvable_pass"] is True
+    assert payload["checks"]["evidence_ref_not_template_reference_pass"] is True
+    assert payload["checks"]["evidence_ref_not_template_artifact_pass"] is False
+    assert payload["checks"]["provenance_complete_pass"] is False
+
+
 def test_license_status_closure_rejects_template_placeholders(tmp_path: Path) -> None:
     license_status = _write(
         tmp_path / "license_status.json",

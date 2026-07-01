@@ -161,6 +161,21 @@ def _same_resolved_path(first: Path, second: Path) -> bool:
         return False
 
 
+def _is_template_like_path(path: Path, *, repo_root: Path) -> bool:
+    try:
+        resolved = path.resolve()
+    except Exception:
+        resolved = path
+    try:
+        templates_dir = (repo_root / "docs" / "templates").resolve()
+        if resolved.is_relative_to(templates_dir):
+            return True
+    except Exception:
+        pass
+    name = resolved.name.lower()
+    return bool(".template." in name or name.endswith(".template"))
+
+
 def build_report(
     *,
     license_status_path: Path,
@@ -192,6 +207,9 @@ def build_report(
     )
     evidence_ref_template_reference = bool(
         resolved_evidence_path and _same_resolved_path(Path(resolved_evidence_path), repo_root / template_path)
+    )
+    evidence_ref_template_artifact = bool(
+        resolved_evidence_path and _is_template_like_path(Path(resolved_evidence_path), repo_root=repo_root)
     )
     product_scope = payload.get("product_scope", payload.get("scope", payload.get("features")))
     expires_at = _text(payload, "expires_at_utc", "expires_at", "valid_until")
@@ -234,6 +252,8 @@ def build_report(
         blockers.append("license_evidence_ref_self_reference")
     elif evidence_ref_template_reference:
         blockers.append("license_evidence_ref_template_reference")
+    elif evidence_ref_template_artifact:
+        blockers.append("license_evidence_ref_template_artifact")
     if _scope_count(product_scope) == 0:
         blockers.append("license_product_scope_missing")
     elif not REQUIRED_PRODUCT_SCOPE.issubset(_scope_values(product_scope)):
@@ -308,6 +328,9 @@ def build_report(
             "evidence_ref_not_template_reference_pass": bool(
                 evidence_ref and evidence_ref_resolution["resolvable"] and not evidence_ref_template_reference
             ),
+            "evidence_ref_not_template_artifact_pass": bool(
+                evidence_ref and evidence_ref_resolution["resolvable"] and not evidence_ref_template_artifact
+            ),
             "product_scope_present_pass": _scope_count(product_scope) > 0,
             "product_scope_boundary_pass": bool(REQUIRED_PRODUCT_SCOPE.issubset(_scope_values(product_scope))),
             "placeholder_values_absent_pass": placeholder_values_absent_pass,
@@ -319,6 +342,7 @@ def build_report(
                 and evidence_ref_resolution["resolvable"]
                 and not evidence_ref_self_reference
                 and not evidence_ref_template_reference
+                and not evidence_ref_template_artifact
                 and approval_ref
                 and license_id
                 and approval_ref.lower() != license_id.lower()
