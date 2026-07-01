@@ -169,6 +169,22 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
         "delete_from_structural_repository": 1,
         "extract_to_molecular_or_science_repository": 1,
     }
+    assert payload["next_owner_review_batch"]["batch_id"] == (
+        "productization_evidence_second"
+    )
+    assert payload["next_owner_review_batch"]["path_count"] == 1
+    assert payload["next_owner_review_batch"]["paths"] == [
+        (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_product_report.json"
+        )
+    ]
+    assert [
+        row["batch_id"] for row in payload["owner_review_priority_batches"]
+    ] == [
+        "productization_evidence_second",
+        "implementation_phase1_cleanup_fifth",
+    ]
     assert payload["release_surface_owner_decision_required_count"] == 0
     assert payload["owner_decision_template_paths"] == {
         "json": (
@@ -190,6 +206,58 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
         "fill structural_scope_owner_decisions"
     )
     assert len(payload["pending_owner_decision_rows"]) == 2
+
+
+def test_application_plan_prioritizes_pending_release_surface_owner_review(
+    tmp_path: Path,
+) -> None:
+    audit = _audit_payload()
+    manifest = _manifest_payload()
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "pocketmd_lite_science_product_surface.json"
+    )
+    audit["quarantined_non_structural_rows"].append(
+        {
+            "path": release_surface_path,
+            "git_state": "tracked",
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "quarantine_status": "quarantined",
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    manifest["paths"].append(
+        {
+            "path": release_surface_path,
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    _write_json(audit_path, audit)
+    _write_json(manifest_path, manifest)
+
+    payload = application_plan.build_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit_path,
+        quarantine_manifest_path=manifest_path,
+        owner_decisions_path=tmp_path / "missing_decisions.json",
+    )
+
+    assert payload["status"] == "pending_owner_decisions"
+    assert payload["release_surface_owner_decision_required_count"] == 1
+    assert payload["next_owner_review_batch"]["batch_id"] == "release_surface_first"
+    assert payload["next_owner_review_batch"]["priority"] == 1
+    assert payload["next_owner_review_batch"]["paths"] == [release_surface_path]
+    assert [
+        row["batch_id"] for row in payload["owner_review_priority_batches"]
+    ] == [
+        "release_surface_first",
+        "productization_evidence_second",
+        "implementation_phase1_cleanup_fifth",
+    ]
 
 
 def test_application_plan_routes_delete_and_extract_decisions(tmp_path: Path) -> None:

@@ -206,6 +206,61 @@ def _cleanup_command_manifest(cleanup_rows: list[dict[str, Any]]) -> dict[str, A
     }
 
 
+def _owner_review_priority_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    priority_order = [
+        ("release_surface", "release_surface_first"),
+        ("productization_evidence", "productization_evidence_second"),
+        ("script", "script_cleanup_third"),
+        ("test", "test_cleanup_fourth"),
+        ("implementation_phase1", "implementation_phase1_cleanup_fifth"),
+    ]
+    known_areas = {area for area, _batch_id in priority_order}
+    batches: list[dict[str, Any]] = []
+    for priority, (area, batch_id) in enumerate(priority_order, start=1):
+        batch_rows = [row for row in rows if row["path_area"] == area]
+        if not batch_rows:
+            continue
+        batches.append(
+            {
+                "batch_id": batch_id,
+                "priority": priority,
+                "path_area": area,
+                "path_count": len(batch_rows),
+                "paths": sorted(row["path"] for row in batch_rows),
+                "family_counts": _family_counts(batch_rows),
+                "recommended_owner_decision_primary_counts": _counts_by_key(
+                    batch_rows,
+                    "recommended_owner_decision_primary",
+                ),
+                "review_goal": (
+                    "record owner delete/extract/retain decisions without "
+                    "mutating the repository"
+                ),
+            }
+        )
+    other_rows = [row for row in rows if row["path_area"] not in known_areas]
+    if other_rows:
+        batches.append(
+            {
+                "batch_id": "other_owner_review_last",
+                "priority": len(priority_order) + 1,
+                "path_area": "other",
+                "path_count": len(other_rows),
+                "paths": sorted(row["path"] for row in other_rows),
+                "family_counts": _family_counts(other_rows),
+                "recommended_owner_decision_primary_counts": _counts_by_key(
+                    other_rows,
+                    "recommended_owner_decision_primary",
+                ),
+                "review_goal": (
+                    "record owner delete/extract/retain decisions without "
+                    "mutating the repository"
+                ),
+            }
+        )
+    return batches
+
+
 def _status_from_packet(packet: dict[str, Any]) -> str:
     if not packet.get("contract_pass"):
         return "blocked_scope_cleanup"
@@ -283,6 +338,9 @@ def build_application_plan(
     pending_owner_decision_rows = [
         row for row in rows if row["owner_decision_valid"] is False
     ]
+    owner_review_priority_batches = _owner_review_priority_batches(
+        pending_owner_decision_rows
+    )
     application_blockers = _deduped(
         [
             *owner_decision_validation_blockers,
@@ -374,6 +432,10 @@ def build_application_plan(
         "pending_owner_decision_primary_counts": _counts_by_key(
             pending_owner_decision_rows, "recommended_owner_decision_primary"
         ),
+        "owner_review_priority_batches": owner_review_priority_batches,
+        "next_owner_review_batch": (
+            owner_review_priority_batches[0] if owner_review_priority_batches else {}
+        ),
         "release_surface_owner_decision_required_count": sum(
             1 for row in pending_owner_decision_rows if row["path_area"] == "release_surface"
         ),
@@ -449,6 +511,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         "- `pending_owner_decision_primary_counts`: "
         f"`{payload['pending_owner_decision_primary_counts']}`"
     )
+    next_batch = payload.get("next_owner_review_batch")
+    next_batch = next_batch if isinstance(next_batch, dict) else {}
+    if next_batch:
+        lines.append(
+            "- `next_owner_review_batch`: "
+            f"`{next_batch.get('batch_id')}` "
+            f"paths=`{next_batch.get('path_count')}` "
+            f"area=`{next_batch.get('path_area')}`"
+        )
+    if payload.get("owner_review_priority_batches"):
+        lines.append(
+            "- `owner_review_priority_batches`: "
+            f"`{len(payload['owner_review_priority_batches'])}`"
+        )
     lines.append("")
     if payload["owner_decision_validation_blockers"]:
         lines.extend(["## Owner Decision Validation Blockers", ""])
