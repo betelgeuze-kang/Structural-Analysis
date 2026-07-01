@@ -27,6 +27,7 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
     f2h = tmp_path / "f2h.local.json"
     g1 = tmp_path / "g1.json"
     global_connectivity = tmp_path / "g1_global_connectivity.json"
+    load_dependent_comparison = tmp_path / "g1_load_dependent_comparison.json"
     script = tmp_path / "scripts/build_g1_f2g_f2h_cause_narrowing_status.py"
     _write_json(
         f2g,
@@ -92,6 +93,17 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
             },
         },
     )
+    _write_json(
+        load_dependent_comparison,
+        {
+            "status": "blocked",
+            "contract_pass": False,
+            "summary": {
+                "near_null_packet_comparison_ready": False,
+                "geometric_softening_signal": "active_secondary",
+            },
+        },
+    )
     script.parent.mkdir(parents=True, exist_ok=True)
     script.write_text("# fixture\n", encoding="utf-8")
 
@@ -101,6 +113,7 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         f2h_status_path=f2h,
         g1_full_load_path=g1,
         global_connectivity_path=global_connectivity,
+        load_dependent_comparison_path=load_dependent_comparison,
     )
 
     assert payload["status"] == "ready"
@@ -135,6 +148,16 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         "consistent_residual_jacobian_newton_rocm_worker"
     )
     assert payload["evidence_signals"]["f2h_lightweight_0p1_0p2_0p4_ready"] is True
+    assert (
+        payload["evidence_signals"][
+            "load_dependent_near_null_geometric_stiffness_comparison_status"
+        ]
+        == "blocked"
+    )
+    assert (
+        payload["evidence_signals"]["load_dependent_geometric_softening_signal"]
+        == "active_secondary"
+    )
     assert payload["decision_record"]["stop_row_only_support_or_elastic_link_correction_loop"] is True
     assert payload["decision_record"]["primary_next_lane"] == (
         "consistent_residual_jacobian_newton_rocm_worker"
@@ -161,6 +184,12 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
     ]
+    assert payload["recommended_next_actions"][2]["action_id"] == (
+        "compare_load_dependent_near_null_and_geometric_stiffness"
+    )
+    assert payload["recommended_next_actions"][2]["status"] == (
+        "blocked_missing_load_dependent_near_null_packets"
+    )
 
 
 def test_cause_narrowing_blocks_when_f2h_is_not_ready(tmp_path: Path) -> None:

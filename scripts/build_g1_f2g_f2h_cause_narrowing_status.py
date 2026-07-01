@@ -23,6 +23,9 @@ DEFAULT_F2G_AUDIT = PRODUCTIZATION / "g1_support_elastic_link_reconciliation_aud
 DEFAULT_F2H_STATUS = PRODUCTIZATION / "f2h_lightweight_continuation_status.local.json"
 DEFAULT_G1_FULL_LOAD = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
 DEFAULT_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
+DEFAULT_LOAD_DEPENDENT_COMPARISON = (
+    PRODUCTIZATION / "g1_load_dependent_near_null_geometric_stiffness_comparison.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
 SCHEMA_VERSION = "g1-f2g-f2h-cause-narrowing-status.v1"
 REUSE_POLICY = "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice"
@@ -104,12 +107,14 @@ def build_status(
     f2h_status_path: Path = DEFAULT_F2H_STATUS,
     g1_full_load_path: Path = DEFAULT_G1_FULL_LOAD,
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
+    load_dependent_comparison_path: Path = DEFAULT_LOAD_DEPENDENT_COMPARISON,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     f2g_audit = _load_json(repo_root, f2g_audit_path)
     f2h_status = _load_json(repo_root, f2h_status_path)
     g1_full_load = _load_json(repo_root, g1_full_load_path)
     global_connectivity = _load_json(repo_root, global_connectivity_path)
+    load_dependent_comparison = _load_json(repo_root, load_dependent_comparison_path)
 
     blockers: list[str] = []
     if not f2g_audit:
@@ -167,6 +172,14 @@ def build_status(
     )
     f2h_residual_trend = str(f2h_summary.get("residual_trend_across_increasing_load") or "")
     residual_growth = _residual_growth_factor(f2h_status)
+    load_dependent_summary = _as_dict(load_dependent_comparison.get("summary"))
+    load_dependent_status = str(load_dependent_comparison.get("status") or "missing")
+    load_dependent_near_null_ready = (
+        load_dependent_summary.get("near_null_packet_comparison_ready") is True
+    )
+    load_dependent_geometric_signal = str(
+        load_dependent_summary.get("geometric_softening_signal") or "not_audited"
+    )
 
     evidence_signals = {
         "dominant_near_null_rows": dominant_rows,
@@ -194,6 +207,13 @@ def build_status(
         "f2h_lightweight_0p1_0p2_0p4_ready": f2h_sequence_ready,
         "f2h_residual_trend_across_increasing_load": f2h_residual_trend,
         "f2h_residual_growth_factor_0p1_to_0p4": residual_growth,
+        "load_dependent_near_null_geometric_stiffness_comparison_status": (
+            load_dependent_status
+        ),
+        "load_dependent_near_null_packet_comparison_ready": (
+            load_dependent_near_null_ready
+        ),
+        "load_dependent_geometric_softening_signal": load_dependent_geometric_signal,
     }
     primary_next_lane = (
         global_primary_next_lane
@@ -279,6 +299,8 @@ def build_status(
                 "near-null packet is distributed translation/rotation-like",
                 f"F2h 0.1->0.2->0.4 status={f2h_status.get('status', 'missing')}",
                 f"residual_trend={f2h_residual_trend}",
+                f"load_dependent_comparison_status={load_dependent_status}",
+                f"load_dependent_geometric_softening_signal={load_dependent_geometric_signal}",
             ],
             "next_action": "compare load-dependent near-null packets and geometric stiffness contributions at 0.2 and 0.4",
         },
@@ -347,6 +369,13 @@ def build_status(
         "f2h_lightweight_0p1_0p2_0p4_ready": f2h_sequence_ready,
         "f2h_max_converged_load_scale": _as_float(f2h_summary.get("max_converged_load_scale")),
         "f2h_residual_trend_across_increasing_load": f2h_residual_trend,
+        "load_dependent_near_null_geometric_stiffness_comparison_status": (
+            load_dependent_status
+        ),
+        "load_dependent_near_null_packet_comparison_ready": (
+            load_dependent_near_null_ready
+        ),
+        "load_dependent_geometric_softening_signal": load_dependent_geometric_signal,
         "primary_next_lane": primary_next_lane,
         "required_next_receipt_count": len(required_next_receipts),
         "promotes_g1_closure": False,
@@ -398,12 +427,19 @@ def build_status(
         {
             "action_id": "compare_load_dependent_near_null_and_geometric_stiffness",
             "priority": 3,
-            "status": "secondary_diagnostic",
+            "status": (
+                "ready"
+                if load_dependent_comparison.get("contract_pass") is True
+                else "blocked_missing_load_dependent_near_null_packets"
+                if load_dependent_status == "blocked"
+                else "secondary_diagnostic"
+            ),
             "rationale": (
                 "Residuals are nondecreasing over 0.1->0.2->0.4, so weak-restraint/geometric "
                 "softening remains an active secondary diagnostic instead of a closure claim."
             ),
             "acceptance_evidence": [
+                "g1_load_dependent_near_null_geometric_stiffness_comparison.status == ready",
                 "load-scale 0.2 and 0.4 near-null packet comparison",
                 "geometric-stiffness contribution audit with stop reasons",
             ],
@@ -431,6 +467,7 @@ def build_status(
                 f2h_status_path,
                 g1_full_load_path,
                 global_connectivity_path,
+                load_dependent_comparison_path,
             ],
             reused_evidence=True,
             reuse_policy=REUSE_POLICY,
@@ -477,6 +514,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--f2h-status-json", type=Path, default=DEFAULT_F2H_STATUS)
     parser.add_argument("--g1-full-load-json", type=Path, default=DEFAULT_G1_FULL_LOAD)
     parser.add_argument("--global-connectivity-json", type=Path, default=DEFAULT_GLOBAL_CONNECTIVITY)
+    parser.add_argument(
+        "--load-dependent-comparison-json",
+        type=Path,
+        default=DEFAULT_LOAD_DEPENDENT_COMPARISON,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     return parser.parse_args(argv)
 
@@ -489,6 +531,7 @@ def main(argv: list[str] | None = None) -> int:
         f2h_status_path=args.f2h_status_json,
         g1_full_load_path=args.g1_full_load_json,
         global_connectivity_path=args.global_connectivity_json,
+        load_dependent_comparison_path=args.load_dependent_comparison_json,
     )
     output = args.out if args.out.is_absolute() else args.repo_root / args.out
     output.parent.mkdir(parents=True, exist_ok=True)
