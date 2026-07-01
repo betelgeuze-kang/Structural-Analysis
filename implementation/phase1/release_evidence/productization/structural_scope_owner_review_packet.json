@@ -22,9 +22,9 @@
     "molecular_dynamics": 25,
     "molecular_science_evidence": 13
   },
-  "generated_at": "2026-07-01T23:14:58.735558+00:00",
+  "generated_at": "2026-07-01T23:16:21.586476+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:502a4146af7043592efe9c7dd65d56725312a1fd450ab64626b29ab1788c9278",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:e61979de6845ae852bd281360b5eb98cb704f68824c3e54212bf009aa9112ed9",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:80edad0f3f3c4f87f64c95e388bdbcfe945c7ac8fa77b3f001833b4eeb2e4e11",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:b6d7e6bd9fa121f9321f3dae4cc03fbf44cdf3d27d51a61466bf1b2b3a4bfedb"
@@ -4590,7 +4590,7 @@
     }
   ],
   "schema_version": "structural-scope-owner-review-packet.v1",
-  "source_commit_sha": "3362fe711e0e12b9737c7771dc83a7366bcdfb5c",
+  "source_commit_sha": "4fbc420259e1c64ac026510d3c7c554558b0bf43",
   "status": "ready_for_owner_review",
   "summary_line": "Structural scope owner review: READY_FOR_OWNER_REVIEW | pending=86 | cleanup_pending=0 | excluded=86/86 | unquarantined=0",
   "unquarantined_non_structural_path_count": 0,
