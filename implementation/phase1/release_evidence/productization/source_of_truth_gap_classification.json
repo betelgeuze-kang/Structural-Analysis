@@ -1,0 +1,190 @@
+{
+  "blockers": [],
+  "claim_boundary": "This artifact classifies the five remaining source-of-truth gap candidates. It records freshness policy and live artifact checks, but does not promote aggregator rollups or replace the heavy validation receipts themselves.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-07-01T07:53:59.849291+00:00",
+  "input_checksums": {
+    "docs/source-of-truth-gap-classification.md": "sha256:d4cd1134e78f6acedaf39c09c5ff2fc0fcbf62451e60e6530686269b855a8c09",
+    "implementation/phase1/real_accuracy_validation_report.json": "sha256:1e63a32c3d0d95e3e34f58aea661e989646088d66cf086da7340bb8dfc8ab46c",
+    "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json": "sha256:38bedbbe84f1a9ceca922498252a2fb4750da7c09ec32f1210d05841cadc13d4",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d8eb5aac9e8200086880864926319fc9d2acfcc45df616298cc8c65466f675b4",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:0f61d1cc1d5c668400ba5b2e67571e8b1539a8bf4882459e646a3a97a70090a5",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json": "sha256:f2f8a0335a2068bc5c231f86b719a6b7a196d6b614ea9dbf6f514cb622f041a8",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:acf89fe41dc56a807e470ad7bed299d4af2f3de31b9212bd502daed620065cbc",
+    "scripts/build_source_of_truth_gap_classification.py": "sha256:8c5639933496df1a1951eb662c765d8c2bd3a9d327218bd86fddf97de1face23",
+    "scripts/report_release_evidence_freshness.py": "sha256:54de81963eaa183ec470d6000d7ce79b4fa2dd2b04f589d3613b44138ea32c25"
+  },
+  "reason_code": "PASS",
+  "reuse_policy": "source_of_truth_gap_classification_materialized_from_freshness_policy",
+  "reused_evidence": true,
+  "rows": [
+    {
+      "candidate": "accuracy_parity_scorecard",
+      "classification": "fix",
+      "contract_pass": true,
+      "current_repo_match": "implementation/phase1/real_accuracy_validation_report.json",
+      "current_repo_path_presence": {
+        "implementation/phase1/real_accuracy_validation_report.json": true
+      },
+      "current_repo_paths": [
+        "implementation/phase1/real_accuracy_validation_report.json"
+      ],
+      "decision": "Direct science scorecard receipt with freshness source tracking; the artifact itself carries overall_pass, benchmark contract/KPI pass, direct-metric/source-family/public-HF checks, and stability-suite pass.",
+      "freshness_label": "accuracy_parity_scorecard",
+      "freshness_policy": "direct_leaf_row",
+      "live_checks": {
+        "accuracy_scorecard_science_checks": {
+          "benchmark_contract_pass": true,
+          "benchmark_kpi_pass": true,
+          "direct_metric_source_pass": true,
+          "overall_pass": true,
+          "public_hf_case_count_pass": true,
+          "source_family_pass": true,
+          "stability_pass": true,
+          "stability_suite_pass": true
+        },
+        "accuracy_scorecard_science_contract_pass": true,
+        "candidate_expected": true,
+        "current_repo_match_present": true,
+        "freshness_leaf_presence_matches": true,
+        "metadata_present_on_current_matches": true
+      },
+      "status": "classified",
+      "validation_basis": [
+        "leaf_artifact_in_default_freshness_rows",
+        "science_scorecard_overall_pass_field",
+        "benchmark_contract_and_kpi_fields",
+        "public_hf_and_source_family_checks",
+        "stability_suite_pass_field"
+      ]
+    },
+    {
+      "candidate": "product_production_ai_checkpoint_readiness",
+      "classification": "fix",
+      "contract_pass": true,
+      "current_repo_match": "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json",
+      "current_repo_path_presence": {
+        "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json": true
+      },
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json"
+      ],
+      "decision": "Direct productization receipt with checkpoint source tracking in freshness audit; the artifact aggregates ML status and checkpoint receipt inputs.",
+      "freshness_label": "product_production_ai_checkpoint_readiness",
+      "freshness_policy": "direct_leaf_row",
+      "live_checks": {
+        "ai_contract_status_ready": true,
+        "candidate_expected": true,
+        "current_repo_match_present": true,
+        "freshness_leaf_presence_matches": true,
+        "metadata_present_on_current_matches": true
+      },
+      "status": "classified",
+      "validation_basis": [
+        "leaf_artifact_in_default_freshness_rows",
+        "checkpoint_contract_aggregate",
+        "ml_status_and_checkpoint_receipt_inputs"
+      ]
+    },
+    {
+      "candidate": "goal_readiness_rollup",
+      "classification": "aggregator-review",
+      "contract_pass": true,
+      "current_repo_match": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+      "current_repo_path_presence": {
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": true
+      },
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+      ],
+      "decision": "Keep snapshot-level upstream stale/inconsistent policy instead of a leaf row.",
+      "freshness_label": "",
+      "freshness_policy": "aggregator_source_tracking_only",
+      "live_checks": {
+        "aggregator_source_tracking_present": true,
+        "candidate_expected": true,
+        "current_repo_match_present": true,
+        "freshness_leaf_presence_matches": true,
+        "metadata_present_on_current_matches": true
+      },
+      "status": "classified",
+      "validation_basis": [
+        "aggregates_upstream_release_readiness_inputs",
+        "excluded_from_leaf_freshness_rows",
+        "snapshot_stale_or_inconsistent_policy_remains_authoritative"
+      ]
+    },
+    {
+      "candidate": "product_goal_completion_audit",
+      "classification": "aggregator-review",
+      "contract_pass": true,
+      "current_repo_match": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
+      "current_repo_path_presence": {
+        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json": true
+      },
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
+      ],
+      "decision": "Track PM report and closure-board inputs rather than treating the audit as heavy evidence.",
+      "freshness_label": "",
+      "freshness_policy": "aggregator_source_tracking_only",
+      "live_checks": {
+        "aggregator_source_tracking_present": true,
+        "candidate_expected": true,
+        "current_repo_match_present": true,
+        "freshness_leaf_presence_matches": true,
+        "metadata_present_on_current_matches": true
+      },
+      "status": "classified",
+      "validation_basis": [
+        "aggregates_pm_report_and_closure_board",
+        "excluded_from_leaf_freshness_rows",
+        "does_not_rerun_heavy_validation"
+      ]
+    },
+    {
+      "candidate": "goal_operator_action_board",
+      "classification": "aggregator-review",
+      "contract_pass": true,
+      "current_repo_match": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json; implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+      "current_repo_path_presence": {
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": true,
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": true
+      },
+      "current_repo_paths": [
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
+      ],
+      "decision": "Keep operator boards as sourced rollups of PM/freshness inputs, not closure evidence.",
+      "freshness_label": "",
+      "freshness_policy": "aggregator_source_tracking_only",
+      "live_checks": {
+        "aggregator_source_tracking_present": true,
+        "candidate_expected": true,
+        "current_repo_match_present": true,
+        "freshness_leaf_presence_matches": true,
+        "metadata_present_on_current_matches": true
+      },
+      "status": "classified",
+      "validation_basis": [
+        "operator_handoff_rollup",
+        "excluded_from_leaf_freshness_rows",
+        "not_closure_evidence_without_owner_receipts"
+      ]
+    }
+  ],
+  "schema_version": "source-of-truth-gap-classification.v1",
+  "source_commit_sha": "8ea3ba23ae7398f025f370eb32b4dc8b9912647b",
+  "status": "ready",
+  "summary": {
+    "aggregator_review_count": 3,
+    "aggregator_reviewed_count": 3,
+    "blocker_count": 0,
+    "candidate_count": 5,
+    "expected_candidate_count": 5,
+    "fix_count": 2,
+    "fixed_count": 2,
+    "no_op_count": 0
+  }
+}
