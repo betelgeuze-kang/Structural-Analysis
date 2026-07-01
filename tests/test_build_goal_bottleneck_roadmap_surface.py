@@ -128,7 +128,6 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced",
     }

@@ -26,10 +26,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T00:10:01.207849+00:00",
+  "generated_at": "2026-07-01T00:12:27.015175+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9fcb866de1cb973086c993878c8b454bc5e19db8a7d2b3b00dce33341e0643e0",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a45a91fdc5894c446a9e3103316ae90b18d6b99e4a25b1fd7afc85b17086fe95",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1be5e59dcc77097acb9a191b4cd60d320370e9ecab213ea29d6c47a593594cc4",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:c2142e297e74fbdd8dff8c504b483c1789701cd982690e1e94108e4558dcb0d3",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:0543425a3c5da8ce86a3710d9cdba728ebd8a6ac985db8d9cb97b693316114ce"
   },
   "next_actions": [
@@ -766,10 +766,10 @@
       },
       "evidence_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "1a705e1f890ba3704b05b56e095b672858474f2e",
+        "current_head_sha": "ede394c6451fab567c4e584eacc517193f5a548f",
         "feature_ahead_count": 1,
         "feature_synced_to_head": false,
-        "main_ahead_count": 13,
+        "main_ahead_count": 15,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
           "push current HEAD to feature",
@@ -780,7 +780,7 @@
           "origin/codex/seed-pr-ci-source-evidence",
           "origin/main"
         ],
-        "preflight_local_head_sha": "1a705e1f890ba3704b05b56e095b672858474f2e",
+        "preflight_local_head_sha": "ede394c6451fab567c4e584eacc517193f5a548f",
         "preflight_source_state_kind": "exact",
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "PASS",
@@ -796,7 +796,7 @@
         "feature_ahead_count": 1,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": false,
-        "main_ahead_count": 13,
+        "main_ahead_count": 15,
         "main_fast_forward_possible": true,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
@@ -871,10 +871,10 @@
       },
       "evidence_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "1a705e1f890ba3704b05b56e095b672858474f2e",
+        "current_head_sha": "ede394c6451fab567c4e584eacc517193f5a548f",
         "feature_ahead_count": 1,
         "feature_synced_to_head": false,
-        "main_ahead_count": 13,
+        "main_ahead_count": 15,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
           "push current HEAD to feature",
@@ -885,7 +885,7 @@
           "origin/codex/seed-pr-ci-source-evidence",
           "origin/main"
         ],
-        "preflight_local_head_sha": "1a705e1f890ba3704b05b56e095b672858474f2e",
+        "preflight_local_head_sha": "ede394c6451fab567c4e584eacc517193f5a548f",
         "preflight_source_state_kind": "exact",
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "PASS",
@@ -901,7 +901,7 @@
         "feature_ahead_count": 1,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": false,
-        "main_ahead_count": 13,
+        "main_ahead_count": 15,
         "main_fast_forward_possible": true,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
@@ -1203,7 +1203,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "1a705e1f890ba3704b05b56e095b672858474f2e",
+  "source_commit_sha": "ede394c6451fab567c4e584eacc517193f5a548f",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 11,

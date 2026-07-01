@@ -49,10 +49,10 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "fresh_full_validation_ready": true,
-  "generated_at": "2026-07-01T00:10:00.750405+00:00",
+  "generated_at": "2026-07-01T00:11:56.542613+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
-    "docs/commercialization-gap-current-state.md": "sha256:e1e24e2b0fbf8529007f9a3b5157faba9f25d96c25306c307e1d157f05a000a7",
+    "docs/commercialization-gap-current-state.md": "sha256:7f4d23e8dd71ed9e6f31a798b9306b6f9916041a4de3c6b7c33171d30ca1737e",
     "docs/release-publication-runbook.md": "sha256:e531952925d22c141e57757c58b428c23330cef11dee71017c162d312fe8ddfb",
     "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
     "implementation/phase1/release_evidence/full_validation": "dir-sha256:77721f570649bc209f28ad7891b0e9c75059c810fd670d453638fe1b87882ebe",
@@ -62,7 +62,7 @@
     "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_smoke_report.json": "sha256:1bf89382ea13a179c00b67ca756a95ad4009456f43627bebe97b4c6750c6266c",
     "implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json": "sha256:52bee2fd112f2c2635f25a90c7691645e5d6da242174bb4252c5c590bf32082b",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
-    "implementation/phase1/release_evidence/surface": "dir-sha256:c72ffb00b89b9b9299779eed72a2978d5dbf7cf2213710fe6db9a8447fa4db7d"
+    "implementation/phase1/release_evidence/surface": "dir-sha256:b6a8936699b2b37001d26f1e58e9db1d066deefb2e8523d1b7770bd8fd1616ea"
   },
   "lane_boundary_metadata": {
     "gpu_hip_policy": "GPU/HIP validation remains a performance-track lane after CPU reference parity. Missing GPU/HIP fresh receipts must stay visible and must not be used to replace CPU full-load/full-mesh/material-Newton closure evidence.",
@@ -355,7 +355,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "1a705e1f890ba3704b05b56e095b672858474f2e",
+  "source_commit_sha": "ede394c6451fab567c4e584eacc517193f5a548f",
   "status": "ready",
   "summary": {
     "blocker_count": 0,
