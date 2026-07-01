@@ -27,10 +27,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T23:53:18.193336+00:00",
+  "generated_at": "2026-07-01T00:00:04.069162+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5abdc25e7ff36ffab7f6683c57a115d696774fea1664c5d492abcb2af0fafeb9",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:b2eb263721360019d014c3e6055013fd49b6cc914bf1088cea8eb6459d90ffda",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9fa10605b1962b181f884aa901940c5f9e5cfd02fd521e8d3ae54f49f3f2433c",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:fd5120655afb004f630d809d282948f64bd51db0001af9c060eaba05f465f883",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:0543425a3c5da8ce86a3710d9cdba728ebd8a6ac985db8d9cb97b693316114ce"
   },
   "next_actions": [
@@ -768,10 +768,10 @@
       },
       "evidence_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "ec879d29fce747b9ac83f6d87d682512aef904b0",
+        "current_head_sha": "e357ea8d9d97f60d63bc14dcfe550ef216f8eeb0",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 6,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
           "fast-forward push current HEAD to main"
@@ -780,7 +780,7 @@
         "pending_remote_update_targets": [
           "origin/main"
         ],
-        "preflight_local_head_sha": "ec879d29fce747b9ac83f6d87d682512aef904b0",
+        "preflight_local_head_sha": "e357ea8d9d97f60d63bc14dcfe550ef216f8eeb0",
         "preflight_source_state_kind": "exact",
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -796,7 +796,7 @@
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 6,
         "main_fast_forward_possible": true,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
@@ -869,10 +869,10 @@
       },
       "evidence_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "ec879d29fce747b9ac83f6d87d682512aef904b0",
+        "current_head_sha": "e357ea8d9d97f60d63bc14dcfe550ef216f8eeb0",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 6,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
           "fast-forward push current HEAD to main"
@@ -881,7 +881,7 @@
         "pending_remote_update_targets": [
           "origin/main"
         ],
-        "preflight_local_head_sha": "ec879d29fce747b9ac83f6d87d682512aef904b0",
+        "preflight_local_head_sha": "e357ea8d9d97f60d63bc14dcfe550ef216f8eeb0",
         "preflight_source_state_kind": "exact",
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -897,7 +897,7 @@
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 6,
         "main_fast_forward_possible": true,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
@@ -970,10 +970,10 @@
       },
       "evidence_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "ec879d29fce747b9ac83f6d87d682512aef904b0",
+        "current_head_sha": "e357ea8d9d97f60d63bc14dcfe550ef216f8eeb0",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 6,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
           "fast-forward push current HEAD to main"
@@ -982,7 +982,7 @@
         "pending_remote_update_targets": [
           "origin/main"
         ],
-        "preflight_local_head_sha": "ec879d29fce747b9ac83f6d87d682512aef904b0",
+        "preflight_local_head_sha": "e357ea8d9d97f60d63bc14dcfe550ef216f8eeb0",
         "preflight_source_state_kind": "exact",
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -998,7 +998,7 @@
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
-        "main_ahead_count": 3,
+        "main_ahead_count": 6,
         "main_fast_forward_possible": true,
         "main_synced_to_head": false,
         "pending_remote_update_actions": [
@@ -1298,7 +1298,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "ec879d29fce747b9ac83f6d87d682512aef904b0",
+  "source_commit_sha": "e357ea8d9d97f60d63bc14dcfe550ef216f8eeb0",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 12,

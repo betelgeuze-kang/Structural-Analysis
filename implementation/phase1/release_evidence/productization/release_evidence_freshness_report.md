@@ -1,9 +1,9 @@
 # Release Evidence Freshness
 
-- `contract_pass`: `False`
-- `reason_code`: `ERR_RELEASE_EVIDENCE_FRESHNESS`
-- `current_source_commit_sha`: `ec879d29fce747b9ac83f6d87d682512aef904b0`
-- `blockers`: `fresh_full_validation_lane_status::input_dependency_newer_than_artifact, evidence_console_scope_status::input_dependency_newer_than_artifact`
+- `contract_pass`: `True`
+- `reason_code`: `PASS`
+- `current_source_commit_sha`: `e357ea8d9d97f60d63bc14dcfe550ef216f8eeb0`
+- `blockers`: `none`
 
 | Artifact | Status | Blockers | Newer Dependencies |
 |---|---|---|---|
@@ -13,11 +13,11 @@
 | `real_project_corpus_measured_status` | `pass` | `none` | none |
 | `customer_shadow_evidence_status` | `pass` | `none` | none |
 | `customer_shadow_evidence_intake_packet` | `pass` | `none` | none |
-| `fresh_full_validation_lane_status` | `blocked` | `input_dependency_newer_than_artifact` | `/home/betelgeuze/건축구조분석/docs/commercialization-gap-current-state.md` |
+| `fresh_full_validation_lane_status` | `pass` | `none` | none |
 | `residual_level3_status` | `pass` | `none` | none |
 | `g1_direct_residual_terminal_gate_report` | `pass` | `none` | none |
 | `g1_shell_material_budgeted_continuation_status` | `pass` | `none` | none |
-| `evidence_console_scope_status` | `blocked` | `input_dependency_newer_than_artifact` | `/home/betelgeuze/건축구조분석/README.md`, `/home/betelgeuze/건축구조분석/docs/commercialization-gap-current-state.md` |
+| `evidence_console_scope_status` | `pass` | `none` | none |
 | `developer_preview_rc_status` | `pass` | `none` | none |
 | `public_benchmark_source_of_truth` | `pass` | `none` | none |
 | `public_benchmark_harness_bundle` | `pass` | `none` | none |
