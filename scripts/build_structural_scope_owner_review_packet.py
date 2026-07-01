@@ -244,6 +244,13 @@ def _decision_row_by_path(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return rows_by_path
 
 
+def _delete_or_extract_decision(decision: str) -> bool:
+    return decision in {
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+    }
+
+
 def _duplicate_decision_paths(payload: dict[str, Any]) -> list[str]:
     seen: set[str] = set()
     duplicates: set[str] = set()
@@ -453,6 +460,7 @@ def build_owner_review_packet(
             )
         )
         review_rows.append(review_row)
+    review_paths = {row["path"] for row in review_rows}
     unquarantined_rows = [
         row
         for row in _as_list(audit.get("unquarantined_non_structural_rows"))
@@ -477,6 +485,41 @@ def build_owner_review_packet(
         not owner_decisions_present
         or owner_decisions.get("schema_version") == DECISION_SCHEMA_VERSION
     )
+    manifest_absent_paths = sorted(manifest_paths - review_paths)
+    post_decision_cleanup_applied_rows: list[dict[str, Any]] = []
+    post_decision_cleanup_missing_owner_decision_paths: list[str] = []
+    post_decision_cleanup_invalid_owner_decision_paths: list[str] = []
+    post_decision_cleanup_retained_absent_paths: list[str] = []
+    for path in manifest_absent_paths:
+        decision_row = owner_decision_by_path.get(path)
+        if not decision_row:
+            post_decision_cleanup_missing_owner_decision_paths.append(path)
+            continue
+        overlay = _owner_decision_overlay({}, decision_row)
+        if not overlay["owner_decision_valid"]:
+            post_decision_cleanup_invalid_owner_decision_paths.append(path)
+            continue
+        if not _delete_or_extract_decision(str(overlay["owner_decision"])):
+            post_decision_cleanup_retained_absent_paths.append(path)
+            continue
+        post_decision_cleanup_applied_rows.append(
+            {
+                "path": path,
+                "owner_decision": overlay["owner_decision"],
+                "owner_identity": overlay.get("owner_identity", ""),
+                "owner_role": overlay.get("owner_role", ""),
+                "decision_timestamp_utc": overlay.get("decision_timestamp_utc", ""),
+                "decision_evidence_reference": overlay.get(
+                    "decision_evidence_reference",
+                    "",
+                ),
+                "post_decision_cleanup_applied": True,
+                "current_repo_path_absent": True,
+            }
+        )
+    external_extra_decision_paths = sorted(
+        set(owner_decision_by_path) - review_paths - manifest_paths
+    )
     decision_blockers: list[str] = [
         str(item) for item in _as_list(owner_decisions.get("blockers")) if str(item)
     ]
@@ -484,9 +527,7 @@ def build_owner_review_packet(
         decision_blockers.append("owner_decisions_schema_version_mismatch")
     if owner_decisions_present and "decision_rows" not in owner_decisions:
         decision_blockers.append("owner_decisions_decision_rows_missing")
-    decision_extra_path_count = len(
-        set(owner_decision_by_path) - {row["path"] for row in review_rows}
-    )
+    decision_extra_path_count = len(external_extra_decision_paths)
     if decision_extra_path_count:
         decision_blockers.append(
             f"owner_decisions_extra_path_count={decision_extra_path_count}"
@@ -495,10 +536,35 @@ def build_owner_review_packet(
         decision_blockers.append(
             f"owner_decisions_duplicate_path_count={len(duplicate_decision_paths)}"
         )
-    owner_decision_recorded_count = sum(
+    if post_decision_cleanup_missing_owner_decision_paths:
+        decision_blockers.append(
+            "post_decision_cleanup_missing_owner_decision_count="
+            f"{len(post_decision_cleanup_missing_owner_decision_paths)}"
+        )
+    if post_decision_cleanup_invalid_owner_decision_paths:
+        decision_blockers.append(
+            "post_decision_cleanup_invalid_owner_decision_count="
+            f"{len(post_decision_cleanup_invalid_owner_decision_paths)}"
+        )
+    if post_decision_cleanup_retained_absent_paths:
+        decision_blockers.append(
+            "post_decision_cleanup_retained_absent_path_count="
+            f"{len(post_decision_cleanup_retained_absent_paths)}"
+        )
+    current_owner_decision_recorded_count = sum(
         1 for row in review_rows if row.get("owner_decision_valid") is True
     )
-    owner_decision_pending_count = pending_count - owner_decision_recorded_count
+    owner_decision_recorded_count = (
+        current_owner_decision_recorded_count
+        + len(post_decision_cleanup_applied_rows)
+    )
+    owner_decision_pending_count = (
+        pending_count
+        - current_owner_decision_recorded_count
+        + len(post_decision_cleanup_missing_owner_decision_paths)
+        + len(post_decision_cleanup_invalid_owner_decision_paths)
+        + len(post_decision_cleanup_retained_absent_paths)
+    )
     post_decision_cleanup_pending_count = sum(
         1 for row in review_rows if row.get("post_decision_cleanup_pending") is True
     )
@@ -556,17 +622,34 @@ def build_owner_review_packet(
             "schema_valid": decision_schema_valid,
             "decision_row_count": len(_decision_rows(owner_decisions)),
             "decision_extra_path_count": decision_extra_path_count,
+            "decision_extra_paths": external_extra_decision_paths,
             "decision_duplicate_path_count": len(duplicate_decision_paths),
             "decision_duplicate_paths": duplicate_decision_paths,
             "decision_recorded_count": owner_decision_recorded_count,
             "decision_pending_count": owner_decision_pending_count,
             "post_decision_cleanup_pending_count": post_decision_cleanup_pending_count,
+            "post_decision_cleanup_applied_count": len(
+                post_decision_cleanup_applied_rows
+            ),
             "blockers": decision_blockers,
         },
         "owner_decision_recorded_count": owner_decision_recorded_count,
         "owner_decision_pending_count": owner_decision_pending_count,
         "post_decision_cleanup_pending_count": post_decision_cleanup_pending_count,
+        "post_decision_cleanup_applied_count": len(
+            post_decision_cleanup_applied_rows
+        ),
+        "post_decision_cleanup_missing_owner_decision_count": len(
+            post_decision_cleanup_missing_owner_decision_paths
+        ),
+        "post_decision_cleanup_invalid_owner_decision_count": len(
+            post_decision_cleanup_invalid_owner_decision_paths
+        ),
+        "post_decision_cleanup_retained_absent_path_count": len(
+            post_decision_cleanup_retained_absent_paths
+        ),
         "quarantined_path_count": pending_count,
+        "manifest_absent_path_count": len(manifest_absent_paths),
         "release_surface_excluded_path_count": release_excluded_count,
         "unquarantined_non_structural_path_count": len(unquarantined_rows),
         "path_area_counts": _counts_by_key(review_rows, "path_area"),
@@ -593,6 +676,16 @@ def build_owner_review_packet(
             ),
         ],
         "review_rows": review_rows,
+        "post_decision_cleanup_applied_rows": post_decision_cleanup_applied_rows,
+        "post_decision_cleanup_missing_owner_decision_paths": (
+            post_decision_cleanup_missing_owner_decision_paths
+        ),
+        "post_decision_cleanup_invalid_owner_decision_paths": (
+            post_decision_cleanup_invalid_owner_decision_paths
+        ),
+        "post_decision_cleanup_retained_absent_paths": (
+            post_decision_cleanup_retained_absent_paths
+        ),
         "unquarantined_rows": unquarantined_rows,
         "artifacts": {
             "structural_scope_contamination_audit": audit_path.as_posix(),
@@ -620,6 +713,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `owner_decision_recorded_count`: `{payload['owner_decision_recorded_count']}`",
         f"- `owner_decision_pending_count`: `{payload['owner_decision_pending_count']}`",
         f"- `post_decision_cleanup_pending_count`: `{payload['post_decision_cleanup_pending_count']}`",
+        f"- `post_decision_cleanup_applied_count`: `{payload['post_decision_cleanup_applied_count']}`",
+        f"- `post_decision_cleanup_missing_owner_decision_count`: `{payload['post_decision_cleanup_missing_owner_decision_count']}`",
         f"- `release_surface_excluded_path_count`: `{payload['release_surface_excluded_path_count']}`",
         f"- `unquarantined_non_structural_path_count`: `{payload['unquarantined_non_structural_path_count']}`",
         f"- `owner_decisions_path`: `{payload['owner_decisions']['path']}`",

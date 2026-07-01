@@ -79,6 +79,14 @@ def _manifest_payload() -> dict:
     }
 
 
+def _post_cleanup_audit_payload() -> dict:
+    payload = _audit_payload()
+    payload["quarantined_non_structural_rows"] = []
+    payload["non_structural_rows"] = []
+    payload["non_structural_path_count"] = 0
+    return payload
+
+
 def _decision_row(path: str, decision: str, index: int) -> dict:
     return {
         "path": path,
@@ -266,6 +274,47 @@ def test_application_plan_closes_retain_exception_decisions(tmp_path: Path) -> N
     assert payload["retain_quarantined_exception_count"] == 2
     assert payload["cleanup_rows"] == []
     assert len(payload["retain_exception_rows"]) == 2
+
+
+def test_application_plan_closes_after_delete_extract_cleanup_applied(
+    tmp_path: Path,
+) -> None:
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(audit, _post_cleanup_audit_payload())
+    _write_json(manifest, _manifest_payload())
+    _write_json(
+        decisions,
+        _decision_payload(
+            (
+                "implementation/phase1/md3bead_soa.py",
+                "extract_to_molecular_or_science_repository",
+            ),
+            (
+                "implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_product_report.json",
+                "delete_from_structural_repository",
+            ),
+        ),
+    )
+
+    payload = application_plan.build_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=decisions,
+    )
+
+    assert payload["status"] == "complete"
+    assert payload["application_ready"] is False
+    assert payload["evidence_closure_pass"] is True
+    assert payload["owner_decision_validation_pass"] is True
+    assert payload["owner_decision_pending_count"] == 0
+    assert payload["post_decision_cleanup_pending_count"] == 0
+    assert payload["post_decision_cleanup_applied_count"] == 2
+    assert payload["cleanup_rows"] == []
+    assert len(payload["post_decision_cleanup_applied_rows"]) == 2
 
 
 def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:

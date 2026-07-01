@@ -201,6 +201,9 @@ def build_application_plan(
         "post_decision_cleanup_pending_count": int(
             packet.get("post_decision_cleanup_pending_count", 0) or 0
         ),
+        "post_decision_cleanup_applied_count": int(
+            packet.get("post_decision_cleanup_applied_count", 0) or 0
+        ),
         "delete_decision_count": len(delete_rows),
         "extract_decision_count": len(extract_rows),
         "retain_quarantined_exception_count": len(retain_rows),
@@ -215,6 +218,11 @@ def build_application_plan(
         "plan_blockers": plan_blockers,
         "cleanup_rows": [
             row for row in rows if row["post_decision_cleanup_pending"] is True
+        ],
+        "post_decision_cleanup_applied_rows": [
+            row
+            for row in _as_list(packet.get("post_decision_cleanup_applied_rows"))
+            if isinstance(row, dict)
         ],
         "retain_exception_rows": retain_rows,
         "pending_owner_decision_rows": [
@@ -250,6 +258,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `owner_decision_validation_pass`: `{payload['owner_decision_validation_pass']}`",
         f"- `owner_decision_pending_count`: `{payload['owner_decision_pending_count']}`",
         f"- `post_decision_cleanup_pending_count`: `{payload['post_decision_cleanup_pending_count']}`",
+        f"- `post_decision_cleanup_applied_count`: `{payload['post_decision_cleanup_applied_count']}`",
         f"- `delete_decision_count`: `{payload['delete_decision_count']}`",
         f"- `extract_decision_count`: `{payload['extract_decision_count']}`",
         f"- `retain_quarantined_exception_count`: `{payload['retain_quarantined_exception_count']}`",

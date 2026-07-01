@@ -80,6 +80,14 @@ def _manifest_payload() -> dict:
     }
 
 
+def _post_cleanup_audit_payload() -> dict:
+    payload = _audit_payload()
+    payload["quarantined_non_structural_rows"] = []
+    payload["non_structural_rows"] = []
+    payload["non_structural_path_count"] = 0
+    return payload
+
+
 def _decision_payload(decision: str) -> dict:
     return {
         "schema_version": owner_review.DECISION_SCHEMA_VERSION,
@@ -227,6 +235,90 @@ def test_owner_review_packet_routes_delete_decisions_to_post_cleanup(
     assert {
         row["owner_review_state"] for row in payload["review_rows"]
     } == {"owner_decision_recorded_post_decision_cleanup_pending"}
+
+
+def test_owner_review_packet_closes_after_delete_extract_cleanup_applied(
+    tmp_path: Path,
+) -> None:
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(audit, _post_cleanup_audit_payload())
+    _write_json(manifest, _manifest_payload())
+    _write_json(
+        decisions,
+        {
+            "schema_version": owner_review.DECISION_SCHEMA_VERSION,
+            "decision_rows": [
+                {
+                    "path": "implementation/phase1/md3bead_soa.py",
+                    "owner_decision": "extract_to_molecular_or_science_repository",
+                    "owner_identity": "scope-owner",
+                    "owner_role": "product_owner",
+                    "decision_timestamp_utc": "2026-07-02T00:00:00Z",
+                    "evidence_reference": "owner-review://scope-cleanup/001",
+                },
+                {
+                    "path": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "gpcr_hard_decoy_product_report.json"
+                    ),
+                    "owner_decision": "delete_from_structural_repository",
+                    "owner_identity": "scope-owner",
+                    "owner_role": "product_owner",
+                    "decision_timestamp_utc": "2026-07-02T00:00:00Z",
+                    "evidence_reference": "owner-review://scope-cleanup/002",
+                },
+            ],
+        },
+    )
+
+    payload = owner_review.build_owner_review_packet(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=decisions,
+    )
+
+    assert payload["status"] == "complete"
+    assert payload["evidence_closure_pass"] is True
+    assert payload["owner_decision_recorded_count"] == 2
+    assert payload["owner_decision_pending_count"] == 0
+    assert payload["post_decision_cleanup_pending_count"] == 0
+    assert payload["post_decision_cleanup_applied_count"] == 2
+    assert payload["owner_decisions"]["decision_extra_path_count"] == 0
+    assert payload["owner_decisions"]["blockers"] == []
+    assert {
+        row["owner_decision"]
+        for row in payload["post_decision_cleanup_applied_rows"]
+    } == {
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+    }
+
+
+def test_owner_review_packet_requires_decisions_for_absent_manifest_paths(
+    tmp_path: Path,
+) -> None:
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    _write_json(audit, _post_cleanup_audit_payload())
+    _write_json(manifest, _manifest_payload())
+
+    payload = owner_review.build_owner_review_packet(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+    )
+
+    assert payload["status"] == "owner_decision_evidence_invalid"
+    assert payload["evidence_closure_pass"] is False
+    assert payload["owner_decision_pending_count"] == 2
+    assert payload["post_decision_cleanup_missing_owner_decision_count"] == 2
+    assert (
+        "post_decision_cleanup_missing_owner_decision_count=2"
+        in payload["closure_blockers"]
+    )
 
 
 def test_owner_review_packet_blocks_unquarantined_scope_leak(tmp_path: Path) -> None:
