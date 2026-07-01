@@ -504,6 +504,7 @@ def _computed_hard_decoy_metrics(
     blockers: list[str] = []
     root_cause_tags: list[str] = []
     normalized_rows: list[dict[str, Any]] = []
+    seen_molecule_ids: set[str] = set()
     score_direction = _score_direction(row.get("score_direction"))
     if score_direction not in {"higher_is_better", "lower_is_better"}:
         blockers.append(f"{target_id}:score_direction_invalid")
@@ -526,6 +527,11 @@ def _computed_hard_decoy_metrics(
         elif molecule_id and _contains_marker(molecule_id, PLACEHOLDER_SOURCE_TEXT_MARKERS):
             blockers.append(f"{target_id}:{row_key}:molecule_id_placeholder")
             root_cause_tags.append("hard_decoy_row_actuality_required")
+        elif molecule_id:
+            if molecule_id in seen_molecule_ids:
+                blockers.append(f"{target_id}:{row_key}:molecule_id_duplicate")
+                root_cause_tags.append("hard_decoy_row_integrity_required")
+            seen_molecule_ids.add(molecule_id)
         if "score" in raw_row and score is None:
             blockers.append(f"{target_id}:{row_key}:score_invalid")
             root_cause_tags.append("operator_values_required")

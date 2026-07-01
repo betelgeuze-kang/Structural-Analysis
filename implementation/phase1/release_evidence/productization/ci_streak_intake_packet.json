@@ -14,7 +14,7 @@
     "nightly:github_actions_filtered_run_count_below_threshold",
     "runner:self_hosted_runner_matching_labels_not_online"
   ],
-  "generated_at": "2026-07-01T04:22:13.075920+00:00",
+  "generated_at": "2026-07-01T05:38:55.316576+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -135,7 +135,7 @@
   },
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 0.02,
+    "age_hours": 0.002,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -145,7 +145,7 @@
     ],
     "contract_pass": false,
     "freshness_pass": true,
-    "generated_at": "2026-07-01T04:21:01.004479+00:00",
+    "generated_at": "2026-07-01T05:38:48.287377+00:00",
     "lanes": {
       "nightly": {
         "blockers": [
@@ -255,9 +255,9 @@
       "x64"
     ],
     "runner_status": "blocked",
-    "source_evidence_age_hours": 0.02,
+    "source_evidence_age_hours": 0.002,
     "source_evidence_freshness_pass": true,
-    "source_evidence_generated_at": "2026-07-01T04:21:01.004479+00:00",
+    "source_evidence_generated_at": "2026-07-01T05:38:48.287377+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
     "threshold": 30

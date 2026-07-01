@@ -192,7 +192,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-01T05:10:13.018768+00:00",
+  "generated_at": "2026-07-01T05:39:42.903361+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -211,11 +211,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:7c2f3776dd8419dfcb74136dfb954b5a5be40ecb72ef290b0c462c0ed014371a",
+      "input_checksum": "sha256:59406cc28fcfe620c2db3d1893e8633035d000a399932c5038f1eb747ec9918a",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "a67ff188d3aa0e22d7c9a1ee6590b3f17fbadb2c",
+      "source_commit_sha": "3c3d2341f59cad5a3fde1d32d298bdca848c5724",
       "status": "blocked"
     }
   },
@@ -223,7 +223,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:b6b28cb3afc96a798d94497909292ccffd952f3b626f7a01af4ad319cdf50fc2",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:7c2f3776dd8419dfcb74136dfb954b5a5be40ecb72ef290b0c462c0ed014371a"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:59406cc28fcfe620c2db3d1893e8633035d000a399932c5038f1eb747ec9918a"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -1663,10 +1663,7 @@
           "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
-        "changed_paths_since_source_commit": [
-          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
-          "tests/test_materialize_public_benchmark_enrichment_scorecard.py"
-        ],
+        "changed_paths_since_source_commit": [],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
         "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
@@ -1702,9 +1699,9 @@
         "reused_evidence": false,
         "rocm_hip_required": true,
         "runtime_blockers": [],
-        "source_commit_sha": "468307498f684d2638fbad3dd674d77415bbd78f",
+        "source_commit_sha": "fca13ed5080a8ce606d7a6c15698dff3dd502e26",
         "source_state_fresh": true,
-        "source_state_kind": "non_g1_hip_paths_changed",
+        "source_state_kind": "exact",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -2044,6 +2041,6 @@
       }
     }
   },
-  "source_commit_sha": "368295826402e3b1a03bc298cb0075dc2fc97cfe",
+  "source_commit_sha": "d40775d696f49d649cf1095c627124b8673fdbab",
   "status": "blocked"
 }

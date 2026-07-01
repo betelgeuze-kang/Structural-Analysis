@@ -24,10 +24,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T04:23:19.267066+00:00",
+  "generated_at": "2026-07-01T05:40:35.485022+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:6240da7930e15638983ab9c456295db5ce4769adf9594defe52034fe88cff143",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ce0a753a79803442a001fc50dbb1f622c9690b4f9dfc54a0343f39e9466d3c35",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:00b8e9dfcf514525b00ce843161bcd32ea6e43258e786828595f62599469eaba",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6aa716e9a5f06d621846f0379a676659fcf856153adc3a5f6ab48b0262027364",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:04910a2beb099623a3f64daae7832bf0f941f086ae648ee37306831ee1984618"
   },
   "next_actions": [
@@ -99,8 +99,9 @@
       ],
       "operator_intake_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
       "operator_intake_route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
-      "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=operator_values_required",
+      "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=hard_decoy_rows_required,operator_values_required",
       "root_cause_tags": [
+        "hard_decoy_rows_required",
         "operator_values_required"
       ],
       "status": "science_evidence_required",
@@ -316,9 +317,9 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 0.02,
+        "ci_streak_source_evidence_age_hours": 0.002,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-07-01T04:21:01.004479+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-07-01T05:38:48.287377+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 1,
         "nightly_github_actions_pass_streak_count": 0,
@@ -446,9 +447,9 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 0.02,
+        "ci_streak_source_evidence_age_hours": 0.002,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-07-01T04:21:01.004479+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-07-01T05:38:48.287377+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 1,
         "nightly_github_actions_pass_streak_count": 0,
@@ -1034,7 +1035,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "26c49d41a2e59792ccf25fef8a8d4c9906185562",
+  "source_commit_sha": "d40775d696f49d649cf1095c627124b8673fdbab",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
