@@ -555,5 +555,59 @@ def test_local_metadata_only_refresh_claim_boundary_is_idempotent(tmp_path: Path
     assert boundary.count(local_boundary) == 1
 
 
+def test_main_preserves_existing_ci_evidence_on_live_query_failure(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    out = tmp_path / "github_actions_ci_streak_evidence.json"
+    before = json_dumps(
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "generated_at": "2026-06-16T19:55:48+00:00",
+            "contract_pass": False,
+            "workflow_discovery": {"query_error": ""},
+            "lanes": {
+                "pr": {"query_error": "", "consecutive_pass_count": 0},
+                "nightly": {"query_error": "", "consecutive_pass_count": 0},
+            },
+        }
+    )
+    out.write_text(before, encoding="utf-8")
+
+    def _query_failed_payload(**_kwargs):
+        return {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "contract_pass": False,
+            "workflow_discovery": {
+                "query_error": "lookup api.github.com: Temporary failure"
+            },
+            "lanes": {
+                "pr": {"query_error": "lookup api.github.com: Temporary failure"},
+                "nightly": {
+                    "query_error": "lookup api.github.com: Temporary failure"
+                },
+            },
+            "summary": {},
+        }
+
+    monkeypatch.setattr(
+        build_github_actions_ci_streak_evidence,
+        "build_evidence",
+        _query_failed_payload,
+    )
+
+    exit_code = build_github_actions_ci_streak_evidence.main(
+        [
+            "--out",
+            out.as_posix(),
+        ]
+    )
+
+    assert exit_code == 2
+    assert out.read_text(encoding="utf-8") == before
+    assert "preserving existing evidence after live query failure" in capsys.readouterr().err
+
+
 def json_dumps(payload: object) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)

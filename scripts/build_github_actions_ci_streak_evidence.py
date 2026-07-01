@@ -779,6 +779,19 @@ def refresh_local_workflow_metadata(
     return payload
 
 
+def _live_query_failed(payload: dict[str, Any]) -> bool:
+    workflow_discovery = _as_dict(payload.get("workflow_discovery"))
+    if str(workflow_discovery.get("query_error") or "").strip():
+        return True
+    lanes = payload.get("lanes")
+    if not isinstance(lanes, dict):
+        return False
+    return any(
+        isinstance(lane, dict) and str(lane.get("query_error") or "").strip()
+        for lane in lanes.values()
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default=DEFAULT_REPO)
@@ -796,6 +809,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
+    parser.add_argument(
+        "--write-query-error-evidence",
+        action="store_true",
+        help=(
+            "Allow a live gh query failure to overwrite an existing CI streak "
+            "evidence file. The default preserves the last run-history evidence "
+            "on live query failure."
+        ),
+    )
     return parser
 
 
@@ -815,6 +837,18 @@ def main(argv: list[str] | None = None) -> int:
             nightly_workflow=args.nightly_workflow,
             local_workflow_dir=args.local_workflow_dir,
         )
+    if (
+        not args.local_metadata_only
+        and _live_query_failed(payload)
+        and args.out.exists()
+        and not args.write_query_error_evidence
+    ):
+        print(
+            "GitHub Actions CI streak evidence: preserving existing evidence "
+            "after live query failure.",
+            file=sys.stderr,
+        )
+        return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["summary"])
