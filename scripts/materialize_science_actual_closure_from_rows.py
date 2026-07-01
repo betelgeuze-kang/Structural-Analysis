@@ -137,6 +137,15 @@ def _gpcr_row_intake_contract(
             "lower_is_better",
         ],
         "default_score_direction": gpcr_rows.DEFAULT_SCORE_DIRECTION,
+        "row_integrity_policy": {
+            "required_unique_row_keys": {
+                "raw_hard_decoy_rows": ["target_id", "molecule_id"]
+            },
+            "purpose": (
+                "Duplicate molecules within a GPCR target cannot be used to inflate "
+                "positive/decoy counts or Phase 3 hard-decoy ranking metrics."
+            ),
+        },
         "source_receipt_required_fields": [
             "source_id",
             "source_url",
@@ -208,6 +217,18 @@ def _pocketmd_row_intake_contract(
             pocketmd_survival.TOPK_ROW_QUALITY_CRITERIA
         ),
         "top_k_rank_prefix_policy": pocketmd_survival.TOP_K_RANK_PREFIX_POLICY,
+        "row_integrity_policy": {
+            "required_unique_row_keys": {
+                "top_k_refinement_rows": [
+                    ["case_id", "top_k_rank"],
+                    ["case_id", "candidate_id"],
+                ]
+            },
+            "purpose": (
+                "Duplicate PocketMD Lite top-k ranks or candidate identities cannot "
+                "be used to inflate case, candidate, or survival counts."
+            ),
+        },
         "source_receipt_required_fields": [
             "source_id",
             "source_url",

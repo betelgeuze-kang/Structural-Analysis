@@ -322,6 +322,9 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "min_positive_count_per_target": 4,
         "min_total_row_count_per_target": 24,
     }
+    assert gpcr_contract["row_integrity_policy"]["required_unique_row_keys"] == {
+        "raw_hard_decoy_rows": ["target_id", "molecule_id"],
+    }
     assert gpcr_contract["required_flat_row_fields"] == [
         "target_id",
         "molecule_id",
@@ -374,6 +377,12 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert pocketmd_contract["top_k_rank_prefix_policy"].startswith(
         "For each case, supplied ranks must form a contiguous prefix"
     )
+    assert pocketmd_contract["row_integrity_policy"]["required_unique_row_keys"] == {
+        "top_k_refinement_rows": [
+            ["case_id", "top_k_rank"],
+            ["case_id", "candidate_id"],
+        ],
+    }
     assert pocketmd_contract["source_receipt_required_fields"] == [
         "source_id",
         "source_url",
