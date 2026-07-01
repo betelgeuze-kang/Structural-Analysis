@@ -34,6 +34,8 @@ DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.
 DEFAULT_POCKETMD_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 
 SCHEMA_VERSION = "science-actual-closure-row-audit.v1"
+GPCR_COMPONENT_ID = "gpcr_hard_decoy_actual_closure"
+POCKETMD_COMPONENT_ID = "pocketmd_lite_topk_actual_closure"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -183,6 +185,216 @@ def _missing_component(component_id: str, blocker: str, expected_mode: str) -> d
     }
 
 
+def _gpcr_missing_phase3_criteria() -> list[dict[str, Any]]:
+    targets = list(gpcr_suite.REQUIRED_TARGETS)
+    return [
+        {
+            "criterion_id": "ranking_pr_auc_ci_low_min",
+            "pass": False,
+            "required": f">={gpcr_suite.EXIT_CRITERIA['ranking_pr_auc_ci_low_min']}",
+            "current_by_target": {target: None for target in targets},
+            "failed_targets": targets,
+            "blockers": [
+                f"{target}:ranking_pr_auc_ci_low_required" for target in targets
+            ],
+        },
+        {
+            "criterion_id": "top20_hit_rate_min",
+            "pass": False,
+            "required": f">={gpcr_suite.EXIT_CRITERIA['top20_hit_rate_min']}",
+            "current_by_target": {target: None for target in targets},
+            "failed_targets": targets,
+            "blockers": [f"{target}:top20_hit_rate_required" for target in targets],
+        },
+        {
+            "criterion_id": "decoys_above_positive_count_max",
+            "pass": False,
+            "required": f"<={gpcr_suite.EXIT_CRITERIA['decoys_above_positive_count_max']}",
+            "current_by_target": {target: None for target in targets},
+            "failed_targets": targets,
+            "blockers": [
+                f"{target}:decoys_above_positive_count_required" for target in targets
+            ],
+        },
+        {
+            "criterion_id": "no_positive_out_anchored_by_top_decoys",
+            "pass": False,
+            "required": bool(
+                gpcr_suite.EXIT_CRITERIA[
+                    "positive_out_anchored_by_top_decoys_allowed"
+                ]
+            ),
+            "current_by_target": {target: None for target in targets},
+            "failed_targets": targets,
+            "blockers": [
+                f"{target}:positive_out_anchored_by_top_decoys_required"
+                for target in targets
+            ],
+        },
+        {
+            "criterion_id": gpcr_suite.ACTUAL_CLOSURE_CRITERION_ID,
+            "pass": False,
+            "required": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
+            "current_by_target": {target: "missing" for target in targets},
+            "failed_targets": targets,
+            "blockers": [
+                f"{target}:hard_decoy_rows_required_for_actual_closure"
+                for target in targets
+            ],
+        },
+    ]
+
+
+def _pocketmd_missing_phase4_criteria() -> list[dict[str, Any]]:
+    summary = {
+        "real_refinement_case_count": 0,
+        "top_k_candidate_count": 0,
+        "top_k_row_quality": {
+            "contract_pass": False,
+            "minimums": dict(pocketmd_survival.TOPK_ROW_QUALITY_CRITERIA),
+        },
+        "local_min_survival_rate": None,
+        "contact_persistence_rate_median": None,
+        "h_bond_persistence_rate_median": None,
+        "clash_relief_rate": None,
+        "uncertainty_width_median": None,
+    }
+    gate = pocketmd_survival.build_phase4_exit_gate(
+        summary=summary,
+        blockers=list(pocketmd_survival.EMPTY_INTAKE_BLOCKERS),
+        product_surface_ready=False,
+        first_blocked_target="top_k_refinement_operator_intake",
+    )
+    return [row for row in gate.get("criteria", []) if isinstance(row, dict)]
+
+
+def _component_criteria(component: dict[str, Any]) -> list[dict[str, Any]]:
+    component_id = str(component.get("component_id") or "")
+    if component_id == GPCR_COMPONENT_ID:
+        rows = component.get("phase3_exit_gate_criteria")
+        if isinstance(rows, list):
+            return [row for row in rows if isinstance(row, dict)]
+        return _gpcr_missing_phase3_criteria()
+    if component_id == POCKETMD_COMPONENT_ID:
+        rows = component.get("phase4_exit_gate_criteria")
+        if isinstance(rows, list):
+            return [row for row in rows if isinstance(row, dict)]
+        return _pocketmd_missing_phase4_criteria()
+    return []
+
+
+def _actual_closure_requirements(
+    components: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    requirements: list[dict[str, Any]] = []
+    for component in components:
+        component_id = str(component.get("component_id") or "")
+        if component_id == GPCR_COMPONENT_ID:
+            scope = "gpcr_phase3_exit_gate"
+            row_input_id = "gpcr_rows"
+            expected_rows_mode = "raw_hard_decoy_rows"
+            requirement_kind = "phase3_exit_criterion"
+            extra = {
+                "required_targets": list(gpcr_suite.REQUIRED_TARGETS),
+                "raw_row_quality_minimums": dict(gpcr_suite.RAW_ROW_QUALITY_CRITERIA),
+            }
+        elif component_id == POCKETMD_COMPONENT_ID:
+            scope = "pocketmd_lite_phase4_exit_gate"
+            row_input_id = "pocketmd_rows"
+            expected_rows_mode = "raw_top_k_refinement_rows"
+            requirement_kind = "phase4_exit_criterion"
+            extra = {
+                "top_k_row_quality_minimums": dict(
+                    pocketmd_survival.TOPK_ROW_QUALITY_CRITERIA
+                ),
+                "blocked_claims_that_remain_locked": list(
+                    pocketmd_survival.BLOCKED_CLAIMS
+                ),
+            }
+        else:
+            continue
+
+        for criterion in _component_criteria(component):
+            blockers = [
+                str(item) for item in criterion.get("blockers", []) if str(item)
+            ]
+            row = {
+                "component_id": component_id,
+                "scope": scope,
+                "requirement_kind": requirement_kind,
+                "criterion_id": str(criterion.get("criterion_id") or ""),
+                "pass": bool(criterion.get("pass")),
+                "materialized": bool(component.get("materialized")),
+                "row_input_id": row_input_id,
+                "expected_rows_mode": expected_rows_mode,
+                "required": criterion.get("required"),
+                "blockers": blockers,
+                "blocker_count": len(blockers),
+            }
+            for key in ("current", "current_by_target", "failed_targets"):
+                if key in criterion:
+                    row[key] = criterion[key]
+            row.update(extra)
+            requirements.append(row)
+    return requirements
+
+
+def _actual_closure_requirement_summary(
+    requirements: list[dict[str, Any]],
+    *,
+    missing_row_inputs: list[str],
+) -> dict[str, Any]:
+    blocked_component_ids = sorted(
+        {
+            str(row.get("component_id") or "")
+            for row in requirements
+            if not bool(row.get("pass")) and str(row.get("component_id") or "")
+        }
+    )
+    gpcr_rows = [
+        row for row in requirements if row.get("component_id") == GPCR_COMPONENT_ID
+    ]
+    pocketmd_rows = [
+        row for row in requirements if row.get("component_id") == POCKETMD_COMPONENT_ID
+    ]
+    return {
+        "required_component_count": 2,
+        "ready_component_count": len(
+            {
+                component_id
+                for component_id in (GPCR_COMPONENT_ID, POCKETMD_COMPONENT_ID)
+                if any(
+                    row.get("component_id") == component_id for row in requirements
+                )
+                and all(
+                    bool(row.get("pass"))
+                    for row in requirements
+                    if row.get("component_id") == component_id
+                )
+            }
+        ),
+        "requirement_count": len(requirements),
+        "passing_requirement_count": sum(
+            1 for row in requirements if bool(row.get("pass"))
+        ),
+        "blocked_requirement_count": sum(
+            1 for row in requirements if not bool(row.get("pass"))
+        ),
+        "blocked_component_ids": blocked_component_ids,
+        "missing_row_inputs": missing_row_inputs,
+        "missing_row_input_count": len(missing_row_inputs),
+        "gpcr_phase3_requirement_count": len(gpcr_rows),
+        "gpcr_phase3_passing_requirement_count": sum(
+            1 for row in gpcr_rows if bool(row.get("pass"))
+        ),
+        "pocketmd_phase4_requirement_count": len(pocketmd_rows),
+        "pocketmd_phase4_passing_requirement_count": sum(
+            1 for row in pocketmd_rows if bool(row.get("pass"))
+        ),
+        "actual_closure_ready": not blocked_component_ids and not missing_row_inputs,
+    }
+
+
 def _component_error(component_id: str, exc: Exception, expected_mode: str) -> dict[str, Any]:
     return {
         "component_id": component_id,
@@ -209,7 +421,7 @@ def _materialize_gpcr(
 ) -> dict[str, Any]:
     if rows_path is None:
         return _missing_component(
-            "gpcr_hard_decoy_actual_closure",
+            GPCR_COMPONENT_ID,
             "gpcr_hard_decoy_rows_not_provided",
             "raw_hard_decoy_rows",
         )
@@ -237,7 +449,7 @@ def _materialize_gpcr(
         _write_json(repo_root, surface_out, surface)
     except Exception as exc:
         return _component_error(
-            "gpcr_hard_decoy_actual_closure",
+            GPCR_COMPONENT_ID,
             exc,
             "raw_hard_decoy_rows",
         )
@@ -256,6 +468,9 @@ def _materialize_gpcr(
         "target_pass_count": int(report.get("target_pass_count") or 0),
         "target_count": int(report.get("target_count") or 0),
         "phase3_exit_gate_status": str(phase3_exit_gate.get("status") or ""),
+        "phase3_exit_gate_criteria": [
+            row for row in phase3_exit_gate.get("criteria", []) if isinstance(row, dict)
+        ],
         "phase3_failed_criteria": [
             str(item) for item in phase3_exit_gate.get("failed_criteria", [])
         ],
@@ -284,7 +499,7 @@ def _materialize_pocketmd(
 ) -> dict[str, Any]:
     if rows_path is None:
         return _missing_component(
-            "pocketmd_lite_topk_actual_closure",
+            POCKETMD_COMPONENT_ID,
             "pocketmd_lite_topk_rows_not_provided",
             "raw_top_k_refinement_rows",
         )
@@ -319,7 +534,7 @@ def _materialize_pocketmd(
         _write_json(repo_root, surface_out, surface)
     except Exception as exc:
         return _component_error(
-            "pocketmd_lite_topk_actual_closure",
+            POCKETMD_COMPONENT_ID,
             exc,
             "raw_top_k_refinement_rows",
         )
@@ -338,6 +553,9 @@ def _materialize_pocketmd(
         "real_refinement_case_count": int(report.get("real_refinement_case_count") or 0),
         "top_k_candidate_count": int(report.get("top_k_candidate_count") or 0),
         "phase4_exit_gate_status": str(phase4_exit_gate.get("status") or ""),
+        "phase4_exit_gate_criteria": [
+            row for row in phase4_exit_gate.get("criteria", []) if isinstance(row, dict)
+        ],
         "phase4_failed_criteria": [
             str(item) for item in phase4_exit_gate.get("failed_criteria", [])
         ],
@@ -407,6 +625,19 @@ def build_science_actual_closure_audit(
         max_top_k=pocketmd_max_top_k,
     )
     components = [gpcr, pocketmd]
+    missing_row_inputs = [
+        row_input_id
+        for row_input_id, rows_path in (
+            ("gpcr_rows", gpcr_rows_path),
+            ("pocketmd_rows", pocketmd_rows_path),
+        )
+        if rows_path is None
+    ]
+    actual_closure_requirements = _actual_closure_requirements(components)
+    requirement_summary = _actual_closure_requirement_summary(
+        actual_closure_requirements,
+        missing_row_inputs=missing_row_inputs,
+    )
     blockers = [
         f"{component['component_id']}::{blocker}"
         for component in components
@@ -435,21 +666,24 @@ def build_science_actual_closure_audit(
         "status": "ready" if contract_pass else "operator_evidence_required",
         "contract_pass": contract_pass,
         "blockers": blockers,
+        "summary": {
+            "component_count": len(components),
+            "component_ready_count": sum(
+                1 for component in components if component.get("contract_pass")
+            ),
+            "blocker_count": len(blockers),
+            **requirement_summary,
+        },
         "component_count": len(components),
         "component_ready_count": sum(1 for component in components if component.get("contract_pass")),
         "components": components,
-        "missing_row_inputs": [
-            row_input_id
-            for row_input_id, rows_path in (
-                ("gpcr_rows", gpcr_rows_path),
-                ("pocketmd_rows", pocketmd_rows_path),
-            )
-            if rows_path is None
-        ],
+        "missing_row_inputs": missing_row_inputs,
         "row_intake_contracts": row_intake_contracts,
+        "actual_closure_requirements": actual_closure_requirements,
+        "actual_closure_requirement_summary": requirement_summary,
         "required_actual_closures": [
-            "gpcr_hard_decoy_actual_closure",
-            "pocketmd_lite_topk_actual_closure",
+            GPCR_COMPONENT_ID,
+            POCKETMD_COMPONENT_ID,
         ],
         "claim_boundary": (
             "This runner only materializes operator-attached raw rows through the "
