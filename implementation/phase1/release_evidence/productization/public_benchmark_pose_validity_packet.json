@@ -110,7 +110,7 @@
     "unique_real_benchmark_case_count": 0
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T06:44:15.043622+00:00",
+  "generated_at": "2026-07-01T07:17:27.846706+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d4cd7091185ef46a3fef3d546d1a670b7911b0e4de2f60703391a2cc757912b0",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:9c8063587ea2dbaa901f1d3a3f930be4b430978636b81e8d38f4ba89a1a6cfb2",
@@ -147,7 +147,7 @@
     }
   },
   "schema_version": "public-benchmark-pose-validity-packet.v1",
-  "source_commit_sha": "a5d0a5a64676fee69e7bed7a049f3214d9db87d0",
+  "source_commit_sha": "77addd71abde6ac4940b9e55eaf0b2543ba1d2ba",
   "status": "ready_for_dry_run",
   "unique_real_benchmark_case_count": 0,
   "validator": {

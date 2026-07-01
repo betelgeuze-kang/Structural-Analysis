@@ -365,6 +365,25 @@
   "contract_pass": false,
   "dry_run": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
+  "f2g_f2h_cause_narrowing_context": {
+    "blockers": [],
+    "claim_boundary": "This context only routes the next G1 diagnostic slice. It does not close G1, prove full-load 1.0 equilibrium, or promote HIP Newton readiness.",
+    "consistent_newton_rocm_lane_prioritized": true,
+    "path": "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
+    "present": true,
+    "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+    "ready": true,
+    "required_next_receipts": [
+      "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+      "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
+    ],
+    "row_only_correction_loop_stopped": true,
+    "schema_version": "g1-full-load-cause-narrowing-context.v1",
+    "source_commit_sha": "08649cdefe65aa3f184b9625f42cfa84d33ce232",
+    "status": "ready",
+    "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=consistent_residual_jacobian_newton_rocm_worker",
+    "support_or_link_row_gap_disfavored": true
+  },
   "frontier_non_promoting_evidence": {
     "claim_boundary": "Frontier and launch-only receipts are attached as non-promoting diagnostic context. They may explain why the lane is blocked, but they do not close full-load, material Newton, consistent residual/Jacobian Newton, production ROCm/HIP residency, or full G1.",
     "direct_residual_gate_tolerance_n": 0.0005,
@@ -1493,23 +1512,33 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-01T06:12:48.749854+00:00",
+  "generated_at": "2026-07-01T07:18:22.455529+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
+      "scripts/build_pocketmd_lite_product_surface.py",
       "scripts/build_product_readiness_snapshot.py",
+      "scripts/build_public_benchmark_source_of_truth.py",
       "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+      "scripts/materialize_pocketmd_lite_topk_survival_report.py",
       "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+      "scripts/materialize_public_benchmark_harness_bundle.py",
       "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
+      "scripts/materialize_public_benchmark_phase2_from_rows.py",
       "scripts/materialize_public_benchmark_pose_success_harness.py",
       "scripts/materialize_public_benchmark_pose_validity_input.py",
       "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
       "scripts/materialize_public_benchmark_rmsd_scorecard.py",
       "scripts/materialize_public_benchmark_subset_manifest.py",
       "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+      "scripts/materialize_science_actual_closure_from_rows.py",
+      "scripts/run_g1_full_load_hip_newton_lane.py",
       "scripts/validate_public_benchmark_pose_validity.py",
       "scripts/validate_public_benchmark_subset_manifest.py",
+      "tests/test_build_pocketmd_lite_product_surface.py",
       "tests/test_build_product_readiness_snapshot.py",
+      "tests/test_build_public_benchmark_source_of_truth.py",
       "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
+      "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
       "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
       "tests/test_materialize_public_benchmark_harness_bundle.py",
       "tests/test_materialize_public_benchmark_operator_bundle_from_rows.py",
@@ -1520,6 +1549,8 @@
       "tests/test_materialize_public_benchmark_rmsd_scorecard.py",
       "tests/test_materialize_public_benchmark_subset_manifest.py",
       "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+      "tests/test_materialize_science_actual_closure_from_rows.py",
+      "tests/test_run_g1_full_load_hip_newton_lane.py",
       "tests/test_validate_public_benchmark_pose_validity.py",
       "tests/test_validate_public_benchmark_subset_manifest.py"
     ],
@@ -1564,6 +1595,7 @@
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:5035b57d5f9193f0e56a97ac6d3753a81562c1a0a4142337bd46d701d56c286f",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:9adb5c4eeb3190c089dca7b56c7ef9fd976ba1238f61c83f8fa0c2482490198a",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:a51bad8ba3f83c1135c2246e1dd85000a75b9b6a1a395900e56c24c36dd99fad",
     "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz": "sha256:e3a48e50edfb68648d1d7c5d720faec45f632de667061be71b30a57a042d1235",
@@ -1585,6 +1617,13 @@
       "workspace_scan_root": "implementation/phase1/release_evidence/productization"
     },
     {
+      "cause_narrowing_primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+      "cause_narrowing_required_next_receipts": [
+        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
+      ],
+      "cause_narrowing_row_only_correction_loop_stopped": true,
+      "cause_narrowing_support_or_link_row_gap_disfavored": true,
       "id": "close_consistent_residual_jacobian_newton_gate",
       "reason": "hip_consistency_proof_gate_not_passed",
       "receipt_blockers": [
@@ -1620,7 +1659,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "2ea0b1e47d2f54b71dce571d0b6589bc069e0d7f",
+  "source_commit_sha": "0ce1a825409fff102c3192fb1f3d4efe9ac445bd",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",
