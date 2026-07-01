@@ -790,6 +790,11 @@ def _release_decision(
     evidence_surface_dir: Path,
 ) -> dict[str, Any]:
     full_release_blockers = [*blockers, *release_area_blockers]
+    first_blocker = (
+        release_area_blockers[0]
+        if release_area_blockers
+        else (full_release_blockers[0] if full_release_blockers else "")
+    )
     evidence_surfaces = _evidence_surface_rows(evidence_surface_dir)
     missing_surface_count = sum(1 for row in evidence_surfaces if row["missing"])
     if not evidence_surface_dir.exists() or not evidence_surface_dir.is_dir():
@@ -890,7 +895,7 @@ def _release_decision(
     return {
         "release_allowed": bool(release_allowed),
         "blocked_release_count": len(full_release_blockers),
-        "first_blocker": full_release_blockers[0] if full_release_blockers else "",
+        "first_blocker": first_blocker,
         "operator_action_count": operator_action_count,
         "approval_token_count": _approval_token_count(
             full_release_blockers=full_release_blockers,

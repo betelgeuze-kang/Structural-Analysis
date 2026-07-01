@@ -782,6 +782,39 @@ def test_public_benchmark_ready_requires_source_of_truth_ready() -> None:
     )
 
 
+def test_release_decision_prioritizes_release_area_first_blocker(
+    tmp_path: Path,
+) -> None:
+    decision = report_pm_release_gate._release_decision(
+        release_allowed=False,
+        blockers=["M5::pm_blocker_closure_board_count_mismatch"],
+        release_area_blockers=[
+            "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+        ],
+        measured_benchmark_breadth_payload={"contract_pass": True},
+        external_benchmark_submission_readiness_payload={
+            "contract_pass": True,
+            "summary": {"ready_to_start_full_submission_now": True},
+        },
+        public_benchmark_source_of_truth_payload={
+            "contract_pass": True,
+            "public_benchmark_ready": True,
+        },
+        release_evidence_freshness_payload={
+            "contract_pass": True,
+            "summary": {"blocker_count": 0},
+        },
+        pm_blocker_register={"summary": {"open_blocker_count": 2}},
+        evidence_surface_dir=tmp_path / "evidence-surfaces",
+    )
+
+    assert decision["blocked_release_count"] == 2
+    assert (
+        decision["first_blocker"]
+        == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    )
+
+
 def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> None:
     actions = report_pm_release_gate._public_benchmark_operator_actions(
         {
