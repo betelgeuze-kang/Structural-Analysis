@@ -483,7 +483,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-01T20:50:41.806182+00:00",
+  "generated_at": "2026-07-01T21:12:10.206114+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:03f3beb6fd151ba5e3c49b4562b90a7a796bd6bf9e53247612c9f99224090021",
@@ -506,7 +506,7 @@
     "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:eb69f39419b3bb2af9f3a9e1cb80c22e3ba4bdbad5cd1bb2551d5f4d55917aa8",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:9e61ef1db0ab2e01a3917d1e410a9677e8e5170aa5b9fb7ccc344bc98ee30cdd",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:488361e49fe5163b558148eef3f1ff064287913638ea7fc8d7df175dbf5b0e5f",
-    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:170d2b4fa8fc0fe606258580623263e9b52a041b9cef84293d2279c348e81775",
+    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:1da775e8d0cc6b97d1b7454f5b983a9d26660121753f8dfb0cc3b8d925f28291",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:d3d304e829539b150dd0977e9fc648cf60b883085e3e3f88b831a6f7590b1a41",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:2d8b3ff07849e743f8a21ab11cf4f8de610f026ff9bd3a03061fb595bc50d242",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:bb47e5d1d69ed17a4d80cbff9924fee9264ea2d38e3e806e51d9bb5be102e8d7",
@@ -1393,6 +1393,17 @@
         "selected_file_checksums_ready": true,
         "silent_data_loss_negative_gate_executed": true,
         "source_files_acquired": true,
+        "source_license_quantity_credit_ready": {
+          "contract_pass": false,
+          "current": 0,
+          "required": 10
+        },
+        "source_license_receipt_contract_pass": false,
+        "source_license_review_ready": {
+          "blocker_count": 3,
+          "contract_pass": false,
+          "pass_count": 0
+        },
         "technical_silent_import_loss_zero": true
       },
       "import_health_blockers": [
@@ -1411,6 +1422,8 @@
         "per_file_license_review_pending",
         "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
         "phase3_ifc_import_case_quantity_credit_missing",
+        "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+        "phase3_ifc_source_license_review_blockers_not_cleared:3",
         "product_legal_license_review_pending",
         "query_expected_answers_missing",
         "query_task_file_checksums_missing"
@@ -1434,6 +1447,7 @@
             "blocked": true,
             "blockers": [
               "per_file_license_review_pending",
+              "phase3_ifc_source_license_review_blockers_not_cleared:3",
               "product_legal_license_review_pending"
             ],
             "display_name": "license/legal",
@@ -1443,7 +1457,8 @@
             "blocked": true,
             "blockers": [
               "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
-              "phase3_ifc_import_case_quantity_credit_missing"
+              "phase3_ifc_import_case_quantity_credit_missing",
+              "phase3_ifc_source_license_quantity_credit_below_required:0/10"
             ],
             "display_name": "quantity credit",
             "scope": "direct_silent_import_loss"
@@ -1479,6 +1494,8 @@
         "per_file_license_review_pending",
         "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
         "phase3_ifc_import_case_quantity_credit_missing",
+        "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+        "phase3_ifc_source_license_review_blockers_not_cleared:3",
         "product_legal_license_review_pending"
       ],
       "silent_import_loss_contract_pass": false,
@@ -1486,12 +1503,16 @@
         "per_file_license_review_pending",
         "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
         "phase3_ifc_import_case_quantity_credit_missing",
+        "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+        "phase3_ifc_source_license_review_blockers_not_cleared:3",
         "product_legal_license_review_pending"
       ],
       "silent_import_loss_product_release_credit_blockers": [
         "per_file_license_review_pending",
         "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
         "phase3_ifc_import_case_quantity_credit_missing",
+        "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+        "phase3_ifc_source_license_review_blockers_not_cleared:3",
         "product_legal_license_review_pending"
       ],
       "silent_import_loss_spillover_blockers": [
@@ -3206,6 +3227,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "7d0452c8fc858af6f2560b70d340e65371a967bf",
+  "source_commit_sha": "d5920ed70fa4b9b8d419144f4d38ea96f22b5ee2",
   "status": "blocked"
 }

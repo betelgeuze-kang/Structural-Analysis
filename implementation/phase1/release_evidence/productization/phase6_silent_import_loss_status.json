@@ -5,6 +5,8 @@
     "per_file_license_review_pending",
     "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
     "phase3_ifc_import_case_quantity_credit_missing",
+    "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+    "phase3_ifc_source_license_review_blockers_not_cleared:3",
     "product_legal_license_review_pending",
     "query_expected_answers_missing",
     "query_task_file_checksums_missing"
@@ -28,6 +30,7 @@
         "blocked": true,
         "blockers": [
           "per_file_license_review_pending",
+          "phase3_ifc_source_license_review_blockers_not_cleared:3",
           "product_legal_license_review_pending"
         ],
         "display_name": "license/legal",
@@ -37,7 +40,8 @@
         "blocked": true,
         "blockers": [
           "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
-          "phase3_ifc_import_case_quantity_credit_missing"
+          "phase3_ifc_import_case_quantity_credit_missing",
+          "phase3_ifc_source_license_quantity_credit_below_required:0/10"
         ],
         "display_name": "quantity credit",
         "scope": "direct_silent_import_loss"
@@ -73,6 +77,8 @@
     "per_file_license_review_pending",
     "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
     "phase3_ifc_import_case_quantity_credit_missing",
+    "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+    "phase3_ifc_source_license_review_blockers_not_cleared:3",
     "product_legal_license_review_pending"
   ],
   "claim_boundary": "This receipt aggregates the current Phase 3 IFC source/license and import-health receipts for the RC silent-import-loss final gate. It does not download or bundle IFC files, approve product redistribution, prove import execution, or prove zero silent import loss until acquired/checksummed sources, license review, import-health execution, and silent-data-loss negative gates all pass. Query/GUI corpus readiness is reported separately as spillover evidence and does not by itself block the direct silent-import-loss final gate. The technical_silent_import_loss_zero field is scoped to acquired/checksummed sources plus executed import-health and negative silent-loss gates; product license review and quantity credit remain separate release/product-credit requirements.",
@@ -83,6 +89,8 @@
     "per_file_license_review_pending",
     "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
     "phase3_ifc_import_case_quantity_credit_missing",
+    "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+    "phase3_ifc_source_license_review_blockers_not_cleared:3",
     "product_legal_license_review_pending"
   ],
   "dirty_selected_file_count": 8,
@@ -99,23 +107,36 @@
     "selected_file_checksums_ready": true,
     "silent_data_loss_negative_gate_executed": true,
     "source_files_acquired": true,
+    "source_license_quantity_credit_ready": {
+      "contract_pass": false,
+      "current": 0,
+      "required": 10
+    },
+    "source_license_receipt_contract_pass": false,
+    "source_license_review_ready": {
+      "blocker_count": 3,
+      "contract_pass": false,
+      "pass_count": 0
+    },
     "technical_silent_import_loss_zero": true
   },
-  "generated_at": "2026-07-01T05:10:05.518541+00:00",
+  "generated_at": "2026-07-01T21:12:10.159495+00:00",
   "import_health_contract_pass_count": 10,
   "import_health_execution_count": 10,
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:3049c3ab2bdc510fd71c873efebfcfa54ab9ebcbaf65c6d4c3c34c89f0a2a946",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:a2fa090ab455b2eee8027f0348a8ce7ddc36fdcedac072527b3d5929336df623",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:94b2a9e406817dca5e4021a224949d5e65325a1b2c2f72e22a804be0a9b39e02",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:2ffcbf48b88f67053b8c0255a02411ada1b916d231f811c60d27a96b1913fc87",
-    "scripts/build_phase6_silent_import_loss_status.py": "sha256:5fdb6815d24d43bd95c59cb9bf6ab36fc85b34bf2f3dc1643b31479c8b32e852"
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:6ebf9065f5b8394ae3e32a4281ae97a9cc397e8f2a795b9cef071278cb953630",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:190de20d56258bebee061d081bf7103c9f5f22df9198d61b4808ea4a332a8382",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:e247ff80b0f98644404bea047c21aa64f7a8320433f1b5fb6ef36a62526c6146",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:8e2ff5a3c583014ec323c0e7502197549f0226326a0ef2b30c95d262c099d711",
+    "scripts/build_phase6_silent_import_loss_status.py": "sha256:39e5274318dd2e9308a9f4edb1c74fd164a10fa9de38704bec3487a951c6535b"
   },
   "owner_action": "complete product/legal and per-file license review for quantity credit; close or explicitly defer the ifc-bench query/GUI spillover blockers; then refresh the RC final gate.",
   "product_release_credit_blockers": [
     "per_file_license_review_pending",
     "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
     "phase3_ifc_import_case_quantity_credit_missing",
+    "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+    "phase3_ifc_source_license_review_blockers_not_cleared:3",
     "product_legal_license_review_pending"
   ],
   "product_release_credit_ready": false,
@@ -134,8 +155,12 @@
   "silent_import_loss_gate_pass_count": 10,
   "silent_import_loss_zero": true,
   "source_checksum_attached_count": 10,
-  "source_commit_sha": "6f8dcef857484f46aa8ed80074f14b46368cea0d",
+  "source_commit_sha": "d5920ed70fa4b9b8d419144f4d38ea96f22b5ee2",
   "source_file_acquired_count": 10,
+  "source_license_quantity_credit_ready_count": 0,
+  "source_license_receipt_contract_pass": false,
+  "source_license_review_blocker_count": 3,
+  "source_license_review_pass_count": 0,
   "spillover_blockers": [
     "dataset_repository_url_missing",
     "gui_task_runner_not_implemented",
