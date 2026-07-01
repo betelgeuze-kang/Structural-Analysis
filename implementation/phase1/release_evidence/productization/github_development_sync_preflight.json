@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-01T04:35:29.127096+00:00",
+  "generated_at": "2026-07-01T04:38:34.863972+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -41,13 +41,13 @@
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
     "ignored_worktree_status_short": "",
-    "local_head_sha": "38d3e62c720e568cc9fa5fbfef328eeccf933328",
+    "local_head_sha": "b13314e3b4623a23217772ed821f1187fefc7838",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "38d3e62c720e568cc9fa5fbfef328eeccf933328",
+    "remote_feature_sha": "b13314e3b4623a23217772ed821f1187fefc7838",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "38d3e62c720e568cc9fa5fbfef328eeccf933328",
+    "remote_main_sha": "b13314e3b4623a23217772ed821f1187fefc7838",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
