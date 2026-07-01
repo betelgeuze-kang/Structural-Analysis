@@ -171,6 +171,8 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         crashed = bool(payload.get("crashed") is True)
         oom = bool(payload.get("oom") is True)
         scorecard_or_review_path = str(payload.get("scorecard_or_review_path") or "")
+        reference_output_sha256 = str(payload.get("reference_output_sha256") or "")
+        normalization_receipt = str(payload.get("normalization_receipt") or "")
         scorecard_execution_pass = bool(
             schema_pass
             and contract_pass
@@ -193,6 +195,8 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
                 "crashed": crashed,
                 "oom": oom,
                 "scorecard_or_review_path": scorecard_or_review_path,
+                "reference_output_sha256": reference_output_sha256,
+                "normalization_receipt": normalization_receipt,
                 "scorecard_execution_pass": scorecard_execution_pass,
                 "pass_or_approved_review": pass_or_review_pass,
                 "blockers": blockers,
@@ -328,11 +332,46 @@ def _operator_next_actions(
     blockers: list[str],
     *,
     required_medium_model_count: int,
+    local_candidate_count: int,
     current_scorecard_count: int,
     pass_or_approved_review_count: int,
 ) -> list[dict[str, Any]]:
     blocker_set = set(blockers)
     actions: list[dict[str, Any]] = []
+    if local_candidate_count < required_medium_model_count:
+        actions.append(
+            {
+                "id": "select_additional_medium_model_cases",
+                "owner": "benchmark_operator",
+                "action": (
+                    "Select and attach additional authoritative medium structural "
+                    "model cases until the RC medium-model set reaches five cases."
+                ),
+                "clears_blockers": [
+                    (
+                        "medium_structural_models_current_below_required:"
+                        f"{local_candidate_count}/{required_medium_model_count}"
+                    )
+                ],
+                "current_candidate_case_count": local_candidate_count,
+                "required_candidate_case_count": required_medium_model_count,
+                "remaining_case_count": max(
+                    required_medium_model_count - local_candidate_count,
+                    0,
+                ),
+                "evidence_artifacts": [
+                    "implementation/phase1/release/benchmark_expansion/"
+                    "opensees_canonical_breadth_report.json",
+                    "operator-attached source/license/reference/normalization rows "
+                    "for each added case",
+                ],
+                "validation_commands": [
+                    "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                    "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                    "python3 scripts/build_developer_preview_rc_status.py --check",
+                ],
+            }
+        )
     if "license_review_pending" in blocker_set:
         actions.append(
             {
@@ -495,6 +534,103 @@ def _case_input_requirements(
     }
 
 
+def _case_readiness_ledger(
+    *,
+    canonical_rows: list[dict[str, Any]],
+    receipt_inventory: dict[str, Any],
+    source_license_receipt: dict[str, Any],
+    required_medium_model_count: int,
+) -> dict[str, Any]:
+    receipts = [
+        receipt
+        for receipt in _safe_list(receipt_inventory.get("receipts"))
+        if isinstance(receipt, dict)
+    ]
+    receipts_by_case = {str(row.get("case_id") or ""): row for row in receipts}
+    source_verified = bool(source_license_receipt.get("source_url_verified") is True)
+    license_approved = bool(
+        source_license_receipt.get("redistribution_allowed") is True
+        and source_license_receipt.get("commercial_use_allowed") is True
+        and str(source_license_receipt.get("license_review_status") or "").startswith(
+            "approved"
+        )
+    )
+    case_rows: list[dict[str, Any]] = []
+    for row in sorted(canonical_rows, key=lambda item: str(item.get("case_id") or "")):
+        case_id = str(row.get("case_id") or "")
+        receipt = receipts_by_case.get(case_id, {})
+        scorecard_execution_pass = bool(
+            receipt.get("scorecard_execution_pass") is True
+        )
+        pass_or_approved_review = bool(
+            receipt.get("pass_or_approved_review") is True
+        )
+        reference_outputs_pass = bool(receipt.get("reference_output_sha256"))
+        normalization_pass = bool(receipt.get("normalization_receipt"))
+        blockers = []
+        if source_verified is not True:
+            blockers.append("source_url_verification_pending")
+        if license_approved is not True:
+            blockers.append("license_review_pending")
+        if reference_outputs_pass is not True:
+            blockers.append("reference_outputs_missing")
+        if normalization_pass is not True:
+            blockers.append("normalization_not_implemented")
+        if scorecard_execution_pass is not True:
+            blockers.append("opensees_medium_scorecard_execution_missing")
+        if pass_or_approved_review is not True:
+            blockers.append("medium_model_pass_or_review_missing")
+        case_rows.append(
+            {
+                "case_id": case_id,
+                "family_id": row.get("family_id"),
+                "source_path": row.get("path"),
+                "source_sha256": row.get("sha256"),
+                "parser_contract_pass": row.get("parser_contract_ready") is True,
+                "authoritative_source_pass": source_verified,
+                "license_approval_pass": license_approved,
+                "reference_outputs_pass": reference_outputs_pass,
+                "normalization_pass": normalization_pass,
+                "scorecard_execution_pass": scorecard_execution_pass,
+                "pass_or_approved_review": pass_or_approved_review,
+                "scorecard_receipt_path": receipt.get("path"),
+                "blockers": blockers,
+                "ready_for_medium_scorecard_credit": not blockers,
+            }
+        )
+    missing_case_count = max(required_medium_model_count - len(case_rows), 0)
+    return {
+        "schema_version": "phase3-medium-model-case-readiness-ledger.v1",
+        "required_case_count": required_medium_model_count,
+        "local_candidate_case_count": len(case_rows),
+        "missing_candidate_case_count": missing_case_count,
+        "case_ready_count": sum(
+            1 for row in case_rows if row["ready_for_medium_scorecard_credit"]
+        ),
+        "case_rows": case_rows,
+        "selection_gate": {
+            "contract_pass": missing_case_count == 0,
+            "current_candidate_case_count": len(case_rows),
+            "required_candidate_case_count": required_medium_model_count,
+            "blockers": (
+                []
+                if missing_case_count == 0
+                else [
+                    (
+                        "medium_structural_models_current_below_required:"
+                        f"{len(case_rows)}/{required_medium_model_count}"
+                    )
+                ]
+            ),
+        },
+        "claim_boundary": (
+            "This ledger is case-level readiness accounting. It does not create "
+            "new source files, license approvals, reference outputs, normalization "
+            "receipts, scorecard executions, or PASS/REVIEW decisions."
+        ),
+    }
+
+
 def _authoritative_source_evidence_row(
     row: dict[str, Any],
     *,
@@ -583,6 +719,12 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
     source_license_receipt = _try_load_json(repo_root / SOURCE_LICENSE_RECEIPT)
     receipt_inventory = _medium_scorecard_receipt_inventory(repo_root)
     required_medium_model_count = 5
+    case_readiness_ledger = _case_readiness_ledger(
+        canonical_rows=canonical_rows,
+        receipt_inventory=receipt_inventory,
+        source_license_receipt=source_license_receipt,
+        required_medium_model_count=required_medium_model_count,
+    )
     current_scorecard_count = int(receipt_inventory["valid_scorecard_case_count"])
     pass_or_approved_review_count = int(receipt_inventory["pass_or_approved_review_count"])
     runner_script = repo_root / RUNNER_SCRIPT
@@ -659,6 +801,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
     operator_next_actions = _operator_next_actions(
         blockers,
         required_medium_model_count=required_medium_model_count,
+        local_candidate_count=len(canonical_rows),
         current_scorecard_count=current_scorecard_count,
         pass_or_approved_review_count=pass_or_approved_review_count,
     )
@@ -707,6 +850,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "required_evidence_pass_count": evidence_pass_count,
         "summary": summary,
         "required_evidence": evidence_rows,
+        "case_readiness_ledger": case_readiness_ledger,
         "runner_command_ready": runner_command_ready,
         "runner_command_template": RUNNER_COMMAND_TEMPLATE,
         "resource_envelope": RESOURCE_ENVELOPE,

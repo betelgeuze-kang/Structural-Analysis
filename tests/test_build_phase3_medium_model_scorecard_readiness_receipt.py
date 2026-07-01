@@ -116,6 +116,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert scorecard_gap["remaining_case_count"] == 5
     assert scorecard_gap["receipt_directory"].endswith("medium_model_scorecard_receipts")
     assert [row["id"] for row in payload["operator_next_actions"]] == [
+        "select_additional_medium_model_cases",
         "complete_product_legal_license_review",
         "attach_medium_reference_outputs",
         "record_medium_canonical_normalization",
@@ -124,12 +125,30 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     ]
     assert payload["recommended_next_actions"] == payload["operator_next_actions"]
     assert payload["next_actions"] == [
+        "select_additional_medium_model_cases",
         "complete_product_legal_license_review",
         "attach_medium_reference_outputs",
         "record_medium_canonical_normalization",
         "run_medium_scorecard_receipts",
         "attach_medium_pass_or_approved_review_decisions",
     ]
+    case_ledger = payload["case_readiness_ledger"]
+    assert case_ledger["schema_version"] == "phase3-medium-model-case-readiness-ledger.v1"
+    assert case_ledger["required_case_count"] == 5
+    assert case_ledger["local_candidate_case_count"] == 2
+    assert case_ledger["missing_candidate_case_count"] == 3
+    assert case_ledger["case_ready_count"] == 0
+    assert case_ledger["selection_gate"] == {
+        "blockers": ["medium_structural_models_current_below_required:2/5"],
+        "contract_pass": False,
+        "current_candidate_case_count": 2,
+        "required_candidate_case_count": 5,
+    }
+    case_rows = {row["case_id"]: row for row in case_ledger["case_rows"]}
+    assert set(case_rows) == {"SCBF16B", "SCBF16B_shell_beam_mix"}
+    assert case_rows["SCBF16B"]["parser_contract_pass"] is True
+    assert case_rows["SCBF16B"]["authoritative_source_pass"] is True
+    assert "reference_outputs_missing" in case_rows["SCBF16B"]["blockers"]
     assert payload["case_input_requirements"]["remaining_case_count"] == 5
     assert "case_id" in {
         row["field"] for row in payload["case_input_requirements"]["case_fields"]
