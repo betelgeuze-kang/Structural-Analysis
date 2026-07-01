@@ -189,6 +189,18 @@ def _bundle(root: Path, *, case_count: int = 12) -> dict[str, object]:
     }
 
 
+def _artifact_paths(out_dir: Path) -> list[Path]:
+    return [
+        out_dir / "public_benchmark_subset_manifest.json",
+        out_dir / "public_benchmark_pose_validity_packet.json",
+        out_dir / "public_benchmark_symmetry_rmsd_scorecard.json",
+        out_dir / "public_benchmark_pose_success_harness.json",
+        out_dir / "public_benchmark_enrichment_scorecard.json",
+        out_dir / "public_benchmark_vina_gnina_comparison_adapter.json",
+        out_dir / "public_benchmark_external_receipts_validation.json",
+    ]
+
+
 def test_public_benchmark_harness_bundle_materializes_tier_beta_ready_artifacts(
     tmp_path: Path,
 ) -> None:
@@ -228,6 +240,18 @@ def test_public_benchmark_harness_bundle_materializes_tier_beta_ready_artifacts(
     assert report["real_vina_gnina_comparison_case_count"] == 1
     assert report["tier_beta_gate"]["failed_criteria"] == []
     assert report["phase2_ready"] is True
+    assert report["phase2_pose_case_alignment"]["contract_pass"] is True
+    assert report["phase2_pose_case_alignment"]["blockers"] == []
+    assert {
+        role: len(case_ids)
+        for role, case_ids in report["phase2_pose_case_alignment"][
+            "case_ids_by_role"
+        ].items()
+    } == {
+        "pose_validity_packet": module.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        "rmsd_scorecard": module.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        "pose_success_harness": module.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+    }
     assert report["phase2_ready_component_count"] == report["phase2_exit_gate"][
         "required_component_count"
     ]
@@ -467,15 +491,7 @@ def test_public_benchmark_harness_artifact_bundle_indexes_phase2_gate(
         bundle_path=bundle_path,
         out_dir=out_dir,
     )
-    artifact_paths = [
-        out_dir / "public_benchmark_subset_manifest.json",
-        out_dir / "public_benchmark_pose_validity_packet.json",
-        out_dir / "public_benchmark_symmetry_rmsd_scorecard.json",
-        out_dir / "public_benchmark_pose_success_harness.json",
-        out_dir / "public_benchmark_enrichment_scorecard.json",
-        out_dir / "public_benchmark_vina_gnina_comparison_adapter.json",
-        out_dir / "public_benchmark_external_receipts_validation.json",
-    ]
+    artifact_paths = _artifact_paths(out_dir)
 
     bundle = module.materialize_public_benchmark_artifact_bundle(
         artifact_paths,
@@ -500,6 +516,51 @@ def test_public_benchmark_harness_artifact_bundle_indexes_phase2_gate(
     assert bundle["phase2_requirement_summary"]["ready_component_count"] == 5
     assert bundle["phase2_requirement_summary"]["blocked_component_count"] == 0
     assert all(row["ready"] for row in bundle["components"])
+
+
+def test_public_benchmark_harness_artifact_bundle_blocks_phase2_pose_case_mismatch(
+    tmp_path: Path,
+) -> None:
+    bundle_path = tmp_path / "operator_bundle.json"
+    payload = _bundle(tmp_path)
+    bundle_path.write_text(json.dumps(payload), encoding="utf-8")
+    out_dir = tmp_path / "out"
+
+    module.materialize_public_benchmark_harness_bundle(
+        payload,
+        repo_root=tmp_path,
+        bundle_path=bundle_path,
+        out_dir=out_dir,
+    )
+    rmsd_path = out_dir / "public_benchmark_symmetry_rmsd_scorecard.json"
+    rmsd_payload = json.loads(rmsd_path.read_text(encoding="utf-8"))
+    rmsd_payload["rows"][0]["case_id"] = "case_99"
+    rmsd_path.write_text(json.dumps(rmsd_payload), encoding="utf-8")
+
+    bundle = module.materialize_public_benchmark_artifact_bundle(
+        _artifact_paths(out_dir),
+        repo_root=tmp_path,
+    )
+
+    assert bundle["status"] == "artifact_bundle_incomplete"
+    assert bundle["contract_pass"] is False
+    assert bundle["phase2_ready"] is False
+    alignment = bundle["phase2_pose_case_alignment"]
+    assert alignment["contract_pass"] is False
+    assert alignment["blockers_by_role"]["rmsd_scorecard"] == [
+        "phase2_pose_case_set_mismatch:pose_validity_packet_vs_rmsd_scorecard",
+        "rmsd_scorecard:phase2_pose_cases_missing:case_01",
+        "rmsd_scorecard:phase2_pose_cases_unexpected:case_99",
+    ]
+    components = {row["component_id"]: row for row in bundle["components"]}
+    assert components["symmetry_aware_ligand_rmsd"]["ready"] is False
+    assert components["symmetry_aware_ligand_rmsd"]["source_artifact_contract_pass"] is True
+    assert components["casf_pdbbind_pose_success_harness"]["ready"] is True
+    assert components["posebusters_style_pose_validity"]["ready"] is True
+    assert (
+        "symmetry_aware_ligand_rmsd::"
+        "phase2_pose_case_set_mismatch:pose_validity_packet_vs_rmsd_scorecard"
+    ) in bundle["blockers"]
 
 
 def test_public_benchmark_harness_bundle_cli_writes_report(tmp_path: Path) -> None:

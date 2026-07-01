@@ -165,6 +165,11 @@ PHASE2_REQUIRED_COMPONENTS = (
         "required_minimum_count": 1,
     },
 )
+PHASE2_POSE_CASE_ALIGNMENT_ROLES = (
+    "pose_validity_packet",
+    "rmsd_scorecard",
+    "pose_success_harness",
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -260,12 +265,102 @@ def _artifact_counts(payload: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def _artifact_case_ids(role: str, payload: dict[str, Any]) -> list[str]:
+    rows_by_role = {
+        "pose_validity_packet": _as_list(payload.get("case_rows")),
+        "rmsd_scorecard": _as_list(payload.get("rows")),
+        "pose_success_harness": _as_list(payload.get("case_rows")),
+    }
+    rows = rows_by_role.get(role, [])
+    return sorted(
+        {
+            str(row.get("case_id") or "").strip()
+            for row in rows
+            if isinstance(row, dict) and str(row.get("case_id") or "").strip()
+        }
+    )
+
+
+def _phase2_pose_case_alignment_blockers(
+    artifact_summaries: list[dict[str, Any]],
+) -> tuple[dict[str, list[str]], dict[str, Any]]:
+    summary_by_role = {
+        str(summary.get("artifact_role")): summary for summary in artifact_summaries
+    }
+    case_ids_by_role = {
+        role: [
+            str(case_id)
+            for case_id in _as_list(summary_by_role.get(role, {}).get("case_ids"))
+            if str(case_id)
+        ]
+        for role in PHASE2_POSE_CASE_ALIGNMENT_ROLES
+    }
+    blockers_by_role = {role: [] for role in PHASE2_POSE_CASE_ALIGNMENT_ROLES}
+    for role in PHASE2_POSE_CASE_ALIGNMENT_ROLES:
+        summary = summary_by_role.get(role, {})
+        if _as_int(summary.get("real_benchmark_case_count")) > 0 and not case_ids_by_role[role]:
+            blockers_by_role[role].append(f"{role}:phase2_pose_case_ids_missing")
+
+    non_empty_sets = {
+        role: set(case_ids)
+        for role, case_ids in case_ids_by_role.items()
+        if case_ids
+    }
+    if len(non_empty_sets) >= 2:
+        reference_role = "pose_validity_packet"
+        if reference_role not in non_empty_sets:
+            reference_role = sorted(non_empty_sets)[0]
+        reference_case_ids = non_empty_sets[reference_role]
+        for role, case_ids in sorted(non_empty_sets.items()):
+            if role == reference_role or case_ids == reference_case_ids:
+                continue
+            missing = sorted(reference_case_ids - case_ids)
+            unexpected = sorted(case_ids - reference_case_ids)
+            blockers_by_role[role].append(
+                f"phase2_pose_case_set_mismatch:{reference_role}_vs_{role}"
+            )
+            if missing:
+                blockers_by_role[role].append(
+                    f"{role}:phase2_pose_cases_missing:{','.join(missing[:5])}"
+                )
+            if unexpected:
+                blockers_by_role[role].append(
+                    f"{role}:phase2_pose_cases_unexpected:{','.join(unexpected[:5])}"
+                )
+
+    blockers_by_role = {
+        role: list(dict.fromkeys(blockers))
+        for role, blockers in blockers_by_role.items()
+    }
+    all_blockers = [
+        blocker
+        for blockers in blockers_by_role.values()
+        for blocker in blockers
+    ]
+    return blockers_by_role, {
+        "schema_version": "public-benchmark-phase2-pose-case-alignment.v1",
+        "roles": list(PHASE2_POSE_CASE_ALIGNMENT_ROLES),
+        "case_ids_by_role": case_ids_by_role,
+        "contract_pass": not all_blockers,
+        "blocker_count": len(all_blockers),
+        "blockers_by_role": blockers_by_role,
+        "blockers": all_blockers,
+        "claim_boundary": (
+            "PoseBusters validity, symmetry-aware RMSD, and pose-success harness "
+            "artifacts must describe the same public benchmark case set."
+        ),
+    }
+
+
 def _phase2_component_rows(
     artifact_summaries: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     summary_by_role = {
         str(summary.get("artifact_role")): summary for summary in artifact_summaries
     }
+    alignment_blockers_by_role, _alignment_summary = (
+        _phase2_pose_case_alignment_blockers(artifact_summaries)
+    )
     rows: list[dict[str, Any]] = []
     for required in PHASE2_REQUIRED_COMPONENTS:
         role = str(required["artifact_role"])
@@ -274,6 +369,7 @@ def _phase2_component_rows(
         current_count = _as_int(summary.get(count_field))
         required_minimum_count = _as_int(required["required_minimum_count"], default=1)
         blockers = [str(blocker) for blocker in _as_list(summary.get("blockers"))]
+        blockers.extend(alignment_blockers_by_role.get(role, []))
         if not summary:
             blockers.append(f"phase2_component_artifact_missing:{role}")
         elif not bool(summary.get("exists", True)):
@@ -323,6 +419,11 @@ def _phase2_component_rows(
                 "count_field": count_field,
                 "current_count": current_count,
                 "required_minimum_count": required_minimum_count,
+                "case_ids": [
+                    str(case_id)
+                    for case_id in _as_list(summary.get("case_ids"))
+                    if str(case_id)
+                ],
                 "blocker_count": len(blockers),
                 "blockers": blockers,
             }
@@ -537,6 +638,7 @@ def materialize_public_benchmark_artifact_bundle(
 
     missing_artifact_blockers = list(blockers)
     phase2_components = _phase2_component_rows(rows)
+    phase2_pose_case_alignment = _phase2_pose_case_alignment_blockers(rows)[1]
     phase2_exit_gate = _build_phase2_exit_gate(phase2_components)
     phase2_requirements = build_phase2_requirement_rows(phase2_components)
     phase2_requirement_summary = build_phase2_requirement_summary(
@@ -568,6 +670,7 @@ def materialize_public_benchmark_artifact_bundle(
         "phase2_requirement_summary": phase2_requirement_summary,
         "phase2_ready": phase2_ready,
         "phase2_exit_gate": phase2_exit_gate,
+        "phase2_pose_case_alignment": phase2_pose_case_alignment,
         "blockers": blockers,
         "materialization_report": {
             "schema_version": FULL_MATERIALIZER_SCHEMA_VERSION,
@@ -579,6 +682,9 @@ def materialize_public_benchmark_artifact_bundle(
             ),
             "phase2_ready": phase2_ready,
             "phase2_requirement_summary": phase2_requirement_summary,
+            "phase2_pose_case_alignment_contract_pass": phase2_pose_case_alignment[
+                "contract_pass"
+            ],
         },
         "claim_boundary": (
             "This bundle indexes local public-benchmark harness artifacts only. "
@@ -606,6 +712,7 @@ def _artifact_summary(
         "status": str(payload.get("status") or ""),
         "contract_pass": payload.get("contract_pass"),
         **_artifact_counts(payload),
+        "case_ids": _artifact_case_ids(role, payload),
         "ready_field": ready_field,
         "ready": _ready_from_payload(
             payload=payload,
@@ -758,6 +865,9 @@ def materialize_public_benchmark_harness_bundle(
         blockers.append(f"source_of_truth:{source_refresh_error}")
 
     phase2_components = _phase2_component_rows(artifact_summaries)
+    phase2_pose_case_alignment = _phase2_pose_case_alignment_blockers(
+        artifact_summaries
+    )[1]
     phase2_exit_gate = _build_phase2_exit_gate(phase2_components)
     phase2_requirements = build_phase2_requirement_rows(phase2_components)
     phase2_requirement_summary = build_phase2_requirement_summary(
@@ -796,6 +906,7 @@ def materialize_public_benchmark_harness_bundle(
         "phase2_requirement_summary": phase2_requirement_summary,
         "phase2_ready": phase2_ready,
         "phase2_exit_gate": phase2_exit_gate,
+        "phase2_pose_case_alignment": phase2_pose_case_alignment,
         "target_subset_case_count": int(
             subset_manifest.get("target_subset_case_count") or 0
         ),
