@@ -2774,6 +2774,7 @@ def test_snapshot_ignores_untracked_non_structural_science_actual_handoff(
 
     assert "stale_or_inconsistent:worktree_dirty" not in payload["blockers"]
     assert payload["state_consistency"]["worktree"]["dirty"] is False
+    assert payload["state_consistency"]["worktree"]["status_rows"] == []
     assert payload["state_consistency"]["worktree"]["dirty_paths"] == []
     assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == []
 

@@ -1608,15 +1608,19 @@ def build_snapshot(
         repo_root=repo_root,
         additional_paths=additional_receipt_paths,
     )
-    worktree_status_rows = (
+    raw_worktree_status_rows = (
         []
         if source_commit_sha is not None
         else _git_status_short(repo_root)
     )
+    worktree_status_rows = [
+        row
+        for row in raw_worktree_status_rows
+        if not _non_structural_product_path(_git_status_path(row))
+    ]
     worktree_dirty_paths = [
         path
         for path in (_git_status_path(row) for row in worktree_status_rows)
-        if not _non_structural_product_path(path)
     ]
     worktree_non_receipt_dirty_paths = [
         path
