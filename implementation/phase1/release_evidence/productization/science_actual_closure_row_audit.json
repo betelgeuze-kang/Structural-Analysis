@@ -1,4 +1,467 @@
 {
+  "actual_closure_requirement_summary": {
+    "actual_closure_ready": false,
+    "blocked_component_ids": [
+      "gpcr_hard_decoy_actual_closure",
+      "pocketmd_lite_topk_actual_closure"
+    ],
+    "blocked_requirement_count": 13,
+    "gpcr_phase3_passing_requirement_count": 0,
+    "gpcr_phase3_requirement_count": 5,
+    "missing_row_input_count": 2,
+    "missing_row_inputs": [
+      "gpcr_rows",
+      "pocketmd_rows"
+    ],
+    "passing_requirement_count": 1,
+    "pocketmd_phase4_passing_requirement_count": 1,
+    "pocketmd_phase4_requirement_count": 9,
+    "ready_component_count": 0,
+    "required_component_count": 2,
+    "requirement_count": 14
+  },
+  "actual_closure_requirements": [
+    {
+      "blocker_count": 3,
+      "blockers": [
+        "DRD2:ranking_pr_auc_ci_low_required",
+        "HTR2A:ranking_pr_auc_ci_low_required",
+        "OPRM1:ranking_pr_auc_ci_low_required"
+      ],
+      "component_id": "gpcr_hard_decoy_actual_closure",
+      "criterion_id": "ranking_pr_auc_ci_low_min",
+      "current_by_target": {
+        "DRD2": null,
+        "HTR2A": null,
+        "OPRM1": null
+      },
+      "expected_rows_mode": "raw_hard_decoy_rows",
+      "failed_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "materialized": false,
+      "pass": false,
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
+      },
+      "required": ">=0.45",
+      "required_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "requirement_kind": "phase3_exit_criterion",
+      "row_input_id": "gpcr_rows",
+      "scope": "gpcr_phase3_exit_gate"
+    },
+    {
+      "blocker_count": 3,
+      "blockers": [
+        "DRD2:top20_hit_rate_required",
+        "HTR2A:top20_hit_rate_required",
+        "OPRM1:top20_hit_rate_required"
+      ],
+      "component_id": "gpcr_hard_decoy_actual_closure",
+      "criterion_id": "top20_hit_rate_min",
+      "current_by_target": {
+        "DRD2": null,
+        "HTR2A": null,
+        "OPRM1": null
+      },
+      "expected_rows_mode": "raw_hard_decoy_rows",
+      "failed_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "materialized": false,
+      "pass": false,
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
+      },
+      "required": ">=0.2",
+      "required_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "requirement_kind": "phase3_exit_criterion",
+      "row_input_id": "gpcr_rows",
+      "scope": "gpcr_phase3_exit_gate"
+    },
+    {
+      "blocker_count": 3,
+      "blockers": [
+        "DRD2:decoys_above_positive_count_required",
+        "HTR2A:decoys_above_positive_count_required",
+        "OPRM1:decoys_above_positive_count_required"
+      ],
+      "component_id": "gpcr_hard_decoy_actual_closure",
+      "criterion_id": "decoys_above_positive_count_max",
+      "current_by_target": {
+        "DRD2": null,
+        "HTR2A": null,
+        "OPRM1": null
+      },
+      "expected_rows_mode": "raw_hard_decoy_rows",
+      "failed_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "materialized": false,
+      "pass": false,
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
+      },
+      "required": "<=0",
+      "required_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "requirement_kind": "phase3_exit_criterion",
+      "row_input_id": "gpcr_rows",
+      "scope": "gpcr_phase3_exit_gate"
+    },
+    {
+      "blocker_count": 3,
+      "blockers": [
+        "DRD2:positive_out_anchored_by_top_decoys_required",
+        "HTR2A:positive_out_anchored_by_top_decoys_required",
+        "OPRM1:positive_out_anchored_by_top_decoys_required"
+      ],
+      "component_id": "gpcr_hard_decoy_actual_closure",
+      "criterion_id": "no_positive_out_anchored_by_top_decoys",
+      "current_by_target": {
+        "DRD2": null,
+        "HTR2A": null,
+        "OPRM1": null
+      },
+      "expected_rows_mode": "raw_hard_decoy_rows",
+      "failed_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "materialized": false,
+      "pass": false,
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
+      },
+      "required": false,
+      "required_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "requirement_kind": "phase3_exit_criterion",
+      "row_input_id": "gpcr_rows",
+      "scope": "gpcr_phase3_exit_gate"
+    },
+    {
+      "blocker_count": 3,
+      "blockers": [
+        "DRD2:hard_decoy_rows_required_for_actual_closure",
+        "HTR2A:hard_decoy_rows_required_for_actual_closure",
+        "OPRM1:hard_decoy_rows_required_for_actual_closure"
+      ],
+      "component_id": "gpcr_hard_decoy_actual_closure",
+      "criterion_id": "raw_hard_decoy_rows_actual_closure",
+      "current_by_target": {
+        "DRD2": "missing",
+        "HTR2A": "missing",
+        "OPRM1": "missing"
+      },
+      "expected_rows_mode": "raw_hard_decoy_rows",
+      "failed_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "materialized": false,
+      "pass": false,
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
+      },
+      "required": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
+      "required_targets": [
+        "DRD2",
+        "HTR2A",
+        "OPRM1"
+      ],
+      "requirement_kind": "phase3_exit_criterion",
+      "row_input_id": "gpcr_rows",
+      "scope": "gpcr_phase3_exit_gate"
+    },
+    {
+      "blocked_claims_that_remain_locked": [
+        "broad_all_atom_md_claim",
+        "free_energy_perturbation_claim",
+        "long_timescale_md_claim",
+        "de_novo_binding_mode_claim"
+      ],
+      "blocker_count": 1,
+      "blockers": [
+        "pocketmd_lite_topk_candidate_rows_missing"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "criterion_id": "top_k_refinement_rows_present",
+      "current": 0,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "pass": false,
+      "required": ">=6",
+      "requirement_kind": "phase4_exit_criterion",
+      "row_input_id": "pocketmd_rows",
+      "scope": "pocketmd_lite_phase4_exit_gate",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      }
+    },
+    {
+      "blocked_claims_that_remain_locked": [
+        "broad_all_atom_md_claim",
+        "free_energy_perturbation_claim",
+        "long_timescale_md_claim",
+        "de_novo_binding_mode_claim"
+      ],
+      "blocker_count": 1,
+      "blockers": [
+        "pocketmd_lite_topk_candidate_rows_missing"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "criterion_id": "top_k_refinement_case_coverage",
+      "current": false,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "pass": false,
+      "required": true,
+      "requirement_kind": "phase4_exit_criterion",
+      "row_input_id": "pocketmd_rows",
+      "scope": "pocketmd_lite_phase4_exit_gate",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      }
+    },
+    {
+      "blocked_claims_that_remain_locked": [
+        "broad_all_atom_md_claim",
+        "free_energy_perturbation_claim",
+        "long_timescale_md_claim",
+        "de_novo_binding_mode_claim"
+      ],
+      "blocker_count": 1,
+      "blockers": [
+        "pocketmd_lite_local_min_survival_rows_missing"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "criterion_id": "local_min_survival_materialized",
+      "current": null,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "pass": false,
+      "required": "present",
+      "requirement_kind": "phase4_exit_criterion",
+      "row_input_id": "pocketmd_rows",
+      "scope": "pocketmd_lite_phase4_exit_gate",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      }
+    },
+    {
+      "blocked_claims_that_remain_locked": [
+        "broad_all_atom_md_claim",
+        "free_energy_perturbation_claim",
+        "long_timescale_md_claim",
+        "de_novo_binding_mode_claim"
+      ],
+      "blocker_count": 1,
+      "blockers": [
+        "pocketmd_lite_contact_persistence_rows_missing"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "criterion_id": "contact_persistence_materialized",
+      "current": null,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "pass": false,
+      "required": "present",
+      "requirement_kind": "phase4_exit_criterion",
+      "row_input_id": "pocketmd_rows",
+      "scope": "pocketmd_lite_phase4_exit_gate",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      }
+    },
+    {
+      "blocked_claims_that_remain_locked": [
+        "broad_all_atom_md_claim",
+        "free_energy_perturbation_claim",
+        "long_timescale_md_claim",
+        "de_novo_binding_mode_claim"
+      ],
+      "blocker_count": 1,
+      "blockers": [
+        "pocketmd_lite_h_bond_persistence_rows_missing"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "criterion_id": "h_bond_persistence_materialized",
+      "current": null,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "pass": false,
+      "required": "present",
+      "requirement_kind": "phase4_exit_criterion",
+      "row_input_id": "pocketmd_rows",
+      "scope": "pocketmd_lite_phase4_exit_gate",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      }
+    },
+    {
+      "blocked_claims_that_remain_locked": [
+        "broad_all_atom_md_claim",
+        "free_energy_perturbation_claim",
+        "long_timescale_md_claim",
+        "de_novo_binding_mode_claim"
+      ],
+      "blocker_count": 1,
+      "blockers": [
+        "pocketmd_lite_clash_relief_rows_missing"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "criterion_id": "clash_relief_materialized",
+      "current": null,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "pass": false,
+      "required": "present",
+      "requirement_kind": "phase4_exit_criterion",
+      "row_input_id": "pocketmd_rows",
+      "scope": "pocketmd_lite_phase4_exit_gate",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      }
+    },
+    {
+      "blocked_claims_that_remain_locked": [
+        "broad_all_atom_md_claim",
+        "free_energy_perturbation_claim",
+        "long_timescale_md_claim",
+        "de_novo_binding_mode_claim"
+      ],
+      "blocker_count": 1,
+      "blockers": [
+        "pocketmd_lite_uncertainty_rows_missing"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "criterion_id": "uncertainty_summary_materialized",
+      "current": null,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "pass": false,
+      "required": "present",
+      "requirement_kind": "phase4_exit_criterion",
+      "row_input_id": "pocketmd_rows",
+      "scope": "pocketmd_lite_phase4_exit_gate",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      }
+    },
+    {
+      "blocked_claims_that_remain_locked": [
+        "broad_all_atom_md_claim",
+        "free_energy_perturbation_claim",
+        "long_timescale_md_claim",
+        "de_novo_binding_mode_claim"
+      ],
+      "blocker_count": 6,
+      "blockers": [
+        "pocketmd_lite_topk_candidate_rows_missing",
+        "pocketmd_lite_local_min_survival_rows_missing",
+        "pocketmd_lite_contact_persistence_rows_missing",
+        "pocketmd_lite_h_bond_persistence_rows_missing",
+        "pocketmd_lite_clash_relief_rows_missing",
+        "pocketmd_lite_uncertainty_rows_missing"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "criterion_id": "report_blockers_resolved",
+      "current": false,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "pass": false,
+      "required": true,
+      "requirement_kind": "phase4_exit_criterion",
+      "row_input_id": "pocketmd_rows",
+      "scope": "pocketmd_lite_phase4_exit_gate",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      }
+    },
+    {
+      "blocked_claims_that_remain_locked": [
+        "broad_all_atom_md_claim",
+        "free_energy_perturbation_claim",
+        "long_timescale_md_claim",
+        "de_novo_binding_mode_claim"
+      ],
+      "blocker_count": 0,
+      "blockers": [],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "criterion_id": "broad_all_atom_fep_claims_locked",
+      "current": true,
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialized": false,
+      "pass": true,
+      "required": true,
+      "requirement_kind": "phase4_exit_criterion",
+      "row_input_id": "pocketmd_rows",
+      "scope": "pocketmd_lite_phase4_exit_gate",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      }
+    }
+  ],
   "blockers": [
     "gpcr_hard_decoy_actual_closure::gpcr_hard_decoy_rows_not_provided",
     "pocketmd_lite_topk_actual_closure::pocketmd_lite_topk_rows_not_provided"
@@ -32,13 +495,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T23:28:58.559289+00:00",
+  "generated_at": "2026-07-01T01:22:58.886432+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:c1df25fb0f85f5640fe6ab5362ec14a05563a3db20ab4c08192910325a6d17ca",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:42c983c6f6d04c35648a16379ba814c9349ed2427c4251a2b7e2c55736d13111",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:493daab9100f920c8f17ab7729ef31e8fee96e1d3b96dcf8840d218de7917817",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:2469abdafaf8024df93a36c74532d0f7ae62b6738dfe95f6f8b751a6b98d0398",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:fbddeea81228fca0e6037db12a658189dd39e719ab36483be2040afb11575e06"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:c04e09d4b5078f6d7dfd7bb42d595dcb1f79a56c696c10b7c575c4c22d7f4a44"
   },
   "missing_row_inputs": [
     "gpcr_rows",
@@ -201,6 +664,30 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "5cc16eeb18bd3757839ccc850705bb40a90438d4",
-  "status": "operator_evidence_required"
+  "source_commit_sha": "d27ae8fb0ad8bab491ab48ce21060cf1844fa02c",
+  "status": "operator_evidence_required",
+  "summary": {
+    "actual_closure_ready": false,
+    "blocked_component_ids": [
+      "gpcr_hard_decoy_actual_closure",
+      "pocketmd_lite_topk_actual_closure"
+    ],
+    "blocked_requirement_count": 13,
+    "blocker_count": 2,
+    "component_count": 2,
+    "component_ready_count": 0,
+    "gpcr_phase3_passing_requirement_count": 0,
+    "gpcr_phase3_requirement_count": 5,
+    "missing_row_input_count": 2,
+    "missing_row_inputs": [
+      "gpcr_rows",
+      "pocketmd_rows"
+    ],
+    "passing_requirement_count": 1,
+    "pocketmd_phase4_passing_requirement_count": 1,
+    "pocketmd_phase4_requirement_count": 9,
+    "ready_component_count": 0,
+    "required_component_count": 2,
+    "requirement_count": 14
+  }
 }
