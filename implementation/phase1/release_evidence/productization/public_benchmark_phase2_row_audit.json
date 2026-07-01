@@ -10,6 +10,105 @@
   "claim_boundary": "This runner only materializes operator-attached public benchmark row files through the existing Public Benchmark harness materializers. It does not download CASF/PDBBind, DUD-E, or LIT-PCBA data, approve licenses, run docking engines, infer chemistry, or treat fixture/proxy rows as actual Phase 2 evidence.",
   "component_count": 5,
   "component_ready_count": 0,
+  "component_requirement_summaries": [
+    {
+      "blocked_requirement_count": 1,
+      "blocker_count": 2,
+      "component_id": "casf_pdbbind_pose_success_harness",
+      "failed_criteria": [
+        "casf_pdbbind_pose_success_harness_ready"
+      ],
+      "failed_criterion_count": 1,
+      "missing_row_input_count": 2,
+      "missing_row_inputs": [
+        "subset_rows",
+        "pose_rows"
+      ],
+      "phase2_component_ready": false,
+      "ready_requirement_count": 0,
+      "required_row_inputs": [
+        "subset_rows",
+        "pose_rows"
+      ],
+      "requirement_count": 1
+    },
+    {
+      "blocked_requirement_count": 1,
+      "blocker_count": 1,
+      "component_id": "symmetry_aware_ligand_rmsd",
+      "failed_criteria": [
+        "symmetry_aware_ligand_rmsd_ready"
+      ],
+      "failed_criterion_count": 1,
+      "missing_row_input_count": 1,
+      "missing_row_inputs": [
+        "pose_rows"
+      ],
+      "phase2_component_ready": false,
+      "ready_requirement_count": 0,
+      "required_row_inputs": [
+        "pose_rows"
+      ],
+      "requirement_count": 1
+    },
+    {
+      "blocked_requirement_count": 1,
+      "blocker_count": 1,
+      "component_id": "posebusters_style_pose_validity",
+      "failed_criteria": [
+        "posebusters_style_pose_validity_ready"
+      ],
+      "failed_criterion_count": 1,
+      "missing_row_input_count": 1,
+      "missing_row_inputs": [
+        "pose_rows"
+      ],
+      "phase2_component_ready": false,
+      "ready_requirement_count": 0,
+      "required_row_inputs": [
+        "pose_rows"
+      ],
+      "requirement_count": 1
+    },
+    {
+      "blocked_requirement_count": 1,
+      "blocker_count": 1,
+      "component_id": "vina_gnina_comparison_adapter",
+      "failed_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "failed_criterion_count": 1,
+      "missing_row_input_count": 1,
+      "missing_row_inputs": [
+        "vina_gnina_rows"
+      ],
+      "phase2_component_ready": false,
+      "ready_requirement_count": 0,
+      "required_row_inputs": [
+        "vina_gnina_rows"
+      ],
+      "requirement_count": 1
+    },
+    {
+      "blocked_requirement_count": 1,
+      "blocker_count": 1,
+      "component_id": "dud_e_or_lit_pcba_enrichment",
+      "failed_criteria": [
+        "dud_e_or_lit_pcba_enrichment_ready"
+      ],
+      "failed_criterion_count": 1,
+      "missing_row_input_count": 1,
+      "missing_row_inputs": [
+        "enrichment_rows"
+      ],
+      "phase2_component_ready": false,
+      "ready_requirement_count": 0,
+      "required_row_inputs": [
+        "enrichment_rows"
+      ],
+      "requirement_count": 1
+    }
+  ],
   "components": [
     {
       "blockers": [
@@ -19,17 +118,42 @@
       "component_id": "casf_pdbbind_pose_success_harness",
       "contract_pass": false,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "failed_criteria": [
+        "casf_pdbbind_pose_success_harness_ready"
+      ],
       "materialized": false,
       "missing_row_inputs": [
         "subset_rows",
         "pose_rows"
       ],
       "outputs": {},
+      "phase2_component_ready": false,
       "ready": false,
       "required_row_inputs": [
         "subset_rows",
         "pose_rows"
       ],
+      "requirement_summary": {
+        "blocked_requirement_count": 1,
+        "blocker_count": 2,
+        "component_id": "casf_pdbbind_pose_success_harness",
+        "failed_criteria": [
+          "casf_pdbbind_pose_success_harness_ready"
+        ],
+        "failed_criterion_count": 1,
+        "missing_row_input_count": 2,
+        "missing_row_inputs": [
+          "subset_rows",
+          "pose_rows"
+        ],
+        "phase2_component_ready": false,
+        "ready_requirement_count": 0,
+        "required_row_inputs": [
+          "subset_rows",
+          "pose_rows"
+        ],
+        "requirement_count": 1
+      },
       "status": "operator_evidence_required"
     },
     {
@@ -39,15 +163,38 @@
       "component_id": "symmetry_aware_ligand_rmsd",
       "contract_pass": false,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "failed_criteria": [
+        "symmetry_aware_ligand_rmsd_ready"
+      ],
       "materialized": false,
       "missing_row_inputs": [
         "pose_rows"
       ],
       "outputs": {},
+      "phase2_component_ready": false,
       "ready": false,
       "required_row_inputs": [
         "pose_rows"
       ],
+      "requirement_summary": {
+        "blocked_requirement_count": 1,
+        "blocker_count": 1,
+        "component_id": "symmetry_aware_ligand_rmsd",
+        "failed_criteria": [
+          "symmetry_aware_ligand_rmsd_ready"
+        ],
+        "failed_criterion_count": 1,
+        "missing_row_input_count": 1,
+        "missing_row_inputs": [
+          "pose_rows"
+        ],
+        "phase2_component_ready": false,
+        "ready_requirement_count": 0,
+        "required_row_inputs": [
+          "pose_rows"
+        ],
+        "requirement_count": 1
+      },
       "status": "operator_evidence_required"
     },
     {
@@ -57,15 +204,38 @@
       "component_id": "posebusters_style_pose_validity",
       "contract_pass": false,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "failed_criteria": [
+        "posebusters_style_pose_validity_ready"
+      ],
       "materialized": false,
       "missing_row_inputs": [
         "pose_rows"
       ],
       "outputs": {},
+      "phase2_component_ready": false,
       "ready": false,
       "required_row_inputs": [
         "pose_rows"
       ],
+      "requirement_summary": {
+        "blocked_requirement_count": 1,
+        "blocker_count": 1,
+        "component_id": "posebusters_style_pose_validity",
+        "failed_criteria": [
+          "posebusters_style_pose_validity_ready"
+        ],
+        "failed_criterion_count": 1,
+        "missing_row_input_count": 1,
+        "missing_row_inputs": [
+          "pose_rows"
+        ],
+        "phase2_component_ready": false,
+        "ready_requirement_count": 0,
+        "required_row_inputs": [
+          "pose_rows"
+        ],
+        "requirement_count": 1
+      },
       "status": "operator_evidence_required"
     },
     {
@@ -75,15 +245,38 @@
       "component_id": "vina_gnina_comparison_adapter",
       "contract_pass": false,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "failed_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
       "materialized": false,
       "missing_row_inputs": [
         "vina_gnina_rows"
       ],
       "outputs": {},
+      "phase2_component_ready": false,
       "ready": false,
       "required_row_inputs": [
         "vina_gnina_rows"
       ],
+      "requirement_summary": {
+        "blocked_requirement_count": 1,
+        "blocker_count": 1,
+        "component_id": "vina_gnina_comparison_adapter",
+        "failed_criteria": [
+          "vina_gnina_comparison_ready"
+        ],
+        "failed_criterion_count": 1,
+        "missing_row_input_count": 1,
+        "missing_row_inputs": [
+          "vina_gnina_rows"
+        ],
+        "phase2_component_ready": false,
+        "ready_requirement_count": 0,
+        "required_row_inputs": [
+          "vina_gnina_rows"
+        ],
+        "requirement_count": 1
+      },
       "status": "operator_evidence_required"
     },
     {
@@ -93,25 +286,48 @@
       "component_id": "dud_e_or_lit_pcba_enrichment",
       "contract_pass": false,
       "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "failed_criteria": [
+        "dud_e_or_lit_pcba_enrichment_ready"
+      ],
       "materialized": false,
       "missing_row_inputs": [
         "enrichment_rows"
       ],
       "outputs": {},
+      "phase2_component_ready": false,
       "ready": false,
       "required_row_inputs": [
         "enrichment_rows"
       ],
+      "requirement_summary": {
+        "blocked_requirement_count": 1,
+        "blocker_count": 1,
+        "component_id": "dud_e_or_lit_pcba_enrichment",
+        "failed_criteria": [
+          "dud_e_or_lit_pcba_enrichment_ready"
+        ],
+        "failed_criterion_count": 1,
+        "missing_row_input_count": 1,
+        "missing_row_inputs": [
+          "enrichment_rows"
+        ],
+        "phase2_component_ready": false,
+        "ready_requirement_count": 0,
+        "required_row_inputs": [
+          "enrichment_rows"
+        ],
+        "requirement_count": 1
+      },
       "status": "operator_evidence_required"
     }
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T01:51:21.125739+00:00",
+  "generated_at": "2026-07-01T02:25:16.538146+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:834f1805a04cfa443914f5c89aa595d9bf7f6212c6e8fdb30767f8df87db4887",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:0361bdbe51fa557983d8529db3c86f1dd2efe9c3e42ebc8f5a66589047cbd874"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:ca222a08d28e7f93e4a25f88a6ef7db1c874851a3e2ab5e649742f9d2b2f7b32"
   },
   "missing_row_inputs": [
     "subset_rows",
@@ -908,7 +1124,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "73813b5dfbd55627309f0b951b7937e7a0ce2cab",
+  "source_commit_sha": "cb73b273d029d4013eb8f4fbac991ee171a16e3d",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
