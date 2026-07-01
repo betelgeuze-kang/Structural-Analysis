@@ -10,13 +10,13 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
-  "generated_at": "2026-07-01T17:19:09.169163+00:00",
+  "generated_at": "2026-07-01T18:35:28.146856+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:dbed17452186f2be09d834518c6fa2fed2d7b07121ce93758f0627c4c01bfa98",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:3503fc1fc7a411b25c20db770068491b2ba716289e343fe6cea5aa3a87f431d9",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:38a7b1376bea46b9e32448f147ebe13d1682ffcf1ff878bc2e8354e74abe1265",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:b6fc096b07318f1b73638297f9ed80f454c99672d94dc8ffce668891f63d0174"
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:94d6e3c3ee052c39c2221d6c97c5da6e69f33106f1efc4489fa4750288efcdb3",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:753b24976157c8ffe0de7b1afe795c94b3079ca686399bb23dd793842c1303b3"
   },
   "owner_decision_pending_count": 86,
   "owner_decision_recorded_count": 0,
@@ -1583,10 +1583,11 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "021aa333fda7326ad816808b726925469bac87c6",
+  "source_commit_sha": "607338ae5b00d61b30fc4eeab00c7203016b22cd",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
-    "fill structural_scope_owner_decisions.json from structural_scope_owner_decisions.template.json",
+    "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
+    "when using CSV, pass it with --owner-decisions <filled-owner-decisions.csv>",
     "rerun this application plan",
     "for delete decisions, remove paths from this structural repository after owner confirmation",
     "for extract decisions, preserve history/evidence externally before removing paths here",
