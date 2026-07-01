@@ -34,9 +34,16 @@ NON_STRUCTURAL_PRODUCT_PATH_SUBSTRINGS = (
     "gpcr",
     "pocketmd",
     "ligand",
+    "docking",
     "vina",
     "gnina",
     "molecular",
+    "science_actual",
+    "h_bond",
+    "md3bead",
+    "fep",
+    "free_energy",
+    "all_atom",
 )
 
 

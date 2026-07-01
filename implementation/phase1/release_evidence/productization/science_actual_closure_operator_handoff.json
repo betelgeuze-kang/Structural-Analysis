@@ -1,0 +1,1120 @@
+{
+  "audit_artifact": "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+  "claim_boundary": "This handoff is an operator checklist derived from the science row audit. It is not actual science evidence and does not close Phase 2, GPCR hard-decoy, or PocketMD Lite gates without accepted real rows.",
+  "component_slot_summary": [
+    {
+      "closes_actual_closure_criteria": [
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "ranking_pr_auc_ci_low_min",
+        "raw_hard_decoy_rows_actual_closure",
+        "top20_hit_rate_min"
+      ],
+      "component_id": "gpcr_hard_decoy_actual_closure",
+      "missing_row_input_ids": [
+        "gpcr_rows"
+      ],
+      "missing_slot_count": 1,
+      "row_input_ids": [
+        "gpcr_rows"
+      ],
+      "slot_count": 1
+    },
+    {
+      "closes_actual_closure_criteria": [
+        "broad_all_atom_fep_claims_locked",
+        "clash_relief_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "local_min_survival_materialized",
+        "report_blockers_resolved",
+        "top_k_refinement_case_coverage",
+        "top_k_refinement_rows_present",
+        "uncertainty_summary_materialized"
+      ],
+      "component_id": "pocketmd_lite_topk_actual_closure",
+      "missing_row_input_ids": [
+        "pocketmd_rows"
+      ],
+      "missing_slot_count": 1,
+      "row_input_ids": [
+        "pocketmd_rows"
+      ],
+      "slot_count": 1
+    },
+    {
+      "closes_actual_closure_criteria": [
+        "casf_pdbbind_pose_success_harness_ready",
+        "dud_e_or_lit_pcba_enrichment_ready",
+        "posebusters_style_pose_validity_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "vina_gnina_comparison_ready"
+      ],
+      "component_id": "public_benchmark_phase2_actual_closure",
+      "missing_row_input_ids": [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows"
+      ],
+      "missing_slot_count": 4,
+      "row_input_ids": [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows"
+      ],
+      "slot_count": 4
+    }
+  ],
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "first_missing_slot": {
+    "accepted_formats": [
+      "json",
+      "jsonl",
+      "ndjson",
+      "csv"
+    ],
+    "actual_closure_component_id": "public_benchmark_phase2_actual_closure",
+    "claim_boundary": "This slot records what operator-attached row evidence is needed. It does not close the science gate until the materializer accepts the real rows and the source receipt.",
+    "closes_actual_closure_criteria": [
+      "casf_pdbbind_pose_success_harness_ready"
+    ],
+    "closes_phase2_criteria": [
+      "casf_pdbbind_pose_success_harness_ready"
+    ],
+    "contract_field_groups": {
+      "required_case_fields": [
+        "case_id",
+        "source_family",
+        "benchmark_split",
+        "complex_id",
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id",
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+        "pose_success_metric",
+        "rmsd_threshold_angstrom"
+      ],
+      "source_receipt_required_fields": [
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ]
+    },
+    "contract_policies": {
+      "source_actuality_policy": {
+        "placeholder_markers_rejected": [
+          "<operator",
+          "dry-run",
+          "dummy",
+          "example.invalid",
+          "example://",
+          "fake",
+          "fixture",
+          "mock",
+          "operator_supplied",
+          "placeholder",
+          "synthetic",
+          "test-accession",
+          "todo",
+          "unit-test"
+        ],
+        "placeholder_provenance_prefixes_rejected": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
+        ],
+        "required_pose_source_receipt_fields": [
+          "receptor_context.provenance_ref"
+        ],
+        "required_source_receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_vina_engine_run_pose_ref_fields": [
+          "predicted_ligand_path_or_pose_ref"
+        ],
+        "required_vina_engine_run_receipt_fields": [
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref"
+        ],
+        "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+        "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+        "vina_engine_run_checksum_fields": [
+          "predicted_ligand_checksum",
+          "engine_config_checksum"
+        ],
+        "vina_engine_run_provenance_fields": [
+          "predicted_ligand_path_or_pose_ref",
+          "engine_run_provenance_ref"
+        ]
+      },
+      "source_checksum_policy": {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_receipt_field": "source_checksum"
+      }
+    },
+    "default_row_path_candidates": [
+      "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+      "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
+      "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.ndjson",
+      "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv"
+    ],
+    "description": "CASF/PDBBind subset rows",
+    "expected_rows_mode": "operator_attached_public_benchmark_rows",
+    "handoff_id": "science_actual_closure::subset_rows",
+    "materialization_chain": [
+      "materialize_public_benchmark_subset_manifest",
+      "validate_public_benchmark_subset_manifest",
+      "materialize_public_benchmark_pose_validity_input",
+      "materialize_public_benchmark_pose_success_harness"
+    ],
+    "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+    "missing": true,
+    "operator_action": "attach_subset_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+    "operator_blockers_if_missing": [
+      "public_benchmark_phase2_actual_closure::casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+    ],
+    "phase2_operator_blockers_if_missing": [
+      "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+    ],
+    "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+    "provided_path": "",
+    "resolved_path": "",
+    "row_contract_ref": "row_intake_contracts.subset_rows",
+    "row_input_id": "subset_rows",
+    "status": "operator_input_required"
+  },
+  "generated_at": "2026-07-01T12:42:56.431296+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:d72f9746d943cd6955bc1294389af0d4661593b326ac8203abdc780c6b490281",
+    "scripts/build_science_actual_closure_operator_handoff.py": "sha256:6ceca1ef844a1e17b88972c169fcd1bd0c98b74668b2b17bec362bb16a859614"
+  },
+  "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+  "missing_row_inputs": [
+    "subset_rows",
+    "pose_rows",
+    "enrichment_rows",
+    "vina_gnina_rows",
+    "gpcr_rows",
+    "pocketmd_rows"
+  ],
+  "operator_next_actions": [
+    "attach_subset_rows",
+    "attach_pose_rows",
+    "attach_enrichment_rows",
+    "attach_vina_gnina_rows",
+    "attach_gpcr_rows",
+    "attach_pocketmd_rows",
+    "run_science_actual_closure_row_materializer",
+    "review_science_actual_closure_row_audit"
+  ],
+  "required_actual_closures": [
+    "public_benchmark_phase2_actual_closure",
+    "gpcr_hard_decoy_actual_closure",
+    "pocketmd_lite_topk_actual_closure"
+  ],
+  "reuse_policy": "science_actual_closure_operator_handoff_from_row_audit",
+  "reused_evidence": true,
+  "row_slot_handoff_count": 6,
+  "row_slot_handoffs": [
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_closure_component_id": "public_benchmark_phase2_actual_closure",
+      "claim_boundary": "This slot records what operator-attached row evidence is needed. It does not close the science gate until the materializer accepts the real rows and the source receipt.",
+      "closes_actual_closure_criteria": [
+        "casf_pdbbind_pose_success_harness_ready"
+      ],
+      "closes_phase2_criteria": [
+        "casf_pdbbind_pose_success_harness_ready"
+      ],
+      "contract_field_groups": {
+        "required_case_fields": [
+          "case_id",
+          "source_family",
+          "benchmark_split",
+          "complex_id",
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id",
+          "ligand_atom_order_contract",
+          "symmetry_permutation_contract",
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref",
+          "pose_success_metric",
+          "rmsd_threshold_angstrom"
+        ],
+        "source_receipt_required_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ]
+      },
+      "contract_policies": {
+        "source_actuality_policy": {
+          "placeholder_markers_rejected": [
+            "<operator",
+            "dry-run",
+            "dummy",
+            "example.invalid",
+            "example://",
+            "fake",
+            "fixture",
+            "mock",
+            "operator_supplied",
+            "placeholder",
+            "synthetic",
+            "test-accession",
+            "todo",
+            "unit-test"
+          ],
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "required_pose_source_receipt_fields": [
+            "receptor_context.provenance_ref"
+          ],
+          "required_source_receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_vina_engine_run_pose_ref_fields": [
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "required_vina_engine_run_receipt_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+          "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+          "vina_engine_run_checksum_fields": [
+            "predicted_ligand_checksum",
+            "engine_config_checksum"
+          ],
+          "vina_engine_run_provenance_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "engine_run_provenance_ref"
+          ]
+        },
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        }
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv"
+      ],
+      "description": "CASF/PDBBind subset rows",
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "handoff_id": "science_actual_closure::subset_rows",
+      "materialization_chain": [
+        "materialize_public_benchmark_subset_manifest",
+        "validate_public_benchmark_subset_manifest",
+        "materialize_public_benchmark_pose_validity_input",
+        "materialize_public_benchmark_pose_success_harness"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "missing": true,
+      "operator_action": "attach_subset_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+      "operator_blockers_if_missing": [
+        "public_benchmark_phase2_actual_closure::casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [
+        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+      ],
+      "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+      "provided_path": "",
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.subset_rows",
+      "row_input_id": "subset_rows",
+      "status": "operator_input_required"
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_closure_component_id": "public_benchmark_phase2_actual_closure",
+      "claim_boundary": "This slot records what operator-attached row evidence is needed. It does not close the science gate until the materializer accepts the real rows and the source receipt.",
+      "closes_actual_closure_criteria": [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready"
+      ],
+      "closes_phase2_criteria": [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready"
+      ],
+      "contract_field_groups": {
+        "required_context_fields": [
+          "ligand_atom_order_contract",
+          "symmetry_permutation_contract",
+          "receptor_context"
+        ],
+        "required_pose_fields": [
+          "case_id",
+          "pose_success_metric",
+          "benchmark_split",
+          "reference_atoms",
+          "predicted_atoms",
+          "ligand_atom_order_contract",
+          "symmetry_permutation_contract",
+          "protein_structure_path",
+          "receptor_context"
+        ]
+      },
+      "contract_policies": {
+        "numeric_value_policy": {
+          "predicted_atoms": "x/y/z coordinates must parse to finite floats; NaN and Infinity are rejected",
+          "reference_atoms": "x/y/z coordinates must parse to finite floats; NaN and Infinity are rejected",
+          "rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected"
+        },
+        "source_actuality_policy": {
+          "placeholder_markers_rejected": [
+            "<operator",
+            "dry-run",
+            "dummy",
+            "example.invalid",
+            "example://",
+            "fake",
+            "fixture",
+            "mock",
+            "operator_supplied",
+            "placeholder",
+            "synthetic",
+            "test-accession",
+            "todo",
+            "unit-test"
+          ],
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "required_pose_source_receipt_fields": [
+            "receptor_context.provenance_ref"
+          ]
+        }
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.csv"
+      ],
+      "description": "CASF/PDBBind pose-coordinate rows",
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "handoff_id": "science_actual_closure::pose_rows",
+      "materialization_chain": [
+        "materialize_public_benchmark_pose_validity_input",
+        "validate_public_benchmark_pose_validity",
+        "materialize_public_benchmark_posebusters_validity_packet",
+        "materialize_public_benchmark_rmsd_scorecard",
+        "materialize_public_benchmark_pose_success_harness"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "missing": true,
+      "operator_action": "attach_pose_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "operator_blockers_if_missing": [
+        "public_benchmark_phase2_actual_closure::casf_pdbbind_pose_success_harness::pose_rows_not_provided",
+        "public_benchmark_phase2_actual_closure::symmetry_aware_ligand_rmsd::pose_rows_not_provided",
+        "public_benchmark_phase2_actual_closure::posebusters_style_pose_validity::pose_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [
+        "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
+        "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
+        "posebusters_style_pose_validity::pose_rows_not_provided"
+      ],
+      "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+      "provided_path": "",
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.pose_rows",
+      "row_input_id": "pose_rows",
+      "status": "operator_input_required"
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_closure_component_id": "public_benchmark_phase2_actual_closure",
+      "claim_boundary": "This slot records what operator-attached row evidence is needed. It does not close the science gate until the materializer accepts the real rows and the source receipt.",
+      "closes_actual_closure_criteria": [
+        "dud_e_or_lit_pcba_enrichment_ready"
+      ],
+      "closes_phase2_criteria": [
+        "dud_e_or_lit_pcba_enrichment_ready"
+      ],
+      "contract_field_groups": {
+        "required_molecule_fields": [
+          "molecule_id",
+          "is_active",
+          "score"
+        ],
+        "required_target_fields": [
+          "benchmark_family",
+          "target_id",
+          "score_direction",
+          "scored_molecules",
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "source_receipt_required_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ]
+      },
+      "contract_policies": {
+        "boolean_label_policy": {
+          "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+        },
+        "numeric_value_policy": {
+          "score": "must parse to a finite float; NaN and Infinity are rejected"
+        },
+        "row_integrity_policy": {
+          "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+          "required_unique_row_keys": {
+            "target_scored_molecules": [
+              "molecule_id"
+            ],
+            "targets": [
+              "target_id"
+            ]
+          }
+        },
+        "score_direction_policy": {
+          "accepted_aliases": {
+            "higher_is_better": [
+              "higher",
+              "higher_is_better",
+              "descending"
+            ],
+            "lower_is_better": [
+              "lower",
+              "lower_is_better",
+              "ascending"
+            ]
+          },
+          "accepted_values": [
+            "higher_is_better",
+            "lower_is_better"
+          ],
+          "blank_values": "rejected; no implicit default is applied",
+          "required": true
+        },
+        "source_actuality_policy": {
+          "placeholder_markers_rejected": [
+            "<operator",
+            "dry-run",
+            "dummy",
+            "example.invalid",
+            "example://",
+            "fake",
+            "fixture",
+            "mock",
+            "operator_supplied",
+            "placeholder",
+            "synthetic",
+            "test-accession",
+            "todo",
+            "unit-test"
+          ],
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "required_pose_source_receipt_fields": [
+            "receptor_context.provenance_ref"
+          ],
+          "required_source_receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_vina_engine_run_pose_ref_fields": [
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "required_vina_engine_run_receipt_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+          "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+          "vina_engine_run_checksum_fields": [
+            "predicted_ligand_checksum",
+            "engine_config_checksum"
+          ],
+          "vina_engine_run_provenance_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "engine_run_provenance_ref"
+          ]
+        },
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        }
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.csv"
+      ],
+      "description": "DUD-E/LIT-PCBA enrichment rows",
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "handoff_id": "science_actual_closure::enrichment_rows",
+      "materialization_chain": [
+        "materialize_public_benchmark_enrichment_scorecard"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "missing": true,
+      "operator_action": "attach_enrichment_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "operator_blockers_if_missing": [
+        "public_benchmark_phase2_actual_closure::dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [
+        "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+      ],
+      "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+      "provided_path": "",
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.enrichment_rows",
+      "row_input_id": "enrichment_rows",
+      "status": "operator_input_required"
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_closure_component_id": "public_benchmark_phase2_actual_closure",
+      "claim_boundary": "This slot records what operator-attached row evidence is needed. It does not close the science gate until the materializer accepts the real rows and the source receipt.",
+      "closes_actual_closure_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "contract_field_groups": {
+        "required_case_fields": [
+          "case_id",
+          "source_family",
+          "benchmark_split",
+          "complex_id",
+          "reference_pose_id",
+          "engine_runs",
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "source_receipt_required_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ]
+      },
+      "contract_policies": {
+        "boolean_value_policy": {
+          "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+        },
+        "numeric_value_policy": {
+          "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+          "score": "must parse to a finite float; NaN and Infinity are rejected",
+          "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+        },
+        "row_integrity_policy": {
+          "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+          "required_unique_row_keys": {
+            "case_engine_runs": [
+              "engine_id",
+              "docking_run_id"
+            ],
+            "cases": [
+              "case_id"
+            ]
+          }
+        },
+        "score_direction_policy": {
+          "accepted_aliases": {
+            "higher_is_better": [
+              "higher",
+              "higher_is_better",
+              "descending"
+            ],
+            "lower_is_better": [
+              "lower",
+              "lower_is_better",
+              "ascending"
+            ]
+          },
+          "accepted_values": [
+            "higher_is_better",
+            "lower_is_better"
+          ],
+          "blank_values": "rejected; no implicit default is applied",
+          "required": true
+        },
+        "source_actuality_policy": {
+          "placeholder_markers_rejected": [
+            "<operator",
+            "dry-run",
+            "dummy",
+            "example.invalid",
+            "example://",
+            "fake",
+            "fixture",
+            "mock",
+            "operator_supplied",
+            "placeholder",
+            "synthetic",
+            "test-accession",
+            "todo",
+            "unit-test"
+          ],
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "required_pose_source_receipt_fields": [
+            "receptor_context.provenance_ref"
+          ],
+          "required_source_receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_vina_engine_run_pose_ref_fields": [
+            "predicted_ligand_path_or_pose_ref"
+          ],
+          "required_vina_engine_run_receipt_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref"
+          ],
+          "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
+          "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+          "vina_engine_run_checksum_fields": [
+            "predicted_ligand_checksum",
+            "engine_config_checksum"
+          ],
+          "vina_engine_run_provenance_fields": [
+            "predicted_ligand_path_or_pose_ref",
+            "engine_run_provenance_ref"
+          ]
+        },
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        }
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+      ],
+      "description": "Vina/GNINA engine comparison rows",
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "handoff_id": "science_actual_closure::vina_gnina_rows",
+      "materialization_chain": [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
+      "missing": true,
+      "operator_action": "attach_vina_gnina_rows_at_implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "operator_blockers_if_missing": [
+        "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [
+        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+      ],
+      "preferred_default_row_path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+      "provided_path": "",
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.vina_gnina_rows",
+      "row_input_id": "vina_gnina_rows",
+      "status": "operator_input_required"
+    },
+    {
+      "accepted_formats": [
+        "csv",
+        "tsv",
+        "json",
+        "jsonl",
+        "ndjson"
+      ],
+      "actual_closure_component_id": "gpcr_hard_decoy_actual_closure",
+      "claim_boundary": "This slot records what operator-attached row evidence is needed. It does not close the science gate until the materializer accepts the real rows and the source receipt.",
+      "closes_actual_closure_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
+      ],
+      "closes_phase2_criteria": [],
+      "contract_field_groups": {
+        "required_flat_row_fields": [
+          "target_id",
+          "molecule_id",
+          "score",
+          "is_positive",
+          "is_decoy"
+        ],
+        "source_receipt_required_fields": [
+          "source_id",
+          "source_url",
+          "source_license",
+          "source_artifact_sha256"
+        ]
+      },
+      "contract_policies": {
+        "boolean_label_policy": {
+          "is_decoy": "must parse to a boolean; exactly one of is_positive/is_decoy must be true per molecule row",
+          "is_positive": "must parse to a boolean; exactly one of is_positive/is_decoy must be true per molecule row"
+        },
+        "numeric_value_policy": {
+          "score": "must parse to a finite float; NaN and Infinity are rejected"
+        },
+        "raw_row_quality_minimums": {
+          "min_decoy_count_per_target": 20,
+          "min_positive_count_per_target": 4,
+          "min_total_row_count_per_target": 24
+        },
+        "row_integrity_policy": {
+          "purpose": "Duplicate molecules within a GPCR target cannot be used to inflate positive/decoy counts or Phase 3 hard-decoy ranking metrics.",
+          "required_unique_row_keys": {
+            "raw_hard_decoy_rows": [
+              "target_id",
+              "molecule_id"
+            ]
+          }
+        },
+        "score_direction_policy": "Each target must use one consistent score_direction value; mixed higher_is_better/lower_is_better rows for the same target are rejected.",
+        "source_actuality_policy": {
+          "placeholder_source_text_markers_rejected": [
+            "<operator",
+            "fixture",
+            "synthetic",
+            "mock",
+            "placeholder",
+            "dummy",
+            "example",
+            "unit-test",
+            "test-only"
+          ],
+          "placeholder_source_url_markers_rejected": [
+            "://example.",
+            ".example/",
+            ".invalid",
+            ".test/",
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0"
+          ],
+          "placeholder_source_url_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "source_artifact_sha256_policy": "sha256:<64 hex> and must match the attached raw hard-decoy row artifact"
+        }
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.tsv"
+      ],
+      "description": "GPCR hard-decoy raw ranking rows",
+      "expected_rows_mode": "raw_hard_decoy_rows",
+      "handoff_id": "science_actual_closure::gpcr_rows",
+      "materialization_chain": [
+        "materialize_gpcr_hard_decoy_operator_template_from_rows",
+        "materialize_gpcr_hard_decoy_suite_report",
+        "build_gpcr_evidence_surface"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --gpcr-rows <gpcr-hard-decoy-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+      "missing": true,
+      "operator_action": "attach_gpcr_rows_at_implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+      "operator_blockers_if_missing": [
+        "gpcr_hard_decoy_actual_closure::gpcr_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [],
+      "preferred_default_row_path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+      "provided_path": "",
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.gpcr_rows",
+      "row_input_id": "gpcr_rows",
+      "status": "operator_input_required"
+    },
+    {
+      "accepted_formats": [
+        "csv",
+        "tsv",
+        "json",
+        "jsonl",
+        "ndjson"
+      ],
+      "actual_closure_component_id": "pocketmd_lite_topk_actual_closure",
+      "claim_boundary": "This slot records what operator-attached row evidence is needed. It does not close the science gate until the materializer accepts the real rows and the source receipt.",
+      "closes_actual_closure_criteria": [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+        "broad_all_atom_fep_claims_locked"
+      ],
+      "closes_phase2_criteria": [],
+      "contract_field_groups": {
+        "required_case_fields": [
+          "case_id",
+          "source_family",
+          "top_k_rank",
+          "candidate_id",
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
+          "pre_refinement_energy_proxy",
+          "post_refinement_energy_proxy",
+          "local_min_survived",
+          "contact_persistence_rate",
+          "h_bond_persistence_rate",
+          "clash_count_before",
+          "clash_count_after",
+          "uncertainty_interval",
+          "provenance_ref",
+          "source_checksum"
+        ],
+        "required_component_metrics": [
+          "local_min_survival_rate",
+          "contact_persistence_rate",
+          "h_bond_persistence_rate",
+          "clash_relief_rate",
+          "uncertainty_width_median"
+        ],
+        "required_summary_metrics": [
+          "local_min_survival_rate",
+          "contact_persistence_rate_median",
+          "h_bond_persistence_rate_median",
+          "clash_relief_rate",
+          "uncertainty_width_median"
+        ],
+        "source_receipt_required_fields": [
+          "source_id",
+          "source_url",
+          "source_license",
+          "source_artifact_sha256",
+          "per_row_source_checksum",
+          "per_row_provenance_ref"
+        ],
+        "uncertainty_field_modes": [
+          "uncertainty_interval:{low,high,unit}",
+          "uncertainty_low+uncertainty_high+uncertainty_unit"
+        ]
+      },
+      "contract_policies": {
+        "boolean_value_policy": {
+          "local_min_survived": "must parse to a boolean value"
+        },
+        "numeric_value_policy": {
+          "contact_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+          "h_bond_persistence_rate": "must parse to a finite float in [0, 1]; NaN and Infinity are rejected",
+          "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+          "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+          "uncertainty_interval.high": "must parse to a finite float and be >= low; NaN and Infinity are rejected",
+          "uncertainty_interval.low": "must parse to a finite float; NaN and Infinity are rejected"
+        },
+        "per_row_source_actuality_policy": {
+          "placeholder_markers_rejected": [
+            "<operator",
+            "fixture",
+            "synthetic",
+            "mock",
+            "placeholder",
+            "dummy",
+            "example",
+            "operator_supplied",
+            "unit-test",
+            "test-only"
+          ],
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://"
+          ],
+          "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+        },
+        "row_integrity_policy": {
+          "purpose": "Duplicate PocketMD Lite top-k ranks or candidate identities cannot be used to inflate case, candidate, or survival counts.",
+          "required_unique_row_keys": {
+            "top_k_refinement_rows": [
+              [
+                "case_id",
+                "top_k_rank"
+              ],
+              [
+                "case_id",
+                "candidate_id"
+              ]
+            ]
+          }
+        },
+        "top_k_row_quality_minimums": {
+          "min_candidate_count_per_case": 2,
+          "min_real_refinement_case_count": 3,
+          "min_top_k_rank_coverage_per_case": 2,
+          "min_total_top_k_candidate_count": 6
+        }
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+      ],
+      "description": "PocketMD Lite top-k refinement rows",
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "handoff_id": "science_actual_closure::pocketmd_rows",
+      "materialization_chain": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+        "materialize_pocketmd_lite_topk_survival_report",
+        "build_pocketmd_lite_science_product_surface"
+      ],
+      "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
+      "missing": true,
+      "operator_action": "attach_pocketmd_rows_at_implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "operator_blockers_if_missing": [
+        "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [],
+      "preferred_default_row_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "provided_path": "",
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.pocketmd_rows",
+      "row_input_id": "pocketmd_rows",
+      "status": "operator_input_required"
+    }
+  ],
+  "schema_version": "science-actual-closure-operator-handoff.v1",
+  "science_actual_closure_contract_pass": false,
+  "science_actual_closure_status": "operator_evidence_required",
+  "source_commit_sha": "6ee008a79302bab8d6f399a568d4a598774c9b8e",
+  "status": "operator_rows_required",
+  "summary": {
+    "closes_actual_closure_criteria_count": 19,
+    "component_count": 3,
+    "expected_slot_count": 6,
+    "missing_slot_count": 6,
+    "provided_slot_count": 0,
+    "science_actual_closure_blocker_count": 8,
+    "slot_count": 6
+  }
+}
