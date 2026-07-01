@@ -10,7 +10,7 @@
   },
   "first_non_structural_path": "implementation/phase1/md3bead_scientific_validity_report.md",
   "first_unquarantined_non_structural_path": "",
-  "generated_at": "2026-07-01T23:21:26.518748+00:00",
+  "generated_at": "2026-07-01T23:22:38.923987+00:00",
   "git_state_counts": {
     "tracked": 86
   },
@@ -2886,9 +2886,9 @@
   "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths_with_release_surface_quarantine_manifest",
   "reused_evidence": false,
   "schema_version": "structural-scope-contamination-audit.v1",
-  "source_commit_sha": "bbc622865f7a94d2eacfb2fedf358071b558091a",
+  "source_commit_sha": "ea3faac9e125d01905db0fbe7166fd21d83520bb",
   "status": "quarantined",
-  "tracked_path_count": 5743,
+  "tracked_path_count": 5746,
   "unquarantined_family_counts": {},
   "unquarantined_git_state_counts": {},
   "unquarantined_non_structural_path_count": 0,
