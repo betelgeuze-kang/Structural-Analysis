@@ -2156,6 +2156,9 @@ def _build_release_area_matrix(
 
     ci_streak_intake = _load_json(ci_streak_intake_packet_path)
     ci_streak_source_evidence = _as_dict(ci_streak_intake.get("source_evidence"))
+    ci_streak_runner_precondition = _as_dict(
+        ci_streak_intake.get("runner_precondition")
+    )
     ci_streak_source_lanes = _as_dict(ci_streak_source_evidence.get("lanes"))
     pr_intake_lane = _lane_row_by_id(ci_streak_intake, "pr")
     nightly_intake_lane = _lane_row_by_id(ci_streak_intake, "nightly")
@@ -2190,6 +2193,18 @@ def _build_release_area_matrix(
         "nightly",
         "claim_boundary",
     ) or _ci_lane_claim_boundary("nightly")
+    runner_precondition_evaluated = bool(
+        ci_streak_runner_precondition.get("evaluated", False)
+    )
+    runner_precondition_pass = bool(
+        ci_streak_runner_precondition.get("contract_pass", True)
+    )
+    runner_owner_action = str(
+        ci_streak_runner_precondition.get("owner_action", "") or ""
+    )
+    if runner_precondition_evaluated and not runner_precondition_pass and runner_owner_action:
+        pr_owner_action = f"{runner_owner_action} After that, {pr_owner_action}"
+        nightly_owner_action = f"{runner_owner_action} After that, {nightly_owner_action}"
     basic_ci_checks = {
         "pr_ci_pass": _reason_pass(ci_pr),
         "nightly_ci_pass": _reason_pass(ci_nightly),
@@ -2197,6 +2212,7 @@ def _build_release_area_matrix(
         "nightly_ci_30_run_streak_pass": nightly_streak >= ci_pass_streak_threshold,
         "ci_streak_intake_contract_pass": _truthy_contract(ci_streak_intake),
         "ci_streak_source_evidence_pass": ci_streak_source_evidence.get("contract_pass") is True,
+        "ci_streak_runner_precondition_pass": runner_precondition_pass,
     }
     basic_ci_blockers = [
         *(["pr_ci_not_pass"] if not basic_ci_checks["pr_ci_pass"] else []),
@@ -2244,6 +2260,24 @@ def _build_release_area_matrix(
                 ),
                 "ci_streak_source_evidence_age_hours": ci_streak_source_evidence.get("age_hours"),
                 "ci_streak_source_evidence_freshness_pass": ci_streak_source_evidence.get("freshness_pass"),
+                "ci_runner_precondition_evaluated": runner_precondition_evaluated,
+                "ci_runner_precondition_pass": runner_precondition_pass,
+                "ci_runner_status": str(
+                    ci_streak_runner_precondition.get("status", "")
+                ),
+                "ci_runner_required_labels": ci_streak_runner_precondition.get(
+                    "required_labels", []
+                ),
+                "ci_runner_matching_runner_count": ci_streak_runner_precondition.get(
+                    "matching_runner_count"
+                ),
+                "ci_runner_online_matching_runner_count": ci_streak_runner_precondition.get(
+                    "online_matching_runner_count"
+                ),
+                "ci_runner_ready_runner_count": ci_streak_runner_precondition.get(
+                    "ready_runner_count"
+                ),
+                "ci_runner_owner_action": runner_owner_action,
                 "pr_source_evidence_release_credit_pass": _as_dict(
                     ci_streak_source_lanes.get("pr")
                 ).get("source_release_credit_pass"),

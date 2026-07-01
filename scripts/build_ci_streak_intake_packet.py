@@ -16,6 +16,9 @@ DEFAULT_MANIFEST = Path("implementation/phase1/release_evidence/productization/c
 DEFAULT_GITHUB_ACTIONS_EVIDENCE = Path(
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json"
 )
+DEFAULT_SELF_HOSTED_RUNNER_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json"
+)
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json")
 DEFAULT_OUT_MD = Path("implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md")
 DEFAULT_MAX_SOURCE_EVIDENCE_AGE_HOURS = 24 * 7
@@ -229,6 +232,57 @@ def _source_evidence(
     }
 
 
+def _runner_precondition(path: Path | None) -> dict[str, Any]:
+    if path is None:
+        return {
+            "evaluated": False,
+            "path": "",
+            "present": False,
+            "contract_pass": True,
+            "status": "not_evaluated",
+            "blockers": [],
+            "required_labels": [],
+            "matching_runner_count": 0,
+            "online_matching_runner_count": 0,
+            "ready_runner_count": 0,
+            "owner_action": "",
+        }
+    payload = _load_json(path)
+    present = bool(payload)
+    blockers = [str(item) for item in payload.get("blockers", []) if str(item)]
+    required_labels = [
+        str(item) for item in payload.get("required_labels", []) if str(item)
+    ]
+    contract_pass = bool(present and payload.get("contract_pass") is True)
+    online_count = _as_int(payload.get("online_matching_runner_count"))
+    matching_count = _as_int(payload.get("matching_runner_count"))
+    ready_count = _as_int(payload.get("ready_runner_count"))
+    if contract_pass:
+        owner_action = "No runner recovery action required; at least one required self-hosted runner is online."
+    else:
+        labels = ", ".join(required_labels) or "required self-hosted runner labels"
+        owner_action = (
+            "Bring at least one GitHub Actions self-hosted runner online with labels "
+            f"{labels}, then refresh github_actions_self_hosted_runner_status.json and "
+            "github_actions_ci_streak_evidence.json before collecting the 30-run streak."
+        )
+    return {
+        "evaluated": True,
+        "path": str(path),
+        "present": present,
+        "schema_version": str(payload.get("schema_version", "")),
+        "contract_pass": contract_pass,
+        "status": str(payload.get("status", "missing") or "missing"),
+        "blockers": blockers if present else ["self_hosted_runner_status_missing"],
+        "required_labels": required_labels,
+        "matching_runner_count": matching_count,
+        "online_matching_runner_count": online_count,
+        "ready_runner_count": ready_count,
+        "owner_action": owner_action,
+        "claim_boundary": str(payload.get("claim_boundary", "")),
+    }
+
+
 def _lane_row(lane: str, manifest: dict[str, Any], source_evidence: dict[str, Any]) -> dict[str, Any]:
     manifest_lane = _manifest_lane(manifest, lane)
     source_lane = _as_dict(_as_dict(source_evidence.get("lanes")).get(lane))
@@ -306,6 +360,7 @@ def build_packet(
     *,
     manifest_path: Path = DEFAULT_MANIFEST,
     github_actions_evidence_path: Path = DEFAULT_GITHUB_ACTIONS_EVIDENCE,
+    runner_status_path: Path | None = None,
     now: datetime | None = None,
     max_source_evidence_age_hours: float = DEFAULT_MAX_SOURCE_EVIDENCE_AGE_HOURS,
 ) -> dict[str, Any]:
@@ -320,6 +375,7 @@ def build_packet(
         now=now,
         max_age_hours=max_source_evidence_age_hours,
     )
+    runner_precondition = _runner_precondition(runner_status_path)
     lane_rows = [
         _lane_row("pr", manifest, source_evidence),
         _lane_row("nightly", manifest, source_evidence),
@@ -330,6 +386,12 @@ def build_packet(
         for blocker in row["blockers"]
         if not row["threshold_pass"]
     ]
+    runner_blockers = [
+        f"runner:{blocker}"
+        for blocker in runner_precondition["blockers"]
+        if runner_precondition["evaluated"] and not runner_precondition["contract_pass"]
+    ]
+    blockers.extend(runner_blockers)
     contract_pass = bool(manifest.get("contract_pass") is True and source_evidence["contract_pass"] and not blockers)
     source_blockers = [str(item) for item in source_evidence["blockers"]]
     return {
@@ -346,12 +408,21 @@ def build_packet(
         "ci_consecutive_pass_manifest": str(manifest_path),
         "github_actions_ci_streak_evidence": str(github_actions_evidence_path),
         "source_evidence": source_evidence,
+        "runner_precondition": runner_precondition,
         "summary": {
             "threshold": threshold,
             "lane_count": len(lane_rows),
             "lane_pass_count": sum(1 for row in lane_rows if row["threshold_pass"]),
             "open_blocker_count": len(blockers),
             "source_evidence_pass": source_evidence["contract_pass"],
+            "runner_precondition_evaluated": runner_precondition["evaluated"],
+            "runner_precondition_pass": runner_precondition["contract_pass"],
+            "runner_status": runner_precondition["status"],
+            "runner_required_labels": runner_precondition["required_labels"],
+            "runner_matching_runner_count": runner_precondition["matching_runner_count"],
+            "runner_online_matching_runner_count": runner_precondition["online_matching_runner_count"],
+            "runner_ready_runner_count": runner_precondition["ready_runner_count"],
+            "runner_owner_action": runner_precondition["owner_action"],
             "source_evidence_generated_at": source_evidence["generated_at"],
             "source_evidence_age_hours": source_evidence["age_hours"],
             "source_evidence_freshness_pass": source_evidence["freshness_pass"],
@@ -396,6 +467,7 @@ def build_packet(
         "lane_rows": lane_rows,
         "current_blockers": blockers,
         "validation_commands": [
+            f"python3 scripts/check_github_actions_self_hosted_runner_status.py --out {DEFAULT_SELF_HOSTED_RUNNER_STATUS}",
             f"python3 scripts/build_github_actions_ci_streak_evidence.py --out {DEFAULT_GITHUB_ACTIONS_EVIDENCE}",
             f"python3 scripts/build_ci_consecutive_pass_manifest.py --out {DEFAULT_MANIFEST}",
             f"python3 scripts/build_ci_streak_intake_packet.py --out {DEFAULT_OUT}",
@@ -434,6 +506,23 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{row['github_actions_workflow_registered']}` | `{row['threshold_pass']}` | "
             f"{row['owner_action']} |"
         )
+    runner = payload["runner_precondition"]
+    if runner["evaluated"]:
+        lines.extend(
+            [
+                "",
+                "## Runner Precondition",
+                "",
+                "| Path | Status | Online Matching | Ready | Pass | Owner Action |",
+                "|---|---|---:|---:|---:|---|",
+                (
+                    f"| `{runner['path']}` | `{runner['status']}` | "
+                    f"`{runner['online_matching_runner_count']}/{runner['matching_runner_count']}` | "
+                    f"`{runner['ready_runner_count']}` | `{runner['contract_pass']}` | "
+                    f"{runner['owner_action']} |"
+                ),
+            ]
+        )
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:
         lines.append(f"- `{command}`")
@@ -458,6 +547,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--github-actions-evidence", type=Path, default=DEFAULT_GITHUB_ACTIONS_EVIDENCE)
+    parser.add_argument("--runner-status", type=Path, default=DEFAULT_SELF_HOSTED_RUNNER_STATUS)
     parser.add_argument("--max-source-evidence-age-hours", type=float, default=DEFAULT_MAX_SOURCE_EVIDENCE_AGE_HOURS)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
@@ -471,6 +561,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = build_packet(
         manifest_path=args.manifest,
         github_actions_evidence_path=args.github_actions_evidence,
+        runner_status_path=args.runner_status,
         max_source_evidence_age_hours=args.max_source_evidence_age_hours,
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
