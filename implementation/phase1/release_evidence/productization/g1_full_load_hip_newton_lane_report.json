@@ -5,8 +5,8 @@
         "checkpoint_resolution_no_full_load_candidate"
       ],
       "full_load_candidate_count": 0,
-      "highest_observed_gap_to_required_load_scale": 0.344,
-      "highest_observed_load_scale": 0.656,
+      "highest_observed_gap_to_required_load_scale": null,
+      "highest_observed_load_scale": null,
       "ready": false,
       "required_load_scale": 1.0
     },
@@ -99,6 +99,7 @@
     "schema_version": "g1-full-load-hip-newton-blocker-partition.v1"
   },
   "blockers": [
+    "auto_select_no_loadable_candidates",
     "checkpoint_load_scale_below_required_full_load",
     "checkpoint_resolution_no_full_load_candidate",
     "hip_consistency_proof_source_commit_sha_mismatch",
@@ -108,141 +109,20 @@
     "hip_consistency_proof_has_blockers"
   ],
   "checkpoint": {
-    "dof_count": 78282,
-    "failed_bracket_load_scales": [],
-    "frontier_load_scale": null,
-    "load_path_provenance_present": false,
-    "load_scale": 0.656,
-    "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
-    "schema": "mgt-direct-residual-newton-state.v1"
+    "load_scale": null,
+    "path": null
   },
   "checkpoint_resolution": {
     "mode": "auto_select",
     "requested_path": null,
     "selection": {
       "candidate_count": 50,
-      "highest_observed_load_scale": 0.656,
-      "loadable_candidates": [
-        {
-          "candidate_index": 49,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 48,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup429_target128_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup429_target128_support4_cpu_continuation_candidate1_target128_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 47,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup428_target128_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup428_target128_support4_cpu_continuation_candidate1_target128_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 46,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup427_target128_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup427_target128_support4_cpu_continuation_candidate1_target128_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 45,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup425_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup425_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 44,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup424_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup424_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 43,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup423_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup423_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 42,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup422_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup422_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 41,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup421_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup421_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 40,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup420_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup420_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 39,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup419_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup419_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        },
-        {
-          "candidate_index": 38,
-          "dof_count": 78282,
-          "exists": true,
-          "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup418_target32_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup418_target32_support4_cpu_continuation_candidate1_target32_support4_final_checkpoint.npz",
-          "provenance_context": {},
-          "schema": "mgt-direct-residual-newton-state.v1"
-        }
-      ],
-      "loadable_count": 42,
+      "highest_observed_load_scale": null,
+      "loadable_candidates": [],
+      "loadable_count": 0,
       "mode": "auto_select",
-      "selected_checkpoint": {
-        "dof_count": 78282,
-        "load_scale": 0.656,
-        "meets_full_load": false,
-        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
-        "provenance_context": {},
-        "schema": "mgt-direct-residual-newton-state.v1"
-      },
-      "selection_reason": "highest_sub_full_load_candidate_selected",
+      "selected_checkpoint": null,
+      "selection_reason": "no_loadable_candidates",
       "sources": [
         {
           "available": true,
@@ -280,7 +160,7 @@
           "path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json"
         }
       ],
-      "unloadable_count": 8
+      "unloadable_count": 50
     }
   },
   "checkpoint_resolution_gate": {
@@ -291,16 +171,16 @@
     "claim_boundary": "This gate proves only whether the scanned checkpoint evidence contains a loadable checkpoint at the required full-load scale. It does not prove residual, increment, material Newton, or production ROCm/HIP closure.",
     "full_load_candidate_count": 0,
     "full_load_tolerance": 1e-12,
-    "highest_observed_gap_to_required_load_scale": 0.344,
-    "highest_observed_load_scale": 0.656,
-    "loadable_count": 42,
+    "highest_observed_gap_to_required_load_scale": null,
+    "highest_observed_load_scale": null,
+    "loadable_count": 0,
     "mode": "auto_select",
     "passed": false,
     "required_load_scale": 1.0,
     "schema_version": "g1-checkpoint-resolution-gate.v1",
-    "selected_checkpoint_load_scale": 0.656,
+    "selected_checkpoint_load_scale": null,
     "selected_checkpoint_meets_full_load": false,
-    "unloadable_count": 8
+    "unloadable_count": 50
   },
   "child_exit_code": null,
   "child_gate_evidence": {
@@ -373,7 +253,7 @@
     "/usr/bin/python3",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
     "--checkpoint-npz",
-    "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
+    "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_candidate1_target4_support4_final_checkpoint.npz",
     "--output-json",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
     "--apply-shell-material-tangent",
@@ -1559,7 +1439,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-01T19:50:39.109137+00:00",
+  "generated_at": "2026-07-01T22:45:28.953707+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
@@ -1644,7 +1524,6 @@
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:64c8ae7e0041b0980d265b817c8af380b8019767c8e8f0e7ec737d77d1a1af67",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:074b5f56420b954981caa83699470679842875fa0840266762530e5af305293f",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:0c7539798ab5ae1b91154edebdc718c7c7d13a3e067f63de179b3ae728e321a0",
-    "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz": "sha256:e3a48e50edfb68648d1d7c5d720faec45f632de667061be71b30a57a042d1235",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:26231b6d8aea08199264cb3ee4e5f24417d58265664a18c88aa74c579a2ab5e3"
   },
   "lane_next_actions": [
@@ -1659,6 +1538,7 @@
       "frontier_operator_target_row_count": 128,
       "highest_observed_gap_to_required_load_scale": 0.344,
       "highest_observed_load_scale": 0.656,
+      "highest_observed_load_scale_source": "workspace_checkpoint_inventory",
       "id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
       "preferred_candidate_generator": "consistent_residual_jacobian_newton_rocm_full_load_candidate",
       "reason": "row_only_largest_rows_operator_exhausted",
@@ -1726,7 +1606,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
+  "source_commit_sha": "c37c20c46806798bc56f2f1e9c2af2d7e60a51f9",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",
@@ -1757,8 +1637,8 @@
           "cause_narrowing_row_only_correction_loop_stopped": true,
           "cause_narrowing_support_or_link_row_gap_disfavored": true,
           "full_load_candidate_count": 0,
-          "highest_observed_gap_to_required_load_scale": 0.344,
-          "highest_observed_load_scale": 0.656,
+          "highest_observed_gap_to_required_load_scale": null,
+          "highest_observed_load_scale": null,
           "load_path_provenance_passed": true,
           "preferred_candidate_generator": "consistent_residual_jacobian_newton_rocm_full_load_candidate",
           "provenance_below_required_full_load": {},
@@ -1880,7 +1760,7 @@
             "/usr/bin/python3",
             "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
             "--checkpoint-npz",
-            "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
+            "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_candidate1_target4_support4_final_checkpoint.npz",
             "--output-json",
             "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
             "--apply-shell-material-tangent",
@@ -1925,7 +1805,7 @@
     "full_load_candidate_count": 0,
     "highest_observed_gap_to_required_load_scale": 0.344,
     "highest_observed_load_scale": 0.656,
-    "loadable_count": 237,
+    "loadable_count": 148,
     "scan_root": "implementation/phase1/release_evidence/productization",
     "scan_root_exists": true,
     "schema_version": "g1-workspace-checkpoint-inventory.v1",
@@ -1934,85 +1814,85 @@
         "blockers": [],
         "dof_count": 78282,
         "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke_children/mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke_step1_reg1em06_scale1e00_final_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke_final_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.65575,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p65575.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke_children/mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke_step1_reg1em06_scale1e00_final_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.6555,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p6555.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke_final_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.65525,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p65525.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.655,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p655.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup384_target2_support4_compact_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.65475,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p65475.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup384_target2_support4_compact_checkpoint_children/mgt_shell_material_rowcorr_budget_controller_followup384_target2_support4_compact_checkpoint_candidate1_target2_support4_final_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.6545,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p6545.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4_children/mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4_candidate1_target2_support4_final_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.65425,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p65425.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4_compact_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.654,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p654.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4_children/mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4_candidate1_target2_support4_final_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.65375,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p65375.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4_compact_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.6535,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p6535.npz",
+        "schema": ""
       },
       {
         "blockers": [],
         "dof_count": 78282,
-        "load_scale": 0.656,
-        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4_candidate1_target4_support4_final_checkpoint.npz",
-        "schema": "mgt-direct-residual-newton-state.v1"
+        "load_scale": 0.65325,
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p65325.npz",
+        "schema": ""
       }
     ]
   }
