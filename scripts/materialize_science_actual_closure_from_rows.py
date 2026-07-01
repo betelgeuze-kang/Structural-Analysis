@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Materialize GPCR and PocketMD Lite science closure from operator row files."""
+"""Materialize row-driven science closure audits from operator row files."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ import materialize_gpcr_hard_decoy_operator_template_from_rows as gpcr_rows  # n
 import materialize_gpcr_hard_decoy_suite_report as gpcr_suite  # noqa: E402
 import materialize_pocketmd_lite_operator_intake_from_rows as pocketmd_rows  # noqa: E402
 import materialize_pocketmd_lite_topk_survival_report as pocketmd_survival  # noqa: E402
+import materialize_public_benchmark_phase2_from_rows as public_phase2  # noqa: E402
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
@@ -32,11 +33,17 @@ DEFAULT_POCKETMD_INTAKE = PRODUCTIZATION / "pocketmd_lite_operator_intake.json"
 DEFAULT_POCKETMD_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_POCKETMD_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
+DEFAULT_PUBLIC_PHASE2_AUDIT = PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
 
 SCHEMA_VERSION = "science-actual-closure-row-audit.v1"
+PUBLIC_BENCHMARK_COMPONENT_ID = "public_benchmark_phase2_actual_closure"
 GPCR_COMPONENT_ID = "gpcr_hard_decoy_actual_closure"
 POCKETMD_COMPONENT_ID = "pocketmd_lite_topk_actual_closure"
 DEFAULT_ROW_INPUT_CANDIDATES = {
+    "subset_rows": tuple(public_phase2.DEFAULT_ROW_INPUT_CANDIDATES["subset_rows"]),
+    "pose_rows": tuple(public_phase2.DEFAULT_ROW_INPUT_CANDIDATES["pose_rows"]),
+    "enrichment_rows": tuple(public_phase2.DEFAULT_ROW_INPUT_CANDIDATES["enrichment_rows"]),
+    "vina_gnina_rows": tuple(public_phase2.DEFAULT_ROW_INPUT_CANDIDATES["vina_gnina_rows"]),
     "gpcr_rows": tuple(
         PRODUCTIZATION / f"gpcr_hard_decoy_rows.{suffix}"
         for suffix in ("json", "jsonl", "ndjson", "csv", "tsv")
@@ -419,6 +426,11 @@ def _pocketmd_missing_phase4_criteria() -> list[dict[str, Any]]:
 
 def _component_criteria(component: dict[str, Any]) -> list[dict[str, Any]]:
     component_id = str(component.get("component_id") or "")
+    if component_id == PUBLIC_BENCHMARK_COMPONENT_ID:
+        rows = component.get("phase2_requirements")
+        if isinstance(rows, list):
+            return [row for row in rows if isinstance(row, dict)]
+        return []
     if component_id == GPCR_COMPONENT_ID:
         rows = component.get("phase3_exit_gate_criteria")
         if isinstance(rows, list):
@@ -438,7 +450,21 @@ def _actual_closure_requirements(
     requirements: list[dict[str, Any]] = []
     for component in components:
         component_id = str(component.get("component_id") or "")
-        if component_id == GPCR_COMPONENT_ID:
+        if component_id == PUBLIC_BENCHMARK_COMPONENT_ID:
+            scope = "public_benchmark_phase2_exit_gate"
+            row_input_id = "public_benchmark_phase2_rows"
+            expected_rows_mode = "operator_attached_public_benchmark_rows"
+            requirement_kind = "phase2_exit_criterion"
+            extra = {
+                "required_phase2_components": [
+                    dict(row)
+                    for row in public_phase2.harness_bundle.PHASE2_REQUIRED_COMPONENTS
+                ],
+                "phase2_row_closure_matrix_count": int(
+                    component.get("phase2_row_closure_matrix_count") or 0
+                ),
+            }
+        elif component_id == GPCR_COMPONENT_ID:
             scope = "gpcr_phase3_exit_gate"
             row_input_id = "gpcr_rows"
             expected_rows_mode = "raw_hard_decoy_rows"
@@ -467,12 +493,17 @@ def _actual_closure_requirements(
             blockers = [
                 str(item) for item in criterion.get("blockers", []) if str(item)
             ]
+            criterion_pass = bool(
+                criterion.get("pass")
+                if "pass" in criterion
+                else criterion.get("ready")
+            )
             row = {
                 "component_id": component_id,
                 "scope": scope,
                 "requirement_kind": requirement_kind,
                 "criterion_id": str(criterion.get("criterion_id") or ""),
-                "pass": bool(criterion.get("pass")),
+                "pass": criterion_pass,
                 "materialized": bool(component.get("materialized")),
                 "row_input_id": row_input_id,
                 "expected_rows_mode": expected_rows_mode,
@@ -480,9 +511,21 @@ def _actual_closure_requirements(
                 "blockers": blockers,
                 "blocker_count": len(blockers),
             }
-            for key in ("current", "current_by_target", "failed_targets"):
+            for key in (
+                "current",
+                "current_by_target",
+                "failed_targets",
+                "required_row_inputs",
+                "missing_row_inputs",
+                "component_id",
+            ):
                 if key in criterion:
-                    row[key] = criterion[key]
+                    output_key = "phase2_component_id" if key == "component_id" else key
+                    row[output_key] = criterion[key]
+            if component_id == PUBLIC_BENCHMARK_COMPONENT_ID:
+                row["row_input_ids"] = [
+                    str(item) for item in row.get("required_row_inputs", [])
+                ]
             row.update(extra)
             requirements.append(row)
     return requirements
@@ -506,12 +549,21 @@ def _actual_closure_requirement_summary(
     pocketmd_rows = [
         row for row in requirements if row.get("component_id") == POCKETMD_COMPONENT_ID
     ]
+    public_rows = [
+        row
+        for row in requirements
+        if row.get("component_id") == PUBLIC_BENCHMARK_COMPONENT_ID
+    ]
     return {
-        "required_component_count": 2,
+        "required_component_count": 3,
         "ready_component_count": len(
             {
                 component_id
-                for component_id in (GPCR_COMPONENT_ID, POCKETMD_COMPONENT_ID)
+                for component_id in (
+                    PUBLIC_BENCHMARK_COMPONENT_ID,
+                    GPCR_COMPONENT_ID,
+                    POCKETMD_COMPONENT_ID,
+                )
                 if any(
                     row.get("component_id") == component_id for row in requirements
                 )
@@ -532,6 +584,10 @@ def _actual_closure_requirement_summary(
         "blocked_component_ids": blocked_component_ids,
         "missing_row_inputs": missing_row_inputs,
         "missing_row_input_count": len(missing_row_inputs),
+        "public_benchmark_phase2_requirement_count": len(public_rows),
+        "public_benchmark_phase2_passing_requirement_count": sum(
+            1 for row in public_rows if bool(row.get("pass"))
+        ),
         "gpcr_phase3_requirement_count": len(gpcr_rows),
         "gpcr_phase3_passing_requirement_count": sum(
             1 for row in gpcr_rows if bool(row.get("pass"))
@@ -604,6 +660,88 @@ def _attach_component_requirement_summaries(
             }
         )
     return enriched
+
+
+def _materialize_public_benchmark(
+    *,
+    subset_rows_path: Path | None,
+    pose_rows_path: Path | None,
+    enrichment_rows_path: Path | None,
+    vina_gnina_rows_path: Path | None,
+    repo_root: Path,
+    audit_out: Path,
+    operator_bundle_out: Path,
+    out_dir: Path,
+    harness_report_out: Path,
+    artifact_bundle_out: Path,
+    target_subset_case_count: int | None,
+) -> dict[str, Any]:
+    try:
+        audit = public_phase2.build_public_benchmark_phase2_row_audit(
+            repo_root=repo_root,
+            subset_rows_path=subset_rows_path,
+            pose_rows_path=pose_rows_path,
+            enrichment_rows_path=enrichment_rows_path,
+            vina_gnina_rows_path=vina_gnina_rows_path,
+            target_subset_case_count=target_subset_case_count,
+            operator_bundle_out=operator_bundle_out,
+            out_dir=out_dir,
+            harness_report_out=harness_report_out,
+            artifact_bundle_out=artifact_bundle_out,
+        )
+        _write_json(repo_root, audit_out, audit)
+    except Exception as exc:
+        return _component_error(
+            PUBLIC_BENCHMARK_COMPONENT_ID,
+            exc,
+            "operator_attached_public_benchmark_rows",
+        )
+
+    phase2_exit_gate = audit.get("phase2_exit_gate")
+    if not isinstance(phase2_exit_gate, dict):
+        phase2_exit_gate = {}
+    blockers = [str(item) for item in audit.get("blockers", []) if str(item)]
+    return {
+        "component_id": PUBLIC_BENCHMARK_COMPONENT_ID,
+        "status": str(audit.get("status") or ""),
+        "contract_pass": bool(audit.get("contract_pass")),
+        "materialized": bool(audit.get("phase2_ready")),
+        "expected_rows_mode": "operator_attached_public_benchmark_rows",
+        "phase2_ready": bool(audit.get("phase2_ready")),
+        "phase2_exit_gate_status": str(phase2_exit_gate.get("status") or ""),
+        "phase2_exit_gate_criteria": [
+            row for row in phase2_exit_gate.get("criteria", []) if isinstance(row, dict)
+        ],
+        "phase2_failed_criteria": [
+            str(item) for item in phase2_exit_gate.get("failed_criteria", [])
+        ],
+        "phase2_requirements": [
+            row for row in audit.get("phase2_requirements", []) if isinstance(row, dict)
+        ],
+        "phase2_requirement_summary": dict(
+            audit.get("phase2_requirement_summary") or {}
+        ),
+        "phase2_row_closure_matrix": [
+            row
+            for row in audit.get("phase2_row_closure_matrix", [])
+            if isinstance(row, dict)
+        ],
+        "phase2_row_closure_matrix_count": int(
+            audit.get("phase2_row_closure_matrix_count") or 0
+        ),
+        "missing_row_inputs": [
+            str(item) for item in audit.get("missing_row_inputs", []) if str(item)
+        ],
+        "blockers": blockers,
+        "outputs": {
+            "phase2_row_audit": str(audit_out),
+            **(
+                dict(audit.get("outputs") or {})
+                if isinstance(audit.get("outputs"), dict)
+                else {}
+            ),
+        },
+    }
 
 
 def _component_error(component_id: str, exc: Exception, expected_mode: str) -> dict[str, Any]:
@@ -782,6 +920,16 @@ def _materialize_pocketmd(
 def build_science_actual_closure_audit(
     *,
     repo_root: Path = ROOT,
+    subset_rows_path: Path | None = None,
+    pose_rows_path: Path | None = None,
+    enrichment_rows_path: Path | None = None,
+    vina_gnina_rows_path: Path | None = None,
+    public_phase2_audit_out: Path = DEFAULT_PUBLIC_PHASE2_AUDIT,
+    public_operator_bundle_out: Path = public_phase2.DEFAULT_OPERATOR_BUNDLE_OUT,
+    public_out_dir: Path = public_phase2.DEFAULT_OUT_DIR,
+    public_harness_report_out: Path = public_phase2.DEFAULT_HARNESS_REPORT_OUT,
+    public_artifact_bundle_out: Path = public_phase2.DEFAULT_ARTIFACT_BUNDLE_OUT,
+    public_target_subset_case_count: int | None = None,
     gpcr_rows_path: Path | None = None,
     pocketmd_rows_path: Path | None = None,
     gpcr_template_out: Path = DEFAULT_GPCR_TEMPLATE,
@@ -797,6 +945,26 @@ def build_science_actual_closure_audit(
     source_version: str = "",
     pocketmd_max_top_k: int = pocketmd_rows.DEFAULT_MAX_TOP_K,
 ) -> dict[str, Any]:
+    subset_rows_path, subset_row_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="subset_rows",
+        explicit_path=subset_rows_path,
+    )
+    pose_rows_path, pose_row_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="pose_rows",
+        explicit_path=pose_rows_path,
+    )
+    enrichment_rows_path, enrichment_row_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="enrichment_rows",
+        explicit_path=enrichment_rows_path,
+    )
+    vina_gnina_rows_path, vina_gnina_row_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="vina_gnina_rows",
+        explicit_path=vina_gnina_rows_path,
+    )
     gpcr_rows_path, gpcr_row_resolution = _resolve_row_input(
         repo_root=repo_root,
         row_input_id="gpcr_rows",
@@ -808,10 +976,32 @@ def build_science_actual_closure_audit(
         explicit_path=pocketmd_rows_path,
     )
     row_input_resolution = {
+        "subset_rows": subset_row_resolution,
+        "pose_rows": pose_row_resolution,
+        "enrichment_rows": enrichment_row_resolution,
+        "vina_gnina_rows": vina_gnina_row_resolution,
         "gpcr_rows": gpcr_row_resolution,
         "pocketmd_rows": pocketmd_row_resolution,
     }
+    public = _materialize_public_benchmark(
+        subset_rows_path=subset_rows_path,
+        pose_rows_path=pose_rows_path,
+        enrichment_rows_path=enrichment_rows_path,
+        vina_gnina_rows_path=vina_gnina_rows_path,
+        repo_root=repo_root,
+        audit_out=public_phase2_audit_out,
+        operator_bundle_out=public_operator_bundle_out,
+        out_dir=public_out_dir,
+        harness_report_out=public_harness_report_out,
+        artifact_bundle_out=public_artifact_bundle_out,
+        target_subset_case_count=public_target_subset_case_count,
+    )
+    public_audit = _load_optional_json(repo_root, public_phase2_audit_out)
+    public_row_intake_contracts = public_audit.get("row_intake_contracts")
+    if not isinstance(public_row_intake_contracts, dict):
+        public_row_intake_contracts = {}
     row_intake_contracts = {
+        **public_row_intake_contracts,
         "gpcr_rows": _gpcr_row_intake_contract(
             template_out=gpcr_template_out,
             report_out=gpcr_report_out,
@@ -849,10 +1039,14 @@ def build_science_actual_closure_audit(
         source_version=source_version,
         max_top_k=pocketmd_max_top_k,
     )
-    components = [gpcr, pocketmd]
+    components = [public, gpcr, pocketmd]
     missing_row_inputs = [
         row_input_id
         for row_input_id, rows_path in (
+            ("subset_rows", subset_rows_path),
+            ("pose_rows", pose_rows_path),
+            ("enrichment_rows", enrichment_rows_path),
+            ("vina_gnina_rows", vina_gnina_rows_path),
             ("gpcr_rows", gpcr_rows_path),
             ("pocketmd_rows", pocketmd_rows_path),
         )
@@ -880,11 +1074,22 @@ def build_science_actual_closure_audit(
     contract_pass = all(bool(component.get("contract_pass")) for component in components)
     input_paths = [
         Path("scripts/materialize_science_actual_closure_from_rows.py"),
+        Path("scripts/materialize_public_benchmark_phase2_from_rows.py"),
+        Path("scripts/materialize_public_benchmark_operator_bundle_from_rows.py"),
+        Path("scripts/materialize_public_benchmark_harness_bundle.py"),
         Path("scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py"),
         Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),
         Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"),
         Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
     ]
+    for path in (
+        subset_rows_path,
+        pose_rows_path,
+        enrichment_rows_path,
+        vina_gnina_rows_path,
+    ):
+        if path is not None:
+            input_paths.append(path)
     if gpcr_rows_path is not None:
         input_paths.append(gpcr_rows_path)
     if pocketmd_rows_path is not None:
@@ -918,14 +1123,16 @@ def build_science_actual_closure_audit(
         "actual_closure_requirements": actual_closure_requirements,
         "actual_closure_requirement_summary": requirement_summary,
         "required_actual_closures": [
+            PUBLIC_BENCHMARK_COMPONENT_ID,
             GPCR_COMPONENT_ID,
             POCKETMD_COMPONENT_ID,
         ],
         "claim_boundary": (
             "This runner only materializes operator-attached raw rows through the "
-            "existing GPCR and PocketMD Lite materializers. It does not generate "
-            "docking scores, run MD, infer missing metrics, or treat fixture/proxy "
-            "rows as actual science closure evidence."
+            "existing Public Benchmark, GPCR, and PocketMD Lite materializers. It "
+            "does not download benchmark data, generate docking scores, run MD, "
+            "infer missing metrics, or treat fixture/proxy rows as actual science "
+            "closure evidence."
         ),
     }
 
@@ -933,6 +1140,16 @@ def build_science_actual_closure_audit(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
+    parser.add_argument("--subset-rows", type=Path)
+    parser.add_argument("--pose-rows", type=Path)
+    parser.add_argument("--enrichment-rows", type=Path)
+    parser.add_argument("--vina-gnina-rows", type=Path)
+    parser.add_argument("--public-phase2-audit-out", type=Path, default=DEFAULT_PUBLIC_PHASE2_AUDIT)
+    parser.add_argument("--public-operator-bundle-out", type=Path, default=public_phase2.DEFAULT_OPERATOR_BUNDLE_OUT)
+    parser.add_argument("--public-out-dir", type=Path, default=public_phase2.DEFAULT_OUT_DIR)
+    parser.add_argument("--public-harness-report-out", type=Path, default=public_phase2.DEFAULT_HARNESS_REPORT_OUT)
+    parser.add_argument("--public-artifact-bundle-out", type=Path, default=public_phase2.DEFAULT_ARTIFACT_BUNDLE_OUT)
+    parser.add_argument("--public-target-subset-case-count", type=int)
     parser.add_argument("--gpcr-rows", type=Path)
     parser.add_argument("--pocketmd-rows", type=Path)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
@@ -956,6 +1173,16 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     payload = build_science_actual_closure_audit(
         repo_root=args.repo_root,
+        subset_rows_path=args.subset_rows,
+        pose_rows_path=args.pose_rows,
+        enrichment_rows_path=args.enrichment_rows,
+        vina_gnina_rows_path=args.vina_gnina_rows,
+        public_phase2_audit_out=args.public_phase2_audit_out,
+        public_operator_bundle_out=args.public_operator_bundle_out,
+        public_out_dir=args.public_out_dir,
+        public_harness_report_out=args.public_harness_report_out,
+        public_artifact_bundle_out=args.public_artifact_bundle_out,
+        public_target_subset_case_count=args.public_target_subset_case_count,
         gpcr_rows_path=args.gpcr_rows,
         pocketmd_rows_path=args.pocketmd_rows,
         gpcr_template_out=args.gpcr_template_out,

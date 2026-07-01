@@ -198,9 +198,221 @@ def _write_pocketmd_rows(path: Path) -> None:
     path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
 
 
+def _write_case_files(root: Path, case_id: str) -> dict[str, str]:
+    case_dir = root / "benchmarks" / case_id
+    case_dir.mkdir(parents=True, exist_ok=True)
+    files = {
+        "protein_structure_path": case_dir / "protein.pdb",
+        "reference_ligand_path": case_dir / "ligand_ref.sdf",
+        "predicted_ligand_path_or_docking_run_id": case_dir / "pose_pred.sdf",
+    }
+    for field, path in files.items():
+        path.write_text(f"{case_id}:{field}\n", encoding="utf-8")
+    return {field: path.relative_to(root).as_posix() for field, path in files.items()}
+
+
+def _write_public_phase2_rows(root: Path) -> dict[str, Path]:
+    case_count = module.public_phase2.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT
+    case_ids = [f"case_{index:02d}" for index in range(1, case_count + 1)]
+    ligand_contract = {"atom_count": 2, "atom_ids": ["C1", "O1"]}
+    symmetry_contract = {"permutations": [[0, 1]]}
+    reference_atoms = [
+        {"element": "C", "x": 0.0, "y": 0.0, "z": 0.0},
+        {"element": "O", "x": 1.2, "y": 0.0, "z": 0.0},
+    ]
+    predicted_atoms = [
+        {"element": "C", "x": 0.1, "y": 0.0, "z": 0.0},
+        {"element": "O", "x": 1.3, "y": 0.0, "z": 0.0},
+    ]
+    subset_rows = root / "public_benchmark_subset_rows.json"
+    pose_rows = root / "public_benchmark_pose_rows.json"
+    enrichment_rows = root / "public_benchmark_enrichment_rows.json"
+    vina_gnina_rows = root / "public_benchmark_vina_gnina_rows.json"
+
+    subset_rows.write_text(
+        json.dumps(
+            {
+                "rows": [
+                    {
+                        "case_id": case_id,
+                        "source_family": "CASF/PDBBind",
+                        "benchmark_split": "CASF-core",
+                        "complex_id": f"{case_id}_complex",
+                        **_write_case_files(root, case_id),
+                        "ligand_atom_order_contract": ligand_contract,
+                        "symmetry_permutation_contract": symmetry_contract,
+                        "source_license_or_accession": (
+                            f"PDBBind-CASF-2016-core:{case_id}"
+                        ),
+                        "source_checksum": _sha(
+                            f"PDBBind-CASF-2016-core:{case_id}"
+                        ),
+                        "provenance_ref": (
+                            "https://zenodo.org/records/2468135/files/"
+                            f"public-benchmark/casf-pdbbind/{case_id}.json"
+                        ),
+                        "pose_success_metric": (
+                            "symmetry_aware_ligand_rmsd_angstrom"
+                        ),
+                        "rmsd_threshold_angstrom": 2.0,
+                    }
+                    for case_id in case_ids
+                ]
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    pose_rows.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {
+                        "case_id": case_id,
+                        "benchmark_split": "CASF-core",
+                        "pose_success_metric": (
+                            "symmetry_aware_ligand_rmsd_angstrom"
+                        ),
+                        "reference_atoms": reference_atoms,
+                        "predicted_atoms": predicted_atoms,
+                        "ligand_atom_order_contract": ligand_contract,
+                        "symmetry_permutation_contract": symmetry_contract,
+                        "protein_structure_path": f"benchmarks/{case_id}/protein.pdb",
+                        "receptor_context": {
+                            "binding_site_frame": "validated_receptor_frame",
+                            "provenance_ref": (
+                                "https://zenodo.org/records/2468135/files/"
+                                f"public-benchmark/pose/{case_id}.json"
+                            ),
+                        },
+                    }
+                    for case_id in case_ids
+                ]
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    enrichment_rows.write_text(
+        json.dumps(
+            {
+                "targets": [
+                    {
+                        "benchmark_family": "DUD-E",
+                        "target_id": "AA2AR",
+                        "score_direction": "higher_is_better",
+                        "source_license_or_accession": "DUD-E:AA2AR:release-2015",
+                        "source_checksum": _sha("DUD-E:AA2AR:release-2015"),
+                        "provenance_ref": (
+                            "https://zenodo.org/records/2468135/files/"
+                            "public-benchmark/dud-e/AA2AR.json"
+                        ),
+                        "scored_molecules": [
+                            {"molecule_id": "active_1", "is_active": True, "score": 0.9},
+                            {"molecule_id": "decoy_1", "is_active": False, "score": 0.1},
+                        ],
+                    }
+                ]
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    vina_gnina_rows.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {
+                        "case_id": case_ids[0],
+                        "source_family": "CASF/PDBBind",
+                        "benchmark_split": "CASF-core",
+                        "complex_id": f"{case_ids[0]}_complex",
+                        "reference_pose_id": f"{case_ids[0]}_reference",
+                        "source_license_or_accession": (
+                            f"PDBBind-CASF-2016-core:{case_ids[0]}"
+                        ),
+                        "source_checksum": _sha("vina-gnina-case-a"),
+                        "provenance_ref": (
+                            "https://zenodo.org/records/2468135/files/"
+                            f"public-benchmark/vina-gnina/{case_ids[0]}.json"
+                        ),
+                        "engine_runs": [
+                            {
+                                "engine_id": "vina",
+                                "docking_run_id": f"{case_ids[0]}_vina",
+                                "predicted_ligand_path_or_pose_ref": (
+                                    "https://zenodo.org/records/2468135/files/"
+                                    f"public-benchmark/vina-gnina/{case_ids[0]}/vina.sdf"
+                                ),
+                                "predicted_ligand_checksum": _sha(
+                                    f"{case_ids[0]}-vina-pose"
+                                ),
+                                "engine_version": "vina 1.2.5",
+                                "engine_config_checksum": _sha(
+                                    f"{case_ids[0]}-vina-config"
+                                ),
+                                "engine_run_provenance_ref": (
+                                    "https://zenodo.org/records/2468135/files/"
+                                    f"public-benchmark/vina-gnina/{case_ids[0]}/vina-run.json"
+                                ),
+                                "symmetry_aware_rmsd_angstrom": 1.4,
+                                "pose_success": True,
+                                "score": -7.2,
+                                "score_direction": "lower_is_better",
+                            },
+                            {
+                                "engine_id": "gnina",
+                                "docking_run_id": f"{case_ids[0]}_gnina",
+                                "predicted_ligand_path_or_pose_ref": (
+                                    "https://zenodo.org/records/2468135/files/"
+                                    f"public-benchmark/vina-gnina/{case_ids[0]}/gnina.sdf"
+                                ),
+                                "predicted_ligand_checksum": _sha(
+                                    f"{case_ids[0]}-gnina-pose"
+                                ),
+                                "engine_version": "gnina 1.3.0",
+                                "engine_config_checksum": _sha(
+                                    f"{case_ids[0]}-gnina-config"
+                                ),
+                                "engine_run_provenance_ref": (
+                                    "https://zenodo.org/records/2468135/files/"
+                                    f"public-benchmark/vina-gnina/{case_ids[0]}/gnina-run.json"
+                                ),
+                                "symmetry_aware_rmsd_angstrom": 1.6,
+                                "pose_success": True,
+                                "score": -7.8,
+                                "score_direction": "lower_is_better",
+                            },
+                        ],
+                    }
+                ]
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+    return {
+        "subset": subset_rows,
+        "pose": pose_rows,
+        "enrichment": enrichment_rows,
+        "vina_gnina": vina_gnina_rows,
+    }
+
+
+def _public_output_kwargs(tmp_path: Path) -> dict[str, Path]:
+    return {
+        "public_phase2_audit_out": tmp_path / "public_phase2_audit.json",
+        "public_operator_bundle_out": tmp_path / "public_operator_bundle.json",
+        "public_out_dir": tmp_path / "public_out",
+        "public_harness_report_out": tmp_path / "public_harness_report.json",
+        "public_artifact_bundle_out": tmp_path / "public_artifact_bundle.json",
+    }
+
+
 def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Path) -> None:
     audit = module.build_science_actual_closure_audit(
-        repo_root=REPO_ROOT,
+        repo_root=tmp_path,
+        **_public_output_kwargs(tmp_path),
         gpcr_template_out=tmp_path / "gpcr_template.json",
         gpcr_report_out=tmp_path / "gpcr_report.json",
         gpcr_surface_out=tmp_path / "gpcr_surface.json",
@@ -213,22 +425,47 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert audit["contract_pass"] is False
     assert audit["component_ready_count"] == 0
     assert audit["blockers"] == [
+        "public_benchmark_phase2_actual_closure::casf_pdbbind_pose_success_harness::subset_rows_not_provided",
+        "public_benchmark_phase2_actual_closure::casf_pdbbind_pose_success_harness::pose_rows_not_provided",
+        "public_benchmark_phase2_actual_closure::symmetry_aware_ligand_rmsd::pose_rows_not_provided",
+        "public_benchmark_phase2_actual_closure::posebusters_style_pose_validity::pose_rows_not_provided",
+        "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided",
+        "public_benchmark_phase2_actual_closure::dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided",
         "gpcr_hard_decoy_actual_closure::gpcr_hard_decoy_rows_not_provided",
         "pocketmd_lite_topk_actual_closure::pocketmd_lite_topk_rows_not_provided",
     ]
-    assert audit["summary"]["requirement_count"] == 14
-    assert audit["summary"]["blocked_requirement_count"] == 13
+    assert audit["summary"]["requirement_count"] == 19
+    assert audit["summary"]["blocked_requirement_count"] == 18
     assert audit["summary"]["passing_requirement_count"] == 1
     assert audit["summary"]["actual_closure_ready"] is False
-    assert audit["missing_row_inputs"] == ["gpcr_rows", "pocketmd_rows"]
+    assert audit["missing_row_inputs"] == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+        "gpcr_rows",
+        "pocketmd_rows",
+    ]
+    assert audit["row_input_resolution"]["subset_rows"]["missing"] is True
+    assert audit["row_input_resolution"]["pose_rows"]["missing"] is True
+    assert audit["row_input_resolution"]["enrichment_rows"]["missing"] is True
+    assert audit["row_input_resolution"]["vina_gnina_rows"]["missing"] is True
     assert audit["row_input_resolution"]["gpcr_rows"]["missing"] is True
     assert audit["row_input_resolution"]["pocketmd_rows"]["missing"] is True
     requirement_summary = audit["actual_closure_requirement_summary"]
+    assert requirement_summary["public_benchmark_phase2_requirement_count"] == 5
+    assert requirement_summary["public_benchmark_phase2_passing_requirement_count"] == 0
     assert requirement_summary["gpcr_phase3_requirement_count"] == 5
     assert requirement_summary["gpcr_phase3_passing_requirement_count"] == 0
     assert requirement_summary["pocketmd_phase4_requirement_count"] == 9
     assert requirement_summary["pocketmd_phase4_passing_requirement_count"] == 1
     assert requirement_summary["blocked_component_ids"] == [
+        "gpcr_hard_decoy_actual_closure",
+        "pocketmd_lite_topk_actual_closure",
+        "public_benchmark_phase2_actual_closure",
+    ]
+    assert audit["required_actual_closures"] == [
+        "public_benchmark_phase2_actual_closure",
         "gpcr_hard_decoy_actual_closure",
         "pocketmd_lite_topk_actual_closure",
     ]
@@ -237,9 +474,26 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         for row in audit["components"]
     }
     assert audit["component_requirement_summaries"] == [
+        component_summaries["public_benchmark_phase2_actual_closure"],
         component_summaries["gpcr_hard_decoy_actual_closure"],
         component_summaries["pocketmd_lite_topk_actual_closure"],
     ]
+    assert component_summaries["public_benchmark_phase2_actual_closure"] == {
+        "actual_closure_ready": False,
+        "blocked_requirement_count": 5,
+        "blocker_count": 6,
+        "component_id": "public_benchmark_phase2_actual_closure",
+        "failed_criteria": [
+            "casf_pdbbind_pose_success_harness_ready",
+            "symmetry_aware_ligand_rmsd_ready",
+            "posebusters_style_pose_validity_ready",
+            "vina_gnina_comparison_ready",
+            "dud_e_or_lit_pcba_enrichment_ready",
+        ],
+        "failed_criterion_count": 5,
+        "passing_requirement_count": 0,
+        "requirement_count": 5,
+    }
     assert component_summaries["gpcr_hard_decoy_actual_closure"] == {
         "actual_closure_ready": False,
         "blocked_requirement_count": 5,
@@ -258,6 +512,14 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     }
     assert audit["components"][0]["actual_closure_ready"] is False
     assert audit["components"][0]["failed_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready",
+        "vina_gnina_comparison_ready",
+        "dud_e_or_lit_pcba_enrichment_ready",
+    ]
+    assert audit["components"][1]["actual_closure_ready"] is False
+    assert audit["components"][1]["failed_criteria"] == [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
@@ -283,8 +545,8 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "passing_requirement_count": 1,
         "requirement_count": 9,
     }
-    assert audit["components"][1]["actual_closure_ready"] is False
-    assert audit["components"][1]["failed_criteria"] == [
+    assert audit["components"][2]["actual_closure_ready"] is False
+    assert audit["components"][2]["failed_criteria"] == [
         "top_k_refinement_rows_present",
         "top_k_refinement_case_coverage",
         "local_min_survival_materialized",
@@ -485,6 +747,11 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert "broad_all_atom_md_claim" in (
         pocketmd_contract["blocked_claims_that_remain_locked"]
     )
+    subset_contract = audit["row_intake_contracts"]["subset_rows"]
+    assert subset_contract["default_row_path_candidates"][0].endswith(
+        "public_benchmark_subset_rows.json"
+    )
+    assert "casf_pdbbind_pose_success_harness" in subset_contract["feeds_components"]
     assert not (tmp_path / "gpcr_report.json").exists()
     assert not (tmp_path / "pocketmd_report.json").exists()
 
@@ -492,6 +759,7 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
 def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     tmp_path: Path,
 ) -> None:
+    public_rows = _write_public_phase2_rows(tmp_path)
     gpcr_rows = tmp_path / "gpcr_rows.csv"
     pocketmd_rows = tmp_path / "pocketmd_rows.json"
     pocketmd_contract = tmp_path / "pocketmd_contract.json"
@@ -503,7 +771,12 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     )
 
     audit = module.build_science_actual_closure_audit(
-        repo_root=REPO_ROOT,
+        repo_root=tmp_path,
+        subset_rows_path=public_rows["subset"],
+        pose_rows_path=public_rows["pose"],
+        enrichment_rows_path=public_rows["enrichment"],
+        vina_gnina_rows_path=public_rows["vina_gnina"],
+        **_public_output_kwargs(tmp_path),
         gpcr_rows_path=gpcr_rows,
         pocketmd_rows_path=pocketmd_rows,
         gpcr_template_out=tmp_path / "gpcr_template.json",
@@ -520,7 +793,7 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
 
     assert audit["status"] == "ready"
     assert audit["contract_pass"] is True
-    assert audit["component_ready_count"] == 2
+    assert audit["component_ready_count"] == 3
     assert audit["blockers"] == []
     assert audit["missing_row_inputs"] == []
     assert audit["actual_closure_requirement_summary"] == {
@@ -531,17 +804,41 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
         "gpcr_phase3_requirement_count": 5,
         "missing_row_input_count": 0,
         "missing_row_inputs": [],
-        "passing_requirement_count": 14,
+        "passing_requirement_count": 19,
         "pocketmd_phase4_passing_requirement_count": 9,
         "pocketmd_phase4_requirement_count": 9,
-        "ready_component_count": 2,
-        "required_component_count": 2,
-        "requirement_count": 14,
+        "public_benchmark_phase2_passing_requirement_count": 5,
+        "public_benchmark_phase2_requirement_count": 5,
+        "ready_component_count": 3,
+        "required_component_count": 3,
+        "requirement_count": 19,
     }
+    assert audit["row_intake_contracts"]["subset_rows"]["accepted_formats"] == [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+    ]
     assert audit["row_intake_contracts"]["pocketmd_rows"]["max_top_k"] == 20
 
-    gpcr = audit["components"][0]
-    pocketmd = audit["components"][1]
+    public = audit["components"][0]
+    gpcr = audit["components"][1]
+    pocketmd = audit["components"][2]
+    assert public["phase2_ready"] is True
+    assert public["phase2_exit_gate_status"] == "ready"
+    assert len(public["phase2_requirements"]) == 5
+    assert public["actual_closure_ready"] is True
+    assert public["failed_criteria"] == []
+    assert public["requirement_summary"] == {
+        "actual_closure_ready": True,
+        "blocked_requirement_count": 0,
+        "blocker_count": 0,
+        "component_id": "public_benchmark_phase2_actual_closure",
+        "failed_criteria": [],
+        "failed_criterion_count": 0,
+        "passing_requirement_count": 5,
+        "requirement_count": 5,
+    }
     assert gpcr["phase3_exit_gate_status"] == "ready"
     assert len(gpcr["phase3_exit_gate_criteria"]) == 5
     assert gpcr["target_pass_count"] == 3
@@ -573,9 +870,12 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
         "requirement_count": 9,
     }
     assert audit["component_requirement_summaries"] == [
+        public["requirement_summary"],
         gpcr["requirement_summary"],
         pocketmd["requirement_summary"],
     ]
+    assert (tmp_path / "public_phase2_audit.json").exists()
+    assert (tmp_path / "public_operator_bundle.json").exists()
     assert (tmp_path / "gpcr_surface.json").exists()
     assert (tmp_path / "pocketmd_surface.json").exists()
 
@@ -583,6 +883,7 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
 def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
     tmp_path: Path,
 ) -> None:
+    public_rows = _write_public_phase2_rows(tmp_path)
     gpcr_rows = tmp_path / "gpcr_rows.csv"
     pocketmd_rows = tmp_path / "pocketmd_rows.json"
     pocketmd_contract = tmp_path / "pocketmd_contract.json"
@@ -596,7 +897,12 @@ def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
     )
 
     audit = module.build_science_actual_closure_audit(
-        repo_root=REPO_ROOT,
+        repo_root=tmp_path,
+        subset_rows_path=public_rows["subset"],
+        pose_rows_path=public_rows["pose"],
+        enrichment_rows_path=public_rows["enrichment"],
+        vina_gnina_rows_path=public_rows["vina_gnina"],
+        **_public_output_kwargs(tmp_path),
         gpcr_rows_path=gpcr_rows,
         pocketmd_rows_path=pocketmd_rows,
         gpcr_template_out=tmp_path / "gpcr_template.json",
@@ -614,7 +920,7 @@ def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
     assert audit["status"] == "operator_evidence_required"
     assert audit["contract_pass"] is False
     assert audit["missing_row_inputs"] == []
-    assert audit["component_ready_count"] == 0
+    assert audit["component_ready_count"] == 1
     assert any(
         blocker.startswith(
             "gpcr_hard_decoy_actual_closure::DRD2:"
@@ -629,8 +935,10 @@ def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
         )
         for blocker in audit["blockers"]
     )
-    gpcr = audit["components"][0]
-    pocketmd = audit["components"][1]
+    public = audit["components"][0]
+    gpcr = audit["components"][1]
+    pocketmd = audit["components"][2]
+    assert public["contract_pass"] is True
     assert gpcr["contract_pass"] is False
     assert pocketmd["contract_pass"] is False
     assert "raw_hard_decoy_rows_actual_closure" in gpcr["failed_criteria"]
@@ -640,6 +948,7 @@ def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
 def test_science_actual_closure_audit_blocks_invalid_actual_rows(
     tmp_path: Path,
 ) -> None:
+    public_rows = _write_public_phase2_rows(tmp_path)
     gpcr_rows = tmp_path / "gpcr_rows.csv"
     pocketmd_rows = tmp_path / "pocketmd_rows.json"
     pocketmd_contract = tmp_path / "pocketmd_contract.json"
@@ -667,7 +976,12 @@ def test_science_actual_closure_audit_blocks_invalid_actual_rows(
     pocketmd_rows.write_text(json.dumps(pocketmd_payload), encoding="utf-8")
 
     audit = module.build_science_actual_closure_audit(
-        repo_root=REPO_ROOT,
+        repo_root=tmp_path,
+        subset_rows_path=public_rows["subset"],
+        pose_rows_path=public_rows["pose"],
+        enrichment_rows_path=public_rows["enrichment"],
+        vina_gnina_rows_path=public_rows["vina_gnina"],
+        **_public_output_kwargs(tmp_path),
         gpcr_rows_path=gpcr_rows,
         pocketmd_rows_path=pocketmd_rows,
         gpcr_template_out=tmp_path / "gpcr_template.json",
@@ -684,11 +998,12 @@ def test_science_actual_closure_audit_blocks_invalid_actual_rows(
 
     assert audit["status"] == "operator_evidence_required"
     assert audit["contract_pass"] is False
-    assert audit["component_ready_count"] == 0
+    assert audit["component_ready_count"] == 1
     assert any("score_invalid" in blocker for blocker in audit["blockers"])
     assert any("top_k_rank_exceeds_max:20" in blocker for blocker in audit["blockers"])
-    assert audit["components"][0]["materialized"] is False
+    assert audit["components"][0]["materialized"] is True
     assert audit["components"][1]["materialized"] is False
+    assert audit["components"][2]["materialized"] is False
     assert audit["actual_closure_requirement_summary"]["actual_closure_ready"] is False
 
 
@@ -697,6 +1012,18 @@ def test_science_actual_closure_audit_autodetects_default_row_paths(
 ) -> None:
     default_dir = tmp_path / "implementation/phase1/release_evidence/productization"
     default_dir.mkdir(parents=True)
+    public_rows = _write_public_phase2_rows(tmp_path)
+    public_default_paths = {
+        "subset": default_dir / "public_benchmark_subset_rows.json",
+        "pose": default_dir / "public_benchmark_pose_rows.json",
+        "enrichment": default_dir / "public_benchmark_enrichment_rows.json",
+        "vina_gnina": default_dir / "public_benchmark_vina_gnina_rows.json",
+    }
+    for key, destination in public_default_paths.items():
+        destination.write_text(
+            public_rows[key].read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
     gpcr_rows = default_dir / "gpcr_hard_decoy_rows.csv"
     pocketmd_rows = default_dir / "pocketmd_lite_topk_rows.json"
     pocketmd_contract = tmp_path / "pocketmd_contract.json"
@@ -709,6 +1036,7 @@ def test_science_actual_closure_audit_autodetects_default_row_paths(
 
     audit = module.build_science_actual_closure_audit(
         repo_root=tmp_path,
+        **_public_output_kwargs(tmp_path),
         gpcr_template_out=tmp_path / "gpcr_template.json",
         gpcr_report_out=tmp_path / "gpcr_report.json",
         gpcr_surface_out=tmp_path / "gpcr_surface.json",
@@ -724,6 +1052,14 @@ def test_science_actual_closure_audit_autodetects_default_row_paths(
     assert audit["status"] == "ready"
     assert audit["contract_pass"] is True
     assert audit["missing_row_inputs"] == []
+    assert audit["row_input_resolution"]["subset_rows"]["auto_detected"] is True
+    assert audit["row_input_resolution"]["subset_rows"]["resolved_path"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_subset_rows.json"
+    )
+    assert audit["row_input_resolution"]["pose_rows"]["auto_detected"] is True
+    assert audit["row_input_resolution"]["enrichment_rows"]["auto_detected"] is True
+    assert audit["row_input_resolution"]["vina_gnina_rows"]["auto_detected"] is True
     assert audit["row_input_resolution"]["gpcr_rows"] == {
         "auto_detected": True,
         "candidate_paths": [
