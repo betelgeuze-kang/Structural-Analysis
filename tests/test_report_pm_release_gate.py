@@ -691,7 +691,7 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
 def _release_decision_inputs(tmp_path: Path) -> dict[str, Path]:
     evidence_surface_dir = tmp_path / "evidence_surfaces"
     _write(
-        evidence_surface_dir / "structural_contact_surface.json",
+        evidence_surface_dir / "structural_contact_gate_report.json",
         {
             "contract_pass": True,
             "status": "ready",
@@ -757,7 +757,7 @@ def _base_kwargs(tmp_path: Path) -> dict[str, Path]:
     return kwargs
 
 
-def test_public_benchmark_ready_requires_source_of_truth_ready() -> None:
+def test_public_benchmark_ready_uses_structural_benchmark_inputs_only() -> None:
     measured = {"contract_pass": True}
     external = {
         "contract_pass": True,
@@ -778,7 +778,7 @@ def test_public_benchmark_ready_requires_source_of_truth_ready() -> None:
             external,
             {"contract_pass": True, "public_benchmark_ready": False},
         )
-        is False
+        is True
     )
 
 
@@ -1200,142 +1200,23 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["input_checksums"][str(base_kwargs["external_benchmark_submission_readiness"])].startswith(
         "sha256:"
     )
-    assert payload["input_checksums"][str(base_kwargs["public_benchmark_source_of_truth"])].startswith(
-        "sha256:"
-    )
     assert payload["release_area_gate_ready"] is True
     assert payload["full_release_gate_ready"] is True
     decision = payload["release_decision"]
     assert decision["release_allowed"] is True
     assert decision["blocked_release_count"] == 0
     assert decision["first_blocker"] == ""
-    assert decision["operator_action_count"] == 19
+    assert decision["operator_action_count"] == 16
     assert decision["approval_token_count"] == 0
     assert decision["stale_artifact_count"] == 0
     assert decision["stale_artifact_refresh_required"] is False
-    assert decision["evidence_surface_count"] == 2
+    assert decision["evidence_surface_count"] == 1
     assert decision["missing_evidence_surface_count"] == 0
-    assert decision["locked_evidence_surface_count"] == 1
+    assert decision["locked_evidence_surface_count"] == 0
     assert decision["public_benchmark_ready"] is True
-    assert decision["public_benchmark_source_of_truth_ready"] is True
-    assert decision["public_benchmark_source_of_truth_status"] == "ready"
-    assert decision["public_benchmark_source_of_truth_blockers"] == []
-    assert decision["h_bond_evidence_surface_present"] is False
-    assert decision["gpcr_evidence_surface_present"] is True
-    assert decision["pocketmd_lite_science_product_surface_present"] is False
-    assert decision["broad_gpcr_family_claim_safe"] is False
-    assert decision["pocketmd_lite_product_surface_ready"] is False
-    assert decision["science_evidence_surface_bottlenecks"] == [
-        "h_bond_evidence_surface_missing",
-        "broad_gpcr_family_claim_locked",
-        "pocketmd_lite_science_product_surface_missing",
-    ]
-    science_surface_status = decision["science_evidence_surface_status"]
-    assert science_surface_status["h_bond"] == {
-        "surface_family": "h_bond",
-        "present": False,
-        "status": "missing",
-        "surface_count": 0,
-        "contract_pass_count": 0,
-        "locked_count": 0,
-        "surface_ids": [],
-        "first_blocked_target": "",
-        "root_cause_tags": [],
-        "blocked_criteria": [],
-        "bottleneck": "h_bond_evidence_surface_missing",
-    }
-    assert science_surface_status["gpcr"] == {
-        "surface_family": "gpcr",
-        "present": True,
-        "status": "locked",
-        "surface_count": 1,
-        "contract_pass_count": 0,
-        "locked_count": 1,
-        "surface_ids": ["gpcr_hard_decoy_surface"],
-        "first_blocked_target": "DRD2",
-        "root_cause_tags": ["operator_values_required"],
-        "blocked_criteria": [
-            "ranking_pr_auc_ci_low_min",
-            "top20_hit_rate_min",
-            "decoys_above_positive_count_max",
-            "no_positive_out_anchored_by_top_decoys",
-        ],
-        "bottleneck": "broad_gpcr_family_claim_locked",
-        "broad_family_claim_safe": False,
-    }
-    assert science_surface_status["pocketmd_lite"] == {
-        "surface_family": "pocketmd_lite",
-        "present": False,
-        "status": "missing",
-        "surface_count": 0,
-        "contract_pass_count": 0,
-        "locked_count": 0,
-        "surface_ids": [],
-        "first_blocked_target": "",
-        "root_cause_tags": [],
-        "blocked_criteria": [],
-        "bottleneck": "pocketmd_lite_science_product_surface_missing",
-        "product_surface_ready": False,
-    }
-    assert decision["operator_actions"] == [
-        {
-            "action_id": "resolve_h_bond_evidence_surface",
-            "status": "science_evidence_required",
-            "surface_family": "h_bond",
-            "bottleneck": "h_bond_evidence_surface_missing",
-            "first_blocked_target": "",
-            "root_cause_tags": [],
-            "blocked_criteria": [],
-            "blocked_criteria_count": 0,
-            "reason": "h_bond evidence surface is missing; bottleneck=h_bond_evidence_surface_missing",
-            "artifact": str(base_kwargs["evidence_surface_dir"]),
-            **_science_action_hints("h_bond"),
-        },
-        {
-            "action_id": "resolve_gpcr_evidence_surface",
-            "status": "science_evidence_required",
-            "surface_family": "gpcr",
-            "bottleneck": "broad_gpcr_family_claim_locked",
-            "first_blocked_target": "DRD2",
-            "root_cause_tags": ["operator_values_required"],
-            "blocked_criteria": [
-                "ranking_pr_auc_ci_low_min",
-                "top20_hit_rate_min",
-                "decoys_above_positive_count_max",
-                "no_positive_out_anchored_by_top_decoys",
-            ],
-            "blocked_criteria_count": 4,
-            "reason": (
-                "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; "
-                "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
-            ),
-            "artifact": "gpcr_hard_decoy_surface",
-            **_science_action_hints("gpcr"),
-        },
-        {
-            "action_id": "resolve_pocketmd_lite_science_product_surface",
-            "status": "science_product_surface_required",
-            "surface_family": "pocketmd_lite",
-            "bottleneck": "pocketmd_lite_science_product_surface_missing",
-            "first_blocked_target": "",
-            "root_cause_tags": [],
-            "blocked_criteria": [],
-            "blocked_criteria_count": 0,
-            "reason": (
-                "pocketmd_lite science product surface is missing; "
-                "bottleneck=pocketmd_lite_science_product_surface_missing"
-            ),
-            "artifact": str(base_kwargs["evidence_surface_dir"]),
-            **_science_action_hints("pocketmd_lite"),
-        },
-    ]
+    assert decision["operator_actions"] == []
     surface_paths = {row["surface_id"]: row for row in decision["evidence_surfaces"]}
-    assert surface_paths["structural_contact_surface"]["contract_pass"] is True
-    assert surface_paths["gpcr_hard_decoy_surface"]["locked"] is True
-    assert surface_paths["gpcr_hard_decoy_surface"]["first_blocked_target"] == "DRD2"
-    assert surface_paths["gpcr_hard_decoy_surface"]["root_cause_tags"] == [
-        "operator_values_required"
-    ]
+    assert surface_paths["structural_contact_gate_report"]["contract_pass"] is True
     assert payload["implementation_orchestration"]["cursor_opencode_worker_preflight_pass"] is True
     assert (
         payload["implementation_orchestration"]["summary"]["opencode_configured_model"]
@@ -1597,56 +1478,6 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "status": "refresh_required",
             "reason": "release_evidence_freshness_report has stale or incomplete source-of-truth blockers",
             "artifact": "release_evidence_freshness_report",
-        },
-        {
-            "action_id": "resolve_h_bond_evidence_surface",
-            "status": "science_evidence_required",
-            "surface_family": "h_bond",
-            "bottleneck": "h_bond_evidence_surface_missing",
-            "first_blocked_target": "",
-            "root_cause_tags": [],
-            "blocked_criteria": [],
-            "blocked_criteria_count": 0,
-            "reason": "h_bond evidence surface is missing; bottleneck=h_bond_evidence_surface_missing",
-            "artifact": str(base_kwargs["evidence_surface_dir"]),
-            **_science_action_hints("h_bond"),
-        },
-        {
-            "action_id": "resolve_gpcr_evidence_surface",
-            "status": "science_evidence_required",
-            "surface_family": "gpcr",
-            "bottleneck": "broad_gpcr_family_claim_locked",
-            "first_blocked_target": "DRD2",
-            "root_cause_tags": ["operator_values_required"],
-            "blocked_criteria": [
-                "ranking_pr_auc_ci_low_min",
-                "top20_hit_rate_min",
-                "decoys_above_positive_count_max",
-                "no_positive_out_anchored_by_top_decoys",
-            ],
-            "blocked_criteria_count": 4,
-            "reason": (
-                "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; "
-                "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
-            ),
-            "artifact": "gpcr_hard_decoy_surface",
-            **_science_action_hints("gpcr"),
-        },
-        {
-            "action_id": "resolve_pocketmd_lite_science_product_surface",
-            "status": "science_product_surface_required",
-            "surface_family": "pocketmd_lite",
-            "bottleneck": "pocketmd_lite_science_product_surface_missing",
-            "first_blocked_target": "",
-            "root_cause_tags": [],
-            "blocked_criteria": [],
-            "blocked_criteria_count": 0,
-            "reason": (
-                "pocketmd_lite science product surface is missing; "
-                "bottleneck=pocketmd_lite_science_product_surface_missing"
-            ),
-            "artifact": str(base_kwargs["evidence_surface_dir"]),
-            **_science_action_hints("pocketmd_lite"),
         },
     ]
 

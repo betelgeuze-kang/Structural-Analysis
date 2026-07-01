@@ -2496,7 +2496,13 @@ def test_snapshot_public_benchmark_vina_gnina_adapter_change_does_not_stale_snap
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["license_status_closure_report"]["source_state_kind"]
-        == "non_artifact_source_paths_changed"
+        == "receipt_only_commit"
+    )
+    assert (
+        "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"
+        not in metadata_rows["license_status_closure_report"][
+            "changed_paths_since_source_commit"
+        ]
     )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert not [
@@ -2569,6 +2575,10 @@ def test_snapshot_structural_roadmap_builder_change_does_not_stale_snapshot_leaf
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "non_artifact_source_paths_changed"
+    )
+    assert (
+        "scripts/materialize_pocketmd_lite_topk_survival_report.py"
+        not in metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"]
     )
     assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
     assert not [
@@ -2685,7 +2695,7 @@ def test_snapshot_pocketmd_topk_materializer_change_does_not_stale_snapshot_leaf
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
-        == "non_artifact_source_paths_changed"
+        == "receipt_only_commit"
     )
     assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
     assert not [
@@ -3297,9 +3307,9 @@ def test_snapshot_allows_release_surface_json_as_receipt_boundary(
     _commit_all(tmp_path, "receipt")
     _write_json(
         tmp_path
-        / "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        / "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
         {
-            "schema_version": "pocketmd-lite-science-product-surface.v1",
+            "schema_version": "structural-contact-gate-report.v1",
             "generated_at": "2026-06-21T00:00:01+00:00",
             "source_commit_sha": source_commit,
             "input_checksums": {"surface_input": "sha256:abc123"},
@@ -3327,7 +3337,7 @@ def test_snapshot_allows_release_surface_json_as_receipt_boundary(
         == "receipt_only_commit"
     )
     assert (
-        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+        "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json"
         in metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"]
     )
     assert not [

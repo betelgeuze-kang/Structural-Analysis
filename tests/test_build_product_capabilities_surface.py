@@ -37,7 +37,7 @@ def _capability_by_id(surface: dict[str, object]) -> dict[str, dict[str, object]
     }
 
 
-def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> None:
+def test_product_capabilities_surface_exposes_structural_solver_row() -> None:
     surface = module.build_product_capabilities_surface(repo_root=REPO_ROOT)
     rows = _capability_by_id(surface)
 
@@ -55,460 +55,43 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "artifact": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
         "mutation_allowed": False,
     }
-    assert surface["capability_count"] == 5
+    assert surface["capability_count"] == 1
     assert surface["ready_capability_count"] == 1
-    assert surface["blocked_capability_count"] == 4
-    assert surface["blocked_capability_register_count"] == 4
-    assert surface["first_blocked_capability_id"] == "public_benchmark_harness"
-    assert surface["first_blocked_capability_next_action"] == (
-        "attach at least 12 local CASF/PDBBind case descriptors"
-    )
-    assert [
-        row["capability_id"] for row in surface["blocked_capability_register"]
-    ] == [
-        "public_benchmark_harness",
-        "h_bond_backmap_evidence",
-        "gpcr_hard_decoy_evidence",
-        "pocketmd_lite_top_k_refinement",
-    ]
-    blocked_register = {
-        row["capability_id"]: row for row in surface["blocked_capability_register"]
-    }
-    first_blocked_capability = surface["first_blocked_capability"]
-    assert first_blocked_capability["first_blocked_target"] == (
-        "casf_pdbbind_subset_intake"
-    )
-    assert first_blocked_capability["operator_intake_route"] == (
-        "/product/public-benchmark/operator-intake"
-    )
-    assert first_blocked_capability["operator_intake_artifact"] == (
-        "implementation/phase1/release_evidence/productization/"
-        "public_benchmark_operator_intake_packet.json"
-    )
-    assert first_blocked_capability["operator_intake_required_slot_count"] == 4
-    assert first_blocked_capability["handoff_slot"]["slot_id"] == (
-        "casf_pdbbind_subset_intake"
-    )
-    assert first_blocked_capability["handoff_slot"]["handoff_id"] == (
-        "public_benchmark::casf_pdbbind_subset_intake"
-    )
-    assert first_blocked_capability["handoff_slot"]["blocked_criteria"] == [
-        "casf_pdbbind_subset_materialized",
-        "external_receipts_attached",
-    ]
-    assert first_blocked_capability["handoff_slot"][
-        "template_artifact"
-    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
-    assert blocked_register["gpcr_hard_decoy_evidence"]["handoff_slot"][
-        "status"
-    ] == "operator_input_required"
-    assert blocked_register["gpcr_hard_decoy_evidence"]["handoff_slot"][
-        "validation_command"
-    ].startswith("python3 scripts/materialize_gpcr_hard_decoy_suite_report.py")
-    assert blocked_register["pocketmd_lite_top_k_refinement"][
-        "first_blocked_target"
-    ] == "top_k_refinement_operator_intake"
-    assert blocked_register["h_bond_backmap_evidence"][
-        "operator_intake_artifact"
-    ].endswith("h_bond_backmap_operator_intake_packet.json")
-    assert blocked_register["gpcr_hard_decoy_evidence"][
-        "operator_intake_artifact"
-    ].endswith("gpcr_hard_decoy_operator_intake_packet.json")
-    assert blocked_register["pocketmd_lite_top_k_refinement"][
-        "operator_intake_artifact"
-    ].endswith("pocketmd_lite_operator_intake_packet.json")
-    assert blocked_register["pocketmd_lite_top_k_refinement"]["handoff_slot"][
-        "materialization_command"
-    ].startswith("python3 scripts/materialize_pocketmd_lite_topk_survival_report.py")
+    assert surface["blocked_capability_count"] == 0
+    assert surface["blocked_capability_register_count"] == 0
+    assert surface["first_blocked_capability_id"] == ""
+    assert surface["first_blocked_capability_next_action"] == ""
+    assert surface["blocked_capability_register"] == []
 
-    assert {
-        "structural_solver_restricted_alpha_surface",
-        "public_benchmark_harness",
-        "h_bond_backmap_evidence",
-        "gpcr_hard_decoy_evidence",
-        "pocketmd_lite_top_k_refinement",
-    } <= set(rows)
+    assert set(rows) == {"structural_solver_restricted_alpha_surface"}
 
-    public_benchmark = rows["public_benchmark_harness"]
-    assert public_benchmark["state"] == "blocked"
-    assert public_benchmark["summary"]["read_model_ready"] is True
-    assert public_benchmark["summary"]["source_of_truth_route"] == (
-        "/product/public-benchmark"
-    )
-    assert public_benchmark["summary"]["public_benchmark_ready"] is False
-    assert public_benchmark["summary"]["first_blocked_target"] == (
-        "casf_pdbbind_subset_intake"
-    )
-    assert public_benchmark["summary"]["root_cause_tags"] == [
-        "operator_source_material_required",
-        "operator_receipts_required",
-    ]
-    assert public_benchmark["summary"]["operator_intake_route"] == (
-        "/product/public-benchmark/operator-intake"
-    )
-    assert public_benchmark["summary"]["operator_intake_packet_status"] == (
-        "ready_for_operator_input"
-    )
-    assert public_benchmark["summary"]["operator_intake_required_slot_count"] == 4
-    assert public_benchmark["summary"]["gate_unblock_plan_count"] == 4
-    assert public_benchmark["summary"]["operator_evidence_gap_count"] == 4
-    assert public_benchmark["summary"]["first_operator_evidence_gap"]["slot_id"] == (
-        "casf_pdbbind_subset_intake"
-    )
-    assert public_benchmark["summary"]["first_operator_evidence_gap"][
-        "blocked_tier_beta_criteria"
-    ] == [
-        "casf_pdbbind_subset_materialized",
-        "external_receipts_attached",
-    ]
-    assert public_benchmark["summary"]["operator_handoff_queue_count"] == 4
-    assert public_benchmark["summary"]["first_operator_handoff"]["handoff_id"] == (
-        "public_benchmark::casf_pdbbind_subset_intake"
-    )
-    assert public_benchmark["summary"]["first_operator_handoff"][
-        "blocked_tier_beta_criteria"
-    ] == [
-        "casf_pdbbind_subset_materialized",
-        "external_receipts_attached",
-    ]
-    assert public_benchmark["summary"]["operator_handoff_queue"][0][
-        "template_artifact"
-    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
-    assert public_benchmark["summary"]["minimum_subset_case_count"] == 12
-    assert public_benchmark["summary"]["tier_beta_gate_status"] == "blocked"
-    assert public_benchmark["summary"]["tier_beta_failed_criterion_count"] == 8
-    assert public_benchmark["summary"]["harness_bundle_artifact"].endswith(
-        "public_benchmark_harness_bundle.json"
-    )
-    assert public_benchmark["summary"]["harness_bundle_status"] == (
-        "artifact_bundle_incomplete"
-    )
-    assert public_benchmark["summary"]["harness_bundle_artifact_count"] == 7
-    assert public_benchmark["summary"]["harness_bundle_missing_artifact_count"] == 0
-    assert public_benchmark["summary"]["harness_bundle_index"]["status"] == (
-        "ready_for_local_artifact_index"
-    )
-    assert [
-        row["criterion_id"]
-        for row in public_benchmark["summary"]["tier_beta_gate_criteria"]
-    ] == [
-        "casf_pdbbind_subset_materialized",
-        "real_pose_validity_packet_materialized",
-        "symmetry_rmsd_scorecard_real_cases",
-        "posebusters_style_validity_real_ligands",
-        "casf_pdbbind_pose_success_harness_ready",
-        "dud_e_lit_pcba_enrichment_ready",
-        "vina_gnina_comparison_ready",
-        "external_receipts_attached",
-    ]
-    assert {
-        row["slot_id"]: row["status"]
-        for row in public_benchmark["summary"]["operator_intake_slots"]
-    } == {
-        "casf_pdbbind_subset_intake": "operator_input_required",
-        "pose_coordinate_intake": "operator_input_required",
-        "dud_e_lit_pcba_enrichment_intake": "operator_input_required",
-        "vina_gnina_comparison_intake": "operator_input_required",
+    structural = rows["structural_solver_restricted_alpha_surface"]
+    assert structural["title"] == "Restricted alpha structural solver evidence"
+    assert structural["capability_kind"] == "engineering_core"
+    assert structural["state"] == "ready"
+    assert structural["contract_pass"] is True
+    assert structural["blocker_count"] == 0
+    assert structural["next_actions"] == []
+    assert structural["summary"] == {
+        "surface_count": 8,
+        "present_surface_count": 8,
+        "ready_surface_count": 8,
     }
-    gate_plan = {
-        row["slot_id"]: row
-        for row in public_benchmark["summary"]["gate_unblock_plan"]
-    }
-    assert gate_plan["casf_pdbbind_subset_intake"][
-        "unblocks_tier_beta_criteria"
-    ] == [
-        "casf_pdbbind_subset_materialized",
-        "external_receipts_attached",
+    assert structural["evidence_artifacts"] == [
+        "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json",
+        "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
+        "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json",
+        "implementation/phase1/release_evidence/surface/solver_breadth_report.json",
+        "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json",
+        "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json",
+        "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
+        "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json",
     ]
-    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
-        "case_count"
-    ] == 12
-    assert gate_plan["casf_pdbbind_subset_intake"]["template_artifact"].endswith(
-        "public_benchmark_casf_pdbbind_operator_template.json"
+    assert surface["reuse_policy"] == (
+        "product_capabilities_surface_aggregates_structural_solver_evidence"
     )
-    assert gate_plan["dud_e_lit_pcba_enrichment_intake"][
-        "materialization_steps"
-    ] == ["materialize_enrichment_scorecard"]
-    gap_register = {
-        row["slot_id"]: row
-        for row in public_benchmark["summary"]["operator_evidence_gap_register"]
-    }
-    assert gap_register["pose_coordinate_intake"]["blocked_tier_beta_criteria"] == [
-        "real_pose_validity_packet_materialized",
-        "symmetry_rmsd_scorecard_real_cases",
-        "posebusters_style_validity_real_ligands",
-        "casf_pdbbind_pose_success_harness_ready",
-    ]
-    assert gap_register["casf_pdbbind_subset_intake"]["first_next_action"] == (
-        "attach at least 12 local CASF/PDBBind case descriptors"
-    )
-    assert public_benchmark["summary"]["operator_template_artifacts"][
-        "pose_coordinate_intake"
-    ].endswith("public_benchmark_pose_coordinate_operator_template.json")
-    assert public_benchmark["summary"]["operator_handoff_queue_count"] == 4
-    assert public_benchmark["summary"]["first_operator_handoff"]["handoff_id"] == (
-        "public_benchmark::casf_pdbbind_subset_intake"
-    )
-    assert public_benchmark["summary"]["first_operator_handoff"][
-        "template_artifact"
-    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
-    assert {
-        row["slot_id"]: row["template_artifact"]
-        for row in public_benchmark["summary"]["operator_handoff_queue"]
-    }["vina_gnina_comparison_intake"].endswith(
-        "public_benchmark_vina_gnina_operator_template.json"
-    )
-    assert public_benchmark["summary"]["symmetry_rmsd_scorecard_summary"] == {
-        "status": "ready",
-        "dry_run_case_count": 1,
-        "real_benchmark_case_count": 0,
-        "dry_run_pose_success": True,
-    }
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "public_benchmark_operator_intake_packet.json"
-        in public_benchmark["evidence_artifacts"]
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "public_benchmark_harness_bundle.json"
-        in public_benchmark["evidence_artifacts"]
-    )
-    assert public_benchmark["summary"]["harness_bundle_artifact"].endswith(
-        "public_benchmark_harness_bundle.json"
-    )
-    assert public_benchmark["summary"]["harness_bundle_status"] == (
-        "artifact_bundle_incomplete"
-    )
-    assert public_benchmark["summary"]["harness_bundle_artifact_count"] == 7
-    assert (
-        public_benchmark["summary"]["harness_bundle_index"]["artifact"]
-        == "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
-    )
-    assert "attach_dud_e_lit_pcba_enrichment_intake" in public_benchmark["next_actions"]
-    assert "attach_vina_gnina_comparison_intake" in public_benchmark["next_actions"]
-    assert "fill_public_benchmark_operator_intake_packet" in public_benchmark["next_actions"]
-
-    h_bond = rows["h_bond_backmap_evidence"]
-    assert h_bond["state"] == "blocked"
-    assert h_bond["summary"]["operator_intake_packet_status"] == (
-        "ready_for_operator_input"
-    )
-    assert h_bond["summary"]["operator_intake_required_slot_count"] == 3
-    assert h_bond["summary"]["claim_locked"] is True
-    assert h_bond["summary"]["first_blocked_target"] == (
-        "operator_attached_h_bond_backmap_cases"
-    )
-    assert h_bond["summary"]["root_cause_tags"] == [
-        "operator_receipts_required",
-        "operator_handoff_required",
-    ]
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "h_bond_backmap_operator_intake_packet.json"
-        in h_bond["evidence_artifacts"]
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "h_bond_backmap_operator_intake_packet.md"
-        in h_bond["evidence_artifacts"]
-    )
-    assert "fill_h_bond_backmap_operator_intake_packet" in h_bond["next_actions"]
-    assert "attach_h_bond_backmap_operator_receipts" in h_bond["next_actions"]
-
-    pocketmd = rows["pocketmd_lite_top_k_refinement"]
-    assert pocketmd["state"] == "blocked"
-    assert pocketmd["summary"]["product_surface_ready"] is False
-    assert pocketmd["summary"]["first_blocked_target"] == (
-        "top_k_refinement_operator_intake"
-    )
-    assert pocketmd["summary"]["root_cause_tags"] == [
-        "operator_refinement_rows_required"
-    ]
-    assert pocketmd["summary"]["operator_intake_packet_status"] == (
-        "ready_for_operator_input"
-    )
-    assert pocketmd["summary"]["operator_intake_route"] == (
-        "/product/pocketmd-lite/operator-intake"
-    )
-    assert pocketmd["summary"]["operator_intake_required_slot_count"] == 1
-    assert pocketmd["summary"]["gate_unblock_plan_count"] == 1
-    assert pocketmd["summary"]["minimum_refinement_case_count"] == 3
-    assert pocketmd["summary"]["minimum_top_k_candidate_count"] == 6
-    assert pocketmd["summary"]["phase4_exit_gate_status"] == "blocked"
-    assert pocketmd["summary"]["phase4_failed_criterion_count"] == 8
-    assert pocketmd["summary"]["phase4_failed_criteria"] == [
-        "top_k_refinement_rows_present",
-        "top_k_refinement_case_coverage",
-        "local_min_survival_materialized",
-        "contact_persistence_materialized",
-        "h_bond_persistence_materialized",
-        "clash_relief_materialized",
-        "uncertainty_summary_materialized",
-        "report_blockers_resolved",
-    ]
-    assert [
-        row["criterion_id"] for row in pocketmd["summary"]["phase4_exit_gate_criteria"]
-    ] == [
-        "top_k_refinement_rows_present",
-        "top_k_refinement_case_coverage",
-        "local_min_survival_materialized",
-        "contact_persistence_materialized",
-        "h_bond_persistence_materialized",
-        "clash_relief_materialized",
-        "uncertainty_summary_materialized",
-        "report_blockers_resolved",
-        "broad_all_atom_fep_claims_locked",
-    ]
-    assert {
-        row["slot_id"]: row["status"]
-        for row in pocketmd["summary"]["operator_intake_slots"]
-    } == {"top_k_refinement_rows": "operator_input_required"}
-    gate_plan = pocketmd["summary"]["gate_unblock_plan"][0]
-    assert gate_plan["slot_id"] == "top_k_refinement_rows"
-    assert gate_plan["unblocks_phase4_criteria"] == [
-        "top_k_refinement_rows_present",
-        "top_k_refinement_case_coverage",
-        "local_min_survival_materialized",
-        "contact_persistence_materialized",
-        "h_bond_persistence_materialized",
-        "clash_relief_materialized",
-        "uncertainty_summary_materialized",
-        "report_blockers_resolved",
-    ]
-    assert gate_plan["preserves_phase4_criteria"] == [
-        "broad_all_atom_fep_claims_locked"
-    ]
-    assert gate_plan["minimum_evidence"]["candidate_scope"] == (
-        "upstream_ranked_top_k_candidates_only"
-    )
-    assert gate_plan["template_artifact"].endswith(
-        "pocketmd_lite_operator_template.json"
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "pocketmd_lite_readonly_api.json"
-        in pocketmd["evidence_artifacts"]
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "pocketmd_lite_delivery_handoff.json"
-        in pocketmd["evidence_artifacts"]
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "pocketmd_lite_operator_intake_packet.json"
-        in pocketmd["evidence_artifacts"]
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "pocketmd_lite_operator_template.json"
-        in pocketmd["evidence_artifacts"]
-    )
-    assert pocketmd["summary"]["readonly_api_status"] == "ready_for_seed_artifacts"
-    assert pocketmd["summary"]["readonly_api_route"] == "/product/pocketmd-lite"
-    assert pocketmd["summary"]["readonly_api_endpoint_count"] == 7
-    assert pocketmd["summary"]["operator_template_artifact"].endswith(
-        "pocketmd_lite_operator_template.json"
-    )
-    assert pocketmd["summary"]["handoff_status"] == (
-        "handoff_ready_operator_evidence_required"
-    )
-    assert pocketmd["summary"]["handoff_route"] == "/product/pocketmd-lite/handoff"
-    assert pocketmd["summary"]["handoff_acceptance_criteria_count"] == 8
-    assert pocketmd["summary"]["handoff_phase4_exit_gate_required_status"] == "ready"
-    assert "fill_pocketmd_lite_operator_intake_packet" in pocketmd["next_actions"]
-    assert "run_pocketmd_lite_topk_survival_materializer" in pocketmd["next_actions"]
-
-    gpcr = rows["gpcr_hard_decoy_evidence"]
-    assert gpcr["state"] == "blocked"
-    assert gpcr["summary"]["product_report_route"] == "/product/gpcr-hard-decoy-suite-report"
-    assert gpcr["summary"]["broad_gpcr_family_claim_safe"] is False
-    assert gpcr["summary"]["operator_intake_route"] == (
-        "/product/gpcr-hard-decoy-suite-report/operator-intake"
-    )
-    assert gpcr["summary"]["operator_intake_packet_status"] == "ready_for_operator_input"
-    assert gpcr["summary"]["operator_intake_required_slot_count"] == 3
-    assert gpcr["summary"]["gate_unblock_plan_count"] == 3
-    assert gpcr["summary"]["minimum_target_count"] == 3
-    assert gpcr["summary"]["minimum_metric_field_count_per_target"] == 4
-    assert gpcr["summary"]["phase3_exit_gate_status"] == "blocked"
-    assert gpcr["summary"]["phase3_failed_criterion_count"] == 5
-    assert gpcr["summary"]["phase3_failed_criteria"] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
-    assert [
-        row["criterion_id"] for row in gpcr["summary"]["phase3_exit_gate_criteria"]
-    ] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
-    assert gpcr["summary"]["phase3_exit_gate_criteria"][0][
-        "current_by_target"
-    ] == {"DRD2": None, "HTR2A": None, "OPRM1": None}
-    assert {
-        row["target_id"]: row["status"]
-        for row in gpcr["summary"]["operator_target_slots"]
-    } == {
-        "DRD2": "operator_input_required",
-        "HTR2A": "operator_input_required",
-        "OPRM1": "operator_input_required",
-    }
-    assert {
-        row["target_id"]: row["template_artifact"]
-        for row in gpcr["summary"]["operator_target_slots"]
-    } == {
-        "DRD2": (
-            "implementation/phase1/release_evidence/productization/"
-            "gpcr_hard_decoy_operator_template.json"
-        ),
-        "HTR2A": (
-            "implementation/phase1/release_evidence/productization/"
-            "gpcr_hard_decoy_operator_template.json"
-        ),
-        "OPRM1": (
-            "implementation/phase1/release_evidence/productization/"
-            "gpcr_hard_decoy_operator_template.json"
-        ),
-    }
-    gate_plan = {row["target_id"]: row for row in gpcr["summary"]["gate_unblock_plan"]}
-    assert gate_plan["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
-    assert gate_plan["DRD2"]["unblocks_phase3_criteria"] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
-    assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"][
-        "top20_hit_rate"
-    ] == ">=0.2"
-    assert gate_plan["DRD2"]["template_artifact"] == (
-        "implementation/phase1/release_evidence/productization/"
-        "gpcr_hard_decoy_operator_template.json"
-    )
-    assert gate_plan["DRD2"]["materialization_steps"] == [
-        "materialize_gpcr_hard_decoy_suite_report",
-        "refresh_gpcr_hard_decoy_product_report",
-        "refresh_product_capabilities_surface",
-        "refresh_goal_bottleneck_roadmap_surface",
-    ]
-    assert (
-        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json"
-        in gpcr["evidence_artifacts"]
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json"
-        in gpcr["evidence_artifacts"]
-    )
-    assert "fill_gpcr_hard_decoy_operator_intake_packet" in gpcr["next_actions"]
+    assert "structural analysis solver product" in surface["claim_boundary"]
+    assert "Non-structural product domains" in surface["claim_boundary"]
 
 
 def test_product_capabilities_surface_cli_writes_pm_visible_ready_surface(
@@ -524,20 +107,4 @@ def test_product_capabilities_surface_cli_writes_pm_visible_ready_surface(
     assert payload["surface_id"] == "product_capabilities_surface"
 
     rows = pm_report._evidence_surface_rows(out.parent)
-    assert rows == [
-        {
-            "surface_id": "product_capabilities_surface",
-            "path": str(out),
-            "present": True,
-            "contract_pass": True,
-            "status": "ready",
-            "reason_code": "PASS",
-            "blocker_count": 0,
-            "locked": False,
-            "missing": False,
-            "summary_line": payload["summary_line"],
-            "first_blocked_target": "",
-            "root_cause_tags": [],
-            "blocked_criteria": [],
-        }
-    ]
+    assert rows == []

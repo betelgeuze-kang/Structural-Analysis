@@ -14,7 +14,7 @@
     "local_pr_report_count": 2,
     "release_streak_source_policy": "github_actions_required"
   },
-  "generated_at": "2026-07-01T10:19:19.949439+00:00",
+  "generated_at": "2026-07-01T11:52:44.859998+00:00",
   "lanes": {
     "nightly": {
       "blockers": [

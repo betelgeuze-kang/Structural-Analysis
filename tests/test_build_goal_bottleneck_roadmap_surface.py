@@ -85,7 +85,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         ).read_text(encoding="utf-8")
     )
     decision = pm_report["release_decision"]
-    assert kpis["operator_action_count"] >= 13
+    assert kpis["operator_action_count"] == 10
     assert kpis == {
         key: decision[key]
         for key in (
@@ -99,20 +99,14 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
             "missing_evidence_surface_count",
             "locked_evidence_surface_count",
             "public_benchmark_ready",
-            "broad_gpcr_family_claim_safe",
-            "pocketmd_lite_product_surface_ready",
         )
     }
     assert kpis["blocked_release_count"] == len(pm_report["full_release_blockers"])
     assert kpis["first_blocker"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
-    assert kpis["evidence_surface_count"] == 12
-    assert kpis["locked_evidence_surface_count"] == 3
-    assert kpis["missing_evidence_surface_count"] == 1
-    assert surface["science_evidence_surface_bottlenecks"] == [
-        "h_bond_evidence_surface_locked",
-        "broad_gpcr_family_claim_locked",
-        "pocketmd_lite_science_product_surface_locked",
-    ]
+    assert kpis["evidence_surface_count"] == 8
+    assert kpis["locked_evidence_surface_count"] == 0
+    assert kpis["missing_evidence_surface_count"] == 0
+    assert surface["science_evidence_surface_bottlenecks"] == []
     assert surface["non_expert_release_briefing_ready"] is True
     briefing = surface["non_expert_release_briefing"]
     assert briefing["audience"] == "non_expert_pm_operator"
@@ -230,143 +224,23 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "gate by itself."
     )
     assert briefing["primary_roadmap_bottleneck"] == (
-        "public_benchmark_source_of_truth_not_ready"
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
-    assert briefing["blocked_science_or_beta_phase_count"] == 3
-    assert [
-        row["phase_id"] for row in briefing["blocked_science_or_beta_phases"]
-    ] == [
-        "phase_2_public_benchmark_harness",
-        "phase_3_gpcr_hard_decoy_closure",
-        "phase_4_pocketmd_lite",
-    ]
-    assert briefing["next_owner_handoff_count"] == 3
-    assert briefing["first_operator_handoff"]["phase_id"] == (
-        "phase_2_public_benchmark_harness"
-    )
-    assert briefing["next_owner_handoff_slot_count"] == 8
-    assert briefing["first_operator_handoff_slot"]["phase_id"] == (
-        "phase_2_public_benchmark_harness"
-    )
-    assert briefing["first_operator_handoff_slot"]["slot_id"] == (
-        "casf_pdbbind_subset_intake"
-    )
+    assert briefing["primary_roadmap_phase_id"] == "phase_1_goal_release_cockpit"
+    assert briefing["blocked_science_or_beta_phase_count"] == 0
+    assert briefing["blocked_science_or_beta_phases"] == []
+    assert briefing["next_owner_handoff_count"] == 0
+    assert briefing["first_operator_handoff"] == {}
+    assert briefing["next_owner_handoff_slot_count"] == 0
+    assert briefing["first_operator_handoff_slot"] == {}
     assert briefing["claim_boundaries"] == [
         "do_not_claim_limited_commercial_release_until_release_allowed_true",
-        "do_not_claim_tier_beta_until_public_benchmark_ready_true",
-        "do_not_claim_broad_gpcr_until_broad_gpcr_family_claim_safe_true",
-        "do_not_claim_pocketmd_lite_ready_until_product_surface_ready_true",
         "do_not_replace_human_ux_observation_with_templates_or_automation",
     ]
-    assert surface["operator_evidence_handoff_scope"] == (
-        "first_blocked_operator_gap_per_blocked_phase"
-    )
-    assert surface["operator_evidence_handoff_count"] == 3
-    assert surface["first_operator_evidence_handoff"]["phase_id"] == (
-        "phase_2_public_benchmark_harness"
-    )
-    assert surface["first_operator_evidence_handoff"]["slot_id"] == (
-        "casf_pdbbind_subset_intake"
-    )
-    assert surface["first_operator_evidence_handoff"]["first_blocker"] == (
-        "casf_pdbbind_source_material_not_attached"
-    )
-    assert surface["first_operator_evidence_handoff"]["template_artifact"].endswith(
-        "public_benchmark_casf_pdbbind_operator_template.json"
-    )
-    assert [
-        row["phase_id"] for row in surface["operator_evidence_handoff_queue"]
-    ] == [
-        "phase_2_public_benchmark_harness",
-        "phase_3_gpcr_hard_decoy_closure",
-        "phase_4_pocketmd_lite",
-    ]
-    assert {
-        row["phase_id"]: (
-            row["capability_id"],
-            row["actual_closure_component_id"],
-        )
-        for row in surface["operator_evidence_handoff_queue"]
-    } == {
-        "phase_2_public_benchmark_harness": ("public_benchmark_harness", ""),
-        "phase_3_gpcr_hard_decoy_closure": (
-            "gpcr_hard_decoy_evidence",
-            "gpcr_hard_decoy_actual_closure",
-        ),
-        "phase_4_pocketmd_lite": (
-            "pocketmd_lite_top_k_refinement",
-            "pocketmd_lite_topk_actual_closure",
-        ),
-    }
-    assert surface["operator_evidence_handoff_slot_scope"] == (
-        "all_blocked_operator_slots_per_blocked_phase"
-    )
-    assert surface["operator_evidence_handoff_slot_count"] == 8
-    assert [
-        row["slot_id"] for row in surface["operator_evidence_handoff_slot_queue"]
-    ] == [
-        "casf_pdbbind_subset_intake",
-        "pose_coordinate_intake",
-        "dud_e_lit_pcba_enrichment_intake",
-        "vina_gnina_comparison_intake",
-        "drd2_hard_decoy_metrics",
-        "htr2a_hard_decoy_metrics",
-        "oprm1_hard_decoy_metrics",
-        "top_k_refinement_rows",
-    ]
-    handoff_ids = {
-        row["slot_id"]: row["handoff_id"]
-        for row in surface["operator_evidence_handoff_slot_queue"]
-    }
-    assert handoff_ids["drd2_hard_decoy_metrics"] == (
-        "gpcr_hard_decoy::drd2_hard_decoy_metrics"
-    )
-    assert handoff_ids["htr2a_hard_decoy_metrics"] == (
-        "gpcr_hard_decoy::htr2a_hard_decoy_metrics"
-    )
-    assert handoff_ids["oprm1_hard_decoy_metrics"] == (
-        "gpcr_hard_decoy::oprm1_hard_decoy_metrics"
-    )
-    assert handoff_ids["top_k_refinement_rows"] == (
-        "pocketmd_lite::top_k_refinement_rows"
-    )
-    slot_capabilities = {
-        row["slot_id"]: (
-            row["capability_id"],
-            row["actual_closure_component_id"],
-        )
-        for row in surface["operator_evidence_handoff_slot_queue"]
-    }
-    assert slot_capabilities["casf_pdbbind_subset_intake"] == (
-        "public_benchmark_harness",
-        "",
-    )
-    assert slot_capabilities["pose_coordinate_intake"] == (
-        "public_benchmark_harness",
-        "",
-    )
-    assert slot_capabilities["drd2_hard_decoy_metrics"] == (
-        "gpcr_hard_decoy_evidence",
-        "gpcr_hard_decoy_actual_closure",
-    )
-    assert slot_capabilities["htr2a_hard_decoy_metrics"] == (
-        "gpcr_hard_decoy_evidence",
-        "gpcr_hard_decoy_actual_closure",
-    )
-    assert slot_capabilities["oprm1_hard_decoy_metrics"] == (
-        "gpcr_hard_decoy_evidence",
-        "gpcr_hard_decoy_actual_closure",
-    )
-    assert slot_capabilities["top_k_refinement_rows"] == (
-        "pocketmd_lite_top_k_refinement",
-        "pocketmd_lite_topk_actual_closure",
-    )
-    assert surface["first_operator_evidence_handoff_slot"]["slot_id"] == (
-        "casf_pdbbind_subset_intake"
-    )
-    assert surface["operator_evidence_handoff_slot_queue"][1][
-        "materialization_command"
-    ].startswith("python3 scripts/materialize_public_benchmark_pose_validity_input.py")
+    assert surface["operator_evidence_handoff_count"] == 0
+    assert surface["operator_evidence_handoff_queue"] == []
+    assert surface["operator_evidence_handoff_slot_count"] == 0
+    assert surface["operator_evidence_handoff_slot_queue"] == []
 
 
 def test_goal_bottleneck_roadmap_surface_promotes_stale_refresh_operator_action(
@@ -425,9 +299,38 @@ def test_goal_bottleneck_roadmap_surface_promotes_stale_refresh_operator_action(
     assert briefing["refresh_required_operator_actions"] == [refresh_action]
 
 
-def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
+def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -> None:
     surface = module.build_goal_bottleneck_roadmap_surface(repo_root=REPO_ROOT)
     rows = _row_by_phase(surface)
+
+    assert set(rows) == {
+        "phase_0_source_of_truth_hardening",
+        "phase_1_goal_release_cockpit",
+    }
+    assert rows["phase_0_source_of_truth_hardening"]["state"] == "ready"
+    phase_1 = rows["phase_1_goal_release_cockpit"]
+    assert phase_1["state"] == "blocked"
+    assert phase_1["bottleneck"] == (
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    )
+    assert phase_1["first_blocker"] == (
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    )
+    assert phase_1["summary"] == {
+        "release_allowed": False,
+        "blocked_release_count": 6,
+        "operator_action_count": 10,
+        "approval_token_count": 5,
+        "action_register_contract_pass": False,
+        "product_capability_count": 1,
+        "blocked_capability_count": 0,
+    }
+    assert phase_1["next_actions"] == ["work_release_decision_operator_actions"]
+    assert surface["primary_roadmap_bottleneck"] == (
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    )
+    assert surface["primary_roadmap_phase_id"] == "phase_1_goal_release_cockpit"
+    return
 
     assert rows["phase_0_source_of_truth_hardening"]["state"] == "ready"
     assert rows["phase_0_source_of_truth_hardening"]["summary"][
@@ -935,4 +838,4 @@ def test_goal_bottleneck_roadmap_surface_cli_writes_payload(tmp_path: Path) -> N
     ].startswith("sha256:")
     assert payload["reused_evidence"] is True
     assert payload["surface_id"] == "goal_bottleneck_roadmap_surface"
-    assert payload["primary_next_actions"][0] == "fill_public_benchmark_operator_intake_packet"
+    assert payload["primary_next_actions"][0] == "work_release_decision_operator_actions"

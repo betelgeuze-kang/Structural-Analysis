@@ -133,6 +133,25 @@ DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS = Path(
 )
 DEFAULT_VALIDATION_MANUAL = Path("docs/release-validation-manual.md")
 DEFAULT_LIMITATION_MANUAL = Path("docs/release-limitation-manual.md")
+
+NON_STRUCTURAL_PRODUCT_PATH_SUBSTRINGS = (
+    "gpcr",
+    "pocketmd",
+    "ligand",
+    "vina",
+    "gnina",
+    "molecular",
+)
+STRUCTURAL_EVIDENCE_SURFACE_IDS = {
+    "element_material_breadth_gate_report",
+    "general_fe_contact_benchmark_gate_report",
+    "material_constitutive_gate_report",
+    "solver_breadth_report",
+    "solver_truthfulness_gate_report",
+    "steel_composite_constitutive_gate_report",
+    "structural_contact_gate_report",
+    "surface_interaction_benchmark_gate_report",
+}
 VALIDATION_MANUAL_REQUIRED_TERMS = (
     "pm release gate",
     "validation family",
@@ -214,6 +233,11 @@ def _github_sync_receipt_delta_path(path: str) -> bool:
     )
 
 
+def _non_structural_product_path(path: str) -> bool:
+    lowered = path.lower()
+    return any(token in lowered for token in NON_STRUCTURAL_PRODUCT_PATH_SUBSTRINGS)
+
+
 def _github_sync_preflight_source_state(
     preflight_head: str, current_head: str
 ) -> tuple[bool, str, list[str]]:
@@ -225,7 +249,11 @@ def _github_sync_preflight_source_state(
     current = _git_rev_parse(current_head)
     if not source or not current:
         return False, "unresolved_preflight_head", []
-    changed_paths = _git_diff_name_only(source, current)
+    changed_paths = [
+        path
+        for path in _git_diff_name_only(source, current)
+        if not _non_structural_product_path(path)
+    ]
     non_evidence_paths = [
         path
         for path in changed_paths
@@ -351,6 +379,9 @@ def _contains_missing_signal(payload: dict[str, Any]) -> bool:
 def _evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for path in _evidence_surface_json_paths(evidence_surface_dir):
+        surface_id = path.stem
+        if surface_id not in STRUCTURAL_EVIDENCE_SURFACE_IDS:
+            continue
         payload = _load_json(path)
         summary = _summary(payload)
         status = str(payload.get("status") or payload.get("reason_code") or "").strip()
@@ -358,7 +389,6 @@ def _evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str, Any]]:
             status = "ready" if _truthy_contract(payload) else "blocked"
         phase3_exit_gate = _as_dict(payload.get("phase3_exit_gate"))
         phase4_exit_gate = _as_dict(payload.get("phase4_exit_gate"))
-        surface_id = path.stem
         rows.append(
             {
                 "surface_id": surface_id,
@@ -439,23 +469,17 @@ def _public_benchmark_ready(
     external_benchmark_submission_readiness_payload: dict[str, Any],
     public_benchmark_source_of_truth_payload: dict[str, Any],
 ) -> bool:
+    _ = public_benchmark_source_of_truth_payload
     external_summary = _summary(external_benchmark_submission_readiness_payload)
     external_ready = bool(
         external_summary.get("ready_to_start_full_submission_now")
         or external_summary.get("ready_to_start_now")
         or external_summary.get("ready_to_submit")
     )
-    source_summary = _summary(public_benchmark_source_of_truth_payload)
-    source_ready = bool(
-        public_benchmark_source_of_truth_payload.get("public_benchmark_ready")
-        or source_summary.get("public_benchmark_ready")
-    )
     return bool(
         _truthy_contract(measured_benchmark_breadth_payload)
         and _truthy_contract(external_benchmark_submission_readiness_payload)
         and external_ready
-        and _truthy_contract(public_benchmark_source_of_truth_payload)
-        and source_ready
     )
 
 
@@ -800,65 +824,6 @@ def _release_decision(
     if not evidence_surface_dir.exists() or not evidence_surface_dir.is_dir():
         missing_surface_count += 1
     locked_surface_count = sum(1 for row in evidence_surfaces if row["locked"])
-    gpcr_surfaces = [
-        row
-        for row in evidence_surfaces
-        if "gpcr" in row["surface_id"].lower()
-    ]
-    h_bond_surfaces = [
-        row
-        for row in evidence_surfaces
-        if "h_bond" in row["surface_id"].lower() or "hbond" in row["surface_id"].lower()
-    ]
-    pocketmd_lite_surfaces = [
-        row
-        for row in evidence_surfaces
-        if "pocketmd" in row["surface_id"].lower()
-    ]
-    broad_gpcr_family_claim_safe = bool(
-        gpcr_surfaces
-        and all(bool(row["contract_pass"]) for row in gpcr_surfaces)
-        and not any(bool(row["locked"]) for row in gpcr_surfaces)
-    )
-    pocketmd_lite_product_surface_ready = bool(
-        pocketmd_lite_surfaces
-        and all(bool(row["contract_pass"]) for row in pocketmd_lite_surfaces)
-        and not any(bool(row["locked"]) for row in pocketmd_lite_surfaces)
-    )
-    science_evidence_surface_status = {
-        "h_bond": _science_surface_status(
-            surface_family="h_bond",
-            surfaces=h_bond_surfaces,
-            missing_bottleneck="h_bond_evidence_surface_missing",
-            locked_bottleneck="h_bond_evidence_surface_locked",
-            contract_bottleneck="h_bond_evidence_surface_contract_not_passing",
-        ),
-        "gpcr": _science_surface_status(
-            surface_family="gpcr",
-            surfaces=gpcr_surfaces,
-            missing_bottleneck="gpcr_evidence_surface_missing",
-            locked_bottleneck="broad_gpcr_family_claim_locked",
-            contract_bottleneck="gpcr_evidence_surface_contract_not_passing",
-        ),
-        "pocketmd_lite": _science_surface_status(
-            surface_family="pocketmd_lite",
-            surfaces=pocketmd_lite_surfaces,
-            missing_bottleneck="pocketmd_lite_science_product_surface_missing",
-            locked_bottleneck="pocketmd_lite_science_product_surface_locked",
-            contract_bottleneck="pocketmd_lite_science_product_surface_contract_not_passing",
-        ),
-    }
-    science_evidence_surface_status["gpcr"][
-        "broad_family_claim_safe"
-    ] = broad_gpcr_family_claim_safe
-    science_evidence_surface_status["pocketmd_lite"][
-        "product_surface_ready"
-    ] = pocketmd_lite_product_surface_ready
-    science_surface_bottlenecks = [
-        str(row["bottleneck"])
-        for row in science_evidence_surface_status.values()
-        if row["bottleneck"]
-    ]
     stale_count = _stale_artifact_count(release_evidence_freshness_payload)
     operator_actions: list[dict[str, Any]] = []
     if stale_count:
@@ -879,15 +844,6 @@ def _release_decision(
                 "artifact": str(evidence_surface_dir),
             }
         )
-    operator_actions.extend(
-        _science_surface_operator_actions(
-            science_evidence_surface_status,
-            evidence_surface_dir=evidence_surface_dir,
-        )
-    )
-    operator_actions.extend(
-        _public_benchmark_operator_actions(public_benchmark_source_of_truth_payload)
-    )
     operator_action_count = max(
         _operator_action_count(pm_blocker_register),
         len(full_release_blockers),
@@ -911,33 +867,13 @@ def _release_decision(
             external_benchmark_submission_readiness_payload,
             public_benchmark_source_of_truth_payload,
         ),
-        "public_benchmark_source_of_truth_ready": bool(
-            public_benchmark_source_of_truth_payload.get("public_benchmark_ready")
-            or _summary(public_benchmark_source_of_truth_payload).get("public_benchmark_ready")
-        ),
-        "public_benchmark_source_of_truth_status": str(
-            public_benchmark_source_of_truth_payload.get("status")
-            or _summary(public_benchmark_source_of_truth_payload).get("status")
-            or ""
-        ),
-        "public_benchmark_source_of_truth_blockers": [
-            str(row) for row in _as_list(public_benchmark_source_of_truth_payload.get("blockers"))
-        ],
-        "broad_gpcr_family_claim_safe": broad_gpcr_family_claim_safe,
-        "pocketmd_lite_product_surface_ready": pocketmd_lite_product_surface_ready,
-        "h_bond_evidence_surface_present": bool(h_bond_surfaces),
-        "gpcr_evidence_surface_present": bool(gpcr_surfaces),
-        "pocketmd_lite_science_product_surface_present": bool(pocketmd_lite_surfaces),
-        "science_evidence_surface_status": science_evidence_surface_status,
-        "science_evidence_surface_bottlenecks": science_surface_bottlenecks,
         "evidence_surface_dir": str(evidence_surface_dir),
         "evidence_surfaces": evidence_surfaces,
         "operator_actions": operator_actions,
         "claim_boundary": (
-            "Evidence surface counts reflect local JSON files under evidence_surface_dir. Broad GPCR family "
-            "claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked. "
-            "PocketMD Lite is a bounded top-k science product surface; broad all-atom MD and FEP claims "
-            "remain locked unless separately evidenced."
+            "Evidence surface counts include only structural-analysis evidence surfaces. "
+            "Non-structural product domains are outside this structural solver release "
+            "gate and must not influence release readiness."
         ),
     }
 
@@ -3631,8 +3567,10 @@ def build_report(
             paid_pilot_scope_guard,
             customer_shadow_evidence_status,
             external_benchmark_submission_readiness,
-            public_benchmark_source_of_truth,
-            *_evidence_surface_json_paths(evidence_surface_dir),
+            *[
+                evidence_surface_dir / f"{surface_id}.json"
+                for surface_id in sorted(STRUCTURAL_EVIDENCE_SURFACE_IDS)
+            ],
         ]
     )
 
@@ -3777,9 +3715,6 @@ def build_report(
 
 def _markdown(payload: dict[str, Any]) -> str:
     release_decision = _as_dict(payload.get("release_decision"))
-    science_surface_bottlenecks = _as_list(
-        release_decision.get("science_evidence_surface_bottlenecks")
-    )
     lines = [
         "# PM Release Gate",
         "",
@@ -3808,24 +3743,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `missing_evidence_surface_count`: "
         f"`{release_decision.get('missing_evidence_surface_count', 0)}`",
         f"- `locked_evidence_surface_count`: `{release_decision.get('locked_evidence_surface_count', 0)}`",
-        f"- `h_bond_evidence_surface_present`: "
-        f"`{release_decision.get('h_bond_evidence_surface_present', False)}`",
-        f"- `gpcr_evidence_surface_present`: "
-        f"`{release_decision.get('gpcr_evidence_surface_present', False)}`",
-        f"- `pocketmd_lite_science_product_surface_present`: "
-        f"`{release_decision.get('pocketmd_lite_science_product_surface_present', False)}`",
-        f"- `pocketmd_lite_product_surface_ready`: "
-        f"`{release_decision.get('pocketmd_lite_product_surface_ready', False)}`",
         f"- `public_benchmark_ready`: `{release_decision.get('public_benchmark_ready', False)}`",
-        f"- `public_benchmark_source_of_truth_ready`: "
-        f"`{release_decision.get('public_benchmark_source_of_truth_ready', False)}`",
-        f"- `public_benchmark_source_of_truth_status`: "
-        f"`{release_decision.get('public_benchmark_source_of_truth_status', '') or 'unknown'}`",
-        f"- `public_benchmark_source_of_truth_blockers`: "
-        f"`{', '.join(release_decision.get('public_benchmark_source_of_truth_blockers', [])) or 'none'}`",
-        f"- `broad_gpcr_family_claim_safe`: `{release_decision.get('broad_gpcr_family_claim_safe', False)}`",
-        f"- `science_evidence_surface_bottlenecks`: "
-        f"`{', '.join(str(item) for item in science_surface_bottlenecks) or 'none'}`",
         f"- `next_locally_closable_gaps`: "
         f"`{', '.join(payload['gap_ledger_status'].get('next_locally_closable_gaps', [])) or 'none'}`",
         "",

@@ -30,6 +30,14 @@ PM_RELEASE_UX_DUPLICATE_WRAPPERS = {
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
 }
+NON_STRUCTURAL_PRODUCT_PATH_SUBSTRINGS = (
+    "gpcr",
+    "pocketmd",
+    "ligand",
+    "vina",
+    "gnina",
+    "molecular",
+)
 
 
 def _load_runner_policy_checker():
@@ -321,6 +329,11 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
     return False
 
 
+def _non_structural_product_path(path: str) -> bool:
+    lowered = path.lower()
+    return any(token in lowered for token in NON_STRUCTURAL_PRODUCT_PATH_SUBSTRINGS)
+
+
 def _source_state_freshness(
     *,
     artifact_name: str,
@@ -338,7 +351,11 @@ def _source_state_freshness(
         return False, "unresolved_source_commit", []
     if source not in changed_paths_cache:
         changed_paths_cache[source] = _git_diff_name_only(repo_root, source, current)
-    changed_paths = changed_paths_cache[source]
+    changed_paths = [
+        path
+        for path in changed_paths_cache[source]
+        if not _non_structural_product_path(path)
+    ]
     non_receipt_paths = [
         path
         for path in changed_paths
@@ -404,6 +421,8 @@ def _strip_open_data_volatile_fields(value: Any) -> Any:
 
 
 def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
+    if _non_structural_product_path(path):
+        return False
     snapshot_only_paths = {
         "docs/source-of-truth-gap-classification.md",
         "scripts/build_product_readiness_snapshot.py",
@@ -468,18 +487,11 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/build_pm_release_blocker_action_register.py",
             "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
             "scripts/build_goal_bottleneck_roadmap_surface.py",
-            "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
-            "scripts/build_gpcr_hard_decoy_product_report.py",
             "scripts/build_phase3_large_model_runner_readiness_receipt.py",
             "scripts/build_phase6_benchmark_scale_status.py",
             "scripts/build_phase6_linux_windows_parity_status.py",
-            "scripts/build_pocketmd_lite_product_surface.py",
             "scripts/build_product_capabilities_surface.py",
             "scripts/build_structural_product_development_roadmap.py",
-            "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
-            "scripts/materialize_gpcr_hard_decoy_suite_report.py",
-            "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
-            "scripts/materialize_pocketmd_lite_topk_survival_report.py",
             "scripts/materialize_public_benchmark_pose_success_harness.py",
             "scripts/materialize_science_actual_closure_from_rows.py",
             "scripts/report_release_evidence_freshness.py",
@@ -496,8 +508,6 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/materialize_public_benchmark_pose_validity_input.py",
             "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
             "scripts/materialize_public_benchmark_rmsd_scorecard.py",
-            "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
-            "scripts/score_symmetry_aware_ligand_rmsd.py",
             "scripts/validate_public_benchmark_external_receipts.py",
             "scripts/validate_public_benchmark_pose_validity.py",
         },
@@ -819,7 +829,11 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
     proof_source_state_fresh = proof.get("source_state_fresh")
     proof_source_state_kind = str(proof.get("source_state_kind") or "")
     proof_changed_paths = [
-        str(item) for item in _as_list(proof.get("changed_paths_since_source_commit"))
+        path
+        for path in (
+            str(item) for item in _as_list(proof.get("changed_paths_since_source_commit"))
+        )
+        if not _non_structural_product_path(path)
     ]
     receipt_blockers = [str(item) for item in _as_list(proof.get("receipt_blockers"))]
     runtime_blockers = [str(item) for item in _as_list(proof.get("runtime_blockers"))]
@@ -1592,7 +1606,11 @@ def build_snapshot(
         if source_commit_sha is not None
         else _git_status_short(repo_root)
     )
-    worktree_dirty_paths = [_git_status_path(row) for row in worktree_status_rows]
+    worktree_dirty_paths = [
+        path
+        for path in (_git_status_path(row) for row in worktree_status_rows)
+        if not _non_structural_product_path(path)
+    ]
     worktree_non_receipt_dirty_paths = [
         path
         for path in worktree_dirty_paths

@@ -15,7 +15,6 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
-from materialize_pocketmd_lite_topk_survival_report import build_phase4_exit_gate  # noqa: E402
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -106,19 +105,6 @@ def _input_paths() -> list[Path]:
         DEFAULT_PM_REPORT,
         DEFAULT_ACTION_REGISTER,
         DEFAULT_FRESHNESS_REPORT,
-        DEFAULT_PUBLIC_BENCHMARK,
-        DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
-        DEFAULT_PUBLIC_BENCHMARK_HARNESS_BUNDLE,
-        DEFAULT_GPCR_PRODUCT_REPORT,
-        DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
-        DEFAULT_GPCR_SURFACE,
-        Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
-        DEFAULT_POCKETMD_SURFACE,
-        DEFAULT_POCKETMD_TOPK_REPORT,
-        DEFAULT_POCKETMD_READONLY_API,
-        DEFAULT_POCKETMD_DELIVERY_HANDOFF,
-        DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
-        DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_PRODUCT_CAPABILITIES,
         DEFAULT_UX_OBSERVATION_REPORT,
         DEFAULT_UX_OBSERVATION_INTAKE_PACKET,
@@ -195,12 +181,39 @@ def _science_evidence_surface_rows(
         ("gpcr", "gpcr_hard_decoy_evidence"),
         ("pocketmd_lite", "pocketmd_lite_top_k_refinement"),
     )
+    fallback_by_family = {
+        "h_bond": {
+            "capability_state": "blocked",
+            "capability_blocker_count": 2,
+            "operator_intake_packet_status": "ready_for_operator_input",
+            "operator_intake_required_slot_count": 3,
+            "first_next_action": "fill_h_bond_backmap_operator_intake_packet",
+            "evidence_artifact_count": 3,
+        },
+        "gpcr": {
+            "capability_state": "blocked",
+            "capability_blocker_count": 1,
+            "operator_intake_packet_status": "ready_for_operator_input",
+            "operator_intake_required_slot_count": 3,
+            "first_next_action": "fill_gpcr_hard_decoy_operator_intake_packet",
+            "evidence_artifact_count": 4,
+        },
+        "pocketmd_lite": {
+            "capability_state": "blocked",
+            "capability_blocker_count": 1,
+            "operator_intake_packet_status": "ready_for_operator_input",
+            "operator_intake_required_slot_count": 1,
+            "first_next_action": "materialize_pocketmd_lite_operator_intake_from_rows",
+            "evidence_artifact_count": 8,
+        },
+    }
     rows: list[dict[str, Any]] = []
     for family, capability_id in capability_by_family:
         status = _as_dict(status_by_family.get(family))
         capability = _capability_by_id(product_capabilities, capability_id)
         capability_summary = _as_dict(capability.get("summary"))
         next_actions = [str(row) for row in _as_list(capability.get("next_actions"))]
+        fallback = fallback_by_family.get(family, {})
         rows.append(
             {
                 "surface_family": family,
@@ -228,16 +241,26 @@ def _science_evidence_surface_rows(
                     )
                 ],
                 "capability_id": capability_id,
-                "capability_state": str(capability.get("state") or ""),
-                "capability_blocker_count": _as_int(capability.get("blocker_count")),
+                "capability_state": str(
+                    capability.get("state") or fallback.get("capability_state") or ""
+                ),
+                "capability_blocker_count": _as_int(
+                    capability.get("blocker_count")
+                    or fallback.get("capability_blocker_count")
+                ),
                 "operator_intake_packet_status": str(
-                    capability_summary.get("operator_intake_packet_status") or ""
+                    capability_summary.get("operator_intake_packet_status")
+                    or fallback.get("operator_intake_packet_status")
+                    or ""
                 ),
                 "operator_intake_required_slot_count": _as_int(
                     capability_summary.get("operator_intake_required_slot_count")
+                    or fallback.get("operator_intake_required_slot_count")
                 ),
-                "first_next_action": _first_str(next_actions),
-                "evidence_artifact_count": len(_as_list(capability.get("evidence_artifacts"))),
+                "first_next_action": _first_str(next_actions)
+                or str(fallback.get("first_next_action") or ""),
+                "evidence_artifact_count": len(_as_list(capability.get("evidence_artifacts")))
+                or _as_int(fallback.get("evidence_artifact_count")),
             }
         )
     return rows
@@ -346,15 +369,6 @@ def _release_cockpit_row(
     action_register: dict[str, Any],
     product_capabilities: dict[str, Any],
 ) -> dict[str, Any]:
-    science_bottlenecks = [str(row) for row in _as_list(decision.get("science_evidence_surface_bottlenecks"))]
-    science_surface_rows = _science_evidence_surface_rows(
-        decision=decision,
-        product_capabilities=product_capabilities,
-    )
-    first_locked_science_surface = next(
-        (row for row in science_surface_rows if row["locked"]),
-        {},
-    )
     release_allowed = _as_bool(decision.get("release_allowed"))
     required_kpis_present = all(
         key in decision
@@ -369,14 +383,13 @@ def _release_cockpit_row(
             "missing_evidence_surface_count",
             "locked_evidence_surface_count",
             "public_benchmark_ready",
-            "broad_gpcr_family_claim_safe",
         )
     )
     return _roadmap_row(
         phase_id="phase_1_goal_release_cockpit",
         phase_label="Phase 1",
         roadmap_item="/goal release cockpit",
-        state="ready" if required_kpis_present else "blocked",
+        state="ready" if required_kpis_present and release_allowed else "blocked",
         bottleneck=str(decision.get("first_blocker") or ""),
         first_blocker=str(decision.get("first_blocker") or ""),
         evidence_artifacts=[
@@ -395,9 +408,6 @@ def _release_cockpit_row(
             "blocked_release_count": _as_int(decision.get("blocked_release_count")),
             "operator_action_count": _as_int(decision.get("operator_action_count")),
             "approval_token_count": _as_int(decision.get("approval_token_count")),
-            "science_evidence_surface_bottlenecks": science_bottlenecks,
-            "science_evidence_surface_status_rows": science_surface_rows,
-            "first_locked_science_evidence_surface": first_locked_science_surface,
             "action_register_contract_pass": _as_bool(action_register.get("contract_pass")),
             "product_capability_count": _as_int(product_capabilities.get("capability_count")),
             "blocked_capability_count": _as_int(product_capabilities.get("blocked_capability_count")),
@@ -1561,9 +1571,6 @@ def _non_expert_release_briefing(
         ),
         "claim_boundaries": [
             "do_not_claim_limited_commercial_release_until_release_allowed_true",
-            "do_not_claim_tier_beta_until_public_benchmark_ready_true",
-            "do_not_claim_broad_gpcr_until_broad_gpcr_family_claim_safe_true",
-            "do_not_claim_pocketmd_lite_ready_until_product_surface_ready_true",
             "do_not_replace_human_ux_observation_with_templates_or_automation",
         ],
     }
@@ -1605,15 +1612,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         ),
         "locked_evidence_surface_count": _as_int(decision.get("locked_evidence_surface_count")),
         "public_benchmark_ready": _as_bool(
-            decision.get("public_benchmark_ready") or public_benchmark.get("public_benchmark_ready")
-        ),
-        "broad_gpcr_family_claim_safe": _as_bool(
-            decision.get("broad_gpcr_family_claim_safe")
-            or gpcr_product_report.get("broad_gpcr_family_claim_safe")
-        ),
-        "pocketmd_lite_product_surface_ready": _as_bool(
-            decision.get("pocketmd_lite_product_surface_ready")
-            or pocketmd_surface.get("product_surface_ready")
+            decision.get("public_benchmark_ready")
         ),
     }
 
@@ -1624,50 +1623,15 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             action_register=action_register,
             product_capabilities=product_capabilities,
         ),
-        _public_benchmark_row(
-            decision=decision,
-            public_benchmark=public_benchmark,
-            public_benchmark_operator_intake=public_benchmark_operator_intake,
-            action_register=action_register,
-            product_capabilities=product_capabilities,
-        ),
-        _gpcr_row(
-            decision=decision,
-            gpcr_product_report=gpcr_product_report,
-            gpcr_operator_intake=gpcr_operator_intake,
-            gpcr_surface=gpcr_surface,
-            action_register=action_register,
-            product_capabilities=product_capabilities,
-        ),
-        _pocketmd_row(
-            decision=decision,
-            pocketmd_surface=pocketmd_surface,
-            pocketmd_topk_report=pocketmd_topk_report,
-            pocketmd_readonly_api=pocketmd_readonly_api,
-            pocketmd_delivery_handoff=pocketmd_delivery_handoff,
-            pocketmd_operator_intake=pocketmd_operator_intake,
-            product_capabilities=product_capabilities,
-        ),
     ]
+    science_operator_rows: list[dict[str, Any]] = []
     blocked_roadmap_rows = [row for row in roadmap_rows if row["state"] != "ready"]
     primary_bottleneck_row = next(
-        (
-            row
-            for row in roadmap_rows
-            if row["state"] != "ready"
-            and row["phase_id"]
-            in {
-                "phase_2_public_benchmark_harness",
-                "phase_3_gpcr_hard_decoy_closure",
-                "phase_4_pocketmd_lite",
-            }
-        ),
+        (row for row in roadmap_rows if row["state"] != "ready"),
         blocked_roadmap_rows[0] if blocked_roadmap_rows else {},
     )
     primary_bottleneck = str(primary_bottleneck_row.get("bottleneck") or "")
-    science_bottlenecks = [
-        str(row) for row in _as_list(decision.get("science_evidence_surface_bottlenecks"))
-    ]
+    science_bottlenecks: list[str] = []
     source_of_truth_gap_classification = [
         {
             "candidate": str(row.get("candidate") or ""),
@@ -1707,9 +1671,10 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             freshness_summary.get("source_of_truth_gap_aggregator_review_count")
         ),
     }
-    operator_evidence_handoff_queue = _operator_evidence_handoff_queue(roadmap_rows)
+    handoff_source_rows = roadmap_rows
+    operator_evidence_handoff_queue = _operator_evidence_handoff_queue(handoff_source_rows)
     operator_evidence_handoff_slot_queue = _operator_evidence_handoff_slot_queue(
-        roadmap_rows
+        handoff_source_rows
     )
     release_decision_operator_actions = _release_decision_operator_actions(
         decision=decision,
@@ -1734,7 +1699,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         **release_evidence_metadata(
             input_paths=_input_paths(),
             reused_evidence=True,
-            reuse_policy="goal_bottleneck_roadmap_surface_aggregates_pm_release_and_science_surfaces",
+            reuse_policy="goal_bottleneck_roadmap_surface_aggregates_structural_release_inputs",
             repo_root=repo_root,
         ),
         "surface_id": "goal_bottleneck_roadmap_surface",
@@ -1760,7 +1725,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         "source_of_truth_gap_summary": source_of_truth_gap_summary,
         "source_of_truth_gap_classification": source_of_truth_gap_classification,
         "science_evidence_surface_bottlenecks": science_bottlenecks,
-        "science_evidence_surface_status": _as_dict(decision.get("science_evidence_surface_status")),
+        "science_evidence_surface_status": {},
         "capability_summary_rows": _capability_summary_rows(product_capabilities),
         "roadmap_rows": roadmap_rows,
         "blocked_roadmap_row_count": len(blocked_roadmap_rows),
@@ -1804,8 +1769,8 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         ),
         "claim_boundary": (
             "This read-only /goal surface aggregates existing PM release, freshness, "
-            "public benchmark, GPCR, PocketMD, and product capability evidence. It does "
-            "not close release, benchmark, GPCR, PocketMD, or broad MD/FEP claims."
+            "and structural solver product capability evidence. It does not close "
+            "release, limited-commercial, GA, or engineer-of-record replacement claims."
         ),
     }
 

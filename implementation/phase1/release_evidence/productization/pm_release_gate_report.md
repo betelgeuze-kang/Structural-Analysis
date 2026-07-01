@@ -1,6 +1,6 @@
 # PM Release Gate
 
-- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
+- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
 - `recommended_scope`: Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.
 - `paid_pilot_candidate`: `True`
 - `limited_commercial_milestone_ready`: `True`
@@ -15,24 +15,15 @@
 - `commercial_solver_gap_ready`: `False`
 - `ai_engine_gap_ready`: `False`
 - `release_allowed`: `False`
-- `blocked_release_count`: `5`
+- `blocked_release_count`: `6`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `14`
-- `approval_token_count`: `4`
+- `operator_action_count`: `10`
+- `approval_token_count`: `5`
 - `stale_artifact_count`: `0`
-- `evidence_surface_count`: `12`
-- `missing_evidence_surface_count`: `1`
-- `locked_evidence_surface_count`: `3`
-- `h_bond_evidence_surface_present`: `True`
-- `gpcr_evidence_surface_present`: `True`
-- `pocketmd_lite_science_product_surface_present`: `True`
-- `pocketmd_lite_product_surface_ready`: `False`
-- `public_benchmark_ready`: `False`
-- `public_benchmark_source_of_truth_ready`: `False`
-- `public_benchmark_source_of_truth_status`: `seed_ready_materialization_blocked`
-- `public_benchmark_source_of_truth_blockers`: `casf_pdbbind_source_material_not_attached, casf_pdbbind_case_checksums_missing, casf_pdbbind_ligand_symmetry_contracts_missing, public_benchmark_real_pose_predictions_missing, public_benchmark_real_pose_validity_rows_missing, public_benchmark_real_rmsd_rows_missing, public_benchmark_pose_success_harness_rows_missing, dud_e_lit_pcba_enrichment_rows_missing, vina_gnina_comparison_rows_missing, public_benchmark_external_receipts_missing`
-- `broad_gpcr_family_claim_safe`: `False`
-- `science_evidence_surface_bottlenecks`: `h_bond_evidence_surface_locked, broad_gpcr_family_claim_locked, pocketmd_lite_science_product_surface_locked`
+- `evidence_surface_count`: `8`
+- `missing_evidence_surface_count`: `0`
+- `locked_evidence_surface_count`: `0`
+- `public_benchmark_ready`: `True`
 - `next_locally_closable_gaps`: `G1`
 
 | Milestone | Status | Blockers |
@@ -60,4 +51,4 @@
 | ux UX | blocked | human_new_user_observation_missing_or_failed, human_new_user_30min_sample_evidence_missing |
 | support Support | pass | none |
 | security Security | blocked | license_status_not_configured |
-| github_sync GitHub Development Sync | pass | none |
+| github_sync GitHub Development Sync | blocked | github_sync_preflight::local_head_mismatch |

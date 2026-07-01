@@ -15,7 +15,6 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
-from materialize_pocketmd_lite_topk_survival_report import build_phase4_exit_gate  # noqa: E402
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -943,24 +942,6 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
 def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_product_capabilities_surface.py"),
-        Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
-        DEFAULT_PUBLIC_BENCHMARK,
-        DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
-        DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD,
-        DEFAULT_POCKETMD_CONTRACT,
-        DEFAULT_POCKETMD_TOPK_REPORT,
-        DEFAULT_POCKETMD_READONLY_API,
-        DEFAULT_POCKETMD_DELIVERY_HANDOFF,
-        DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
-        DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
-        DEFAULT_POCKETMD_SURFACE,
-        DEFAULT_GPCR_PRODUCT_REPORT,
-        DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
-        DEFAULT_GPCR_OPERATOR_INTAKE_PACKET_MD,
-        DEFAULT_H_BOND_SURFACE,
-        DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET,
-        DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET_MD,
-        DEFAULT_GPCR_SURFACE,
         *STRUCTURAL_SURFACE_PATHS,
     ]
 
@@ -968,10 +949,6 @@ def _input_paths() -> list[Path]:
 def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, Any]:
     capability_rows = [
         _structural_solver_capability(repo_root),
-        _public_benchmark_capability(repo_root),
-        _h_bond_capability(repo_root),
-        _gpcr_capability(repo_root),
-        _pocketmd_capability(repo_root),
     ]
     ready_count = sum(1 for row in capability_rows if row["state"] == "ready")
     blocked_rows = [row for row in capability_rows if row["state"] != "ready"]
@@ -984,7 +961,7 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
         **release_evidence_metadata(
             input_paths=_input_paths(),
             reused_evidence=False,
-            reuse_policy="product_capabilities_surface_aggregates_science_and_release_evidence",
+            reuse_policy="product_capabilities_surface_aggregates_structural_solver_evidence",
             repo_root=repo_root,
         ),
         "surface_id": "product_capabilities_surface",
@@ -1028,9 +1005,9 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
             f"blocked={len(blocked_rows)}"
         ),
         "claim_boundary": (
-            "This surface is a read-only capability discovery map over existing evidence. "
-            "It does not promote beta, GPCR, PocketMD, benchmark, or release claims beyond "
-            "the referenced artifacts."
+            "This surface is a read-only capability discovery map for the structural "
+            "analysis solver product. Non-structural product domains are outside this "
+            "repository's product scope."
         ),
     }
 
