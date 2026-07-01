@@ -22,6 +22,8 @@
 - `pending_owner_decision_family_counts`: `{'molecular_docking': 48, 'molecular_dynamics': 25, 'molecular_science_evidence': 13}`
 - `pending_owner_decision_recommended_owner_decision_counts`: `{'delete_from_structural_repository_or_extract_only_if_owner_requires_history': 39, 'extract_to_molecular_or_science_repository_or_delete_if_obsolete': 47}`
 - `pending_owner_decision_primary_counts`: `{'delete_from_structural_repository': 39, 'extract_to_molecular_or_science_repository': 47}`
+- `next_owner_review_batch`: `release_surface_first` paths=`3` area=`release_surface`
+- `owner_review_priority_batches`: `5`
 
 ## Owner Decision Validation Blockers
 
