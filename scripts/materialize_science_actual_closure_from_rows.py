@@ -214,6 +214,26 @@ def _pocketmd_row_intake_contract(
             "uncertainty_interval:{low,high,unit}",
             "uncertainty_low+uncertainty_high+uncertainty_unit",
         ],
+        "numeric_value_policy": {
+            "pre_refinement_energy_proxy": (
+                "must parse to a finite float; NaN and Infinity are rejected"
+            ),
+            "post_refinement_energy_proxy": (
+                "must parse to a finite float; NaN and Infinity are rejected"
+            ),
+            "contact_persistence_rate": (
+                "must parse to a finite float in [0, 1]; NaN and Infinity are rejected"
+            ),
+            "h_bond_persistence_rate": (
+                "must parse to a finite float in [0, 1]; NaN and Infinity are rejected"
+            ),
+            "uncertainty_interval.low": (
+                "must parse to a finite float; NaN and Infinity are rejected"
+            ),
+            "uncertainty_interval.high": (
+                "must parse to a finite float and be >= low; NaN and Infinity are rejected"
+            ),
+        },
         "required_summary_metrics": list(pocketmd_survival.REQUIRED_SUMMARY_METRICS),
         "required_component_metrics": list(pocketmd_survival.REQUIRED_METRICS),
         "top_k_row_quality_minimums": dict(

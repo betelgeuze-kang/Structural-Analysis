@@ -380,6 +380,26 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert pocketmd_contract["top_k_rank_prefix_policy"].startswith(
         "For each case, supplied ranks must form a contiguous prefix"
     )
+    assert pocketmd_contract["numeric_value_policy"] == {
+        "contact_persistence_rate": (
+            "must parse to a finite float in [0, 1]; NaN and Infinity are rejected"
+        ),
+        "h_bond_persistence_rate": (
+            "must parse to a finite float in [0, 1]; NaN and Infinity are rejected"
+        ),
+        "post_refinement_energy_proxy": (
+            "must parse to a finite float; NaN and Infinity are rejected"
+        ),
+        "pre_refinement_energy_proxy": (
+            "must parse to a finite float; NaN and Infinity are rejected"
+        ),
+        "uncertainty_interval.high": (
+            "must parse to a finite float and be >= low; NaN and Infinity are rejected"
+        ),
+        "uncertainty_interval.low": (
+            "must parse to a finite float; NaN and Infinity are rejected"
+        ),
+    }
     assert pocketmd_contract["row_integrity_policy"]["required_unique_row_keys"] == {
         "top_k_refinement_rows": [
             ["case_id", "top_k_rank"],
