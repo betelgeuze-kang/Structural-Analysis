@@ -1012,6 +1012,123 @@ def _case_readiness_ledger(
     }
 
 
+def _case_blocker_next_inputs(blockers: list[str]) -> list[str]:
+    mapping = {
+        "license_review_pending": "approved OpenSees medium product/legal license receipt",
+        "reference_outputs_missing": "reference output checksum or approved REVIEW baseline",
+        "normalization_receipts_missing": (
+            f"passing {NORMALIZATION_RECEIPT_SCHEMA_VERSION} normalization receipt"
+        ),
+        "opensees_medium_scorecard_execution_missing": (
+            "medium scorecard receipt, result artifact, and validation report"
+        ),
+        "medium_model_pass_or_review_missing": (
+            "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
+        ),
+        "source_url_verification_pending": "verified authoritative source URL/checksum",
+    }
+    return [mapping[item] for item in blockers if item in mapping]
+
+
+def _medium_model_case_execution_queue(
+    *,
+    case_readiness_ledger: dict[str, Any],
+    required_medium_model_count: int,
+) -> dict[str, Any]:
+    case_rows = [
+        row
+        for row in _safe_list(case_readiness_ledger.get("case_rows"))
+        if isinstance(row, dict)
+    ]
+    queue_rows: list[dict[str, Any]] = []
+    for slot_index, row in enumerate(case_rows, start=1):
+        blockers = [str(item) for item in _safe_list(row.get("blockers")) if str(item)]
+        case_id = str(row.get("case_id") or f"medium_slot_{slot_index}")
+        queue_rows.append(
+            {
+                "slot": slot_index,
+                "slot_status": (
+                    "ready_for_medium_scorecard_credit"
+                    if row.get("ready_for_medium_scorecard_credit") is True
+                    else "selected_blocked"
+                ),
+                "case_id": case_id,
+                "source_path": row.get("source_path"),
+                "source_sha256": row.get("source_sha256"),
+                "scorecard_receipt_path": row.get("scorecard_receipt_path"),
+                "blockers": blockers,
+                "next_required_inputs": _case_blocker_next_inputs(blockers),
+                "runner_command_template": RUNNER_COMMAND_TEMPLATE,
+                "claim_boundary": (
+                    "This slot is execution scheduling only. It does not create "
+                    "source, license, reference, normalization, scorecard, or "
+                    "PASS/REVIEW evidence."
+                ),
+            }
+        )
+    missing_case_count = max(required_medium_model_count - len(case_rows), 0)
+    for offset in range(missing_case_count):
+        slot = len(case_rows) + offset + 1
+        queue_rows.append(
+            {
+                "slot": slot,
+                "slot_status": "operator_selection_required",
+                "case_id": f"OPERATOR_ATTACHED_MEDIUM_CASE_{slot}",
+                "source_path": "OPERATOR_ATTACHED_MODEL.json",
+                "source_sha256": "OPERATOR_ATTACHED_SHA256",
+                "scorecard_receipt_path": "",
+                "blockers": [
+                    (
+                        "medium_structural_models_current_below_required:"
+                        f"{len(case_rows)}/{required_medium_model_count}"
+                    )
+                ],
+                "next_required_inputs": [
+                    "authoritative medium structural model case",
+                    "stable source id",
+                    "source/model checksum",
+                    "reference output or approved REVIEW baseline",
+                    "normalization receipt",
+                    "scorecard/review decision",
+                ],
+                "runner_command_template": RUNNER_COMMAND_TEMPLATE,
+                "claim_boundary": (
+                    "This placeholder reserves an RC medium-model slot. It cannot "
+                    "receive scorecard credit until an operator-attached case and "
+                    "all per-case evidence are present."
+                ),
+            }
+        )
+    return {
+        "schema_version": "phase3-medium-model-case-execution-queue.v1",
+        "required_case_count": required_medium_model_count,
+        "selected_case_count": len(case_rows),
+        "missing_case_count": missing_case_count,
+        "case_ready_count": sum(
+            1 for row in case_rows if row.get("ready_for_medium_scorecard_credit") is True
+        ),
+        "queue_rows": queue_rows,
+        "next_case_slot": (
+            queue_rows[0]
+            if queue_rows
+            and queue_rows[0].get("slot_status") != "ready_for_medium_scorecard_credit"
+            else next(
+                (
+                    row
+                    for row in queue_rows
+                    if row.get("slot_status") != "ready_for_medium_scorecard_credit"
+                ),
+                {},
+            )
+        ),
+        "claim_boundary": (
+            "This queue translates the medium-model RC gate into five execution slots. "
+            "It is non-promoting and does not replace actual source, license, "
+            "reference-output, normalization, scorecard, or PASS/REVIEW receipts."
+        ),
+    }
+
+
 def _authoritative_source_evidence_row(
     row: dict[str, Any],
     *,
@@ -1104,6 +1221,10 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         canonical_rows=canonical_rows,
         receipt_inventory=receipt_inventory,
         source_license_receipt=source_license_receipt,
+        required_medium_model_count=required_medium_model_count,
+    )
+    medium_model_case_execution_queue = _medium_model_case_execution_queue(
+        case_readiness_ledger=case_readiness_ledger,
         required_medium_model_count=required_medium_model_count,
     )
     current_scorecard_count = int(receipt_inventory["valid_scorecard_case_count"])
@@ -1262,6 +1383,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "summary": summary,
         "required_evidence": evidence_rows,
         "case_readiness_ledger": case_readiness_ledger,
+        "medium_model_case_execution_queue": medium_model_case_execution_queue,
         "runner_command_ready": runner_command_ready,
         "runner_command_template": RUNNER_COMMAND_TEMPLATE,
         "resource_envelope": RESOURCE_ENVELOPE,

@@ -189,6 +189,33 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert case_rows["SCBF16B"]["parser_contract_pass"] is True
     assert case_rows["SCBF16B"]["authoritative_source_pass"] is True
     assert "reference_outputs_missing" in case_rows["SCBF16B"]["blockers"]
+    queue = payload["medium_model_case_execution_queue"]
+    assert queue["schema_version"] == "phase3-medium-model-case-execution-queue.v1"
+    assert queue["required_case_count"] == 5
+    assert queue["selected_case_count"] == 2
+    assert queue["missing_case_count"] == 3
+    assert queue["case_ready_count"] == 0
+    assert len(queue["queue_rows"]) == 5
+    assert queue["next_case_slot"]["slot"] == 1
+    assert queue["next_case_slot"]["case_id"] == "SCBF16B"
+    selected_slots = queue["queue_rows"][:2]
+    missing_slots = queue["queue_rows"][2:]
+    assert [row["slot_status"] for row in selected_slots] == [
+        "selected_blocked",
+        "selected_blocked",
+    ]
+    assert [row["slot_status"] for row in missing_slots] == [
+        "operator_selection_required",
+        "operator_selection_required",
+        "operator_selection_required",
+    ]
+    assert "PASS or APPROVED_REVIEW decision with non-generated evidence_ref" in (
+        selected_slots[0]["next_required_inputs"]
+    )
+    assert missing_slots[0]["case_id"] == "OPERATOR_ATTACHED_MEDIUM_CASE_3"
+    assert "run_phase3_medium_model_scorecard_receipt.py" in (
+        missing_slots[0]["runner_command_template"]
+    )
     assert payload["case_input_requirements"]["remaining_case_count"] == 5
     assert "case_id" in {
         row["field"] for row in payload["case_input_requirements"]["case_fields"]
