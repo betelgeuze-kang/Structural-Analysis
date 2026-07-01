@@ -17,7 +17,7 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 66.7,
-  "generated_at": "2026-07-01T06:31:39.927399+00:00",
+  "generated_at": "2026-07-01T06:33:03.525956+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:6daabccf41ec83b03fbefd505ff88bb5ee5af22610c51ed0c0126d4f66239044",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:4b44b12f77358b2fbd3d4b0251762fd92803c08f3e1a1a8552a975f23083f213",
@@ -26,7 +26,7 @@
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:ba62012ebe3fc03770ad17094ebff5291dff419f5b67dc17efde202c20ce7887",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:3dd87004d8b5a9f26dce8231f775ec4000c3ed5c311f0afca14b52cbbbf2f6b0",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:ce31af7036e31bcce4f0c3e23586599bcef1a9231c135f649c8d1a92fba852f7",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:862dfc3d95f96314f0d1e064dac7e86df8c1ebc4132a0f07538aee89bf5c10f2",
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:b7f5f0ee6da4183ddcd54f4c4222b5142466cc88589f21eda427cb0bd0f60bb2",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:f88b40c9b13affd69130fe01ecf7558b38c5ab23a1f21034cc43f4731877fcb7",
     "scripts/build_structural_product_development_roadmap.py": "sha256:7fefa7570e85ee2d5a4c130fcd9bd12577146739ced51a2da9a15b6d115a302a"
@@ -376,7 +376,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "b1c3bc13fdcc39fbc5584f01865e6a5a4531924e",
+  "source_commit_sha": "c97f761b4e696206b293fd554c0fac43e97d1449",
   "stage_average_progress_percent": 56.1,
   "stage_count": 7,
   "status": "blocked",
