@@ -1518,7 +1518,7 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T13:19:52.171570+00:00",
+  "generated_at": "2026-07-01T13:25:49.608515+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:2e144fbb69c76a239fe89f132042db246745bf3938f4c49db722f0d0f63b8c2f",
@@ -1526,7 +1526,7 @@
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:adde929084eb2ecbc686c83b46f6a7665807d88664d1de0a9dcbd80b41aa76ad",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:2457d6aa4481fb05b5d355bcccc960d3f7334f5a1763fb2b46cd30998978c758",
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:13e521c3769157bb3189fcd714d41a1e1e1748ca5ddda8941493f4706172e24a",
     "scripts/materialize_science_actual_closure_from_rows.py": "sha256:253471fb6328aec977a50689a41eaa267fe80cfdc697b08147c0dfd4815d4487"
   },
   "missing_row_inputs": [
@@ -2947,7 +2947,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "7a2e4b047c89cd7e4bea0fb94b4ee76c67e4c26f",
+  "source_commit_sha": "5c77020087a9def00933ee80b18100be736b28f7",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,

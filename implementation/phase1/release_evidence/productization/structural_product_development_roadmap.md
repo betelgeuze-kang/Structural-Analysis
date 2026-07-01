@@ -12,7 +12,7 @@ Structural product roadmap: BLOCKED | evidence_progress=60.4% | stage_average=45
 - `pm_milestones`: `5/5`
 - `pm_release_areas`: `12/16`
 - `release_ready`: `False`
-- `snapshot_blocker_count`: `41`
+- `snapshot_blocker_count`: `43`
 - `snapshot_status`: `stale_or_inconsistent`
 - `workstation_delivery_ready`: `True`
 

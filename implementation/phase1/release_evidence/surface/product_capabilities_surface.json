@@ -38,7 +38,7 @@
   "first_blocked_capability_id": "",
   "first_blocked_capability_next_action": "",
   "first_blocked_target": "",
-  "generated_at": "2026-07-01T13:20:52.577701+00:00",
+  "generated_at": "2026-07-01T13:26:11.291665+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
@@ -68,7 +68,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "7a2e4b047c89cd7e4bea0fb94b4ee76c67e4c26f",
+  "source_commit_sha": "5c77020087a9def00933ee80b18100be736b28f7",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=1 | ready=1 | blocked=0",
   "surface_id": "product_capabilities_surface",

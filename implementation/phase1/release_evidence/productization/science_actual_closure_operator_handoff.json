@@ -202,9 +202,9 @@
     "row_input_id": "subset_rows",
     "status": "operator_input_required"
   },
-  "generated_at": "2026-07-01T13:19:58.032811+00:00",
+  "generated_at": "2026-07-01T13:25:57.544921+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:5c3f82187d81a89138e559bfb75b6468b8e6dba453dce9797226c809ba7698fa",
+    "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:3fe7a70e7aac7e2881158df8fd5c739451125cc4e38b518a4c113073acecfd9a",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:6ceca1ef844a1e17b88972c169fcd1bd0c98b74668b2b17bec362bb16a859614"
   },
   "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
@@ -1106,7 +1106,7 @@
   "schema_version": "science-actual-closure-operator-handoff.v1",
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "7a2e4b047c89cd7e4bea0fb94b4ee76c67e4c26f",
+  "source_commit_sha": "5c77020087a9def00933ee80b18100be736b28f7",
   "status": "operator_rows_required",
   "summary": {
     "closes_actual_closure_criteria_count": 19,

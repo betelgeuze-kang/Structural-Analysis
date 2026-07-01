@@ -14,14 +14,14 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-01T13:21:07.244069+00:00",
+  "generated_at": "2026-07-01T13:26:25.787548+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7e6821c62a9ee7520a8c3b154e0738778d1e2ec34f8560c9d7bc15cb6656c915",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:80cff8cd3655140071f17b747458a6a07199c5a519c5b0c139e8c6bf5f7c86b8",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:72858e99d3f956a6bd680339dfc35eaf384a62d65a13932936a3039400686729",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:df66136183c218e7bb707c99e213da79b5267b3583dd6ee5b4cb2501c9ee263c",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:34fac54ccead0019a8c8a1c4173535ed570ebc5fd5a935ec0f83ccbc769a8653",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:f1d349767c211fde2b05f72376c19af8fa80d4ba0583cd44888d6de9158f36a7",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:56e7773bf677da83d00b40b6e84101925056c330db03e70999a8f0e7fee19868",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:3afeeacd10c337af07fc6b841f8d001a65976d499f99abea3a030594ce51be8a",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:539aac51e22e892fd78fa1b128941b4a328bad0f2fac5b013fa40d833f119ce5",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:3149db5e586d1c69801459866eb06e8ac19fcd864207ca8f797adf2f424bc8d9"
   },
   "mutation_allowed": false,
@@ -135,8 +135,8 @@
     "refresh_required_operator_action_count": 0,
     "refresh_required_operator_actions": [],
     "release_allowed": false,
-    "release_area_blocker_count": 8,
-    "release_area_owner_handoff_count": 8,
+    "release_area_blocker_count": 9,
+    "release_area_owner_handoff_count": 9,
     "release_area_owner_handoffs": [
       {
         "acceptance_criteria": [
@@ -286,6 +286,19 @@
         "title": "GitHub Development Sync"
       },
       {
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
+        "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
+        "namespace": "github_sync",
+        "owner": "",
+        "owner_action": "",
+        "title": ""
+      },
+      {
         "acceptance_criteria": [
           "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
           "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
@@ -353,7 +366,7 @@
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
     "approval_token_count": 7,
-    "blocked_release_count": 8,
+    "blocked_release_count": 9,
     "evidence_surface_count": 8,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 0,
@@ -483,7 +496,7 @@
         "action_register_contract_pass": false,
         "approval_token_count": 7,
         "blocked_capability_count": 0,
-        "blocked_release_count": 8,
+        "blocked_release_count": 9,
         "operator_action_count": 12,
         "product_capability_count": 1,
         "release_allowed": false
@@ -494,7 +507,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "7a2e4b047c89cd7e4bea0fb94b4ee76c67e4c26f",
+  "source_commit_sha": "5c77020087a9def00933ee80b18100be736b28f7",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
