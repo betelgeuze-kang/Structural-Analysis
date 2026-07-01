@@ -1,15 +1,17 @@
 {
-  "blockers": [],
+  "blockers": [
+    "remote_mutation_approval_required"
+  ],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
-    "feature_synced_to_head": true,
+    "feature_synced_to_head": false,
     "main_fast_forward_possible": true,
-    "main_synced_to_head": true,
+    "main_synced_to_head": false,
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": false
+    "worktree_only_ignored_evidence_dirty": true
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -17,37 +19,53 @@
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
-  "contract_pass": true,
-  "generated_at": "2026-07-01T05:33:24.664940+00:00",
-  "pending_remote_updates": [],
+  "contract_pass": false,
+  "generated_at": "2026-07-01T05:42:43.476941+00:00",
+  "pending_remote_updates": [
+    {
+      "action": "push current HEAD to feature",
+      "command": "git push origin codex/seed-pr-ci-source-evidence:codex/seed-pr-ci-source-evidence",
+      "rollback": "restore feature to previous remote SHA a63076d75e0884ad2eddd9c9a72fbc7aff85c50c with an approved restore action",
+      "target": "origin/codex/seed-pr-ci-source-evidence"
+    },
+    {
+      "action": "fast-forward push current HEAD to main",
+      "command": "git push origin HEAD:main",
+      "rollback": "restore main to previous remote SHA a63076d75e0884ad2eddd9c9a72fbc7aff85c50c with an approved revert/restore action",
+      "target": "origin/main"
+    }
+  ],
   "preflight_pass": true,
   "r4_disclosure": {
-    "action": "no remote mutation required",
-    "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
-    "risk": "No remote mutation remains.",
-    "rollback": "no rollback needed",
-    "target": [],
+    "action": "push current HEAD to feature; fast-forward push current HEAD to main",
+    "impact": "GitHub pending refs become externally visible at the local development state.",
+    "risk": "Main CI and external reviewers immediately see the current commits.",
+    "rollback": "restore feature to previous remote SHA a63076d75e0884ad2eddd9c9a72fbc7aff85c50c with an approved restore action; restore main to previous remote SHA a63076d75e0884ad2eddd9c9a72fbc7aff85c50c with an approved revert/restore action",
+    "target": [
+      "origin/codex/seed-pr-ci-source-evidence",
+      "origin/main"
+    ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
-  "reason_code": "PASS",
+  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
   "remote_fetch_attempted": true,
   "remote_fetch_ok": true,
   "remote_mutation_approved": false,
-  "remote_sync_needed": false,
+  "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
-    "feature_ahead_count": 0,
+    "feature_ahead_count": 1,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "",
-    "local_head_sha": "3c3d2341f59cad5a3fde1d32d298bdca848c5724",
-    "main_ahead_count": 0,
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+    "local_head_sha": "ac3dba61704b456969e3dcaf533b8008b5542c70",
+    "main_ahead_count": 1,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "3c3d2341f59cad5a3fde1d32d298bdca848c5724",
+    "remote_feature_sha": "a63076d75e0884ad2eddd9c9a72fbc7aff85c50c",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "3c3d2341f59cad5a3fde1d32d298bdca848c5724",
+    "remote_main_sha": "a63076d75e0884ad2eddd9c9a72fbc7aff85c50c",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +79,7 @@
         ]
       }
     },
-    "worktree_status_short": ""
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "status": "synced"
+  "status": "approval_required"
 }
