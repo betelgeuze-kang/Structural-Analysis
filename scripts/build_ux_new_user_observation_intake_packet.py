@@ -163,6 +163,12 @@ DERIVED_CHECK_SPECS = (
         "check": "evidence_ref_not_template_artifact_pass",
         "owner_note": "Any template-like file is rejected as human observation evidence.",
     },
+    {
+        "field": "evidence_ref_not_generated_gate_artifact",
+        "required_value": "evidence_ref must not point to generated UX report or intake artifacts",
+        "check": "evidence_ref_not_generated_gate_artifact_pass",
+        "owner_note": "Generated gate reports are validation outputs, not separate human-observation evidence.",
+    },
 )
 
 
@@ -246,6 +252,8 @@ def _current_value(field: str, observation: dict[str, Any], summary: dict[str, A
     if field == "evidence_ref_not_template_reference":
         return summary.get("evidence_ref_resolved_path", "")
     if field == "evidence_ref_not_template_artifact":
+        return summary.get("evidence_ref_resolved_path", "")
+    if field == "evidence_ref_not_generated_gate_artifact":
         return summary.get("evidence_ref_resolved_path", "")
     return observation.get(field)
 

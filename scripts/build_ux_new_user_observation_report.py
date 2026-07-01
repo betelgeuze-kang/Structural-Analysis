@@ -25,6 +25,10 @@ REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_OBSERVATION = Path("implementation/phase1/release_evidence/productization/ux_new_user_observation.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_INTAKE_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
+)
+DEFAULT_INTAKE_PACKET_MD = DEFAULT_INTAKE_PACKET.with_suffix(".md")
 DEFAULT_TEMPLATE = Path("docs/templates/ux_new_user_observation.template.json")
 DEFAULT_TIMESTAMP_TOLERANCE_MINUTES = 1.0
 ACCEPTED_DECISIONS = {"accepted", "approved", "pass", "signed", "approved_for_release"}
@@ -240,6 +244,19 @@ def _is_template_like_path(path: Path, *, repo_root: Path) -> bool:
     return bool(".template." in name or name.endswith(".template"))
 
 
+def _is_generated_ux_gate_artifact(path: Path, *, repo_root: Path) -> bool:
+    generated_paths = {
+        (repo_root / DEFAULT_OUT).resolve(),
+        (repo_root / DEFAULT_OUT_MD).resolve(),
+        (repo_root / DEFAULT_INTAKE_PACKET).resolve(),
+        (repo_root / DEFAULT_INTAKE_PACKET_MD).resolve(),
+    }
+    try:
+        return path.resolve() in generated_paths
+    except Exception:
+        return False
+
+
 def _next_actions(contract_pass: bool) -> list[str]:
     if contract_pass:
         return []
@@ -299,6 +316,7 @@ def _gate_unblock_plan(
                 "evidence_ref is a ticket/jira/ux/user-study reference, https URL, or existing local evidence path",
                 "evidence_ref is not the observation JSON itself",
                 "evidence_ref is not docs/templates or a .template artifact",
+                "evidence_ref is not a generated UX report or intake artifact",
                 "approval_decision is accepted, approved, pass, signed, or approved_for_release",
             ],
         },
@@ -357,6 +375,10 @@ def build_report(
     )
     evidence_ref_template_artifact = bool(
         resolved_evidence_path and _is_template_like_path(Path(resolved_evidence_path), repo_root=repo_root)
+    )
+    evidence_ref_generated_gate_artifact = bool(
+        resolved_evidence_path
+        and _is_generated_ux_gate_artifact(Path(resolved_evidence_path), repo_root=repo_root)
     )
     template_only = observation.get("template_only") is True
     template_note_present = _looks_placeholder(observation.get("note"))
@@ -419,6 +441,11 @@ def build_report(
             and evidence_ref_resolution["resolvable"]
             and not evidence_ref_template_artifact
         ),
+        "evidence_ref_not_generated_gate_artifact_pass": bool(
+            _field_present(observation, "evidence_ref")
+            and evidence_ref_resolution["resolvable"]
+            and not evidence_ref_generated_gate_artifact
+        ),
         "approval_decision_pass": decision in ACCEPTED_DECISIONS,
     }
     blockers = [
@@ -458,6 +485,7 @@ def build_report(
         *(["evidence_ref_self_reference"] if evidence_ref_self_reference else []),
         *(["evidence_ref_template_reference"] if evidence_ref_template_reference else []),
         *(["evidence_ref_template_artifact"] if evidence_ref_template_artifact and not evidence_ref_template_reference else []),
+        *(["evidence_ref_generated_gate_artifact"] if evidence_ref_generated_gate_artifact else []),
         *(["approval_decision_not_accepted"] if not checks["approval_decision_pass"] else []),
     ]
     contract_pass = not blockers

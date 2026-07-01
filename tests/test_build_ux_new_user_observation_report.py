@@ -112,6 +112,7 @@ def test_ux_new_user_observation_passes_with_human_record(tmp_path: Path) -> Non
     assert payload["checks"]["all_required_workflow_steps_observed"] is True
     assert payload["checks"]["all_required_workflow_steps_passed"] is True
     assert payload["checks"]["evidence_ref_resolvable_pass"] is True
+    assert payload["checks"]["evidence_ref_not_generated_gate_artifact_pass"] is True
     assert payload["summary"]["evidence_ref_kind"] == "external_reference"
     assert payload["summary"]["workflow_step_pass_count"] == 5
     assert payload["summary"]["missing_workflow_steps"] == []
@@ -336,6 +337,31 @@ def test_ux_new_user_observation_rejects_template_like_evidence_artifact(tmp_pat
     assert payload["checks"]["evidence_ref_resolvable_pass"] is True
     assert payload["checks"]["evidence_ref_not_template_reference_pass"] is True
     assert payload["checks"]["evidence_ref_not_template_artifact_pass"] is False
+
+
+def test_ux_new_user_observation_rejects_generated_gate_artifact_evidence_ref(tmp_path: Path) -> None:
+    generated_report = _write_json(
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release_evidence"
+        / "productization"
+        / "ux_new_user_observation_report.json",
+        {"contract_pass": False},
+    )
+    record = _passing_observation()
+    record["evidence_ref"] = str(generated_report)
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(
+        observation_path=observation,
+        repo_root=tmp_path,
+    )
+
+    assert payload["contract_pass"] is False
+    assert "evidence_ref_generated_gate_artifact" in payload["blockers"]
+    assert payload["checks"]["evidence_ref_resolvable_pass"] is True
+    assert payload["checks"]["evidence_ref_not_generated_gate_artifact_pass"] is False
 
 
 def test_ux_new_user_observation_rejects_placeholder_and_slow_completion(tmp_path: Path) -> None:
