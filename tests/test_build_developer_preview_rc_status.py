@@ -54,7 +54,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert final_gates["selected_medium_models_pass_or_approved_review"]["contract_pass"] is False
     assert final_gates["large_models_crash_oom_free"]["contract_pass"] is True
     medium_blockers = final_gates["selected_medium_models_pass_or_approved_review"]["blockers"]
-    assert "medium_structural_models_current_below_required:0/5" in medium_blockers
+    assert "medium_structural_models_current_below_required:2/5" in medium_blockers
     assert "opensees_medium_runner_command_missing" not in medium_blockers
     assert "opensees_medium_scorecard_execution_missing" in medium_blockers
     assert "medium_model_pass_or_review_missing" in medium_blockers
@@ -358,9 +358,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "remaining": 0,
         "contract_pass": True,
     }
-    assert quantity_handoff["targets"]["medium_structural_models"]["current"] == 0
+    assert quantity_handoff["targets"]["medium_structural_models"]["current"] == 2
     assert quantity_handoff["targets"]["medium_structural_models"]["required"] == 5
-    assert quantity_handoff["targets"]["medium_structural_models"]["remaining"] == 5
+    assert quantity_handoff["targets"]["medium_structural_models"]["remaining"] == 3
     assert quantity_handoff["targets"]["medium_structural_models"]["contract_pass"] is False
     assert (
         "opensees_medium_scorecard_execution_missing"

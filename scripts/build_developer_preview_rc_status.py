@@ -565,6 +565,16 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
         if isinstance(benchmark_scale.get("medium_gate"), dict)
         else {}
     )
+    medium_current = max(
+        medium_current,
+        int(
+            benchmark_medium_gate.get(
+                "local_candidate_artifact_count",
+                medium_model_scorecard.get("local_candidate_artifact_count", 0),
+            )
+            or 0
+        ),
+    )
     benchmark_medium_blocker_grouping = (
         benchmark_medium_gate.get("blocker_grouping_metadata")
         if isinstance(benchmark_medium_gate.get("blocker_grouping_metadata"), dict)
