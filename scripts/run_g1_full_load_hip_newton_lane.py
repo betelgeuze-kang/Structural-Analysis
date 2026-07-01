@@ -949,20 +949,40 @@ def _g1_lane_next_actions(
             if isinstance(workspace_checkpoint_inventory, dict)
             else {}
         )
+        highest_observed = _float_or_none(
+            checkpoint_resolution_gate.get("highest_observed_load_scale")
+        )
+        highest_observed_gap = _float_or_none(
+            checkpoint_resolution_gate.get(
+                "highest_observed_gap_to_required_load_scale"
+            )
+        )
+        highest_observed_source = (
+            "checkpoint_resolution_gate" if highest_observed is not None else None
+        )
+        if highest_observed is None and workspace_inventory.get("enabled") is True:
+            highest_observed = _float_or_none(
+                workspace_inventory.get("highest_observed_load_scale")
+            )
+            highest_observed_gap = _float_or_none(
+                workspace_inventory.get(
+                    "highest_observed_gap_to_required_load_scale"
+                )
+            )
+            highest_observed_source = (
+                "workspace_checkpoint_inventory"
+                if highest_observed is not None
+                else None
+            )
         action = {
             "id": next_action_context["id"],
             "reason": next_action_context["routing_reason"],
             "required_load_scale": checkpoint_resolution_gate.get(
                 "required_load_scale"
             ),
-            "highest_observed_load_scale": checkpoint_resolution_gate.get(
-                "highest_observed_load_scale"
-            ),
-            "highest_observed_gap_to_required_load_scale": (
-                checkpoint_resolution_gate.get(
-                    "highest_observed_gap_to_required_load_scale"
-                )
-            ),
+            "highest_observed_load_scale": highest_observed,
+            "highest_observed_gap_to_required_load_scale": highest_observed_gap,
+            "highest_observed_load_scale_source": highest_observed_source,
             "acceptance_receipt": (
                 "a loadable mgt-direct-residual-newton-state.v1 checkpoint with "
                 "load_scale >= required_load_scale and no load-path provenance "
