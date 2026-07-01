@@ -2930,20 +2930,20 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T00:17:24.969112+00:00",
+  "generated_at": "2026-07-01T00:19:35.481498+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
-    "README.md": "sha256:0394dc2dc18d915db629349354e62e14e8956ea0e92bfe0f3334c0b372354a5a",
-    "docs/commercialization-gap-current-state.md": "sha256:b2406b47c80d18c2448a212361962ba478898a0ddfc532b384f595e6171293b1",
+    "README.md": "sha256:3ca1fdac05bd9570eba6c0466c818c54abd46d669e26affbb0d999370d208734",
+    "docs/commercialization-gap-current-state.md": "sha256:7dbd47a031c5306abc350ab4b0e6bf103c8692f04c01a1e7cc55104a1f3f7611",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:49ba5600b2bab1cd954fc68e41498ae33ada291f7768f8cbd739873afdbcceec",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:8fad82ec467e48bc94ec75621d0dd241482c0a767b228f56f9bd7c61fde5324b",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:7dc5f795b650e9b32188bed7e905d28b89cd8fa7b0e6faafa005f4b37eb7eb44",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:ce44bc7b1c524fc16bfe9fb7a8328f587ea0696232328976540eb22b5d349adf",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:f185fcc9b245286410e4cda961ad3bf483a3f2191c27ceb992341349b6f84ef6",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:2db551edc88b0542b60e328e98c55c50f4e36efcbfe4b3e832dba0cf0c515d64",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:8ff9fd73cf8f0748c9af2f952db48c6a0918396952ff931589e934b16d1c31bc",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:7a2210f049efe93885b7f5a2112fb4bdccd65a1fe4a88451686c07de21b30a78",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:f443c5fb719b89ed05c27abeaaefe4d3605b235f9f208195fe1d37c91625feea",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:28b797d5771542c7294228ecf63839355fc5bfb3b0df9f6fa5ea1346dc82cbc7",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:329383ae1476d0f8af0c3196cf6b394463308ad7caebbf1bbaefa71603ad46d0",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:8efdd121e9061f275b15f7bbab9a2e1894d40cf92020618e662f5c6f344965a0",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:cbaf117208c2583171d27672cbabae05a4c81550d51701b2b3398c013013e64d",
@@ -3609,7 +3609,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "57c4adc1ec96567b93c172a55bb791762a77adbf",
+  "source_commit_sha": "90f72ba5ea45c679be462721b06bf63ed16468dc",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3699,17 +3699,9 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
-          "README.md",
-          "docs/commercialization-gap-current-state.md",
-          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-07-01T00:15:13.585172+00:00",
         "input_checksum_present": true,
@@ -3718,14 +3710,17 @@
         "source_commit_matches_head": false,
         "source_commit_sha": "88a1b4307627b0068c39deb25e2edd024b65045f",
         "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
+          "docs/source-of-truth-gap-classification.md",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/report_release_evidence_freshness.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:41:59.561076+00:00",
         "input_checksum_present": true,
@@ -3739,9 +3734,12 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
+          "docs/source-of-truth-gap-classification.md",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/report_release_evidence_freshness.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:41:49.850960+00:00",
         "input_checksum_present": true,
@@ -3755,9 +3753,12 @@
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
+          "docs/source-of-truth-gap-classification.md",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/report_release_evidence_freshness.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:41:49.797242+00:00",
         "input_checksum_present": true,
@@ -3771,9 +3772,12 @@
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
+          "docs/source-of-truth-gap-classification.md",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/report_release_evidence_freshness.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:41:51.107049+00:00",
         "input_checksum_present": true,
@@ -3787,7 +3791,10 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-07-01T00:11:58.345319+00:00",
         "input_checksum_present": true,
@@ -3801,35 +3808,42 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
-        "generated_at": "2026-07-01T00:11:58.410585+00:00",
+        "generated_at": "2026-07-01T00:18:34.595184+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "ede394c6451fab567c4e584eacc517193f5a548f",
+        "source_commit_sha": "57c4adc1ec96567b93c172a55bb791762a77adbf",
         "source_state_fresh": true,
         "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
-        "generated_at": "2026-07-01T00:11:56.542613+00:00",
+        "generated_at": "2026-07-01T00:18:30.306659+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "ede394c6451fab567c4e584eacc517193f5a548f",
+        "source_commit_sha": "57c4adc1ec96567b93c172a55bb791762a77adbf",
         "source_state_fresh": true,
         "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:42:40.304119+00:00",
         "input_checksum_present": true,
@@ -3843,7 +3857,10 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:42:40.415277+00:00",
         "input_checksum_present": true,
@@ -3857,9 +3874,12 @@
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
+          "docs/source-of-truth-gap-classification.md",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/report_release_evidence_freshness.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:41:49.753208+00:00",
         "input_checksum_present": true,
@@ -3873,9 +3893,12 @@
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
+          "docs/source-of-truth-gap-classification.md",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/report_release_evidence_freshness.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:41:59.454618+00:00",
         "input_checksum_present": true,
@@ -3907,7 +3930,10 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:42:21.666191+00:00",
         "input_checksum_present": true,
@@ -3921,7 +3947,10 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:42:31.598174+00:00",
         "input_checksum_present": true,
@@ -3935,7 +3964,10 @@
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:42:31.605781+00:00",
         "input_checksum_present": true,
@@ -3949,7 +3981,10 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:42:31.687193+00:00",
         "input_checksum_present": true,
@@ -3963,7 +3998,10 @@
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:42:47.230699+00:00",
         "input_checksum_present": true,
@@ -3977,7 +4015,10 @@
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
-          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+          "docs/source-of-truth-gap-classification.md",
+          "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_release_evidence_freshness.py"
         ],
         "generated_at": "2026-06-30T23:42:59.221853+00:00",
         "input_checksum_present": true,
