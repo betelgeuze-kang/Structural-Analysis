@@ -419,6 +419,20 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         "reference_atoms",
         "predicted_atoms",
     ]
+    assert pose_contract["numeric_value_policy"] == {
+        "reference_atoms": (
+            "x/y/z coordinates must parse to finite floats; NaN and Infinity "
+            "are rejected"
+        ),
+        "predicted_atoms": (
+            "x/y/z coordinates must parse to finite floats; NaN and Infinity "
+            "are rejected"
+        ),
+        "rmsd_threshold_angstrom": (
+            "must parse to a finite positive float; NaN, Infinity, zero, and "
+            "negative thresholds are rejected"
+        ),
+    }
     assert pose_contract["default_rmsd_threshold_angstrom"] == 2.0
     assert pose_contract["source_actuality_policy"][
         "placeholder_provenance_prefixes_rejected"
@@ -573,8 +587,10 @@ def test_public_benchmark_phase2_row_audit_blocks_non_finite_numeric_rows(
     tmp_path: Path,
 ) -> None:
     rows = _write_phase2_rows(tmp_path)
+    pose_payload = json.loads(rows["pose"].read_text(encoding="utf-8"))
     enrichment_payload = json.loads(rows["enrichment"].read_text(encoding="utf-8"))
     vina_payload = json.loads(rows["vina_gnina"].read_text(encoding="utf-8"))
+    pose_payload["cases"][0]["rmsd_threshold_angstrom"] = float("inf")
     enrichment_payload["targets"][0]["scored_molecules"][0]["score"] = float("nan")
     vina_payload["cases"][0]["engine_runs"][0][
         "symmetry_aware_rmsd_angstrom"
@@ -583,6 +599,7 @@ def test_public_benchmark_phase2_row_audit_blocks_non_finite_numeric_rows(
     vina_payload["cases"][0]["engine_runs"][0][
         "pose_success_rmsd_threshold_angstrom"
     ] = float("nan")
+    _write_json(rows["pose"], pose_payload)
     _write_json(rows["enrichment"], enrichment_payload)
     _write_json(rows["vina_gnina"], vina_payload)
 
@@ -605,8 +622,14 @@ def test_public_benchmark_phase2_row_audit_blocks_non_finite_numeric_rows(
     blocked_components = {
         row["component_id"]: row for row in audit["components"] if not row["ready"]
     }
+    assert "symmetry_aware_ligand_rmsd" in blocked_components
+    assert "posebusters_style_pose_validity" in blocked_components
     assert "dud_e_or_lit_pcba_enrichment" in blocked_components
     assert "vina_gnina_comparison_adapter" in blocked_components
+    assert any(
+        "rmsd_threshold_angstrom_invalid" in blocker
+        for blocker in audit["blockers"]
+    )
     assert (
         "enrichment_scorecard:AA2AR:molecule_0:score_invalid"
         in audit["blockers"]

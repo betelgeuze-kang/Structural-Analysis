@@ -323,11 +323,11 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T08:20:14.469896+00:00",
+  "generated_at": "2026-07-01T08:56:44.814904+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:8fcd3dd11225cc788bac2278acf53cb77be5d230dfe2d8202eda5df8e5d05a22",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:ee0bac5372567516451bfdf3fd9059f2ede3476658256e3879989206a17a9c37"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:a5b9025b1b6d6bba7de310c832bd17b0c5e883912c7b63ef9cc338ff70f88aa9"
   },
   "missing_row_inputs": [
     "subset_rows",
@@ -928,6 +928,11 @@
           "real_comparison_case_count": 1
         }
       },
+      "numeric_value_policy": {
+        "predicted_atoms": "x/y/z coordinates must parse to finite floats; NaN and Infinity are rejected",
+        "reference_atoms": "x/y/z coordinates must parse to finite floats; NaN and Infinity are rejected",
+        "rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected"
+      },
       "paired_row_inputs_required": [
         "subset_rows"
       ],
@@ -1245,7 +1250,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "c2d870dc960cc9df3b85172896accb671a09dd72",
+  "source_commit_sha": "07fc560f00b06b1730b189e5a042dffff053147a",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [

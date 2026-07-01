@@ -48,7 +48,7 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-07-01T08:47:10.726987+00:00",
+  "generated_at": "2026-07-01T08:53:11.143301+00:00",
   "git_clean_clone_executed": false,
   "git_clean_clone_reproducibility_claim": "local_file_protocol_clone_when_preflight_passes",
   "git_clean_clone_reproduction_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
@@ -89,7 +89,7 @@
     "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:1ca44501a11754522cfae9364e5e1388739a9557f015c6877b4e576be2e12744",
     "tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:aa6f98bf811d78120cb8a0412e02b2c538a2ebed2780883e1d5fe2eead56ef1f",
     "tests/test_build_phase3_ifc_import_health_execution_receipt.py": "sha256:3fcc957ca4b1e4109957dc301d158c28addaace0f253eb34ec3d704b54fbfa62",
-    "tests/test_build_phase3_ifc_source_license_receipt.py": "sha256:f3d7039d2e8b1d8b0a49ddfb437efac0bf08cfa38edb7e540302e14cf442794d",
+    "tests/test_build_phase3_ifc_source_license_receipt.py": "sha256:6510febdf2024aa836a3849d5d776e8d0614539df7cb668487e9e0e72083d596",
     "tests/test_build_phase3_opensees_source_license_receipt.py": "sha256:0b586e1316dbda51cb30cc56f0ef66fdb60c648990eb2dedcf9b3721169df64c",
     "tests/test_build_phase4_analytic_physical_fallback_scorecard.py": "sha256:c009cba7a88c34576f0ba46632b67d9d8e96d0bf572b23dfe189c7fe4b284f6d",
     "tests/test_build_phase4_commercial_comparison_import_template.py": "sha256:0df6104047e571e55baa21a832deef486d60f1b3ab6bc03e6f91d6cf568be002",
@@ -235,7 +235,7 @@
     "tests/test_structure_viewer_explainability_report_contract.py"
   ],
   "schema_version": "phase3-benchmark-factory-seed-reproducibility-bundle.v1",
-  "source_commit_sha": "a0ece51968c501f0bae238d76ebee9f60787a655",
+  "source_commit_sha": "07fc560f00b06b1730b189e5a042dffff053147a",
   "stable_artifact_checksums": {
     "acquisition_plan": "sha256:ee8fc1bbf6f3ec11e5ee8a169a130cec20947ccc669e0902cacf53a089594e33",
     "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:ad48bd01ec19d476563c7553c8157863bae5a067e9b5bc40db5607c251c789b6",

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any
@@ -180,6 +181,18 @@ def _validate_symmetry_contract(
     return blockers
 
 
+def _positive_finite_float(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return None
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(parsed) or parsed <= 0.0:
+        return None
+    return parsed
+
+
 def validate_pose_case(
     row: dict[str, Any],
     *,
@@ -196,6 +209,11 @@ def validate_pose_case(
             blockers.append(f"{case_id}:{field}_missing")
     if str(row.get("pose_success_metric") or "").strip() != REQUIRED_POSE_SUCCESS_METRIC:
         blockers.append(f"{case_id}:pose_success_metric_invalid")
+    rmsd_threshold = _positive_finite_float(
+        row.get("rmsd_threshold_angstrom", DEFAULT_THRESHOLD_ANGSTROM)
+    )
+    if rmsd_threshold is None:
+        blockers.append(f"{case_id}:rmsd_threshold_angstrom_invalid")
     try:
         reference = coordinates_array(row.get("reference_atoms", []))
         predicted = coordinates_array(row.get("predicted_atoms", []))
@@ -222,9 +240,7 @@ def validate_pose_case(
                 reference_atoms=row["reference_atoms"],
                 predicted_atoms=row["predicted_atoms"],
                 symmetry_permutations=row["symmetry_permutation_contract"]["permutations"],
-                threshold_angstrom=float(
-                    row.get("rmsd_threshold_angstrom", DEFAULT_THRESHOLD_ANGSTROM)
-                ),
+                threshold_angstrom=rmsd_threshold or DEFAULT_THRESHOLD_ANGSTROM,
             )
         except Exception as exc:
             blockers.append(f"{case_id}:symmetry_aware_rmsd_failed:{exc.__class__.__name__}")

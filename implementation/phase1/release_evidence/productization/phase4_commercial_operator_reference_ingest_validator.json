@@ -4,7 +4,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-07-01T08:46:50.598631+00:00",
+  "generated_at": "2026-07-01T08:52:51.121008+00:00",
   "input_checksums": {
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
     "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
@@ -23,7 +23,7 @@
   "selected_benchmark_lanes": [
     "commercial-cross-solver"
   ],
-  "source_commit_sha": "a0ece51968c501f0bae238d76ebee9f60787a655",
+  "source_commit_sha": "07fc560f00b06b1730b189e5a042dffff053147a",
   "status": "blocked",
   "truth_class": "comparison_reference",
   "validation_result": {

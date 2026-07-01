@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any, Iterable
@@ -98,6 +99,9 @@ def score_symmetry_aware_rmsd(
     predicted = coordinates_array(predicted_atoms)
     if reference.shape != predicted.shape:
         raise ValueError("reference and predicted atom counts must match")
+    threshold = float(threshold_angstrom)
+    if not math.isfinite(threshold) or threshold <= 0.0:
+        raise ValueError("rmsd threshold must be finite and positive")
     permutations = _normalized_permutations(symmetry_permutations, reference.shape[0])
     rows: list[dict[str, Any]] = []
     for permutation in permutations:
@@ -106,14 +110,14 @@ def score_symmetry_aware_rmsd(
             {
                 "permutation": permutation,
                 "rmsd_angstrom": rmsd,
-                "pass": bool(rmsd <= threshold_angstrom),
+                "pass": bool(rmsd <= threshold),
             }
         )
     best = min(rows, key=lambda row: float(row["rmsd_angstrom"]))
     return {
         "schema_version": SCHEMA_VERSION,
         "atom_count": int(reference.shape[0]),
-        "threshold_angstrom": float(threshold_angstrom),
+        "threshold_angstrom": threshold,
         "symmetry_permutation_count": len(permutations),
         "best_rmsd_angstrom": float(best["rmsd_angstrom"]),
         "best_permutation": best["permutation"],

@@ -8,7 +8,7 @@
   "claim_boundary": "This seed defines the DUD-E/LIT-PCBA enrichment scorecard shape and materializer command. With zero operator-attached target rows it is intentionally blocked and cannot support an enrichment claim.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T08:20:19.526795+00:00",
+  "generated_at": "2026-07-01T08:56:53.196533+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d4cd7091185ef46a3fef3d546d1a670b7911b0e4de2f60703391a2cc757912b0",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:9c8063587ea2dbaa901f1d3a3f930be4b430978636b81e8d38f4ba89a1a6cfb2",
@@ -21,9 +21,9 @@
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:988022141137fa8dd3f56ff4feaebad1bdc218c838ed4cc9028f85bcc510d6e7",
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:58d09754c886a093ceccc0305fcad5099a9160de2890f3795fe00d0c8e53f606",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:4304a885e1e72c640a100f1a846f850be1cd58c750b62a39132968a60bf885bc",
-    "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
+    "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:4718c87bbcef615afc9f3ab4cce2e1e7a74e4f767d14d7558903d6cfec59dab3",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:efe47b90b4d467b89ea13797c2681851e7cffc4f8ab8ba15f9d11bb0a765a8e0",
-    "scripts/validate_public_benchmark_pose_validity.py": "sha256:a5b37644e07011ebe1d02b8d117f60f43bfe8d19af56fdd757301d0395bd72c4",
+    "scripts/validate_public_benchmark_pose_validity.py": "sha256:781e1a90205d6e04929d2bd29f7519427db86eefb708320e12a0ebc5559fea9d",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:1750e9440703be1f4e85fbc950adc15b197466af19cd3c8c21df9f46bae5dcf5"
   },
   "materializer": {
@@ -65,7 +65,7 @@
   "reuse_policy": "public_benchmark_enrichment_scorecard_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-enrichment-scorecard.v1",
-  "source_commit_sha": "c2d870dc960cc9df3b85172896accb671a09dd72",
+  "source_commit_sha": "07fc560f00b06b1730b189e5a042dffff053147a",
   "status": "operator_evidence_required",
   "summary": {
     "active_count": 0,

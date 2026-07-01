@@ -124,6 +124,23 @@ def test_pose_validity_input_materializer_blocks_placeholder_source_family() -> 
     assert "case_a:source_family_placeholder" in payload["blockers"]
 
 
+def test_pose_validity_input_materializer_blocks_invalid_rmsd_threshold() -> None:
+    pose_case = _pose_case()
+    pose_case["rmsd_threshold_angstrom"] = float("inf")
+
+    payload = module.materialize_pose_validity_input(
+        _subset_manifest(),
+        {"cases": [pose_case]},
+        repo_root=REPO_ROOT,
+    )
+
+    assert payload["pose_validity_ready"] is False
+    assert "case_a:rmsd_threshold_angstrom_invalid" in payload["blockers"]
+    assert "case_a:rmsd_threshold_angstrom_invalid" in (
+        payload["validation"]["rows"][0]["blockers"]
+    )
+
+
 def test_pose_validity_input_materializer_blocks_duplicate_case_ids() -> None:
     subset = _subset_manifest()
     subset["target_subset_case_count"] = 2

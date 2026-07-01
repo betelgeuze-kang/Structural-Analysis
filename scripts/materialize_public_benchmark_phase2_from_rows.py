@@ -223,6 +223,20 @@ def _row_intake_contracts(
             "required_pose_fields": list(pose_validity_input.REQUIRED_POSE_FIELDS),
             "paired_row_inputs_required": ["subset_rows"],
             "coordinate_payload_fields": ["reference_atoms", "predicted_atoms"],
+            "numeric_value_policy": {
+                "reference_atoms": (
+                    "x/y/z coordinates must parse to finite floats; NaN and "
+                    "Infinity are rejected"
+                ),
+                "predicted_atoms": (
+                    "x/y/z coordinates must parse to finite floats; NaN and "
+                    "Infinity are rejected"
+                ),
+                "rmsd_threshold_angstrom": (
+                    "must parse to a finite positive float; NaN, Infinity, zero, "
+                    "and negative thresholds are rejected"
+                ),
+            },
             "required_context_fields": [
                 "ligand_atom_order_contract",
                 "symmetry_permutation_contract",

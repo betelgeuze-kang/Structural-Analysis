@@ -4,9 +4,9 @@
   "contract_pass": true,
   "depends_on": [],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T08:20:19.544072+00:00",
+  "generated_at": "2026-07-01T08:56:57.426610+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:aa2e58ce220bf3db281b57cc97959a2f1e8ab28cea32ef4d4df75a10354c7ad4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:6df45fffe9689716a43ab2c16965e144ca953e9068b97758a2a89adc407faadc",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d4cd7091185ef46a3fef3d546d1a670b7911b0e4de2f60703391a2cc757912b0",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:430585319bd80f9a388a1808bd87887c4842761a1010077ce6912ed3f53f78b9",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
@@ -18,7 +18,7 @@
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:58d09754c886a093ceccc0305fcad5099a9160de2890f3795fe00d0c8e53f606",
     "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:4304a885e1e72c640a100f1a846f850be1cd58c750b62a39132968a60bf885bc",
     "scripts/validate_public_benchmark_external_receipts.py": "sha256:efe47b90b4d467b89ea13797c2681851e7cffc4f8ab8ba15f9d11bb0a765a8e0",
-    "scripts/validate_public_benchmark_pose_validity.py": "sha256:a5b37644e07011ebe1d02b8d117f60f43bfe8d19af56fdd757301d0395bd72c4",
+    "scripts/validate_public_benchmark_pose_validity.py": "sha256:781e1a90205d6e04929d2bd29f7519427db86eefb708320e12a0ebc5559fea9d",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:1750e9440703be1f4e85fbc950adc15b197466af19cd3c8c21df9f46bae5dcf5"
   },
   "intake_artifact": "<operator-casf-pdbbind-intake.json>",
@@ -84,7 +84,7 @@
   "reused_evidence": true,
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "casf_pdbbind_subset_intake",
-  "source_commit_sha": "c2d870dc960cc9df3b85172896accb671a09dd72",
+  "source_commit_sha": "07fc560f00b06b1730b189e5a042dffff053147a",
   "status": "operator_template_seed",
   "template": {
     "cases": [

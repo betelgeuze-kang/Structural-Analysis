@@ -25,7 +25,7 @@
   "contract_pass": true,
   "engine_version": "1.0.0",
   "full_phase3_quantity_gates_met": false,
-  "generated_at": "2026-07-01T08:47:10.724025+00:00",
+  "generated_at": "2026-07-01T08:53:11.140282+00:00",
   "input_checksums": {
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70",
@@ -121,6 +121,6 @@
   "scorecard_expected_output_comparison_pass_count": 88,
   "scorecard_expected_output_contract_pass": true,
   "scorecard_reproducible_from_manifest": true,
-  "source_commit_sha": "a0ece51968c501f0bae238d76ebee9f60787a655",
+  "source_commit_sha": "07fc560f00b06b1730b189e5a042dffff053147a",
   "status": "ready"
 }

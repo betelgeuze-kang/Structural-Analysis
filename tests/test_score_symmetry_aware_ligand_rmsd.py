@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import math
 from pathlib import Path
 import sys
 
@@ -48,6 +49,30 @@ def test_symmetry_aware_rmsd_selects_lowest_permutation() -> None:
     assert score["pose_success"] is True
 
 
+def test_symmetry_aware_rmsd_rejects_invalid_thresholds() -> None:
+    reference = [
+        {"x": 0.0, "y": 0.0, "z": 0.0},
+        {"x": 1.0, "y": 0.0, "z": 0.0},
+    ]
+    predicted = [
+        {"x": 0.0, "y": 0.0, "z": 0.0},
+        {"x": 1.0, "y": 0.0, "z": 0.0},
+    ]
+
+    for threshold in (float("inf"), float("nan"), 0.0, -1.0):
+        try:
+            module.score_symmetry_aware_rmsd(
+                reference_atoms=reference,
+                predicted_atoms=predicted,
+                symmetry_permutations=[[0, 1]],
+                threshold_angstrom=threshold,
+            )
+        except ValueError as exc:
+            assert "threshold" in str(exc)
+        else:
+            raise AssertionError(f"accepted invalid RMSD threshold: {threshold!r}")
+
+
 def test_symmetry_aware_rmsd_cli_writes_scorecard(tmp_path: Path) -> None:
     pose_input = tmp_path / "pose.json"
     pose_input.write_text(
@@ -71,3 +96,20 @@ def test_symmetry_aware_rmsd_cli_writes_scorecard(tmp_path: Path) -> None:
     assert payload["pose_success"] is True
     assert payload["source_commit_sha"]
     assert payload["input_checksums"][str(pose_input)].startswith("sha256:")
+
+
+def test_symmetry_aware_rmsd_rejects_non_finite_threshold() -> None:
+    reference = [{"x": 0.0, "y": 0.0, "z": 0.0}]
+    predicted = [{"x": 0.0, "y": 0.0, "z": 0.0}]
+
+    try:
+        module.score_symmetry_aware_rmsd(
+            reference_atoms=reference,
+            predicted_atoms=predicted,
+            symmetry_permutations=[[0]],
+            threshold_angstrom=math.inf,
+        )
+    except ValueError as exc:
+        assert str(exc) == "rmsd threshold must be finite and positive"
+    else:
+        raise AssertionError("expected non-finite threshold error")

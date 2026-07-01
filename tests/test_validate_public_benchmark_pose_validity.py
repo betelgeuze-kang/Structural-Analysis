@@ -107,6 +107,17 @@ def test_pose_validity_validator_blocks_invalid_pose_success_metric() -> None:
     assert "wrong_metric_pose:pose_success_metric_invalid" in result["blockers"]
 
 
+def test_pose_validity_validator_blocks_non_finite_rmsd_threshold() -> None:
+    case = _valid_pose_case("bad_threshold_pose")
+    case["rmsd_threshold_angstrom"] = float("nan")
+
+    result = module.validate_pose_validity_payload({"cases": [case]})
+
+    assert result["status"] == "blocked"
+    assert result["pose_validity_ready"] is False
+    assert "bad_threshold_pose:rmsd_threshold_angstrom_invalid" in result["blockers"]
+
+
 def test_pose_validity_validator_blocks_duplicate_case_rows() -> None:
     case = _valid_pose_case("case_a")
     case["source_family"] = "CASF/PDBBind"
