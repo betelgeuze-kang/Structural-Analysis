@@ -323,11 +323,11 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T09:31:29.032704+00:00",
+  "generated_at": "2026-07-01T09:51:22.030477+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:8fcd3dd11225cc788bac2278acf53cb77be5d230dfe2d8202eda5df8e5d05a22",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:1c1948f2c37c39321207d7e1ccce4bfd32c385ad2d62e80a33e06b9577f5903c"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:1dcb68a1b0866a0235313cabe2d52a77c2eb9cb0a2764be91e1a27f429b1d2ec"
   },
   "missing_row_inputs": [
     "subset_rows",
@@ -977,6 +977,57 @@
         "subset_rows"
       ],
       "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+      "posebusters_style_check_contract": {
+        "all_checks_required": true,
+        "check_definitions": [
+          {
+            "check_id": "coordinate_finiteness",
+            "description": "reference and predicted ligand coordinates are finite 3D values",
+            "required": true
+          },
+          {
+            "check_id": "atom_count_and_order_contract",
+            "description": "reference/predicted ligand atoms share a declared atom-order contract",
+            "required": true
+          },
+          {
+            "check_id": "pose_success_metric_contract",
+            "description": "pose success metric is explicitly symmetry-aware ligand RMSD",
+            "required": true
+          },
+          {
+            "check_id": "symmetry_permutation_contract",
+            "description": "allowed symmetry permutations are explicit zero-based atom-index maps",
+            "required": true
+          },
+          {
+            "check_id": "minimum_interatomic_distance_guard",
+            "description": "predicted ligand coordinates must not contain impossible self-clashes",
+            "required": true
+          },
+          {
+            "check_id": "receptor_ligand_context_present",
+            "description": "protein structure and binding-site context are present",
+            "required": true
+          },
+          {
+            "check_id": "symmetry_aware_ligand_rmsd_angstrom",
+            "description": "pose success uses the best rigid-aligned RMSD over allowed symmetry permutations",
+            "required": true
+          }
+        ],
+        "materializer_schema_version": "public-benchmark-posebusters-style-validity-packet-materialization.v1",
+        "packet_schema_version": "public-benchmark-pose-validity-packet.v1",
+        "required_check_ids": [
+          "coordinate_finiteness",
+          "atom_count_and_order_contract",
+          "pose_success_metric_contract",
+          "symmetry_permutation_contract",
+          "minimum_interatomic_distance_guard",
+          "receptor_ligand_context_present",
+          "symmetry_aware_ligand_rmsd_angstrom"
+        ]
+      },
       "required_context_fields": [
         "ligand_atom_order_contract",
         "symmetry_permutation_contract",
@@ -1342,7 +1393,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "bc98a98d9a1e46cb2e91177f1a99b0c4cca59915",
+  "source_commit_sha": "9b5e1b8796e588759667470c21e2e85a6c5c8d52",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
