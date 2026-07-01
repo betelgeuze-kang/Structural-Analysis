@@ -3,11 +3,11 @@
   "claim_boundary": "This is a fillable operator template seed for bounded PocketMD Lite top-k refinement rows. It is not refinement evidence and does not unlock broad all-atom MD, FEP, long-timescale dynamics, or de novo binding claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T03:19:05.689780+00:00",
+  "generated_at": "2026-07-01T04:46:04.285660+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:6696bc4d8fd6d50e941e9489c38c196bcf128f59f9325ed1fe08bf01d6624ebe",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:493daab9100f920c8f17ab7729ef31e8fee96e1d3b96dcf8840d218de7917817",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:7d72cc4d56752323369e605f144f839ce9c2265133b7472c241452117bd4b5e5"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:c21039d69201be45cea2ecdb6d241d622c50dfe9f2fbca37ef207f6e713ed29c",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:15dfa8ba61da5e3deabd93106765cf31bb2efd538475284527a8c7a85efd08fd",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:ee77db68c961316d094bebb23a2a5e4b41024b50a704cbb5f137e12242543eb0"
   },
   "intake_artifact": "<operator-pocketmd-lite-intake.json>",
   "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -48,6 +48,7 @@
       "jsonl",
       "ndjson"
     ],
+    "top_k_rank_prefix_policy": "For each case, supplied ranks must form a contiguous prefix starting at rank 1; cherry-picked gaps are not valid top-k refinement input.",
     "top_k_row_quality_minimums": {
       "min_candidate_count_per_case": 2,
       "min_real_refinement_case_count": 3,
@@ -75,7 +76,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-operator-template.v1",
   "slot_id": "top_k_refinement_rows",
-  "source_commit_sha": "a68f86b82839d20a84c593688b47c34d04410121",
+  "source_commit_sha": "468307498f684d2638fbad3dd674d77415bbd78f",
   "status": "operator_template_seed",
   "template": {
     "cases": [

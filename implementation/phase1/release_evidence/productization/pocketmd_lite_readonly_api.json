@@ -46,11 +46,11 @@
     "promote_all_atom_or_fep_claim",
     "write_operator_evidence"
   ],
-  "generated_at": "2026-07-01T03:19:05.693771+00:00",
+  "generated_at": "2026-07-01T04:46:04.289068+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:6696bc4d8fd6d50e941e9489c38c196bcf128f59f9325ed1fe08bf01d6624ebe",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:493daab9100f920c8f17ab7729ef31e8fee96e1d3b96dcf8840d218de7917817",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:7d72cc4d56752323369e605f144f839ce9c2265133b7472c241452117bd4b5e5"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:c21039d69201be45cea2ecdb6d241d622c50dfe9f2fbca37ef207f6e713ed29c",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:15dfa8ba61da5e3deabd93106765cf31bb2efd538475284527a8c7a85efd08fd",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:ee77db68c961316d094bebb23a2a5e4b41024b50a704cbb5f137e12242543eb0"
   },
   "mutation_allowed": false,
   "read_model": {
@@ -68,6 +68,6 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite",
   "schema_version": "pocketmd-lite-readonly-api.v1",
-  "source_commit_sha": "a68f86b82839d20a84c593688b47c34d04410121",
+  "source_commit_sha": "468307498f684d2638fbad3dd674d77415bbd78f",
   "status": "ready_for_seed_artifacts"
 }

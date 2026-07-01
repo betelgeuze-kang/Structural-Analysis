@@ -2279,7 +2279,7 @@
   "frontier_chain_monotonic_nonincreasing": true,
   "frontier_improvement_inf_n": 17.660102320633595,
   "frontier_relative_improvement": 0.9309818708904479,
-  "generated_at": "2026-06-30T12:33:43.681528+00:00",
+  "generated_at": "2026-07-01T04:48:26.878306+00:00",
   "hip_residual_row_backend": {
     "claim_boundary": "HIP row backend receipts are live descent/saturation evidence only; they do not close G1 unless residual gates and production in-process ROCm/HIP residency are both proven.",
     "contract_pass": false,
@@ -2386,7 +2386,7 @@
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup69_frontier_probe.json": "sha256:0f8d3fff4a6b43d5f402dac8d88344bb62403a7fc119dfea19726a7d488ad9b8",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup71_frontier_probe.json": "sha256:02d40919374e40906d3b8e9ba0de5412c5c8c8eca170620de15edf84f9bd5b93",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup73_frontier_probe.json": "sha256:078c7d1ac28c28d325e9d2cbd4846db672f11684bb6882cda868ad34ca42a4ba",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:4c793192ff37f209f153119b1f6d0025c7ad18e0cd84c4e734ef99ef7c0bb119",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:cd100326ca2d1207a3d9ec49623644d3a18db76f6c6719578fc856d375504fe7",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_physical_audit_followup85_86_summary.json": "sha256:0cff9ddbac28f93ebb922683d0cda38d44b5f8adfff7d469f3f68ba5fcb82e0b",
     "implementation/phase1/release_evidence/productization/mgt_rocm_backend_newton_row_integration_followup67_summary.json": "sha256:de188cc7e796bce9bc6839ff080508a5be80161af6b2463204b2c905ed41f8dd",
     "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup382_support8_checkpointed.json": "sha256:719a39a126ac94bb644684159b67f8b18993ef49257c05a7a9253f74b60566e0",
@@ -3692,7 +3692,7 @@
   "same_operator_repetition_exhausted": true,
   "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v3",
   "shell_material_tangent_applied": true,
-  "source_commit_sha": "db51ce253e601628058ed2530d87dabcc8db68e9",
+  "source_commit_sha": "468307498f684d2638fbad3dd674d77415bbd78f",
   "status": "partial",
   "storage_policy": {
     "checkpoint_compactness_unknown_count": 1,

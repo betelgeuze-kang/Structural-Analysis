@@ -586,13 +586,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T04:22:13.111674+00:00",
+  "generated_at": "2026-07-01T04:46:04.334993+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:c1df25fb0f85f5640fe6ab5362ec14a05563a3db20ab4c08192910325a6d17ca",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:7045af1876986e6e6ab0cad176841683ac369f0bc0eec6c7579770002bdd13e8",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:493daab9100f920c8f17ab7729ef31e8fee96e1d3b96dcf8840d218de7917817",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:7d72cc4d56752323369e605f144f839ce9c2265133b7472c241452117bd4b5e5",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:c1663c1b2df7dd1de778f083f6c13f427d6fdb1650951f5927a0fc5665e2b9b3"
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:15dfa8ba61da5e3deabd93106765cf31bb2efd538475284527a8c7a85efd08fd",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:ee77db68c961316d094bebb23a2a5e4b41024b50a704cbb5f137e12242543eb0",
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:a239d98d5aa67e0734bb657868a8cd9d9dad5c575cfb3352d60f9a719d819ee7"
   },
   "missing_row_inputs": [
     "gpcr_rows",
@@ -830,6 +830,7 @@
         "per_row_source_checksum",
         "per_row_provenance_ref"
       ],
+      "top_k_rank_prefix_policy": "For each case, supplied ranks must form a contiguous prefix starting at rank 1; cherry-picked gaps are not valid top-k refinement input.",
       "top_k_row_quality_minimums": {
         "min_candidate_count_per_case": 2,
         "min_real_refinement_case_count": 3,
@@ -843,7 +844,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "26c49d41a2e59792ccf25fef8a8d4c9906185562",
+  "source_commit_sha": "468307498f684d2638fbad3dd674d77415bbd78f",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
