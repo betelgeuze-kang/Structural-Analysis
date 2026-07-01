@@ -182,12 +182,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T05:42:44.024566+00:00",
+  "generated_at": "2026-07-01T05:44:58.096149+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:740dc81c45d773418c451e8457bfae9953e0365f82a2dc30de7e7cc2407c379b",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:9974f6c2d75f9f9b1aeb87bf01ea554cde52106d45cdd948a8812bbdc62f8b29",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5c8308fa4966ba623a5dc4fd7d14b809210f90bba58857cef7cb6245f4e49550",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:7e9cfbf094e7e29b272b044733daa2172efa0f5cdeb5885424b33232cdd35082",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:918481506b8d9001a671a1a1448e5f63fa55a2686e419d394b97bfa78c972c3e",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:f57c5aa9b31855eb840e071d0adda4c58086185d1bf1eb2e544b605682ec5896",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:cb4b26dd94bb79a742956fc5fa82d7d69c9e22ff84760bde236bc4ed1bc8aded",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:c3d084be87b8af31707e078d055cee46d33e928380dc51e689a31d355b916935",
@@ -196,7 +196,7 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:5c5c5bf0135f4d60a465eb810e9386644681a406710977e626f5e93a2c4979f4",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:3ddb79bfdcef7697044995c70baf5996266fd44768e6efb6f8326e5bf9a6849d",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:70abf0791dbdfa4cee6b348bf89b67d796d27b496b7919a02ad7154b9e0cd903",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d1b6f49ddf13e47f1b10e077cbec9ad975cb4a5ce74e073498245d6436443654",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:bb4f8ad5ef5699a7ff1bc1af1a01a4c55f382fafab98852ed84aa5574f0505a6",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:f1d349767c211fde2b05f72376c19af8fa80d4ba0583cd44888d6de9158f36a7",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:97dbff3e3510a9c6033c171fc4147b1bbc1db62d6c464827cd615483cb8a6a88",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:8b04cee72aade01b6152c60fd34e20c90d82a227428dd5981dcc6bc3f175a260",
@@ -500,8 +500,8 @@
     "refresh_required_operator_action_count": 0,
     "refresh_required_operator_actions": [],
     "release_allowed": false,
-    "release_area_blocker_count": 8,
-    "release_area_owner_handoff_count": 8,
+    "release_area_blocker_count": 5,
+    "release_area_owner_handoff_count": 5,
     "release_area_owner_handoffs": [
       {
         "acceptance_criteria": [
@@ -628,45 +628,6 @@
         "owner": "product_legal_owner",
         "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
         "title": "Security"
-      },
-      {
-        "acceptance_criteria": [],
-        "acceptance_criteria_count": 0,
-        "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
-        "evidence_artifact_keys": [],
-        "evidence_state": "",
-        "external_input_required": false,
-        "handoff_state": "action_register_row_missing",
-        "namespace": "github_sync",
-        "owner": "",
-        "owner_action": "",
-        "title": ""
-      },
-      {
-        "acceptance_criteria": [],
-        "acceptance_criteria_count": 0,
-        "blocker_id": "github_sync::github_sync_remote_sync_pending",
-        "evidence_artifact_keys": [],
-        "evidence_state": "",
-        "external_input_required": false,
-        "handoff_state": "action_register_row_missing",
-        "namespace": "github_sync",
-        "owner": "",
-        "owner_action": "",
-        "title": ""
-      },
-      {
-        "acceptance_criteria": [],
-        "acceptance_criteria_count": 0,
-        "blocker_id": "github_sync::github_sync_preflight_not_synced",
-        "evidence_artifact_keys": [],
-        "evidence_state": "",
-        "external_input_required": false,
-        "handoff_state": "action_register_row_missing",
-        "namespace": "github_sync",
-        "owner": "",
-        "owner_action": "",
-        "title": ""
       }
     ]
   },
@@ -1629,8 +1590,8 @@
   "read_model_ready": true,
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
-    "approval_token_count": 5,
-    "blocked_release_count": 8,
+    "approval_token_count": 4,
+    "blocked_release_count": 5,
     "broad_gpcr_family_claim_safe": false,
     "evidence_surface_count": 12,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -1998,9 +1959,9 @@
       "state": "ready",
       "summary": {
         "action_register_contract_pass": false,
-        "approval_token_count": 5,
+        "approval_token_count": 4,
         "blocked_capability_count": 4,
-        "blocked_release_count": 8,
+        "blocked_release_count": 5,
         "first_locked_science_evidence_surface": {
           "bottleneck": "h_bond_evidence_surface_locked",
           "capability_blocker_count": 2,
@@ -4328,7 +4289,7 @@
       ]
     }
   },
-  "source_commit_sha": "ac3dba61704b456969e3dcaf533b8008b5542c70",
+  "source_commit_sha": "38182f3958c9aea4dc4a1602238111d1cc1563bb",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
