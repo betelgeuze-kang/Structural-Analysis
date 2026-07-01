@@ -10,7 +10,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/pcert/Building-Structural.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_pcert_building_structural.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_pcert_building_structural.model_health_report.json",
-        "elapsed_seconds": 0.205,
+        "elapsed_seconds": 0.217,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -189,7 +189,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/pcert/Infra-Bridge.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_pcert_infra_bridge.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_pcert_infra_bridge.model_health_report.json",
-        "elapsed_seconds": 0.43,
+        "elapsed_seconds": 0.428,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -372,7 +372,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_architectural/Duplex_A_20110907.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_architectural.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_architectural.model_health_report.json",
-        "elapsed_seconds": 0.437,
+        "elapsed_seconds": 0.433,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -594,7 +594,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_electrical/Duplex_Electrical_20121207.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_electrical.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_electrical.model_health_report.json",
-        "elapsed_seconds": 0.347,
+        "elapsed_seconds": 0.343,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -797,7 +797,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_mep/Duplex_MEP_20110907.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_mep.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_mep.model_health_report.json",
-        "elapsed_seconds": 2.508,
+        "elapsed_seconds": 2.566,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -1008,7 +1008,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_architectural/Clinic_Architectural.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_architectural.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_architectural.model_health_report.json",
-        "elapsed_seconds": 1.701,
+        "elapsed_seconds": 1.819,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -1234,7 +1234,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_electrical/Clinic_Electrical.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_electrical.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_electrical.model_health_report.json",
-        "elapsed_seconds": 0.959,
+        "elapsed_seconds": 0.934,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -1440,7 +1440,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_hvac/Clinic_HVAC.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_hvac.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_hvac.model_health_report.json",
-        "elapsed_seconds": 3.591,
+        "elapsed_seconds": 3.517,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -1640,7 +1640,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_plumbing/Clinic_Plumbing.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_plumbing.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_plumbing.model_health_report.json",
-        "elapsed_seconds": 7.091,
+        "elapsed_seconds": 7.154,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -1835,7 +1835,7 @@
       "claim_boundary": "This case can receive Phase 3 IFC quantity credit only after the source file is locally acquired, checksummed, product/legal review remains visible, and model_health execution proves the expected blocked/warning contract.",
       "execution": {
         "command": "/usr/bin/python3 -m structural_analysis.api.cli /home/betelgeuze/건축구조분석/private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_structural/Clinic_Structural.ifc --analysis-type model_health --out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_structural.model_health_result.json --report-out /home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_structural.model_health_report.json",
-        "elapsed_seconds": 2.432,
+        "elapsed_seconds": 2.444,
         "report": {
           "claim_boundary_version": "developer-preview-core-api-v1",
           "comparisons": [],
@@ -2039,7 +2039,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T03:59:57.025748+00:00",
+  "generated_at": "2026-07-01T08:47:10.722266+00:00",
   "import_health_contract_pass_count": 10,
   "import_health_execution_count": 10,
   "input_checksums": {
@@ -2073,7 +2073,7 @@
   },
   "silent_import_loss_gate_pass_count": 10,
   "source_checksum_attached_count": 10,
-  "source_commit_sha": "339dafaba7f4472c83ba74dad30cb1237879e77b",
+  "source_commit_sha": "a0ece51968c501f0bae238d76ebee9f60787a655",
   "source_file_acquired_count": 10,
   "status": "blocked",
   "visible_entity_accounting_case_count": 10

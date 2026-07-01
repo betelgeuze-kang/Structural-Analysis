@@ -14,14 +14,14 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T04:00:02.181159+00:00",
+  "generated_at": "2026-07-01T08:46:50.599543+00:00",
   "import_health_contract_pass_count": 10,
   "import_health_execution_count": 10,
   "input_checksums": {
     "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:fa2599e305d75fc385bded48680b0fe1139ed08755f8ae567e317e262a67e36f",
     "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:c55917f412b60e4dd91869b53794ee0a65a52f39cb889fe55bfe439a322cae89",
     "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:77b7a381e438ca48ef3143a1002e585d67aef10717507c1a5568a3f52dfe7065"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
   },
   "phase3_closure_claim": false,
   "phase3_ifc_import_case_requirement": {
@@ -43,7 +43,7 @@
   "schema_version": "phase3-ifc-source-license-receipt.v1",
   "silent_import_loss_gate_pass_count": 10,
   "source_checksum_attached_count": 10,
-  "source_commit_sha": "339dafaba7f4472c83ba74dad30cb1237879e77b",
+  "source_commit_sha": "a0ece51968c501f0bae238d76ebee9f60787a655",
   "source_count": 3,
   "source_file_acquired_count": 10,
   "source_license_review_blocker_count": 3,

@@ -52,7 +52,7 @@
   ],
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T00:19:32.201310+00:00",
+  "generated_at": "2026-07-01T08:46:50.567758+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
     "implementation/phase1/report_commercial_solver_cross_validation.py": "sha256:057f528757bd848099c66b603515bca8e0a3507087f4b82f07e7ad02a8f13a9b",
@@ -150,7 +150,7 @@
   "selected_benchmark_lanes": [
     "commercial-cross-solver"
   ],
-  "source_commit_sha": "8e10f054c9f53e5f01726928111be41a51952438",
+  "source_commit_sha": "a0ece51968c501f0bae238d76ebee9f60787a655",
   "status": "ready",
   "template_scope": {
     "commercial_results_are_absolute_truth": false,

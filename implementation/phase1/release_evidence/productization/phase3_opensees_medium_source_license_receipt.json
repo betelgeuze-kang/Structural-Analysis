@@ -40,14 +40,14 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-30T15:18:39.378360+00:00",
+  "generated_at": "2026-07-01T08:46:50.567295+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl": "sha256:309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl": "sha256:ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:275b61ecbc71a9827552451982caa0317a7a1d55412d135577d0a128b873e712"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
   },
   "lanes": [
     "opensees-medium"
@@ -127,7 +127,7 @@
   "phase3_closure_claim": false,
   "redistribution_allowed": false,
   "schema_version": "phase3-opensees-medium-source-license-receipt.v1",
-  "source_commit_sha": "95db1987c1f4e94d919e87aa1d2ccedea3a835fd",
+  "source_commit_sha": "a0ece51968c501f0bae238d76ebee9f60787a655",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_url_candidates": [
     {
