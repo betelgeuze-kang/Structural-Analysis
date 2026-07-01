@@ -10,6 +10,7 @@
         "casf_pdbbind_case_checksums_missing",
         "casf_pdbbind_ligand_symmetry_contracts_missing"
       ],
+      "case_ids": [],
       "contract_pass": true,
       "exists": true,
       "materialized_case_count": 0,
@@ -27,6 +28,7 @@
       "artifact_role": "pose_validity_packet",
       "blocker_count": 0,
       "blockers": [],
+      "case_ids": [],
       "contract_pass": true,
       "exists": true,
       "materialized_case_count": 0,
@@ -44,6 +46,9 @@
       "artifact_role": "rmsd_scorecard",
       "blocker_count": 0,
       "blockers": [],
+      "case_ids": [
+        "dry_run_symmetry_swap_pose"
+      ],
       "contract_pass": true,
       "exists": true,
       "materialized_case_count": 0,
@@ -62,6 +67,9 @@
       "blocker_count": 1,
       "blockers": [
         "public_benchmark_pose_success_harness_rows_missing"
+      ],
+      "case_ids": [
+        "dry_run_symmetry_swap_pose"
       ],
       "contract_pass": true,
       "exists": true,
@@ -84,6 +92,7 @@
         "dud_e_lit_pcba_scored_molecules_missing",
         "dud_e_lit_pcba_active_decoy_labels_missing"
       ],
+      "case_ids": [],
       "contract_pass": false,
       "exists": true,
       "materialized_case_count": 0,
@@ -105,6 +114,7 @@
         "vina_gnina_engine_runs_missing",
         "vina_gnina_external_receipts_missing"
       ],
+      "case_ids": [],
       "contract_pass": false,
       "exists": true,
       "materialized_case_count": 0,
@@ -124,6 +134,7 @@
       "blockers": [
         "public_benchmark_external_receipts_missing"
       ],
+      "case_ids": [],
       "contract_pass": true,
       "exists": true,
       "materialized_case_count": 0,
@@ -161,6 +172,9 @@
         "public_benchmark_pose_success_harness_rows_missing",
         "real_benchmark_case_count_below_required:0<12"
       ],
+      "case_ids": [
+        "dry_run_symmetry_swap_pose"
+      ],
       "component_id": "casf_pdbbind_pose_success_harness",
       "contract_pass": false,
       "count_field": "real_benchmark_case_count",
@@ -181,6 +195,9 @@
       "blocker_count": 1,
       "blockers": [
         "real_benchmark_case_count_below_required:0<12"
+      ],
+      "case_ids": [
+        "dry_run_symmetry_swap_pose"
       ],
       "component_id": "symmetry_aware_ligand_rmsd",
       "contract_pass": false,
@@ -203,6 +220,7 @@
       "blockers": [
         "real_benchmark_case_count_below_required:0<12"
       ],
+      "case_ids": [],
       "component_id": "posebusters_style_pose_validity",
       "contract_pass": false,
       "count_field": "real_benchmark_case_count",
@@ -227,6 +245,7 @@
         "vina_gnina_external_receipts_missing",
         "real_comparison_case_count_below_required:0<1"
       ],
+      "case_ids": [],
       "component_id": "vina_gnina_comparison_adapter",
       "contract_pass": false,
       "count_field": "real_comparison_case_count",
@@ -251,6 +270,7 @@
         "dud_e_lit_pcba_active_decoy_labels_missing",
         "real_enrichment_target_count_below_required:0<1"
       ],
+      "case_ids": [],
       "component_id": "dud_e_or_lit_pcba_enrichment",
       "contract_pass": false,
       "count_field": "real_enrichment_target_count",
@@ -268,21 +288,22 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T06:30:51.614295+00:00",
+  "generated_at": "2026-07-01T06:44:30.621842+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:348e173412cd77fe72d5fa3c36e979b096d9fab9e4fab26adac1ef81227593dd",
+    "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json": "sha256:2969bcac928a91c3d2ba9f9edf7a15e68bd289065b380643739c3bb86a577018",
     "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json": "sha256:ebad77368627c20437a800eeb1bcfe1bea120acc064275665fab9b9494d9e967",
-    "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json": "sha256:002acad6fbe2810639c991c799a7f4d0e9cadcc5d2c459c3903028c1934fea46",
-    "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json": "sha256:19f29ebdcfb41ba81015715686c46c97142d498e0d07e26595d830a86ff73fe8",
-    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:3c55ead482fada5ade0629fdd7f00045e0c74797af0e459bb02b68ff88b6b1c3",
-    "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json": "sha256:f893edaa714364f597ac28658d77c347e9ee9d79f04e677e32b5abb1131408c2",
-    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json": "sha256:74ba3fe275652246e04c862c46e055bfc38edd02aa6098b612245358b9b68a53",
-    "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb"
+    "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json": "sha256:e893b1f76b484a88dcccfab7c07bf856dcad4d15265f061523f4bfcab57091a0",
+    "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json": "sha256:2dd95a4ac6d79adf25d7682d073c6e30426317044b8841e89b03a42f811c51ea",
+    "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json": "sha256:d15593ca194bb4e5520ad1a38a71798a399434cca0a01fde8233ad365c66b8e2",
+    "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json": "sha256:6a7964e3828eaad759059afe9d82fc5bf9f7032cb88476a419d44d569afe66eb",
+    "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json": "sha256:5f0ce06644bd4c8ec28634ee71c5c8eee67ef4685f88e21f123660661ac93858",
+    "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269"
   },
   "materialization_report": {
     "artifact_count": 7,
     "missing_artifact_count": 0,
     "phase2_component_count": 5,
+    "phase2_pose_case_alignment_contract_pass": true,
     "phase2_ready": false,
     "phase2_ready_component_count": 0,
     "phase2_requirement_summary": {
@@ -423,6 +444,32 @@
     "ready_component_count": 0,
     "required_component_count": 5,
     "status": "blocked"
+  },
+  "phase2_pose_case_alignment": {
+    "blocker_count": 0,
+    "blockers": [],
+    "blockers_by_role": {
+      "pose_success_harness": [],
+      "pose_validity_packet": [],
+      "rmsd_scorecard": []
+    },
+    "case_ids_by_role": {
+      "pose_success_harness": [
+        "dry_run_symmetry_swap_pose"
+      ],
+      "pose_validity_packet": [],
+      "rmsd_scorecard": [
+        "dry_run_symmetry_swap_pose"
+      ]
+    },
+    "claim_boundary": "PoseBusters validity, symmetry-aware RMSD, and pose-success harness artifacts must describe the same public benchmark case set.",
+    "contract_pass": true,
+    "roles": [
+      "pose_validity_packet",
+      "rmsd_scorecard",
+      "pose_success_harness"
+    ],
+    "schema_version": "public-benchmark-phase2-pose-case-alignment.v1"
   },
   "phase2_ready": false,
   "phase2_requirement_summary": {
@@ -606,6 +653,6 @@
   "reuse_policy": "public_benchmark_harness_bundle_from_materialized_local_artifacts",
   "reused_evidence": false,
   "schema_version": "public-benchmark-harness-bundle.v1",
-  "source_commit_sha": "08649cdefe65aa3f184b9625f42cfa84d33ce232",
+  "source_commit_sha": "a5d0a5a64676fee69e7bed7a049f3214d9db87d0",
   "status": "artifact_bundle_incomplete"
 }
