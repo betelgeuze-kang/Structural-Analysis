@@ -83,7 +83,9 @@
         "molecule_id",
         "score",
         "is_positive",
-        "is_decoy"
+        "is_decoy",
+        "source_checksum",
+        "provenance_ref"
       ],
       "required_operator_fields": [
         "target_id",
@@ -94,6 +96,26 @@
         "score_direction",
         "hard_decoy_rows"
       ],
+      "row_source_receipt_requirements": {
+        "placeholder_provenance_prefixes_rejected": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
+        ],
+        "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+        "required_row_fields": [
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+      },
       "source_receipt_requirements": {
         "mode": "raw_hard_decoy_rows",
         "placeholder_block_policy": {
@@ -204,7 +226,9 @@
           "molecule_id",
           "score",
           "is_positive",
-          "is_decoy"
+          "is_decoy",
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_operator_fields": [
           "target_id",
@@ -215,6 +239,26 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "row_source_receipt_requirements": {
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+          "required_row_fields": [
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+        },
         "source_receipt_requirements": {
           "mode": "raw_hard_decoy_rows",
           "placeholder_block_policy": {
@@ -316,7 +360,9 @@
           "molecule_id",
           "score",
           "is_positive",
-          "is_decoy"
+          "is_decoy",
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_operator_fields": [
           "target_id",
@@ -327,6 +373,26 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "row_source_receipt_requirements": {
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+          "required_row_fields": [
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+        },
         "source_receipt_requirements": {
           "mode": "raw_hard_decoy_rows",
           "placeholder_block_policy": {
@@ -428,7 +494,9 @@
           "molecule_id",
           "score",
           "is_positive",
-          "is_decoy"
+          "is_decoy",
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_operator_fields": [
           "target_id",
@@ -439,6 +507,26 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "row_source_receipt_requirements": {
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+          "required_row_fields": [
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+        },
         "source_receipt_requirements": {
           "mode": "raw_hard_decoy_rows",
           "placeholder_block_policy": {
@@ -508,14 +596,14 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-07-01T09:40:11.445592+00:00",
+  "generated_at": "2026-07-01T10:02:05.432565+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:30d2b6a86da1915602bc647de024eece488f243636888b685fcd601591e7660a",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:24983ed914879fdc1a9155172826c00c1e8018349a6be2bc8a224d8f895c87f3",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:de7328505d180ea83f0ad04ad55ca63503f44bf6e70ff34d33e8df52caf4e0bd",
-    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:5a7d1437b3191a00b1b088a094e81927d5626e0fccfeb4eb84c8a6b6325c3a53",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:d1d3f306a711ca60b730a6d8c7236de75d47106951b9a2bb3e1b32d08bc2770f"
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:ddc979982fa76ec9757fe56c8be0a1215f74474363d190d689940a986e3ad712",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:184b563a18d475ba631a971e9b3e2d1cb8a293009c534c0df95bc8bf32f168a4",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:3b8a06940a79511aeb2d75114f94306a1083608c101f89dc6febb0042cf90e4a",
+    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:2e144fbb69c76a239fe89f132042db246745bf3938f4c49db722f0d0f63b8c2f"
   },
   "linked_artifacts": {
     "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -561,7 +649,9 @@
     "molecule_id",
     "score",
     "is_positive",
-    "is_decoy"
+    "is_decoy",
+    "source_checksum",
+    "provenance_ref"
   ],
   "minimum_raw_hard_decoy_row_quality": {
     "min_decoy_count_per_target": 20,
@@ -631,19 +721,43 @@
       "molecule_id",
       "score",
       "is_positive",
-      "is_decoy"
+      "is_decoy",
+      "source_checksum",
+      "provenance_ref"
     ],
     "required_row_fields": [
       "molecule_id",
       "score",
       "is_positive",
-      "is_decoy"
+      "is_decoy",
+      "source_checksum",
+      "provenance_ref"
     ],
     "required_targets": [
       "DRD2",
       "HTR2A",
       "OPRM1"
     ],
+    "row_source_receipt_requirements": {
+      "placeholder_provenance_prefixes_rejected": [
+        "operator://",
+        "local-evidence://",
+        "local://",
+        "fixture://",
+        "mock://",
+        "synthetic://",
+        "placeholder://",
+        "test://",
+        "unit-test://",
+        "file://"
+      ],
+      "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+      "required_row_fields": [
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+    },
     "source_receipt_requirements": {
       "mode": "raw_hard_decoy_rows",
       "placeholder_block_policy": {
@@ -721,7 +835,7 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "e058551f9359ec23efc798819fdf874582883a89",
+  "source_commit_sha": "ef71af2fc897b4668568e2e6894a4d8bfa9cc22c",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
@@ -790,7 +904,9 @@
           "molecule_id",
           "score",
           "is_positive",
-          "is_decoy"
+          "is_decoy",
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_operator_fields": [
           "target_id",
@@ -801,6 +917,26 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "row_source_receipt_requirements": {
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+          "required_row_fields": [
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+        },
         "source_receipt_requirements": {
           "mode": "raw_hard_decoy_rows",
           "placeholder_block_policy": {
@@ -929,7 +1065,9 @@
           "molecule_id",
           "score",
           "is_positive",
-          "is_decoy"
+          "is_decoy",
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_operator_fields": [
           "target_id",
@@ -940,6 +1078,26 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "row_source_receipt_requirements": {
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+          "required_row_fields": [
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+        },
         "source_receipt_requirements": {
           "mode": "raw_hard_decoy_rows",
           "placeholder_block_policy": {
@@ -1068,7 +1226,9 @@
           "molecule_id",
           "score",
           "is_positive",
-          "is_decoy"
+          "is_decoy",
+          "source_checksum",
+          "provenance_ref"
         ],
         "required_operator_fields": [
           "target_id",
@@ -1079,6 +1239,26 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "row_source_receipt_requirements": {
+          "placeholder_provenance_prefixes_rejected": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ],
+          "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+          "required_row_fields": [
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+        },
         "source_receipt_requirements": {
           "mode": "raw_hard_decoy_rows",
           "placeholder_block_policy": {
@@ -1191,13 +1371,17 @@
             "is_decoy": false,
             "is_positive": true,
             "molecule_id": "positive_001",
-            "score": null
+            "provenance_ref": null,
+            "score": null,
+            "source_checksum": null
           },
           {
             "is_decoy": true,
             "is_positive": false,
             "molecule_id": "decoy_001",
-            "score": null
+            "provenance_ref": null,
+            "score": null,
+            "source_checksum": null
           }
         ],
         "positive_out_anchored_by_top_decoys": null,
@@ -1242,13 +1426,17 @@
             "is_decoy": false,
             "is_positive": true,
             "molecule_id": "positive_001",
-            "score": null
+            "provenance_ref": null,
+            "score": null,
+            "source_checksum": null
           },
           {
             "is_decoy": true,
             "is_positive": false,
             "molecule_id": "decoy_001",
-            "score": null
+            "provenance_ref": null,
+            "score": null,
+            "source_checksum": null
           }
         ],
         "positive_out_anchored_by_top_decoys": null,
@@ -1293,13 +1481,17 @@
             "is_decoy": false,
             "is_positive": true,
             "molecule_id": "positive_001",
-            "score": null
+            "provenance_ref": null,
+            "score": null,
+            "source_checksum": null
           },
           {
             "is_decoy": true,
             "is_positive": false,
             "molecule_id": "decoy_001",
-            "score": null
+            "provenance_ref": null,
+            "score": null,
+            "source_checksum": null
           }
         ],
         "positive_out_anchored_by_top_decoys": null,

@@ -18,9 +18,12 @@ from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from materialize_gpcr_hard_decoy_suite_report import (  # noqa: E402
     ACTUAL_CLOSURE_CRITERION_ID,
     EXIT_CRITERIA,
+    PLACEHOLDER_PROVENANCE_PREFIXES,
     PLACEHOLDER_SOURCE_TEXT_MARKERS,
     PLACEHOLDER_SOURCE_URL_MARKERS,
     PLACEHOLDER_SOURCE_URL_PREFIXES,
+    RAW_RANKING_SOURCE_RECEIPT_FIELDS,
+    REQUIRED_ACTUAL_CLOSURE_RAW_ROW_FIELDS,
     RAW_ROW_QUALITY_CRITERIA,
     REQUIRED_TARGETS,
     SCHEMA_VERSION as SUITE_REPORT_SCHEMA_VERSION,
@@ -65,7 +68,18 @@ PHASE3_EXIT_CRITERIA_BY_FIELD = {
     "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
     "hard_decoy_rows": ACTUAL_CLOSURE_CRITERION_ID,
 }
-RAW_HARD_DECOY_ROW_FIELDS = ("molecule_id", "score", "is_positive", "is_decoy")
+RAW_HARD_DECOY_ROW_FIELDS = REQUIRED_ACTUAL_CLOSURE_RAW_ROW_FIELDS
+ROW_SOURCE_RECEIPT_REQUIREMENTS = {
+    "required_row_fields": list(RAW_RANKING_SOURCE_RECEIPT_FIELDS),
+    "source_checksum_policy": (
+        "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+    ),
+    "provenance_ref_policy": (
+        "provenance_ref must be nonblank and must not use local, fixture, mock, "
+        "synthetic, placeholder, test, or file-only provenance prefixes"
+    ),
+    "placeholder_provenance_prefixes_rejected": list(PLACEHOLDER_PROVENANCE_PREFIXES),
+}
 RAW_ROW_VALUE_CONTRACT = {
     "target_id_policy": (
         "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target "
@@ -153,12 +167,16 @@ def _target_template(target_id: str) -> dict[str, Any]:
                 "score": None,
                 "is_positive": True,
                 "is_decoy": False,
+                "source_checksum": None,
+                "provenance_ref": None,
             },
             {
                 "molecule_id": "decoy_001",
                 "score": None,
                 "is_positive": False,
                 "is_decoy": True,
+                "source_checksum": None,
+                "provenance_ref": None,
             },
         ],
     }
@@ -301,6 +319,9 @@ def _target_execution_preflight_checklist(
                     },
                     "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
                     "raw_row_value_contract": dict(RAW_ROW_VALUE_CONTRACT),
+                    "row_source_receipt_requirements": dict(
+                        ROW_SOURCE_RECEIPT_REQUIREMENTS
+                    ),
                     "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
                 },
                 "materialization_command": materialize_command,
@@ -341,6 +362,9 @@ def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
                 },
                 "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
                 "raw_row_value_contract": dict(RAW_ROW_VALUE_CONTRACT),
+                "row_source_receipt_requirements": dict(
+                    ROW_SOURCE_RECEIPT_REQUIREMENTS
+                ),
                 "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
             },
             "materialization_steps": [
@@ -463,6 +487,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             ],
             "minimum_row_quality_per_target": dict(RAW_ROW_QUALITY_CRITERIA),
             "raw_row_value_contract": dict(RAW_ROW_VALUE_CONTRACT),
+            "row_source_receipt_requirements": dict(ROW_SOURCE_RECEIPT_REQUIREMENTS),
             "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
             "optional_row_fields": ["score_direction"],
             "required_targets": list(REQUIRED_TARGETS),

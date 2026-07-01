@@ -4,27 +4,13 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 19,
+  "blocker_count": 5,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
-    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-    "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-    "human_ux::observation_file_missing",
-    "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-    "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-    "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-    "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-    "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-    "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-    "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-    "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-    "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-    "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-    "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+    "human_ux::observation_file_missing"
   ],
   "categories": {
     "benchmark": {
@@ -71,33 +57,19 @@
     },
     "numerical": {
       "blocked": true,
-      "blocker_count": 6,
+      "blocker_count": 4,
       "blockers": [
         "g1::full_load_gate_not_closed",
         "g1::full_mesh_nonlinear_equilibrium_not_closed",
         "g1::material_newton_breadth_not_closed",
-        "g1::production_rocm_hip_residency_not_closed",
-        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report"
+        "g1::production_rocm_hip_residency_not_closed"
       ]
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 13,
+      "blocker_count": 1,
       "blockers": [
-        "human_ux::observation_file_missing",
-        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+        "human_ux::observation_file_missing"
       ]
     }
   },
@@ -220,7 +192,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-01T09:22:16.114768+00:00",
+  "generated_at": "2026-07-01T10:01:50.012020+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -239,22 +211,22 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:90f8c806a36f2022f8899d6b616e037e36d83ab32e3e4b0cfbc672f98e98a5ab",
+      "input_checksum": "sha256:b1481fee9cdc8b418105488ed36103bd6d3f42313ad4c496cf324eb51d2dadcf",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "d5380601a383f4ed066e0e0972916938b73844c2",
-      "status": "stale_or_inconsistent"
+      "source_commit_sha": "0d6f31a689260caf9aba5765c2da6c6706e254e0",
+      "status": "blocked"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:1c7f176aa1883fcaaca3c194a9ab8d37f9cabde983052cf123de16ebf37db6b2",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:90f8c806a36f2022f8899d6b616e037e36d83ab32e3e4b0cfbc672f98e98a5ab"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:b1481fee9cdc8b418105488ed36103bd6d3f42313ad4c496cf324eb51d2dadcf"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
-  "product_snapshot_status": "stale_or_inconsistent",
+  "product_snapshot_status": "blocked",
   "reason_code": "ERR_DEVELOPER_PREVIEW_BLOCKED",
   "reuse_policy": "derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence",
   "reused_evidence": false,
@@ -1703,20 +1675,56 @@
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
         "changed_paths_since_source_commit": [
+          ".github/workflows/ai-contract-verify.yml",
+          ".github/workflows/ci.yml",
+          ".github/workflows/deploy-pages.yml",
+          ".github/workflows/frontend-web-ci.yml",
+          ".github/workflows/viewer-browser-ci.yml",
+          ".github/workflows/workflow-contract-ci.yml",
           "docs/source-of-truth-gap-classification.md",
+          "implementation/phase1/open_data/korea/korean_source_catalog.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt_real_section_lateral_pushover_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.model_derived_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.wind_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_converted_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
+          "scripts/build_phase3_benchmark_factory_artifacts.py",
+          "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_source_of_truth_gap_classification.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+          "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "scripts/materialize_science_actual_closure_from_rows.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
+          "scripts/score_symmetry_aware_ligand_rmsd.py",
+          "scripts/validate_public_benchmark_pose_validity.py",
+          "tests/ai-verify-contract.test.mjs",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
+          "tests/test_build_phase3_benchmark_factory_artifacts.py",
+          "tests/test_build_phase3_ifc_source_license_receipt.py",
+          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_source_of_truth_gap_classification.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
+          "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_operator_bundle_from_rows.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_pose_validity_input.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py"
+          "tests/test_materialize_science_actual_closure_from_rows.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py",
+          "tests/test_score_symmetry_aware_ligand_rmsd.py",
+          "tests/test_validate_public_benchmark_pose_validity.py"
         ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
@@ -1897,25 +1905,9 @@
         ]
       },
       "release freshness/sync": {
-        "blocked": true,
-        "blocker_count": 15,
-        "blockers": [
-          "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-          "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-          "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-          "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-          "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-          "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-          "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-          "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-          "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-          "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-          "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-          "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-          "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-          "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-          "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
-        ]
+        "blocked": false,
+        "blocker_count": 0,
+        "blockers": []
       }
     }
   },
@@ -2111,6 +2103,6 @@
       }
     }
   },
-  "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+  "source_commit_sha": "ef71af2fc897b4668568e2e6894a4d8bfa9cc22c",
   "status": "blocked"
 }

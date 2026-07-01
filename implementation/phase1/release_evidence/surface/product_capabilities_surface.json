@@ -145,7 +145,9 @@
             "molecule_id",
             "score",
             "is_positive",
-            "is_decoy"
+            "is_decoy",
+            "source_checksum",
+            "provenance_ref"
           ],
           "required_operator_fields": [
             "target_id",
@@ -156,6 +158,26 @@
             "score_direction",
             "hard_decoy_rows"
           ],
+          "row_source_receipt_requirements": {
+            "placeholder_provenance_prefixes_rejected": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ],
+            "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+            "required_row_fields": [
+              "source_checksum",
+              "provenance_ref"
+            ],
+            "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+          },
           "source_receipt_requirements": {
             "mode": "raw_hard_decoy_rows",
             "placeholder_block_policy": {
@@ -1955,7 +1977,9 @@
                 "molecule_id",
                 "score",
                 "is_positive",
-                "is_decoy"
+                "is_decoy",
+                "source_checksum",
+                "provenance_ref"
               ],
               "required_operator_fields": [
                 "target_id",
@@ -1966,6 +1990,26 @@
                 "score_direction",
                 "hard_decoy_rows"
               ],
+              "row_source_receipt_requirements": {
+                "placeholder_provenance_prefixes_rejected": [
+                  "operator://",
+                  "local-evidence://",
+                  "local://",
+                  "fixture://",
+                  "mock://",
+                  "synthetic://",
+                  "placeholder://",
+                  "test://",
+                  "unit-test://",
+                  "file://"
+                ],
+                "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+                "required_row_fields": [
+                  "source_checksum",
+                  "provenance_ref"
+                ],
+                "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+              },
               "source_receipt_requirements": {
                 "mode": "raw_hard_decoy_rows",
                 "placeholder_block_policy": {
@@ -2067,7 +2111,9 @@
                 "molecule_id",
                 "score",
                 "is_positive",
-                "is_decoy"
+                "is_decoy",
+                "source_checksum",
+                "provenance_ref"
               ],
               "required_operator_fields": [
                 "target_id",
@@ -2078,6 +2124,26 @@
                 "score_direction",
                 "hard_decoy_rows"
               ],
+              "row_source_receipt_requirements": {
+                "placeholder_provenance_prefixes_rejected": [
+                  "operator://",
+                  "local-evidence://",
+                  "local://",
+                  "fixture://",
+                  "mock://",
+                  "synthetic://",
+                  "placeholder://",
+                  "test://",
+                  "unit-test://",
+                  "file://"
+                ],
+                "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+                "required_row_fields": [
+                  "source_checksum",
+                  "provenance_ref"
+                ],
+                "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+              },
               "source_receipt_requirements": {
                 "mode": "raw_hard_decoy_rows",
                 "placeholder_block_policy": {
@@ -2179,7 +2245,9 @@
                 "molecule_id",
                 "score",
                 "is_positive",
-                "is_decoy"
+                "is_decoy",
+                "source_checksum",
+                "provenance_ref"
               ],
               "required_operator_fields": [
                 "target_id",
@@ -2190,6 +2258,26 @@
                 "score_direction",
                 "hard_decoy_rows"
               ],
+              "row_source_receipt_requirements": {
+                "placeholder_provenance_prefixes_rejected": [
+                  "operator://",
+                  "local-evidence://",
+                  "local://",
+                  "fixture://",
+                  "mock://",
+                  "synthetic://",
+                  "placeholder://",
+                  "test://",
+                  "unit-test://",
+                  "file://"
+                ],
+                "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+                "required_row_fields": [
+                  "source_checksum",
+                  "provenance_ref"
+                ],
+                "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+              },
               "source_receipt_requirements": {
                 "mode": "raw_hard_decoy_rows",
                 "placeholder_block_policy": {
@@ -3047,11 +3135,11 @@
   "first_blocked_capability_id": "public_benchmark_harness",
   "first_blocked_capability_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
   "first_blocked_target": "",
-  "generated_at": "2026-07-01T09:51:13.915465+00:00",
+  "generated_at": "2026-07-01T10:02:05.559587+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:f861484dabf263a4888683e86d038ce32424632574abde1f11bec327037076fd",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:a8fbaa8b9ed050c0c558a0d3f1b14e85ec98a98b5f9dad4626fb07f936424c54",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:1379ca75ad08399aac8d2872ca4436288c0c3470e287afc7f06ab54e259e3d17",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:7c902b6c655576c14789108a44638ed3a42b0819014482b58edd7579d6d5e4bd",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:16edb0beeec404cadd5eefe82de5850fc47f518462e1f6c88dda96af84f03284",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:b26effd76c4c5373ec2d7640dbdf8ee40f80c32af6787c61bf7a3645e82cad08",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json": "sha256:9621d05ff0cf781897321f8b5000cd4620c88972b98c7c852f795ab171abeb3b",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md": "sha256:4e8a44624068cda8110c2986014663a2bddb61333cc5e81d90e77d8477d0401e",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:da9bfa74bb20dab8932eaf1c9a1bdb2ef7026cf9b2a2c286aa382910dfa6ee12",
@@ -3060,12 +3148,12 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:01a76dd96e7888c11f8876915dc089d0478add8125bc1167ff7d9a6c27b1390d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:43c2bd6c2df34cb2f397d3baa6574fa19dce68480e271efdb8eac9a4e832fb9f",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:610d2c0d0d1cb6c049ca61660abeab19fbef32bb10bb952f1256a154381f5e05",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:e29751b607ffc5b1788e3950d4673dccc3f8691e55ad0aa8ebf2ada12cb8e93f",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:f2ca135287f809421780c2beaa95c9da116194046c11babe5bed15a40867dae3",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md": "sha256:5f380fcdaa06aa10cf6de0cfba5e92e62b94b3453cadb8e57301b7bab5f398a8",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:c7b477bb431a36de26f0b29f084fcee4ca2b6c4ec60a29224ebfdb7cde2069eb",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:9492e990aaf7625517dc7eabb2669964a91eb36d19dab9d755abe891cc37ea25",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:24983ed914879fdc1a9155172826c00c1e8018349a6be2bc8a224d8f895c87f3",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:184b563a18d475ba631a971e9b3e2d1cb8a293009c534c0df95bc8bf32f168a4",
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:0d57c89df5c33d8fba0557d7f8cf421c301ed4bfe754a95b892df3abecaca0ed",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:2fa3068f79fdd4c705c80cc598227e172d603afa748df1a5e41b38eb50bed8bd",
@@ -3095,7 +3183,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "9b5e1b8796e588759667470c21e2e85a6c5c8d52",
+  "source_commit_sha": "ef71af2fc897b4668568e2e6894a4d8bfa9cc22c",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",

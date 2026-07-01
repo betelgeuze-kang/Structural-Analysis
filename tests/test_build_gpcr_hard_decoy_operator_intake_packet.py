@@ -124,6 +124,8 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "score",
         "is_positive",
         "is_decoy",
+        "source_checksum",
+        "provenance_ref",
     ]
     assert gate_plan["DRD2"]["minimum_evidence"]["raw_row_value_contract"][
         "numeric_value_policy"
@@ -150,6 +152,9 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "source_artifact",
         "source_artifact_sha256",
     ]
+    assert gate_plan["DRD2"]["minimum_evidence"][
+        "row_source_receipt_requirements"
+    ]["required_row_fields"] == ["source_checksum", "provenance_ref"]
     assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"] == {
         "decoys_above_positive_count": "<=0",
         "hard_decoy_rows": (
@@ -220,6 +225,16 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "score",
         "is_positive",
         "is_decoy",
+        "source_checksum",
+        "provenance_ref",
+    ]
+    assert packet["raw_row_import"]["required_row_fields"] == [
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
+        "source_checksum",
+        "provenance_ref",
     ]
     assert packet["raw_row_import"]["minimum_row_quality_per_target"] == {
         "min_decoy_count_per_target": 20,
@@ -233,6 +248,9 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
     assert packet["raw_row_import"]["source_receipt_requirements"]["mode"] == (
         "raw_hard_decoy_rows"
     )
+    assert packet["raw_row_import"]["row_source_receipt_requirements"][
+        "source_checksum_policy"
+    ].startswith("source_checksum must be sha256:")
     assert packet["raw_row_import"]["default_row_path_candidates"] == [
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
