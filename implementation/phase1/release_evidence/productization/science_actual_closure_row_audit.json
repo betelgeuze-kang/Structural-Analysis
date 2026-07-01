@@ -586,13 +586,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T08:46:50.377094+00:00",
+  "generated_at": "2026-07-01T09:15:01.689926+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:f72484ef5092419f1415d48301d80278c37701e9ec6de0c8a1f38398c4e24fcb",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:d1d3f306a711ca60b730a6d8c7236de75d47106951b9a2bb3e1b32d08bc2770f",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:03be810a0da0415b46f9ced29f9d4e292fd5722d8c130ae996185fec28accc4a",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24ee81b77e8d5650e97dd6ca7fe7745933a475b959adc915cefaa68fc66ef3f1",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:4c97541392e84651524ae7e38fc08c89e59749919851758f47040d9bdcc94834"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:f94741bfa130a2ca446c7ea0b6062b970394257ba84b52ecfe43df57c585da99"
   },
   "missing_row_inputs": [
     "gpcr_rows",
@@ -649,6 +649,10 @@
       ],
       "actual_closure_criterion_id": "raw_hard_decoy_rows_actual_closure",
       "auto_detection_policy": "When --gpcr-rows is omitted, the runner uses the first existing default row path candidate and records it in row_input_resolution.",
+      "boolean_label_policy": {
+        "is_decoy": "must parse to a boolean; exactly one of is_positive/is_decoy must be true per molecule row",
+        "is_positive": "must parse to a boolean; exactly one of is_positive/is_decoy must be true per molecule row"
+      },
       "claim_boundary": "GPCR Phase 3 actual closure requires operator-attached raw hard-decoy ranking rows for every required target plus a verifiable source receipt. Summary metrics or fixture rows do not satisfy actual closure.",
       "component_id": "gpcr_hard_decoy_actual_closure",
       "default_row_path_candidates": [
@@ -704,6 +708,7 @@
           ]
         }
       },
+      "score_direction_policy": "Each target must use one consistent score_direction value; mixed higher_is_better/lower_is_better rows for the same target are rejected.",
       "source_actuality_policy": {
         "placeholder_source_text_markers_rejected": [
           "<operator",
@@ -744,7 +749,8 @@
         "source_url",
         "source_license",
         "source_artifact_sha256"
-      ]
+      ],
+      "unexpected_target_policy": "Rows for targets outside the required DRD2/HTR2A/OPRM1 set are recorded as unexpected_targets and do not count toward actual closure."
     },
     "pocketmd_rows": {
       "accepted_formats": [
@@ -761,6 +767,9 @@
         "long_timescale_md_claim",
         "de_novo_binding_mode_claim"
       ],
+      "boolean_value_policy": {
+        "local_min_survived": "must parse to a boolean value"
+      },
       "claim_boundary": "PocketMD Lite closure is limited to top-k local refinement rows with local-min survival, contact persistence, H-bond persistence, clash relief, and uncertainty summaries. It does not unlock broad all-atom MD, FEP, long-timescale dynamics, or de novo binding claims.",
       "component_id": "pocketmd_lite_topk_actual_closure",
       "contract_path": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
@@ -775,6 +784,11 @@
         "operator_intake": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake.json",
         "science_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
         "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+      },
+      "integer_value_policy": {
+        "clash_count_after": "must parse to a non-negative integer",
+        "clash_count_before": "must parse to a non-negative integer",
+        "top_k_rank": "must parse to a positive integer <= max_top_k and form a contiguous rank prefix starting at 1 for each case"
       },
       "materialization_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --pocketmd-rows <pocketmd-lite-topk-rows.csv|tsv|json|jsonl|ndjson> --source-id <source-id> --source-url <source-url> --source-license <license> --fail-blocked",
       "max_top_k": 20,
@@ -880,7 +894,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "a0ece51968c501f0bae238d76ebee9f60787a655",
+  "source_commit_sha": "f6ffed25e146e5f881bb440499e994b3416262e5",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
