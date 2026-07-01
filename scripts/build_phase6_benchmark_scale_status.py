@@ -93,6 +93,7 @@ def _benchmark_scale_blocker_grouping_metadata(blockers: list[str]) -> dict[str,
                 "matches": (
                     "reference_outputs_missing",
                     "normalization_not_implemented",
+                    "normalization_receipts_missing",
                 ),
             },
         ),

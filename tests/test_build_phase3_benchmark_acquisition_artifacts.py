@@ -112,11 +112,14 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert opensees_medium["checksum_status"] == "local_candidate_checksum_attached_upstream_sha256_verified"
     assert "source_url_verification_pending" not in opensees_medium["blockers"]
     assert "license_review_pending" in opensees_medium["blockers"]
+    assert "normalization_receipts_missing" in opensees_medium["blockers"]
+    assert "normalization_not_implemented" not in opensees_medium["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in opensees_medium["blockers"]
     assert "upstream GitHub source URL" in opensees_medium["claim_boundary"]
     assert "GPL-3.0" in opensees_medium["claim_boundary"]
     assert "redistribution rights" in opensees_medium["claim_boundary"]
     assert "OpenSees medium scorecard execution" in opensees_medium["claim_boundary"]
+    assert "normalization receipt schema is implemented" in opensees_medium["claim_boundary"]
     assert len(opensees_medium["local_candidate_artifacts"]) == 2
     assert opensees_medium["local_candidate_artifacts"][0]["case_id"] == "SCBF16B_shell_beam_mix"
     assert opensees_medium["local_candidate_artifacts"][0]["sha256"] == (

@@ -26,6 +26,8 @@ DEFAULT_OUT = PRODUCTIZATION / "phase3_medium_model_scorecard_readiness_receipt.
 SOURCE_LICENSE_RECEIPT = PRODUCTIZATION / "phase3_opensees_medium_source_license_receipt.json"
 MEDIUM_RECEIPT_DIR = PRODUCTIZATION / "medium_model_scorecard_receipts"
 MEDIUM_RECEIPT_SCHEMA_VERSION = "phase3-medium-model-scorecard-receipt.v1"
+NORMALIZATION_RECEIPT_SCHEMA_VERSION = "phase3-medium-normalization-receipt.v1"
+NORMALIZATION_MIN_MAPPING_COVERAGE = 0.99
 MEDIUM_MODEL_INPUTS = [
     Path("implementation/phase1/opensees_topology_report.json"),
     Path("implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"),
@@ -92,7 +94,7 @@ REQUIRED_EVIDENCE = (
         "required": "Canonical model normalization with units, coordinates, and mapping coverage.",
         "status": "missing",
         "contract_pass": False,
-        "blocker": "normalization_not_implemented",
+        "blocker": "normalization_receipts_missing",
     },
     {
         "id": "scorecard_execution",
@@ -145,7 +147,7 @@ def _receipt_files(repo_root: Path, receipt_dir: Path) -> list[Path]:
     resolved = receipt_dir if receipt_dir.is_absolute() else repo_root / receipt_dir
     if not resolved.exists():
         return []
-    return sorted(path for path in resolved.glob("*.json") if path.is_file())
+    return sorted(path for path in resolved.glob("*.scorecard_receipt.json") if path.is_file())
 
 
 def _safe_dict(value: Any) -> dict[str, Any]:
@@ -156,13 +158,92 @@ def _safe_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _relative_path(repo_root: Path, path: Path) -> str:
+    try:
+        return path.relative_to(repo_root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _resolve_receipt_path(repo_root: Path, value: str) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else repo_root / path
+
+
+def _as_float(value: Any, *, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _normalization_receipt_status(
+    repo_root: Path,
+    *,
+    case_id: str,
+    receipt_ref: str,
+) -> dict[str, Any]:
+    if not receipt_ref:
+        return {
+            "path": "",
+            "present": False,
+            "contract_pass": False,
+            "blockers": ["normalization_receipt_missing"],
+        }
+    path = _resolve_receipt_path(repo_root, receipt_ref)
+    if not path.exists():
+        return {
+            "path": receipt_ref,
+            "present": False,
+            "contract_pass": False,
+            "blockers": ["normalization_receipt_missing"],
+        }
+    payload = _try_load_json(path)
+    mapping_coverage = _safe_dict(payload.get("mapping_coverage"))
+    node_coverage = max(
+        _as_float(mapping_coverage.get("node")),
+        _as_float(payload.get("node_mapping_coverage")),
+    )
+    member_coverage = max(
+        _as_float(mapping_coverage.get("member")),
+        _as_float(payload.get("member_mapping_coverage")),
+    )
+    blockers: list[str] = []
+    if payload.get("schema_version") != NORMALIZATION_RECEIPT_SCHEMA_VERSION:
+        blockers.append("normalization_receipt_schema_mismatch")
+    if payload.get("contract_pass") is not True:
+        blockers.append("normalization_receipt_contract_not_passed")
+    receipt_case_id = str(payload.get("case_id") or "")
+    if receipt_case_id and receipt_case_id != case_id:
+        blockers.append("normalization_receipt_case_id_mismatch")
+    if not _safe_dict(payload.get("units")):
+        blockers.append("normalization_units_missing")
+    if not (payload.get("coordinate_transform") or payload.get("coordinate_mapping")):
+        blockers.append("normalization_coordinate_mapping_missing")
+    if node_coverage < NORMALIZATION_MIN_MAPPING_COVERAGE:
+        blockers.append("normalization_node_mapping_coverage_below_minimum")
+    if member_coverage < NORMALIZATION_MIN_MAPPING_COVERAGE:
+        blockers.append("normalization_member_mapping_coverage_below_minimum")
+    return {
+        "path": _relative_path(repo_root, path),
+        "present": True,
+        "contract_pass": not blockers,
+        "schema_version": payload.get("schema_version"),
+        "case_id": receipt_case_id,
+        "node_mapping_coverage": node_coverage,
+        "member_mapping_coverage": member_coverage,
+        "blockers": blockers,
+    }
+
+
 def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
     receipt_rows: list[dict[str, Any]] = []
     valid_scorecard_case_ids: set[str] = set()
     pass_or_review_case_ids: set[str] = set()
+    valid_normalization_case_ids: set[str] = set()
     for path in _receipt_files(repo_root, MEDIUM_RECEIPT_DIR):
         payload = _try_load_json(path)
-        relative_path = path.relative_to(repo_root).as_posix() if path.is_relative_to(repo_root) else path.as_posix()
+        relative_path = _relative_path(repo_root, path)
         schema_pass = payload.get("schema_version") == MEDIUM_RECEIPT_SCHEMA_VERSION
         case_id = str(payload.get("case_id") or path.stem)
         blockers = [str(blocker) for blocker in _safe_list(payload.get("blockers")) if str(blocker)]
@@ -173,6 +254,11 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         scorecard_or_review_path = str(payload.get("scorecard_or_review_path") or "")
         reference_output_sha256 = str(payload.get("reference_output_sha256") or "")
         normalization_receipt = str(payload.get("normalization_receipt") or "")
+        normalization_status = _normalization_receipt_status(
+            repo_root,
+            case_id=case_id,
+            receipt_ref=normalization_receipt,
+        )
         scorecard_execution_pass = bool(
             schema_pass
             and contract_pass
@@ -185,6 +271,8 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
             valid_scorecard_case_ids.add(case_id)
         if pass_or_review_pass:
             pass_or_review_case_ids.add(case_id)
+        if normalization_status["contract_pass"]:
+            valid_normalization_case_ids.add(case_id)
         receipt_rows.append(
             {
                 "path": relative_path,
@@ -197,6 +285,8 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
                 "scorecard_or_review_path": scorecard_or_review_path,
                 "reference_output_sha256": reference_output_sha256,
                 "normalization_receipt": normalization_receipt,
+                "normalization_receipt_contract_pass": normalization_status["contract_pass"],
+                "normalization_receipt_status": normalization_status,
                 "scorecard_execution_pass": scorecard_execution_pass,
                 "pass_or_approved_review": pass_or_review_pass,
                 "blockers": blockers,
@@ -208,6 +298,7 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         "receipt_file_count": len(receipt_rows),
         "valid_scorecard_case_count": len(valid_scorecard_case_ids),
         "pass_or_approved_review_count": len(pass_or_review_case_ids),
+        "valid_normalization_case_count": len(valid_normalization_case_ids),
         "receipts": receipt_rows,
         "claim_boundary": (
             "Only operator-attached medium scorecard receipts with the expected schema, "
@@ -248,12 +339,36 @@ def _pass_review_evidence_row(row: dict[str, Any], *, current: int, required: in
     return enriched
 
 
+def _normalization_evidence_row(row: dict[str, Any], *, current: int, required: int) -> dict[str, Any]:
+    enriched = dict(row)
+    ready = current >= required
+    enriched.update(
+        {
+            "status": "ready" if ready else ("partial" if current else "missing"),
+            "contract_pass": ready,
+            "blocker": "" if ready else row["blocker"],
+            "current_normalization_receipt_count": current,
+            "required_normalization_receipt_count": required,
+            "schema_version_required": NORMALIZATION_RECEIPT_SCHEMA_VERSION,
+            "minimum_node_mapping_coverage": NORMALIZATION_MIN_MAPPING_COVERAGE,
+            "minimum_member_mapping_coverage": NORMALIZATION_MIN_MAPPING_COVERAGE,
+            "claim_boundary": (
+                "The normalization contract is implemented as a receipt validator. "
+                "This row still requires one valid operator-attached normalization "
+                "receipt per selected medium case before it can pass."
+            ),
+        }
+    )
+    return enriched
+
+
 def _missing_evidence_breakdown(
     evidence_rows: list[dict[str, Any]],
     *,
     required_medium_model_count: int,
     current_scorecard_count: int,
     pass_or_approved_review_count: int,
+    normalization_receipt_count: int,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for row in evidence_rows:
@@ -293,8 +408,13 @@ def _missing_evidence_breakdown(
             item.update(
                 {
                     "required_case_count": required_medium_model_count,
-                    "current_case_count": 0,
-                    "remaining_case_count": required_medium_model_count,
+                    "current_case_count": normalization_receipt_count,
+                    "remaining_case_count": max(
+                        required_medium_model_count - normalization_receipt_count,
+                        0,
+                    ),
+                    "schema_version_required": NORMALIZATION_RECEIPT_SCHEMA_VERSION,
+                    "minimum_mapping_coverage": NORMALIZATION_MIN_MAPPING_COVERAGE,
                     "required_artifacts": [
                         "canonical units and coordinate mapping",
                         "node/member mapping coverage",
@@ -409,17 +529,20 @@ def _operator_next_actions(
                 ],
             }
         )
-    if "normalization_not_implemented" in blocker_set:
+    if "normalization_receipts_missing" in blocker_set:
         actions.append(
             {
                 "id": "record_medium_canonical_normalization",
                 "owner": "benchmark_operator",
                 "action": (
-                    "Record units, coordinate transforms, node/member mapping coverage, "
-                    "and normalization receipt paths for all selected medium cases."
+                    "Attach one validated medium normalization receipt per selected case, "
+                    "including canonical units, coordinate transforms, and node/member "
+                    "mapping coverage."
                 ),
-                "clears_blockers": ["normalization_not_implemented"],
+                "clears_blockers": ["normalization_receipts_missing"],
                 "remaining_case_count": required_medium_model_count,
+                "schema_version_required": NORMALIZATION_RECEIPT_SCHEMA_VERSION,
+                "minimum_mapping_coverage": NORMALIZATION_MIN_MAPPING_COVERAGE,
                 "evidence_artifacts": ["OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"],
                 "validation_commands": [
                     "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
@@ -514,7 +637,10 @@ def _case_input_requirements(
             {
                 "field": "normalization_receipt",
                 "runner_argument": "receipt_field",
-                "required_artifact": "units/coordinates/mapping normalization receipt",
+                "required_artifact": (
+                    "units/coordinates/mapping normalization receipt passing "
+                    f"{NORMALIZATION_RECEIPT_SCHEMA_VERSION}"
+                ),
             },
         ],
         "per_case_outputs": [
@@ -566,7 +692,7 @@ def _case_readiness_ledger(
             receipt.get("pass_or_approved_review") is True
         )
         reference_outputs_pass = bool(receipt.get("reference_output_sha256"))
-        normalization_pass = bool(receipt.get("normalization_receipt"))
+        normalization_pass = bool(receipt.get("normalization_receipt_contract_pass") is True)
         blockers = []
         if source_verified is not True:
             blockers.append("source_url_verification_pending")
@@ -575,7 +701,7 @@ def _case_readiness_ledger(
         if reference_outputs_pass is not True:
             blockers.append("reference_outputs_missing")
         if normalization_pass is not True:
-            blockers.append("normalization_not_implemented")
+            blockers.append("normalization_receipts_missing")
         if scorecard_execution_pass is not True:
             blockers.append("opensees_medium_scorecard_execution_missing")
         if pass_or_approved_review is not True:
@@ -591,6 +717,7 @@ def _case_readiness_ledger(
                 "license_approval_pass": license_approved,
                 "reference_outputs_pass": reference_outputs_pass,
                 "normalization_pass": normalization_pass,
+                "normalization_receipt_status": receipt.get("normalization_receipt_status"),
                 "scorecard_execution_pass": scorecard_execution_pass,
                 "pass_or_approved_review": pass_or_approved_review,
                 "scorecard_receipt_path": receipt.get("path"),
@@ -727,6 +854,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
     )
     current_scorecard_count = int(receipt_inventory["valid_scorecard_case_count"])
     pass_or_approved_review_count = int(receipt_inventory["pass_or_approved_review_count"])
+    normalization_receipt_count = int(receipt_inventory["valid_normalization_case_count"])
     runner_script = repo_root / RUNNER_SCRIPT
     runner_command_ready = runner_script.exists()
     evidence_rows: list[dict[str, Any]] = []
@@ -758,6 +886,14 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
                 _pass_review_evidence_row(
                     row,
                     current=pass_or_approved_review_count,
+                    required=required_medium_model_count,
+                )
+            )
+        elif row["id"] == "canonical_normalization":
+            evidence_rows.append(
+                _normalization_evidence_row(
+                    row,
+                    current=normalization_receipt_count,
                     required=required_medium_model_count,
                 )
             )
@@ -797,6 +933,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         required_medium_model_count=required_medium_model_count,
         current_scorecard_count=current_scorecard_count,
         pass_or_approved_review_count=pass_or_approved_review_count,
+        normalization_receipt_count=normalization_receipt_count,
     )
     operator_next_actions = _operator_next_actions(
         blockers,
@@ -809,6 +946,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "required_medium_model_count": required_medium_model_count,
         "current_medium_model_scorecard_count": current_scorecard_count,
         "pass_or_approved_review_count": pass_or_approved_review_count,
+        "normalization_receipt_count": normalization_receipt_count,
         "remaining_scorecard_case_count": max(
             required_medium_model_count - current_scorecard_count,
             0,
@@ -889,6 +1027,25 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
             "decision": "PASS|APPROVED_REVIEW",
             "contract_pass": False,
         },
+        "normalization_receipt_template": {
+            "schema_version": NORMALIZATION_RECEIPT_SCHEMA_VERSION,
+            "case_id": "OPERATOR_ATTACHED_CASE_ID",
+            "contract_pass": False,
+            "units": {
+                "length": "m",
+                "force": "kN",
+            },
+            "coordinate_transform": "OPERATOR_RECORDED_TRANSFORM_OR_IDENTITY",
+            "mapping_coverage": {
+                "node": "OPERATOR_RECORDED_NODE_MAPPING_COVERAGE",
+                "member": "OPERATOR_RECORDED_MEMBER_MAPPING_COVERAGE",
+            },
+            "claim_boundary": (
+                "This normalization receipt records units, coordinates, and mapping "
+                "coverage only. It is not a reference-output receipt, solver pass, "
+                "or benchmark scorecard decision."
+            ),
+        },
         "missing_evidence_breakdown": missing_evidence,
         "operator_next_actions": operator_next_actions,
         "recommended_next_actions": operator_next_actions,
@@ -913,9 +1070,10 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
             "This receipt records the evidence contract for OpenSees medium scorecards. "
             "It preserves local topology/parser evidence as parser-only, reads the source "
             "license receipt for upstream source identity, and implements the operator "
-            "scorecard runner command, but it does not prove product license approval, "
-            "reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, "
-            "Phase 3 closure, or DP RC readiness."
+            "scorecard runner command plus normalization receipt validation, but it does "
+            "not prove product license approval, reference outputs, attached normalization "
+            "receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP "
+            "RC readiness."
         ),
     }
 

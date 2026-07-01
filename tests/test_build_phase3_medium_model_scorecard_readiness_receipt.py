@@ -78,6 +78,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["summary"] == {
         "required_medium_model_count": 5,
         "current_medium_model_scorecard_count": 0,
+        "normalization_receipt_count": 0,
         "pass_or_approved_review_count": 0,
         "remaining_scorecard_case_count": 5,
         "remaining_pass_or_review_case_count": 5,
@@ -90,7 +91,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert "source_url_verification_pending" not in payload["blockers"]
     assert "license_review_pending" in payload["blockers"]
     assert "reference_outputs_missing" in payload["blockers"]
-    assert "normalization_not_implemented" in payload["blockers"]
+    assert "normalization_receipts_missing" in payload["blockers"]
     assert "opensees_medium_runner_command_missing" not in payload["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in payload["blockers"]
     assert "medium_model_pass_or_review_missing" in payload["blockers"]
@@ -198,9 +199,61 @@ def test_medium_model_scorecard_readiness_counts_operator_scorecard_receipts(tmp
     assert "source_url_verification_pending" in payload["blockers"]
     assert "license_review_pending" in payload["blockers"]
     assert "reference_outputs_missing" in payload["blockers"]
-    assert "normalization_not_implemented" in payload["blockers"]
+    assert "normalization_receipts_missing" in payload["blockers"]
     assert payload["contract_pass"] is False
     assert payload["developer_preview_release_candidate_claim"] is False
+
+
+def test_medium_model_scorecard_readiness_validates_normalization_receipts(tmp_path: Path) -> None:
+    _write_minimal_medium_readiness_inputs(tmp_path)
+    receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
+    for index in range(5):
+        normalization_receipt = (
+            module.MEDIUM_RECEIPT_DIR
+            / f"medium-{index}.normalization_receipt.json"
+        )
+        _write_json(
+            tmp_path / normalization_receipt,
+            {
+                "schema_version": "phase3-medium-normalization-receipt.v1",
+                "case_id": f"medium-{index}",
+                "contract_pass": True,
+                "units": {"force": "kN", "length": "m"},
+                "coordinate_transform": "identity",
+                "mapping_coverage": {"member": 1.0, "node": 1.0},
+            },
+        )
+        _write_json(
+            receipt_dir / f"medium-{index}.scorecard_receipt.json",
+            {
+                "schema_version": "phase3-medium-model-scorecard-receipt.v1",
+                "case_id": f"medium-{index}",
+                "contract_pass": True,
+                "validation_contract_pass": True,
+                "crashed": False,
+                "oom": False,
+                "scorecard_or_review_path": f"approved-review-{index}.json",
+                "normalization_receipt": normalization_receipt.as_posix(),
+                "blockers": [],
+            },
+        )
+
+    payload = module.build_phase3_medium_model_scorecard_readiness_receipt(
+        repo_root=tmp_path,
+        source_commit_sha="test-sha",
+    )
+
+    assert payload["scorecard_receipt_inventory"]["valid_normalization_case_count"] == 5
+    assert payload["summary"]["normalization_receipt_count"] == 5
+    assert "normalization_receipts_missing" not in payload["blockers"]
+    canonical_normalization = {
+        row["id"]: row for row in payload["required_evidence"]
+    }["canonical_normalization"]
+    assert canonical_normalization["contract_pass"] is True
+    assert all(
+        row["normalization_receipt_contract_pass"] is True
+        for row in payload["scorecard_receipt_inventory"]["receipts"]
+    )
 
 
 def test_medium_model_scorecard_readiness_check_detects_missing_output(tmp_path: Path) -> None:

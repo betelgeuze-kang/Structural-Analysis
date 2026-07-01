@@ -59,12 +59,12 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
             commercial_use_allowed=False,
             checksum_status="local_candidate_checksum_attached_upstream_sha256_verified",
             expected_output_status="missing_until_reference_outputs_ingested",
-            normalization_status="not_started",
+            normalization_status="receipt_contract_ready_evidence_missing",
             reference_result_status="not_ingested",
             blockers=(
                 "license_review_pending",
                 "reference_outputs_missing",
-                "normalization_not_implemented",
+                "normalization_receipts_missing",
                 "opensees_medium_scorecard_execution_missing",
                 "medium_model_pass_or_review_missing",
             ),
@@ -73,7 +73,9 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                 "parser evidence. The upstream GitHub source URL, raw checksum, and GPL-3.0 "
                 "license identity are identified, but product legal review, redistribution "
                 "rights, commercial use rights, reference output ingest, normalization, and "
-                "OpenSees medium scorecard execution are still not closed."
+                "OpenSees medium scorecard execution are still not closed. The medium "
+                "normalization receipt schema is implemented, but operator-attached "
+                "per-case normalization receipts are still missing."
             ),
             local_candidate_artifacts=(
                 {
