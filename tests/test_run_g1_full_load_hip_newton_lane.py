@@ -108,17 +108,23 @@ def test_sub_full_load_checkpoint_blocks_before_execution(tmp_path: Path) -> Non
         in partition["checkpoint_resolution"]["blockers"]
     )
     next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
-    assert "generate_full_load_1p0_checkpoint_candidate" in next_actions
+    full_load_action_id = (
+        "build_consistent_newton_full_load_checkpoint_candidate_runner"
+    )
+    assert full_load_action_id in next_actions
     assert (
-        next_actions["generate_full_load_1p0_checkpoint_candidate"][
+        next_actions[full_load_action_id][
             "highest_observed_gap_to_required_load_scale"
         ]
         == 1.0 - 0.656
     )
     assert (
-        next_actions["generate_full_load_1p0_checkpoint_candidate"]["rerun_command"]
+        next_actions[full_load_action_id]["rerun_command"]
         == "python3 scripts/run_g1_full_load_hip_newton_lane.py "
         "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
+    )
+    assert next_actions[full_load_action_id]["reason"] == (
+        "row_only_largest_rows_operator_exhausted"
     )
     terminal = payload["terminal_requirement_breakdown"]
     assert (
@@ -214,6 +220,87 @@ def test_frontier_non_promoting_context_is_attached_without_promotion(
     assert context["frontier_residual_above_tolerance"] is True
     assert context["non_promoting_launch_receipts"][0]["counted_in_frontier"] is False
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+
+
+def test_row_only_frontier_exhaustion_routes_full_load_candidate_to_newton_runner(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=0.656)
+    frontier_status = tmp_path / "mgt_g1_frontier_status.json"
+    frontier_status.write_text(
+        json.dumps(
+            {
+                "schema_version": (
+                    "mgt-g1-shell-material-budgeted-continuation-status.v1"
+                ),
+                "status": "partial",
+                "contract_pass": False,
+                "latest_frontier_receipt": "followup431.json",
+                "latest_frontier_compact_checkpoint": "followup431_checkpoint.npz",
+                "latest_frontier_direct_residual_inf_n": 1.3092276661494922,
+                "direct_residual_gate_tolerance_n": 0.0005,
+                "frontier_chain": [{"receipt": "followup431.json"}],
+                "non_promoting_launch_receipts": [],
+                "same_operator_exhausted_at_latest_checkpoint": True,
+                "latest_frontier_operator_stop_reason": "no_residual_descent",
+                "latest_frontier_operator_target_row_count": 128,
+                "latest_frontier_operator_support_column_count": 8,
+                "next_actions": [
+                    "do not spend another slice on largest-rows support/Jacobian retuning",
+                    (
+                        "replace row-only correction with a consistent residual/"
+                        "Jacobian Newton path"
+                    ),
+                ],
+                "blockers": ["full_mesh_nonlinear_equilibrium_not_closed"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=False,
+        evidence_sources=(frontier_status,),
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    context = payload["frontier_non_promoting_evidence"]
+    assert context["same_operator_exhausted_at_latest_checkpoint"] is True
+    assert context["latest_frontier_operator_stop_reason"] == "no_residual_descent"
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    assert "generate_full_load_1p0_checkpoint_candidate" not in next_actions
+    routed = next_actions["build_consistent_newton_full_load_checkpoint_candidate_runner"]
+    assert routed["reason"] == "row_only_largest_rows_operator_exhausted"
+    assert (
+        routed["preferred_candidate_generator"]
+        == "consistent_residual_jacobian_newton_rocm_full_load_candidate"
+    )
+    assert routed["row_only_largest_rows_exhausted_at_latest_checkpoint"] is True
+    assert routed["suppressed_retry_action_ids"] == [
+        "repeat_largest_rows_target128_support8_row_only_retuning"
+    ]
+    requirements = {
+        row["id"]: row
+        for row in payload["terminal_requirement_breakdown"]["requirements"]
+    }
+    checkpoint_requirement = requirements["full_load_checkpoint_1p0"]
+    assert checkpoint_requirement["next_action_ids"] == [
+        "build_consistent_newton_full_load_checkpoint_candidate_runner"
+    ]
+    assert (
+        checkpoint_requirement["observed"][
+            "row_only_largest_rows_exhausted_at_latest_checkpoint"
+        ]
+        is True
+    )
 
 
 def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Path) -> None:
@@ -1086,7 +1173,7 @@ def test_hip_proof_partitions_worker_path_from_g1_closure_gate(
     }
     assert requirements["production_rocm_hip_residual_jvp_worker"][
         "next_action_ids"
-    ] == ["generate_full_load_1p0_checkpoint_candidate"]
+    ] == ["build_consistent_newton_full_load_checkpoint_candidate_runner"]
 
 
 def test_hip_proof_non_receipt_source_commit_still_blocks(
@@ -2574,7 +2661,9 @@ def test_cli_writes_workspace_checkpoint_inventory_by_default(
     assert inventory["highest_observed_load_scale"] == 0.82
     next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
     assert (
-        next_actions["generate_full_load_1p0_checkpoint_candidate"][
+        next_actions[
+            "build_consistent_newton_full_load_checkpoint_candidate_runner"
+        ][
             "workspace_highest_observed_load_scale"
         ]
         == 0.82
@@ -2905,7 +2994,7 @@ def test_workspace_checkpoint_inventory_reports_no_full_load_candidate(
     assert inventory["top_loadable_candidates"][0]["path"] == str(higher_sub)
     assert inventory["top_loadable_candidates"][0]["load_scale"] == 0.8
     next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
-    action = next_actions["generate_full_load_1p0_checkpoint_candidate"]
+    action = next_actions["build_consistent_newton_full_load_checkpoint_candidate_runner"]
     assert action["workspace_scan_root"] == str(workspace_root)
     assert action["workspace_candidate_count"] == 2
     assert action["workspace_full_load_candidate_count"] == 0

@@ -845,26 +845,100 @@ def _g1_lane_blocker_partition(
     }
 
 
+GENERIC_FULL_LOAD_CHECKPOINT_ACTION_ID = "generate_full_load_1p0_checkpoint_candidate"
+CONSISTENT_NEWTON_FULL_LOAD_CHECKPOINT_ACTION_ID = (
+    "build_consistent_newton_full_load_checkpoint_candidate_runner"
+)
+
+
+def _full_load_checkpoint_next_action_context(
+    *,
+    frontier_non_promoting_context: dict[str, Any],
+    cause_narrowing_context: dict[str, Any],
+) -> dict[str, Any]:
+    row_only_exhausted = (
+        frontier_non_promoting_context.get(
+            "same_operator_exhausted_at_latest_checkpoint"
+        )
+        is True
+    )
+    consistent_newton_prioritized = (
+        cause_narrowing_context.get("consistent_newton_rocm_lane_prioritized") is True
+        or cause_narrowing_context.get("primary_next_lane")
+        == "consistent_residual_jacobian_newton_rocm_worker"
+    )
+    use_consistent_newton_runner = row_only_exhausted
+    suppressed_retries = (
+        ["repeat_largest_rows_target128_support8_row_only_retuning"]
+        if row_only_exhausted
+        else []
+    )
+    return {
+        "id": (
+            CONSISTENT_NEWTON_FULL_LOAD_CHECKPOINT_ACTION_ID
+            if use_consistent_newton_runner
+            else GENERIC_FULL_LOAD_CHECKPOINT_ACTION_ID
+        ),
+        "routing_reason": (
+            "row_only_largest_rows_operator_exhausted"
+            if row_only_exhausted
+            else "checkpoint_resolution_no_full_load_candidate"
+        ),
+        "preferred_candidate_generator": (
+            "consistent_residual_jacobian_newton_rocm_full_load_candidate"
+            if use_consistent_newton_runner
+            else "frontier_continuation_full_load_candidate"
+        ),
+        "row_only_largest_rows_exhausted_at_latest_checkpoint": row_only_exhausted,
+        "suppressed_retry_action_ids": suppressed_retries,
+        "frontier_operator_stop_reason": frontier_non_promoting_context.get(
+            "latest_frontier_operator_stop_reason"
+        ),
+        "frontier_operator_target_row_count": frontier_non_promoting_context.get(
+            "latest_frontier_operator_target_row_count"
+        ),
+        "frontier_operator_support_column_count": frontier_non_promoting_context.get(
+            "latest_frontier_operator_support_column_count"
+        ),
+        "cause_narrowing_primary_next_lane": cause_narrowing_context.get(
+            "primary_next_lane"
+        ),
+        "cause_narrowing_consistent_newton_rocm_lane_prioritized": (
+            consistent_newton_prioritized
+        ),
+        "claim_boundary": (
+            "This routes the next checkpoint-generation slice only. It does not "
+            "promote a full-load checkpoint, close G1, or allow another exhausted "
+            "row-only largest-rows retuning loop to count as progress."
+        ),
+    }
+
+
 def _g1_lane_next_actions(
     *,
     checkpoint_resolution_gate: dict[str, Any],
     workspace_checkpoint_inventory: dict[str, Any] | None = None,
     hip_consistency_proof: dict[str, Any],
     cause_narrowing_context: dict[str, Any],
+    frontier_non_promoting_context: dict[str, Any],
     child_gate_evidence: dict[str, Any],
     child_hip_residual_refresh_evidence: dict[str, Any],
     command: list[str],
 ) -> list[dict[str, Any]]:
     actions: list[dict[str, Any]] = []
     if checkpoint_resolution_gate.get("passed") is not True:
+        next_action_context = _full_load_checkpoint_next_action_context(
+            frontier_non_promoting_context=frontier_non_promoting_context,
+            cause_narrowing_context=cause_narrowing_context,
+        )
         workspace_inventory = (
             workspace_checkpoint_inventory
             if isinstance(workspace_checkpoint_inventory, dict)
             else {}
         )
         action = {
-            "id": "generate_full_load_1p0_checkpoint_candidate",
-            "reason": "checkpoint_resolution_no_full_load_candidate",
+            "id": next_action_context["id"],
+            "reason": next_action_context["routing_reason"],
             "required_load_scale": checkpoint_resolution_gate.get(
                 "required_load_scale"
             ),
@@ -885,6 +959,30 @@ def _g1_lane_next_actions(
                 "python3 scripts/run_g1_full_load_hip_newton_lane.py "
                 "--checkpoint-npz <full-load-checkpoint.npz> --fail-blocked"
             ),
+            "preferred_candidate_generator": next_action_context[
+                "preferred_candidate_generator"
+            ],
+            "row_only_largest_rows_exhausted_at_latest_checkpoint": (
+                next_action_context[
+                    "row_only_largest_rows_exhausted_at_latest_checkpoint"
+                ]
+            ),
+            "suppressed_retry_action_ids": next_action_context[
+                "suppressed_retry_action_ids"
+            ],
+            "frontier_operator_stop_reason": next_action_context[
+                "frontier_operator_stop_reason"
+            ],
+            "frontier_operator_target_row_count": next_action_context[
+                "frontier_operator_target_row_count"
+            ],
+            "frontier_operator_support_column_count": next_action_context[
+                "frontier_operator_support_column_count"
+            ],
+            "cause_narrowing_primary_next_lane": next_action_context[
+                "cause_narrowing_primary_next_lane"
+            ],
+            "claim_boundary": next_action_context["claim_boundary"],
         }
         if workspace_inventory.get("enabled") is True:
             action.update(
@@ -1013,6 +1111,8 @@ def _g1_lane_terminal_requirement_breakdown(
     load_path_provenance_blockers: list[str],
     hip_consistency_proof: dict[str, Any],
     hip_consistency_blockers: list[str],
+    cause_narrowing_context: dict[str, Any],
+    frontier_non_promoting_context: dict[str, Any],
     child_gate_evidence: dict[str, Any],
     child_hip_residual_refresh_evidence: dict[str, Any],
     command: list[str],
@@ -1089,6 +1189,13 @@ def _g1_lane_terminal_requirement_breakdown(
         worker_partition_next_action.get("id")
         or "close_consistent_residual_jacobian_newton_gate"
     )
+    full_load_next_action_context = _full_load_checkpoint_next_action_context(
+        frontier_non_promoting_context=frontier_non_promoting_context,
+        cause_narrowing_context=cause_narrowing_context,
+    )
+    full_load_next_action_id = str(full_load_next_action_context["id"])
+    if worker_next_action_id == GENERIC_FULL_LOAD_CHECKPOINT_ACTION_ID:
+        worker_next_action_id = full_load_next_action_id
 
     child_blockers = _dedupe_strings(
         [
@@ -1151,12 +1258,24 @@ def _g1_lane_terminal_requirement_breakdown(
                 "provenance_below_required_full_load": load_path_provenance.get(
                     "provenance_below_required_full_load"
                 ),
+                "preferred_candidate_generator": (
+                    full_load_next_action_context["preferred_candidate_generator"]
+                ),
+                "row_only_largest_rows_exhausted_at_latest_checkpoint": (
+                    full_load_next_action_context[
+                        "row_only_largest_rows_exhausted_at_latest_checkpoint"
+                    ]
+                ),
+                "suppressed_retry_action_ids": full_load_next_action_context[
+                    "suppressed_retry_action_ids"
+                ],
+                "routing_reason": full_load_next_action_context["routing_reason"],
             },
             "blockers": checkpoint_blockers,
             "next_action_ids": (
                 []
                 if checkpoint_ready
-                else ["generate_full_load_1p0_checkpoint_candidate"]
+                else [full_load_next_action_id]
             ),
             "rerun_command": (
                 "python3 scripts/run_g1_full_load_hip_newton_lane.py "
@@ -1483,7 +1602,27 @@ def _frontier_non_promoting_evidence_context(
         "promotes_lane_status": False,
         "frontier_chain_count": len(frontier_chain),
         "latest_frontier_receipt": selected_payload.get("latest_frontier_receipt"),
+        "latest_frontier_compact_checkpoint": selected_payload.get(
+            "latest_frontier_compact_checkpoint"
+        ),
         "latest_frontier_direct_residual_inf_n": latest_residual,
+        "latest_frontier_load_scale": _float_or_none(
+            selected_payload.get("latest_frontier_load_scale")
+        ),
+        "latest_frontier_operator_stop_reason": selected_payload.get(
+            "latest_frontier_operator_stop_reason"
+        ),
+        "latest_frontier_operator_target_row_count": selected_payload.get(
+            "latest_frontier_operator_target_row_count"
+        ),
+        "latest_frontier_operator_support_column_count": selected_payload.get(
+            "latest_frontier_operator_support_column_count"
+        ),
+        "same_operator_exhausted_at_latest_checkpoint": bool(
+            selected_payload.get("same_operator_exhausted_at_latest_checkpoint")
+            is True
+        ),
+        "source_next_actions": _string_list(selected_payload.get("next_actions")),
         "direct_residual_gate_tolerance_n": tolerance,
         "frontier_residual_above_tolerance": frontier_residual_above_tolerance,
         "non_promoting_launch_receipt_count": len(non_promoting_launch_receipts),
@@ -1735,6 +1874,7 @@ def build_lane_report(
         workspace_checkpoint_inventory=workspace_checkpoint_inventory,
         hip_consistency_proof=hip_consistency_proof,
         cause_narrowing_context=cause_narrowing,
+        frontier_non_promoting_context=frontier_non_promoting_context,
         child_gate_evidence=initial_child_gate_evidence,
         child_hip_residual_refresh_evidence=initial_child_hip_residual_refresh_evidence,
         command=command,
@@ -1745,6 +1885,8 @@ def build_lane_report(
         load_path_provenance_blockers=load_path_provenance_blockers,
         hip_consistency_proof=hip_consistency_proof,
         hip_consistency_blockers=hip_consistency_blockers,
+        cause_narrowing_context=cause_narrowing,
+        frontier_non_promoting_context=frontier_non_promoting_context,
         child_gate_evidence=initial_child_gate_evidence,
         child_hip_residual_refresh_evidence=initial_child_hip_residual_refresh_evidence,
         command=command,
@@ -1883,6 +2025,7 @@ def build_lane_report(
         workspace_checkpoint_inventory=workspace_checkpoint_inventory,
         hip_consistency_proof=hip_consistency_proof,
         cause_narrowing_context=cause_narrowing,
+        frontier_non_promoting_context=frontier_non_promoting_context,
         child_gate_evidence=child_gate_evidence,
         child_hip_residual_refresh_evidence=child_hip_residual_refresh_evidence,
         command=command,
@@ -1893,6 +2036,8 @@ def build_lane_report(
         load_path_provenance_blockers=load_path_provenance_blockers,
         hip_consistency_proof=hip_consistency_proof,
         hip_consistency_blockers=hip_consistency_blockers,
+        cause_narrowing_context=cause_narrowing,
+        frontier_non_promoting_context=frontier_non_promoting_context,
         child_gate_evidence=child_gate_evidence,
         child_hip_residual_refresh_evidence=child_hip_residual_refresh_evidence,
         command=command,
