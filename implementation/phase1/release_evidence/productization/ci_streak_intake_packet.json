@@ -2,6 +2,7 @@
   "ci_consecutive_pass_manifest": "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
   "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
   "contract_pass": false,
+  "current_blocker_count": 10,
   "current_blockers": [
     "pr:pr_github_actions_job_start_blocked",
     "pr:pr_ci_30_consecutive_pass_evidence_missing",
@@ -14,7 +15,7 @@
     "nightly:github_actions_filtered_run_count_below_threshold",
     "runner:self_hosted_runner_matching_labels_not_online"
   ],
-  "generated_at": "2026-07-01T18:01:26.822506+00:00",
+  "generated_at": "2026-07-01T20:13:09.705481+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -135,7 +136,7 @@
   },
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 7.702,
+    "age_hours": 9.897,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -227,6 +228,7 @@
     "threshold_match": true,
     "workflow_discovery_query_error": ""
   },
+  "status": "blocked",
   "summary": {
     "lane_count": 2,
     "lane_pass_count": 0,
@@ -255,13 +257,14 @@
       "x64"
     ],
     "runner_status": "blocked",
-    "source_evidence_age_hours": 7.702,
+    "source_evidence_age_hours": 9.897,
     "source_evidence_freshness_pass": true,
     "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
     "threshold": 30
   },
+  "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=10 | runner=blocked",
   "validation_commands": [
     "python3 scripts/check_github_actions_self_hosted_runner_status.py --out implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json",
     "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",

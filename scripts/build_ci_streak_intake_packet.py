@@ -394,9 +394,16 @@ def build_packet(
     blockers.extend(runner_blockers)
     contract_pass = bool(manifest.get("contract_pass") is True and source_evidence["contract_pass"] and not blockers)
     source_blockers = [str(item) for item in source_evidence["blockers"]]
+    lane_pass_count = sum(1 for row in lane_rows if row["threshold_pass"])
+    pr_missing = next(row["missing_consecutive_pass_count"] for row in lane_rows if row["lane"] == "pr")
+    nightly_missing = next(
+        row["missing_consecutive_pass_count"] for row in lane_rows if row["lane"] == "nightly"
+    )
+    runner_status = str(runner_precondition["status"])
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "reason_code": (
             "PASS"
@@ -405,6 +412,12 @@ def build_packet(
             if source_blockers
             else "ERR_CI_STREAK_EVIDENCE_INCOMPLETE"
         ),
+        "summary_line": (
+            f"CI streak intake: {'PASS' if contract_pass else 'BLOCKED'} | "
+            f"lanes={lane_pass_count}/{len(lane_rows)} | "
+            f"pr_missing={pr_missing} | nightly_missing={nightly_missing} | "
+            f"blockers={len(blockers)} | runner={runner_status}"
+        ),
         "ci_consecutive_pass_manifest": str(manifest_path),
         "github_actions_ci_streak_evidence": str(github_actions_evidence_path),
         "source_evidence": source_evidence,
@@ -412,7 +425,7 @@ def build_packet(
         "summary": {
             "threshold": threshold,
             "lane_count": len(lane_rows),
-            "lane_pass_count": sum(1 for row in lane_rows if row["threshold_pass"]),
+            "lane_pass_count": lane_pass_count,
             "open_blocker_count": len(blockers),
             "source_evidence_pass": source_evidence["contract_pass"],
             "runner_precondition_evaluated": runner_precondition["evaluated"],
@@ -466,6 +479,7 @@ def build_packet(
         },
         "lane_rows": lane_rows,
         "current_blockers": blockers,
+        "current_blocker_count": len(blockers),
         "validation_commands": [
             f"python3 scripts/check_github_actions_self_hosted_runner_status.py --out {DEFAULT_SELF_HOSTED_RUNNER_STATUS}",
             f"python3 scripts/build_github_actions_ci_streak_evidence.py --out {DEFAULT_GITHUB_ACTIONS_EVIDENCE}",
@@ -491,8 +505,11 @@ def _markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# CI Streak Intake Packet",
         "",
+        f"- `summary_line`: `{payload['summary_line']}`",
+        f"- `status`: `{payload['status']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `reason_code`: `{payload['reason_code']}`",
+        f"- `current_blocker_count`: `{payload['current_blocker_count']}`",
         f"- `ci_consecutive_pass_manifest`: `{payload['ci_consecutive_pass_manifest']}`",
         f"- `github_actions_ci_streak_evidence`: `{payload['github_actions_ci_streak_evidence']}`",
         "",

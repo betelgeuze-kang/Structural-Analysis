@@ -168,7 +168,13 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
     rows = {row["lane"]: row for row in payload["lane_rows"]}
 
     assert payload["contract_pass"] is False
+    assert payload["status"] == "blocked"
     assert payload["reason_code"] == "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE"
+    assert payload["summary_line"] == (
+        "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | "
+        "nightly_missing=30 | blockers=12 | runner=not_evaluated"
+    )
+    assert payload["current_blocker_count"] == 12
     assert payload["summary"]["source_evidence_pass"] is False
     assert payload["summary"]["source_evidence_freshness_pass"] is True
     assert payload["summary"]["pr_missing_consecutive_pass_count"] == 30
@@ -216,6 +222,8 @@ def test_ci_streak_intake_packet_blocks_closed_manifest_without_source_evidence(
 
     assert payload["contract_pass"] is False
     assert payload["reason_code"] == "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE"
+    assert payload["status"] == "blocked"
+    assert payload["summary_line"].startswith("CI streak intake: BLOCKED")
     assert payload["source_evidence"]["present"] is False
     assert "pr:github_actions_ci_streak_evidence_missing" in payload["current_blockers"]
     assert payload["summary"]["lane_pass_count"] == 0
@@ -315,6 +323,7 @@ def test_ci_streak_intake_packet_preserves_observed_partial_github_streak(tmp_pa
     markdown = build_ci_streak_intake_packet._markdown(payload)
 
     assert payload["contract_pass"] is False
+    assert payload["status"] == "blocked"
     assert rows["pr"]["threshold_pass"] is False
     assert rows["pr"]["consecutive_pass_count"] == 12
     assert rows["pr"]["github_actions_consecutive_pass_count"] == 12
@@ -411,6 +420,7 @@ def test_ci_streak_intake_packet_surfaces_offline_self_hosted_runner(
     markdown = build_ci_streak_intake_packet._markdown(payload)
 
     assert payload["contract_pass"] is False
+    assert payload["status"] == "blocked"
     assert payload["runner_precondition"]["evaluated"] is True
     assert payload["runner_precondition"]["contract_pass"] is False
     assert payload["summary"]["runner_precondition_pass"] is False
@@ -419,6 +429,11 @@ def test_ci_streak_intake_packet_surfaces_offline_self_hosted_runner(
         "runner:self_hosted_runner_matching_labels_not_online"
         in payload["current_blockers"]
     )
+    assert payload["summary_line"] == (
+        "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | "
+        "nightly_missing=30 | blockers=9 | runner=blocked"
+    )
+    assert payload["current_blocker_count"] == 9
     assert "Runner Precondition" in markdown
     assert "self-hosted, linux, x64" in payload["runner_precondition"]["owner_action"]
 
@@ -448,7 +463,13 @@ def test_ci_streak_intake_packet_passes_closed_manifest_with_valid_source_eviden
     )
 
     assert payload["contract_pass"] is True
+    assert payload["status"] == "ready"
     assert payload["reason_code"] == "PASS"
+    assert payload["summary_line"] == (
+        "CI streak intake: PASS | lanes=2/2 | pr_missing=0 | "
+        "nightly_missing=0 | blockers=0 | runner=not_evaluated"
+    )
+    assert payload["current_blocker_count"] == 0
     assert payload["current_blockers"] == []
     assert payload["summary"]["lane_pass_count"] == 2
     assert payload["summary"]["source_evidence_pass"] is True
@@ -585,7 +606,11 @@ def test_ci_streak_intake_packet_cli_writes_markdown(tmp_path: Path, capsys) -> 
     assert "CI Streak Intake Packet" in captured.out
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["summary"]["open_blocker_count"] > 1
+    assert payload["status"] == "blocked"
+    assert payload["current_blocker_count"] == payload["summary"]["open_blocker_count"]
     assert payload["reason_code"] == "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE"
-    assert "Validation Commands" in out_md.read_text(encoding="utf-8")
-    assert "Workflow Registered" in out_md.read_text(encoding="utf-8")
-    assert "Source Evidence" in out_md.read_text(encoding="utf-8")
+    markdown = out_md.read_text(encoding="utf-8")
+    assert "summary_line" in markdown
+    assert "Validation Commands" in markdown
+    assert "Workflow Registered" in markdown
+    assert "Source Evidence" in markdown

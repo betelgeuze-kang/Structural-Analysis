@@ -1,7 +1,10 @@
 # CI Streak Intake Packet
 
+- `summary_line`: `CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=10 | runner=blocked`
+- `status`: `blocked`
 - `contract_pass`: `False`
 - `reason_code`: `ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE`
+- `current_blocker_count`: `10`
 - `ci_consecutive_pass_manifest`: `implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json`
 - `github_actions_ci_streak_evidence`: `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json`
 
@@ -29,4 +32,4 @@
 
 | Path | Schema | Fresh | Age Hours | Pass |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `7.702` | `False` |
+| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `9.897` | `False` |
