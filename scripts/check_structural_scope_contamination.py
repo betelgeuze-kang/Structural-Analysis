@@ -23,6 +23,26 @@ DEFAULT_OUT = PRODUCTIZATION / "structural_scope_contamination_audit.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_QUARANTINE_MANIFEST = PRODUCTIZATION / "structural_scope_quarantine_manifest.json"
 QUARANTINE_SCHEMA_VERSION = "structural-scope-quarantine-manifest.v1"
+RELEASE_SURFACE_TEXT_GUARD_PATHS: tuple[Path, ...] = (
+    Path("implementation/phase1/release_evidence/surface/product_capabilities_surface.json"),
+    PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json",
+)
+RELEASE_SURFACE_TEXT_LEAK_TOKENS: tuple[str, ...] = (
+    "pocketmd",
+    "gpcr",
+    "md3bead",
+    "casf",
+    "pdbbind",
+    "vina",
+    "gnina",
+    "dud_e",
+    "lit_pcba",
+    "posebusters",
+    "symmetry_aware_ligand",
+    "ligand_rmsd",
+    "science_actual",
+    "h_bond_backmap",
+)
 
 RULES: tuple[dict[str, Any], ...] = (
     {
@@ -264,6 +284,38 @@ def _scope_blockers(rows: list[dict[str, Any]], *, prefix: str = "unquarantined"
     return blockers
 
 
+def _release_surface_text_leak_rows(*, repo_root: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for path in RELEASE_SURFACE_TEXT_GUARD_PATHS:
+        resolved = _resolve(repo_root, path)
+        if not resolved.exists():
+            continue
+        try:
+            text = resolved.read_text(encoding="utf-8")
+        except Exception as exc:
+            rows.append(
+                {
+                    "path": path.as_posix(),
+                    "read_error": exc.__class__.__name__,
+                    "matched_tokens": [],
+                }
+            )
+            continue
+        lowered = text.lower()
+        matched_tokens = [
+            token for token in RELEASE_SURFACE_TEXT_LEAK_TOKENS if token in lowered
+        ]
+        if matched_tokens:
+            rows.append(
+                {
+                    "path": path.as_posix(),
+                    "read_error": "",
+                    "matched_tokens": matched_tokens,
+                }
+            )
+    return rows
+
+
 def build_audit(
     *,
     repo_root: Path = ROOT,
@@ -295,19 +347,25 @@ def build_audit(
     unquarantined_git_state_counts = _counts_by_key(unquarantined_rows, "git_state")
     quarantined_area_counts = _counts_by_key(quarantined_rows, "path_area")
     quarantined_family_counts = _family_counts(quarantined_rows)
+    release_surface_text_leak_rows = _release_surface_text_leak_rows(repo_root=repo_root)
 
     blockers = [f"quarantine_manifest::{item}" for item in manifest_blockers]
     tracked_non_structural_count = git_state_counts.get("tracked", 0)
     untracked_non_structural_count = git_state_counts.get("untracked", 0)
     blockers.extend(_scope_blockers(unquarantined_rows))
+    if release_surface_text_leak_rows:
+        blockers.append(
+            "release_surface_text_non_structural_token_path_count="
+            f"{len(release_surface_text_leak_rows)}"
+        )
 
     contract_pass = not blockers and not unquarantined_rows
-    if not rows:
-        status = "pass"
-    elif contract_pass:
+    if blockers:
+        status = "blocked"
+    elif rows:
         status = "quarantined"
     else:
-        status = "blocked"
+        status = "pass"
 
     return {
         "schema_version": "structural-scope-contamination-audit.v1",
@@ -315,6 +373,7 @@ def build_audit(
             input_paths=[
                 Path("scripts/check_structural_scope_contamination.py"),
                 quarantine_manifest,
+                *RELEASE_SURFACE_TEXT_GUARD_PATHS,
             ],
             reused_evidence=False,
             reuse_policy=(
@@ -349,6 +408,11 @@ def build_audit(
         "unquarantined_family_counts": unquarantined_family_counts,
         "unquarantined_git_state_counts": unquarantined_git_state_counts,
         "quarantine_manifest": quarantine_summary,
+        "release_surface_text_guard_paths": [
+            path.as_posix() for path in RELEASE_SURFACE_TEXT_GUARD_PATHS
+        ],
+        "release_surface_text_leak_path_count": len(release_surface_text_leak_rows),
+        "release_surface_text_leak_rows": release_surface_text_leak_rows,
         "blockers": blockers,
         "first_non_structural_path": rows[0]["path"] if rows else "",
         "first_unquarantined_non_structural_path": (
@@ -359,6 +423,11 @@ def build_audit(
         "unquarantined_non_structural_rows": unquarantined_rows,
         "next_actions": (
             [
+                "remove_non_structural_tokens_from_structural_release_surface_outputs",
+                "regenerate_release_freshness_pm_snapshot_after_scope_cleanup",
+            ]
+            if release_surface_text_leak_rows
+            else [
                 "quarantine_or_delete_unquarantined_non_structural_paths_after_owner_review",
                 "regenerate_release_freshness_pm_snapshot_after_scope_cleanup",
             ]
@@ -451,6 +520,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `unquarantined_non_structural_path_count`: `{payload['unquarantined_non_structural_path_count']}`",
         f"- `first_non_structural_path`: `{payload['first_non_structural_path'] or 'none'}`",
         f"- `first_unquarantined_non_structural_path`: `{payload['first_unquarantined_non_structural_path'] or 'none'}`",
+        f"- `release_surface_text_leak_path_count`: `{payload['release_surface_text_leak_path_count']}`",
         "",
         "## Quarantine",
         "",
@@ -475,6 +545,18 @@ def _markdown(payload: dict[str, Any]) -> str:
     lines.extend(["", "| Family | Count |", "|---|---:|"])
     for family, count in payload["family_counts"].items():
         lines.append(f"| `{family}` | {count} |")
+    lines.extend(["", "## Release Surface Text Guard", ""])
+    if payload["release_surface_text_leak_rows"]:
+        lines.extend(["| Path | Tokens | Read Error |", "|---|---|---|"])
+        for row in payload["release_surface_text_leak_rows"]:
+            lines.append(
+                "| "
+                f"`{row['path']}` | "
+                f"`{', '.join(row['matched_tokens'])}` | "
+                f"`{row['read_error']}` |"
+            )
+    else:
+        lines.append("No guarded structural release surface text leaks detected.")
     lines.extend(
         [
             "",

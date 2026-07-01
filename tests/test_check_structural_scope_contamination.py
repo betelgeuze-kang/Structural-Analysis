@@ -210,6 +210,54 @@ def test_scope_audit_quarantines_exact_manifest_paths(tmp_path: Path) -> None:
     }
 
 
+def test_scope_audit_blocks_release_surface_text_leak(tmp_path: Path) -> None:
+    _git("init", cwd=tmp_path)
+    _tracked(tmp_path / "src" / "structural_analysis" / "solver.py")
+    _tracked(
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release_evidence"
+        / "surface"
+        / "product_capabilities_surface.json",
+        json.dumps(
+            {
+                "surface_id": "product_capabilities_surface",
+                "capability_rows": [
+                    {"capability_id": "pocketmd_lite_top_k_refinement"}
+                ],
+            }
+        )
+        + "\n",
+    )
+    _git("add", ".", cwd=tmp_path)
+
+    payload = scope_audit.build_audit(repo_root=tmp_path)
+
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["non_structural_path_count"] == 0
+    assert payload["release_surface_text_leak_path_count"] == 1
+    assert payload["release_surface_text_leak_rows"] == [
+        {
+            "path": (
+                "implementation/phase1/release_evidence/surface/"
+                "product_capabilities_surface.json"
+            ),
+            "read_error": "",
+            "matched_tokens": ["pocketmd"],
+        }
+    ]
+    assert (
+        "release_surface_text_non_structural_token_path_count=1"
+        in payload["blockers"]
+    )
+    assert payload["next_actions"] == [
+        "remove_non_structural_tokens_from_structural_release_surface_outputs",
+        "regenerate_release_freshness_pm_snapshot_after_scope_cleanup",
+    ]
+
+
 def test_scope_audit_writes_json_and_markdown(tmp_path: Path) -> None:
     _git("init", cwd=tmp_path)
     _tracked(tmp_path / "implementation" / "phase1" / "md3bead_soa.py")
