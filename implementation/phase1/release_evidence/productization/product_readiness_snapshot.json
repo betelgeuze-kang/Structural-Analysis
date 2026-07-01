@@ -349,12 +349,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 5,
+      "blocker_count": 7,
       "category_counts": {
         "benchmark": 0,
-        "future commercial": 31,
+        "future commercial": 35,
         "numerical": 4,
-        "software product": 1
+        "software product": 3
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -363,7 +363,7 @@
         "gpu_hip": "performance_track_after_cpu_reference_parity",
         "new_feature_development": "frozen_until_developer_preview_baseline_is_clean"
       },
-      "future_commercial_blocker_count": 31,
+      "future_commercial_blocker_count": 35,
       "gap_ledger_closure_requirement_visibility": {
         "ai_engine_guardrail_rows_ready": true,
         "autonomous_ai_engine_claim_blockers": [
@@ -2929,7 +2929,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T10:53:22.613006+00:00",
+  "generated_at": "2026-07-01T10:54:00.403139+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2939,8 +2939,8 @@
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d61804a3527203f67209a2002fcc6fbedaf42881b73332e2a4b0c64e54fe6a52",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:1647eca0a52631dc30445dbd78154f4c15eaf09d969b2e853e2fd966463bdbb7",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:d34268f2786d59b54a71a372b88fa2e1db175ef4c96fbe34e32e08ba1066f096",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:3e7f32f3ceba9e0b2bd4bb20a01944ec65de62353f55e795d00ae44419a72535",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:9c116ad6fdf8177037c57cd007b7a6d0a2365efef7f3f5e2d7eaddf092e3b0f0",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:f8ba0f4c413dd5e12b881fa0c4f6db7978fdd34b82b5146652ee4df006525c96",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:fe7b1a461932b0589e0992b7ed869bf02f27d13b077cdf4180b4f185efbe646d",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:b84de3f75279e33eb0d5f292d743081313cbb09f01c0078370bde1ef3d5453e2",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:2e857168ba841beadb0ae2ea40044f209584c713a34447ab7a33d097aeb1495b",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:79c2406660fa2fa3219cb9d50b3067567b2c24b3078f0644a1679f3044d58a89",
@@ -3802,29 +3802,20 @@
       },
       {
         "artifact": "developer_preview_readiness",
-        "changed_paths_since_source_commit": [
-          "implementation/phase1/open_data/korea/korean_source_catalog.json",
-          "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt_real_section_lateral_pushover_test.json",
-          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.model_derived_test.json",
-          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.wind_test.json",
-          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_converted_test.json",
-          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_test.json",
-          "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
-          "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json"
-        ],
-        "generated_at": "2026-07-01T10:01:50.012020+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-01T10:53:26.607955+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "ef71af2fc897b4668568e2e6894a4d8bfa9cc22c",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "97ab9e306ad009d6ae19521e554a79a3ff3a23b1",
         "source_state_fresh": true,
-        "source_state_kind": "generated_open_data_timestamp_only_commit"
+        "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T10:50:30.040418+00:00",
+        "generated_at": "2026-07-01T10:53:30.345528+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
@@ -4105,6 +4096,8 @@
         "implementation/phase1/release_evidence/productization/ai_review_queue_contract.json",
         "implementation/phase1/release_evidence/productization/ai_safety_governance_contract.json",
         "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+        "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+        "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
         "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
         "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
         "implementation/phase1/release_evidence/productization/gap_closure_status.json",
@@ -4209,6 +4202,8 @@
         " M implementation/phase1/release_evidence/productization/ai_review_queue_contract.json",
         " M implementation/phase1/release_evidence/productization/ai_safety_governance_contract.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+        " M implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+        " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
         " M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
         " M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
         " M implementation/phase1/release_evidence/productization/gap_closure_status.json",

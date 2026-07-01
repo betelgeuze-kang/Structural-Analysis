@@ -182,7 +182,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T10:53:33.710711+00:00",
+  "generated_at": "2026-07-01T10:54:05.664701+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:7c902b6c655576c14789108a44638ed3a42b0819014482b58edd7579d6d5e4bd",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:b26effd76c4c5373ec2d7640dbdf8ee40f80c32af6787c61bf7a3645e82cad08",
@@ -193,10 +193,10 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:32a17a0253494eea04908f1537a68f42233b3e7e2b78db89cc575aa77feb3760",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:454611bcf426cc66f06f45b27e3702235f280061bdb2e4c8d99348607a5c3e24",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:657444180fa12d13ef6a3c149b3aeb54f76d80d8f0a9d6f58af1bf0e0d58ec0e",
-    "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:01820164306a5cad5c56d4294c96f8d4820e2cefb8bb25da1baae8f07071d1c7",
+    "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:dc6a3abf00506425414917d587c215d0a5d2c5ac7c1ac1b8497f3855ac92ff01",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:5fd0dd6312037b3492990a7ee82f894826401d9c2bdeacc582a5f465c6ece747",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:481951b31b3df7613e2abf948cb8c48b071a7439468166196335b01f78f1c85e",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:062f5ee909ef0914d386fc60598f17fae0972efe5b465714373b26f899b544c0",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:aa33df04efd987bccb830e8c0c58edb1eeaf5f0f6653910070eafe871eeb1020",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:f1d349767c211fde2b05f72376c19af8fa80d4ba0583cd44888d6de9158f36a7",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:75068315ad3d130570a45d117c96f3b1e326ff1437642f7f269d53b900c0c823",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:184b563a18d475ba631a971e9b3e2d1cb8a293009c534c0df95bc8bf32f168a4",
@@ -6415,7 +6415,7 @@
       ]
     }
   },
-  "source_commit_sha": "97ab9e306ad009d6ae19521e554a79a3ff3a23b1",
+  "source_commit_sha": "9ee0c24fa28f156760aa53e1cb289f42df1cb7b7",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
