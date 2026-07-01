@@ -2610,7 +2610,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T16:31:32.726337+00:00",
+  "generated_at": "2026-07-01T16:50:35.460329+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2643,7 +2643,7 @@
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:0a039b00834ed75b02dedf493240f56d9f8d8262cd1b1191ad1e73b07ea1e2e5",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:14195679bb39ba506238e7d37bdfb7405eab17c1a982497220231cfa84fea3e1"
+    "scripts/build_product_readiness_snapshot.py": "sha256:acd82958847f4c0a2462d4551d8506ef76f019c5b95d7b793db40bbc3e30d217"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -2882,7 +2882,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "ce3d2b2e388117f34b307de7b159308b77a04438",
+  "source_commit_sha": "071833b9ded1947077d5e3dacb953b27f89c6ba6",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2973,11 +2973,15 @@
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
           "scripts/build_developer_preview_final_gate_owner_packet.py",
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/build_support_bundle.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_developer_preview_final_gate_owner_packet.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_build_support_bundle.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
@@ -3013,15 +3017,21 @@
       },
       {
         "artifact": "commercial_gap_ledger_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py"
+        ],
         "generated_at": "2026-07-01T16:31:26.937934+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "ce3d2b2e388117f34b307de7b159308b77a04438",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_ledger_evidence_audit",
@@ -3069,11 +3079,15 @@
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
           "scripts/build_developer_preview_final_gate_owner_packet.py",
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/build_support_bundle.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_developer_preview_final_gate_owner_packet.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_build_support_bundle.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
@@ -3089,7 +3103,12 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:23:21.595955+00:00",
@@ -3104,7 +3123,12 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:23:21.434311+00:00",
@@ -3139,15 +3163,21 @@
       },
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py"
+        ],
         "generated_at": "2026-07-01T16:31:25.950050+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "ce3d2b2e388117f34b307de7b159308b77a04438",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "customer_shadow_evidence_status",
@@ -3216,6 +3246,7 @@
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
           "scripts/build_developer_preview_final_gate_owner_packet.py",
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
           "scripts/build_phase6_benchmark_scale_status.py",
@@ -3223,6 +3254,7 @@
           "scripts/build_product_capabilities_surface.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_support_bundle.py",
           "scripts/check_structural_scope_contamination.py",
@@ -3232,6 +3264,7 @@
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "src/structural_analysis/benchmark/acquisition.py",
           "tests/test_build_developer_preview_final_gate_owner_packet.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase3_benchmark_acquisition_artifacts.py",
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
@@ -3239,6 +3272,7 @@
           "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_support_bundle.py",
           "tests/test_check_structural_scope_contamination.py",
@@ -3362,7 +3396,12 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:22:23.261852+00:00",
@@ -3377,7 +3416,12 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:23:20.464222+00:00",
@@ -3392,7 +3436,12 @@
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T16:23:21.639066+00:00",
@@ -3427,11 +3476,8 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
-        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
+        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -3456,11 +3502,8 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
-        " M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
+        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
       ]
     }
   },
