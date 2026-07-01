@@ -143,6 +143,20 @@ def _gpcr_row_intake_contract(
             "source_license",
             "source_artifact_sha256",
         ],
+        "source_actuality_policy": {
+            "placeholder_source_text_markers_rejected": list(
+                gpcr_suite.PLACEHOLDER_SOURCE_TEXT_MARKERS
+            ),
+            "placeholder_source_url_markers_rejected": list(
+                gpcr_suite.PLACEHOLDER_SOURCE_URL_MARKERS
+            ),
+            "placeholder_source_url_prefixes_rejected": list(
+                gpcr_suite.PLACEHOLDER_SOURCE_URL_PREFIXES
+            ),
+            "source_artifact_sha256_policy": (
+                "sha256:<64 hex> and must match the attached raw hard-decoy row artifact"
+            ),
+        },
         "raw_row_quality_minimums": dict(gpcr_suite.RAW_ROW_QUALITY_CRITERIA),
         "phase3_exit_criteria": dict(gpcr_suite.EXIT_CRITERIA),
         "actual_closure_criterion_id": gpcr_suite.ACTUAL_CLOSURE_CRITERION_ID,

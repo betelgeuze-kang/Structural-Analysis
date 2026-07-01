@@ -30,6 +30,7 @@ DEFAULT_LIMIT = 500
 GH_FIELDS = "databaseId,event,conclusion,status,headSha,headBranch,createdAt,updatedAt,url,name"
 GH_DEBUG_LINE = re.compile(r"^\* Request(?:\s|$)")
 MAX_JOB_START_BLOCKER_RUNS = 5
+QUEUED_SELF_HOSTED_BLOCKER_MINUTES = 15
 LOCAL_METADATA_CLAIM_BOUNDARY = (
     "Local workflow trigger metadata is parsed from the current checkout and does not refresh "
     "or replace GitHub Actions run-history evidence."
@@ -114,6 +115,18 @@ def _clean_gh_message(message: str) -> str:
         if line.strip() and not GH_DEBUG_LINE.match(line.strip())
     ]
     return "\n".join(lines) or "gh command failed"
+
+
+def _parse_datetime(value: Any) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def _as_dict(value: Any) -> dict[str, Any]:
@@ -470,11 +483,13 @@ def _lane_from_rows(
     local_workflows: list[dict[str, Any]],
     job_start_blockers: list[dict[str, Any]] | None = None,
     error: str = "",
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     error = _clean_gh_message(error) if error else ""
     registered_workflow = _workflow_match(registered_workflows, workflow)
     local_workflow = _workflow_match(local_workflows, workflow)
     local_trigger_status = _local_trigger_status(lane, local_workflow)
+    local_self_hosted_runner_default = local_trigger_status["local_self_hosted_runner_default"]
     relevant = [
         {
             "run_id": row.get("databaseId"),
@@ -508,7 +523,19 @@ def _lane_from_rows(
             break
         consecutive += 1
     blockers = []
-    job_start_blockers = job_start_blockers or []
+    now = now or datetime.now(timezone.utc)
+    job_start_blockers = [
+        *(job_start_blockers or []),
+        *(
+            _queued_self_hosted_run_blockers(
+                lane=lane,
+                rows=relevant,
+                now=now,
+            )
+            if local_self_hosted_runner_default
+            else []
+        ),
+    ]
     if error:
         blockers.append("github_actions_query_failed")
     if registered_workflows and not registered_workflow:
@@ -545,6 +572,42 @@ def _lane_from_rows(
     }
 
 
+def _queued_self_hosted_run_blockers(
+    *,
+    lane: str,
+    rows: list[dict[str, Any]],
+    now: datetime,
+    threshold_minutes: int = QUEUED_SELF_HOSTED_BLOCKER_MINUTES,
+) -> list[dict[str, Any]]:
+    blockers: list[dict[str, Any]] = []
+    for row in rows[:MAX_JOB_START_BLOCKER_RUNS]:
+        if str(row.get("status", "") or "").lower() != "queued":
+            continue
+        created_at = _parse_datetime(row.get("created_at"))
+        if created_at is None:
+            continue
+        queued_minutes = (now - created_at).total_seconds() / 60
+        if queued_minutes < threshold_minutes:
+            continue
+        blockers.append(
+            {
+                "run_id": row.get("run_id"),
+                "event": row.get("event"),
+                "head_sha": row.get("head_sha"),
+                "head_branch": row.get("head_branch"),
+                "url": row.get("url"),
+                "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+                "message": (
+                    f"{lane} workflow run has remained queued for "
+                    f"{round(queued_minutes, 1)} minutes on a self-hosted runner lane."
+                ),
+                "queued_minutes": round(queued_minutes, 1),
+                "queued_threshold_minutes": threshold_minutes,
+            }
+        )
+    return blockers
+
+
 def build_evidence(
     *,
     repo: str,
@@ -562,6 +625,7 @@ def build_evidence(
     local_workflow_dir: Path = DEFAULT_LOCAL_WORKFLOW_DIR,
     pr_job_start_blockers: list[dict[str, Any]] | None = None,
     nightly_job_start_blockers: list[dict[str, Any]] | None = None,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     pr_rows_from_api = pr_rows is None
     nightly_rows_from_api = nightly_rows is None
@@ -579,6 +643,7 @@ def build_evidence(
         nightly_job_start_blockers = (
             _job_start_blockers_for_rows(repo=repo, rows=nightly_rows) if nightly_rows_from_api else []
         )
+    now = now or datetime.now(timezone.utc)
     lanes = {
         "pr": _lane_from_rows(
             lane="pr",
@@ -590,6 +655,7 @@ def build_evidence(
             local_workflows=local_workflows,
             job_start_blockers=pr_job_start_blockers,
             error=pr_error,
+            now=now,
         ),
         "nightly": _lane_from_rows(
             lane="nightly",
@@ -601,6 +667,7 @@ def build_evidence(
             local_workflows=local_workflows,
             job_start_blockers=nightly_job_start_blockers,
             error=nightly_error,
+            now=now,
         ),
     }
     return {
@@ -640,8 +707,9 @@ def build_evidence(
         "claim_boundary": (
             "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts "
             "pull_request events and nightly lane only counts schedule/workflow_dispatch events. "
-            "Job-start annotations are read-only GitHub check-run metadata and may identify external "
-            "account/billing blockers, but they do not create CI streak credit."
+            "Job-start annotations and stale queued self-hosted runs are read-only GitHub metadata "
+            "and may identify external account, billing, or runner-availability blockers, but they "
+            "do not create CI streak credit."
         ),
     }
 

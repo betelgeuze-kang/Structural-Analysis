@@ -329,6 +329,34 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "is_positive",
         "is_decoy",
     ]
+    assert gpcr_contract["source_receipt_required_fields"] == [
+        "source_id",
+        "source_url",
+        "source_license",
+        "source_artifact_sha256",
+    ]
+    assert gpcr_contract["source_actuality_policy"][
+        "placeholder_source_url_prefixes_rejected"
+    ] == [
+        "operator://",
+        "local-evidence://",
+        "local://",
+        "fixture://",
+        "mock://",
+        "synthetic://",
+        "placeholder://",
+        "test://",
+        "unit-test://",
+        "file://",
+    ]
+    assert "fixture" in gpcr_contract["source_actuality_policy"][
+        "placeholder_source_text_markers_rejected"
+    ]
+    assert gpcr_contract["source_actuality_policy"][
+        "source_artifact_sha256_policy"
+    ] == (
+        "sha256:<64 hex> and must match the attached raw hard-decoy row artifact"
+    )
     pocketmd_contract = audit["row_intake_contracts"]["pocketmd_rows"]
     assert pocketmd_contract["default_row_path_candidates"][0].endswith(
         "pocketmd_lite_topk_rows.json"
@@ -460,6 +488,63 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     ]
     assert (tmp_path / "gpcr_surface.json").exists()
     assert (tmp_path / "pocketmd_surface.json").exists()
+
+
+def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
+    tmp_path: Path,
+) -> None:
+    gpcr_rows = tmp_path / "gpcr_rows.csv"
+    pocketmd_rows = tmp_path / "pocketmd_rows.json"
+    pocketmd_contract = tmp_path / "pocketmd_contract.json"
+    _write_gpcr_rows(gpcr_rows)
+    _write_pocketmd_rows(pocketmd_rows)
+    pocketmd_contract.write_text(
+        json.dumps(
+            {"schema_version": "pocketmd-lite-contract.v1", "contract_pass": True}
+        ),
+        encoding="utf-8",
+    )
+
+    audit = module.build_science_actual_closure_audit(
+        repo_root=REPO_ROOT,
+        gpcr_rows_path=gpcr_rows,
+        pocketmd_rows_path=pocketmd_rows,
+        gpcr_template_out=tmp_path / "gpcr_template.json",
+        gpcr_report_out=tmp_path / "gpcr_report.json",
+        gpcr_surface_out=tmp_path / "gpcr_surface.json",
+        pocketmd_intake_out=tmp_path / "pocketmd_intake.json",
+        pocketmd_report_out=tmp_path / "pocketmd_report.json",
+        pocketmd_surface_out=tmp_path / "pocketmd_surface.json",
+        pocketmd_contract_path=pocketmd_contract,
+        source_id="fixture_science_actual_closure_rows",
+        source_url="local-evidence://science-actual-closure/rows",
+        source_license="fixture-only",
+    )
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["contract_pass"] is False
+    assert audit["missing_row_inputs"] == []
+    assert audit["component_ready_count"] == 0
+    assert any(
+        blocker.startswith(
+            "gpcr_hard_decoy_actual_closure::DRD2:"
+            "operator_input_source_source_url_placeholder"
+        )
+        for blocker in audit["blockers"]
+    )
+    assert any(
+        blocker.startswith(
+            "pocketmd_lite_topk_actual_closure::"
+            "operator_input_source_source_url_placeholder"
+        )
+        for blocker in audit["blockers"]
+    )
+    gpcr = audit["components"][0]
+    pocketmd = audit["components"][1]
+    assert gpcr["contract_pass"] is False
+    assert pocketmd["contract_pass"] is False
+    assert "raw_hard_decoy_rows_actual_closure" in gpcr["failed_criteria"]
+    assert "report_blockers_resolved" in pocketmd["failed_criteria"]
 
 
 def test_science_actual_closure_audit_autodetects_default_row_paths(

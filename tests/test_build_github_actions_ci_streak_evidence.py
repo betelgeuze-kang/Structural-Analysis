@@ -29,6 +29,12 @@ def _run(run_id: int, event: str, conclusion: str, created_at: datetime) -> dict
     }
 
 
+def _queued_run(run_id: int, event: str, created_at: datetime) -> dict[str, object]:
+    row = _run(run_id, event, "", created_at)
+    row["status"] = "queued"
+    return row
+
+
 def test_build_evidence_filters_pr_and_nightly_events_for_streaks() -> None:
     base = datetime(2026, 6, 16, tzinfo=timezone.utc)
     pr_rows = [_run(i, "pull_request", "success", base - timedelta(minutes=i)) for i in range(3)]
@@ -217,6 +223,103 @@ def test_job_start_blocker_classifies_self_hosted_runner_unavailable() -> None:
     )
 
     assert reason == "github_actions_self_hosted_runner_unavailable"
+
+
+def test_build_evidence_surfaces_stale_queued_self_hosted_runner_blockers() -> None:
+    now = datetime(2026, 6, 16, 12, 0, tzinfo=timezone.utc)
+    payload = build_github_actions_ci_streak_evidence.build_evidence(
+        repo="owner/repo",
+        threshold=3,
+        limit=10,
+        pr_workflow="CI",
+        nightly_workflow="Nightly Full Quality",
+        pr_rows=[_queued_run(1, "pull_request", now - timedelta(minutes=31))],
+        nightly_rows=[_queued_run(2, "schedule", now - timedelta(minutes=45))],
+        registered_workflows=[
+            {"id": 1, "name": "CI", "path": ".github/workflows/ci.yml", "state": "active"},
+            {
+                "id": 2,
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "state": "active",
+            },
+        ],
+        local_workflows=[
+            {
+                "name": "CI",
+                "path": ".github/workflows/ci.yml",
+                "exists": True,
+                "trigger_events": ["pull_request", "push"],
+                "self_hosted_runner_default": True,
+            },
+            {
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "exists": True,
+                "trigger_events": ["schedule", "workflow_dispatch"],
+                "self_hosted_runner_default": True,
+            },
+        ],
+        now=now,
+    )
+
+    pr = payload["lanes"]["pr"]
+    nightly = payload["lanes"]["nightly"]
+
+    assert payload["contract_pass"] is False
+    assert pr["job_start_blocker_count"] == 1
+    assert nightly["job_start_blocker_count"] == 1
+    assert pr["job_start_blockers"][0]["reason_code"] == "github_actions_self_hosted_runner_queued_timeout"
+    assert pr["job_start_blockers"][0]["queued_minutes"] == 31.0
+    assert "github_actions_job_start_blocked" in pr["blockers"]
+    assert "github_actions_job_start_blocked" in nightly["blockers"]
+    assert payload["summary"]["pr_job_start_blocker_count"] == 1
+    assert payload["summary"]["nightly_job_start_blocker_count"] == 1
+    assert "stale queued self-hosted runs" in payload["claim_boundary"]
+
+
+def test_build_evidence_does_not_count_fresh_queued_runs_as_stale_blockers() -> None:
+    now = datetime(2026, 6, 16, 12, 0, tzinfo=timezone.utc)
+    payload = build_github_actions_ci_streak_evidence.build_evidence(
+        repo="owner/repo",
+        threshold=3,
+        limit=10,
+        pr_workflow="CI",
+        nightly_workflow="Nightly Full Quality",
+        pr_rows=[_queued_run(1, "pull_request", now - timedelta(minutes=5))],
+        nightly_rows=[],
+        registered_workflows=[
+            {"id": 1, "name": "CI", "path": ".github/workflows/ci.yml", "state": "active"},
+            {
+                "id": 2,
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "state": "active",
+            },
+        ],
+        local_workflows=[
+            {
+                "name": "CI",
+                "path": ".github/workflows/ci.yml",
+                "exists": True,
+                "trigger_events": ["pull_request", "push"],
+                "self_hosted_runner_default": True,
+            },
+            {
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "exists": True,
+                "trigger_events": ["schedule", "workflow_dispatch"],
+                "self_hosted_runner_default": True,
+            },
+        ],
+        now=now,
+    )
+
+    pr = payload["lanes"]["pr"]
+
+    assert pr["job_start_blocker_count"] == 0
+    assert "github_actions_job_start_blocked" not in pr["blockers"]
 
 
 def test_build_evidence_records_missing_registered_workflow_and_sanitized_query_error() -> None:
