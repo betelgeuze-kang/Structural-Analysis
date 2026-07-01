@@ -1,6 +1,6 @@
 {
   "schema_version": "solver-governance-support-contract.v1",
-  "generated_at": "2026-06-23T15:03:14.069901+00:00",
+  "generated_at": "2026-07-01T08:28:56.922664+00:00",
   "status": "ready",
   "governance_support_ready": true,
   "bundle_status": "ready",
@@ -77,7 +77,10 @@
       "title": "Full 3D Global FEA Core",
       "status": "partial",
       "blockers": [
-        "full_mesh_nonlinear_equilibrium_not_closed"
+        "full_load_gate_not_closed",
+        "full_mesh_nonlinear_equilibrium_not_closed",
+        "material_newton_breadth_not_closed",
+        "production_rocm_hip_residency_not_closed"
       ]
     },
     {
