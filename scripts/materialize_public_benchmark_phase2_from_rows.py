@@ -334,6 +334,12 @@ def _components_from_report(report: dict[str, Any]) -> list[dict[str, Any]]:
                 "count_field": str(row.get("count_field") or ""),
                 "current_count": int(row.get("current_count") or 0),
                 "required_minimum_count": int(row.get("required_minimum_count") or 0),
+                "required_row_inputs": list(
+                    COMPONENT_ROW_INPUTS.get(component_id, ())
+                ),
+                "missing_row_inputs": [],
+                "expected_rows_mode": "operator_attached_public_benchmark_rows",
+                "operator_evidence_required": not bool(row.get("ready")),
                 "blockers": [str(blocker) for blocker in row.get("blockers", [])],
             }
         )
@@ -378,6 +384,12 @@ def build_public_benchmark_phase2_row_audit(
     ]
     if missing_input_ids:
         components = _missing_components(row_inputs)
+        phase2_requirements = harness_bundle.build_phase2_requirement_rows(
+            components
+        )
+        phase2_requirement_summary = (
+            harness_bundle.build_phase2_requirement_summary(phase2_requirements)
+        )
         blockers = [
             f"{component['component_id']}::{blocker}"
             for component in components
@@ -401,6 +413,8 @@ def build_public_benchmark_phase2_row_audit(
             "component_count": len(components),
             "component_ready_count": 0,
             "components": components,
+            "phase2_requirements": phase2_requirements,
+            "phase2_requirement_summary": phase2_requirement_summary,
             "outputs": {},
             "required_phase2_components": [
                 dict(row) for row in harness_bundle.PHASE2_REQUIRED_COMPONENTS
@@ -441,6 +455,12 @@ def build_public_benchmark_phase2_row_audit(
         _write_json(repo_root, artifact_bundle_out, artifact_bundle)
     except Exception as exc:
         components = [_component_error(exc)]
+        phase2_requirements = harness_bundle.build_phase2_requirement_rows(
+            components
+        )
+        phase2_requirement_summary = (
+            harness_bundle.build_phase2_requirement_summary(phase2_requirements)
+        )
         blockers = [
             f"{components[0]['component_id']}::{blocker}"
             for blocker in components[0]["blockers"]
@@ -463,6 +483,8 @@ def build_public_benchmark_phase2_row_audit(
             "component_count": len(components),
             "component_ready_count": 0,
             "components": components,
+            "phase2_requirements": phase2_requirements,
+            "phase2_requirement_summary": phase2_requirement_summary,
             "outputs": {},
             "claim_boundary": (
                 "Public Benchmark Phase 2 row materialization failed before any "
@@ -471,6 +493,10 @@ def build_public_benchmark_phase2_row_audit(
         }
 
     components = _components_from_report(materialization_report)
+    phase2_requirements = harness_bundle.build_phase2_requirement_rows(components)
+    phase2_requirement_summary = harness_bundle.build_phase2_requirement_summary(
+        phase2_requirements
+    )
     operator_materialization_report = operator_bundle.get("materialization_report", {})
     if not isinstance(operator_materialization_report, dict):
         operator_materialization_report = {}
@@ -531,6 +557,8 @@ def build_public_benchmark_phase2_row_audit(
         "component_count": len(components),
         "component_ready_count": sum(1 for component in components if component["ready"]),
         "components": components,
+        "phase2_requirements": phase2_requirements,
+        "phase2_requirement_summary": phase2_requirement_summary,
         "outputs": {
             "operator_bundle": str(operator_bundle_out),
             "harness_materialization_report": str(harness_report_out),

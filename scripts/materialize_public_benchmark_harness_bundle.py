@@ -318,6 +318,8 @@ def _phase2_component_rows(
                 "source_artifact_contract_pass": source_artifact_contract_pass,
                 "ready_field": str(required["ready_field"]),
                 "ready": ready,
+                "materialized": bool(summary and summary.get("exists", True)),
+                "operator_evidence_required": not ready,
                 "count_field": count_field,
                 "current_count": current_count,
                 "required_minimum_count": required_minimum_count,
@@ -378,6 +380,104 @@ def _build_phase2_exit_gate(
     }
 
 
+def build_phase2_requirement_rows(
+    component_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Return stable top-level rows for every Public Benchmark Phase 2 requirement."""
+    component_by_id = {
+        str(row.get("component_id") or ""): row for row in component_rows
+    }
+    rows: list[dict[str, Any]] = []
+    for required in PHASE2_REQUIRED_COMPONENTS:
+        component_id = str(required["component_id"])
+        component = component_by_id.get(component_id, {})
+        blockers = [str(blocker) for blocker in _as_list(component.get("blockers"))]
+        if not component:
+            blockers.append(f"phase2_component_missing:{component_id}")
+        count_field = str(
+            component.get("count_field") or required["count_field"]
+        )
+        current_count = _as_int(component.get("current_count"))
+        required_minimum_count = _as_int(
+            component.get("required_minimum_count")
+            or required["required_minimum_count"],
+            default=1,
+        )
+        ready = bool(component.get("ready")) and not blockers
+        row = {
+            "component_id": component_id,
+            "requirement": str(required["requirement"]),
+            "criterion_id": str(required["criterion_id"]),
+            "artifact_role": str(
+                component.get("artifact_role") or required["artifact_role"]
+            ),
+            "artifact": str(component.get("artifact") or ""),
+            "status": str(component.get("status") or "blocked"),
+            "contract_pass": bool(component.get("contract_pass")) and not blockers,
+            "source_artifact_contract_pass": bool(
+                component.get("source_artifact_contract_pass")
+            ),
+            "ready_field": str(required["ready_field"]),
+            "ready": ready,
+            "materialized": bool(component.get("materialized")),
+            "operator_evidence_required": bool(
+                component.get("operator_evidence_required", not ready)
+            ),
+            "count_field": count_field,
+            "current_count": current_count,
+            "required_minimum_count": required_minimum_count,
+            "blocker_count": len(blockers),
+            "blockers": blockers,
+        }
+        required_row_inputs = _as_list(component.get("required_row_inputs"))
+        missing_row_inputs = _as_list(component.get("missing_row_inputs"))
+        if required_row_inputs:
+            row["required_row_inputs"] = [
+                str(input_id) for input_id in required_row_inputs
+            ]
+        if missing_row_inputs:
+            row["missing_row_inputs"] = [
+                str(input_id) for input_id in missing_row_inputs
+            ]
+        expected_rows_mode = component.get("expected_rows_mode")
+        if expected_rows_mode:
+            row["expected_rows_mode"] = str(expected_rows_mode)
+        rows.append(row)
+    return rows
+
+
+def build_phase2_requirement_summary(
+    requirement_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    blocked_component_ids = [
+        str(row["component_id"]) for row in requirement_rows if not row["ready"]
+    ]
+    missing_row_inputs = sorted(
+        {
+            str(input_id)
+            for row in requirement_rows
+            for input_id in _as_list(row.get("missing_row_inputs"))
+        }
+    )
+    ready_component_count = sum(1 for row in requirement_rows if row["ready"])
+    return {
+        "required_component_count": len(requirement_rows),
+        "ready_component_count": ready_component_count,
+        "blocked_component_count": len(blocked_component_ids),
+        "materialized_component_count": sum(
+            1 for row in requirement_rows if row.get("materialized")
+        ),
+        "operator_evidence_required_count": sum(
+            1 for row in requirement_rows if row.get("operator_evidence_required")
+        ),
+        "missing_row_input_count": len(missing_row_inputs),
+        "missing_row_inputs": missing_row_inputs,
+        "phase2_ready": bool(requirement_rows)
+        and ready_component_count == len(requirement_rows),
+        "blocked_component_ids": blocked_component_ids,
+    }
+
+
 def _phase2_component_blockers(component_rows: list[dict[str, Any]]) -> list[str]:
     return [
         f"{row['component_id']}::{blocker}"
@@ -433,6 +533,10 @@ def materialize_public_benchmark_artifact_bundle(
     missing_artifact_blockers = list(blockers)
     phase2_components = _phase2_component_rows(rows)
     phase2_exit_gate = _build_phase2_exit_gate(phase2_components)
+    phase2_requirements = build_phase2_requirement_rows(phase2_components)
+    phase2_requirement_summary = build_phase2_requirement_summary(
+        phase2_requirements
+    )
     blockers.extend(_phase2_component_blockers(phase2_components))
     blockers = sorted(dict.fromkeys(blockers))
     phase2_ready = phase2_exit_gate["status"] == "ready"
@@ -455,6 +559,8 @@ def materialize_public_benchmark_artifact_bundle(
         "artifact_rows": rows,
         "required_components": list(PHASE2_REQUIRED_COMPONENTS),
         "components": phase2_components,
+        "phase2_requirements": phase2_requirements,
+        "phase2_requirement_summary": phase2_requirement_summary,
         "phase2_ready": phase2_ready,
         "phase2_exit_gate": phase2_exit_gate,
         "blockers": blockers,
@@ -467,6 +573,7 @@ def materialize_public_benchmark_artifact_bundle(
                 1 for row in phase2_components if row["ready"]
             ),
             "phase2_ready": phase2_ready,
+            "phase2_requirement_summary": phase2_requirement_summary,
         },
         "claim_boundary": (
             "This bundle indexes local public-benchmark harness artifacts only. "
@@ -647,6 +754,10 @@ def materialize_public_benchmark_harness_bundle(
 
     phase2_components = _phase2_component_rows(artifact_summaries)
     phase2_exit_gate = _build_phase2_exit_gate(phase2_components)
+    phase2_requirements = build_phase2_requirement_rows(phase2_components)
+    phase2_requirement_summary = build_phase2_requirement_summary(
+        phase2_requirements
+    )
     blockers.extend(_phase2_component_blockers(phase2_components))
     blockers = sorted(dict.fromkeys(blockers))
     phase2_ready = phase2_exit_gate["status"] == "ready"
@@ -676,6 +787,8 @@ def materialize_public_benchmark_harness_bundle(
         "source_of_truth_tier_beta_ready": source_tier_beta_ready,
         "required_components": list(PHASE2_REQUIRED_COMPONENTS),
         "components": phase2_components,
+        "phase2_requirements": phase2_requirements,
+        "phase2_requirement_summary": phase2_requirement_summary,
         "phase2_ready": phase2_ready,
         "phase2_exit_gate": phase2_exit_gate,
         "target_subset_case_count": int(
