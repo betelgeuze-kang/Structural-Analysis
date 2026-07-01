@@ -46,6 +46,7 @@
   },
   "cleanup_family_counts": {},
   "cleanup_path_area_counts": {},
+  "cleanup_priority_batches": [],
   "cleanup_required_count": 0,
   "cleanup_rows": [],
   "closure_blockers": [
@@ -58,12 +59,12 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-01T23:16:21.596315+00:00",
+  "generated_at": "2026-07-01T23:21:48.589072+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:e61979de6845ae852bd281360b5eb98cb704f68824c3e54212bf009aa9112ed9",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:1bb84a630860e90cf492702ebb2d92813e8ceb4aa512e7cda8a7e52c4ae0d388",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:80edad0f3f3c4f87f64c95e388bdbcfe945c7ac8fa77b3f001833b4eeb2e4e11",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:4d2d4a2e31bffae7fe9c83317eb9818932dbbb0f37ed9e40dac1b8b3bae7a9c6",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:79d9c4a6b673e85ea5e4b73f3a6a6ffba3690e2b434d39f22b42e169b356dd2c",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:b6d7e6bd9fa121f9321f3dae4cc03fbf44cdf3d27d51a61466bf1b2b3a4bfedb"
   },
   "next_actions": [
@@ -75,6 +76,7 @@
     "rerun structural scope audit and owner review packet",
     "refresh product readiness snapshot"
   ],
+  "next_cleanup_application_batch": {},
   "next_owner_review_batch": {
     "batch_id": "release_surface_first",
     "family_counts": {
@@ -190,6 +192,11 @@
         "signed_owner_exception_reference": ""
       }
     ],
+    "generated_template_paths": {
+      "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
+      "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
+      "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md"
+    },
     "path_area": "release_surface",
     "post_batch_verification": [
       "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
@@ -417,6 +424,7 @@
       "review_goal": "record owner delete/extract/retain decisions without mutating the repository"
     }
   ],
+  "partial_cleanup_ready": false,
   "pending_owner_decision_family_counts": {
     "molecular_docking": 48,
     "molecular_dynamics": 25,
@@ -2869,6 +2877,7 @@
   "post_decision_cleanup_applied_rows": [],
   "post_decision_cleanup_pending_count": 0,
   "quarantined_path_count": 86,
+  "release_surface_batch_cleanup_ready": false,
   "release_surface_cleanup_paths": [],
   "release_surface_cleanup_required_count": 0,
   "release_surface_excluded_path_count": 86,
@@ -2884,7 +2893,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "4fbc420259e1c64ac026510d3c7c554558b0bf43",
+  "source_commit_sha": "bbc622865f7a94d2eacfb2fedf358071b558091a",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",

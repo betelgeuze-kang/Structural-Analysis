@@ -262,6 +262,20 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
         "implementation/phase1/release_evidence/productization/"
         "structural_scope_owner_decisions.json"
     )
+    assert batch_template["generated_template_paths"] == {
+        "json": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.template.json"
+        ),
+        "csv": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.template.csv"
+        ),
+        "markdown": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.template.md"
+        ),
+    }
     assert batch_template["decision_rows"] == [
         {
             "row_id": "release_surface_first-001",
@@ -446,6 +460,77 @@ def test_application_plan_accepts_owner_decision_csv(tmp_path: Path) -> None:
     assert payload["post_decision_cleanup_pending_count"] == 2
 
 
+def test_application_plan_surfaces_partial_release_surface_cleanup_batch(
+    tmp_path: Path,
+) -> None:
+    audit = _audit_payload()
+    manifest = _manifest_payload()
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "pocketmd_lite_science_product_surface.json"
+    )
+    audit["quarantined_non_structural_rows"].append(
+        {
+            "path": release_surface_path,
+            "git_state": "tracked",
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "quarantine_status": "quarantined",
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    manifest["paths"].append(
+        {
+            "path": release_surface_path,
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(audit_path, audit)
+    _write_json(manifest_path, manifest)
+    _write_json(
+        decisions,
+        _decision_payload(
+            (release_surface_path, "delete_from_structural_repository"),
+        ),
+    )
+
+    payload = application_plan.build_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit_path,
+        quarantine_manifest_path=manifest_path,
+        owner_decisions_path=decisions,
+    )
+
+    assert payload["status"] == "pending_owner_decisions"
+    assert payload["application_ready"] is False
+    assert payload["partial_cleanup_ready"] is True
+    assert payload["release_surface_batch_cleanup_ready"] is True
+    assert payload["owner_decision_pending_count"] == 2
+    assert payload["post_decision_cleanup_pending_count"] == 1
+    assert payload["cleanup_required_count"] == 1
+    assert payload["release_surface_cleanup_required_count"] == 1
+    assert payload["next_cleanup_application_batch"]["batch_id"] == (
+        "release_surface_cleanup"
+    )
+    assert payload["next_cleanup_application_batch"]["paths"] == [
+        release_surface_path
+    ]
+    assert payload["next_cleanup_application_batch"]["delete_git_rm_args"] == [
+        "git",
+        "rm",
+        "--",
+        release_surface_path,
+    ]
+    assert payload["next_cleanup_application_batch"]["extract_paths"] == []
+    assert payload["cleanup_priority_batches"] == [
+        payload["next_cleanup_application_batch"]
+    ]
+
+
 def test_application_plan_prioritizes_release_surface_cleanup_commands(
     tmp_path: Path,
 ) -> None:
@@ -605,6 +690,9 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
     audit, manifest = _write_inputs(tmp_path)
     out = tmp_path / "plan.json"
     out_md = tmp_path / "plan.md"
+    next_template = tmp_path / "next_batch.template.json"
+    next_template_md = tmp_path / "next_batch.template.md"
+    next_template_csv = tmp_path / "next_batch.template.csv"
 
     payload = application_plan.write_application_plan(
         repo_root=tmp_path,
@@ -613,6 +701,9 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
         owner_decisions_path=tmp_path / "missing_decisions.json",
         out=out,
         out_md=out_md,
+        next_batch_template_out=next_template,
+        next_batch_template_out_md=next_template_md,
+        next_batch_template_out_csv=next_template_csv,
     )
 
     assert payload["status"] == "pending_owner_decisions"
@@ -627,6 +718,17 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "cleanup_required_count" in markdown
     assert "Cleanup Command Manifest" in markdown
     assert "owner_decision_pending_count=2" in markdown
+    next_payload = json.loads(next_template.read_text(encoding="utf-8"))
+    assert next_payload["batch_id"] == "productization_evidence_second"
+    assert next_payload["decision_pending_count"] == 1
+    assert next_payload["decision_rows"][0]["path"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_product_report.json"
+    )
+    assert "# Structural Scope Next Batch Owner Decision Template" in (
+        next_template_md.read_text(encoding="utf-8")
+    )
+    assert "owner_decision" in next_template_csv.read_text(encoding="utf-8")
 
 
 def test_application_plan_fail_invalid_owner_decisions_exit_code(
