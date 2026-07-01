@@ -132,7 +132,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 29,
+      "blocker_count": 8,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -141,38 +141,16 @@
         "human_ux::observation_file_missing",
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-        "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
-        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-        "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
-        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
-        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+        "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
       ],
       "description": "Developer Preview productization evidence: release freshness/sync, CI/runner streaks, generated artifact consistency, and human UX workflow observation.",
       "root_streams": [
         "CI runner/streak",
-        "human UX",
-        "release freshness/sync"
+        "human UX"
       ]
     }
   },
-  "blocker_count": 57,
+  "blocker_count": 36,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -209,28 +187,7 @@
     "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "pm_release::security::license_status_not_configured",
-    "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-    "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-    "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-    "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
-    "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
-    "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
-    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-    "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
-    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-    "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-    "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-    "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-    "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-    "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-    "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-    "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-    "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-    "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
-    "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
-    "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-    "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+    "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
   ],
   "claim_boundary": {
     "assisted_service_pilot": "assisted_service_pilot_ready is the engineer-review workstation service track. It requires workstation delivery 8/8, supported-scope guard, full quality, clean GitHub sync, real human UX observation, product/legal license approval, acceptance package, and explicit proxy/fallback/engineer-review boundaries. It does not relax solver_product gates.",
@@ -249,9 +206,8 @@
   "components": {
     "assisted_service_pilot": {
       "acceptance_package_ready": true,
-      "blocker_count": 4,
+      "blocker_count": 3,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "full_quality_not_ready",
         "human_ux_observation_not_ready",
         "license_approval_not_ready"
@@ -272,7 +228,7 @@
       "human_ux_observation_ready": false,
       "license_approval_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false,
+      "snapshot_source_state_consistent": true,
       "supported_scope_guard_ready": true,
       "workstation_delivery_8_of_8": true
     },
@@ -2495,9 +2451,8 @@
       "remote_github_sync_clean": true
     },
     "solver_product": {
-      "blocker_count": 6,
+      "blocker_count": 5,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "independent_product_not_ready",
         "g1_full_mesh_full_load_not_ready",
         "g1_full_load_hip_newton_lane_not_ready",
@@ -2511,7 +2466,7 @@
       "g1_full_mesh_full_load_ready": false,
       "independent_product_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false
+      "snapshot_source_state_consistent": true
     },
     "structural_scope_contamination": {
       "blockers": [],
@@ -2597,9 +2552,9 @@
     }
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_fresh": false,
+  "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T20:15:28.241843+00:00",
+  "generated_at": "2026-07-01T20:19:29.634285+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2624,19 +2579,19 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:ab24d234600f80df38b7f96516966150aa4cb3bc72f988be6af5944c5b325ef2",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:f2c709762e7e3cf74a1e65543dd12bba17c851ecca2a7223af281ea36865a7af",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1db1e6105bb5ca1dc5df6d528c086f7e56abcf69e6e281bf3e189ebe2fe8b6cf",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:c3a5b56bd1061346e4d0650fc7c7917e25338c2ae07a7c4547f26258489c6e0a",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:107e6e637b5bd28db372159addad3bb30929dfecd728994cdb4656d65fe9e910",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:a5366e9f82f020d6d276ba335af7c297815fafd658e00404d25d88103735c947",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:ea529a58c81cb810a0b6efe3e0096dc53a916cc139efece7928e8d944e44fc91",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:3b755fd61e6380a9b032e0b7cb06580f60c03c824f05568d65bc6046aa87fda7",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:1e14dfca123e7f72932af68008d243781c33fe0dbfc3542cd74c49493b8e2863",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:397667849fee09c2a8bd05f578f816d52513c242f7408e72755c1096a38b9d12"
+    "scripts/build_product_readiness_snapshot.py": "sha256:73a25b098cd9a76fa0055c422ac7fd9ab490f9b265656ec5807260a332417a9d"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
-  "reason_code": "STALE_OR_INCONSISTENT",
+  "reason_code": "BLOCKED",
   "release_decision": {
     "approval_token_count": 4,
     "blocked_release_count": 5,
@@ -2857,31 +2812,9 @@
       ]
     },
     "release freshness/sync": {
-      "blocked": true,
-      "blocker_count": 21,
-      "blockers": [
-        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
-        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-        "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
-        "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
-        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
-      ]
+      "blocked": false,
+      "blocker_count": 0,
+      "blockers": []
     },
     "structural scope": {
       "blocked": false,
@@ -2891,10 +2824,10 @@
   },
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "snapshot_source_state_consistent": false,
+  "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "d093e06f07fead918411d544826b0487c0154d81",
-  "stale_or_inconsistent": true,
+  "source_commit_sha": "5cb807d7d97367a04fa2e67b7e7a44cb2f57e672",
+  "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -2983,19 +2916,24 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T20:15:00.476501+00:00",
+        "generated_at": "2026-07-01T20:17:56.801361+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "d093e06f07fead918411d544826b0487c0154d81",
+        "source_commit_sha": "5cb807d7d97367a04fa2e67b7e7a44cb2f57e672",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:51:22.996495+00:00",
         "input_checksum_present": true,
@@ -3003,13 +2941,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:51:11.580138+00:00",
         "input_checksum_present": true,
@@ -3017,13 +2960,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:51:22.886984+00:00",
         "input_checksum_present": true,
@@ -3031,13 +2979,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:40.294577+00:00",
         "input_checksum_present": true,
@@ -3045,13 +2998,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:57:59.491161+00:00",
         "input_checksum_present": true,
@@ -3059,13 +3017,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "f16a1ce521e84563fb713a6e2f4f23fce713fe8d",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:59:26.578751+00:00",
         "input_checksum_present": true,
@@ -3073,13 +3036,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "f16a1ce521e84563fb713a6e2f4f23fce713fe8d",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:39.951163+00:00",
         "input_checksum_present": true,
@@ -3087,13 +3055,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:39.037282+00:00",
         "input_checksum_present": true,
@@ -3101,13 +3074,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:39.109137+00:00",
         "input_checksum_present": true,
@@ -3115,13 +3093,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:22.757270+00:00",
         "input_checksum_present": true,
@@ -3129,13 +3112,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:22.731204+00:00",
         "input_checksum_present": true,
@@ -3143,13 +3131,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:23.687442+00:00",
         "input_checksum_present": true,
@@ -3157,13 +3150,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T10:19:19.231347+00:00",
         "input_checksum_present": true,
@@ -3171,13 +3169,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:22.743518+00:00",
         "input_checksum_present": true,
@@ -3185,13 +3188,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:22.735187+00:00",
         "input_checksum_present": true,
@@ -3199,13 +3207,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:53:44.685029+00:00",
         "input_checksum_present": true,
@@ -3213,13 +3226,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:22.782544+00:00",
         "input_checksum_present": true,
@@ -3227,13 +3245,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:50:39.089083+00:00",
         "input_checksum_present": true,
@@ -3241,13 +3264,18 @@
         "reused_evidence": true,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:51:11.419371+00:00",
         "input_checksum_present": true,
@@ -3255,13 +3283,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:51:22.844011+00:00",
         "input_checksum_present": true,
@@ -3269,13 +3302,18 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py"
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T19:59:30.794344+00:00",
         "input_checksum_present": true,
@@ -3283,8 +3321,8 @@
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "f16a1ce521e84563fb713a6e2f4f23fce713fe8d",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       }
     ],
     "open_blocker_counts": {
@@ -3315,7 +3353,6 @@
         "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
       ],
       "non_receipt_dirty_paths": [],
@@ -3347,11 +3384,10 @@
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
       ]
     }
   },
-  "status": "stale_or_inconsistent",
+  "status": "blocked",
   "workstation_delivery_ready": true
 }
