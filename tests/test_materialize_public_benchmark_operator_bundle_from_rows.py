@@ -492,6 +492,174 @@ def test_public_benchmark_operator_bundle_from_rows_flags_local_proxy_sources(
     ) in source_check["blockers"]
 
 
+def test_public_benchmark_operator_bundle_from_rows_flags_duplicate_row_identities(
+    tmp_path: Path,
+) -> None:
+    subset_rows = tmp_path / "subset.json"
+    pose_rows = tmp_path / "pose.json"
+    enrichment_rows = tmp_path / "enrichment.json"
+    vina_gnina_rows = tmp_path / "vina_gnina.json"
+
+    subset_rows.write_text(
+        json.dumps(
+            {
+                "rows": [
+                    {
+                        "case_id": "case_a",
+                        "source_license_or_accession": "PDBBind-CASF-2016-core:case_a",
+                        "source_checksum": _checksum("subset-case-a"),
+                        "provenance_ref": _provenance_ref(
+                            "public-benchmark", "casf-pdbbind", "case_a.json"
+                        ),
+                    },
+                    {
+                        "case_id": "case_a",
+                        "source_license_or_accession": "PDBBind-CASF-2016-core:case_a-copy",
+                        "source_checksum": _checksum("subset-case-a-copy"),
+                        "provenance_ref": _provenance_ref(
+                            "public-benchmark", "casf-pdbbind", "case_a_copy.json"
+                        ),
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    pose_rows.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {
+                        "case_id": "case_a",
+                        "receptor_context": {
+                            "provenance_ref": _provenance_ref(
+                                "public-benchmark", "pose", "case_a.json"
+                            )
+                        },
+                    },
+                    {
+                        "case_id": "case_a",
+                        "receptor_context": {
+                            "provenance_ref": _provenance_ref(
+                                "public-benchmark", "pose", "case_a_copy.json"
+                            )
+                        },
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    enrichment_rows.write_text(
+        json.dumps(
+            {
+                "targets": [
+                    {
+                        "target_id": "AA2AR",
+                        "source_license_or_accession": "DUD-E:AA2AR:release-2015",
+                        "source_checksum": _checksum("dude-aa2ar"),
+                        "provenance_ref": _provenance_ref(
+                            "public-benchmark", "dud-e", "AA2AR.json"
+                        ),
+                        "scored_molecules": [
+                            {"molecule_id": "active_1", "is_active": True, "score": 0.9},
+                            {"molecule_id": "active_1", "is_active": True, "score": 0.8},
+                        ],
+                    },
+                    {
+                        "target_id": "AA2AR",
+                        "source_license_or_accession": "DUD-E:AA2AR:release-2015-copy",
+                        "source_checksum": _checksum("dude-aa2ar-copy"),
+                        "provenance_ref": _provenance_ref(
+                            "public-benchmark", "dud-e", "AA2AR_copy.json"
+                        ),
+                        "scored_molecules": [
+                            {"molecule_id": "decoy_1", "is_active": False, "score": 0.1}
+                        ],
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    vina_gnina_rows.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {
+                        "case_id": "case_a",
+                        "source_license_or_accession": "PDBBind-CASF-2016-core:case_a",
+                        "source_checksum": _checksum("vina-case-a"),
+                        "provenance_ref": _provenance_ref(
+                            "public-benchmark", "vina-gnina", "case_a.json"
+                        ),
+                        "engine_runs": [
+                            {
+                                "engine_id": "vina",
+                                "docking_run_id": "case_a_vina",
+                                "predicted_ligand_path_or_pose_ref": _provenance_ref(
+                                    "public-benchmark", "vina-gnina", "case_a", "vina.sdf"
+                                ),
+                            },
+                            {
+                                "engine_id": "vina",
+                                "docking_run_id": "case_a_vina",
+                                "predicted_ligand_path_or_pose_ref": _provenance_ref(
+                                    "public-benchmark",
+                                    "vina-gnina",
+                                    "case_a",
+                                    "vina_copy.sdf",
+                                ),
+                            },
+                        ],
+                    },
+                    {
+                        "case_id": "case_a",
+                        "source_license_or_accession": "PDBBind-CASF-2016-core:case_a-copy",
+                        "source_checksum": _checksum("vina-case-a-copy"),
+                        "provenance_ref": _provenance_ref(
+                            "public-benchmark", "vina-gnina", "case_a_copy.json"
+                        ),
+                        "engine_runs": [],
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = module.build_public_benchmark_operator_bundle_from_rows(
+        subset_rows_path=subset_rows,
+        pose_rows_path=pose_rows,
+        enrichment_rows_path=enrichment_rows,
+        vina_gnina_rows_path=vina_gnina_rows,
+        target_subset_case_count=12,
+        repo_root=REPO_ROOT,
+    )
+
+    source_check = payload["materialization_report"]["source_actuality_check"]
+    assert source_check["contract_pass"] is False
+    assert source_check["row_integrity_policy"]["required_unique_row_keys"][
+        "vina_gnina_engine_runs"
+    ] == ["engine_id", "docking_run_id"]
+    assert "subset_rows:case_a:case_id_duplicate" in source_check["blockers"]
+    assert "pose_rows:case_a:case_id_duplicate" in source_check["blockers"]
+    assert "enrichment_rows:AA2AR:target_id_duplicate" in source_check["blockers"]
+    assert (
+        "enrichment_rows:AA2AR:molecule_1:molecule_id_duplicate:active_1"
+        in source_check["blockers"]
+    )
+    assert "vina_gnina_rows:case_a:case_id_duplicate" in source_check["blockers"]
+    assert (
+        "vina_gnina_rows:case_a:engine_run_1:engine_id_duplicate:vina"
+        in source_check["blockers"]
+    )
+    assert (
+        "vina_gnina_rows:case_a:engine_run_1:"
+        "docking_run_id_duplicate:case_a_vina"
+    ) in source_check["blockers"]
+
+
 def test_public_benchmark_operator_bundle_from_rows_cli_writes_bundle(
     tmp_path: Path,
 ) -> None:

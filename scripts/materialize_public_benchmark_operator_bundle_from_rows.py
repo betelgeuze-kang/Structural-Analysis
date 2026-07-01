@@ -101,6 +101,20 @@ SOURCE_ACTUALITY_POLICY = {
     "placeholder_markers_rejected": list(PLACEHOLDER_SOURCE_TEXT_MARKERS),
     "placeholder_provenance_prefixes_rejected": list(PLACEHOLDER_PROVENANCE_PREFIXES),
 }
+ROW_INTEGRITY_POLICY = {
+    "required_unique_row_keys": {
+        "subset_rows": ["case_id"],
+        "pose_rows": ["case_id"],
+        "enrichment_targets": ["target_id"],
+        "enrichment_target_molecules": ["molecule_id"],
+        "vina_gnina_cases": ["case_id"],
+        "vina_gnina_engine_runs": ["engine_id", "docking_run_id"],
+    },
+    "purpose": (
+        "Duplicate operator rows cannot be used to inflate Phase 2 Public Benchmark "
+        "case, target, molecule, or engine-run counts."
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -253,6 +267,132 @@ def _vina_engine_pose_ref_actuality_blockers(
     return blockers
 
 
+def _duplicate_field_blockers(
+    rows: list[dict[str, Any]],
+    *,
+    group_id: str,
+    field: str,
+) -> list[str]:
+    blockers: list[str] = []
+    seen: set[str] = set()
+    for row in rows:
+        value = _string(row.get(field))
+        if not value:
+            continue
+        if value in seen:
+            blockers.append(f"{group_id}:{value}:{field}_duplicate")
+            continue
+        seen.add(value)
+    return blockers
+
+
+def _molecule_identity_blockers(targets: list[dict[str, Any]]) -> list[str]:
+    blockers: list[str] = []
+    for target_index, target in enumerate(targets):
+        target_key = _row_key(
+            target,
+            fallback=f"target_{target_index}",
+            preferred_fields=("target_id",),
+        )
+        scored_molecules = target.get("scored_molecules")
+        if not isinstance(scored_molecules, list):
+            continue
+        seen_molecule_ids: set[str] = set()
+        for molecule_index, molecule in enumerate(scored_molecules):
+            if not isinstance(molecule, dict):
+                continue
+            molecule_id = _string(molecule.get("molecule_id"))
+            if not molecule_id:
+                continue
+            if molecule_id in seen_molecule_ids:
+                blockers.append(
+                    "enrichment_rows:"
+                    f"{target_key}:molecule_{molecule_index}:"
+                    f"molecule_id_duplicate:{molecule_id}"
+                )
+                continue
+            seen_molecule_ids.add(molecule_id)
+    return blockers
+
+
+def _engine_run_identity_blockers(cases: list[dict[str, Any]]) -> list[str]:
+    blockers: list[str] = []
+    for case_index, case in enumerate(cases):
+        case_key = _row_key(
+            case,
+            fallback=f"case_{case_index}",
+            preferred_fields=("case_id", "complex_id"),
+        )
+        raw_runs = case.get("engine_runs")
+        if not isinstance(raw_runs, list):
+            continue
+        seen_engine_ids: set[str] = set()
+        seen_docking_run_ids: set[str] = set()
+        for run_index, run in enumerate(raw_runs):
+            if not isinstance(run, dict):
+                continue
+            engine_id = _string(run.get("engine_id")).lower().replace("_", "-")
+            docking_run_id = _string(run.get("docking_run_id"))
+            if engine_id:
+                if engine_id in seen_engine_ids:
+                    blockers.append(
+                        "vina_gnina_rows:"
+                        f"{case_key}:engine_run_{run_index}:"
+                        f"engine_id_duplicate:{engine_id}"
+                    )
+                seen_engine_ids.add(engine_id)
+            if docking_run_id:
+                if docking_run_id in seen_docking_run_ids:
+                    blockers.append(
+                        "vina_gnina_rows:"
+                        f"{case_key}:engine_run_{run_index}:"
+                        f"docking_run_id_duplicate:{docking_run_id}"
+                    )
+                seen_docking_run_ids.add(docking_run_id)
+    return blockers
+
+
+def _row_integrity_blockers(
+    *,
+    subset_rows: list[dict[str, Any]],
+    pose_rows: list[dict[str, Any]],
+    enrichment_targets: list[dict[str, Any]],
+    vina_gnina_cases: list[dict[str, Any]],
+) -> list[str]:
+    blockers: list[str] = []
+    blockers.extend(
+        _duplicate_field_blockers(
+            subset_rows,
+            group_id="subset_rows",
+            field="case_id",
+        )
+    )
+    blockers.extend(
+        _duplicate_field_blockers(
+            pose_rows,
+            group_id="pose_rows",
+            field="case_id",
+        )
+    )
+    blockers.extend(
+        _duplicate_field_blockers(
+            enrichment_targets,
+            group_id="enrichment_rows",
+            field="target_id",
+        )
+    )
+    blockers.extend(_molecule_identity_blockers(enrichment_targets))
+    blockers.extend(
+        _duplicate_field_blockers(
+            vina_gnina_cases,
+            group_id="vina_gnina_rows",
+            field="case_id",
+        )
+    )
+    blockers.extend(_engine_run_identity_blockers(vina_gnina_cases))
+    return blockers
+
+
 def _row_key(row: dict[str, Any], *, fallback: str, preferred_fields: tuple[str, ...]) -> str:
     for field in preferred_fields:
         value = _string(row.get(field))
@@ -269,6 +409,14 @@ def _source_actuality_check(
     vina_gnina_cases: list[dict[str, Any]],
 ) -> dict[str, Any]:
     blockers: list[str] = []
+    blockers.extend(
+        _row_integrity_blockers(
+            subset_rows=subset_rows,
+            pose_rows=pose_rows,
+            enrichment_targets=enrichment_targets,
+            vina_gnina_cases=vina_gnina_cases,
+        )
+    )
     for index, row in enumerate(subset_rows):
         blockers.extend(
             _source_receipt_actuality_blockers(
@@ -318,10 +466,12 @@ def _source_actuality_check(
             "vina_gnina_cases": len(vina_gnina_cases),
         },
         "policy": SOURCE_ACTUALITY_POLICY,
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "claim_boundary": (
             "This check rejects fixture, dry-run, placeholder, local/proxy URI, and repeated-digest "
-            "source receipts before Public Benchmark Phase 2 can be promoted as actual evidence. "
-            "It does not independently verify external licenses or download public benchmark data."
+            "source receipts and duplicate row identities before Public Benchmark Phase 2 can be "
+            "promoted as actual evidence. It does not independently verify external licenses or "
+            "download public benchmark data."
         ),
     }
 

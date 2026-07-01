@@ -616,6 +616,52 @@ def test_public_benchmark_phase2_row_audit_blocks_failed_source_actuality_contra
     assert audit["summary"]["blocker_count"] == 1
 
 
+def test_public_benchmark_phase2_row_audit_blocks_duplicate_case_rows(
+    tmp_path: Path,
+) -> None:
+    rows = _write_phase2_rows(tmp_path)
+    subset_payload = json.loads(rows["subset"].read_text(encoding="utf-8"))
+    pose_payload = json.loads(rows["pose"].read_text(encoding="utf-8"))
+    subset_payload["rows"][1]["case_id"] = subset_payload["rows"][0]["case_id"]
+    pose_payload["cases"][1]["case_id"] = pose_payload["cases"][0]["case_id"]
+    rows["subset"].write_text(json.dumps(subset_payload), encoding="utf-8")
+    rows["pose"].write_text(json.dumps(pose_payload), encoding="utf-8")
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        subset_rows_path=rows["subset"],
+        pose_rows_path=rows["pose"],
+        enrichment_rows_path=rows["enrichment"],
+        vina_gnina_rows_path=rows["vina_gnina"],
+        target_subset_case_count=module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["contract_pass"] is False
+    assert audit["phase2_ready"] is False
+    assert audit["operator_bundle_source_actuality_check"]["contract_pass"] is False
+    assert (
+        "subset_rows:case_01:case_id_duplicate"
+        in audit["operator_bundle_source_actuality_check"]["blockers"]
+    )
+    assert (
+        "pose_rows:case_01:case_id_duplicate"
+        in audit["operator_bundle_source_actuality_check"]["blockers"]
+    )
+    assert (
+        "operator_bundle_source_actuality::subset_rows:case_01:case_id_duplicate"
+        in audit["blockers"]
+    )
+    assert (
+        "operator_bundle_source_actuality::pose_rows:case_01:case_id_duplicate"
+        in audit["blockers"]
+    )
+
+
 def test_public_benchmark_phase2_row_audit_autodetects_default_row_paths(
     tmp_path: Path,
 ) -> None:
