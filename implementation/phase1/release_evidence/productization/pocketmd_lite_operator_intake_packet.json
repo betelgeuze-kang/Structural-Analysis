@@ -161,11 +161,11 @@
     }
   ],
   "gate_unblock_plan_count": 1,
-  "generated_at": "2026-07-01T05:11:40.524724+00:00",
+  "generated_at": "2026-07-01T06:36:54.433118+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:c21039d69201be45cea2ecdb6d241d622c50dfe9f2fbca37ef207f6e713ed29c",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:c95d3613bc538e66ed7c54c191e813019e40ddfd728272e11d3cb2ef1ac877f0",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:901204e8a2c4f20693a6ec22d288f8333aee72c373fdce5fe07ca75d3a882048",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:b38110a12eeb1057133dd701c32e09d3bb89a1317f140d4c0374b9d2e3e7c4be"
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:b849c3ca45e7e840e8c778f251b0ed613400adb0982d507d50092583a93ac6a9"
   },
   "input_slots": [
     {
@@ -407,7 +407,7 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/operator-intake",
   "schema_version": "pocketmd-lite-operator-intake-packet.v1",
-  "source_commit_sha": "7a127c25261f9425ce717509c9b39f135bc5785c",
+  "source_commit_sha": "a42a913582607f8746c80b4b67033a6c72171738",
   "status": "ready_for_operator_input",
   "summary": {
     "current_blocker_count": 6,
