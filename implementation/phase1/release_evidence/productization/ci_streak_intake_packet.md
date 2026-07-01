@@ -19,6 +19,13 @@
 |---|---|---:|---:|---:|---|
 | `implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json` | `blocked` | `0/1` | `0` | `False` | Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. |
 
+## Job Start Blocker Queue
+
+| Lane | Count | Reason Codes | First Run | Owner Action |
+|---|---:|---|---|---|
+| `pr` | `5` | `github_actions_self_hosted_runner_queued_timeout` | `28481977838` | Resolve the pr GitHub Actions job-start blocker, bring the required self-hosted runner online, rerun the workflow, then collect 30 consecutive successful run(s). |
+| `nightly` | `1` | `github_actions_self_hosted_runner_queued_timeout` | `28473310506` | Resolve the nightly GitHub Actions job-start blocker, bring the required self-hosted runner online, rerun the workflow, then collect 30 consecutive successful run(s). |
+
 ## Validation Commands
 
 - `python3 scripts/check_github_actions_self_hosted_runner_status.py --out implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json`
@@ -32,4 +39,4 @@
 
 | Path | Schema | Fresh | Age Hours | Pass |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `9.897` | `False` |
+| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `13.246` | `False` |

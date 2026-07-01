@@ -15,8 +15,182 @@
     "nightly:github_actions_filtered_run_count_below_threshold",
     "runner:self_hosted_runner_matching_labels_not_online"
   ],
-  "generated_at": "2026-07-01T20:13:09.705481+00:00",
+  "first_job_start_blocker": {
+    "first_head_branch": "codex/seed-pr-ci-source-evidence",
+    "first_head_sha": "fc6ba0f860d0edd8f4b1d661aad9734c643a864e",
+    "first_message": "pr workflow run has remained queued for 665.1 minutes on a self-hosted runner lane.",
+    "first_queued_minutes": 665.1,
+    "first_run_id": 28481977838,
+    "first_run_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481977838",
+    "job_start_blocker_count": 5,
+    "lane": "pr",
+    "owner_action": "Resolve the pr GitHub Actions job-start blocker, bring the required self-hosted runner online, rerun the workflow, then collect 30 consecutive successful run(s).",
+    "reason_codes": [
+      "github_actions_self_hosted_runner_queued_timeout"
+    ],
+    "sample_blockers": [
+      {
+        "event": "pull_request",
+        "head_branch": "codex/seed-pr-ci-source-evidence",
+        "head_sha": "fc6ba0f860d0edd8f4b1d661aad9734c643a864e",
+        "message": "pr workflow run has remained queued for 665.1 minutes on a self-hosted runner lane.",
+        "queued_minutes": 665.1,
+        "queued_threshold_minutes": 15,
+        "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+        "run_id": 28481977838,
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481977838"
+      },
+      {
+        "event": "pull_request",
+        "head_branch": "codex/seed-pr-ci-source-evidence",
+        "head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
+        "message": "pr workflow run has remained queued for 669.5 minutes on a self-hosted runner lane.",
+        "queued_minutes": 669.5,
+        "queued_threshold_minutes": 15,
+        "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+        "run_id": 28481792430,
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481792430"
+      },
+      {
+        "event": "pull_request",
+        "head_branch": "codex/seed-pr-ci-source-evidence",
+        "head_sha": "e27064f14285901d7999bdec2244a9901bb724e1",
+        "message": "pr workflow run has remained queued for 670.7 minutes on a self-hosted runner lane.",
+        "queued_minutes": 670.7,
+        "queued_threshold_minutes": 15,
+        "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+        "run_id": 28481741944,
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481741944"
+      },
+      {
+        "event": "pull_request",
+        "head_branch": "codex/seed-pr-ci-source-evidence",
+        "head_sha": "c26924c10254504ebab89f10c19d288387c582f3",
+        "message": "pr workflow run has remained queued for 676.8 minutes on a self-hosted runner lane.",
+        "queued_minutes": 676.8,
+        "queued_threshold_minutes": 15,
+        "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+        "run_id": 28481469423,
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481469423"
+      },
+      {
+        "event": "pull_request",
+        "head_branch": "codex/seed-pr-ci-source-evidence",
+        "head_sha": "d2e14ab688f917aba703844d28610b06eeb662a0",
+        "message": "pr workflow run has remained queued for 689.4 minutes on a self-hosted runner lane.",
+        "queued_minutes": 689.4,
+        "queued_threshold_minutes": 15,
+        "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+        "run_id": 28480922171,
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28480922171"
+      }
+    ],
+    "status": "external_runner_recovery_required"
+  },
+  "generated_at": "2026-07-01T23:34:05.287175+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+  "job_start_blocker_queue": [
+    {
+      "first_head_branch": "codex/seed-pr-ci-source-evidence",
+      "first_head_sha": "fc6ba0f860d0edd8f4b1d661aad9734c643a864e",
+      "first_message": "pr workflow run has remained queued for 665.1 minutes on a self-hosted runner lane.",
+      "first_queued_minutes": 665.1,
+      "first_run_id": 28481977838,
+      "first_run_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481977838",
+      "job_start_blocker_count": 5,
+      "lane": "pr",
+      "owner_action": "Resolve the pr GitHub Actions job-start blocker, bring the required self-hosted runner online, rerun the workflow, then collect 30 consecutive successful run(s).",
+      "reason_codes": [
+        "github_actions_self_hosted_runner_queued_timeout"
+      ],
+      "sample_blockers": [
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "fc6ba0f860d0edd8f4b1d661aad9734c643a864e",
+          "message": "pr workflow run has remained queued for 665.1 minutes on a self-hosted runner lane.",
+          "queued_minutes": 665.1,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481977838,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481977838"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
+          "message": "pr workflow run has remained queued for 669.5 minutes on a self-hosted runner lane.",
+          "queued_minutes": 669.5,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481792430,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481792430"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "e27064f14285901d7999bdec2244a9901bb724e1",
+          "message": "pr workflow run has remained queued for 670.7 minutes on a self-hosted runner lane.",
+          "queued_minutes": 670.7,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481741944,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481741944"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "c26924c10254504ebab89f10c19d288387c582f3",
+          "message": "pr workflow run has remained queued for 676.8 minutes on a self-hosted runner lane.",
+          "queued_minutes": 676.8,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481469423,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481469423"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "d2e14ab688f917aba703844d28610b06eeb662a0",
+          "message": "pr workflow run has remained queued for 689.4 minutes on a self-hosted runner lane.",
+          "queued_minutes": 689.4,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28480922171,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28480922171"
+        }
+      ],
+      "status": "external_runner_recovery_required"
+    },
+    {
+      "first_head_branch": "main",
+      "first_head_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
+      "first_message": "nightly workflow run has remained queued for 838.6 minutes on a self-hosted runner lane.",
+      "first_queued_minutes": 838.6,
+      "first_run_id": 28473310506,
+      "first_run_url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28473310506",
+      "job_start_blocker_count": 1,
+      "lane": "nightly",
+      "owner_action": "Resolve the nightly GitHub Actions job-start blocker, bring the required self-hosted runner online, rerun the workflow, then collect 30 consecutive successful run(s).",
+      "reason_codes": [
+        "github_actions_self_hosted_runner_queued_timeout"
+      ],
+      "sample_blockers": [
+        {
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
+          "message": "nightly workflow run has remained queued for 838.6 minutes on a self-hosted runner lane.",
+          "queued_minutes": 838.6,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28473310506,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28473310506"
+        }
+      ],
+      "status": "external_runner_recovery_required"
+    }
+  ],
   "lane_rows": [
     {
       "blockers": [
@@ -38,6 +212,64 @@
       "github_actions_workflow_active": true,
       "github_actions_workflow_registered": true,
       "github_actions_workflow_state": "active",
+      "job_start_blocker_count": 5,
+      "job_start_blockers": [
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "fc6ba0f860d0edd8f4b1d661aad9734c643a864e",
+          "message": "pr workflow run has remained queued for 665.1 minutes on a self-hosted runner lane.",
+          "queued_minutes": 665.1,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481977838,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481977838"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
+          "message": "pr workflow run has remained queued for 669.5 minutes on a self-hosted runner lane.",
+          "queued_minutes": 669.5,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481792430,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481792430"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "e27064f14285901d7999bdec2244a9901bb724e1",
+          "message": "pr workflow run has remained queued for 670.7 minutes on a self-hosted runner lane.",
+          "queued_minutes": 670.7,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481741944,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481741944"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "c26924c10254504ebab89f10c19d288387c582f3",
+          "message": "pr workflow run has remained queued for 676.8 minutes on a self-hosted runner lane.",
+          "queued_minutes": 676.8,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481469423,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481469423"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "d2e14ab688f917aba703844d28610b06eeb662a0",
+          "message": "pr workflow run has remained queued for 689.4 minutes on a self-hosted runner lane.",
+          "queued_minutes": 689.4,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28480922171,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28480922171"
+        }
+      ],
       "lane": "pr",
       "local_consecutive_pass_count": 2,
       "local_pull_request_trigger_present": true,
@@ -84,6 +316,20 @@
       "github_actions_workflow_active": true,
       "github_actions_workflow_registered": true,
       "github_actions_workflow_state": "active",
+      "job_start_blocker_count": 1,
+      "job_start_blockers": [
+        {
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
+          "message": "nightly workflow run has remained queued for 838.6 minutes on a self-hosted runner lane.",
+          "queued_minutes": 838.6,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28473310506,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28473310506"
+        }
+      ],
       "lane": "nightly",
       "local_consecutive_pass_count": 230,
       "local_pull_request_trigger_present": false,
@@ -136,7 +382,7 @@
   },
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 9.897,
+    "age_hours": 13.246,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -153,6 +399,20 @@
           "github_actions_lane_threshold_not_pass",
           "github_actions_lane_streak_below_threshold",
           "github_actions_filtered_run_count_below_threshold"
+        ],
+        "job_start_blocker_count": 1,
+        "job_start_blockers": [
+          {
+            "event": "schedule",
+            "head_branch": "main",
+            "head_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
+            "message": "nightly workflow run has remained queued for 838.6 minutes on a self-hosted runner lane.",
+            "queued_minutes": 838.6,
+            "queued_threshold_minutes": 15,
+            "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+            "run_id": 28473310506,
+            "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28473310506"
+          }
         ],
         "lane": "nightly",
         "local_github_hosted_runner_default": false,
@@ -186,6 +446,64 @@
         "blockers": [
           "github_actions_lane_threshold_not_pass",
           "github_actions_lane_streak_below_threshold"
+        ],
+        "job_start_blocker_count": 5,
+        "job_start_blockers": [
+          {
+            "event": "pull_request",
+            "head_branch": "codex/seed-pr-ci-source-evidence",
+            "head_sha": "fc6ba0f860d0edd8f4b1d661aad9734c643a864e",
+            "message": "pr workflow run has remained queued for 665.1 minutes on a self-hosted runner lane.",
+            "queued_minutes": 665.1,
+            "queued_threshold_minutes": 15,
+            "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+            "run_id": 28481977838,
+            "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481977838"
+          },
+          {
+            "event": "pull_request",
+            "head_branch": "codex/seed-pr-ci-source-evidence",
+            "head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
+            "message": "pr workflow run has remained queued for 669.5 minutes on a self-hosted runner lane.",
+            "queued_minutes": 669.5,
+            "queued_threshold_minutes": 15,
+            "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+            "run_id": 28481792430,
+            "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481792430"
+          },
+          {
+            "event": "pull_request",
+            "head_branch": "codex/seed-pr-ci-source-evidence",
+            "head_sha": "e27064f14285901d7999bdec2244a9901bb724e1",
+            "message": "pr workflow run has remained queued for 670.7 minutes on a self-hosted runner lane.",
+            "queued_minutes": 670.7,
+            "queued_threshold_minutes": 15,
+            "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+            "run_id": 28481741944,
+            "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481741944"
+          },
+          {
+            "event": "pull_request",
+            "head_branch": "codex/seed-pr-ci-source-evidence",
+            "head_sha": "c26924c10254504ebab89f10c19d288387c582f3",
+            "message": "pr workflow run has remained queued for 676.8 minutes on a self-hosted runner lane.",
+            "queued_minutes": 676.8,
+            "queued_threshold_minutes": 15,
+            "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+            "run_id": 28481469423,
+            "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481469423"
+          },
+          {
+            "event": "pull_request",
+            "head_branch": "codex/seed-pr-ci-source-evidence",
+            "head_sha": "d2e14ab688f917aba703844d28610b06eeb662a0",
+            "message": "pr workflow run has remained queued for 689.4 minutes on a self-hosted runner lane.",
+            "queued_minutes": 689.4,
+            "queued_threshold_minutes": 15,
+            "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+            "run_id": 28480922171,
+            "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28480922171"
+          }
         ],
         "lane": "pr",
         "local_github_hosted_runner_default": false,
@@ -230,6 +548,8 @@
   },
   "status": "blocked",
   "summary": {
+    "job_start_blocker_count": 6,
+    "job_start_blocker_lane_count": 2,
     "lane_count": 2,
     "lane_pass_count": 0,
     "nightly_github_actions_workflow_registered": true,
@@ -257,7 +577,7 @@
       "x64"
     ],
     "runner_status": "blocked",
-    "source_evidence_age_hours": 9.897,
+    "source_evidence_age_hours": 13.246,
     "source_evidence_freshness_pass": true,
     "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
     "source_evidence_pass": false,

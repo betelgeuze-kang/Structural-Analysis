@@ -334,6 +334,113 @@ def test_ci_streak_intake_packet_preserves_observed_partial_github_streak(tmp_pa
     assert "Observed Streak" in markdown
 
 
+def test_ci_streak_intake_packet_surfaces_job_start_blocker_queue(
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    manifest = _write_json(
+        tmp_path / "ci_consecutive_pass_manifest.json",
+        {
+            "contract_pass": False,
+            "threshold": 30,
+            "lanes": {
+                "pr": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "streak_source": "github_actions_job_start_blocked",
+                    "owner_action": "Resolve queued PR run.",
+                    "blockers": ["pr_github_actions_job_start_blocked"],
+                },
+                "nightly": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "owner_action": "Collect nightly passes.",
+                    "blockers": ["nightly_ci_30_consecutive_pass_evidence_missing"],
+                },
+            },
+        },
+    )
+    github_actions = _write_json(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "generated_at": now.isoformat(),
+            "threshold": 30,
+            "workflow_discovery": {"query_error": ""},
+            "lanes": {
+                "pr": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "run_count": 30,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_required_trigger_present": True,
+                    "local_pull_request_trigger_present": True,
+                    "query_error": "",
+                    "pull_request_run_source_present": True,
+                    "job_start_blockers": [
+                        {
+                            "run_id": 123,
+                            "url": "https://example.test/actions/runs/123",
+                            "head_sha": "abc123",
+                            "head_branch": "release-branch",
+                            "reason_code": (
+                                "github_actions_self_hosted_runner_queued_timeout"
+                            ),
+                            "queued_minutes": 42.5,
+                            "message": (
+                                "pr workflow run has remained queued for "
+                                "42.5 minutes on a self-hosted runner lane."
+                            ),
+                        }
+                    ],
+                },
+                "nightly": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "run_count": 30,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_required_trigger_present": True,
+                    "local_schedule_trigger_present": True,
+                    "query_error": "",
+                },
+            },
+        },
+    )
+
+    payload = build_ci_streak_intake_packet.build_packet(
+        manifest_path=manifest,
+        github_actions_evidence_path=github_actions,
+        now=now,
+    )
+    rows = {row["lane"]: row for row in payload["lane_rows"]}
+    queue = payload["job_start_blocker_queue"]
+    markdown = build_ci_streak_intake_packet._markdown(payload)
+
+    assert rows["pr"]["job_start_blocker_count"] == 1
+    assert rows["pr"]["job_start_blockers"][0]["run_id"] == 123
+    assert payload["summary"]["job_start_blocker_lane_count"] == 1
+    assert payload["summary"]["job_start_blocker_count"] == 1
+    assert queue == [payload["first_job_start_blocker"]]
+    assert queue[0]["lane"] == "pr"
+    assert queue[0]["first_run_id"] == 123
+    assert queue[0]["first_head_sha"] == "abc123"
+    assert queue[0]["first_head_branch"] == "release-branch"
+    assert queue[0]["first_queued_minutes"] == 42.5
+    assert queue[0]["reason_codes"] == [
+        "github_actions_self_hosted_runner_queued_timeout"
+    ]
+    assert "Job Start Blocker Queue" in markdown
+    assert "https://example.test/actions/runs/123" not in markdown
+
+
 def test_ci_streak_intake_packet_surfaces_offline_self_hosted_runner(
     tmp_path: Path,
 ) -> None:
