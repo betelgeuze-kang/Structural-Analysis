@@ -49,6 +49,10 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
             "candidate_case_count_without_scorecard_receipts",
             "license_pending_rows_used_as_pass_evidence",
         ],
+        "release_surface_impacts": [
+            "developer_preview_rc::selected_medium_models_pass_or_approved_review",
+            "product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review",
+        ],
         "closure_decision_required": "five_PASS_or_explicit_APPROVED_REVIEW_rows",
     },
     "linux_windows_reproducibility_confirmed": {
@@ -73,6 +77,10 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
             "linux_only_replay_copied_as_windows_parity",
             "git_clean_clone_receipt_counted_twice",
             "manual_platform_claim_without_replay_receipt",
+        ],
+        "release_surface_impacts": [
+            "developer_preview_rc::linux_windows_reproducibility_confirmed",
+            "product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed",
         ],
         "closure_decision_required": "direct_windows_replay_receipt_passes",
     },
@@ -112,6 +120,12 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
             "template_ux_observation_json",
             "self_referential_or_placeholder_evidence_refs",
             "gui_shell_coverage_without_user_observation",
+        ],
+        "release_surface_impacts": [
+            "developer_preview_rc::new_user_core_workflow_observation_passed",
+            "pm_release::ux::human_new_user_observation_missing_or_failed",
+            "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+            "product_readiness_snapshot::human_ux::*",
         ],
         "closure_decision_required": "accepted_human_new_user_observation",
     },
@@ -176,6 +190,9 @@ def _owner_packet_for_gate(gate: dict[str, Any]) -> dict[str, Any]:
         ],
         "prohibited_substitutes": [
             str(item) for item in _as_list(handoff.get("prohibited_substitutes"))
+        ],
+        "release_surface_impacts": [
+            str(item) for item in _as_list(handoff.get("release_surface_impacts"))
         ],
         "current_blockers": [str(item) for item in _as_list(gate.get("blockers"))],
         "blocker_grouping_metadata": gate.get("blocker_grouping_metadata", {}),
@@ -269,6 +286,9 @@ def build_owner_packet(
             if gate not in blocked_gates
         ],
         "owner_packet_count": len(owner_packets),
+        "release_surface_impact_count": sum(
+            len(packet["release_surface_impacts"]) for packet in owner_packets
+        ),
         "owner_packets": owner_packets,
         "required_closure_evidence_policy": (
             "Each blocked final gate must attach the named owner evidence and "
@@ -318,6 +338,14 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(f"### `{packet['gate']}`")
         for command in packet["verification_commands"]:
             lines.append(f"- `{command}`")
+        lines.append("")
+    lines.extend(["## Release Surface Impacts", ""])
+    for packet in payload["owner_packets"]:
+        lines.append(f"### `{packet['gate']}`")
+        for item in packet["release_surface_impacts"]:
+            lines.append(f"- `{item}`")
+        if not packet["release_surface_impacts"]:
+            lines.append("- none")
         lines.append("")
     if payload["blockers"]:
         lines.extend(["## Packet Blockers", ""])

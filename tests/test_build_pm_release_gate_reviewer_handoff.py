@@ -173,6 +173,72 @@ def test_build_handoff_blocks_when_required_review_fields_are_missing(tmp_path: 
     assert payload["incomplete_blockers"] == ["security::license_status_not_configured"]
 
 
+def test_build_handoff_routes_release_tier_blocker_verdict_conditions(tmp_path: Path) -> None:
+    pm_report = _write_json(tmp_path / "pm_release_gate_report.json", {"summary_line": "PM release gate"})
+    closure_board = _write_json(
+        tmp_path / "pm_release_blocker_closure_board.json",
+        {
+            "rows": [
+                {
+                    "blocker_id": "independent_vv_missing",
+                    "owner": "independent_vv_owner",
+                    "closure_state": "external_owner_input_ready",
+                    "handoff_state": "external_owner_input_ready",
+                    "evidence_state": "missing_external_ga_enterprise_signoff_evidence",
+                    "next_action": "Attach an approved independent V&V attestation.",
+                    "claim_boundary": "GA requires independent V&V evidence.",
+                    "acceptance_criteria": ["approved independent V&V attestation attached"],
+                    "primary_evidence_artifacts": {
+                        "ga_enterprise_signoff_intake_packet": "ga_packet.json"
+                    },
+                    "reproduction_commands": ["python3 scripts/build_ga_enterprise_signoff_intake_packet.py"],
+                    "verification_commands": [
+                        "python3 scripts/build_pm_release_gate_reviewer_handoff.py"
+                    ],
+                    "external_input_required": True,
+                    "owner_input_required": True,
+                }
+            ]
+        },
+    )
+    completion_audit = _write_json(
+        tmp_path / "pm_release_gate_completion_audit.json",
+        {
+            "rows": [
+                {
+                    "requirement_id": "release_tier.ga_enterprise_evidence_gate_pass",
+                    "group": "release_tier",
+                    "title": "GA / Enterprise Evidence Gate",
+                    "status": "blocked",
+                    "pass": False,
+                    "blockers": ["independent_vv_missing"],
+                    "next_action": "Attach independent V&V evidence.",
+                    "claim_boundary": "GA requires independent V&V.",
+                }
+            ]
+        },
+    )
+
+    payload = build_handoff_module.build_handoff(
+        pm_report=pm_report,
+        closure_board=closure_board,
+        completion_audit=completion_audit,
+    )
+    row = payload["rows"][0]
+
+    assert payload["contract_pass"] is True
+    assert row["release_area_requirement_id"] == ""
+    assert row["verdict_requirement_id"] == "release_tier.ga_enterprise_evidence_gate_pass"
+    assert row["verdict_requirement_group"] == "release_tier"
+    assert any("pass is `true`" in item for item in row["verdict_change_conditions"])
+    assert any("independent_vv_missing" in item for item in row["verdict_change_conditions"])
+    assert not any("release_area." in item for item in row["verdict_change_conditions"])
+
+    markdown = build_handoff_module._markdown(payload)
+    assert "Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`" in markdown
+    assert "Verdict requirement group: `release_tier`" in markdown
+
+
 def test_build_handoff_blocks_when_blocked_release_tier_missing_handoff_fields(tmp_path: Path) -> None:
     pm_report = _write_json(tmp_path / "pm_release_gate_report.json", {"summary_line": "PM release gate"})
     closure_board = _write_json(tmp_path / "pm_release_blocker_closure_board.json", {"rows": []})

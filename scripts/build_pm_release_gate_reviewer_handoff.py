@@ -101,14 +101,36 @@ def _required_fields_present(row: dict[str, Any]) -> bool:
 def _verdict_change_conditions(*, blocker_id: str, audit_row: dict[str, Any]) -> list[str]:
     namespace, _ = _split_blocker(blocker_id)
     check_keys = BLOCKER_CHECK_KEYS.get(blocker_id, [])
-    conditions = [
-        f"`release_area.{namespace}` status is `pass` in `pm_release_gate_completion_audit.json`",
-        f"`{blocker_id}` is absent from `pm_release_gate_report.json.release_area_blockers`",
-    ]
-    for key in check_keys:
-        conditions.append(f"`release_area.{namespace}::{key}` is `true` in `pm_release_gate_report.json`")
-    if not check_keys:
-        conditions.append("The owning release-area row has no blocker-specific false check in the PM report.")
+    requirement_id = str(audit_row.get("requirement_id", "") or "")
+    group = str(audit_row.get("group", "") or "")
+    conditions: list[str] = []
+    if requirement_id:
+        if group == "release_tier":
+            conditions.append(
+                f"`{requirement_id}` pass is `true` in `pm_release_gate_completion_audit.json`"
+            )
+            conditions.append(
+                f"`{blocker_id}` is absent from `{requirement_id}.blockers` "
+                "in `pm_release_gate_completion_audit.json`"
+            )
+        else:
+            conditions.append(
+                f"`{requirement_id}` status is `pass` in `pm_release_gate_completion_audit.json`"
+            )
+            conditions.append(
+                f"`{blocker_id}` is absent from `pm_release_gate_report.json.release_area_blockers`"
+            )
+    else:
+        conditions.append("An owning PM completion-audit requirement row must be identified.")
+    if group != "release_tier":
+        for key in check_keys:
+            conditions.append(
+                f"`release_area.{namespace}::{key}` is `true` in `pm_release_gate_report.json`"
+            )
+        if not check_keys:
+            conditions.append(
+                "The owning release-area row has no blocker-specific false check in the PM report."
+            )
     checks = _as_dict(audit_row.get("checks"))
     false_checks = [key for key, value in checks.items() if value is False]
     if false_checks:
@@ -116,22 +138,42 @@ def _verdict_change_conditions(*, blocker_id: str, audit_row: dict[str, Any]) ->
     return conditions
 
 
-def _audit_row_for_blocker(blocker_id: str, audit_rows: dict[str, dict[str, Any]]) -> dict[str, Any]:
+def _audit_row_for_blocker(
+    blocker_id: str,
+    audit_rows: dict[str, dict[str, Any]],
+    audit_row_list: list[dict[str, Any]],
+) -> dict[str, Any]:
     namespace, _ = _split_blocker(blocker_id)
-    return _as_dict(audit_rows.get(f"release_area.{namespace}"))
+    if namespace:
+        direct_row = _as_dict(audit_rows.get(f"release_area.{namespace}"))
+        if direct_row:
+            return direct_row
+    matching_rows = [
+        row for row in audit_row_list if blocker_id in [str(item) for item in _as_list(row.get("blockers"))]
+    ]
+    if not matching_rows:
+        return {}
+    matching_rows.sort(key=lambda row: 0 if str(row.get("group", "")) == "release_area" else 1)
+    return matching_rows[0]
 
 
 def _handoff_row(
     *,
     blocker: dict[str, Any],
     audit_rows: dict[str, dict[str, Any]],
+    audit_row_list: list[dict[str, Any]],
 ) -> dict[str, Any]:
     blocker_id = str(blocker.get("blocker_id", ""))
-    audit_row = _audit_row_for_blocker(blocker_id, audit_rows)
+    audit_row = _audit_row_for_blocker(blocker_id, audit_rows, audit_row_list)
+    requirement_id = str(audit_row.get("requirement_id", ""))
+    requirement_group = str(audit_row.get("group", ""))
     return {
         "blocker_id": blocker_id,
-        "release_area_requirement_id": str(audit_row.get("requirement_id", "")),
-        "release_area_status": str(audit_row.get("status", "")),
+        "release_area_requirement_id": requirement_id if requirement_group != "release_tier" else "",
+        "release_area_status": str(audit_row.get("status", "")) if requirement_group != "release_tier" else "",
+        "verdict_requirement_id": requirement_id,
+        "verdict_requirement_group": requirement_group,
+        "verdict_requirement_status": str(audit_row.get("status", "")),
         "owner": str(blocker.get("owner", "")),
         "closure_state": str(blocker.get("closure_state", "")),
         "handoff_state": str(blocker.get("handoff_state", "")),
@@ -186,9 +228,10 @@ def build_handoff(
     pm_payload = _load_json(pm_report)
     closure_payload = _load_json(closure_board)
     audit_payload = _load_json(completion_audit)
-    audit_rows = _indexed(_as_list(audit_payload.get("rows")), "requirement_id")
+    audit_row_list = [row for row in _as_list(audit_payload.get("rows")) if isinstance(row, dict)]
+    audit_rows = _indexed(audit_row_list, "requirement_id")
     rows = [
-        _handoff_row(blocker=row, audit_rows=audit_rows)
+        _handoff_row(blocker=row, audit_rows=audit_rows, audit_row_list=audit_row_list)
         for row in _as_list(closure_payload.get("rows"))
         if isinstance(row, dict)
     ]
@@ -320,7 +363,9 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"### `{row['blocker_id']}`",
                 "",
                 f"- Owner: `{row['owner']}`",
-                f"- Release area status: `{row['release_area_status']}`",
+                f"- Verdict requirement: `{row['verdict_requirement_id'] or 'unmapped'}`",
+                f"- Verdict requirement group: `{row['verdict_requirement_group'] or 'unmapped'}`",
+                f"- Verdict requirement status: `{row['verdict_requirement_status'] or 'unmapped'}`",
                 f"- Closure state: `{row['closure_state']}`",
                 f"- Evidence state: `{row['evidence_state']}`",
                 f"- External input required: `{row['external_input_required']}`",

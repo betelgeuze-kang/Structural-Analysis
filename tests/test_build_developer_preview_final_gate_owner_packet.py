@@ -91,6 +91,7 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
     assert payload["evidence_closure_pass"] is False
     assert payload["blocked_final_gate_count"] == 3
     assert payload["owner_packet_count"] == 3
+    assert payload["release_surface_impact_count"] == 8
     packets = {packet["gate"]: packet for packet in payload["owner_packets"]}
     assert packets["selected_medium_models_pass_or_approved_review"]["owner"] == (
         "benchmark_validation_owner"
@@ -110,6 +111,12 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
     assert "automated_browser_smoke_without_human_observation" in packets[
         "new_user_core_workflow_observation_passed"
     ]["prohibited_substitutes"]
+    assert "pm_release::ux::human_new_user_observation_missing_or_failed" in packets[
+        "new_user_core_workflow_observation_passed"
+    ]["release_surface_impacts"]
+    assert "pm_release::ux::human_new_user_30min_sample_evidence_missing" in packets[
+        "new_user_core_workflow_observation_passed"
+    ]["release_surface_impacts"]
 
 
 def test_owner_packet_blocks_missing_action_register(tmp_path: Path) -> None:
@@ -150,3 +157,4 @@ def test_owner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     markdown = out_md.read_text(encoding="utf-8")
     assert "# Developer Preview Final Gate Owner Packet" in markdown
     assert "selected_medium_models_pass_or_approved_review" in markdown
+    assert "## Release Surface Impacts" in markdown
