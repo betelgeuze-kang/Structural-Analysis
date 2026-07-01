@@ -81,6 +81,10 @@ TOPK_ROW_QUALITY_CRITERIA = {
     "min_top_k_rank_coverage_per_case": 2,
     "min_total_top_k_candidate_count": 6,
 }
+TOP_K_RANK_PREFIX_POLICY = (
+    "For each case, supplied ranks must form a contiguous prefix starting at "
+    "rank 1; cherry-picked gaps are not valid top-k refinement input."
+)
 SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 PLACEHOLDER_SOURCE_TEXT_MARKERS = (
     "<operator",
@@ -372,6 +376,15 @@ def _topk_row_quality(rows: list[dict[str, Any]]) -> dict[str, Any]:
         )
         for case_id, case_rows in sorted(rows_by_case.items())
     }
+    case_rank_prefix_gaps = {
+        case_id: [
+            rank
+            for rank in range(1, max(ranks) + 1)
+            if rank not in set(ranks)
+        ]
+        for case_id, ranks in case_rank_coverage.items()
+        if ranks
+    }
 
     blockers: list[str] = []
     if rows:
@@ -385,16 +398,27 @@ def _topk_row_quality(rows: list[dict[str, Any]]) -> dict[str, Any]:
             rank_set = set(case_rank_coverage[case_id])
             if not set(required_ranks).issubset(rank_set):
                 blockers.append(f"{case_id}:top_k_rank_coverage_below_minimum")
+            if case_rank_prefix_gaps.get(case_id):
+                missing = ",".join(
+                    str(rank) for rank in case_rank_prefix_gaps[case_id]
+                )
+                blockers.append(f"{case_id}:top_k_rank_prefix_gap:{missing}")
 
     blockers = list(dict.fromkeys(blockers))
     return {
         "contract_pass": bool(rows and not blockers),
         "minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         "required_rank_span_per_case": required_ranks,
+        "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
         "real_refinement_case_count": len(rows_by_case),
         "top_k_candidate_count": len(rows),
         "case_candidate_counts": case_candidate_counts,
         "case_rank_coverage": case_rank_coverage,
+        "case_rank_prefix_gaps": {
+            case_id: gaps
+            for case_id, gaps in sorted(case_rank_prefix_gaps.items())
+            if gaps
+        },
         "blockers": blockers,
         "root_cause_tags": (
             ["top_k_refinement_coverage_required"] if blockers else []
@@ -681,6 +705,7 @@ def build_phase4_exit_gate(
                 "real_refinement_case_count",
                 "top_k_candidate_count",
                 "top_k_rank_coverage",
+                "top_k_rank_prefix_gap",
                 "candidate_rows",
                 "topk_candidate",
             ),

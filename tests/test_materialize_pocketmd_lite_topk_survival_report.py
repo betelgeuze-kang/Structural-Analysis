@@ -224,6 +224,7 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary(
                 "case_b": [1, 2],
                 "case_c": [1, 2],
             },
+            "case_rank_prefix_gaps": {},
             "contract_pass": True,
             "minimums": {
                 "min_candidate_count_per_case": 2,
@@ -235,6 +236,10 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary(
             "required_rank_span_per_case": [1, 2],
             "root_cause_tags": [],
             "top_k_candidate_count": 6,
+            "top_k_rank_prefix_policy": (
+                "For each case, supplied ranks must form a contiguous prefix starting "
+                "at rank 1; cherry-picked gaps are not valid top-k refinement input."
+            ),
         },
         "uncertainty_width_median": 0.3,
     }
@@ -453,6 +458,32 @@ def test_pocketmd_lite_materializer_blocks_duplicate_topk_rank(tmp_path: Path) -
     assert report["first_blocked_target"] == "case_a"
     assert "case_a:top_k_rank_1_duplicate" in report["blockers"]
     assert "top_k_integrity_required" in report["root_cause_tags"]
+
+
+def test_pocketmd_lite_materializer_blocks_non_contiguous_topk_rank_prefix(
+    tmp_path: Path,
+) -> None:
+    intake = _with_source_receipt(_valid_intake(), tmp_path)
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    cases[1]["top_k_rank"] = 3
+    cases[1]["candidate_id"] = "pose_3"
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["top_k_row_quality"]["contract_pass"] is False
+    assert report["top_k_row_quality"]["case_rank_prefix_gaps"] == {
+        "case_a": [2]
+    }
+    assert "case_a:top_k_rank_prefix_gap:2" in report["blockers"]
+    assert "top_k_refinement_case_coverage" in report["phase4_exit_gate"][
+        "failed_criteria"
+    ]
 
 
 def test_pocketmd_lite_materializer_blocks_empty_intake() -> None:

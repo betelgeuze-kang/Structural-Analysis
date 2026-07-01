@@ -20,6 +20,7 @@ from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
     PLACEHOLDER_SOURCE_TEXT_MARKERS,
     REQUIRED_CASE_FIELDS,
     SOURCE_CHECKSUM_PATTERN,
+    TOP_K_RANK_PREFIX_POLICY,
     TOPK_ROW_QUALITY_CRITERIA,
 )
 from release_evidence_metadata import file_sha256, release_evidence_metadata  # noqa: E402
@@ -335,10 +336,12 @@ def _normalize_row(
 def _validate_topk_integrity(rows: list[dict[str, Any]]) -> None:
     ranks_by_case: set[tuple[str, int]] = set()
     candidates_by_case: set[tuple[str, str]] = set()
+    ranks_for_case: dict[str, set[int]] = {}
     for row in rows:
         case_id = str(row["case_id"])
         top_k_rank = int(row["top_k_rank"])
         candidate_id = str(row["candidate_id"])
+        ranks_for_case.setdefault(case_id, set()).add(top_k_rank)
         rank_key = (case_id, top_k_rank)
         if rank_key in ranks_by_case:
             raise ValueError(f"{case_id}:top_k_rank_{top_k_rank}_duplicate")
@@ -347,6 +350,22 @@ def _validate_topk_integrity(rows: list[dict[str, Any]]) -> None:
         if candidate_key in candidates_by_case:
             raise ValueError(f"{case_id}:candidate_id_{candidate_id}_duplicate")
         candidates_by_case.add(candidate_key)
+    for case_id, ranks in sorted(ranks_for_case.items()):
+        expected_prefix = set(range(1, max(ranks) + 1))
+        missing = sorted(expected_prefix - ranks)
+        if missing:
+            missing_text = ",".join(str(rank) for rank in missing)
+            raise ValueError(f"{case_id}:top_k_rank_prefix_gap:{missing_text}")
+
+
+def _topk_rank_prefixes(rows: list[dict[str, Any]]) -> dict[str, list[int]]:
+    case_ids = sorted({str(row["case_id"]) for row in rows})
+    return {
+        case_id: sorted(
+            {int(row["top_k_rank"]) for row in rows if row["case_id"] == case_id}
+        )
+        for case_id in case_ids
+    }
 
 
 def build_pocketmd_lite_operator_intake_from_rows(
@@ -405,6 +424,8 @@ def build_pocketmd_lite_operator_intake_from_rows(
             "top_k_candidate_count": len(cases),
             "max_top_k": max_top_k,
             "case_row_counts": case_row_counts,
+            "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
+            "case_top_k_rank_prefixes": _topk_rank_prefixes(cases),
             "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         },
         "claim_boundary": (

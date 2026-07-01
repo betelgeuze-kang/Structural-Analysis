@@ -16,6 +16,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
+    TOP_K_RANK_PREFIX_POLICY,
     TOPK_ROW_QUALITY_CRITERIA,
     build_operator_input_source_receipt,
     build_phase4_exit_gate,
@@ -187,6 +188,7 @@ def _raw_row_importer_contract() -> dict[str, Any]:
         "output_intake": "<operator-pocketmd-lite-intake.json>",
         "emits_operator_input_source_receipt": True,
         "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+        "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
         "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
         "command": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
@@ -222,6 +224,7 @@ def _operator_intake_schema() -> dict[str, Any]:
             "included. Broad all-atom rescoring, long MD, FEP, and de novo docking claims "
             "remain out of scope."
         ),
+        "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
         "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
         "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
         "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
@@ -383,6 +386,7 @@ def _operator_handoff_context(
             POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE
         ),
         "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+        "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
         "first_blocker": first_blocker,
         "first_blocked_target": first_blocked_target,
         "root_cause_tags": ["operator_refinement_rows_required"],
@@ -804,6 +808,7 @@ def build_operator_intake_packet(
                 "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
                 "intake_artifact": "<operator-pocketmd-lite-intake.json>",
                 "required_case_fields": required_case_fields,
+                "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
                 "raw_row_importer": raw_row_importer,
                 "template": template,
                 "owner_actions": [
@@ -829,6 +834,7 @@ def build_operator_intake_packet(
             POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE
         ),
         "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+        "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
         "current_surface_status": {
             "artifact": str(DEFAULT_SURFACE_OUT),
             "status": str(surface.get("status") or ""),

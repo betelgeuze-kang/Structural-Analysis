@@ -207,6 +207,7 @@ def _pocketmd_row_intake_contract(
         "top_k_row_quality_minimums": dict(
             pocketmd_survival.TOPK_ROW_QUALITY_CRITERIA
         ),
+        "top_k_rank_prefix_policy": pocketmd_survival.TOP_K_RANK_PREFIX_POLICY,
         "source_receipt_required_fields": [
             "source_id",
             "source_url",

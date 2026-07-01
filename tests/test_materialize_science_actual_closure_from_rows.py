@@ -371,6 +371,9 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "min_top_k_rank_coverage_per_case": 2,
         "min_total_top_k_candidate_count": 6,
     }
+    assert pocketmd_contract["top_k_rank_prefix_policy"].startswith(
+        "For each case, supplied ranks must form a contiguous prefix"
+    )
     assert pocketmd_contract["source_receipt_required_fields"] == [
         "source_id",
         "source_url",

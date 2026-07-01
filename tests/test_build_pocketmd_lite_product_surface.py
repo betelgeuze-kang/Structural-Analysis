@@ -101,6 +101,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "min_top_k_rank_coverage_per_case": 2,
                 "min_total_top_k_candidate_count": 6,
             },
+            "top_k_rank_prefix_policy": (
+                "For each case, supplied ranks must form a contiguous prefix starting "
+                "at rank 1; cherry-picked gaps are not valid top-k refinement input."
+            ),
             "operator_input_source_receipt_policy": {
                 "required_mode": "raw_top_k_refinement_rows",
                 "source_artifact_sha256_policy": (
@@ -204,6 +208,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
             "min_top_k_rank_coverage_per_case": 2,
             "min_total_top_k_candidate_count": 6,
         },
+        "top_k_rank_prefix_policy": (
+            "For each case, supplied ranks must form a contiguous prefix starting "
+            "at rank 1; cherry-picked gaps are not valid top-k refinement input."
+        ),
         "first_blocker": "pocketmd_lite_topk_candidate_rows_missing",
         "first_blocked_target": "top_k_refinement_operator_intake",
         "root_cause_tags": ["operator_refinement_rows_required"],
@@ -353,6 +361,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "min_top_k_rank_coverage_per_case": 2,
         "min_total_top_k_candidate_count": 6,
     }
+    assert operator["top_k_rank_prefix_policy"].startswith(
+        "For each case, supplied ranks must form a contiguous prefix"
+    )
     gate_plan = operator["gate_unblock_plan"][0]
     assert gate_plan["slot_id"] == "top_k_refinement_rows"
     assert gate_plan["unblocks_phase4_criteria"] == [

@@ -244,6 +244,14 @@ def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None
         "case_b": 2,
         "case_c": 2,
     }
+    assert payload["operator_input_source"]["top_k_rank_prefix_policy"].startswith(
+        "For each case, supplied ranks must form a contiguous prefix"
+    )
+    assert payload["operator_input_source"]["case_top_k_rank_prefixes"] == {
+        "case_a": [1, 2],
+        "case_b": [1, 2],
+        "case_c": [1, 2],
+    }
     assert payload["operator_input_source"]["top_k_row_quality_minimums"] == {
         "min_candidate_count_per_case": 2,
         "min_real_refinement_case_count": 3,
@@ -441,6 +449,47 @@ def test_blocks_invalid_checksum_and_non_topk_rank(tmp_path: Path) -> None:
         assert str(exc) == "row_1:case_bad:top_k_rank_exceeds_max:20"
     else:
         raise AssertionError("expected max top-k error")
+
+
+def test_blocks_non_contiguous_topk_rank_prefix(tmp_path: Path) -> None:
+    rows = tmp_path / "pocketmd_lite_rows.json"
+    rows.write_text(
+        json.dumps(
+            [
+                _row(
+                    case_id="case_gap",
+                    candidate_id="pose_1",
+                    top_k_rank=1,
+                    local_min_survived=True,
+                    contact_rate=0.9,
+                    h_bond_rate=0.5,
+                    clash_before=3,
+                    clash_after=1,
+                ),
+                _row(
+                    case_id="case_gap",
+                    candidate_id="pose_3",
+                    top_k_rank=3,
+                    local_min_survived=True,
+                    contact_rate=0.9,
+                    h_bond_rate=0.5,
+                    clash_before=3,
+                    clash_after=1,
+                ),
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "case_gap:top_k_rank_prefix_gap:2"
+    else:
+        raise AssertionError("expected top-k rank prefix gap error")
 
 
 def test_blocks_placeholder_row_receipts(tmp_path: Path) -> None:
