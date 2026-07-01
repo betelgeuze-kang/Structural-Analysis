@@ -322,6 +322,9 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "min_positive_count_per_target": 4,
         "min_total_row_count_per_target": 24,
     }
+    assert gpcr_contract["numeric_value_policy"] == {
+        "score": "must parse to a finite float; NaN and Infinity are rejected",
+    }
     assert gpcr_contract["row_integrity_policy"]["required_unique_row_keys"] == {
         "raw_hard_decoy_rows": ["target_id", "molecule_id"],
     }

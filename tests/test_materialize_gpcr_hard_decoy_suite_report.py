@@ -327,6 +327,38 @@ def test_gpcr_hard_decoy_suite_blocks_duplicate_molecule_ids(
     ]
 
 
+def test_gpcr_hard_decoy_suite_blocks_non_finite_raw_scores(
+    tmp_path: Path,
+) -> None:
+    intake = _passing_intake(tmp_path)
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    drd2 = targets[0]
+    assert isinstance(drd2, dict)
+    rows = drd2["hard_decoy_rows"]
+    assert isinstance(rows, list)
+    first_row = rows[0]
+    assert isinstance(first_row, dict)
+    first_row["score"] = float("nan")
+
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["first_blocked_target"] == "DRD2"
+    assert "operator_values_required" in report["root_cause_tags"]
+    assert "DRD2:positive_1:score_invalid" in report["blockers"]
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
+    ]
+
+
 def test_gpcr_hard_decoy_suite_blocks_local_source_url(
     tmp_path: Path,
 ) -> None:

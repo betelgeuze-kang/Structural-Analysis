@@ -262,6 +262,53 @@ def test_blocks_duplicate_molecule_ids_per_target(tmp_path: Path) -> None:
         raise AssertionError("expected duplicate molecule id error")
 
 
+def test_blocks_non_finite_raw_scores(tmp_path: Path) -> None:
+    rows = tmp_path / "gpcr_rows.jsonl"
+    rows.write_text(
+        "\n".join(
+            json.dumps(row, sort_keys=True)
+            for row in [
+                {
+                    "target_id": "DRD2",
+                    "molecule_id": "drd2_positive",
+                    "score": float("inf"),
+                    "is_positive": True,
+                    "is_decoy": False,
+                    "score_direction": "higher_is_better",
+                },
+                {
+                    "target_id": "HTR2A",
+                    "molecule_id": "htr2a_positive",
+                    "score": 0.9,
+                    "is_positive": True,
+                    "is_decoy": False,
+                    "score_direction": "higher_is_better",
+                },
+                {
+                    "target_id": "OPRM1",
+                    "molecule_id": "oprm1_positive",
+                    "score": 0.9,
+                    "is_positive": True,
+                    "is_decoy": False,
+                    "score_direction": "higher_is_better",
+                },
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    try:
+        module.build_gpcr_hard_decoy_operator_template_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "row_1:drd2_positive:score_invalid"
+    else:
+        raise AssertionError("expected non-finite score error")
+
+
 def test_blocks_missing_required_targets_unless_allowed(tmp_path: Path) -> None:
     rows = tmp_path / "gpcr_rows.csv"
     _write_csv(rows, targets=("DRD2",))

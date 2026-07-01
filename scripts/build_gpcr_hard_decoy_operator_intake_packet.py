@@ -260,6 +260,11 @@ def _target_execution_preflight_checklist(
                         ),
                     },
                     "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
+                    "numeric_value_policy": {
+                        "score": (
+                            "must parse to a finite float; NaN and Infinity are rejected"
+                        ),
+                    },
                 },
                 "materialization_command": materialize_command,
                 "validation_command": materialize_command,
@@ -298,6 +303,11 @@ def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
                     ),
                 },
                 "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
+                "numeric_value_policy": {
+                    "score": (
+                        "must parse to a finite float; NaN and Infinity are rejected"
+                    ),
+                },
             },
             "materialization_steps": [
                 "materialize_gpcr_hard_decoy_suite_report",
@@ -418,6 +428,9 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
                 *RAW_HARD_DECOY_ROW_FIELDS,
             ],
             "minimum_row_quality_per_target": dict(RAW_ROW_QUALITY_CRITERIA),
+            "numeric_value_policy": {
+                "score": "must parse to a finite float; NaN and Infinity are rejected",
+            },
             "optional_row_fields": ["score_direction"],
             "required_targets": list(REQUIRED_TARGETS),
             "default_score_direction": "higher_is_better",

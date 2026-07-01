@@ -167,6 +167,9 @@ def _gpcr_row_intake_contract(
             ),
         },
         "raw_row_quality_minimums": dict(gpcr_suite.RAW_ROW_QUALITY_CRITERIA),
+        "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+        },
         "phase3_exit_criteria": dict(gpcr_suite.EXIT_CRITERIA),
         "actual_closure_criterion_id": gpcr_suite.ACTUAL_CLOSURE_CRITERION_ID,
         "expected_outputs": {

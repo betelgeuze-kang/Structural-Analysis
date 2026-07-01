@@ -69,7 +69,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     assert packet["target_execution_preflight_count"] == 3
     assert packet["first_target_execution_preflight_blocker"]["target_id"] == "DRD2"
     assert packet["first_target_execution_preflight_blocker"]["first_blocker"] == (
-        "DRD2:operator_metrics_required"
+        "DRD2:hard_decoy_rows_required_for_actual_closure"
     )
     assert packet["minimum_target_count"] == 3
     assert packet["minimum_metric_field_count_per_target"] == 4
@@ -101,7 +101,10 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "no_positive_out_anchored_by_top_decoys",
         "raw_hard_decoy_rows_actual_closure",
     ]
-    assert preflight["DRD2"]["root_cause_tags"] == ["operator_values_required"]
+    assert preflight["DRD2"]["root_cause_tags"] == [
+        "hard_decoy_rows_required",
+        "operator_values_required",
+    ]
     assert (
         "materialize_gpcr_hard_decoy_suite_report.py"
         in preflight["DRD2"]["materialization_command"]
@@ -122,6 +125,12 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "is_positive",
         "is_decoy",
     ]
+    assert gate_plan["DRD2"]["minimum_evidence"]["numeric_value_policy"] == {
+        "score": "must parse to a finite float; NaN and Infinity are rejected",
+    }
+    assert preflight["DRD2"]["minimum_evidence"]["numeric_value_policy"] == {
+        "score": "must parse to a finite float; NaN and Infinity are rejected",
+    }
     assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"] == {
         "decoys_above_positive_count": "<=0",
         "hard_decoy_rows": (
@@ -157,11 +166,11 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "materialization_command"
     ]
     assert packet["current_suite_status"]["first_blocked_target"] == "DRD2"
-    assert packet["current_suite_status"]["blocker_count"] == 18
+    assert packet["current_suite_status"]["blocker_count"] == 15
     assert packet["summary"]["target_execution_preflight_count"] == 3
     assert packet["summary"]["first_target_execution_preflight_target"] == "DRD2"
     assert packet["summary"]["first_target_execution_preflight_blocker"] == (
-        "DRD2:operator_metrics_required"
+        "DRD2:hard_decoy_rows_required_for_actual_closure"
     )
 
 
