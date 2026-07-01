@@ -126,20 +126,17 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 12,
+      "blocker_count": 9,
       "blockers": [
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
         "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
         "human_ux::observation_file_missing",
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-        "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight_not_synced",
         "pm_release::github_sync::github_sync_remote_sync_pending",
-        "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-        "stale_or_inconsistent:open_blocker_count_conflict",
-        "stale_or_inconsistent:worktree_dirty"
+        "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
       ],
       "description": "Developer Preview productization evidence: release freshness/sync, CI/runner streaks, generated artifact consistency, and human UX workflow observation.",
       "root_streams": [
@@ -149,7 +146,7 @@
       ]
     }
   },
-  "blocker_count": 40,
+  "blocker_count": 37,
   "blockers": [
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
     "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -183,14 +180,11 @@
     "license_server::operation_readiness_missing",
     "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-    "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
     "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
     "pm_release::github_sync::github_sync_preflight_not_synced",
     "pm_release::github_sync::github_sync_remote_sync_pending",
     "pm_release::security::license_status_not_configured",
-    "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-    "stale_or_inconsistent:open_blocker_count_conflict",
-    "stale_or_inconsistent:worktree_dirty"
+    "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
   ],
   "claim_boundary": {
     "assisted_service_pilot": "assisted_service_pilot_ready is the engineer-review workstation service track. It requires workstation delivery 8/8, supported-scope guard, full quality, clean GitHub sync, real human UX observation, product/legal license approval, acceptance package, and explicit proxy/fallback/engineer-review boundaries. It does not relax solver_product gates.",
@@ -209,9 +203,8 @@
   "components": {
     "assisted_service_pilot": {
       "acceptance_package_ready": true,
-      "blocker_count": 5,
+      "blocker_count": 4,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "full_quality_not_ready",
         "github_sync_not_clean",
         "human_ux_observation_not_ready",
@@ -233,7 +226,7 @@
       "human_ux_observation_ready": false,
       "license_approval_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false,
+      "snapshot_source_state_consistent": true,
       "supported_scope_guard_ready": true,
       "workstation_delivery_8_of_8": true
     },
@@ -2315,17 +2308,17 @@
         "pm_release::ux::human_new_user_30min_sample_evidence_missing": "human_ux::*",
         "pm_release::ux::human_new_user_observation_missing_or_failed": "human_ux::*"
       },
-      "full_release_blocker_count": 9,
+      "full_release_blocker_count": 8,
       "full_release_gate_ready": false,
       "limited_commercial_release_ready": false,
       "paid_pilot_candidate": true,
-      "release_area_blocker_count": 9,
+      "release_area_blocker_count": 8,
       "release_area_gate_ready": false,
       "release_area_green_count": 12,
       "release_area_total_count": 16,
       "release_decision": {
-        "approval_token_count": 7,
-        "blocked_release_count": 9,
+        "approval_token_count": 8,
+        "blocked_release_count": 8,
         "broad_gpcr_family_claim_safe": false,
         "claim_boundary": "Evidence surface counts reflect local JSON files under evidence_surface_dir. Broad GPCR family claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked. PocketMD Lite is a bounded top-k science product surface; broad all-atom MD and FEP claims remain locked unless separately evidenced.",
         "evidence_surface_count": 12,
@@ -2540,7 +2533,7 @@
         "h_bond_evidence_surface_present": true,
         "locked_evidence_surface_count": 3,
         "missing_evidence_surface_count": 1,
-        "operator_action_count": 17,
+        "operator_action_count": 18,
         "operator_actions": [
           {
             "action_id": "attach_missing_evidence_surfaces",
@@ -2911,17 +2904,16 @@
       "cleanup_plan_status": "ready",
       "cleanup_plan_track_or_add_required_path_count": 0,
       "codex_commit_or_push_performed": false,
-      "dirty_path_count": 1,
+      "dirty_path_count": 0,
       "human_git_action_required": false,
       "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
       "human_handoff_push_or_release_command_included": false,
       "human_handoff_status": "ready",
       "human_handoff_suggested_command_count": 3,
-      "local_worktree_dirty": true,
-      "non_receipt_dirty_path_count": 1,
-      "remote_github_sync_blocker_count": 4,
+      "local_worktree_dirty": false,
+      "non_receipt_dirty_path_count": 0,
+      "remote_github_sync_blocker_count": 3,
       "remote_github_sync_blockers": [
-        "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight_not_synced",
         "pm_release::github_sync::github_sync_remote_sync_pending"
@@ -2929,9 +2921,8 @@
       "remote_github_sync_clean": false
     },
     "solver_product": {
-      "blocker_count": 6,
+      "blocker_count": 5,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "independent_product_not_ready",
         "g1_full_mesh_full_load_not_ready",
         "g1_full_load_hip_newton_lane_not_ready",
@@ -2945,13 +2936,13 @@
       "g1_full_mesh_full_load_ready": false,
       "independent_product_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false
+      "snapshot_source_state_consistent": true
     }
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_fresh": false,
+  "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T01:01:37.483421+00:00",
+  "generated_at": "2026-07-01T01:06:27.352478+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
@@ -2975,8 +2966,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:bdc2cba87bed54c43a84dcab50800027e5e6f10bca60a80795bcf88a38980040",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:43b81643d519ff5f5389f4b6686023dee7048da8fd5230225e41698846604015",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:460bd55e0be3747e7a60ce32a8d5d057c407dc87b4e6b06d7bcb163287251059",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f8b03ebd5dd97594c9b34a91694a3c4acea170b5881bc12678ecd079462b6ed5",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:bf1f82ef566efd4397ea47cbf8fa26befbc655348dcccbe61f58c6bdecf79d5c",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:6acabc3b094c0c243f72be21aa1bb85d55bf27af15e71183de4dbfc8924991d2",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f3f29ec0fdb04508b52ee5ac11967a1fdb3db51f11cd3a6bcad9568c896dac1b",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:4d194f0756d9010f6ffd806293bf0da2d3fb6784131022a4091b3b892347a0dc",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2985,10 +2976,10 @@
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
-  "reason_code": "STALE_OR_INCONSISTENT",
+  "reason_code": "BLOCKED",
   "release_decision": {
-    "approval_token_count": 7,
-    "blocked_release_count": 9,
+    "approval_token_count": 8,
+    "blocked_release_count": 8,
     "broad_gpcr_family_claim_safe": false,
     "claim_boundary": "Evidence surface counts reflect local JSON files under evidence_surface_dir. Broad GPCR family claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked. PocketMD Lite is a bounded top-k science product surface; broad all-atom MD and FEP claims remain locked unless separately evidenced.",
     "evidence_surface_count": 12,
@@ -3203,7 +3194,7 @@
     "h_bond_evidence_surface_present": true,
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 1,
-    "operator_action_count": 17,
+    "operator_action_count": 18,
     "operator_actions": [
       {
         "action_id": "attach_missing_evidence_surfaces",
@@ -3622,23 +3613,20 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 6,
+      "blocker_count": 3,
       "blockers": [
-        "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight_not_synced",
-        "pm_release::github_sync::github_sync_remote_sync_pending",
-        "stale_or_inconsistent:open_blocker_count_conflict",
-        "stale_or_inconsistent:worktree_dirty"
+        "pm_release::github_sync::github_sync_remote_sync_pending"
       ]
     }
   },
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "snapshot_source_state_consistent": false,
+  "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "60d27c32d13b6952c36fc76d0cb6d17f89f82948",
-  "stale_or_inconsistent": true,
+  "source_commit_sha": "1106e231709a4b459a785978e77de7d4d590d14e",
+  "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -3726,15 +3714,17 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T00:59:03.656260+00:00",
+        "changed_paths_since_source_commit": [
+          "tests/test_build_goal_bottleneck_roadmap_surface.py"
+        ],
+        "generated_at": "2026-07-01T01:05:02.334001+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
-        "source_commit_sha": "60d27c32d13b6952c36fc76d0cb6d17f89f82948",
+        "source_commit_matches_head": false,
+        "source_commit_sha": "731493efa3097b9734ae2269f2474963d268c9ee",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_closure_status",
@@ -3861,27 +3851,67 @@
       },
       {
         "artifact": "developer_preview_rc_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
+          "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+          "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
+          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+          "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        ],
         "generated_at": "2026-07-01T00:58:50.397092+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "60d27c32d13b6952c36fc76d0cb6d17f89f82948",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
+          "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+          "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
+          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+          "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        ],
         "generated_at": "2026-07-01T00:58:32.117939+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "60d27c32d13b6952c36fc76d0cb6d17f89f82948",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
@@ -4139,7 +4169,7 @@
     "open_blocker_counts": {
       "README.md": 12,
       "docs/commercialization-gap-current-state.md": 12,
-      "pm_release_blocker_action_register": 13
+      "pm_release_blocker_action_register": 12
     },
     "release_area_counts": {
       "README.md": [
@@ -4156,32 +4186,11 @@
       ]
     },
     "worktree": {
-      "dirty": true,
+      "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
-        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-        "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
-        "tests/test_build_goal_bottleneck_roadmap_surface.py"
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
-      "non_receipt_dirty_paths": [
-        "tests/test_build_goal_bottleneck_roadmap_surface.py"
-      ],
+      "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
         "candidate_set_scope": "Phase 3 seed git-clean-clone reproduction required-input set only; it is not an exhaustive current-worktree dirty-path inventory.",
@@ -4204,29 +4213,10 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        " M implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
-        " M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-        " M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
-        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        " M implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
-        " M tests/test_build_goal_bottleneck_roadmap_surface.py"
+        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
   },
-  "status": "stale_or_inconsistent",
+  "status": "blocked",
   "workstation_delivery_ready": true
 }
