@@ -551,6 +551,53 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     assert artifact_bundle["phase2_exit_gate"]["status"] == "ready"
 
 
+def test_public_benchmark_phase2_row_audit_blocks_failed_source_actuality_contract(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    rows = _write_phase2_rows(tmp_path)
+
+    def failed_source_actuality_check(**_: object) -> dict[str, object]:
+        return {
+            "contract_pass": False,
+            "blocker_count": 0,
+            "blockers": [],
+            "checked_row_counts": {},
+            "policy": module.row_bundle.SOURCE_ACTUALITY_POLICY,
+            "claim_boundary": "Injected failed contract for Phase 2 audit coverage.",
+        }
+
+    monkeypatch.setattr(
+        module.row_bundle,
+        "_source_actuality_check",
+        failed_source_actuality_check,
+    )
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        subset_rows_path=rows["subset"],
+        pose_rows_path=rows["pose"],
+        enrichment_rows_path=rows["enrichment"],
+        vina_gnina_rows_path=rows["vina_gnina"],
+        target_subset_case_count=module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["contract_pass"] is False
+    assert audit["phase2_ready"] is False
+    assert audit["phase2_exit_gate"]["status"] == "ready"
+    assert audit["operator_bundle_source_actuality_check"]["contract_pass"] is False
+    assert audit["operator_bundle_source_actuality_check"]["blockers"] == []
+    assert audit["blockers"] == [
+        "operator_bundle_source_actuality::source_actuality_contract_failed"
+    ]
+    assert audit["summary"]["blocker_count"] == 1
+
+
 def test_public_benchmark_phase2_row_audit_autodetects_default_row_paths(
     tmp_path: Path,
 ) -> None:

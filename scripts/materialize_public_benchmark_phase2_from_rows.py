@@ -787,9 +787,13 @@ def build_public_benchmark_phase2_row_audit(
         for blocker in source_actuality_check.get("blockers", [])
         if str(blocker)
     ]
+    source_actuality_contract_pass = source_actuality_check.get("contract_pass") is True
+    if not source_actuality_contract_pass and not source_actuality_blockers:
+        source_actuality_blockers.append("source_actuality_contract_failed")
     phase2_ready = bool(
         materialization_report.get("phase2_ready")
         and artifact_bundle.get("phase2_ready")
+        and source_actuality_contract_pass
         and not source_actuality_blockers
     )
     phase2_exit_gate = materialization_report.get("phase2_exit_gate")
