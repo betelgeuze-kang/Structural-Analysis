@@ -2511,8 +2511,16 @@
       },
       "ready": true,
       "release_surface_text_guard_paths": [
+        "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+        "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json",
+        "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
+        "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json",
         "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
-        "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
+        "implementation/phase1/release_evidence/surface/solver_breadth_report.json",
+        "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json",
+        "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json",
+        "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
+        "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json"
       ],
       "release_surface_text_leak_path_count": 0,
       "release_surface_text_leak_rows": [],
@@ -2557,7 +2565,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T21:44:25.227681+00:00",
+  "generated_at": "2026-07-01T21:59:41.602739+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2584,8 +2592,8 @@
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d36b5385fc9453e8633fabf6fa4a13e175755c2bc5babcec4f297096fc340287",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c1c5bb6ed6d71ecdf672fa21a18e56a7d7e42a33a6501501f2af1590502d8a97",
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:a5366e9f82f020d6d276ba335af7c297815fafd658e00404d25d88103735c947",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:e1ffb7c74e4f108766360554f78bd95c3d7d738637e85b1d297508c964f5c454",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:4d1321d8cb9048111c3780621dd96be4e895b00d85963f825d8a2d9b5aa93757",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:6c044f90b3f46da00aa1bf1cf2d9086bfd627913ec87b91acc9ebb8344a13356",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:d264bc14ae0f5134554d44b56998a20d101e9b7092b75d71c1eb8ba97fbfaf94",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:1e14dfca123e7f72932af68008d243781c33fe0dbfc3542cd74c49493b8e2863",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2829,7 +2837,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
+  "source_commit_sha": "e6d539cf91f3b023a95683963ac4033f8b4a3f6b",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2918,15 +2926,18 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/check_structural_scope_contamination.py",
+          "tests/test_check_structural_scope_contamination.py"
+        ],
         "generated_at": "2026-07-01T21:44:13.932971+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_closure_status",
@@ -2945,6 +2956,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -2963,6 +2975,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -2993,6 +3006,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3011,6 +3025,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3041,6 +3056,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3059,6 +3075,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3089,6 +3106,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3107,6 +3125,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3137,6 +3156,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3155,6 +3175,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3170,15 +3191,18 @@
       },
       {
         "artifact": "developer_preview_rc_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/check_structural_scope_contamination.py",
+          "tests/test_check_structural_scope_contamination.py"
+        ],
         "generated_at": "2026-07-01T21:44:20.664430+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
@@ -3197,6 +3221,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3215,6 +3240,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3245,6 +3271,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3263,6 +3290,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3293,6 +3321,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3311,6 +3340,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3341,6 +3371,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3359,6 +3390,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3389,6 +3421,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3407,6 +3440,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3437,6 +3471,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3455,6 +3490,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3485,6 +3521,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3503,6 +3540,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3518,15 +3556,18 @@
       },
       {
         "artifact": "ux_new_user_observation_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/check_structural_scope_contamination.py",
+          "tests/test_check_structural_scope_contamination.py"
+        ],
         "generated_at": "2026-07-01T21:43:58.507279+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "license_status_closure_report",
@@ -3545,6 +3586,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3563,6 +3605,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3593,6 +3636,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3611,6 +3655,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3641,6 +3686,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3659,6 +3705,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3689,6 +3736,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3707,6 +3755,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3723,84 +3772,36 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
-          "docs/templates/ux_new_user_observation.template.json",
-          "scripts/build_ci_streak_intake_packet.py",
-          "scripts/build_goal_bottleneck_roadmap_surface.py",
-          "scripts/build_phase3_large_model_runner_readiness_receipt.py",
-          "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "scripts/build_phase6_linux_windows_parity_status.py",
-          "scripts/build_phase6_silent_import_loss_status.py",
-          "scripts/build_phase6_ux_observation_status.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/build_structural_scope_owner_review_packet.py",
-          "scripts/build_ux_new_user_observation_intake_packet.py",
-          "scripts/build_ux_new_user_observation_report.py",
-          "scripts/check_github_development_sync_preflight.py",
-          "scripts/report_pm_release_gate.py",
-          "scripts/run_phase3_large_model_execution_receipt.py",
-          "scripts/run_phase3_medium_model_scorecard_receipt.py",
-          "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_goal_bottleneck_roadmap_surface.py",
-          "tests/test_build_phase3_large_model_runner_readiness_receipt.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_linux_windows_parity_status.py",
-          "tests/test_build_phase6_silent_import_loss_status.py",
-          "tests/test_build_phase6_ux_observation_status.py",
-          "tests/test_build_product_capabilities_surface.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py",
-          "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py",
-          "tests/test_check_github_development_sync_preflight.py",
-          "tests/test_report_pm_release_gate.py",
-          "tests/test_run_phase3_large_model_execution_receipt.py",
-          "tests/test_run_phase3_medium_model_scorecard_receipt.py"
+          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
         ],
-        "generated_at": "2026-07-01T19:51:11.419371+00:00",
+        "generated_at": "2026-07-01T21:58:39.745037+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
+        "source_commit_sha": "85f5d79484dd080f726198cb63ebe668bf1f0b78",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
-          "scripts/build_phase3_large_model_runner_readiness_receipt.py",
-          "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "scripts/build_phase6_silent_import_loss_status.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_ux_new_user_observation_intake_packet.py",
-          "scripts/build_ux_new_user_observation_report.py",
-          "scripts/check_github_development_sync_preflight.py",
-          "scripts/report_pm_release_gate.py",
-          "scripts/run_phase3_large_model_execution_receipt.py",
-          "scripts/run_phase3_medium_model_scorecard_receipt.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_phase3_large_model_runner_readiness_receipt.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_silent_import_loss_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py",
-          "tests/test_check_github_development_sync_preflight.py",
-          "tests/test_report_pm_release_gate.py",
-          "tests/test_run_phase3_large_model_execution_receipt.py",
-          "tests/test_run_phase3_medium_model_scorecard_receipt.py"
+          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
         ],
-        "generated_at": "2026-07-01T21:02:11.057793+00:00",
+        "generated_at": "2026-07-01T21:58:39.713358+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "9ce2dba31b734c6282447be17e4a99838b6a8af7",
+        "source_commit_sha": "85f5d79484dd080f726198cb63ebe668bf1f0b78",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
@@ -3819,6 +3820,7 @@
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
+          "scripts/check_structural_scope_contamination.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
@@ -3837,6 +3839,7 @@
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_check_structural_scope_contamination.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_phase3_large_model_execution_receipt.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
@@ -3873,15 +3876,7 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.md",
-        "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -3906,15 +3901,7 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        " M implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-        " M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.md",
-        " M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
+        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
   },
