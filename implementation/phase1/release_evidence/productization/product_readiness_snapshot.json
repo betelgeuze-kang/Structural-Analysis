@@ -2554,7 +2554,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T18:38:06.971258+00:00",
+  "generated_at": "2026-07-01T18:43:26.919190+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2826,7 +2826,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "b289c7ab7371d81017122d66ec29b47f9f529e63",
+  "source_commit_sha": "27998c24079a5304ef2174a1ca0a213dd3371c4f",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3477,7 +3477,9 @@
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
           "scripts/build_product_readiness_snapshot.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T18:35:28.125334+00:00",
         "input_checksum_present": true,
