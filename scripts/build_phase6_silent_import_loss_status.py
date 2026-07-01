@@ -47,17 +47,25 @@ BLOCKER_GROUPS = {
         "display_name": "license/legal",
         "scope": "direct_silent_import_loss",
         "blockers": {
+            "phase3_ifc_source_license_review_counts_missing",
             "product_legal_license_review_pending",
             "per_file_license_review_pending",
         },
+        "prefixes": (
+            "phase3_ifc_source_license_review_blockers_not_cleared:",
+        ),
     },
     "quantity_credit": {
         "display_name": "quantity credit",
         "scope": "direct_silent_import_loss",
         "blockers": {
+            "phase3_ifc_source_license_quantity_credit_count_missing",
             "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
             "phase3_ifc_import_case_quantity_credit_missing",
         },
+        "prefixes": (
+            "phase3_ifc_source_license_quantity_credit_below_required:",
+        ),
     },
     "import_execution": {
         "display_name": "import execution",
@@ -182,6 +190,15 @@ def _group_blockers(blockers: list[str], group_ids: set[str]) -> list[str]:
     return sorted(dict.fromkeys(selected))
 
 
+def _optional_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _selected_count(payload: dict[str, Any]) -> int:
     return int(payload.get("selected_file_count", 0) or 0)
 
@@ -225,7 +242,29 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
     import_health_blockers = _blockers(import_health)
     source_acquired = source_file_acquired_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
     checksums_ready = source_checksum_attached_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
-    license_ready = not any("license" in blocker or "legal" in blocker for blocker in source_blockers)
+    source_license_receipt_contract_pass = source_license.get("contract_pass") is True
+    source_license_review_blocker_count = _optional_int(
+        source_license.get("source_license_review_blocker_count")
+    )
+    source_license_review_pass_count = _optional_int(
+        source_license.get("source_license_review_pass_count")
+    )
+    source_license_quantity_credit_ready_count = _optional_int(
+        source_license.get("quantity_credit_ready_count")
+    )
+    license_blocker_names_clear = not any(
+        "license" in blocker or "legal" in blocker for blocker in source_blockers
+    )
+    source_license_review_ready = bool(
+        source_license_review_blocker_count == 0
+        and source_license_review_pass_count is not None
+        and license_blocker_names_clear
+    )
+    source_license_quantity_credit_ready = bool(
+        source_license_quantity_credit_ready_count is not None
+        and source_license_quantity_credit_ready_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
+    )
+    license_ready = source_license_review_ready
     import_health_ready = bool(
         import_health_execution_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
         and import_health_contract_pass_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
@@ -244,10 +283,35 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         "source_files_acquired": source_acquired,
         "selected_file_checksums_ready": checksums_ready,
         "product_license_review_ready": license_ready,
+        "source_license_review_ready": {
+            "blocker_count": source_license_review_blocker_count,
+            "pass_count": source_license_review_pass_count,
+            "contract_pass": source_license_review_ready,
+        },
+        "source_license_quantity_credit_ready": {
+            "current": source_license_quantity_credit_ready_count,
+            "required": REQUIRED_IFC_IMPORT_CASE_COUNT,
+            "contract_pass": source_license_quantity_credit_ready,
+        },
+        "source_license_receipt_contract_pass": source_license_receipt_contract_pass,
         "import_health_execution_ready": import_health_ready,
         "silent_data_loss_negative_gate_executed": silent_negative_gate_executed,
     }
     blockers = _blockers(import_health, source_license)
+    if source_license_review_blocker_count is None:
+        blockers.append("phase3_ifc_source_license_review_counts_missing")
+    elif source_license_review_blocker_count:
+        blockers.append(
+            "phase3_ifc_source_license_review_blockers_not_cleared:"
+            f"{source_license_review_blocker_count}"
+        )
+    if source_license_quantity_credit_ready_count is None:
+        blockers.append("phase3_ifc_source_license_quantity_credit_count_missing")
+    elif source_license_quantity_credit_ready_count < REQUIRED_IFC_IMPORT_CASE_COUNT:
+        blockers.append(
+            "phase3_ifc_source_license_quantity_credit_below_required:"
+            f"{source_license_quantity_credit_ready_count}/{REQUIRED_IFC_IMPORT_CASE_COUNT}"
+        )
     if not source_acquired or not checksums_ready:
         blockers.extend(acquisition_blockers)
     if not import_health_ready:
@@ -283,6 +347,7 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         not product_credit_blockers
         and license_ready
         and quantity_credit_ready_count >= REQUIRED_IFC_IMPORT_CASE_COUNT
+        and source_license_quantity_credit_ready
     )
     contract_pass = bool(
         not direct_blockers
@@ -290,6 +355,7 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         and source_acquired
         and checksums_ready
         and license_ready
+        and source_license_quantity_credit_ready
         and import_health_ready
         and silent_negative_gate_executed
     )
@@ -346,6 +412,10 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         "visible_entity_accounting_case_count": visible_entity_accounting_case_count,
         "silent_import_loss_gate_pass_count": silent_import_loss_gate_pass_count,
         "quantity_credit_ready_count": quantity_credit_ready_count,
+        "source_license_receipt_contract_pass": source_license_receipt_contract_pass,
+        "source_license_review_blocker_count": source_license_review_blocker_count,
+        "source_license_review_pass_count": source_license_review_pass_count,
+        "source_license_quantity_credit_ready_count": source_license_quantity_credit_ready_count,
         "silent_import_loss_zero": technical_silent_import_loss_zero,
         "evidence_requirements": {
             **evidence_requirements,

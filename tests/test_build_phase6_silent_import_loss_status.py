@@ -46,6 +46,8 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
         "per_file_license_review_pending",
         "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
         "phase3_ifc_import_case_quantity_credit_missing",
+        "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+        "phase3_ifc_source_license_review_blockers_not_cleared:3",
         "product_legal_license_review_pending",
     ]
     assert payload["evidence_requirements"]["clean_dirty_import_case_count"] == {
@@ -56,6 +58,17 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
     assert payload["evidence_requirements"]["source_files_acquired"] is True
     assert payload["evidence_requirements"]["selected_file_checksums_ready"] is True
     assert payload["evidence_requirements"]["product_license_review_ready"] is False
+    assert payload["evidence_requirements"]["source_license_review_ready"] == {
+        "blocker_count": 3,
+        "pass_count": 0,
+        "contract_pass": False,
+    }
+    assert payload["evidence_requirements"]["source_license_quantity_credit_ready"] == {
+        "current": 0,
+        "required": 10,
+        "contract_pass": False,
+    }
+    assert payload["evidence_requirements"]["source_license_receipt_contract_pass"] is False
     assert payload["evidence_requirements"]["import_health_execution_ready"] is True
     assert payload["evidence_requirements"]["silent_data_loss_negative_gate_executed"] is True
     assert payload["evidence_requirements"]["technical_silent_import_loss_zero"] is True
@@ -69,6 +82,8 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
     assert "product_legal_license_review_pending" in payload["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_missing" in payload["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review" in payload["blockers"]
+    assert "phase3_ifc_source_license_quantity_credit_below_required:0/10" in payload["blockers"]
+    assert "phase3_ifc_source_license_review_blockers_not_cleared:3" in payload["blockers"]
     assert "dataset_repository_url_missing" not in payload["blockers"]
     assert "gui_task_runner_not_implemented" not in payload["blockers"]
     assert "query_expected_answers_missing" not in payload["blockers"]
@@ -95,7 +110,12 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
     assert groups["source_acquisition"]["blockers"] == []
     assert groups["checksum"]["blockers"] == []
     assert "product_legal_license_review_pending" in groups["license_legal"]["blockers"]
+    assert "phase3_ifc_source_license_review_blockers_not_cleared:3" in groups["license_legal"]["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_missing" in groups["quantity_credit"]["blockers"]
+    assert (
+        "phase3_ifc_source_license_quantity_credit_below_required:0/10"
+        in groups["quantity_credit"]["blockers"]
+    )
     assert groups["import_execution"]["blockers"] == []
     assert groups["silent_loss_gate"]["blockers"] == []
     assert groups["query_gui_spillover"]["scope"] == "spillover_not_direct_silent_import_loss"
@@ -114,6 +134,56 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
     assert "does not download or bundle IFC files" in payload["claim_boundary"]
     assert "reported separately as spillover evidence" in payload["claim_boundary"]
     assert "technical_silent_import_loss_zero field is scoped" in payload["claim_boundary"]
+
+
+def test_phase6_silent_import_loss_status_fails_closed_on_license_count_drift(monkeypatch) -> None:
+    ready_import_health = {
+        "import_health_execution_count": 10,
+        "import_health_contract_pass_count": 10,
+        "source_file_acquired_count": 10,
+        "source_checksum_attached_count": 10,
+        "visible_entity_accounting_case_count": 10,
+        "silent_import_loss_gate_pass_count": 10,
+        "quantity_credit_ready_count": 10,
+        "silent_import_loss_gate": {"blockers": []},
+        "blockers": [],
+    }
+    clean_acquisition = {"selected_file_count": 2, "blockers": []}
+    dirty_acquisition = {"selected_file_count": 8, "blockers": []}
+    source_license_with_drifted_blocker_names = {
+        "contract_pass": False,
+        "source_license_review_blocker_count": 2,
+        "source_license_review_pass_count": 1,
+        "quantity_credit_ready_count": 10,
+        "blockers": [],
+    }
+
+    def fake_load_json(repo_root: Path, path: Path) -> dict:
+        del repo_root
+        if path == module.PHASE3_IFC_IMPORT_HEALTH:
+            return ready_import_health
+        if path == module.PHASE3_IFC_CLEAN_ACQUISITION:
+            return clean_acquisition
+        if path == module.PHASE3_IFC_DIRTY_ACQUISITION:
+            return dirty_acquisition
+        if path == module.PHASE3_IFC_SOURCE_LICENSE:
+            return source_license_with_drifted_blocker_names
+        raise AssertionError(f"unexpected path: {path}")
+
+    monkeypatch.setattr(module, "_load_json", fake_load_json)
+
+    payload = module.build_phase6_silent_import_loss_status(repo_root=REPO_ROOT)
+
+    assert payload["technical_silent_import_loss_zero"] is True
+    assert payload["product_release_credit_ready"] is False
+    assert payload["contract_pass"] is False
+    assert payload["evidence_requirements"]["product_license_review_ready"] is False
+    assert payload["evidence_requirements"]["source_license_review_ready"] == {
+        "blocker_count": 2,
+        "pass_count": 1,
+        "contract_pass": False,
+    }
+    assert "phase3_ifc_source_license_review_blockers_not_cleared:2" in payload["blockers"]
 
 
 def test_phase6_silent_import_loss_status_check_detects_missing_output(tmp_path: Path) -> None:

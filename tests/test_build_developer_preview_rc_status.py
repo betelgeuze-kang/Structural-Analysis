@@ -525,6 +525,16 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert ifc_handoff["evidence_requirements"]["import_health_execution_ready"] is True
     assert ifc_handoff["evidence_requirements"]["silent_data_loss_negative_gate_executed"] is True
     assert ifc_handoff["evidence_requirements"]["product_license_review_ready"] is False
+    assert ifc_handoff["evidence_requirements"]["source_license_review_ready"] == {
+        "blocker_count": 3,
+        "pass_count": 0,
+        "contract_pass": False,
+    }
+    assert ifc_handoff["evidence_requirements"]["source_license_quantity_credit_ready"] == {
+        "current": 0,
+        "required": 10,
+        "contract_pass": False,
+    }
     assert ifc_handoff["evidence_requirements"]["technical_silent_import_loss_zero"] is True
     assert ifc_handoff["evidence_requirements"]["product_release_credit_ready"] is False
     assert "source_file_not_acquired" not in ifc_handoff["import_health_blockers"]
@@ -547,6 +557,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "per_file_license_review_pending",
         "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
         "phase3_ifc_import_case_quantity_credit_missing",
+        "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+        "phase3_ifc_source_license_review_blockers_not_cleared:3",
         "product_legal_license_review_pending",
     ]
     assert "gui_task_runner_not_implemented" not in ifc_handoff[
@@ -565,6 +577,12 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "phase3_ifc_import_case_quantity_credit_missing" in grouping["groups"][
         "quantity_credit"
     ]["blockers"]
+    assert "phase3_ifc_source_license_quantity_credit_below_required:0/10" in grouping[
+        "groups"
+    ]["quantity_credit"]["blockers"]
+    assert "phase3_ifc_source_license_review_blockers_not_cleared:3" in grouping[
+        "groups"
+    ]["license_legal"]["blockers"]
     assert grouping["groups"]["query_gui_spillover"]["scope"] == (
         "spillover_not_direct_silent_import_loss"
     )
