@@ -16,7 +16,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-07-01T23:38:13.299418+00:00",
+  "generated_at": "2026-07-01T23:48:24.658511+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -146,12 +146,14 @@
             "runner_precondition_pass": false,
             "runner_ready_runner_count": 0,
             "runner_status": "blocked",
-            "source_evidence_age_hours": 13.31,
+            "source_evidence_age_hours": 13.481,
             "source_evidence_freshness_pass": true,
             "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
             "source_evidence_pass": false,
             "source_evidence_schema_pass": true,
-            "threshold": 30
+            "threshold": 30,
+            "workflow_queue_backlog_count": 0,
+            "workflow_queue_backlog_lane_count": 0
           },
           "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=10 | runner=blocked"
         }
@@ -362,12 +364,14 @@
               "runner_precondition_pass": false,
               "runner_ready_runner_count": 0,
               "runner_status": "blocked",
-              "source_evidence_age_hours": 13.31,
+              "source_evidence_age_hours": 13.481,
               "source_evidence_freshness_pass": true,
               "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
               "source_evidence_pass": false,
               "source_evidence_schema_pass": true,
-              "threshold": 30
+              "threshold": 30,
+              "workflow_queue_backlog_count": 0,
+              "workflow_queue_backlog_lane_count": 0
             },
             "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=10 | runner=blocked"
           },
@@ -514,12 +518,14 @@
               "runner_precondition_pass": false,
               "runner_ready_runner_count": 0,
               "runner_status": "blocked",
-              "source_evidence_age_hours": 13.31,
+              "source_evidence_age_hours": 13.481,
               "source_evidence_freshness_pass": true,
               "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
               "source_evidence_pass": false,
               "source_evidence_schema_pass": true,
-              "threshold": 30
+              "threshold": 30,
+              "workflow_queue_backlog_count": 0,
+              "workflow_queue_backlog_lane_count": 0
             },
             "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=10 | runner=blocked"
           },

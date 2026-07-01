@@ -441,6 +441,104 @@ def test_ci_streak_intake_packet_surfaces_job_start_blocker_queue(
     assert "https://example.test/actions/runs/123" not in markdown
 
 
+def test_ci_streak_intake_packet_surfaces_workflow_queue_backlog(
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    manifest = _write_json(
+        tmp_path / "ci_consecutive_pass_manifest.json",
+        {
+            "contract_pass": False,
+            "threshold": 30,
+            "lanes": {
+                "pr": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "streak_source": "github_actions_job_start_blocked",
+                    "owner_action": "Collect PR passes.",
+                    "blockers": ["pr_ci_30_consecutive_pass_evidence_missing"],
+                },
+                "nightly": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "owner_action": "Collect nightly passes.",
+                    "blockers": ["nightly_ci_30_consecutive_pass_evidence_missing"],
+                },
+            },
+        },
+    )
+    github_actions = _write_json(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "generated_at": now.isoformat(),
+            "threshold": 30,
+            "workflow_discovery": {"query_error": ""},
+            "workflow_queue_backlog": [
+                {
+                    "lane": "pr",
+                    "workflow": "CI",
+                    "run_id": 456,
+                    "url": "https://example.test/actions/runs/456",
+                    "event": "push",
+                    "head_sha": "def456",
+                    "head_branch": "main",
+                    "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+                    "queued_minutes": 61.0,
+                    "message": "CI run has remained queued for 61.0 minutes.",
+                }
+            ],
+            "lanes": {
+                "pr": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "run_count": 0,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_required_trigger_present": True,
+                    "local_pull_request_trigger_present": True,
+                    "query_error": "",
+                    "pull_request_run_source_present": False,
+                },
+                "nightly": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "run_count": 0,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_required_trigger_present": True,
+                    "local_schedule_trigger_present": True,
+                    "query_error": "",
+                },
+            },
+        },
+    )
+
+    payload = build_ci_streak_intake_packet.build_packet(
+        manifest_path=manifest,
+        github_actions_evidence_path=github_actions,
+        now=now,
+    )
+    queue = payload["workflow_queue_backlog"]
+    markdown = build_ci_streak_intake_packet._markdown(payload)
+
+    assert payload["summary"]["workflow_queue_backlog_count"] == 1
+    assert payload["summary"]["workflow_queue_backlog_lane_count"] == 1
+    assert queue == [payload["first_workflow_queue_backlog"]]
+    assert queue[0]["workflow"] == "CI"
+    assert queue[0]["event"] == "push"
+    assert queue[0]["run_id"] == 456
+    assert queue[0]["head_branch"] == "main"
+    assert "Workflow Queue Backlog" in markdown
+    assert "| `CI` | `push` | `pr` | `61.0` | `456` |" in markdown
+
+
 def test_ci_streak_intake_packet_surfaces_offline_self_hosted_runner(
     tmp_path: Path,
 ) -> None:

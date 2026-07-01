@@ -278,6 +278,60 @@ def test_build_evidence_surfaces_stale_queued_self_hosted_runner_blockers() -> N
     assert "stale queued self-hosted runs" in payload["claim_boundary"]
 
 
+def test_build_evidence_surfaces_push_queue_backlog_without_pr_streak_credit() -> None:
+    now = datetime(2026, 6, 16, 12, 0, tzinfo=timezone.utc)
+    payload = build_github_actions_ci_streak_evidence.build_evidence(
+        repo="owner/repo",
+        threshold=3,
+        limit=10,
+        pr_workflow="CI",
+        nightly_workflow="Nightly Full Quality",
+        pr_rows=[_queued_run(101, "push", now - timedelta(minutes=37))],
+        nightly_rows=[],
+        registered_workflows=[
+            {"id": 1, "name": "CI", "path": ".github/workflows/ci.yml", "state": "active"},
+            {
+                "id": 2,
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "state": "active",
+            },
+        ],
+        local_workflows=[
+            {
+                "name": "CI",
+                "path": ".github/workflows/ci.yml",
+                "exists": True,
+                "trigger_events": ["pull_request", "push"],
+                "self_hosted_runner_default": True,
+            },
+            {
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "exists": True,
+                "trigger_events": ["schedule", "workflow_dispatch"],
+                "self_hosted_runner_default": True,
+            },
+        ],
+        now=now,
+    )
+
+    pr = payload["lanes"]["pr"]
+    backlog = payload["workflow_queue_backlog"]
+
+    assert pr["run_count"] == 0
+    assert pr["pull_request_run_source_present"] is False
+    assert pr["job_start_blocker_count"] == 0
+    assert payload["summary"]["workflow_queue_backlog_count"] == 1
+    assert payload["summary"]["workflow_queue_backlog_lane_count"] == 1
+    assert backlog == [payload["first_workflow_queue_backlog"]]
+    assert backlog[0]["lane"] == "pr"
+    assert backlog[0]["event"] == "push"
+    assert backlog[0]["run_id"] == 101
+    assert backlog[0]["reason_code"] == "github_actions_self_hosted_runner_queued_timeout"
+    assert "do not create CI streak credit" in payload["claim_boundary"]
+
+
 def test_build_evidence_does_not_count_fresh_queued_runs_as_stale_blockers() -> None:
     now = datetime(2026, 6, 16, 12, 0, tzinfo=timezone.utc)
     payload = build_github_actions_ci_streak_evidence.build_evidence(
@@ -320,6 +374,70 @@ def test_build_evidence_does_not_count_fresh_queued_runs_as_stale_blockers() -> 
 
     assert pr["job_start_blocker_count"] == 0
     assert "github_actions_job_start_blocked" not in pr["blockers"]
+
+
+def test_build_evidence_uses_run_list_success_when_workflow_discovery_fails(
+    monkeypatch,
+) -> None:
+    now = datetime(2026, 6, 16, 12, 0, tzinfo=timezone.utc)
+
+    def _workflow_discovery_failed(*, repo: str) -> tuple[list[dict[str, object]], str]:
+        return [], "lookup api.github.com: Temporary failure"
+
+    def _run_list(
+        *,
+        repo: str,
+        workflow: str,
+        limit: int,
+    ) -> tuple[list[dict[str, object]], str]:
+        if workflow == "CI":
+            return [_run(1, "pull_request", "success", now)], ""
+        return [_run(2, "schedule", "success", now)], ""
+
+    monkeypatch.setattr(
+        build_github_actions_ci_streak_evidence,
+        "_run_gh_workflows",
+        _workflow_discovery_failed,
+    )
+    monkeypatch.setattr(
+        build_github_actions_ci_streak_evidence,
+        "_run_gh_list",
+        _run_list,
+    )
+    monkeypatch.setattr(
+        build_github_actions_ci_streak_evidence,
+        "_job_start_blockers_for_rows",
+        lambda **_kwargs: [],
+    )
+
+    payload = build_github_actions_ci_streak_evidence.build_evidence(
+        repo="owner/repo",
+        threshold=3,
+        limit=10,
+        pr_workflow="CI",
+        nightly_workflow="Nightly Full Quality",
+        local_workflows=[
+            {
+                "name": "CI",
+                "path": ".github/workflows/ci.yml",
+                "exists": True,
+                "trigger_events": ["pull_request", "push"],
+            },
+            {
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "exists": True,
+                "trigger_events": ["schedule", "workflow_dispatch"],
+            },
+        ],
+        now=now,
+    )
+
+    assert payload["workflow_discovery"]["query_error"] == "lookup api.github.com: Temporary failure"
+    assert payload["lanes"]["pr"]["workflow_registered"] is True
+    assert payload["lanes"]["pr"]["registered_workflow"]["source"] == "gh_run_list"
+    assert payload["lanes"]["nightly"]["workflow_registered"] is True
+    assert build_github_actions_ci_streak_evidence._live_query_failed(payload) is False
 
 
 def test_build_evidence_records_missing_registered_workflow_and_sanitized_query_error() -> None:

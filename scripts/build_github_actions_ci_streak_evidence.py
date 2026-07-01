@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import time
 from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -31,6 +32,8 @@ GH_FIELDS = "databaseId,event,conclusion,status,headSha,headBranch,createdAt,upd
 GH_DEBUG_LINE = re.compile(r"^\* Request(?:\s|$)")
 MAX_JOB_START_BLOCKER_RUNS = 5
 QUEUED_SELF_HOSTED_BLOCKER_MINUTES = 15
+GH_RETRY_ATTEMPTS = 3
+GH_RETRY_SLEEP_SECONDS = 0.5
 LOCAL_METADATA_CLAIM_BOUNDARY = (
     "Local workflow trigger metadata is parsed from the current checkout and does not refresh "
     "or replace GitHub Actions run-history evidence."
@@ -93,9 +96,32 @@ def _git_head() -> str:
 
 
 def _gh_env() -> dict[str, str]:
-    env = os.environ.copy()
-    env.pop("GH_DEBUG", None)
-    return env
+    return os.environ.copy()
+
+
+def _retryable_gh_error(message: str) -> bool:
+    text = message.lower()
+    return (
+        "lookup api.github.com" in text
+        or "temporary failure in name resolution" in text
+        or "connection reset by peer" in text
+        or "connection refused" in text
+        or "i/o timeout" in text
+    )
+
+
+def _run_gh_command(cmd: list[str]) -> subprocess.CompletedProcess[str]:
+    completed: subprocess.CompletedProcess[str] | None = None
+    for attempt in range(GH_RETRY_ATTEMPTS):
+        completed = subprocess.run(cmd, check=False, capture_output=True, text=True, env=_gh_env())
+        if completed.returncode == 0:
+            return completed
+        message = completed.stderr or completed.stdout or ""
+        if attempt == GH_RETRY_ATTEMPTS - 1 or not _retryable_gh_error(message):
+            return completed
+        time.sleep(GH_RETRY_SLEEP_SECONDS)
+    assert completed is not None
+    return completed
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -147,7 +173,7 @@ def _run_gh_list(*, repo: str, workflow: str, limit: int) -> tuple[list[dict[str
         "--json",
         GH_FIELDS,
     ]
-    completed = subprocess.run(cmd, check=False, capture_output=True, text=True, env=_gh_env())
+    completed = _run_gh_command(cmd)
     if completed.returncode != 0:
         message = _clean_gh_message(completed.stderr or completed.stdout or "gh run list failed")
         return [], message
@@ -160,13 +186,7 @@ def _run_gh_list(*, repo: str, workflow: str, limit: int) -> tuple[list[dict[str
 
 
 def _run_gh_workflows(*, repo: str) -> tuple[list[dict[str, Any]], str]:
-    completed = subprocess.run(
-        ["gh", "api", f"repos/{repo}/actions/workflows?per_page=100"],
-        check=False,
-        capture_output=True,
-        text=True,
-        env=_gh_env(),
-    )
+    completed = _run_gh_command(["gh", "api", f"repos/{repo}/actions/workflows?per_page=100"])
     if completed.returncode != 0:
         return [], _clean_gh_message(completed.stderr or completed.stdout or "gh workflow discovery failed")
     try:
@@ -187,13 +207,7 @@ def _run_gh_workflows(*, repo: str) -> tuple[list[dict[str, Any]], str]:
 
 
 def _run_gh_api_json(*, repo: str, path: str) -> tuple[dict[str, Any], str]:
-    completed = subprocess.run(
-        ["gh", "api", f"repos/{repo}/{path}"],
-        check=False,
-        capture_output=True,
-        text=True,
-        env=_gh_env(),
-    )
+    completed = _run_gh_command(["gh", "api", f"repos/{repo}/{path}"])
     if completed.returncode != 0:
         return {}, _clean_gh_message(completed.stderr or completed.stdout or "gh api failed")
     try:
@@ -204,13 +218,7 @@ def _run_gh_api_json(*, repo: str, path: str) -> tuple[dict[str, Any], str]:
 
 
 def _run_gh_api_list(*, repo: str, path: str) -> tuple[list[dict[str, Any]], str]:
-    completed = subprocess.run(
-        ["gh", "api", f"repos/{repo}/{path}"],
-        check=False,
-        capture_output=True,
-        text=True,
-        env=_gh_env(),
-    )
+    completed = _run_gh_command(["gh", "api", f"repos/{repo}/{path}"])
     if completed.returncode != 0:
         return [], _clean_gh_message(completed.stderr or completed.stdout or "gh api failed")
     try:
@@ -484,9 +492,17 @@ def _lane_from_rows(
     job_start_blockers: list[dict[str, Any]] | None = None,
     error: str = "",
     now: datetime | None = None,
+    workflow_query_succeeded: bool = False,
 ) -> dict[str, Any]:
     error = _clean_gh_message(error) if error else ""
     registered_workflow = _workflow_match(registered_workflows, workflow)
+    if not registered_workflow and workflow_query_succeeded:
+        registered_workflow = {
+            "name": workflow,
+            "path": "",
+            "state": "query_succeeded",
+            "source": "gh_run_list",
+        }
     local_workflow = _workflow_match(local_workflows, workflow)
     local_trigger_status = _local_trigger_status(lane, local_workflow)
     local_self_hosted_runner_default = local_trigger_status["local_self_hosted_runner_default"]
@@ -608,6 +624,50 @@ def _queued_self_hosted_run_blockers(
     return blockers
 
 
+def _workflow_queue_backlog(
+    *,
+    lane: str,
+    workflow: str,
+    rows: list[dict[str, Any]],
+    local_self_hosted_runner_default: bool,
+    now: datetime,
+    threshold_minutes: int = QUEUED_SELF_HOSTED_BLOCKER_MINUTES,
+) -> list[dict[str, Any]]:
+    if not local_self_hosted_runner_default:
+        return []
+    backlog: list[dict[str, Any]] = []
+    recent_rows = sorted(rows, key=lambda item: str(item.get("createdAt", "")), reverse=True)
+    for row in recent_rows[:MAX_JOB_START_BLOCKER_RUNS]:
+        if str(row.get("status", "") or "").lower() != "queued":
+            continue
+        created_at = _parse_datetime(row.get("createdAt"))
+        if created_at is None:
+            continue
+        queued_minutes = (now - created_at).total_seconds() / 60
+        if queued_minutes < threshold_minutes:
+            continue
+        backlog.append(
+            {
+                "lane": lane,
+                "workflow": workflow,
+                "run_id": row.get("databaseId"),
+                "event": row.get("event"),
+                "head_sha": row.get("headSha"),
+                "head_branch": row.get("headBranch"),
+                "url": row.get("url"),
+                "status": row.get("status"),
+                "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+                "message": (
+                    f"{workflow} run has remained queued for "
+                    f"{round(queued_minutes, 1)} minutes on a self-hosted runner lane."
+                ),
+                "queued_minutes": round(queued_minutes, 1),
+                "queued_threshold_minutes": threshold_minutes,
+            }
+        )
+    return backlog
+
+
 def build_evidence(
     *,
     repo: str,
@@ -644,6 +704,30 @@ def build_evidence(
             _job_start_blockers_for_rows(repo=repo, rows=nightly_rows) if nightly_rows_from_api else []
         )
     now = now or datetime.now(timezone.utc)
+    pr_local_workflow = _workflow_match(local_workflows, pr_workflow)
+    nightly_local_workflow = _workflow_match(local_workflows, nightly_workflow)
+    workflow_queue_backlog = [
+        *_workflow_queue_backlog(
+            lane="pr",
+            workflow=pr_workflow,
+            rows=pr_rows,
+            local_self_hosted_runner_default=_local_trigger_status(
+                "pr",
+                pr_local_workflow,
+            )["local_self_hosted_runner_default"],
+            now=now,
+        ),
+        *_workflow_queue_backlog(
+            lane="nightly",
+            workflow=nightly_workflow,
+            rows=nightly_rows,
+            local_self_hosted_runner_default=_local_trigger_status(
+                "nightly",
+                nightly_local_workflow,
+            )["local_self_hosted_runner_default"],
+            now=now,
+        ),
+    ]
     lanes = {
         "pr": _lane_from_rows(
             lane="pr",
@@ -656,6 +740,7 @@ def build_evidence(
             job_start_blockers=pr_job_start_blockers,
             error=pr_error,
             now=now,
+            workflow_query_succeeded=pr_rows_from_api and not pr_error,
         ),
         "nightly": _lane_from_rows(
             lane="nightly",
@@ -668,6 +753,7 @@ def build_evidence(
             job_start_blockers=nightly_job_start_blockers,
             error=nightly_error,
             now=now,
+            workflow_query_succeeded=nightly_rows_from_api and not nightly_error,
         ),
     }
     return {
@@ -703,13 +789,19 @@ def build_evidence(
             "nightly_local_required_trigger_present": lanes["nightly"]["local_required_trigger_present"],
             "pr_job_start_blocker_count": lanes["pr"]["job_start_blocker_count"],
             "nightly_job_start_blocker_count": lanes["nightly"]["job_start_blocker_count"],
+            "workflow_queue_backlog_count": len(workflow_queue_backlog),
+            "workflow_queue_backlog_lane_count": len(
+                {str(row.get("lane", "") or "") for row in workflow_queue_backlog}
+            ),
         },
+        "workflow_queue_backlog": workflow_queue_backlog,
+        "first_workflow_queue_backlog": workflow_queue_backlog[0] if workflow_queue_backlog else {},
         "claim_boundary": (
             "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts "
             "pull_request events and nightly lane only counts schedule/workflow_dispatch events. "
-            "Job-start annotations and stale queued self-hosted runs are read-only GitHub metadata "
-            "and may identify external account, billing, or runner-availability blockers, but they "
-            "do not create CI streak credit."
+            "Job-start annotations, stale queued self-hosted runs, and workflow queue backlog rows "
+            "are read-only GitHub metadata and may identify external account, billing, or "
+            "runner-availability blockers, but they do not create CI streak credit."
         ),
     }
 
@@ -780,9 +872,6 @@ def refresh_local_workflow_metadata(
 
 
 def _live_query_failed(payload: dict[str, Any]) -> bool:
-    workflow_discovery = _as_dict(payload.get("workflow_discovery"))
-    if str(workflow_discovery.get("query_error") or "").strip():
-        return True
     lanes = payload.get("lanes")
     if not isinstance(lanes, dict):
         return False

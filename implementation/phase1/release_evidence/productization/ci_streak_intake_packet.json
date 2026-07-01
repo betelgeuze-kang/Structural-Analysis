@@ -87,7 +87,8 @@
     ],
     "status": "external_runner_recovery_required"
   },
-  "generated_at": "2026-07-01T23:37:56.846169+00:00",
+  "first_workflow_queue_backlog": {},
+  "generated_at": "2026-07-01T23:48:10.565238+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "job_start_blocker_queue": [
     {
@@ -382,7 +383,7 @@
   },
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 13.31,
+    "age_hours": 13.481,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -544,7 +545,8 @@
     "source_threshold": 30,
     "threshold": 30,
     "threshold_match": true,
-    "workflow_discovery_query_error": ""
+    "workflow_discovery_query_error": "",
+    "workflow_queue_backlog": []
   },
   "status": "blocked",
   "summary": {
@@ -577,12 +579,14 @@
       "x64"
     ],
     "runner_status": "blocked",
-    "source_evidence_age_hours": 13.31,
+    "source_evidence_age_hours": 13.481,
     "source_evidence_freshness_pass": true,
     "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
-    "threshold": 30
+    "threshold": 30,
+    "workflow_queue_backlog_count": 0,
+    "workflow_queue_backlog_lane_count": 0
   },
   "summary_line": "CI streak intake: BLOCKED | lanes=0/2 | pr_missing=30 | nightly_missing=30 | blockers=10 | runner=blocked",
   "validation_commands": [
@@ -592,5 +596,6 @@
     "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
     "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
     "python3 scripts/build_pm_release_blocker_action_register.py  --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-  ]
+  ],
+  "workflow_queue_backlog": []
 }

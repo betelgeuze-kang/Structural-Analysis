@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 from typing import Any
 
 
@@ -21,6 +22,8 @@ DEFAULT_OUT = Path(
     "github_actions_self_hosted_runner_status.json"
 )
 DEFAULT_REQUIRED_LABELS = ("self-hosted", "linux", "x64")
+GH_RETRY_ATTEMPTS = 3
+GH_RETRY_SLEEP_SECONDS = 0.5
 
 
 def _now_utc_iso() -> str:
@@ -40,9 +43,32 @@ def _git_head() -> str:
 
 
 def _gh_env() -> dict[str, str]:
-    env = os.environ.copy()
-    env.pop("GH_DEBUG", None)
-    return env
+    return os.environ.copy()
+
+
+def _retryable_gh_error(message: str) -> bool:
+    text = message.lower()
+    return (
+        "lookup api.github.com" in text
+        or "temporary failure in name resolution" in text
+        or "connection reset by peer" in text
+        or "connection refused" in text
+        or "i/o timeout" in text
+    )
+
+
+def _run_gh_command(cmd: list[str]) -> subprocess.CompletedProcess[str]:
+    completed: subprocess.CompletedProcess[str] | None = None
+    for attempt in range(GH_RETRY_ATTEMPTS):
+        completed = subprocess.run(cmd, check=False, capture_output=True, text=True, env=_gh_env())
+        if completed.returncode == 0:
+            return completed
+        message = completed.stderr or completed.stdout or ""
+        if attempt == GH_RETRY_ATTEMPTS - 1 or not _retryable_gh_error(message):
+            return completed
+        time.sleep(GH_RETRY_SLEEP_SECONDS)
+    assert completed is not None
+    return completed
 
 
 def _clean_message(message: str) -> str:
@@ -82,13 +108,7 @@ def _load_runner_rows(path: Path) -> tuple[list[dict[str, Any]], str]:
 
 def _query_runner_rows(repo: str) -> tuple[list[dict[str, Any]], str]:
     try:
-        completed = subprocess.run(
-            ["gh", "api", f"repos/{repo}/actions/runners?per_page=100"],
-            check=False,
-            capture_output=True,
-            text=True,
-            env=_gh_env(),
-        )
+        completed = _run_gh_command(["gh", "api", f"repos/{repo}/actions/runners?per_page=100"])
     except FileNotFoundError:
         return [], "gh CLI not found"
     if completed.returncode != 0:

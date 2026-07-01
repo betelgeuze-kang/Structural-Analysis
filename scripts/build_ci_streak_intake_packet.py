@@ -197,6 +197,11 @@ def _source_evidence(
     freshness_pass = bool(age_hours is not None and 0 <= age_hours <= max_age_hours)
     workflow_discovery = _as_dict(github_actions.get("workflow_discovery"))
     workflow_discovery_query_error = str(workflow_discovery.get("query_error", "") or "")
+    workflow_queue_backlog = [
+        row
+        for row in github_actions.get("workflow_queue_backlog", [])
+        if isinstance(row, dict)
+    ]
     lanes = {
         lane: _source_lane(
             lane=lane,
@@ -233,6 +238,7 @@ def _source_evidence(
         "max_age_hours": max_age_hours,
         "freshness_pass": freshness_pass,
         "workflow_discovery_query_error": workflow_discovery_query_error,
+        "workflow_queue_backlog": workflow_queue_backlog,
         "lanes": lanes,
         "contract_pass": not blockers,
         "blockers": _dedupe(blockers),
@@ -411,6 +417,34 @@ def _job_start_blocker_queue(lane_rows: list[dict[str, Any]]) -> list[dict[str, 
     return queue
 
 
+def _workflow_queue_backlog(source_evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    queue: list[dict[str, Any]] = []
+    for row in source_evidence.get("workflow_queue_backlog", []):
+        if not isinstance(row, dict):
+            continue
+        queue.append(
+            {
+                "lane": str(row.get("lane", "") or ""),
+                "workflow": str(row.get("workflow", "") or ""),
+                "status": "external_runner_recovery_required",
+                "reason_code": str(row.get("reason_code", "") or ""),
+                "run_id": row.get("run_id"),
+                "run_url": str(row.get("url", "") or ""),
+                "event": str(row.get("event", "") or ""),
+                "head_sha": str(row.get("head_sha", "") or ""),
+                "head_branch": str(row.get("head_branch", "") or ""),
+                "queued_minutes": row.get("queued_minutes"),
+                "message": str(row.get("message", "") or ""),
+                "owner_action": (
+                    "Bring the required self-hosted runner online, let queued "
+                    f"{row.get('workflow', 'workflow')} runs start, then refresh "
+                    "github_actions_ci_streak_evidence.json before collecting release streak credit."
+                ),
+            }
+        )
+    return queue
+
+
 def build_packet(
     *,
     manifest_path: Path = DEFAULT_MANIFEST,
@@ -436,6 +470,7 @@ def build_packet(
         _lane_row("nightly", manifest, source_evidence),
     ]
     job_start_queue = _job_start_blocker_queue(lane_rows)
+    workflow_backlog_queue = _workflow_queue_backlog(source_evidence)
     blockers = [
         f"{row['lane']}:{blocker}"
         for row in lane_rows
@@ -496,6 +531,10 @@ def build_packet(
             "job_start_blocker_count": sum(
                 row["job_start_blocker_count"] for row in job_start_queue
             ),
+            "workflow_queue_backlog_count": len(workflow_backlog_queue),
+            "workflow_queue_backlog_lane_count": len(
+                {row["lane"] for row in workflow_backlog_queue if row["lane"]}
+            ),
             "source_evidence_generated_at": source_evidence["generated_at"],
             "source_evidence_age_hours": source_evidence["age_hours"],
             "source_evidence_freshness_pass": source_evidence["freshness_pass"],
@@ -540,6 +579,8 @@ def build_packet(
         "lane_rows": lane_rows,
         "job_start_blocker_queue": job_start_queue,
         "first_job_start_blocker": job_start_queue[0] if job_start_queue else {},
+        "workflow_queue_backlog": workflow_backlog_queue,
+        "first_workflow_queue_backlog": workflow_backlog_queue[0] if workflow_backlog_queue else {},
         "current_blockers": blockers,
         "current_blocker_count": len(blockers),
         "validation_commands": [
@@ -617,6 +658,21 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"| `{row['lane']}` | `{row['job_start_blocker_count']}` | "
                 f"`{', '.join(row['reason_codes'])}` | "
                 f"`{row['first_run_id']}` | {row['owner_action']} |"
+            )
+    if payload.get("workflow_queue_backlog"):
+        lines.extend(
+            [
+                "",
+                "## Workflow Queue Backlog",
+                "",
+                "| Workflow | Event | Counted Lane | Queued Minutes | Run | Owner Action |",
+                "|---|---|---|---:|---|---|",
+            ]
+        )
+        for row in payload["workflow_queue_backlog"]:
+            lines.append(
+                f"| `{row['workflow']}` | `{row['event']}` | `{row['lane']}` | "
+                f"`{row['queued_minutes']}` | `{row['run_id']}` | {row['owner_action']} |"
             )
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:
