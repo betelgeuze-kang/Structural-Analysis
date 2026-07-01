@@ -14,14 +14,14 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-01T13:26:25.787548+00:00",
+  "generated_at": "2026-07-01T13:36:25.829641+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7e6821c62a9ee7520a8c3b154e0738778d1e2ec34f8560c9d7bc15cb6656c915",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:df66136183c218e7bb707c99e213da79b5267b3583dd6ee5b4cb2501c9ee263c",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:34fac54ccead0019a8c8a1c4173535ed570ebc5fd5a935ec0f83ccbc769a8653",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:e692945854618887eb57799ea1cb0157390b431e994bac0be6775f257a49b8fa",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:f1d349767c211fde2b05f72376c19af8fa80d4ba0583cd44888d6de9158f36a7",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:56e7773bf677da83d00b40b6e84101925056c330db03e70999a8f0e7fee19868",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:539aac51e22e892fd78fa1b128941b4a328bad0f2fac5b013fa40d833f119ce5",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:006b7b1843f5fa047553a67cfc0a72f31b4ccad5d0edb6f9d509a8ea31368e9f",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:3149db5e586d1c69801459866eb06e8ac19fcd864207ca8f797adf2f424bc8d9"
   },
   "mutation_allowed": false,
@@ -507,7 +507,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "5c77020087a9def00933ee80b18100be736b28f7",
+  "source_commit_sha": "5d59a79d85c91d5678007c75061efe8c1fbb3f31",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
