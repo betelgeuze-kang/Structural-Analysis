@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-01T21:44:13.932971+00:00",
+  "generated_at": "2026-07-01T21:54:14.102521+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -104,13 +104,13 @@
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:5f7ad336023d3a407b1e4827a7c94906d9df77abfa18cc9759e6538c39c857d4",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:92f27d4e9c439e2b061b20706aa18a2ccf081747764d2249db22992f29990381",
-    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:5955f1f305f78fb9ed873b52776438a7701c35d556f65f47deccaa1910339639",
+    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:e4ebe512e9696a7254401a76a3a7ceb242d95ef47b9d0c9facf440d2a033574d",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:2e7561258db261665716e859d41313d91f371f83d3ef39e330a34584ea5057c3",
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:ab24d234600f80df38b7f96516966150aa4cb3bc72f988be6af5944c5b325ef2",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:57afefc090718743d484006c7ce0ab9466936dc9b4aa7fae3aef05fcb8db0867",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d36b5385fc9453e8633fabf6fa4a13e175755c2bc5babcec4f297096fc340287",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:5f3aa1bdab3ac6e23d6ed93e1fdb563b300f8ccd51cc76c216a021f145d55a00",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:d87974bc5927df56ac74608784a75bdf6fc34b4c793c7f695a2a496f3afb5efc",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
@@ -127,7 +127,7 @@
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
-    "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
+    "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:56d86b7b57ffd17def5bf314f9287599ed40a42868726f705150a9d80d8fa740",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
@@ -952,7 +952,7 @@
       "status": "pass",
       "summary": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
+        "current_head_sha": "c440f5309c156e76e0b3497ed6430dadf60d605a",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -960,8 +960,8 @@
         "pending_remote_update_actions": [],
         "pending_remote_update_count": 0,
         "pending_remote_update_targets": [],
-        "preflight_local_head_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
-        "preflight_source_commit_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
+        "preflight_local_head_sha": "c440f5309c156e76e0b3497ed6430dadf60d605a",
+        "preflight_source_commit_sha": "c440f5309c156e76e0b3497ed6430dadf60d605a",
         "preflight_source_state_kind": "exact",
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
@@ -1054,7 +1054,7 @@
         "reason_code": "PASS",
         "root_cause_tags": [],
         "status": "PASS",
-        "summary_line": "Solver truthfulness: PASS | reports=4/4 | explicit=4/4 | production_seeded=4/4 | surrogate_free=4/4 | cpu_fallback=0/4 | solver_hip_variants=20/20 | hazards=20 | topologies=17 | load_paths=15",
+        "summary_line": "Solver truthfulness: PASS | reports=4/4 | explicit=4/4 | production_seeded=2/4 | surrogate_free=4/4 | cpu_fallback=0/4 | solver_hip_variants=20/20 | hazards=20 | topologies=17 | load_paths=15",
         "surface_id": "solver_truthfulness_gate_report"
       },
       {
@@ -1165,6 +1165,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
+  "source_commit_sha": "c440f5309c156e76e0b3497ed6430dadf60d605a",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }
