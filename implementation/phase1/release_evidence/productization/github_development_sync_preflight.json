@@ -5,13 +5,13 @@
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
-    "feature_synced_to_head": true,
+    "feature_synced_to_head": false,
     "main_fast_forward_possible": true,
     "main_synced_to_head": false,
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": false
+    "worktree_only_ignored_evidence_dirty": true
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -20,8 +20,14 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-07-01T00:52:30.462281+00:00",
+  "generated_at": "2026-07-01T01:04:32.007621+00:00",
   "pending_remote_updates": [
+    {
+      "action": "push current HEAD to feature",
+      "command": "git push origin codex/seed-pr-ci-source-evidence:codex/seed-pr-ci-source-evidence",
+      "rollback": "restore feature to previous remote SHA 3dafda59dfe60447efb454e9da6e26b7c1d6be79 with an approved restore action",
+      "target": "origin/codex/seed-pr-ci-source-evidence"
+    },
     {
       "action": "fast-forward push current HEAD to main",
       "command": "git push origin HEAD:main",
@@ -31,11 +37,12 @@
   ],
   "preflight_pass": true,
   "r4_disclosure": {
-    "action": "fast-forward push current HEAD to main",
+    "action": "push current HEAD to feature; fast-forward push current HEAD to main",
     "impact": "GitHub pending refs become externally visible at the local development state.",
     "risk": "Main CI and external reviewers immediately see the current commits.",
-    "rollback": "restore main to previous remote SHA 34e10da0d85b459d2bcd7a7846c8c05762c215c4 with an approved revert/restore action",
+    "rollback": "restore feature to previous remote SHA 3dafda59dfe60447efb454e9da6e26b7c1d6be79 with an approved restore action; restore main to previous remote SHA 34e10da0d85b459d2bcd7a7846c8c05762c215c4 with an approved revert/restore action",
     "target": [
+      "origin/codex/seed-pr-ci-source-evidence",
       "origin/main"
     ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
@@ -49,11 +56,11 @@
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
-    "feature_ahead_count": 0,
+    "feature_ahead_count": 3,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "",
-    "local_head_sha": "3dafda59dfe60447efb454e9da6e26b7c1d6be79",
-    "main_ahead_count": 7,
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+    "local_head_sha": "731493efa3097b9734ae2269f2474963d268c9ee",
+    "main_ahead_count": 10,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
     "remote_feature_sha": "3dafda59dfe60447efb454e9da6e26b7c1d6be79",
@@ -72,7 +79,7 @@
         ]
       }
     },
-    "worktree_status_short": ""
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
   },
   "status": "approval_required"
 }
