@@ -125,12 +125,31 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "is_positive",
         "is_decoy",
     ]
-    assert gate_plan["DRD2"]["minimum_evidence"]["numeric_value_policy"] == {
+    assert gate_plan["DRD2"]["minimum_evidence"]["raw_row_value_contract"][
+        "numeric_value_policy"
+    ] == {
         "score": "must parse to a finite float; NaN and Infinity are rejected",
     }
-    assert preflight["DRD2"]["minimum_evidence"]["numeric_value_policy"] == {
+    assert preflight["DRD2"]["minimum_evidence"]["raw_row_value_contract"][
+        "numeric_value_policy"
+    ] == {
         "score": "must parse to a finite float; NaN and Infinity are rejected",
     }
+    assert gate_plan["DRD2"]["minimum_evidence"]["raw_row_value_contract"][
+        "target_id_policy"
+    ].startswith("target_id must be one of DRD2")
+    assert gate_plan["DRD2"]["minimum_evidence"]["raw_row_value_contract"][
+        "boolean_label_policy"
+    ] == "is_positive and is_decoy must parse to booleans and be mutually exclusive."
+    assert gate_plan["DRD2"]["minimum_evidence"]["source_receipt_requirements"][
+        "required_fields"
+    ] == [
+        "source_id",
+        "source_url",
+        "source_license",
+        "source_artifact",
+        "source_artifact_sha256",
+    ]
     assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"] == {
         "decoys_above_positive_count": "<=0",
         "hard_decoy_rows": (
@@ -207,6 +226,13 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "min_positive_count_per_target": 4,
         "min_total_row_count_per_target": 24,
     }
+    assert packet["raw_row_import"]["raw_row_value_contract"]["score_direction_policy"] == (
+        "score_direction must be higher_is_better or lower_is_better, with exactly "
+        "one direction per target."
+    )
+    assert packet["raw_row_import"]["source_receipt_requirements"]["mode"] == (
+        "raw_hard_decoy_rows"
+    )
     assert packet["raw_row_import"]["default_row_path_candidates"] == [
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",

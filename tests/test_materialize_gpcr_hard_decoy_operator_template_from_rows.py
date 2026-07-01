@@ -96,6 +96,15 @@ def test_materializes_operator_template_from_flat_csv_rows(tmp_path: Path) -> No
         "HTR2A": 2,
         "OPRM1": 2,
     }
+    assert payload["operator_input_source"]["target_id_policy"].startswith(
+        "target_id must be one of DRD2"
+    )
+    assert payload["operator_input_source"]["boolean_label_policy"] == (
+        "is_positive and is_decoy must parse to booleans and be mutually exclusive."
+    )
+    assert payload["operator_input_source"]["numeric_value_policy"] == {
+        "score": "must parse to a finite float; NaN and Infinity are rejected",
+    }
     drd2 = payload["targets"][0]
     assert drd2["target_id"] == "DRD2"
     assert drd2["score_direction"] == "higher_is_better"
@@ -260,6 +269,36 @@ def test_blocks_duplicate_molecule_ids_per_target(tmp_path: Path) -> None:
         assert str(exc) == "DRD2:drd2_positive:molecule_id_duplicate"
     else:
         raise AssertionError("expected duplicate molecule id error")
+
+
+def test_blocks_unexpected_gpcr_targets(tmp_path: Path) -> None:
+    rows = tmp_path / "gpcr_rows.jsonl"
+    _write_jsonl(rows)
+    with rows.open("a", encoding="utf-8") as handle:
+        handle.write(
+            json.dumps(
+                {
+                    "target_id": "ADRB2",
+                    "molecule_id": "adrb2_positive",
+                    "score": 0.9,
+                    "is_positive": True,
+                    "is_decoy": False,
+                    "score_direction": "higher_is_better",
+                },
+                sort_keys=True,
+            )
+            + "\n"
+        )
+
+    try:
+        module.build_gpcr_hard_decoy_operator_template_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "unexpected_gpcr_targets:ADRB2"
+    else:
+        raise AssertionError("expected unexpected target error")
 
 
 def test_blocks_non_finite_raw_scores(tmp_path: Path) -> None:
