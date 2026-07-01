@@ -23,6 +23,7 @@
 | `provenance_complete` | `role=; evidence_ref=; evidence_kind=missing` | approver role, approval time, evidence ref, and distinct approval ref all pass | `provenance_complete_pass` = `False` |
 | `evidence_ref_not_self_reference` | `` | evidence_ref must not point back to license_status.json | `evidence_ref_not_self_reference_pass` = `False` |
 | `evidence_ref_not_template_reference` | `` | evidence_ref must not point to the license status template | `evidence_ref_not_template_reference_pass` = `False` |
+| `evidence_ref_not_template_artifact` | `` | evidence_ref must not point to docs/templates or a .template.* artifact | `evidence_ref_not_template_artifact_pass` = `False` |
 
 ## Validation Commands
 

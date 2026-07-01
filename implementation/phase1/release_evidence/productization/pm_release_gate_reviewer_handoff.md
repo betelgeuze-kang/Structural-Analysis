@@ -1,10 +1,10 @@
 # PM Release Gate Reviewer Handoff
 
 - `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=9 | incomplete=0 | release_tiers=2/4`
-- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
+- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
 - `contract_pass`: `True`
-- `release_area_summary`: `13/16`
-- `release_area_blocker_count`: `5`
+- `release_area_summary`: `12/16`
+- `release_area_blocker_count`: `6`
 
 | Blocker | Owner | Closure | Verdict Change Conditions |
 |---|---|---|---|

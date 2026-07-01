@@ -1,27 +1,28 @@
 {
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 5,
+    "release_area_blocker_count": 6,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
-      "security::license_status_not_configured"
+      "security::license_status_not_configured",
+      "github_sync::github_sync_preflight::local_head_mismatch"
     ],
-    "release_area_green_count": 13,
-    "release_area_summary": "13/16",
+    "release_area_green_count": 12,
+    "release_area_summary": "12/16",
     "release_area_total_count": 16
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-07-01T16:01:02.349483+00:00",
+  "generated_at": "2026-07-01T17:28:37.281943+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_completion_audit": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
   "reason_code": "PASS",
   "release_tier_rows": [
     {
@@ -487,9 +488,9 @@
     "open_blocker_count": 9,
     "owner_input_required_count": 9,
     "paid_pilot_candidate": true,
-    "release_area_blocker_count": 5,
+    "release_area_blocker_count": 6,
     "release_area_gate_ready": false,
-    "release_area_green_count": 13,
+    "release_area_green_count": 12,
     "release_area_total_count": 16,
     "release_tier_blocked_count": 2,
     "release_tier_count": 4,
