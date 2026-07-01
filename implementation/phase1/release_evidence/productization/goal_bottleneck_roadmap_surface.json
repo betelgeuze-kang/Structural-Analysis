@@ -182,21 +182,21 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T08:22:29.471300+00:00",
+  "generated_at": "2026-07-01T08:28:04.450718+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:49edd929ef9afde606d0653c9cded207c353a131a0502fcc42ec157c838db8a5",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:1379ca75ad08399aac8d2872ca4436288c0c3470e287afc7f06ab54e259e3d17",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d8eb5aac9e8200086880864926319fc9d2acfcc45df616298cc8c65466f675b4",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e5fa1316f3faf5d2d8e65b564d4944ee4c310c8653203ca63d157e5d14113a28",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9ce1856c9252d207161d825a428a910a959cfa1671a89c84204edf6ef731d9f5",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:d20edb05ba698d5d228209ef8813d8b056d2f10b78c9d36238dfc13b1bb62fc9",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:02abc7a94a6de76e1eba7768f94d2da8ca0e8899d4ffa39e61b41a55317930e5",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:c3d084be87b8af31707e078d055cee46d33e928380dc51e689a31d355b916935",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:9749393639ab111968930351f319add1b7d3570f73946e5ff73ecb720e1a3d9a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:4989fa82ea5dda9805eb35482492706b4a53f6ddb6f3c8602332a3e418c752f3",
-    "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:84892e4e0b52ad2dc6c1df36299bfc8f43ed819ec494a60d1b475fe376e264fa",
+    "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:e1030e447e011fd2c19c9ed3753e6b2947be7a6287e5b6bd91eea5d3ca5c0d18",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:e100721c2c718467de2e69bdf47935386177e3a2e65dd27fe7be45b36c5a7d92",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:aa2e58ce220bf3db281b57cc97959a2f1e8ab28cea32ef4d4df75a10354c7ad4",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:974e91e54c3865ad9c65758f6726a2286dfb619cda5334e9eecc50c9b2a9653f",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:2a70fd04c9be3445b217877572d5d2c9a2de120ab736d5de193e7be8c1f2fee2",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:f1d349767c211fde2b05f72376c19af8fa80d4ba0583cd44888d6de9158f36a7",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:63f8dbe11a9337b0e8e94cd1619fe2b0935cb7aa9aa226ff6c4fc61f774e02b7",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:24983ed914879fdc1a9155172826c00c1e8018349a6be2bc8a224d8f895c87f3",
@@ -4324,7 +4324,7 @@
       ]
     }
   },
-  "source_commit_sha": "c2d870dc960cc9df3b85172896accb671a09dd72",
+  "source_commit_sha": "38b56d857f25eb9f5c0bc3be95ba59c3bf1c334c",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
