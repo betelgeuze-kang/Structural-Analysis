@@ -212,6 +212,89 @@ def _missing_platform_receipt_handoff(
     return handoff
 
 
+def _validation_commands() -> list[str]:
+    return [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check",
+    ]
+
+
+def _next_actions(*, missing_platforms: list[str], blocked_platforms: list[str], contract_pass: bool) -> list[str]:
+    if contract_pass:
+        return []
+    actions: list[str] = []
+    for platform in missing_platforms:
+        actions.append(f"attach_{platform}_platform_replay_receipt")
+    for platform in blocked_platforms:
+        actions.append(f"repair_{platform}_platform_replay_receipt")
+    actions.append("rerun_linux_windows_parity_and_dp_rc_checks")
+    return actions
+
+
+def _gate_unblock_plan(
+    *,
+    missing_platform_handoff: list[dict[str, Any]],
+    blocked_platforms: list[str],
+    receipt_paths: dict[str, str],
+    validation_commands: list[str],
+    contract_pass: bool,
+) -> list[dict[str, Any]]:
+    if contract_pass:
+        return []
+    plan: list[dict[str, Any]] = []
+    for row in missing_platform_handoff:
+        platform = str(row.get("platform", ""))
+        plan.append(
+            {
+                "slot_id": f"attach_{platform}_platform_replay_receipt",
+                "platform": platform,
+                "required_artifact": str(row.get("receipt_path", "")),
+                "schema_version": PLATFORM_RECEIPT_SCHEMA,
+                "required_source_commit_sha": str(row.get("required_source_commit_sha", "")),
+                "minimum_evidence": [
+                    "receipt exists at the required artifact path",
+                    "receipt platform matches the required platform",
+                    "contract_pass=true only after replay commands return zero",
+                    "working_tree_clean=true and local_dirty_inputs=[]",
+                    "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle",
+                ],
+                "required_replay_commands": row.get("required_replay_commands", []),
+                "forbidden_shortcuts": row.get("forbidden_shortcuts", []),
+                "validation_commands_after_attachment": row.get(
+                    "validation_commands_after_attachment",
+                    validation_commands,
+                ),
+            }
+        )
+    for platform in blocked_platforms:
+        plan.append(
+            {
+                "slot_id": f"repair_{platform}_platform_replay_receipt",
+                "platform": platform,
+                "required_artifact": receipt_paths.get(platform, ""),
+                "schema_version": PLATFORM_RECEIPT_SCHEMA,
+                "minimum_evidence": [
+                    "existing receipt schema_version, platform, replay commands, cleanliness, scorecard, and checksums all satisfy the parity status contract",
+                    "platform_replay_receipt_not_passed blocker disappears from phase6_linux_windows_parity_status.json",
+                ],
+                "validation_commands_after_attachment": validation_commands,
+            }
+        )
+    plan.append(
+        {
+            "slot_id": "rerun_linux_windows_parity_and_dp_rc_checks",
+            "validation_commands": validation_commands,
+            "minimum_evidence": [
+                "phase6_linux_windows_parity_status.json contract_pass=true",
+                "developer_preview_rc_status no longer blocks linux_windows_reproducibility_confirmed",
+                "product_readiness_snapshot remains semantically consistent",
+            ],
+        }
+    )
+    return plan
+
+
 def build_phase6_linux_platform_replay_receipt(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     repro_bundle = _load_json(repo_root, PHASE3_REPRO_BUNDLE)
@@ -405,6 +488,14 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         platform_receipt_template=platform_receipt_template,
         comparison_requirements=comparison_requirements,
     )
+    validation_commands = _validation_commands()
+    gate_unblock_plan = _gate_unblock_plan(
+        missing_platform_handoff=missing_platform_handoff,
+        blocked_platforms=blocked_platforms,
+        receipt_paths=receipt_paths,
+        validation_commands=validation_commands,
+        contract_pass=contract_pass,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -423,6 +514,7 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "developer_preview_release_candidate_claim": contract_pass,
+        "blockers": blockers,
         "required_platforms": REQUIRED_PLATFORMS,
         "platform_receipt_schema": PLATFORM_RECEIPT_SCHEMA,
         "platform_receipt_paths": receipt_paths,
@@ -449,6 +541,16 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         "parity_comparison_contract": parity_comparison_contract,
         "blocked_by": blockers,
         "blocker_grouping_metadata": _parity_blocker_grouping_metadata(blockers),
+        "gate_unblock_plan": gate_unblock_plan,
+        "gate_unblock_plan_count": len(gate_unblock_plan),
+        "next_actions": _next_actions(
+            missing_platforms=missing_platforms,
+            blocked_platforms=blocked_platforms,
+            contract_pass=contract_pass,
+        ),
+        "operator_next_actions": gate_unblock_plan,
+        "recommended_next_actions": gate_unblock_plan,
+        "validation_commands": validation_commands,
         "required_commands": [
             "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
             "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
@@ -462,6 +564,21 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
             "tracked source state, then rerun this parity status receipt before "
             "promoting the RC parity gate."
         ),
+        "summary": {
+            "required_platform_receipt_count": len(REQUIRED_PLATFORMS),
+            "current_platform_receipt_count": len(REQUIRED_PLATFORMS) - len(missing_platforms),
+            "missing_platforms": missing_platforms,
+            "blocked_platforms": blocked_platforms,
+            "required_platforms": REQUIRED_PLATFORMS,
+            "platform_receipt_schema": PLATFORM_RECEIPT_SCHEMA,
+            "platform_receipt_paths": receipt_paths,
+            "owner_action": (
+                "Attach passing Linux and Windows platform replay receipts from the same "
+                "tracked source state, then rerun this parity status receipt before "
+                "promoting the RC parity gate."
+            ),
+            "developer_preview_release_candidate_claim": contract_pass,
+        },
         "summary_line": (
             "Phase 6 Linux/Windows parity: "
             f"{'READY' if contract_pass else 'BLOCKED'} | receipts="

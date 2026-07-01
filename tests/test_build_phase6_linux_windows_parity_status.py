@@ -50,6 +50,7 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
     assert payload["developer_preview_release_candidate_claim"] is False
+    assert payload["blockers"] == ["platform_replay_receipt_missing:windows"]
     assert payload["required_platforms"] == ["linux", "windows"]
     assert payload["platform_receipt_schema"] == "phase6-linux-windows-platform-replay-receipt.v1"
     assert payload["current_platform_receipts"] == ["linux"]
@@ -73,6 +74,32 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
     assert "platform_replay_receipt_missing:windows" in rows["windows"]["blockers"]
     assert "linux_windows_parity_receipts_missing" not in payload["blocked_by"]
     assert payload["blocked_by"] == ["platform_replay_receipt_missing:windows"]
+    assert payload["summary"]["required_platform_receipt_count"] == 2
+    assert payload["summary"]["current_platform_receipt_count"] == 1
+    assert payload["summary"]["missing_platforms"] == ["windows"]
+    assert payload["summary"]["blocked_platforms"] == []
+    assert payload["summary"]["developer_preview_release_candidate_claim"] is False
+    assert payload["next_actions"] == [
+        "attach_windows_platform_replay_receipt",
+        "rerun_linux_windows_parity_and_dp_rc_checks",
+    ]
+    assert payload["gate_unblock_plan_count"] == 2
+    gate_plan = {row["slot_id"]: row for row in payload["gate_unblock_plan"]}
+    assert "attach_windows_platform_replay_receipt" in gate_plan
+    assert "rerun_linux_windows_parity_and_dp_rc_checks" in gate_plan
+    assert gate_plan["attach_windows_platform_replay_receipt"]["required_artifact"].endswith(
+        "phase6_windows_platform_replay_receipt.json"
+    )
+    assert (
+        "do_not_copy_linux_receipt_as_windows_receipt"
+        in gate_plan["attach_windows_platform_replay_receipt"]["forbidden_shortcuts"]
+    )
+    assert payload["operator_next_actions"] == payload["gate_unblock_plan"]
+    assert payload["recommended_next_actions"] == payload["gate_unblock_plan"]
+    assert (
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+        in payload["validation_commands"]
+    )
     assert "git_clean_clone_reproduction_not_passed" not in payload["blocked_by"]
     assert "platform_replay_receipt_not_passed:linux" not in payload["blocked_by"]
     assert "platform_replay_receipt_missing:linux" not in payload["blocked_by"]
