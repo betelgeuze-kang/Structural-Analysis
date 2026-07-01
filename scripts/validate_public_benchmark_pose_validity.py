@@ -36,6 +36,48 @@ REQUIRED_POSE_FIELDS = (
     "protein_structure_path",
     "receptor_context",
 )
+NON_ACTUAL_SOURCE_FAMILY_MARKERS = (
+    "dry_run",
+    "dry-run",
+    "synthetic",
+    "fixture",
+    "mock",
+    "placeholder",
+    "dummy",
+    "example",
+    "fake",
+    "operator_supplied",
+    "test-accession",
+    "todo",
+    "unit-test",
+    "local-evidence",
+)
+BLOCKED_PLACEHOLDER_IDENTITY_MARKERS = (
+    "<operator",
+    "dummy",
+    "example.invalid",
+    "example://",
+    "fake",
+    "fixture",
+    "mock",
+    "operator_supplied",
+    "placeholder",
+    "test-accession",
+    "todo",
+    "unit-test",
+    "local-evidence",
+)
+PLACEHOLDER_IDENTITY_PREFIXES = (
+    "operator://",
+    "local-evidence://",
+    "local://",
+    "fixture://",
+    "mock://",
+    "placeholder://",
+    "test://",
+    "unit-test://",
+    "file://",
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -44,6 +86,43 @@ def _json_text(payload: dict[str, Any]) -> str:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _string(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def _contains_blocked_placeholder_identity(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(marker in lowered for marker in BLOCKED_PLACEHOLDER_IDENTITY_MARKERS)
+
+
+def _has_placeholder_identity_prefix(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_IDENTITY_PREFIXES)
+
+
+def is_non_actual_pose_case(row: dict[str, Any]) -> bool:
+    source_family = _string(row.get("source_family")).lower()
+    if not source_family:
+        return True
+    return any(marker in source_family for marker in NON_ACTUAL_SOURCE_FAMILY_MARKERS)
+
+
+def pose_case_actuality_blockers(row: dict[str, Any]) -> list[str]:
+    case_id = _string(row.get("case_id")) or "case_without_id"
+    blockers: list[str] = []
+    source_family = _string(row.get("source_family"))
+    if not source_family:
+        blockers.append(f"{case_id}:source_family_missing")
+    elif (
+        _contains_blocked_placeholder_identity(source_family)
+        or _has_placeholder_identity_prefix(source_family)
+    ):
+        blockers.append(f"{case_id}:source_family_placeholder")
+    if _contains_blocked_placeholder_identity(case_id) or _has_placeholder_identity_prefix(case_id):
+        blockers.append(f"{case_id}:case_id_placeholder")
+    return blockers
 
 
 def _minimum_pairwise_distance(coords: np.ndarray) -> float:
@@ -99,12 +178,12 @@ def validate_pose_case(
     *,
     min_interatomic_distance_angstrom: float = DEFAULT_MIN_INTERATOMIC_DISTANCE_ANGSTROM,
 ) -> dict[str, Any]:
-    case_id = str(row.get("case_id") or "case_without_id")
+    case_id = _string(row.get("case_id")) or "case_without_id"
     traceability = {
-        "source_family": str(row.get("source_family") or ""),
-        "benchmark_split": str(row.get("benchmark_split") or ""),
+        "source_family": _string(row.get("source_family")),
+        "benchmark_split": _string(row.get("benchmark_split")),
     }
-    blockers: list[str] = []
+    blockers: list[str] = pose_case_actuality_blockers(row)
     for field in REQUIRED_POSE_FIELDS:
         if row.get(field) in (None, "", [], {}):
             blockers.append(f"{case_id}:{field}_missing")
@@ -164,9 +243,7 @@ def validate_pose_validity_payload(payload: dict[str, Any]) -> dict[str, Any]:
     case_rows = [row for row in _as_list(cases) if isinstance(row, dict)]
     rows = [validate_pose_case(row) for row in case_rows]
     blockers = [blocker for row in rows for blocker in row["blockers"]]
-    dry_run_case_count = sum(
-        1 for row in case_rows if str(row.get("source_family", "")).lower() in {"synthetic", "dry_run"}
-    )
+    dry_run_case_count = sum(1 for row in case_rows if is_non_actual_pose_case(row))
     real_case_count = max(len(case_rows) - dry_run_case_count, 0)
     return {
         "schema_version": SCHEMA_VERSION,

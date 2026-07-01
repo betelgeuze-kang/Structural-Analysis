@@ -19,6 +19,10 @@ from score_symmetry_aware_ligand_rmsd import (  # noqa: E402
     DEFAULT_THRESHOLD_ANGSTROM,
     score_symmetry_aware_rmsd,
 )
+from validate_public_benchmark_pose_validity import (  # noqa: E402
+    is_non_actual_pose_case,
+    pose_case_actuality_blockers,
+)
 
 
 SCHEMA_VERSION = "public-benchmark-rmsd-scorecard-materialization.v1"
@@ -31,10 +35,6 @@ def _json_text(payload: dict[str, Any]) -> str:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
-
-
-def _case_source_family(row: dict[str, Any]) -> str:
-    return str(row.get("source_family") or "").strip().lower()
 
 
 def _score_case(row: dict[str, Any]) -> dict[str, Any]:
@@ -73,6 +73,7 @@ def materialize_rmsd_scorecard(
 
     rows: list[dict[str, Any]] = []
     for index, row in enumerate(cases):
+        blockers.extend(pose_case_actuality_blockers(row))
         try:
             rows.append(_score_case(row))
         except Exception as exc:
@@ -81,9 +82,7 @@ def materialize_rmsd_scorecard(
                 f"{case_id}:symmetry_aware_rmsd_score_failed:{exc.__class__.__name__}"
             )
 
-    dry_run_case_count = sum(
-        1 for row in cases if _case_source_family(row) in {"synthetic", "dry_run"}
-    )
+    dry_run_case_count = sum(1 for row in cases if is_non_actual_pose_case(row))
     real_benchmark_case_count = max(len(cases) - dry_run_case_count, 0)
     if cases and real_benchmark_case_count == 0:
         blockers.append("real_benchmark_rmsd_cases_missing")

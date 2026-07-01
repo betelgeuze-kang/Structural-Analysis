@@ -15,6 +15,10 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+from validate_public_benchmark_pose_validity import (  # noqa: E402
+    is_non_actual_pose_case,
+    pose_case_actuality_blockers,
+)
 
 
 SCHEMA_VERSION = "public-benchmark-pose-success-harness-materialization.v1"
@@ -33,20 +37,12 @@ def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-def _case_source_family(row: dict[str, Any]) -> str:
-    return str(row.get("source_family") or "").strip().lower()
-
-
 def _rows_by_case_id(rows: list[Any]) -> dict[str, dict[str, Any]]:
     return {
         str(row.get("case_id")): row
         for row in rows
         if isinstance(row, dict) and row.get("case_id")
     }
-
-
-def _is_dry_run(row: dict[str, Any]) -> bool:
-    return _case_source_family(row) in {"synthetic", "dry_run"}
 
 
 def _harness_case_row(
@@ -72,6 +68,15 @@ def _harness_case_row(
     if rmsd_row and not score:
         blockers.append(f"{case_id}:symmetry_rmsd_score_missing")
 
+    source_family = str(
+        pose_row.get("source_family") or rmsd_row.get("source_family") or ""
+    )
+    benchmark_split = str(
+        pose_row.get("benchmark_split") or rmsd_row.get("benchmark_split") or ""
+    )
+    actuality_row = {"case_id": case_id, "source_family": source_family}
+    blockers.extend(pose_case_actuality_blockers(actuality_row))
+
     pose_validity_pass = bool(pose_row.get("pass"))
     pose_success = score.get("pose_success") if score else None
     if blockers:
@@ -81,12 +86,6 @@ def _harness_case_row(
     else:
         status = "pose_failed"
 
-    source_family = str(
-        pose_row.get("source_family") or rmsd_row.get("source_family") or ""
-    )
-    benchmark_split = str(
-        pose_row.get("benchmark_split") or rmsd_row.get("benchmark_split") or ""
-    )
     return (
         {
             "case_id": case_id,
@@ -162,7 +161,9 @@ def materialize_pose_success_harness(
         case_rows.append(row)
         blockers.extend(row_blockers)
 
-    real_benchmark_case_count = sum(1 for row in case_rows if not _is_dry_run(row))
+    real_benchmark_case_count = sum(
+        1 for row in case_rows if not is_non_actual_pose_case(row)
+    )
     dry_run_case_count = max(len(case_rows) - real_benchmark_case_count, 0)
     if case_rows and real_benchmark_case_count == 0:
         blockers.append("real_benchmark_pose_success_cases_missing")
