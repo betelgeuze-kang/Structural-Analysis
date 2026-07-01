@@ -75,12 +75,12 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-30T21:53:51.200599+00:00",
+  "generated_at": "2026-07-01T05:10:05.582626+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:55d2922f91d04c9ed411d98e4d710442f1774749795f76eb103203ecd87e6ee1",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:60b59a12228241029f9ff1ad43d27baa1b379372aa69ba859948a3ebae29b3bd",
-    "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:2236f4ab785483464044d47816b12ea85b6b7ee38c81de02bf5e961a6997a781",
-    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:1bf18312e869dbfb5412a5769e505e49ced87551daafde183141cec8734cbdb2",
+    "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:0851e59368d7903a83c614984ec8aaa95203313064f1423223b8172635e79e21",
+    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:ccef3cde6827854b4812e58e7eda7c5741598c5285355b318d97bdb9a0b9ddae",
     "scripts/build_phase6_benchmark_scale_status.py": "sha256:e61667c479d1830bbe9d44423258e7c8a968d8d7abaf3b4cc98061d111318f56"
   },
   "large_gate": {
@@ -246,7 +246,7 @@
   "reused_evidence": true,
   "schema_version": "phase6-benchmark-scale-status.v1",
   "seed_benchmark_status": "ready",
-  "source_commit_sha": "188fa358c3517c5e03e1d48e1b82e7130f4ca194",
+  "source_commit_sha": "6f8dcef857484f46aa8ed80074f14b46368cea0d",
   "status": "blocked",
   "summary_line": "Phase 6 benchmark scale: BLOCKED | medium=0/5 | large_exec=2/2"
 }

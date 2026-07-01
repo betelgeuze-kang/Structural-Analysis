@@ -3,11 +3,11 @@
   "claim_boundary": "This is a fillable operator template seed for bounded PocketMD Lite top-k refinement rows. It is not refinement evidence and does not unlock broad all-atom MD, FEP, long-timescale dynamics, or de novo binding claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T04:46:04.285660+00:00",
+  "generated_at": "2026-07-01T05:09:54.378902+00:00",
   "input_checksums": {
     "scripts/build_pocketmd_lite_product_surface.py": "sha256:c21039d69201be45cea2ecdb6d241d622c50dfe9f2fbca37ef207f6e713ed29c",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:15dfa8ba61da5e3deabd93106765cf31bb2efd538475284527a8c7a85efd08fd",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:ee77db68c961316d094bebb23a2a5e4b41024b50a704cbb5f137e12242543eb0"
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:901204e8a2c4f20693a6ec22d288f8333aee72c373fdce5fe07ca75d3a882048",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:b38110a12eeb1057133dd701c32e09d3bb89a1317f140d4c0374b9d2e3e7c4be"
   },
   "intake_artifact": "<operator-pocketmd-lite-intake.json>",
   "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -76,7 +76,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-operator-template.v1",
   "slot_id": "top_k_refinement_rows",
-  "source_commit_sha": "468307498f684d2638fbad3dd674d77415bbd78f",
+  "source_commit_sha": "6f8dcef857484f46aa8ed80074f14b46368cea0d",
   "status": "operator_template_seed",
   "template": {
     "cases": [

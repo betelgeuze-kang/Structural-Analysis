@@ -101,7 +101,7 @@
     "source_files_acquired": true,
     "technical_silent_import_loss_zero": true
   },
-  "generated_at": "2026-06-30T08:00:55.488622+00:00",
+  "generated_at": "2026-07-01T05:10:05.518541+00:00",
   "import_health_contract_pass_count": 10,
   "import_health_execution_count": 10,
   "input_checksums": {
@@ -134,7 +134,7 @@
   "silent_import_loss_gate_pass_count": 10,
   "silent_import_loss_zero": true,
   "source_checksum_attached_count": 10,
-  "source_commit_sha": "d3c794b61d469d545c3960aeaee89a9c6d228f05",
+  "source_commit_sha": "6f8dcef857484f46aa8ed80074f14b46368cea0d",
   "source_file_acquired_count": 10,
   "spillover_blockers": [
     "dataset_repository_url_missing",
