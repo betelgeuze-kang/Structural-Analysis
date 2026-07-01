@@ -19,9 +19,12 @@ if str(SCRIPT_DIR) not in sys.path:
 from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
     PLACEHOLDER_PROVENANCE_PREFIXES,
     PLACEHOLDER_SOURCE_TEXT_MARKERS,
+    PLACEHOLDER_SOURCE_URL_MARKERS,
+    PLACEHOLDER_SOURCE_URL_PREFIXES,
     REQUIRED_CASE_FIELDS,
     SOURCE_CHECKSUM_PATTERN,
     TOP_K_RANK_PREFIX_POLICY,
+    TOP_K_SCOPE_POLICY,
     TOPK_ROW_QUALITY_CRITERIA,
 )
 from release_evidence_metadata import file_sha256, release_evidence_metadata  # noqa: E402
@@ -33,6 +36,66 @@ SCHEMA_VERSION = "pocketmd-lite-operator-intake.v1"
 SUPPORTED_ROW_FORMATS = ("csv", "tsv", "json", "jsonl", "ndjson")
 DEFAULT_MAX_TOP_K = 20
 UNCERTAINTY_FLAT_FIELDS = ("uncertainty_low", "uncertainty_high", "uncertainty_unit")
+SOURCE_RECEIPT_REQUIREMENTS = {
+    "mode": "raw_top_k_refinement_rows",
+    "required_fields": [
+        "source_id",
+        "source_url",
+        "source_license",
+        "source_artifact",
+        "source_artifact_sha256",
+    ],
+    "source_artifact_sha256_policy": (
+        "must be a sha256:<hex> reference matching the attached top-k row artifact"
+    ),
+    "placeholder_block_policy": {
+        "text_markers": list(PLACEHOLDER_SOURCE_TEXT_MARKERS),
+        "url_markers": list(PLACEHOLDER_SOURCE_URL_MARKERS),
+        "url_prefixes": list(PLACEHOLDER_SOURCE_URL_PREFIXES),
+    },
+}
+
+
+def _row_value_contract(*, max_top_k: int) -> dict[str, Any]:
+    return {
+        "top_k_rank_policy": (
+            "top_k_rank must parse to a positive integer not exceeding "
+            f"max_top_k ({max_top_k}); ranks within each case must form a "
+            "contiguous prefix starting at 1."
+        ),
+        "top_k_survival_scope_policy": TOP_K_SCOPE_POLICY,
+        "numeric_value_policy": {
+            "pre_refinement_energy_proxy": (
+                "must parse to a finite float; NaN and Infinity are rejected"
+            ),
+            "post_refinement_energy_proxy": (
+                "must parse to a finite float; NaN and Infinity are rejected"
+            ),
+        },
+        "rate_value_policy": {
+            "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+            "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+        },
+        "integer_value_policy": {
+            "clash_count_before": "must parse to a non-negative integer",
+            "clash_count_after": "must parse to a non-negative integer",
+        },
+        "boolean_value_policy": {
+            "local_min_survived": "must parse to a boolean value",
+        },
+        "uncertainty_interval_policy": (
+            "uncertainty_interval or uncertainty_low/high must parse to finite "
+            "numbers with high >= low and a nonblank unit."
+        ),
+        "row_integrity_policy": (
+            "case_id, source_family, and candidate_id must be nonblank and "
+            "non-placeholder; candidate_id and top_k_rank must be unique per case."
+        ),
+        "row_receipt_policy": (
+            "provenance_ref must be non-placeholder and source_checksum must be a "
+            "non-placeholder sha256:<hex> row receipt."
+        ),
+    }
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -435,8 +498,14 @@ def build_pocketmd_lite_operator_intake_from_rows(
             "max_top_k": max_top_k,
             "case_row_counts": case_row_counts,
             "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
+            "top_k_scope_policy": (
+                "Operator import is bounded to supplied upstream top-k candidates; "
+                f"top_k_rank must be between 1 and {max_top_k}."
+            ),
             "case_top_k_rank_prefixes": _topk_rank_prefixes(cases),
             "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+            "row_value_contract": _row_value_contract(max_top_k=max_top_k),
+            "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
         },
         "claim_boundary": (
             "Operator intake materialized from bounded top-k refinement rows. The "

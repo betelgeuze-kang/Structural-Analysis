@@ -247,6 +247,10 @@ def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None
     assert payload["operator_input_source"]["top_k_rank_prefix_policy"].startswith(
         "For each case, supplied ranks must form a contiguous prefix"
     )
+    assert payload["operator_input_source"]["top_k_scope_policy"] == (
+        "Operator import is bounded to supplied upstream top-k candidates; "
+        "top_k_rank must be between 1 and 20."
+    )
     assert payload["operator_input_source"]["case_top_k_rank_prefixes"] == {
         "case_a": [1, 2],
         "case_b": [1, 2],
@@ -258,6 +262,26 @@ def test_materializes_operator_intake_from_flat_csv_rows(tmp_path: Path) -> None
         "min_top_k_rank_coverage_per_case": 2,
         "min_total_top_k_candidate_count": 6,
     }
+    row_contract = payload["operator_input_source"]["row_value_contract"]
+    assert row_contract["top_k_rank_policy"].startswith(
+        "top_k_rank must parse to a positive integer not exceeding max_top_k (20)"
+    )
+    assert row_contract["rate_value_policy"] == {
+        "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+        "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+    }
+    assert row_contract["uncertainty_interval_policy"].startswith(
+        "uncertainty_interval or uncertainty_low/high must parse to finite numbers"
+    )
+    assert payload["operator_input_source"]["source_receipt_requirements"][
+        "required_fields"
+    ] == [
+        "source_id",
+        "source_url",
+        "source_license",
+        "source_artifact",
+        "source_artifact_sha256",
+    ]
     assert payload["cases"][0]["top_k_rank"] == 1
     assert payload["cases"][0]["local_min_survived"] is True
     assert payload["cases"][0]["uncertainty_interval"] == {
@@ -315,6 +339,11 @@ def test_materializes_operator_intake_from_nested_json_rows(tmp_path: Path) -> N
             clash_after=1,
         )
     ]
+    assert payload["operator_input_source"]["row_value_contract"][
+        "top_k_rank_policy"
+    ].startswith(
+        "top_k_rank must parse to a positive integer not exceeding max_top_k (5)"
+    )
 
 
 def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:
