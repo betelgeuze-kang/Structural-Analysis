@@ -11,10 +11,10 @@
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T03:26:31.688336+00:00",
+  "generated_at": "2026-07-01T03:37:58.017698+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:4f723799607dd2feabd04b8ba857a3dae39e550ec4a6b96620a47200d7346f92",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5e073ae3dfd67fcc17f5565c7302795c046b3d4c34694f0d8bb60ff326cff292",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:9b75f2830565d386e46198827309d752be089b1cbf61284873f47c0cc3e62083",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f898414c6cfba9a310253f427afa0dd8837468b885cd4cca7540d0ea91cef5af",
     "scripts/build_pm_release_gate_completion_audit.py": "sha256:39246c0a8e4784455e85036062d2aa268cbe4c01393b924790e076d86a9b81cc"
   },
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -32,6 +32,7 @@
       ],
       "checks": {
         "ci_streak_intake_contract_pass": false,
+        "ci_streak_runner_precondition_pass": false,
         "ci_streak_source_evidence_pass": false,
         "nightly_ci_30_run_streak_pass": false,
         "nightly_ci_pass": true,
@@ -51,20 +52,20 @@
         "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
       },
       "group": "release_area",
-      "next_action": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing: Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.; basic_ci::nightly_ci_30_consecutive_pass_evidence_missing: Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "next_action": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing: Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.; basic_ci::nightly_ci_30_consecutive_pass_evidence_missing: Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "next_actions": [
         {
           "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
           "closure_state": "external_owner_input_ready",
-          "evidence_state": "missing_tracked_ci_streak_evidence",
-          "next_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+          "evidence_state": "self_hosted_runner_offline",
+          "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
           "owner": "release_ci_owner"
         },
         {
           "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
           "closure_state": "external_owner_input_ready",
-          "evidence_state": "missing_tracked_ci_streak_evidence",
-          "next_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+          "evidence_state": "self_hosted_runner_offline",
+          "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
           "owner": "release_ci_owner"
         }
       ],
@@ -74,7 +75,19 @@
       "source_present": true,
       "status": "blocked_external_owner_input_ready",
       "summary_snapshot": {
-        "ci_streak_source_evidence_age_hours": 0.012,
+        "ci_runner_matching_runner_count": 1,
+        "ci_runner_online_matching_runner_count": 0,
+        "ci_runner_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak.",
+        "ci_runner_precondition_evaluated": true,
+        "ci_runner_precondition_pass": false,
+        "ci_runner_ready_runner_count": 0,
+        "ci_runner_required_labels": [
+          "self-hosted",
+          "linux",
+          "x64"
+        ],
+        "ci_runner_status": "blocked",
+        "ci_streak_source_evidence_age_hours": 0.003,
         "ci_streak_source_evidence_freshness_pass": true,
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
@@ -87,7 +100,7 @@
           "workflow_dispatch"
         ],
         "nightly_missing_consecutive_pass_count": 30,
-        "nightly_owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "nightly_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "nightly_pass_streak_count": 0,
         "nightly_source_evidence_release_credit_pass": false,
         "nightly_streak_source": "missing_tracked_ci_evidence",
@@ -103,7 +116,7 @@
           "workflow_dispatch"
         ],
         "pr_missing_consecutive_pass_count": 30,
-        "pr_owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "pr_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "pr_pass_streak_count": 0,
         "pr_pull_request_run_source_present": true,
         "pr_source_evidence_release_credit_pass": false,
@@ -172,7 +185,7 @@
       "summary_snapshot": {
         "artifact_count": 18,
         "blocker_count": 0,
-        "current_source_commit_sha": "99df803b294302d10d2f00abc95e4c2dd8a391e1",
+        "current_source_commit_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
         "max_age_days": 30.0,
         "pass_count": 18
       },
@@ -718,7 +731,7 @@
       "status": "pass",
       "summary_snapshot": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "30ab490d526b700398970121bf88ba6a20034499",
+        "current_head_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -726,7 +739,7 @@
         "pending_remote_update_actions": [],
         "pending_remote_update_count": 0,
         "pending_remote_update_targets": [],
-        "preflight_local_head_sha": "30ab490d526b700398970121bf88ba6a20034499",
+        "preflight_local_head_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
         "preflight_source_state_kind": "exact",
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
@@ -2537,7 +2550,7 @@
     "reason": "Completion audit snapshots exclude volatile timestamps and hashes. Support bundle manifests hash this audit as an output artifact, so the audit avoids embedding support-bundle archive hashes that would create circular freshness claims.",
     "stable_summary_snapshot": true
   },
-  "source_commit_sha": "30ab490d526b700398970121bf88ba6a20034499",
+  "source_commit_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
   "summary": {
     "blocked_external_owner_input_ready_count": 3,
     "blocked_handoff_incomplete_count": 0,

@@ -182,12 +182,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T03:27:26.294895+00:00",
+  "generated_at": "2026-07-01T03:38:05.713482+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:014c798a693c620e1e7e9e534d27d6fe0503ced1438813612204c490ce9d3dd1",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:bd56e693994082c699cbb47be1649806b14d30a9827fdd04be0815bacb8a44b9",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:137382d7714673ab77b5c0f3549a0547c0527ce8222690baacc13325227da4c3",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5e073ae3dfd67fcc17f5565c7302795c046b3d4c34694f0d8bb60ff326cff292",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:14b1acdf68cee74bbd009be331a84fbefd1cb17739792be47684a58930358180",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f898414c6cfba9a310253f427afa0dd8837468b885cd4cca7540d0ea91cef5af",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:64a656f74d9abb47b486fa11fc64f1e03907ee930e1b3288076943a3015cdbeb",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:8cc7371c637c6542331dc39dccc4a6bee4a5d02b3d02de40ef245f96d86b50ef",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:c3d084be87b8af31707e078d055cee46d33e928380dc51e689a31d355b916935",
@@ -196,7 +196,7 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json": "sha256:acea4fbbc14ddcef2c42eb574ee1ab5d46624205b73e4002f2a921d1c9f32c67",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:7d1885cb873852b788af730092ec7d5fafa3ae346d447155f09cc598c51e15b0",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:44ef9f84de69f4db4bc7c37e35a07a68aa34ce79f2e346a050256cccc9a7d6eb",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:453f1421e1923d6d208075529c4e67ba0ba0315dcb8219fb949f179d6e5a43e2",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9352b9f4312eda8724eafee7f42d19afcf6a86de3535118d306220152697cfe3",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:bbec510503fdaacfb9c9d533149b589a2de3a16404ab3f3d7922c43a6f6f1594",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f4fd73d1d69af9925fc60709d05c8b1b51fd0b578b96daefe642ed91a42f3331",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:d6e06e17ebc306700c81a93500356a29f23829a7f45514f6ab03caf31996213f",
@@ -520,12 +520,12 @@
           "pm_release_gate_report",
           "pr_ci"
         ],
-        "evidence_state": "missing_tracked_ci_streak_evidence",
+        "evidence_state": "self_hosted_runner_offline",
         "external_input_required": true,
         "handoff_state": "external_owner_input_ready",
         "namespace": "basic_ci",
         "owner": "release_ci_owner",
-        "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "title": "Basic CI"
       },
       {
@@ -545,12 +545,12 @@
           "pm_release_gate_report",
           "pr_ci"
         ],
-        "evidence_state": "missing_tracked_ci_streak_evidence",
+        "evidence_state": "self_hosted_runner_offline",
         "external_input_required": true,
         "handoff_state": "external_owner_input_ready",
         "namespace": "basic_ci",
         "owner": "release_ci_owner",
-        "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "title": "Basic CI"
       },
       {
@@ -4256,7 +4256,7 @@
       ]
     }
   },
-  "source_commit_sha": "30ab490d526b700398970121bf88ba6a20034499",
+  "source_commit_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

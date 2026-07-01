@@ -8,8 +8,8 @@
 
 | Blocker | Owner | Closure | Verdict Change Conditions |
 |---|---|---|---|
-| `basic_ci::pr_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`<br>`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.basic_ci::pr_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass` |
-| `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`<br>`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.basic_ci::nightly_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass` |
+| `basic_ci::pr_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`<br>`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.basic_ci::pr_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass` |
+| `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`<br>`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.basic_ci::nightly_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass` |
 | `ux::human_new_user_observation_missing_or_failed` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_observation_missing_or_failed` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_observation_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_30min_sample_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_sample_30min_evidence_present` is `true` in `pm_release_gate_report.json`<br>`release_area.ux::human_new_user_sample_30min_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `release_area.security` status is `pass` in `pm_release_gate_completion_audit.json`<br>`security::license_status_not_configured` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.security::license_status_configured_pass` is `true` in `pm_release_gate_report.json`<br>`release_area.security::license_status_closure_report_present` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `license_status_configured_pass` |
@@ -34,10 +34,10 @@
 - Owner: `release_ci_owner`
 - Release area status: `blocked_external_owner_input_ready`
 - Closure state: `external_owner_input_ready`
-- Evidence state: `missing_tracked_ci_streak_evidence`
+- Evidence state: `self_hosted_runner_offline`
 - External input required: `True`
 - Owner input required: `True`
-- Next action: Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.
+- Next action: Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.
 
 Acceptance criteria:
 - `pr_pass_streak_count >= 30` in `pm_release_gate_report.json`
@@ -68,17 +68,17 @@ Verdict change conditions:
 - `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`
 - `basic_ci::pr_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`
 - `release_area.basic_ci::pr_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`
-- Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`
+- Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`
 
 ### `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`
 
 - Owner: `release_ci_owner`
 - Release area status: `blocked_external_owner_input_ready`
 - Closure state: `external_owner_input_ready`
-- Evidence state: `missing_tracked_ci_streak_evidence`
+- Evidence state: `self_hosted_runner_offline`
 - External input required: `True`
 - Owner input required: `True`
-- Next action: Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.
+- Next action: Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.
 
 Acceptance criteria:
 - `nightly_pass_streak_count >= 30` in `pm_release_gate_report.json`
@@ -109,7 +109,7 @@ Verdict change conditions:
 - `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`
 - `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`
 - `release_area.basic_ci::nightly_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`
-- Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`
+- Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`
 
 ### `ux::human_new_user_observation_missing_or_failed`
 

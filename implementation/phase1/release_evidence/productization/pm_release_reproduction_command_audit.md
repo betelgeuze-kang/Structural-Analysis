@@ -1,6 +1,6 @@
 # PM Release Reproduction Command Audit
 
-- `summary_line`: `PM reproduction command audit: PASS | artifacts=7/7 | commands=320 | violations=0`
+- `summary_line`: `PM reproduction command audit: PASS | artifacts=7/7 | commands=321 | violations=0`
 - `contract_pass`: `True`
 
 ## Artifacts
@@ -11,7 +11,7 @@
 | `pm_release_blocker_closure_board` | `True` | `59` | `0` |
 | `pm_release_gate_reviewer_handoff` | `True` | `59` | `0` |
 | `pm_owner_evidence_request_packet` | `True` | `118` | `0` |
-| `ci_streak_intake_packet` | `True` | `5` | `0` |
+| `ci_streak_intake_packet` | `True` | `6` | `0` |
 | `ux_new_user_observation_intake_packet` | `True` | `4` | `0` |
 | `license_status_intake_packet` | `True` | `3` | `0` |
 
@@ -358,6 +358,7 @@
 | `pm_owner_evidence_request_packet` | `verification_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` |
 | `pm_owner_evidence_request_packet` | `verification_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked` |
 | `pm_owner_evidence_request_packet` | `verification_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` |
+| `ci_streak_intake_packet` | `validation_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/check_github_actions_self_hosted_runner_status.py --out implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json` |
 | `ci_streak_intake_packet` | `validation_commands` | `True` | `external_owner_network` | `none` | `python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` |
 | `ci_streak_intake_packet` | `validation_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_ci_consecutive_pass_manifest.py --out implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json` |
 | `ci_streak_intake_packet` | `validation_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json` |

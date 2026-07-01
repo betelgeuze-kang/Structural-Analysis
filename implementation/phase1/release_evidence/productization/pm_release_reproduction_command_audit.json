@@ -39,7 +39,7 @@
     {
       "artifact": "ci_streak_intake_packet",
       "blockers": [],
-      "command_count": 5,
+      "command_count": 6,
       "contract_pass": true,
       "exists": true,
       "path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
@@ -5524,12 +5524,29 @@
       "artifact": "ci_streak_intake_packet",
       "artifact_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
       "blockers": [],
-      "command": "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+      "command": "python3 scripts/check_github_actions_self_hosted_runner_status.py --out implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json",
       "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "validation_commands",
+      "json_path": "$.validation_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/check_github_actions_self_hosted_runner_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json"
+      ]
+    },
+    {
+      "artifact": "ci_streak_intake_packet",
+      "artifact_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+      "blockers": [],
+      "command": "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+      "command_index": 1,
       "contract_pass": true,
       "execution_class": "external_owner_network",
       "field": "validation_commands",
-      "json_path": "$.validation_commands[0]",
+      "json_path": "$.validation_commands[1]",
       "parsed_argv": [
         "python3",
         "scripts/build_github_actions_ci_streak_evidence.py",
@@ -5542,11 +5559,11 @@
       "artifact_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
       "blockers": [],
       "command": "python3 scripts/build_ci_consecutive_pass_manifest.py --out implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
-      "command_index": 1,
+      "command_index": 2,
       "contract_pass": true,
       "execution_class": "local_static_or_report",
       "field": "validation_commands",
-      "json_path": "$.validation_commands[1]",
+      "json_path": "$.validation_commands[2]",
       "parsed_argv": [
         "python3",
         "scripts/build_ci_consecutive_pass_manifest.py",
@@ -5559,11 +5576,11 @@
       "artifact_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
       "blockers": [],
       "command": "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
-      "command_index": 2,
+      "command_index": 3,
       "contract_pass": true,
       "execution_class": "local_static_or_report",
       "field": "validation_commands",
-      "json_path": "$.validation_commands[2]",
+      "json_path": "$.validation_commands[3]",
       "parsed_argv": [
         "python3",
         "scripts/build_ci_streak_intake_packet.py",
@@ -5576,11 +5593,11 @@
       "artifact_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
       "blockers": [],
       "command": "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-      "command_index": 3,
+      "command_index": 4,
       "contract_pass": true,
       "execution_class": "local_static_or_report",
       "field": "validation_commands",
-      "json_path": "$.validation_commands[3]",
+      "json_path": "$.validation_commands[4]",
       "parsed_argv": [
         "python3",
         "scripts/report_pm_release_gate.py",
@@ -5595,11 +5612,11 @@
       "artifact_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
       "blockers": [],
       "command": "python3 scripts/build_pm_release_blocker_action_register.py  --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-      "command_index": 4,
+      "command_index": 5,
       "contract_pass": true,
       "execution_class": "local_static_or_report",
       "field": "validation_commands",
-      "json_path": "$.validation_commands[4]",
+      "json_path": "$.validation_commands[5]",
       "parsed_argv": [
         "python3",
         "scripts/build_pm_release_blocker_action_register.py",
@@ -5973,7 +5990,7 @@
     }
   ],
   "contract_pass": true,
-  "generated_at": "2026-07-01T03:26:43.546722+00:00",
+  "generated_at": "2026-07-01T03:37:52.799476+00:00",
   "mode": "static_command_audit",
   "package_regeneration_command_rows": [
     {
@@ -6466,7 +6483,7 @@
   "summary": {
     "artifact_count": 7,
     "artifact_pass_count": 7,
-    "command_count": 320,
+    "command_count": 321,
     "command_violation_count": 0,
     "external_owner_command_count": 10,
     "npm_script_count": 26,
@@ -6477,7 +6494,7 @@
     "package_regeneration_violation_count": 0,
     "violation_count": 0
   },
-  "summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=320 | violations=0",
+  "summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=321 | violations=0",
   "validation_commands": [
     "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
     "python3 scripts/build_pm_release_blocker_closure_board.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",

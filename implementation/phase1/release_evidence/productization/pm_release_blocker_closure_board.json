@@ -25,10 +25,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T03:26:27.635720+00:00",
+  "generated_at": "2026-07-01T03:37:58.030659+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:137382d7714673ab77b5c0f3549a0547c0527ce8222690baacc13325227da4c3",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5e073ae3dfd67fcc17f5565c7302795c046b3d4c34694f0d8bb60ff326cff292",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:14b1acdf68cee74bbd009be331a84fbefd1cb17739792be47684a58930358180",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f898414c6cfba9a310253f427afa0dd8837468b885cd4cca7540d0ea91cef5af",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:c1d51c93e91a69095fab5303dfe3d4331003c783b636386a2b9f26fa03b1d8e0"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -48,11 +48,11 @@
       "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "closure_state": "external_owner_input_ready",
-      "evidence_state": "missing_tracked_ci_streak_evidence",
+      "evidence_state": "self_hosted_runner_offline",
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner": "release_ci_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -87,11 +87,11 @@
       "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
       "closure_state": "external_owner_input_ready",
-      "evidence_state": "missing_tracked_ci_streak_evidence",
+      "evidence_state": "self_hosted_runner_offline",
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner": "release_ci_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -373,7 +373,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "30ab490d526b700398970121bf88ba6a20034499",
+  "source_commit_sha": "1a112c3632f2dfe4c2d935c2abdd9775e8c62e50",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,

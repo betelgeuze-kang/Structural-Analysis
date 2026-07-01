@@ -15,7 +15,7 @@
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-07-01T03:26:35.585050+00:00",
+  "generated_at": "2026-07-01T03:37:46.270570+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -116,10 +116,10 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
       },
-      "evidence_state": "missing_tracked_ci_streak_evidence",
+      "evidence_state": "self_hosted_runner_offline",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner": "release_ci_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.basic_ci",
@@ -135,7 +135,7 @@
         "`release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "`release_area.basic_ci::pr_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`",
-        "Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`"
+        "Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`"
       ],
       "verification_commands": [
         "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
@@ -160,10 +160,10 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
       },
-      "evidence_state": "missing_tracked_ci_streak_evidence",
+      "evidence_state": "self_hosted_runner_offline",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner": "release_ci_owner",
       "owner_input_required": true,
       "release_area_requirement_id": "release_area.basic_ci",
@@ -179,7 +179,7 @@
         "`release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "`release_area.basic_ci::nightly_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`",
-        "Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`"
+        "Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`"
       ],
       "verification_commands": [
         "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
