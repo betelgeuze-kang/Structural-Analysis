@@ -1518,7 +1518,7 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T12:01:19.485131+00:00",
+  "generated_at": "2026-07-01T12:10:24.320575+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:2e144fbb69c76a239fe89f132042db246745bf3938f4c49db722f0d0f63b8c2f",
@@ -1527,7 +1527,7 @@
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:2457d6aa4481fb05b5d355bcccc960d3f7334f5a1763fb2b46cd30998978c758",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:03df63e6489d5551a3a178a66949fc96b5496d9fc81b03a4ce3ce9423ab27572"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:8b06f8fcf43cbeeb7fa481fa231d29b5ae34dfd0db41b76b45ef50eda5099929"
   },
   "missing_row_inputs": [
     "subset_rows",
@@ -1537,6 +1537,16 @@
     "gpcr_rows",
     "pocketmd_rows"
   ],
+  "operator_next_actions": [
+    "attach_subset_rows",
+    "attach_pose_rows",
+    "attach_enrichment_rows",
+    "attach_vina_gnina_rows",
+    "attach_gpcr_rows",
+    "attach_pocketmd_rows",
+    "run_science_actual_closure_row_materializer",
+    "review_science_actual_closure_row_audit"
+  ],
   "required_actual_closures": [
     "public_benchmark_phase2_actual_closure",
     "gpcr_hard_decoy_actual_closure",
@@ -1544,6 +1554,342 @@
   ],
   "reuse_policy": "science_actual_closure_audit_from_operator_rows",
   "reused_evidence": false,
+  "row_closure_matrix": [
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_closure_component_id": "public_benchmark_phase2_actual_closure",
+      "auto_detected": false,
+      "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_actual_closure_criteria": [
+        "casf_pdbbind_pose_success_harness_ready"
+      ],
+      "closes_phase2_criteria": [
+        "casf_pdbbind_pose_success_harness_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv"
+      ],
+      "description": "CASF/PDBBind subset rows",
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "feeds_components": [
+        "casf_pdbbind_pose_success_harness"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_subset_manifest",
+        "validate_public_benchmark_subset_manifest",
+        "materialize_public_benchmark_pose_validity_input",
+        "materialize_public_benchmark_pose_success_harness"
+      ],
+      "missing": true,
+      "operator_blockers_if_missing": [
+        "public_benchmark_phase2_actual_closure::casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [
+        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+      ],
+      "provided_path": "",
+      "required_by_components": [
+        {
+          "artifact_role": "pose_success_harness",
+          "component_id": "casf_pdbbind_pose_success_harness",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+          "ready_field": "pose_success_harness_ready",
+          "required_minimum_count": 12
+        }
+      ],
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.subset_rows",
+      "row_input_id": "subset_rows",
+      "status": "missing"
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_closure_component_id": "public_benchmark_phase2_actual_closure",
+      "auto_detected": false,
+      "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_actual_closure_criteria": [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready"
+      ],
+      "closes_phase2_criteria": [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.csv"
+      ],
+      "description": "CASF/PDBBind pose-coordinate rows",
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "feeds_components": [
+        "symmetry_aware_ligand_rmsd",
+        "posebusters_style_pose_validity",
+        "casf_pdbbind_pose_success_harness"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_pose_validity_input",
+        "validate_public_benchmark_pose_validity",
+        "materialize_public_benchmark_posebusters_validity_packet",
+        "materialize_public_benchmark_rmsd_scorecard",
+        "materialize_public_benchmark_pose_success_harness"
+      ],
+      "missing": true,
+      "operator_blockers_if_missing": [
+        "public_benchmark_phase2_actual_closure::casf_pdbbind_pose_success_harness::pose_rows_not_provided",
+        "public_benchmark_phase2_actual_closure::symmetry_aware_ligand_rmsd::pose_rows_not_provided",
+        "public_benchmark_phase2_actual_closure::posebusters_style_pose_validity::pose_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [
+        "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
+        "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
+        "posebusters_style_pose_validity::pose_rows_not_provided"
+      ],
+      "provided_path": "",
+      "required_by_components": [
+        {
+          "artifact_role": "pose_success_harness",
+          "component_id": "casf_pdbbind_pose_success_harness",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+          "ready_field": "pose_success_harness_ready",
+          "required_minimum_count": 12
+        },
+        {
+          "artifact_role": "rmsd_scorecard",
+          "component_id": "symmetry_aware_ligand_rmsd",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+          "ready_field": "scorecard_ready",
+          "required_minimum_count": 12
+        },
+        {
+          "artifact_role": "pose_validity_packet",
+          "component_id": "posebusters_style_pose_validity",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "posebusters_style_pose_validity_ready",
+          "ready_field": "posebusters_validity_ready",
+          "required_minimum_count": 12
+        }
+      ],
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.pose_rows",
+      "row_input_id": "pose_rows",
+      "status": "missing"
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_closure_component_id": "public_benchmark_phase2_actual_closure",
+      "auto_detected": false,
+      "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_actual_closure_criteria": [
+        "dud_e_or_lit_pcba_enrichment_ready"
+      ],
+      "closes_phase2_criteria": [
+        "dud_e_or_lit_pcba_enrichment_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.csv"
+      ],
+      "description": "DUD-E/LIT-PCBA enrichment rows",
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "feeds_components": [
+        "dud_e_or_lit_pcba_enrichment"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_enrichment_scorecard"
+      ],
+      "missing": true,
+      "operator_blockers_if_missing": [
+        "public_benchmark_phase2_actual_closure::dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [
+        "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided"
+      ],
+      "provided_path": "",
+      "required_by_components": [
+        {
+          "artifact_role": "enrichment_scorecard",
+          "component_id": "dud_e_or_lit_pcba_enrichment",
+          "count_field": "real_enrichment_target_count",
+          "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+          "ready_field": "public_benchmark_enrichment_ready",
+          "required_minimum_count": 1
+        }
+      ],
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.enrichment_rows",
+      "row_input_id": "enrichment_rows",
+      "status": "missing"
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "actual_closure_component_id": "public_benchmark_phase2_actual_closure",
+      "auto_detected": false,
+      "claim_boundary": "This row documents which Phase 2 readiness criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_actual_closure_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+      ],
+      "description": "Vina/GNINA engine comparison rows",
+      "expected_rows_mode": "operator_attached_public_benchmark_rows",
+      "feeds_components": [
+        "vina_gnina_comparison_adapter"
+      ],
+      "materialization_chain": [
+        "materialize_public_benchmark_vina_gnina_comparison_adapter"
+      ],
+      "missing": true,
+      "operator_blockers_if_missing": [
+        "public_benchmark_phase2_actual_closure::vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+      ],
+      "phase2_operator_blockers_if_missing": [
+        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
+      ],
+      "provided_path": "",
+      "required_by_components": [
+        {
+          "artifact_role": "vina_gnina_comparison_adapter",
+          "component_id": "vina_gnina_comparison_adapter",
+          "count_field": "real_comparison_case_count",
+          "criterion_id": "vina_gnina_comparison_ready",
+          "ready_field": "public_benchmark_engine_comparison_ready",
+          "required_minimum_count": 1
+        }
+      ],
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.vina_gnina_rows",
+      "row_input_id": "vina_gnina_rows",
+      "status": "missing"
+    },
+    {
+      "accepted_formats": [
+        "csv",
+        "tsv",
+        "json",
+        "jsonl",
+        "ndjson"
+      ],
+      "actual_closure_component_id": "gpcr_hard_decoy_actual_closure",
+      "auto_detected": false,
+      "claim_boundary": "This row documents which science closure criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_actual_closure_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.tsv"
+      ],
+      "description": "GPCR hard-decoy raw ranking rows",
+      "expected_rows_mode": "raw_hard_decoy_rows",
+      "materialization_chain": [
+        "materialize_gpcr_hard_decoy_operator_template_from_rows",
+        "materialize_gpcr_hard_decoy_suite_report",
+        "build_gpcr_evidence_surface"
+      ],
+      "missing": true,
+      "operator_blockers_if_missing": [
+        "gpcr_hard_decoy_actual_closure::gpcr_rows_not_provided"
+      ],
+      "provided_path": "",
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.gpcr_rows",
+      "row_input_id": "gpcr_rows",
+      "status": "missing"
+    },
+    {
+      "accepted_formats": [
+        "csv",
+        "tsv",
+        "json",
+        "jsonl",
+        "ndjson"
+      ],
+      "actual_closure_component_id": "pocketmd_lite_topk_actual_closure",
+      "auto_detected": false,
+      "claim_boundary": "This row documents which science closure criteria a real operator-attached row file can unblock; it is not evidence by itself.",
+      "closes_actual_closure_criteria": [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+        "broad_all_atom_fep_claims_locked"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+      ],
+      "description": "PocketMD Lite top-k refinement rows",
+      "expected_rows_mode": "raw_top_k_refinement_rows",
+      "materialization_chain": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+        "materialize_pocketmd_lite_topk_survival_report",
+        "build_pocketmd_lite_science_product_surface"
+      ],
+      "missing": true,
+      "operator_blockers_if_missing": [
+        "pocketmd_lite_topk_actual_closure::pocketmd_rows_not_provided"
+      ],
+      "provided_path": "",
+      "resolved_path": "",
+      "row_contract_ref": "row_intake_contracts.pocketmd_rows",
+      "row_input_id": "pocketmd_rows",
+      "status": "missing"
+    }
+  ],
+  "row_closure_matrix_count": 6,
   "row_input_resolution": {
     "enrichment_rows": {
       "auto_detected": false,
@@ -2601,7 +2947,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "9c60f59279591cf74672443eb1a1958991748435",
+  "source_commit_sha": "0554edb8dcbe42bb98e3ee972cccaa073fa4edca",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
