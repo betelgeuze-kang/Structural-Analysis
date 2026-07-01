@@ -1,10 +1,10 @@
 # PM Release Gate Reviewer Handoff
 
-- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=13 | incomplete=0 | release_tiers=2/4`
-- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
+- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=9 | incomplete=0 | release_tiers=2/4`
+- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
 - `contract_pass`: `True`
-- `release_area_summary`: `12/16`
-- `release_area_blocker_count`: `9`
+- `release_area_summary`: `13/16`
+- `release_area_blocker_count`: `5`
 
 | Blocker | Owner | Closure | Verdict Change Conditions |
 |---|---|---|---|
@@ -13,10 +13,6 @@
 | `ux::human_new_user_observation_missing_or_failed` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_observation_missing_or_failed` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_observation_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_30min_sample_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_sample_30min_evidence_present` is `true` in `pm_release_gate_report.json`<br>`release_area.ux::human_new_user_sample_30min_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `release_area.security` status is `pass` in `pm_release_gate_completion_audit.json`<br>`security::license_status_not_configured` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.security::license_status_configured_pass` is `true` in `pm_release_gate_report.json`<br>`release_area.security::license_status_closure_report_present` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `license_status_configured_pass` |
-| `github_sync::github_sync_preflight::remote_mutation_approval_required` | `release_owner` | `external_owner_input_ready` | `release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`<br>`github_sync::github_sync_preflight::remote_mutation_approval_required` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh` |
-| `github_sync::github_sync_preflight::local_head_mismatch` | `release_owner` | `external_owner_input_ready` | `release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`<br>`github_sync::github_sync_preflight::local_head_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh` |
-| `github_sync::github_sync_remote_sync_pending` | `release_owner` | `external_owner_input_ready` | `release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`<br>`github_sync::github_sync_remote_sync_pending` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh` |
-| `github_sync::github_sync_preflight_not_synced` | `release_owner` | `external_owner_input_ready` | `release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`<br>`github_sync::github_sync_preflight_not_synced` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh` |
 | `independent_vv_missing` | `independent_vv_owner` | `external_owner_input_ready` | `release_area.` status is `pass` in `pm_release_gate_completion_audit.json`<br>`independent_vv_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `family_validation_manual_signoff_missing` | `validation_manual_owner` | `external_owner_input_ready` | `release_area.` status is `pass` in `pm_release_gate_completion_audit.json`<br>`family_validation_manual_signoff_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `customer_audit_failure_bundle_sla_missing` | `customer_success_ops_owner` | `external_owner_input_ready` | `release_area.` status is `pass` in `pm_release_gate_completion_audit.json`<br>`customer_audit_failure_bundle_sla_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
@@ -28,8 +24,8 @@
 |---|---|---|---|---|
 | `release_tier.technical_paid_pilot_candidate` Technical Paid Pilot Candidate | `pass` | none | none | Technical paid pilot candidate status depends on local milestone evidence and still requires the paid-pilot scope guard before customer use. |
 | `release_tier.paid_pilot_scope_guard_pass` Paid Pilot Scope Guard | `pass` | none | none | Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness. |
-| `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured`, `github_sync::github_sync_preflight::remote_mutation_approval_required`, `github_sync::github_sync_preflight::local_head_mismatch`, `github_sync::github_sync_remote_sync_pending`, `github_sync::github_sync_preflight_not_synced` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
-| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `customer_shadow::completed_shadow_case_count_below_minimum`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured`, `github_sync::github_sync_preflight::remote_mutation_approval_required`, `github_sync::github_sync_preflight::local_head_mismatch`, `github_sync::github_sync_remote_sync_pending`, `github_sync::github_sync_preflight_not_synced` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
+| `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
+| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `customer_shadow::completed_shadow_case_count_below_minimum`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
 
 ## Blocker Details
 
@@ -239,150 +235,6 @@ Verdict change conditions:
 - `release_area.security::license_status_configured_pass` is `true` in `pm_release_gate_report.json`
 - `release_area.security::license_status_closure_report_present` is `true` in `pm_release_gate_report.json`
 - Current false audit check(s): `license_status_configured_pass`
-
-### `github_sync::github_sync_preflight::remote_mutation_approval_required`
-
-- Owner: `release_owner`
-- Release area status: `blocked_external_owner_input_ready`
-- Closure state: `external_owner_input_ready`
-- Evidence state: `approval_required`
-- External input required: `True`
-- Owner input required: `True`
-- Next action: Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.
-
-Acceptance criteria:
-- Explicit R4 approval phrase received: `feature push + main fast-forward 승인`
-- `check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`
-- `github_sync` absent from `release_area_blockers` after PM release gate regeneration
-- `origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD
-
-Evidence artifact paths:
-- `github_development_sync_preflight`: `implementation/phase1/release_evidence/productization/github_development_sync_preflight.json`
-- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
-
-Reproduction commands:
-- `python3 scripts/check_github_development_sync_preflight.py --fetch --json`
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
-
-Verification commands:
-- `python3 scripts/check_github_development_sync_preflight.py --fetch --json`
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
-
-Verdict change conditions:
-- `release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`
-- `github_sync::github_sync_preflight::remote_mutation_approval_required` is absent from `pm_release_gate_report.json.release_area_blockers`
-- The owning release-area row has no blocker-specific false check in the PM report.
-- Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`
-
-### `github_sync::github_sync_preflight::local_head_mismatch`
-
-- Owner: `release_owner`
-- Release area status: `blocked_external_owner_input_ready`
-- Closure state: `external_owner_input_ready`
-- Evidence state: `approval_required`
-- External input required: `True`
-- Owner input required: `True`
-- Next action: Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.
-
-Acceptance criteria:
-- Explicit R4 approval phrase received: `feature push + main fast-forward 승인`
-- `check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`
-- `github_sync` absent from `release_area_blockers` after PM release gate regeneration
-- `origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD
-
-Evidence artifact paths:
-- `github_development_sync_preflight`: `implementation/phase1/release_evidence/productization/github_development_sync_preflight.json`
-- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
-
-Reproduction commands:
-- `python3 scripts/check_github_development_sync_preflight.py --fetch --json`
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
-
-Verification commands:
-- `python3 scripts/check_github_development_sync_preflight.py --fetch --json`
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
-
-Verdict change conditions:
-- `release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`
-- `github_sync::github_sync_preflight::local_head_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
-- The owning release-area row has no blocker-specific false check in the PM report.
-- Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`
-
-### `github_sync::github_sync_remote_sync_pending`
-
-- Owner: `release_owner`
-- Release area status: `blocked_external_owner_input_ready`
-- Closure state: `external_owner_input_ready`
-- Evidence state: `approval_required`
-- External input required: `True`
-- Owner input required: `True`
-- Next action: Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.
-
-Acceptance criteria:
-- Explicit R4 approval phrase received: `feature push + main fast-forward 승인`
-- `check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`
-- `github_sync` absent from `release_area_blockers` after PM release gate regeneration
-- `origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD
-
-Evidence artifact paths:
-- `github_development_sync_preflight`: `implementation/phase1/release_evidence/productization/github_development_sync_preflight.json`
-- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
-
-Reproduction commands:
-- `python3 scripts/check_github_development_sync_preflight.py --fetch --json`
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
-
-Verification commands:
-- `python3 scripts/check_github_development_sync_preflight.py --fetch --json`
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
-
-Verdict change conditions:
-- `release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`
-- `github_sync::github_sync_remote_sync_pending` is absent from `pm_release_gate_report.json.release_area_blockers`
-- The owning release-area row has no blocker-specific false check in the PM report.
-- Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`
-
-### `github_sync::github_sync_preflight_not_synced`
-
-- Owner: `release_owner`
-- Release area status: `blocked_external_owner_input_ready`
-- Closure state: `external_owner_input_ready`
-- Evidence state: `approval_required`
-- External input required: `True`
-- Owner input required: `True`
-- Next action: Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.
-
-Acceptance criteria:
-- Explicit R4 approval phrase received: `feature push + main fast-forward 승인`
-- `check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`
-- `github_sync` absent from `release_area_blockers` after PM release gate regeneration
-- `origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD
-
-Evidence artifact paths:
-- `github_development_sync_preflight`: `implementation/phase1/release_evidence/productization/github_development_sync_preflight.json`
-- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
-
-Reproduction commands:
-- `python3 scripts/check_github_development_sync_preflight.py --fetch --json`
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
-
-Verification commands:
-- `python3 scripts/check_github_development_sync_preflight.py --fetch --json`
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
-
-Verdict change conditions:
-- `release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`
-- `github_sync::github_sync_preflight_not_synced` is absent from `pm_release_gate_report.json.release_area_blockers`
-- The owning release-area row has no blocker-specific false check in the PM report.
-- Current false audit check(s): `github_sync_main_synced_to_head`, `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`
 
 ### `independent_vv_missing`
 
