@@ -65,13 +65,19 @@
         "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
         "top20_hit_rate": "top20_hit_rate_min"
       },
-      "numeric_value_policy": {
-        "score": "must parse to a finite float; NaN and Infinity are rejected"
-      },
       "raw_row_quality_minimums": {
         "min_decoy_count_per_target": 20,
         "min_positive_count_per_target": 4,
         "min_total_row_count_per_target": 24
+      },
+      "raw_row_value_contract": {
+        "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+        "numeric_value_policy": {
+          "score": "must parse to a finite float; NaN and Infinity are rejected"
+        },
+        "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+        "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+        "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
       },
       "required_hard_decoy_row_fields": [
         "molecule_id",
@@ -88,6 +94,51 @@
         "score_direction",
         "hard_decoy_rows"
       ],
+      "source_receipt_requirements": {
+        "mode": "raw_hard_decoy_rows",
+        "placeholder_block_policy": {
+          "text_markers": [
+            "<operator",
+            "fixture",
+            "synthetic",
+            "mock",
+            "placeholder",
+            "dummy",
+            "example",
+            "unit-test",
+            "test-only"
+          ],
+          "url_markers": [
+            "://example.",
+            ".example/",
+            ".invalid",
+            ".test/",
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0"
+          ],
+          "url_prefixes": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ]
+        },
+        "required_fields": [
+          "source_id",
+          "source_url",
+          "source_license",
+          "source_artifact",
+          "source_artifact_sha256"
+        ],
+        "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+      },
       "target_id": "DRD2",
       "thresholds": {
         "decoys_above_positive_count": "<=0",
@@ -135,13 +186,19 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
-        "numeric_value_policy": {
-          "score": "must parse to a finite float; NaN and Infinity are rejected"
-        },
         "raw_row_quality_minimums": {
           "min_decoy_count_per_target": 20,
           "min_positive_count_per_target": 4,
           "min_total_row_count_per_target": 24
+        },
+        "raw_row_value_contract": {
+          "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+          "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+          "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
         },
         "required_hard_decoy_row_fields": [
           "molecule_id",
@@ -158,6 +215,51 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "source_receipt_requirements": {
+          "mode": "raw_hard_decoy_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+        },
         "target_id": "DRD2",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
@@ -196,13 +298,19 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
-        "numeric_value_policy": {
-          "score": "must parse to a finite float; NaN and Infinity are rejected"
-        },
         "raw_row_quality_minimums": {
           "min_decoy_count_per_target": 20,
           "min_positive_count_per_target": 4,
           "min_total_row_count_per_target": 24
+        },
+        "raw_row_value_contract": {
+          "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+          "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+          "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
         },
         "required_hard_decoy_row_fields": [
           "molecule_id",
@@ -219,6 +327,51 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "source_receipt_requirements": {
+          "mode": "raw_hard_decoy_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+        },
         "target_id": "HTR2A",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
@@ -257,13 +410,19 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
-        "numeric_value_policy": {
-          "score": "must parse to a finite float; NaN and Infinity are rejected"
-        },
         "raw_row_quality_minimums": {
           "min_decoy_count_per_target": 20,
           "min_positive_count_per_target": 4,
           "min_total_row_count_per_target": 24
+        },
+        "raw_row_value_contract": {
+          "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+          "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+          "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
         },
         "required_hard_decoy_row_fields": [
           "molecule_id",
@@ -280,6 +439,51 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "source_receipt_requirements": {
+          "mode": "raw_hard_decoy_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+        },
         "target_id": "OPRM1",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
@@ -304,13 +508,13 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-07-01T08:17:01.517215+00:00",
+  "generated_at": "2026-07-01T09:39:44.476985+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:30d2b6a86da1915602bc647de024eece488f243636888b685fcd601591e7660a",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:24983ed914879fdc1a9155172826c00c1e8018349a6be2bc8a224d8f895c87f3",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:909befb45e89e0ee0873b699f2ed266ea779eed1849aaf8598b308bacd17b2d6",
-    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:f72484ef5092419f1415d48301d80278c37701e9ec6de0c8a1f38398c4e24fcb",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:de7328505d180ea83f0ad04ad55ca63503f44bf6e70ff34d33e8df52caf4e0bd",
+    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:5a7d1437b3191a00b1b088a094e81927d5626e0fccfeb4eb84c8a6b6325c3a53",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:d1d3f306a711ca60b730a6d8c7236de75d47106951b9a2bb3e1b32d08bc2770f"
   },
   "linked_artifacts": {
@@ -409,13 +613,19 @@
       "min_positive_count_per_target": 4,
       "min_total_row_count_per_target": 24
     },
-    "numeric_value_policy": {
-      "score": "must parse to a finite float; NaN and Infinity are rejected"
-    },
     "optional_row_fields": [
       "score_direction"
     ],
     "produces": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+    "raw_row_value_contract": {
+      "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+      "numeric_value_policy": {
+        "score": "must parse to a finite float; NaN and Infinity are rejected"
+      },
+      "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+      "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+      "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
+    },
     "required_flat_row_fields": [
       "target_id",
       "molecule_id",
@@ -434,6 +644,51 @@
       "HTR2A",
       "OPRM1"
     ],
+    "source_receipt_requirements": {
+      "mode": "raw_hard_decoy_rows",
+      "placeholder_block_policy": {
+        "text_markers": [
+          "<operator",
+          "fixture",
+          "synthetic",
+          "mock",
+          "placeholder",
+          "dummy",
+          "example",
+          "unit-test",
+          "test-only"
+        ],
+        "url_markers": [
+          "://example.",
+          ".example/",
+          ".invalid",
+          ".test/",
+          "localhost",
+          "127.0.0.1",
+          "0.0.0.0"
+        ],
+        "url_prefixes": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
+        ]
+      },
+      "required_fields": [
+        "source_id",
+        "source_url",
+        "source_license",
+        "source_artifact",
+        "source_artifact_sha256"
+      ],
+      "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+    },
     "step_id": "materialize_gpcr_hard_decoy_operator_template_from_rows"
   },
   "read_model": {
@@ -466,7 +721,7 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "3297fd8d5fa62e9547d6ec31cb9e3f73e1213508",
+  "source_commit_sha": "38c83e08301e16041a6584dde8d828ed382a256b",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
@@ -517,13 +772,19 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
-        "numeric_value_policy": {
-          "score": "must parse to a finite float; NaN and Infinity are rejected"
-        },
         "raw_row_quality_minimums": {
           "min_decoy_count_per_target": 20,
           "min_positive_count_per_target": 4,
           "min_total_row_count_per_target": 24
+        },
+        "raw_row_value_contract": {
+          "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+          "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+          "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
         },
         "required_hard_decoy_row_fields": [
           "molecule_id",
@@ -540,6 +801,51 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "source_receipt_requirements": {
+          "mode": "raw_hard_decoy_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+        },
         "target_id": "DRD2",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
@@ -605,13 +911,19 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
-        "numeric_value_policy": {
-          "score": "must parse to a finite float; NaN and Infinity are rejected"
-        },
         "raw_row_quality_minimums": {
           "min_decoy_count_per_target": 20,
           "min_positive_count_per_target": 4,
           "min_total_row_count_per_target": 24
+        },
+        "raw_row_value_contract": {
+          "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+          "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+          "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
         },
         "required_hard_decoy_row_fields": [
           "molecule_id",
@@ -628,6 +940,51 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "source_receipt_requirements": {
+          "mode": "raw_hard_decoy_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+        },
         "target_id": "HTR2A",
         "thresholds": {
           "decoys_above_positive_count": "<=0",
@@ -693,13 +1050,19 @@
           "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
           "top20_hit_rate": "top20_hit_rate_min"
         },
-        "numeric_value_policy": {
-          "score": "must parse to a finite float; NaN and Infinity are rejected"
-        },
         "raw_row_quality_minimums": {
           "min_decoy_count_per_target": 20,
           "min_positive_count_per_target": 4,
           "min_total_row_count_per_target": 24
+        },
+        "raw_row_value_contract": {
+          "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+          "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+          "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
         },
         "required_hard_decoy_row_fields": [
           "molecule_id",
@@ -716,6 +1079,51 @@
           "score_direction",
           "hard_decoy_rows"
         ],
+        "source_receipt_requirements": {
+          "mode": "raw_hard_decoy_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+        },
         "target_id": "OPRM1",
         "thresholds": {
           "decoys_above_positive_count": "<=0",

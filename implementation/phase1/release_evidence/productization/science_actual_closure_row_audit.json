@@ -586,9 +586,9 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T09:15:01.689926+00:00",
+  "generated_at": "2026-07-01T09:39:44.527886+00:00",
   "input_checksums": {
-    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:f72484ef5092419f1415d48301d80278c37701e9ec6de0c8a1f38398c4e24fcb",
+    "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:5a7d1437b3191a00b1b088a094e81927d5626e0fccfeb4eb84c8a6b6325c3a53",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:d1d3f306a711ca60b730a6d8c7236de75d47106951b9a2bb3e1b32d08bc2770f",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:03be810a0da0415b46f9ced29f9d4e292fd5722d8c130ae996185fec28accc4a",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24ee81b77e8d5650e97dd6ca7fe7745933a475b959adc915cefaa68fc66ef3f1",
@@ -894,7 +894,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "f6ffed25e146e5f881bb440499e994b3416262e5",
+  "source_commit_sha": "38c83e08301e16041a6584dde8d828ed382a256b",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
