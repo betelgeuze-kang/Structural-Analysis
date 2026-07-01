@@ -216,6 +216,17 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
             "input checksum, and reuse marker metadata, then rerun the freshness and PM release reports."
         )
     if namespace == "github_sync":
+        github_sync_checks = _as_dict(row.get("checks"))
+        preflight_fresh = bool(github_sync_checks.get("github_sync_preflight_source_state_fresh", True))
+        preflight_kind = str(summary.get("preflight_source_state_kind", "") or "")
+        if not preflight_fresh:
+            return (
+                "Tracked GitHub sync preflight is stale for the current release HEAD "
+                f"(`{preflight_kind or 'source_delta'}`). Regenerate it with "
+                "`python3 scripts/check_github_development_sync_preflight.py --json`, "
+                f"obtain explicit R4 approval phrase `{GITHUB_SYNC_APPROVAL_PHRASE}` for "
+                "the pending feature push and main fast-forward, then rerun the PM release gate."
+            )
         feature_synced = bool(summary.get("feature_synced_to_head", False))
         main_synced = bool(summary.get("main_synced_to_head", False))
         if feature_synced and not main_synced:
@@ -808,6 +819,13 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
         return {
             "state": str(summary.get("status", "") or "approval_required"),
             "reason_code": str(summary.get("reason_code", "") or ""),
+            "preflight_source_state_fresh": checks.get("github_sync_preflight_source_state_fresh"),
+            "preflight_source_state_kind": str(summary.get("preflight_source_state_kind", "") or ""),
+            "preflight_local_head_sha": str(summary.get("preflight_local_head_sha", "") or ""),
+            "current_head_sha": str(summary.get("current_head_sha", "") or ""),
+            "changed_paths_since_preflight_head": _as_list(
+                summary.get("changed_paths_since_preflight_head")
+            ),
             "remote_sync_needed": bool(summary.get("remote_sync_needed", False)),
             "remote_mutation_approval_pending": bool(
                 summary.get("remote_mutation_approval_pending", False)

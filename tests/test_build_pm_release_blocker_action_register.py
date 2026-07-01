@@ -530,6 +530,79 @@ def test_build_register_guides_github_sync_r4_blocker(tmp_path: Path) -> None:
     assert row["evidence_status"]["approval_phrase"] == "feature push + main fast-forward 승인"
 
 
+def test_build_register_guides_stale_github_sync_preflight(tmp_path: Path) -> None:
+    blocker_id = "github_sync::github_sync_preflight::local_head_mismatch"
+    report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "full_release_blockers": [blocker_id],
+            "release_area_blockers": [blocker_id],
+            "blockers": [],
+            "milestones": [],
+            "release_area_matrix": [
+                {
+                    "area": "github_sync",
+                    "title": "GitHub Development Sync",
+                    "status": "blocked",
+                    "blockers": ["github_sync_preflight::local_head_mismatch"],
+                    "checks": {
+                        "github_sync_preflight_source_state_fresh": False,
+                        "github_sync_feature_fast_forward_possible": True,
+                        "github_sync_main_fast_forward_possible": True,
+                        "github_sync_feature_synced_to_head": True,
+                        "github_sync_main_synced_to_head": False,
+                        "github_sync_remote_safety_ok": True,
+                    },
+                    "summary": {
+                        "status": "approval_required",
+                        "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
+                        "preflight_source_state_kind": "source_delta",
+                        "preflight_local_head_sha": "old-head",
+                        "current_head_sha": "new-head",
+                        "changed_paths_since_preflight_head": [
+                            "docs/developer_preview_final_gate_action_register.md"
+                        ],
+                        "remote_sync_needed": True,
+                        "remote_mutation_approval_pending": True,
+                        "remote_mutation_approved": False,
+                        "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
+                        "remote_main_ref": "origin/main",
+                        "feature_synced_to_head": True,
+                        "main_synced_to_head": False,
+                        "feature_ahead_count": 0,
+                        "main_ahead_count": 32,
+                        "pending_remote_update_count": 1,
+                        "pending_remote_update_targets": ["origin/main"],
+                        "pending_remote_update_actions": [
+                            "fast-forward push current HEAD to main"
+                        ],
+                    },
+                    "artifacts": {
+                        "github_development_sync_preflight": "github_development_sync_preflight.json",
+                    },
+                    "claim_boundary": "The GitHub development sync preflight is read-only.",
+                }
+            ],
+        },
+    )
+
+    payload = build_register_module.build_register(pm_report=report)
+    row = payload["rows"][0]
+
+    assert row["blocker_id"] == blocker_id
+    assert "Tracked GitHub sync preflight is stale" in row["owner_action"]
+    assert "Feature branch is synced" not in row["owner_action"]
+    assert "pending feature push and main fast-forward" in row["owner_action"]
+    assert row["evidence_status"]["preflight_source_state_fresh"] is False
+    assert row["evidence_status"]["preflight_source_state_kind"] == "source_delta"
+    assert row["evidence_status"]["preflight_local_head_sha"] == "old-head"
+    assert row["evidence_status"]["current_head_sha"] == "new-head"
+    assert row["evidence_status"]["changed_paths_since_preflight_head"] == [
+        "docs/developer_preview_final_gate_action_register.md"
+    ]
+
+
 def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None:
     report = _write_json(
         tmp_path / "pm_release_gate_report.json",
