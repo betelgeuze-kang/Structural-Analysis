@@ -175,6 +175,9 @@ def test_release_evidence_freshness_allows_canonical_receipt_boundary_paths() ->
     assert freshness._receipt_commit_allowed_path(
         "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
     )
+    assert freshness._receipt_commit_allowed_path(
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+    )
     assert not freshness._receipt_commit_allowed_path("src/structural_analysis/core.py")
 
 

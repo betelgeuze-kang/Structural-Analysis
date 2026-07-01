@@ -412,6 +412,7 @@ def _receipt_commit_allowed_path(path: str) -> bool:
         return True
     return normalized in {
         "implementation/phase1/customer_shadow_evidence_status.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
         "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
     }
 
