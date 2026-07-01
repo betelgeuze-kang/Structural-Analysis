@@ -38,7 +38,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-01T16:50:17.215806+00:00",
+  "generated_at": "2026-07-01T16:51:57.459727+00:00",
   "hip_worker_contract": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -143,7 +143,7 @@
     "runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner"
   },
   "schema_version": "g1-consistent-newton-full-load-checkpoint-candidate-runner.v1",
-  "source_commit_sha": "071833b9ded1947077d5e3dacb953b27f89c6ba6",
+  "source_commit_sha": "d45274fd54813f4d199978a539b92f279911d4df",
   "status": "ready_for_runner_implementation",
   "summary_line": "G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=0.656/1 | closure_blockers=17",
   "verification_commands": [
