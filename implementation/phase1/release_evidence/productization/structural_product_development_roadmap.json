@@ -17,7 +17,7 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 66.7,
-  "generated_at": "2026-07-01T09:42:01.839232+00:00",
+  "generated_at": "2026-07-01T09:47:16.924840+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:414115e105acebde0d1b39db6cb9e746cbee8adca064a1099cc0603bb455486c",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d61804a3527203f67209a2002fcc6fbedaf42881b73332e2a4b0c64e54fe6a52",
@@ -27,8 +27,8 @@
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:82fbf59aa4018bda91e0a14b5cbc6984071cd7a8bd9189789a44061671361089",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2912fc7a5d391e696ad075e8deb957f383ce4f83f933b59080d8f14cd7565ec0",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:dc9a909cfe25cef7f3ee0c0326f6449b7968ebfd62a16ee6200968647ff298ab",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:dac0ff4ceb20489a7c590869fa098c4c012df46c3cd52bfb39fdd1d32df3a1e1",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:6b17a662be6ced15a91c334c58e2f2b279c2ecf6dac6bd6e562c20ca09841bb1",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:24e425e60afce9afdf4b796c801f476c6a11696cc553e50f742b02bf796fa0d9",
     "scripts/build_structural_product_development_roadmap.py": "sha256:7fefa7570e85ee2d5a4c130fcd9bd12577146739ced51a2da9a15b6d115a302a"
   },
   "passed_evidence_requirement_count": 32,
@@ -376,7 +376,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "d026f82c8a459e4fae1c5e9b0368b208c74a2762",
+  "source_commit_sha": "4ef2df633c2eed05cdaceb63124e9c9979fcd145",
   "stage_average_progress_percent": 56.1,
   "stage_count": 7,
   "status": "blocked",
