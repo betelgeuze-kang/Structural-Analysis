@@ -266,6 +266,11 @@ def test_source_of_truth_gap_classification_keeps_rollups_out_of_leaf_freshness(
         assert row["freshness_policy"] == "direct_leaf_row"
         assert row["freshness_label"] in labels
 
+    accuracy_row = rows["accuracy_parity_scorecard"]
+    assert "Direct science scorecard receipt" in accuracy_row["decision"]
+    assert "overall_pass" in accuracy_row["decision"]
+    assert "stability-suite pass" in accuracy_row["decision"]
+
     for candidate in (
         "goal_readiness_rollup",
         "product_goal_completion_audit",

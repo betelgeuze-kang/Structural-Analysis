@@ -156,7 +156,11 @@ SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
         "freshness_policy": "direct_leaf_row",
         "freshness_label": "accuracy_parity_scorecard",
         "current_repo_match": "implementation/phase1/real_accuracy_validation_report.json",
-        "decision": "Direct validation receipt with source tracking in freshness audit.",
+        "decision": (
+            "Direct science scorecard receipt with freshness source tracking; "
+            "the artifact itself carries overall_pass, benchmark contract/KPI pass, "
+            "direct-metric/source-family/public-HF checks, and stability-suite pass."
+        ),
     },
     {
         "candidate": "product_production_ai_checkpoint_readiness",
@@ -167,7 +171,10 @@ SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
             "implementation/phase1/release_evidence/productization/"
             "ai_engine_productization_contracts.json"
         ),
-        "decision": "Direct productization receipt with checkpoint source tracking in freshness audit.",
+        "decision": (
+            "Direct productization receipt with checkpoint source tracking in freshness audit; "
+            "the artifact aggregates ML status and checkpoint receipt inputs."
+        ),
     },
     {
         "candidate": "goal_readiness_rollup",
