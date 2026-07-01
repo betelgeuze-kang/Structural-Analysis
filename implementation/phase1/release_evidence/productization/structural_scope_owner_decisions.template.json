@@ -1,0 +1,2113 @@
+{
+  "allowed_owner_decisions": [
+    "delete_from_structural_repository",
+    "extract_to_molecular_or_science_repository",
+    "retain_quarantined_with_signed_owner_exception"
+  ],
+  "blockers": [],
+  "claim_boundary": "This is a fill-in owner decision template. It is not approval, does not delete files, and does not close structural scope cleanup until every row has an allowed owner_decision, owner identity/role, decision timestamp, evidence reference, and any delete/extract decision has been applied and followed by a refreshed structural scope audit.",
+  "contract_pass": true,
+  "decision_pending_count": 86,
+  "decision_recorded_count": 0,
+  "decision_rows": [
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/md3bead_scientific_validity_report.md",
+      "path_area": "implementation_phase1",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-001"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/md3bead_soa.py",
+      "path_area": "implementation_phase1",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-002"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-003"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-004"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-005"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-006"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-007"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-008"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.md",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-009"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-010"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-011"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-012"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-013"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-014"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-015"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-016"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-017"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-018"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-019"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-020"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "casf_pdbbind",
+        "pdbbind"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-021"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-022"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-023"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-024"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-025"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-026"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-027"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-028"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-029"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-030"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "symmetry_rmsd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-031"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-032"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-033"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-034"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-035"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.md",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-036"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-037"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.md",
+      "path_area": "productization_evidence",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-038"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "path_area": "release_surface",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-039"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "path_area": "release_surface",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-040"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+      "path_area": "release_surface",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "row_id": "structural-scope-owner-041"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/rust_hip_md3bead_hook.py",
+      "path_area": "implementation_phase1",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-042"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+      "path_area": "implementation_phase1",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-043"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+      "path_area": "implementation_phase1",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-044"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+      "path_area": "implementation_phase1",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-045"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/src/main.rs",
+      "path_area": "implementation_phase1",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-046"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/rust_md3bead_parity_report.json",
+      "path_area": "implementation_phase1",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-047"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "md3bead"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/validate_md3bead_rust_parity.py",
+      "path_area": "implementation_phase1",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-048"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-049"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/build_gpcr_hard_decoy_product_report.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-050"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/build_h_bond_backmap_operator_intake_packet.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-051"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/build_pocketmd_lite_product_surface.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-052"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/build_science_actual_closure_operator_handoff.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-053"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-054"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-055"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-056"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_pocketmd_lite_topk_survival_report.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-057"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-058"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_public_benchmark_pose_success_harness.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-059"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_public_benchmark_pose_validity_input.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-060"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "posebusters",
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-061"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_public_benchmark_subset_manifest.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-062"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-063"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/materialize_science_actual_closure_from_rows.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-064"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "ligand",
+        "symmetry_aware_ligand"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/score_symmetry_aware_ligand_rmsd.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-065"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/validate_public_benchmark_pose_validity.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-066"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "scripts/validate_public_benchmark_subset_manifest.py",
+      "path_area": "script",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-067"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-068"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_build_gpcr_hard_decoy_product_report.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-069"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_build_h_bond_backmap_operator_intake_packet.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-070"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_build_pocketmd_lite_product_surface.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-071"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_build_science_actual_closure_operator_handoff.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-072"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-073"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-074"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-075"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-076"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-077"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_public_benchmark_pose_success_harness.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-078"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_public_benchmark_pose_validity_input.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-079"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "posebusters",
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_public_benchmark_posebusters_validity_packet.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-080"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_public_benchmark_subset_manifest.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-081"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-082"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "science_actual"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_materialize_science_actual_closure_from_rows.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-083"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "ligand",
+        "symmetry_aware_ligand"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_score_symmetry_aware_ligand_rmsd.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-084"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_validate_public_benchmark_pose_validity.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-085"
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "tests/test_validate_public_benchmark_subset_manifest.py",
+      "path_area": "test",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
+      "row_id": "structural-scope-owner-086"
+    }
+  ],
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_closure_pass": false,
+  "generated_at": "2026-07-01T17:12:14.157827+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:260f1ee8487dba3a3c2581734bb8ca80609dfb1b3a46bc0aed73aa8a9a00c777",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:b6fc096b07318f1b73638297f9ed80f454c99672d94dc8ffce668891f63d0174"
+  },
+  "owner_decision_required_count": 86,
+  "required_closure_evidence": [
+    "owner_identity_and_role",
+    "decision_timestamp_utc",
+    "per_path_decision",
+    "evidence_reference",
+    "post_decision_structural_scope_audit"
+  ],
+  "reuse_policy": "structural_scope_owner_decision_template_from_review_packet",
+  "reused_evidence": false,
+  "schema_version": "structural-scope-owner-decisions.v1",
+  "source_commit_sha": "533264cc12e06959e7543e78959881c5b813d8de",
+  "status": "pending_owner_decisions"
+}
