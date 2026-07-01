@@ -20,6 +20,7 @@
     "approved_at_valid_pass": false,
     "approver_role_allowed_pass": false,
     "approver_role_present_pass": false,
+    "evidence_ref_not_generated_gate_artifact_pass": false,
     "evidence_ref_not_self_reference_pass": false,
     "evidence_ref_not_template_artifact_pass": false,
     "evidence_ref_not_template_reference_pass": false,
@@ -99,7 +100,8 @@
       "minimum_evidence": [
         "evidence_ref is a ticket/jira/legal/docusign reference, https URL, or existing local evidence path",
         "evidence_ref is not license_status.json itself",
-        "evidence_ref is not docs/templates or a .template artifact"
+        "evidence_ref is not docs/templates or a .template artifact",
+        "evidence_ref is not a generated PM/license/readiness gate artifact"
       ],
       "slot_id": "attach_distinct_retrievable_evidence_reference"
     },
@@ -119,7 +121,7 @@
     }
   ],
   "gate_unblock_plan_count": 6,
-  "generated_at": "2026-07-01T19:50:22.735187+00:00",
+  "generated_at": "2026-07-01T22:09:35.955298+00:00",
   "input_checksums": {
     "docs/templates/license_status.template.json": "sha256:bd5c741b071bb5cde08710ea641889fbd2be704e0c1de5afd8537a550f4154b7",
     "implementation/phase1/release/support_bundle/license_status.json": "sha256:147abf67f7c0fa71a4f60cb12470f38114e8e3075367b875f274df9a1755d03c"
@@ -135,7 +137,7 @@
   "reason_code": "ERR_LICENSE_STATUS_NOT_CLOSED",
   "reused_evidence": false,
   "schema_version": "license-status-closure-report.v1",
-  "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
+  "source_commit_sha": "5bb82972527f988c1aeb074f4818e54a8e297746",
   "status": "blocked",
   "summary": {
     "allowed_approver_roles": [
