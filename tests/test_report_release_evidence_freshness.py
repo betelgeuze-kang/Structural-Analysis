@@ -616,6 +616,44 @@ def test_release_evidence_freshness_blocks_newer_input_dependency(
     assert any(path == str(input_dep) for path in row["input_dependency_paths"])
 
 
+def test_release_evidence_freshness_ignores_newer_intake_helper_dependency(
+    tmp_path: Path,
+) -> None:
+    freshness._git_head = lambda _repo_root: "abcdef1234567890"
+    producer = tmp_path / "producer.py"
+    producer.write_text("print('producer')\n", encoding="utf-8")
+    helper = tmp_path / "scripts" / "build_ux_new_user_observation_intake_packet.py"
+    helper.parent.mkdir(parents=True, exist_ok=True)
+    helper.write_text("print('intake helper')\n", encoding="utf-8")
+    artifact = _write_json(
+        tmp_path / "evidence.json",
+        {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "source_commit_sha": "abcdef123456",
+            "engine_version": "engine-v1",
+            "input_checksums": {
+                "scripts/build_ux_new_user_observation_intake_packet.py": "sha256:abc"
+            },
+            "reused_evidence": True,
+        },
+    )
+    os.utime(producer, (artifact.stat().st_mtime - 5, artifact.stat().st_mtime - 5))
+    future = artifact.stat().st_mtime + 30
+    os.utime(helper, (future, future))
+
+    payload = freshness.build_report(
+        repo_root=tmp_path,
+        artifacts=(("evidence", artifact, producer),),
+        max_age_days=30,
+    )
+    row = payload["rows"][0]
+
+    assert payload["contract_pass"] is True
+    assert row["dependency_mtime_pass"] is True
+    assert row["input_dependency_paths"] == []
+    assert "evidence::input_dependency_newer_than_artifact" not in payload["blockers"]
+
+
 def test_release_evidence_freshness_ignores_non_path_input_checksum_keys(
     tmp_path: Path,
 ) -> None:

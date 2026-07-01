@@ -117,6 +117,15 @@ DEFAULT_ARTIFACTS = (
     ),
 )
 
+FRESHNESS_HELPER_INPUT_PATHS = frozenset(
+    {
+        "scripts/build_license_status_intake_packet.py",
+        "scripts/build_ux_new_user_observation_intake_packet.py",
+        "scripts/build_structural_scope_owner_decision_application_plan.py",
+        "scripts/build_structural_scope_owner_review_packet.py",
+    }
+)
+
 SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, Any], ...] = (
     {
         "candidate": "accuracy_parity_scorecard",
@@ -358,6 +367,17 @@ def _commit_matches(value: Any, current_commit: str) -> bool:
     return current_commit.startswith(text) or text.startswith(current_commit)
 
 
+def _repo_relative_path(repo_root: Path, path: Path) -> str:
+    try:
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except ValueError:
+        return path.as_posix().replace("\\", "/").lstrip("./")
+
+
+def _freshness_helper_input_path(repo_root: Path, path: Path) -> bool:
+    return _repo_relative_path(repo_root, path) in FRESHNESS_HELPER_INPUT_PATHS
+
+
 def _input_checksum_paths(repo_root: Path, input_checksum: Any) -> list[Path]:
     if not isinstance(input_checksum, dict):
         return []
@@ -369,7 +389,7 @@ def _input_checksum_paths(repo_root: Path, input_checksum: Any) -> list[Path]:
         candidate = Path(text)
         if not candidate.is_absolute():
             candidate = repo_root / candidate
-        if candidate.exists():
+        if candidate.exists() and not _freshness_helper_input_path(repo_root, candidate):
             paths.append(candidate)
     return paths
 
