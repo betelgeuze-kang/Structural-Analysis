@@ -44,6 +44,17 @@ NON_STRUCTURAL_PRODUCT_PATH_SUBSTRINGS = (
     "fep",
     "free_energy",
     "all_atom",
+    "casf_pdbbind",
+    "pdbbind",
+    "dud_e",
+    "lit_pcba",
+    "posebusters",
+    "symmetry_rmsd",
+    "symmetry_aware_ligand",
+    "public_benchmark_enrichment",
+    "public_benchmark_pose",
+    "public_benchmark_subset",
+    "public_benchmark_vina_gnina",
 )
 
 
@@ -91,6 +102,7 @@ class SnapshotInputPaths:
     external_benchmark_submission_updates: Path = (
         PRODUCTIZATION / "external_benchmark_submission_updates.json"
     )
+    structural_scope_contamination: Path = PRODUCTIZATION / "structural_scope_contamination_audit.json"
     phase3_release_control_cleanup_plan: Path = PRODUCTIZATION / "phase3_release_control_cleanup_plan.json"
     self_hosted_runner_status: Path = PRODUCTIZATION / "github_actions_self_hosted_runner_status.json"
     package_json: Path = Path("package.json")
@@ -297,6 +309,7 @@ def _receipt_commit_allowed_paths(
         "paid_pilot_scope_guard",
         "external_benchmark_submission_readiness",
         "external_benchmark_submission_updates",
+        "structural_scope_contamination",
         "phase3_release_control_cleanup_plan",
         "self_hosted_runner_status",
     }
@@ -1163,6 +1176,8 @@ def _root_blocker_stream(blocker: str) -> str:
         return "external benchmark"
     if text.startswith("fresh_full_validation::"):
         return "fresh validation"
+    if text.startswith("structural_scope::"):
+        return "structural scope"
     if text.startswith("g1") or "::g1" in text or "residual_holdout" in text:
         return "G1 solver"
     return "release freshness/sync"
@@ -1177,6 +1192,7 @@ def _root_blockers(blockers: list[str]) -> dict[str, dict[str, Any]]:
         "customer shadow",
         "external benchmark",
         "fresh validation",
+        "structural scope",
         "G1 solver",
     )
     grouped: dict[str, list[str]] = {stream: [] for stream in streams}
@@ -1199,6 +1215,7 @@ PHASE0_BLOCKER_CATEGORY_BY_STREAM = {
     "release freshness/sync": "software product",
     "CI runner/streak": "software product",
     "human UX": "software product",
+    "structural scope": "software product",
     "customer shadow": "future commercial",
     "license/legal": "future commercial",
 }
@@ -1661,6 +1678,11 @@ def build_snapshot(
         paths.external_benchmark_submission_updates,
         blockers,
     )
+    structural_scope = _load_json(
+        repo_root,
+        paths.structural_scope_contamination,
+        blockers,
+    )
     phase3_release_control_cleanup_plan = _load_json(
         repo_root,
         paths.phase3_release_control_cleanup_plan,
@@ -1746,6 +1768,7 @@ def build_snapshot(
         "paid_pilot_scope_guard_report": scope_guard,
         "external_benchmark_submission_readiness": external_benchmark_readiness,
         "external_benchmark_submission_updates": external_benchmark_updates,
+        "structural_scope_contamination_audit": structural_scope,
     }
     schema_artifacts = {
         **metadata_artifacts,
@@ -1971,6 +1994,17 @@ def build_snapshot(
             f"{max(external_benchmark_receipts['pending_count'], 0)}"
         )
 
+    structural_scope_ready = bool(
+        _contract_pass(structural_scope)
+        and _as_int(structural_scope.get("unquarantined_non_structural_path_count"), 0) == 0
+        and not _as_list(structural_scope.get("blockers"))
+    )
+    if not structural_scope_ready:
+        scope_blockers = _as_list(structural_scope.get("blockers"))
+        blockers.extend(f"structural_scope::{item}" for item in scope_blockers)
+        if not scope_blockers:
+            blockers.append("structural_scope:not_ready")
+
     g1_claim_boundary = str(g1.get("claim_boundary", ""))
     if "full_g1_closure_ready" in g1:
         g1_full_mesh_ready = bool(g1.get("full_g1_closure_ready"))
@@ -2107,6 +2141,7 @@ def build_snapshot(
         and workstation_delivery_ready
         and workstation_summary["workstation_delivery_8_of_8"]
         and supported_scope_guard_ready
+        and structural_scope_ready
         and full_quality_ready
         and github_sync_clean
         and ux_human_ready
@@ -2122,6 +2157,7 @@ def build_snapshot(
             ("workstation_delivery_not_ready", workstation_delivery_ready),
             ("workstation_delivery_8_of_8_not_ready", workstation_summary["workstation_delivery_8_of_8"]),
             ("supported_scope_guard_not_ready", supported_scope_guard_ready),
+            ("structural_scope_not_clean", structural_scope_ready),
             ("full_quality_not_ready", full_quality_ready),
             ("github_sync_not_clean", github_sync_clean),
             ("human_ux_observation_not_ready", ux_human_ready),
@@ -2140,6 +2176,7 @@ def build_snapshot(
         and external_benchmark_ready
         and customer_ready
         and fresh_ready
+        and structural_scope_ready
     )
     solver_product_blockers = [
         label
@@ -2152,6 +2189,7 @@ def build_snapshot(
             ("external_benchmark_4_of_4_not_ready", external_benchmark_ready),
             ("customer_shadow_3_of_3_not_ready", customer_ready),
             ("fresh_validation_8_of_8_not_ready", fresh_ready),
+            ("structural_scope_not_clean", structural_scope_ready),
         )
         if not ready
     ]
@@ -2166,6 +2204,7 @@ def build_snapshot(
         and license_ready
         and external_benchmark_ready
         and fresh_ready
+        and structural_scope_ready
         and g1_full_mesh_ready
         and g1_full_load_lane_ready
         and identity["matches"]
@@ -2517,6 +2556,55 @@ def build_snapshot(
                 "updates_reused_evidence": external_benchmark_updates.get("reused_evidence"),
                 "updates_fresh": external_benchmark_updates_fresh,
                 "ready": external_benchmark_ready,
+            },
+            "structural_scope_contamination": {
+                "contract_pass": bool(structural_scope.get("contract_pass")),
+                "status": str(structural_scope.get("status", "")),
+                "non_structural_path_count": _as_int(
+                    structural_scope.get("non_structural_path_count"),
+                    0,
+                ),
+                "non_structural_tracked_path_count": _as_int(
+                    structural_scope.get("non_structural_tracked_path_count"),
+                    0,
+                ),
+                "non_structural_untracked_path_count": _as_int(
+                    structural_scope.get("non_structural_untracked_path_count"),
+                    0,
+                ),
+                "quarantined_non_structural_path_count": _as_int(
+                    structural_scope.get("quarantined_non_structural_path_count"),
+                    0,
+                ),
+                "unquarantined_non_structural_path_count": _as_int(
+                    structural_scope.get("unquarantined_non_structural_path_count"),
+                    0,
+                ),
+                "unquarantined_non_structural_tracked_path_count": _as_int(
+                    structural_scope.get("unquarantined_non_structural_tracked_path_count"),
+                    0,
+                ),
+                "unquarantined_non_structural_untracked_path_count": _as_int(
+                    structural_scope.get("unquarantined_non_structural_untracked_path_count"),
+                    0,
+                ),
+                "path_area_counts": _as_dict(structural_scope.get("path_area_counts")),
+                "family_counts": _as_dict(structural_scope.get("family_counts")),
+                "quarantined_path_area_counts": _as_dict(
+                    structural_scope.get("quarantined_path_area_counts")
+                ),
+                "quarantined_family_counts": _as_dict(
+                    structural_scope.get("quarantined_family_counts")
+                ),
+                "unquarantined_path_area_counts": _as_dict(
+                    structural_scope.get("unquarantined_path_area_counts")
+                ),
+                "unquarantined_family_counts": _as_dict(
+                    structural_scope.get("unquarantined_family_counts")
+                ),
+                "quarantine_manifest": _as_dict(structural_scope.get("quarantine_manifest")),
+                "blockers": _as_list(structural_scope.get("blockers")),
+                "ready": structural_scope_ready,
             },
             "g1": {
                 "contract_pass": bool(g1.get("contract_pass")),

@@ -173,6 +173,7 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         paid_pilot_scope_guard=Path("paid_pilot_scope_guard_report.json"),
         external_benchmark_submission_readiness=Path("external_benchmark_submission_readiness.json"),
         external_benchmark_submission_updates=Path("external_benchmark_submission_updates.json"),
+        structural_scope_contamination=Path("structural_scope_contamination_audit.json"),
         phase3_release_control_cleanup_plan=Path("phase3_release_control_cleanup_plan.json"),
         self_hosted_runner_status=Path("github_actions_self_hosted_runner_status.json"),
         package_json=Path("package.json"),
@@ -285,6 +286,29 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
             "Fixture audit verifies row evidence visibility only; it does not "
             "create commercial release readiness."
         ),
+    })
+    _write_json(tmp_path / "structural_scope_contamination_audit.json", {
+        "schema_version": "structural-scope-contamination-audit.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "scripts/check_structural_scope_contamination.py": "sha256:abc123"
+        },
+        "reused_evidence": False,
+        "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths",
+        "status": "pass",
+        "contract_pass": True,
+        "tracked_path_count": 10,
+        "untracked_path_count": 0,
+        "non_structural_path_count": 0,
+        "non_structural_tracked_path_count": 0,
+        "non_structural_untracked_path_count": 0,
+        "path_area_counts": {},
+        "family_counts": {},
+        "git_state_counts": {},
+        "blockers": [],
+        "non_structural_rows": [],
     })
     _write_json(tmp_path / "phase1_core_api_contract_summary.json", {
         "schema_version": "phase1-core-api-contract-artifacts.v1",
@@ -1093,6 +1117,7 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
         "customer shadow",
         "external benchmark",
         "fresh validation",
+        "structural scope",
         "G1 solver",
     }
     assert set(payload["blocker_categories"]) == {
@@ -2434,6 +2459,73 @@ def test_snapshot_public_benchmark_phase2_runner_change_does_not_stale_snapshot_
     ]
 
 
+def test_snapshot_molecular_public_benchmark_row_templates_do_not_stale_structural_receipts(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    productization = (
+        tmp_path / "implementation/phase1/release_evidence/productization"
+    )
+    _write_text(
+        productization / "public_benchmark_enrichment_rows_template.csv",
+        "benchmark_family,target_id,molecule_id\n"
+        "DUD-E,SOURCE_TARGET_ID,active_001\n",
+    )
+    _write_text(
+        productization / "public_benchmark_pose_rows_template.csv",
+        "case_id,pose_success_metric,protein_structure_path\n"
+        "casf_pdbbind_subset_001,symmetry_aware_ligand_rmsd_angstrom,protein.pdb\n",
+    )
+    _write_text(
+        productization / "public_benchmark_subset_rows_template.csv",
+        "case_id,source_family,reference_ligand_path\n"
+        "casf_pdbbind_subset_001,CASF/PDBBind,reference_ligand.sdf\n",
+    )
+    _commit_all(tmp_path, "molecular public benchmark row templates")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "receipt_only_commit"
+    )
+    changed_paths = metadata_rows["pm_release_gate_report"][
+        "changed_paths_since_source_commit"
+    ]
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_enrichment_rows_template.csv"
+    ) not in changed_paths
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_pose_rows_template.csv"
+    ) not in changed_paths
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_subset_rows_template.csv"
+    ) not in changed_paths
+    assert metadata_rows["g1_full_load_hip_newton_lane_report"][
+        "source_state_fresh"
+    ] is True
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
 def test_snapshot_public_benchmark_enrichment_change_does_not_stale_snapshot_leaf_receipts(
     tmp_path: Path,
 ) -> None:
@@ -2460,7 +2552,7 @@ def test_snapshot_public_benchmark_enrichment_change_does_not_stale_snapshot_lea
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["license_status_closure_report"]["source_state_kind"]
-        == "non_artifact_source_paths_changed"
+        == "receipt_only_commit"
     )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert not [
@@ -3892,6 +3984,208 @@ def test_snapshot_surfaces_release_operation_evidence_blockers(tmp_path: Path) -
         "blocker_categories"
     ]["future commercial"]["blockers"]
     assert payload["blocker_categories"]["numerical"]["blocked"] is False
+
+
+def test_snapshot_blocks_structural_scope_contamination(tmp_path: Path) -> None:
+    commit = "abc123"
+    _write_text(
+        tmp_path / "README.md",
+        "PM release areas are `16/16` green. Current action register has `0` open blocker handoffs.\n",
+    )
+    _write_text(
+        tmp_path / "docs/commercialization-gap-current-state.md",
+        "PM release areas are `16/16` green. The open blocker total is `0`.\n",
+    )
+    _write_json(tmp_path / "pm_release_gate_report.json", {
+        "schema_version": "pm-release-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "limited_commercial_release_ready": True,
+        "release_area_gate_ready": True,
+        "full_release_gate_ready": True,
+        "paid_pilot_candidate": True,
+        "ga_enterprise_ready": True,
+        "release_area_matrix": [{"ok": True} for _ in range(16)],
+        "release_area_blockers": [],
+        "full_release_blockers": [],
+        "release_decision": {"release_allowed": True, "blocked_release_count": 0},
+    })
+    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
+        "schema_version": "pm-release-blocker-action-register.v1",
+        "summary": {"open_blocker_count": 0},
+    })
+    _write_common_metadata(tmp_path, commit=commit)
+    _write_json(tmp_path / "structural_scope_contamination_audit.json", {
+        "schema_version": "structural-scope-contamination-audit.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "scripts/check_structural_scope_contamination.py": "sha256:abc123"
+        },
+        "reused_evidence": False,
+        "status": "blocked",
+        "contract_pass": False,
+        "non_structural_path_count": 2,
+        "non_structural_tracked_path_count": 2,
+        "non_structural_untracked_path_count": 0,
+        "quarantined_non_structural_path_count": 0,
+        "unquarantined_non_structural_path_count": 2,
+        "unquarantined_non_structural_tracked_path_count": 2,
+        "unquarantined_non_structural_untracked_path_count": 0,
+        "path_area_counts": {"productization_evidence": 1, "script": 1},
+        "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
+        "quarantined_path_area_counts": {},
+        "quarantined_family_counts": {},
+        "unquarantined_path_area_counts": {"productization_evidence": 1, "script": 1},
+        "unquarantined_family_counts": {
+            "molecular_dynamics": 1,
+            "molecular_docking": 1,
+        },
+        "quarantine_manifest": {"present": False},
+        "git_state_counts": {"tracked": 2},
+        "blockers": [
+            "unquarantined_non_structural_path_count=2",
+            "unquarantined_non_structural_release_evidence_path_count=1",
+        ],
+        "non_structural_rows": [
+            {"path": "scripts/score_symmetry_aware_ligand_rmsd.py"},
+            {
+                "path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "pocketmd_lite_contract.json"
+                )
+            },
+        ],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["structural_scope_contamination"] == {
+        "contract_pass": False,
+        "status": "blocked",
+        "non_structural_path_count": 2,
+        "non_structural_tracked_path_count": 2,
+        "non_structural_untracked_path_count": 0,
+        "quarantined_non_structural_path_count": 0,
+        "unquarantined_non_structural_path_count": 2,
+        "unquarantined_non_structural_tracked_path_count": 2,
+        "unquarantined_non_structural_untracked_path_count": 0,
+        "path_area_counts": {"productization_evidence": 1, "script": 1},
+        "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
+        "quarantined_path_area_counts": {},
+        "quarantined_family_counts": {},
+        "unquarantined_path_area_counts": {"productization_evidence": 1, "script": 1},
+        "unquarantined_family_counts": {
+            "molecular_dynamics": 1,
+            "molecular_docking": 1,
+        },
+        "quarantine_manifest": {"present": False},
+        "blockers": [
+            "unquarantined_non_structural_path_count=2",
+            "unquarantined_non_structural_release_evidence_path_count=1",
+        ],
+        "ready": False,
+    }
+    assert "structural_scope::unquarantined_non_structural_path_count=2" in payload[
+        "blockers"
+    ]
+    assert (
+        "structural_scope::unquarantined_non_structural_release_evidence_path_count=1"
+        in payload["blocker_categories"]["software product"]["blockers"]
+    )
+    assert "structural scope" in payload["blocker_categories"]["software product"][
+        "root_streams"
+    ]
+    assert "structural scope" in payload["root_blockers"]
+
+
+def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _write_json(tmp_path / "structural_scope_contamination_audit.json", {
+        "schema_version": "structural-scope-contamination-audit.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": source_commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "scripts/check_structural_scope_contamination.py": "sha256:abc123",
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_quarantine_manifest.json": "sha256:def456",
+        },
+        "reused_evidence": False,
+        "reuse_policy": (
+            "structural_scope_contamination_audit_from_tracked_paths"
+            "_with_release_surface_quarantine_manifest"
+        ),
+        "status": "quarantined",
+        "contract_pass": True,
+        "tracked_path_count": 10,
+        "untracked_path_count": 0,
+        "non_structural_path_count": 2,
+        "non_structural_tracked_path_count": 2,
+        "non_structural_untracked_path_count": 0,
+        "quarantined_non_structural_path_count": 2,
+        "unquarantined_non_structural_path_count": 0,
+        "unquarantined_non_structural_tracked_path_count": 0,
+        "unquarantined_non_structural_untracked_path_count": 0,
+        "path_area_counts": {"productization_evidence": 1, "script": 1},
+        "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
+        "quarantined_path_area_counts": {"productization_evidence": 1, "script": 1},
+        "quarantined_family_counts": {
+            "molecular_dynamics": 1,
+            "molecular_docking": 1,
+        },
+        "unquarantined_path_area_counts": {},
+        "unquarantined_family_counts": {},
+        "quarantine_manifest": {
+            "present": True,
+            "active": True,
+            "quarantined_path_count": 2,
+        },
+        "blockers": [],
+        "non_structural_rows": [
+            {
+                "path": "scripts/score_symmetry_aware_ligand_rmsd.py",
+                "quarantine_status": "quarantined",
+            },
+            {
+                "path": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "pocketmd_lite_contract.json"
+                ),
+                "quarantine_status": "quarantined",
+            },
+        ],
+    })
+    _commit_all(tmp_path, "receipt")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+
+    component = payload["components"]["structural_scope_contamination"]
+    assert component["ready"] is True
+    assert component["status"] == "quarantined"
+    assert component["non_structural_path_count"] == 2
+    assert component["quarantined_non_structural_path_count"] == 2
+    assert component["unquarantined_non_structural_path_count"] == 0
+    assert not [
+        blocker for blocker in payload["blockers"] if blocker.startswith("structural_scope::")
+    ]
+    assert (
+        "structural_scope_not_clean"
+        not in payload["components"]["assisted_service_pilot"]["blockers"]
+    )
 
 
 def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Path) -> None:

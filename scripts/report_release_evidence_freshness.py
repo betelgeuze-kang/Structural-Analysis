@@ -103,30 +103,6 @@ DEFAULT_ARTIFACTS = (
         Path("scripts/build_developer_preview_rc_status.py"),
     ),
     (
-        "public_benchmark_source_of_truth",
-        Path(
-            "implementation/phase1/release_evidence/productization/"
-            "public_benchmark_source_of_truth.json"
-        ),
-        Path("scripts/build_public_benchmark_source_of_truth.py"),
-    ),
-    (
-        "public_benchmark_harness_bundle",
-        Path(
-            "implementation/phase1/release_evidence/productization/"
-            "public_benchmark_harness_bundle.json"
-        ),
-        Path("scripts/materialize_public_benchmark_harness_bundle.py"),
-    ),
-    (
-        "public_benchmark_phase2_row_audit",
-        Path(
-            "implementation/phase1/release_evidence/productization/"
-            "public_benchmark_phase2_row_audit.json"
-        ),
-        Path("scripts/materialize_public_benchmark_phase2_from_rows.py"),
-    ),
-    (
         "accuracy_parity_scorecard",
         Path("implementation/phase1/real_accuracy_validation_report.json"),
         Path("implementation/phase1/run_real_accuracy_validation.py"),
@@ -138,14 +114,6 @@ DEFAULT_ARTIFACTS = (
             "ai_engine_productization_contracts.json"
         ),
         Path("scripts/build_ai_engine_productization_contracts.py"),
-    ),
-    (
-        "science_actual_closure_row_audit",
-        Path(
-            "implementation/phase1/release_evidence/productization/"
-            "science_actual_closure_row_audit.json"
-        ),
-        Path("scripts/materialize_science_actual_closure_from_rows.py"),
     ),
 )
 
@@ -412,7 +380,6 @@ def _receipt_commit_allowed_path(path: str) -> bool:
         return True
     return normalized in {
         "implementation/phase1/customer_shadow_evidence_status.json",
-        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
         "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
     }
 
