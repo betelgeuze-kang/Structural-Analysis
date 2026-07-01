@@ -3427,6 +3427,42 @@ def test_snapshot_ux_observation_template_only_stales_ux_report(
     ]
 
 
+def test_snapshot_phase6_ux_status_helper_only_stales_dp_rc(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/build_phase6_ux_observation_status.py",
+        "print('phase6 ux status helper changed')\n",
+    )
+    _commit_all(tmp_path, "phase6 ux status helper change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+    mismatch_blockers = [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
+    assert metadata_rows["ux_new_user_observation_report"]["source_state_fresh"] is True
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert mismatch_blockers == [
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
+    ]
+
+
 def test_snapshot_source_of_truth_classification_doc_does_not_stale_leaf_receipts(
     tmp_path: Path,
 ) -> None:
