@@ -98,6 +98,39 @@ POCKETMD_LITE_SURFACE_BLOCKERS = [
     *POCKETMD_LITE_OPERATOR_EVIDENCE_BLOCKERS,
     "pocketmd_lite_broad_all_atom_fep_claim_locked",
 ]
+PHASE4_TOPK_ROW_CLOSURE_CRITERIA = [
+    "top_k_refinement_rows_present",
+    "top_k_refinement_case_coverage",
+    "local_min_survival_materialized",
+    "contact_persistence_materialized",
+    "h_bond_persistence_materialized",
+    "clash_relief_materialized",
+    "uncertainty_summary_materialized",
+]
+PHASE4_TOPK_GUARD_CRITERIA = ["report_blockers_resolved"]
+PHASE4_TOPK_PRESERVED_CRITERIA = ["broad_all_atom_fep_claims_locked"]
+PHASE4_TOPK_CRITERION_BY_FIELD = {
+    "case_id": "top_k_refinement_case_coverage",
+    "source_family": "top_k_refinement_case_coverage",
+    "top_k_rank": "top_k_refinement_case_coverage",
+    "candidate_id": "top_k_refinement_rows_present",
+    "upstream_top_k_provenance_ref": "top_k_refinement_rows_present",
+    "upstream_top_k_source_checksum": "top_k_refinement_rows_present",
+    "pre_refinement_energy_proxy": "report_blockers_resolved",
+    "post_refinement_energy_proxy": "report_blockers_resolved",
+    "local_min_survived": "local_min_survival_materialized",
+    "contact_persistence_rate": "contact_persistence_materialized",
+    "h_bond_persistence_rate": "h_bond_persistence_materialized",
+    "clash_count_before": "clash_relief_materialized",
+    "clash_count_after": "clash_relief_materialized",
+    "uncertainty_interval": "uncertainty_summary_materialized",
+    "uncertainty_low": "uncertainty_summary_materialized",
+    "uncertainty_high": "uncertainty_summary_materialized",
+    "uncertainty_unit": "uncertainty_summary_materialized",
+    "provenance_ref": "report_blockers_resolved",
+    "source_checksum": "report_blockers_resolved",
+    "operator_input_source": "report_blockers_resolved",
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -259,6 +292,58 @@ def _operator_intake_schema() -> dict[str, Any]:
     }
 
 
+def _required_flat_row_fields(required_case_fields: list[str]) -> list[str]:
+    return [
+        (
+            "uncertainty_interval_or_uncertainty_low_high_unit"
+            if field == "uncertainty_interval"
+            else field
+        )
+        for field in required_case_fields
+    ]
+
+
+def _minimum_topk_evidence(required_case_fields: list[str]) -> dict[str, Any]:
+    raw_row_importer = _raw_row_importer_contract()
+    return {
+        "real_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
+        "top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
+        "candidate_count_per_case": POCKETMD_LITE_MINIMUM_CANDIDATE_COUNT_PER_CASE,
+        "top_k_rank_coverage_per_case": (
+            POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE
+        ),
+        "required_rank_span_per_case": list(
+            range(1, POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE + 1)
+        ),
+        "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+        "candidate_scope": "upstream_ranked_top_k_candidates_only",
+        "required_case_fields": required_case_fields,
+        "receipt_fields": [
+            "upstream_top_k_provenance_ref",
+            "upstream_top_k_source_checksum",
+            "provenance_ref",
+            "source_checksum",
+            "operator_input_source.source_artifact",
+            "operator_input_source.source_artifact_sha256",
+            "operator_input_source.source_id",
+            "operator_input_source.source_url",
+            "operator_input_source.source_license",
+        ],
+        "upstream_top_k_receipt_fields": list(UPSTREAM_TOP_K_RECEIPT_FIELDS),
+        "upstream_top_k_receipt_policy": (
+            "Rows must prove the candidate came from the upstream ranked top-k "
+            "set before Lite refinement."
+        ),
+        "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+        "row_value_contract": raw_row_importer["row_value_contract"],
+        "source_receipt_requirements": raw_row_importer[
+            "source_receipt_requirements"
+        ],
+        "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
+        "raw_row_supported_formats": raw_row_importer["supported_source_formats"],
+    }
+
+
 def _operator_gate_unblock_plan(
     *,
     required_case_fields: list[str],
@@ -282,45 +367,7 @@ def _operator_gate_unblock_plan(
             ],
             "preserves_phase4_criteria": ["broad_all_atom_fep_claims_locked"],
             "minimum_evidence": {
-                "real_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
-                "top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
-                "candidate_count_per_case": (
-                    POCKETMD_LITE_MINIMUM_CANDIDATE_COUNT_PER_CASE
-                ),
-                "top_k_rank_coverage_per_case": (
-                    POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE
-                ),
-                "required_rank_span_per_case": list(
-                    range(1, POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE + 1)
-                ),
-                "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
-                "candidate_scope": "upstream_ranked_top_k_candidates_only",
-                "required_case_fields": required_case_fields,
-                "receipt_fields": [
-                    "upstream_top_k_provenance_ref",
-                    "upstream_top_k_source_checksum",
-                    "provenance_ref",
-                    "source_checksum",
-                    "operator_input_source.source_artifact",
-                    "operator_input_source.source_artifact_sha256",
-                    "operator_input_source.source_id",
-                    "operator_input_source.source_url",
-                    "operator_input_source.source_license",
-                ],
-                "upstream_top_k_receipt_fields": list(UPSTREAM_TOP_K_RECEIPT_FIELDS),
-                "upstream_top_k_receipt_policy": (
-                    "Rows must prove the candidate came from the upstream ranked top-k "
-                    "set before Lite refinement."
-                ),
-                "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
-                "row_value_contract": raw_row_importer["row_value_contract"],
-                "source_receipt_requirements": raw_row_importer[
-                    "source_receipt_requirements"
-                ],
-                "operator_input_source_receipt_policy": (
-                    OPERATOR_INPUT_SOURCE_RECEIPT_POLICY
-                ),
-                "raw_row_supported_formats": raw_row_importer["supported_source_formats"],
+                **_minimum_topk_evidence(required_case_fields)
             },
             "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
             "raw_row_importer": raw_row_importer,
@@ -333,6 +380,60 @@ def _operator_gate_unblock_plan(
             ],
             "materialization_command": materializer_command,
             "validation_command": materializer_command,
+        }
+    ]
+
+
+def _phase4_topk_row_closure_matrix(
+    *,
+    required_case_fields: list[str],
+    materializer_command: str,
+) -> list[dict[str, Any]]:
+    raw_row_importer = _raw_row_importer_contract()
+    import_command = raw_row_importer["command"]
+    return [
+        {
+            "row_input_id": "pocketmd_lite_topk_rows",
+            "description": "PocketMD Lite top-k refinement rows",
+            "slot_id": "top_k_refinement_rows",
+            "status": "operator_input_required",
+            "default_row_path_candidates": list(DEFAULT_RAW_ROW_INPUT_CANDIDATES),
+            "accepted_formats": list(raw_row_importer["supported_source_formats"]),
+            "required_flat_row_fields": _required_flat_row_fields(
+                required_case_fields
+            ),
+            "required_case_fields": required_case_fields,
+            "top_k_scope_policy": raw_row_importer["top_k_scope_policy"],
+            "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
+            "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+            "minimum_evidence": _minimum_topk_evidence(required_case_fields),
+            "row_value_contract": raw_row_importer["row_value_contract"],
+            "source_receipt_requirements": raw_row_importer[
+                "source_receipt_requirements"
+            ],
+            "operator_input_source_receipt_policy": (
+                OPERATOR_INPUT_SOURCE_RECEIPT_POLICY
+            ),
+            "closes_phase4_criteria": list(PHASE4_TOPK_ROW_CLOSURE_CRITERIA),
+            "must_resolve_guard_criteria": list(PHASE4_TOPK_GUARD_CRITERIA),
+            "preserves_phase4_criteria": list(PHASE4_TOPK_PRESERVED_CRITERIA),
+            "criterion_by_field": dict(PHASE4_TOPK_CRITERION_BY_FIELD),
+            "materialization_chain": [
+                "materialize_pocketmd_lite_operator_intake_from_rows",
+                "materialize_pocketmd_lite_topk_survival_report",
+                "refresh_pocketmd_lite_science_product_surface",
+                "refresh_product_capabilities_surface",
+                "refresh_goal_bottleneck_roadmap_surface",
+            ],
+            "import_command": import_command,
+            "materialization_command": materializer_command,
+            "claim_boundary": (
+                "This matrix row maps operator-attached top-k refinement rows to "
+                "the bounded PocketMD Lite Phase 4 criteria they can unblock. It is "
+                "not closure evidence until source receipts verify and the survival "
+                "materializer computes passing local-min, contact, H-bond, clash, "
+                "and uncertainty metrics."
+            ),
         }
     ]
 
@@ -470,6 +571,10 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         first_blocker=first_blocker,
         first_blocked_target=first_blocked_target,
     )
+    phase4_topk_row_closure_matrix = _phase4_topk_row_closure_matrix(
+        required_case_fields=required_case_fields,
+        materializer_command=_materializer_contract()["command"],
+    )
     summary = {
         "local_min_survival_rate": None,
         "contact_persistence_rate_median": None,
@@ -535,6 +640,10 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "operator_intake_packet": handoff_context["operator_intake_packet"],
         "first_operator_evidence_gap": handoff_context["first_operator_evidence_gap"],
         "operator_gate_unblock_plan": handoff_context["gate_unblock_plan"],
+        "phase4_topk_row_closure_matrix": phase4_topk_row_closure_matrix,
+        "phase4_topk_row_closure_matrix_count": len(
+            phase4_topk_row_closure_matrix
+        ),
         "operator_handoff_summary": handoff_context["operator_handoff_summary"],
         "materialization_report": {
             "schema_version": MATERIALIZER_SCHEMA_VERSION,
@@ -805,6 +914,10 @@ def build_operator_intake_packet(
         required_case_fields=required_case_fields,
         materializer_command=materializer_command,
     )
+    phase4_topk_row_closure_matrix = _phase4_topk_row_closure_matrix(
+        required_case_fields=required_case_fields,
+        materializer_command=materializer_command,
+    )
     return {
         "schema_version": OPERATOR_INTAKE_PACKET_SCHEMA_VERSION,
         **_metadata(
@@ -865,6 +978,10 @@ def build_operator_intake_packet(
         ],
         "gate_unblock_plan": gate_unblock_plan,
         "gate_unblock_plan_count": len(gate_unblock_plan),
+        "phase4_topk_row_closure_matrix": phase4_topk_row_closure_matrix,
+        "phase4_topk_row_closure_matrix_count": len(
+            phase4_topk_row_closure_matrix
+        ),
         "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
         "minimum_top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
         "minimum_candidate_count_per_case": (
@@ -970,6 +1087,9 @@ def build_operator_intake_packet(
             "required_slot_count": 1,
             "required_case_field_count": len(required_case_fields),
             "gate_unblock_plan_count": len(gate_unblock_plan),
+            "phase4_topk_row_closure_matrix_count": len(
+                phase4_topk_row_closure_matrix
+            ),
             "operator_template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
             "raw_row_importer_script": str(RAW_ROW_IMPORTER_SCRIPT),
             "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
@@ -1023,6 +1143,10 @@ def build_surface(
         first_blocked_target="top_k_refinement_operator_intake",
     )
     gate_unblock_plan = handoff_context["gate_unblock_plan"]
+    phase4_topk_row_closure_matrix = _phase4_topk_row_closure_matrix(
+        required_case_fields=required_case_fields,
+        materializer_command=_materializer_contract()["command"],
+    )
     first_operator_evidence_gap = handoff_context["first_operator_evidence_gap"]
     operator_handoff_summary = handoff_context["operator_handoff_summary"]
     operator_input_source_receipt = topk_survival_report.get(
@@ -1063,6 +1187,10 @@ def build_surface(
         "first_operator_evidence_gap": first_operator_evidence_gap,
         "operator_evidence_gap_register": [first_operator_evidence_gap],
         "operator_gate_unblock_plan": gate_unblock_plan,
+        "phase4_topk_row_closure_matrix": phase4_topk_row_closure_matrix,
+        "phase4_topk_row_closure_matrix_count": len(
+            phase4_topk_row_closure_matrix
+        ),
         "operator_handoff_summary": operator_handoff_summary,
         "required_receipts": [
             "top_k_candidate_refinement_rows",
@@ -1206,6 +1334,28 @@ def _operator_intake_markdown(payload: dict[str, Any]) -> str:
         )
         minimum = json.dumps(row["minimum_evidence"], ensure_ascii=False, sort_keys=True)
         lines.append(f"| `{row['slot_id']}` | {criteria} | `{minimum}` |")
+    lines.extend(
+        [
+            "",
+            "## Phase 4 Top-k Row Closure Matrix",
+            "",
+            "| Row Input | Slot | Closes Criteria | Minimum Evidence |",
+            "|---|---|---|---|",
+        ]
+    )
+    for row in payload["phase4_topk_row_closure_matrix"]:
+        criteria = ", ".join(
+            f"`{criterion}`" for criterion in row["closes_phase4_criteria"]
+        )
+        minimum = json.dumps(
+            row["top_k_row_quality_minimums"],
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        lines.append(
+            f"| `{row['row_input_id']}` | `{row['slot_id']}` | "
+            f"{criteria} | `{minimum}` |"
+        )
     lines.extend(["", "## Materialization Sequence", ""])
     for step in payload["materialization_sequence"]:
         lines.append(f"- `{step['step_id']}`: `{step['command']}`")

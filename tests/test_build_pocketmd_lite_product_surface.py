@@ -329,6 +329,74 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert survival["operator_gate_unblock_plan"][0]["minimum_evidence"][
         "required_case_fields"
     ] == survival["required_case_fields"]
+    assert survival["phase4_topk_row_closure_matrix_count"] == 1
+    survival_closure = survival["phase4_topk_row_closure_matrix"][0]
+    assert survival_closure["row_input_id"] == "pocketmd_lite_topk_rows"
+    assert survival_closure["slot_id"] == "top_k_refinement_rows"
+    assert survival_closure["accepted_formats"] == [
+        "csv",
+        "tsv",
+        "json",
+        "jsonl",
+        "ndjson",
+    ]
+    assert survival_closure["required_flat_row_fields"] == [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_interval_or_uncertainty_low_high_unit",
+        "provenance_ref",
+        "source_checksum",
+    ]
+    assert survival_closure["closes_phase4_criteria"] == [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+    ]
+    assert survival_closure["must_resolve_guard_criteria"] == [
+        "report_blockers_resolved"
+    ]
+    assert survival_closure["preserves_phase4_criteria"] == [
+        "broad_all_atom_fep_claims_locked"
+    ]
+    assert survival_closure["criterion_by_field"]["candidate_id"] == (
+        "top_k_refinement_rows_present"
+    )
+    assert survival_closure["criterion_by_field"]["uncertainty_high"] == (
+        "uncertainty_summary_materialized"
+    )
+    assert survival_closure["minimum_evidence"]["top_k_candidate_count"] == 6
+    assert survival_closure["minimum_evidence"]["receipt_fields"] == [
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "provenance_ref",
+        "source_checksum",
+        "operator_input_source.source_artifact",
+        "operator_input_source.source_artifact_sha256",
+        "operator_input_source.source_id",
+        "operator_input_source.source_url",
+        "operator_input_source.source_license",
+    ]
+    assert "materialize_pocketmd_lite_topk_survival_report" in (
+        survival_closure["materialization_chain"]
+    )
+    assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in (
+        survival_closure["import_command"]
+    )
     assert survival["operator_handoff_summary"]["first_blocker"] == (
         "pocketmd_lite_topk_candidate_rows_missing"
     )
@@ -457,6 +525,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "pocketmd_lite_operator_template.json"
     )
     assert operator["gate_unblock_plan_count"] == 1
+    assert operator["phase4_topk_row_closure_matrix_count"] == 1
+    assert operator["summary"]["phase4_topk_row_closure_matrix_count"] == 1
+    assert operator["phase4_topk_row_closure_matrix"][0] == survival_closure
     assert operator["minimum_refinement_case_count"] == 3
     assert operator["minimum_top_k_candidate_count"] == 6
     assert operator["minimum_candidate_count_per_case"] == 2
@@ -549,6 +620,8 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert surface["operator_intake_route"] == "/product/pocketmd-lite/operator-intake"
     assert surface["operator_intake_required_slot_count"] == 1
     assert surface["operator_evidence_gap_count"] == 1
+    assert surface["phase4_topk_row_closure_matrix_count"] == 1
+    assert surface["phase4_topk_row_closure_matrix"][0] == survival_closure
     assert surface["first_operator_evidence_gap"]["slot_id"] == (
         "top_k_refinement_rows"
     )
@@ -713,6 +786,8 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         surface["readiness_summary"]["operator_input_source_receipt_contract_pass"]
         is False
     )
+    assert surface["phase4_topk_row_closure_matrix_count"] == 1
+    assert surface["phase4_topk_row_closure_matrix"][0] == survival_closure
     assert surface["goal_roadmap_linkage"] == {
         "phase": "Phase 4",
         "roadmap_item": "PocketMD Lite science product surface",
@@ -787,6 +862,9 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
             "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py"
         ].startswith("sha256:")
     assert "# PocketMD Lite Operator Intake Packet" in operator_md_out.read_text(
+        encoding="utf-8"
+    )
+    assert "## Phase 4 Top-k Row Closure Matrix" in operator_md_out.read_text(
         encoding="utf-8"
     )
     survival_payload = json.loads(survival_out.read_text(encoding="utf-8"))
