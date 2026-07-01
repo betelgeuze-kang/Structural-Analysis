@@ -11,7 +11,7 @@
     "remote_fetch_ok": null,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": true
+    "worktree_only_ignored_evidence_dirty": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -20,7 +20,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-07-01T10:55:05.917933+00:00",
+  "generated_at": "2026-07-01T11:02:14.923830+00:00",
   "pending_remote_updates": [
     {
       "action": "push current HEAD to feature",
@@ -56,11 +56,11 @@
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
-    "feature_ahead_count": 9,
+    "feature_ahead_count": 10,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-    "local_head_sha": "56483d10ee6fdaa676c8729b6cb1847728a27440",
-    "main_ahead_count": 9,
+    "ignored_worktree_status_short": "",
+    "local_head_sha": "a429fc1bf281b2ddbcc56480059110e7b96e93e4",
+    "main_ahead_count": 10,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
     "remote_feature_sha": "5477ba5be3d15a7b3bcef4644d0b752f632d9603",
@@ -79,7 +79,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+    "worktree_status_short": ""
   },
   "status": "approval_required"
 }

@@ -1558,7 +1558,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-01T10:58:21.826092+00:00",
+  "generated_at": "2026-07-01T11:02:15.449605+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       ".github/workflows/ai-contract-verify.yml",
@@ -1777,7 +1777,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "56483d10ee6fdaa676c8729b6cb1847728a27440",
+  "source_commit_sha": "a429fc1bf281b2ddbcc56480059110e7b96e93e4",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",
