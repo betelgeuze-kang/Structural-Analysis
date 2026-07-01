@@ -28,6 +28,7 @@ from structural_analysis.api.core import AnalysisConfig, analyze, load_model, va
 DEFAULT_TIMEOUT_SECONDS = 7200
 DEFAULT_MEMORY_LIMIT_GB = 64.0
 SCHEMA_VERSION = "phase3-large-model-execution-receipt.v1"
+ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS = {"PASS", "APPROVED_REVIEW"}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -51,6 +52,68 @@ def _peak_memory_gb() -> float:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(_json_text(payload), encoding="utf-8")
+
+
+def _load_json_object(path: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _normalized_decision(value: Any) -> str:
+    return str(value or "").strip().upper().replace("-", "_").replace(" ", "_")
+
+
+def _scorecard_or_review_status(path: Path | None) -> dict[str, Any]:
+    if path is None:
+        return {
+            "path": "",
+            "present": False,
+            "contract_pass": False,
+            "decision": "",
+            "evidence_ref": "",
+            "reviewer": "",
+            "blockers": ["scorecard_or_review_missing"],
+        }
+    if not path.exists():
+        return {
+            "path": str(path),
+            "present": False,
+            "contract_pass": False,
+            "decision": "",
+            "evidence_ref": "",
+            "reviewer": "",
+            "blockers": ["scorecard_or_review_path_missing"],
+        }
+    payload = _load_json_object(path)
+    decision = _normalized_decision(payload.get("decision") or payload.get("status"))
+    evidence_ref = str(
+        payload.get("evidence_ref")
+        or payload.get("review_evidence_ref")
+        or payload.get("scorecard_ref")
+        or ""
+    ).strip()
+    reviewer = str(payload.get("reviewer") or payload.get("approved_by") or "").strip()
+    blockers: list[str] = []
+    if not payload:
+        blockers.append("scorecard_or_review_json_invalid_or_empty")
+    if decision not in ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS:
+        blockers.append("scorecard_or_review_decision_not_accepted")
+    if not evidence_ref:
+        blockers.append("scorecard_or_review_evidence_ref_missing")
+    if not reviewer:
+        blockers.append("scorecard_or_review_reviewer_missing")
+    return {
+        "path": str(path),
+        "present": True,
+        "contract_pass": not blockers,
+        "decision": decision,
+        "evidence_ref": evidence_ref,
+        "reviewer": reviewer,
+        "blockers": blockers,
+    }
 
 
 def build_large_model_execution_receipt(
@@ -79,6 +142,7 @@ def build_large_model_execution_receipt(
     computed_sha = _sha256(resolved_model)
     expected_sha = source_sha256 or computed_sha
     source_sha256_match = computed_sha == expected_sha
+    scorecard_or_review_status = _scorecard_or_review_status(scorecard_or_review_path)
     result_payload: dict[str, Any] | None = None
     report_payload: dict[str, Any] | None = None
     exception: str | None = None
@@ -121,10 +185,7 @@ def build_large_model_execution_receipt(
     blockers: list[str] = []
     if not source_sha256_match:
         blockers.append("source_sha256_mismatch")
-    if scorecard_or_review_path is None:
-        blockers.append("scorecard_or_review_missing")
-    elif not scorecard_or_review_path.exists():
-        blockers.append("scorecard_or_review_path_missing")
+    blockers.extend(scorecard_or_review_status["blockers"])
     if crashed:
         blockers.append("execution_crashed")
     if oom:
@@ -174,6 +235,7 @@ def build_large_model_execution_receipt(
         "oom": oom,
         "exception": exception or "",
         "scorecard_or_review_path": str(scorecard_or_review_path or ""),
+        "scorecard_or_review_status": scorecard_or_review_status,
         "result_out": str(result_out or ""),
         "report_out": str(report_out or ""),
         "analysis_result_status": str((result_payload or {}).get("status", "")),

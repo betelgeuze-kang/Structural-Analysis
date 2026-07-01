@@ -25,6 +25,17 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _write_review(path: Path, *, index: int) -> None:
+    _write_json(
+        path,
+        {
+            "decision": "APPROVED_REVIEW",
+            "evidence_ref": f"operator-review://large-{index}",
+            "reviewer": "release_owner",
+        },
+    )
+
+
 def _write_minimal_large_readiness_inputs(repo_root: Path) -> None:
     runner = repo_root / module.RUNNER_SCRIPT
     runner.parent.mkdir(parents=True, exist_ok=True)
@@ -105,6 +116,7 @@ def test_large_model_runner_readiness_counts_crash_oom_free_receipts_separately(
     _write_minimal_large_readiness_inputs(tmp_path)
     receipt_dir = tmp_path / module.LARGE_RECEIPT_DIR
     for index in range(2):
+        _write_review(tmp_path / f"approved-review-{index}.json", index=index)
         _write_json(
             receipt_dir / f"large-{index}.execution_receipt.json",
             {
@@ -151,6 +163,7 @@ def test_large_model_runner_readiness_counts_operator_execution_receipts(tmp_pat
     _write_minimal_large_readiness_inputs(tmp_path)
     receipt_dir = tmp_path / module.LARGE_RECEIPT_DIR
     for index in range(2):
+        _write_review(tmp_path / f"approved-review-{index}.json", index=index)
         _write_json(
             receipt_dir / f"large-{index}.execution_receipt.json",
             {
@@ -193,6 +206,47 @@ def test_large_model_runner_readiness_counts_operator_execution_receipts(tmp_pat
     assert "normalization_not_implemented" in payload["blockers"]
     assert payload["contract_pass"] is False
     assert payload["developer_preview_release_candidate_claim"] is False
+
+
+def test_large_model_runner_readiness_rejects_invalid_review_payloads(tmp_path: Path) -> None:
+    _write_minimal_large_readiness_inputs(tmp_path)
+    receipt_dir = tmp_path / module.LARGE_RECEIPT_DIR
+    for index in range(2):
+        _write_json(tmp_path / f"invalid-review-{index}.json", {})
+        _write_json(
+            receipt_dir / f"large-{index}.execution_receipt.json",
+            {
+                "schema_version": "phase3-large-model-execution-receipt.v1",
+                "case_id": f"large-{index}",
+                "contract_pass": True,
+                "validation_contract_pass": True,
+                "exit_code": 0,
+                "crashed": False,
+                "oom": False,
+                "source_sha256": f"sha256:{index:064x}",
+                "source_sha256_match": True,
+                "scorecard_or_review_path": f"invalid-review-{index}.json",
+                "blockers": [],
+            },
+        )
+
+    payload = module.build_phase3_large_model_runner_readiness_receipt(
+        repo_root=tmp_path,
+        source_commit_sha="test-sha",
+    )
+
+    assert payload["current_large_model_execution_receipt_count"] == 2
+    assert payload["crash_oom_free_execution_count"] == 2
+    assert payload["scorecard_or_review_count"] == 0
+    assert "large_model_scorecard_or_review_missing" in payload["blockers"]
+    assert all(
+        row["scorecard_or_review_contract_pass"] is False
+        for row in payload["execution_receipt_inventory"]["receipts"]
+    )
+    first = payload["execution_receipt_inventory"]["receipts"][0]
+    assert "scorecard_or_review_decision_not_accepted" in first[
+        "scorecard_or_review_status"
+    ]["blockers"]
 
 
 def test_large_model_runner_readiness_check_detects_missing_output(tmp_path: Path) -> None:

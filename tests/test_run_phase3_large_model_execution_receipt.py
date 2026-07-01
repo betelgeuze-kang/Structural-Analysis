@@ -57,7 +57,20 @@ def test_large_model_execution_receipt_runner_writes_pass_receipt_for_valid_atta
     report = tmp_path / "report.json"
     out = tmp_path / "receipt.json"
     _write_model(model)
-    review.write_text('{"decision": "approved_review_for_runner_smoke"}\n', encoding="utf-8")
+    review.write_text(
+        json.dumps(
+            {
+                "decision": "APPROVED_REVIEW",
+                "evidence_ref": "operator-review://large-runner-smoke",
+                "reviewer": "release_owner",
+            },
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
     payload = module.build_large_model_execution_receipt(
         model_path=model,
@@ -77,6 +90,8 @@ def test_large_model_execution_receipt_runner_writes_pass_receipt_for_valid_atta
     assert payload["developer_preview_release_candidate_claim"] is False
     assert payload["phase3_closure_claim"] is False
     assert payload["blockers"] == []
+    assert payload["scorecard_or_review_status"]["contract_pass"] is True
+    assert payload["scorecard_or_review_status"]["decision"] == "APPROVED_REVIEW"
     assert payload["source_sha256_match"] is True
     assert payload["validation_contract_pass"] is True
     assert payload["crashed"] is False
@@ -107,3 +122,29 @@ def test_large_model_execution_receipt_blocks_on_sha_mismatch_and_missing_review
     assert payload["source_sha256_match"] is False
     assert "source_sha256_mismatch" in payload["blockers"]
     assert "scorecard_or_review_missing" in payload["blockers"]
+
+
+def test_large_model_execution_receipt_blocks_invalid_review_payload(
+    tmp_path: Path,
+) -> None:
+    model = tmp_path / "attached-model.json"
+    review = tmp_path / "empty-review.json"
+    out = tmp_path / "receipt.json"
+    _write_model(model)
+    review.write_text("{}\n", encoding="utf-8")
+
+    payload = module.build_large_model_execution_receipt(
+        model_path=model,
+        source_id="operator_attached_runner_smoke",
+        case_id="operator_attached_runner_smoke_case",
+        source_sha256=module._sha256(model),
+        scorecard_or_review_path=review,
+        out_path=out,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["scorecard_or_review_status"]["contract_pass"] is False
+    assert "scorecard_or_review_json_invalid_or_empty" in payload["blockers"]
+    assert "scorecard_or_review_decision_not_accepted" in payload["blockers"]
+    assert "scorecard_or_review_evidence_ref_missing" in payload["blockers"]
+    assert "scorecard_or_review_reviewer_missing" in payload["blockers"]

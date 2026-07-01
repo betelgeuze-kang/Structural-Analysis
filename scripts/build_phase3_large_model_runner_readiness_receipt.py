@@ -26,6 +26,7 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_large_model_runner_readiness_receipt.json"
 LARGE_RECEIPT_DIR = PRODUCTIZATION / "large_model_execution_receipts"
 LARGE_RECEIPT_SCHEMA_VERSION = "phase3-large-model-execution-receipt.v1"
+ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS = {"PASS", "APPROVED_REVIEW"}
 LUXINZHENG_MEGATALL_MODEL1 = Path(
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/"
     "extracted/OpenSees_Model/Model1/opensees.tcl"
@@ -295,6 +296,73 @@ def _sha256_or_empty(path: Path) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
+def _relative_path(repo_root: Path, path: Path) -> str:
+    try:
+        return path.relative_to(repo_root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _resolve_receipt_path(repo_root: Path, value: str) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else repo_root / path
+
+
+def _normalized_decision(value: Any) -> str:
+    return str(value or "").strip().upper().replace("-", "_").replace(" ", "_")
+
+
+def _scorecard_or_review_status(repo_root: Path, receipt_ref: str) -> dict[str, Any]:
+    if not receipt_ref:
+        return {
+            "path": "",
+            "present": False,
+            "contract_pass": False,
+            "decision": "",
+            "evidence_ref": "",
+            "reviewer": "",
+            "blockers": ["scorecard_or_review_missing"],
+        }
+    path = _resolve_receipt_path(repo_root, receipt_ref)
+    if not path.exists():
+        return {
+            "path": receipt_ref,
+            "present": False,
+            "contract_pass": False,
+            "decision": "",
+            "evidence_ref": "",
+            "reviewer": "",
+            "blockers": ["scorecard_or_review_path_missing"],
+        }
+    payload = _try_load_json(path)
+    decision = _normalized_decision(payload.get("decision") or payload.get("status"))
+    evidence_ref = str(
+        payload.get("evidence_ref")
+        or payload.get("review_evidence_ref")
+        or payload.get("scorecard_ref")
+        or ""
+    ).strip()
+    reviewer = str(payload.get("reviewer") or payload.get("approved_by") or "").strip()
+    blockers: list[str] = []
+    if not payload:
+        blockers.append("scorecard_or_review_json_invalid_or_empty")
+    if decision not in ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS:
+        blockers.append("scorecard_or_review_decision_not_accepted")
+    if not evidence_ref:
+        blockers.append("scorecard_or_review_evidence_ref_missing")
+    if not reviewer:
+        blockers.append("scorecard_or_review_reviewer_missing")
+    return {
+        "path": _relative_path(repo_root, path),
+        "present": True,
+        "contract_pass": not blockers,
+        "decision": decision,
+        "evidence_ref": evidence_ref,
+        "reviewer": reviewer,
+        "blockers": blockers,
+    }
+
+
 def _large_model_source_identity_inventory(repo_root: Path) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     source_url_case_ids: set[str] = set()
@@ -369,7 +437,7 @@ def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
     checksum_case_ids: set[str] = set()
     for path in _receipt_files(repo_root, LARGE_RECEIPT_DIR):
         payload = _try_load_json(path)
-        relative_path = path.relative_to(repo_root).as_posix() if path.is_relative_to(repo_root) else path.as_posix()
+        relative_path = _relative_path(repo_root, path)
         schema_pass = payload.get("schema_version") == LARGE_RECEIPT_SCHEMA_VERSION
         case_id = str(payload.get("case_id") or path.stem)
         blockers = [str(blocker) for blocker in _safe_list(payload.get("blockers")) if str(blocker)]
@@ -381,6 +449,10 @@ def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         source_sha256 = str(payload.get("source_sha256") or "")
         source_sha256_match = bool(payload.get("source_sha256_match") is True)
         scorecard_or_review_path = str(payload.get("scorecard_or_review_path") or "")
+        scorecard_or_review_status = _scorecard_or_review_status(
+            repo_root,
+            scorecard_or_review_path,
+        )
         execution_receipt_present = bool(
             schema_pass
             and source_sha256.startswith("sha256:")
@@ -397,7 +469,9 @@ def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         )
         crash_oom_free_pass = bool(execution_receipt_present and not crashed and not oom)
         scorecard_or_review_pass = bool(
-            execution_receipt_present and crash_oom_free_pass and scorecard_or_review_path
+            execution_receipt_present
+            and crash_oom_free_pass
+            and scorecard_or_review_status["contract_pass"]
         )
         checksum_pass = bool(
             schema_pass
@@ -427,6 +501,8 @@ def _large_model_execution_receipt_inventory(repo_root: Path) -> dict[str, Any]:
                 "source_sha256": source_sha256,
                 "source_sha256_match": source_sha256_match,
                 "scorecard_or_review_path": scorecard_or_review_path,
+                "scorecard_or_review_contract_pass": scorecard_or_review_status["contract_pass"],
+                "scorecard_or_review_status": scorecard_or_review_status,
                 "execution_receipt_present": execution_receipt_present,
                 "execution_pass": strict_execution_pass,
                 "crash_oom_free": crash_oom_free_pass,
