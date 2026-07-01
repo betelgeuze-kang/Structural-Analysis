@@ -41,16 +41,102 @@
   "claim_boundary": "This report verifies that license status evidence is populated and current; it does not create legal approval or substitute for counsel/product-owner signoff.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T17:32:00.238009+00:00",
+  "gate_unblock_plan": [
+    {
+      "minimum_evidence": [
+        "status is active, approved, or valid",
+        "tier is paid-pilot or limited-commercial",
+        "license_id, issuer_or_approver, approver_role, approval_ref, and approved_at_utc are populated",
+        "template placeholders such as LICENSE-ID or OWNER_INPUT_REQUIRED are absent"
+      ],
+      "required_artifact": "implementation/phase1/release/support_bundle/license_status.json",
+      "slot_id": "attach_license_status_record",
+      "template_artifact": "docs/templates/license_status.template.json"
+    },
+    {
+      "allowed_approver_roles": [
+        "delegated_product_owner",
+        "legal_counsel",
+        "product_and_legal",
+        "product_owner"
+      ],
+      "minimum_evidence": [
+        "approver_role is product_owner, legal_counsel, product_and_legal, or delegated_product_owner",
+        "approved_at_utc is timezone-aware and not in the future",
+        "approval_ref names the product/legal decision record",
+        "approval_ref differs from license_id"
+      ],
+      "slot_id": "prove_product_legal_approval"
+    },
+    {
+      "allowed_tiers": [
+        "limited-commercial",
+        "paid-pilot"
+      ],
+      "minimum_evidence": [
+        "product_scope includes review-assist",
+        "product_scope includes specified-structure-families",
+        "product_scope includes specified-workflows",
+        "product_scope includes engine-and-reviewer-evidence-package"
+      ],
+      "required_product_scope": [
+        "engine-and-reviewer-evidence-package",
+        "review-assist",
+        "specified-structure-families",
+        "specified-workflows"
+      ],
+      "slot_id": "prove_scope_and_tier_boundary"
+    },
+    {
+      "minimum_evidence": [
+        "expires_at_utc is timezone-aware and in the future",
+        "or perpetual=true is explicitly approved",
+        "approved_at_utc is not later than expires_at_utc when an expiry exists"
+      ],
+      "slot_id": "prove_validity_window_or_perpetual_approval"
+    },
+    {
+      "minimum_evidence": [
+        "evidence_ref is a ticket/jira/legal/docusign reference, https URL, or existing local evidence path",
+        "evidence_ref is not license_status.json itself",
+        "evidence_ref is not docs/templates or a .template artifact"
+      ],
+      "slot_id": "attach_distinct_retrievable_evidence_reference"
+    },
+    {
+      "minimum_evidence": [
+        "license_status_closure_report.json contract_pass=true",
+        "license_status_intake_packet.json contract_pass=true",
+        "PM release security area no longer blocks license_status_not_configured"
+      ],
+      "slot_id": "regenerate_release_gate_evidence",
+      "validation_commands": [
+        "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+        "python3 scripts/build_license_status_intake_packet.py --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json --out-md implementation/phase1/release_evidence/productization/license_status_intake_packet.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    }
+  ],
+  "gate_unblock_plan_count": 6,
+  "generated_at": "2026-07-01T19:20:08.102995+00:00",
   "input_checksums": {
     "docs/templates/license_status.template.json": "sha256:bd5c741b071bb5cde08710ea641889fbd2be704e0c1de5afd8537a550f4154b7",
     "implementation/phase1/release/support_bundle/license_status.json": "sha256:147abf67f7c0fa71a4f60cb12470f38114e8e3075367b875f274df9a1755d03c"
   },
   "license_status_path": "implementation/phase1/release/support_bundle/license_status.json",
+  "next_actions": [
+    "fill_license_status_record_from_template",
+    "attach_product_or_legal_approval_evidence",
+    "set_paid_pilot_or_limited_commercial_scope_boundary",
+    "prove_future_expiry_or_perpetual_approval",
+    "rerun_license_status_and_release_gates"
+  ],
   "reason_code": "ERR_LICENSE_STATUS_NOT_CLOSED",
   "reused_evidence": false,
   "schema_version": "license-status-closure-report.v1",
-  "source_commit_sha": "c8d4a6edfd6df4ba706355ffd49fd19482f1a5ed",
+  "source_commit_sha": "dd43b8caf7afed4bfd8bb1a75ab71aad79d09b48",
+  "status": "blocked",
   "summary": {
     "allowed_approver_roles": [
       "delegated_product_owner",
@@ -88,5 +174,13 @@
     "status": "not_configured",
     "template_path": "docs/templates/license_status.template.json",
     "tier": ""
-  }
+  },
+  "summary_line": "License status: BLOCKED | status=not_configured | tier=missing | blockers=10",
+  "template_path": "docs/templates/license_status.template.json",
+  "validation_commands": [
+    "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+    "python3 scripts/build_license_status_intake_packet.py --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json --out-md implementation/phase1/release_evidence/productization/license_status_intake_packet.md",
+    "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+    "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+  ]
 }
