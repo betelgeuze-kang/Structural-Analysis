@@ -3717,6 +3717,76 @@ def test_snapshot_medium_scorecard_runner_change_only_stales_dp_rc_artifact(
     ]
 
 
+def test_snapshot_large_model_builder_change_only_stales_dp_rc_artifact(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/build_phase3_large_model_runner_readiness_receipt.py",
+        "print('large model runner readiness changed')\n",
+    )
+    _commit_all(tmp_path, "large model readiness builder change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
+    assert [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ] == [
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
+    ]
+
+
+def test_snapshot_large_model_runner_change_only_stales_dp_rc_artifact(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/run_phase3_large_model_execution_receipt.py",
+        "print('large model execution runner contract changed')\n",
+    )
+    _commit_all(tmp_path, "large model execution runner change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
+    assert [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ] == [
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
+    ]
+
+
 def test_snapshot_phase6_parity_builder_change_only_stales_dp_rc_artifact(
     tmp_path: Path,
 ) -> None:
