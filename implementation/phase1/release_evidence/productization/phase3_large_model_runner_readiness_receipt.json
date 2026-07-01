@@ -42,7 +42,19 @@
         "path": "implementation/phase1/release_evidence/productization/large_model_execution_receipts/midas_generator_33_optimized_local.execution_receipt.json",
         "schema_pass": true,
         "scorecard_or_review": false,
+        "scorecard_or_review_contract_pass": false,
         "scorecard_or_review_path": "",
+        "scorecard_or_review_status": {
+          "blockers": [
+            "scorecard_or_review_missing"
+          ],
+          "contract_pass": false,
+          "decision": "",
+          "evidence_ref": "",
+          "path": "",
+          "present": false,
+          "reviewer": ""
+        },
         "source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
         "source_sha256_match": true,
         "validation_contract_pass": false
@@ -64,7 +76,19 @@
         "path": "implementation/phase1/release_evidence/productization/large_model_execution_receipts/setback_tower_proxy_ifc.execution_receipt.json",
         "schema_pass": true,
         "scorecard_or_review": false,
+        "scorecard_or_review_contract_pass": false,
         "scorecard_or_review_path": "",
+        "scorecard_or_review_status": {
+          "blockers": [
+            "scorecard_or_review_missing"
+          ],
+          "contract_pass": false,
+          "decision": "",
+          "evidence_ref": "",
+          "path": "",
+          "present": false,
+          "reviewer": ""
+        },
         "source_sha256": "sha256:05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
         "source_sha256_match": true,
         "validation_contract_pass": false
@@ -75,15 +99,15 @@
     "source_checksum_count": 2,
     "valid_execution_case_count": 0
   },
-  "generated_at": "2026-07-01T06:23:00.964748+00:00",
+  "generated_at": "2026-07-01T21:35:01.313360+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json": "sha256:efe4af8459fc34480a3e5bb6e62dc4022f1bf5bed51c49d428e8847e5c1556d8",
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl": "sha256:66b73f329080e06a083f6f1ac3bbdc8ce45ca1fb8c2184c676efb978b32bb30f",
     "implementation/phase1/release_evidence/productization/large_model_execution_receipts": "dir-sha256:24fc3e9d2147dbd1b7c72999c57798285e3babc6b43511ccbc31b85b6ef1a853",
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:8a9e393a1c0d9c40ca51648a74ae2de0ea514cf4e12d696d1671fcd3680d469c",
-    "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:9bb1c71f77d906fec775f65ad6648eadecb7c0852d47a6a6ce1dd60e4b9a981c",
+    "scripts/run_phase3_large_model_execution_receipt.py": "sha256:d615b169fda3f3f8c9a231a957b7b0354f503c769269724f23c8dc477c9250eb",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82"
   },
   "lanes": [
     "opensees-megatall",
@@ -321,7 +345,7 @@
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
   "source_checksum_count": 2,
-  "source_commit_sha": "0d8611d00aa52041fc80c23565ff455a5dd9e16c",
+  "source_commit_sha": "cc4feb72030ca991990d5c76985e0dd8dbf9d2cb",
   "source_id": "opensees_megatall_model_2_large",
   "source_identity_inventory": {
     "claim_boundary": "This inventory records already-collected local large-model source files, their SHA256 values, and source URL metadata. It does not approve licenses, create reference outputs, normalize models, execute analyses, or count as large-model PASS/REVIEW evidence.",
