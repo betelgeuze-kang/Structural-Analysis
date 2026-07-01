@@ -119,7 +119,7 @@ def test_phase6_ux_observation_status_blocks_without_human_and_execution_evidenc
         "run_monitor",
         "compare_report",
     ]
-    assert handoff["missing_field_count"] == 13
+    assert handoff["missing_field_count"] == 14
     assert "completion_minutes <= 30" in handoff["acceptance_criteria"]
     assert "approval_decision == accepted" in handoff["acceptance_criteria"]
     assert any(

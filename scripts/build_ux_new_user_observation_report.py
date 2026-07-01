@@ -36,6 +36,7 @@ PLACEHOLDER_TOKENS = {
 }
 REQUIRED_FIELDS = (
     "contract_pass",
+    "participant_ref",
     "participant_role",
     "new_to_product",
     "sample_project_id",
@@ -265,6 +266,7 @@ def _gate_unblock_plan(
             "required_artifact": str(observation_path),
             "template_artifact": str(template_path),
             "minimum_evidence": [
+                "participant_ref is a stable anonymized participant reference",
                 "participant_role is new_user, first_time_user, or pilot_user",
                 "new_to_product=true",
                 "observer is a human observer or UX research owner",
@@ -337,6 +339,7 @@ def build_report(
     )
     decision = str(observation.get("approval_decision", "")).strip().lower()
     participant_role = str(observation.get("participant_role", "")).strip().lower()
+    participant_ref = str(observation.get("participant_ref", "") or "").strip()
     new_to_product = observation.get("new_to_product") is True
     blocker_count = _as_int(observation.get("blocker_count"), 1)
     evidence_ref = observation.get("evidence_ref")
@@ -499,6 +502,7 @@ def build_report(
             "started_at_utc": started_at.isoformat() if started_at is not None else None,
             "completed_at_utc": completed_at.isoformat() if completed_at is not None else None,
             "participant_role": participant_role,
+            "participant_ref": participant_ref,
             "new_to_product": new_to_product,
             "blocker_count": blocker_count,
             "reported_blocker_count": blocker_count,
@@ -521,7 +525,7 @@ def build_report(
             "placeholder_workflow_steps": placeholder_workflow_steps,
             "owner_action": (
                 "Attach a human new-user observation record for the sample project workflow, including "
-                "participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, "
+                "an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, "
                 "Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion "
                 "minutes, blocker count, evidence reference, and accepted release decision."
             ),

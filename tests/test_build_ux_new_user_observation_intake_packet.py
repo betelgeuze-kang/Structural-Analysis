@@ -22,6 +22,7 @@ def _write_json(path: Path, payload: object) -> Path:
 def _template() -> dict[str, object]:
     return {
         "contract_pass": False,
+        "participant_ref": "OWNER_INPUT_REQUIRED: anonymized participant or session reference",
         "participant_role": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user",
         "new_to_product": "OWNER_INPUT_REQUIRED: true",
         "sample_project_id": "OWNER_INPUT_REQUIRED: sample project identifier",
@@ -49,6 +50,7 @@ def _template() -> dict[str, object]:
 def _observation() -> dict[str, object]:
     return {
         "contract_pass": True,
+        "participant_ref": "ux-participant-001",
         "participant_role": "new_user",
         "new_to_product": True,
         "sample_project_id": "sample_tower",
@@ -100,6 +102,7 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
             "summary": {
                 "missing_fields": [
                     "contract_pass",
+                    "participant_ref",
                     "participant_role",
                     "new_to_product",
                     "sample_project_id",
@@ -139,6 +142,7 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
         "run_30_minute_human_new_user_core_workflow_observation",
         "rerun_ux_observation_validation_chain",
     ]
+    assert rows["participant_ref"]["template_value"].startswith("OWNER_INPUT_REQUIRED")
     assert rows["participant_role"]["template_value"].startswith("OWNER_INPUT_REQUIRED")
     assert rows["completion_minutes"]["missing"] is True
     assert rows["completion_minutes"]["report_check_pass"] is False
@@ -221,8 +225,8 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
     assert payload["contract_pass"] is True
     assert payload["status"] == "ready"
     assert payload["reason_code"] == "PASS"
-    assert payload["summary"]["field_pass_count"] == 22
-    assert payload["summary"]["field_count"] == 22
+    assert payload["summary"]["field_pass_count"] == 23
+    assert payload["summary"]["field_count"] == 23
     assert payload["gate_unblock_plan"] == []
     assert payload["gate_unblock_plan_count"] == 0
     assert payload["next_actions"] == []

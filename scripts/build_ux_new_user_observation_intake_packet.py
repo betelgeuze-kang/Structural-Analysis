@@ -27,6 +27,12 @@ FIELD_SPECS = (
         "owner_note": "Observation source must explicitly opt into release evidence, not remain draft or template-only.",
     },
     {
+        "field": "participant_ref",
+        "required_value": "stable anonymized participant reference",
+        "check": "required_fields_present",
+        "owner_note": "Use an anonymized participant/session reference so reviewers can trace the observation without storing raw personal data.",
+    },
+    {
         "field": "participant_role",
         "required_value": "new_user | first_time_user | pilot_user",
         "check": "participant_role_new_user_pass",

@@ -22,6 +22,7 @@ def _write_json(path: Path, payload: object) -> Path:
 def _passing_observation() -> dict[str, object]:
     return {
         "contract_pass": True,
+        "participant_ref": "ux-participant-001",
         "participant_role": "new_user",
         "new_to_product": True,
         "sample_project_id": "sample_tower",
@@ -106,6 +107,7 @@ def test_ux_new_user_observation_passes_with_human_record(tmp_path: Path) -> Non
     assert payload["checks"]["completion_minutes_elapsed_match_pass"] is True
     assert payload["summary"]["completion_minutes"] == 24.0
     assert payload["summary"]["elapsed_minutes"] == 24.0
+    assert payload["summary"]["participant_ref"] == "ux-participant-001"
     assert payload["summary"]["timestamp_tolerance_minutes"] == 1.0
     assert payload["checks"]["all_required_workflow_steps_observed"] is True
     assert payload["checks"]["all_required_workflow_steps_passed"] is True
@@ -152,6 +154,18 @@ def test_ux_new_user_observation_rejects_naive_timestamps(tmp_path: Path) -> Non
     assert "started_at_utc_invalid" in payload["blockers"]
     assert "elapsed_minutes_missing" in payload["blockers"]
     assert payload["checks"]["started_at_utc_valid"] is False
+
+
+def test_ux_new_user_observation_requires_participant_ref(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record.pop("participant_ref")
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "required_fields_missing" in payload["blockers"]
+    assert "participant_ref" in payload["summary"]["missing_fields"]
 
 
 def test_ux_new_user_observation_rejects_reversed_timestamps(tmp_path: Path) -> None:

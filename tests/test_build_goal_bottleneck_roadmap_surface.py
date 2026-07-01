@@ -184,7 +184,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED"
     )
     assert human_ux["owner_intake_current_blocker_count"] == 12
-    assert human_ux["missing_field_count"] == 13
+    assert human_ux["missing_field_count"] == 14
     assert human_ux["workflow_step_pass_count"] == 0
     assert human_ux["required_workflow_step_count"] == 5
     assert human_ux["missing_workflow_steps"] == [

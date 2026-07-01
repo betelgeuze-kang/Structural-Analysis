@@ -1,5 +1,6 @@
 {
   "contract_pass": false,
+  "participant_ref": "OWNER_INPUT_REQUIRED: anonymized participant or session reference, e.g. ux-participant-001",
   "participant_role": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user",
   "new_to_product": "OWNER_INPUT_REQUIRED: true",
   "sample_project_id": "OWNER_INPUT_REQUIRED: sample project identifier",
