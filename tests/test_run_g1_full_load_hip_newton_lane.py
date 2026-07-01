@@ -631,6 +631,7 @@ def test_missing_hip_worker_contract_blocks_lane_promotion(
         "residual_jvp_worker_path_blockers": [],
         "g1_closure_gate_ready": None,
         "g1_closure_gate_blockers": [],
+        "terminal_gate_partition": {},
     }
     assert payload["child_exit_code"] is None
     assert not child.exists()
@@ -1013,6 +1014,39 @@ def test_hip_proof_partitions_worker_path_from_g1_closure_gate(
             "required_for_g1_closure": True,
             "promotes_g1_closure": False,
             "cpu_fallback_allowed": False,
+            "terminal_gate_partition": {
+                "schema_version": (
+                    "production-rocm-hip-worker-terminal-gate-partition.v1"
+                ),
+                "worker_path": {"ready": True, "blockers": []},
+                "g1_closure_gate": {
+                    "ready": False,
+                    "blockers": [
+                        "consistent_residual_jacobian_newton_gate_not_passed"
+                    ],
+                    "consistent_residual_jacobian_newton_gate_passed": False,
+                },
+                "checkpoint_gate": {
+                    "full_load_required": True,
+                    "load_scale": 0.656,
+                    "full_load_candidate": False,
+                    "gap_to_full_load": 0.344,
+                    "full_load_closure_passed": False,
+                },
+                "direct_residual_gate": {
+                    "passed": False,
+                    "relative_increment_gate_passed": True,
+                    "material_newton_breadth_passed": False,
+                    "fallback_zero_passed": True,
+                },
+                "next_action": {
+                    "id": "generate_full_load_1p0_checkpoint_candidate",
+                    "blockers": [
+                        "full_load_checkpoint_candidate_missing",
+                        "full_load_closure_gate_not_passed",
+                    ],
+                },
+            },
         },
     )
 
@@ -1024,11 +1058,36 @@ def test_hip_proof_partitions_worker_path_from_g1_closure_gate(
     worker = summary["production_rocm_hip_residual_jvp_worker"]
     assert worker["residual_jvp_worker_path_ready"] is True
     assert worker["g1_closure_gate_ready"] is False
+    assert (
+        worker["terminal_gate_partition"]["next_action"]["id"]
+        == "generate_full_load_1p0_checkpoint_candidate"
+    )
     assert "hip_consistency_proof_worker_g1_closure_gate_not_ready" in blockers
     assert (
         "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready"
         not in blockers
     )
+
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=0.656)
+    child = tmp_path / "child.json"
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+    assert exit_code == 1
+    partition = payload["blocker_partition"][
+        "production_rocm_hip_residual_jvp_worker"
+    ]["terminal_gate_partition"]
+    assert partition["checkpoint_gate"]["full_load_candidate"] is False
+    requirements = {
+        row["id"]: row
+        for row in payload["terminal_requirement_breakdown"]["requirements"]
+    }
+    assert requirements["production_rocm_hip_residual_jvp_worker"][
+        "next_action_ids"
+    ] == ["generate_full_load_1p0_checkpoint_candidate"]
 
 
 def test_hip_proof_non_receipt_source_commit_still_blocks(

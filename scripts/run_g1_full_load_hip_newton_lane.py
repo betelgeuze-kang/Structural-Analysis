@@ -121,6 +121,10 @@ def _git_diff_name_only(base: str, head: str) -> list[str]:
     return [line.strip() for line in output.splitlines() if line.strip()]
 
 
+def _dict_or_none(value: Any) -> dict[str, Any] | None:
+    return value if isinstance(value, dict) else None
+
+
 def _receipt_commit_allowed_path(path: str) -> bool:
     if path in {"README.md", "docs/commercialization-gap-current-state.md"}:
         return True
@@ -764,6 +768,12 @@ def _g1_lane_blocker_partition(
 ) -> dict[str, Any]:
     worker = hip_consistency_proof.get("production_rocm_hip_residual_jvp_worker")
     worker = worker if isinstance(worker, dict) else {}
+    worker_terminal_gate_partition = worker.get("terminal_gate_partition")
+    worker_terminal_gate_partition = (
+        worker_terminal_gate_partition
+        if isinstance(worker_terminal_gate_partition, dict)
+        else {}
+    )
     return {
         "schema_version": "g1-full-load-hip-newton-blocker-partition.v1",
         "checkpoint_resolution": {
@@ -818,6 +828,7 @@ def _g1_lane_blocker_partition(
             "g1_closure_gate_blockers": _string_list(
                 worker.get("g1_closure_gate_blockers")
             ),
+            "terminal_gate_partition": worker_terminal_gate_partition,
         },
         "child_direct_probe": {
             "ready": child_gate_evidence.get("ready") is True,
@@ -1066,6 +1077,22 @@ def _g1_lane_terminal_requirement_breakdown(
         and worker.get("g1_closure_gate_ready") is True
         and not worker_blockers
     )
+    worker_terminal_gate_partition = worker.get("terminal_gate_partition")
+    worker_terminal_gate_partition = (
+        worker_terminal_gate_partition
+        if isinstance(worker_terminal_gate_partition, dict)
+        else {}
+    )
+    worker_partition_next_action = worker_terminal_gate_partition.get("next_action")
+    worker_partition_next_action = (
+        worker_partition_next_action
+        if isinstance(worker_partition_next_action, dict)
+        else {}
+    )
+    worker_next_action_id = str(
+        worker_partition_next_action.get("id")
+        or "close_consistent_residual_jacobian_newton_gate"
+    )
 
     child_blockers = _dedupe_strings(
         [
@@ -1187,13 +1214,10 @@ def _g1_lane_terminal_requirement_breakdown(
                     "residual_jvp_worker_path_ready"
                 ),
                 "g1_closure_gate_ready": worker.get("g1_closure_gate_ready"),
+                "terminal_gate_partition": worker_terminal_gate_partition,
             },
             "blockers": worker_blockers,
-            "next_action_ids": (
-                []
-                if worker_ready
-                else ["close_consistent_residual_jacobian_newton_gate"]
-            ),
+            "next_action_ids": [] if worker_ready else [worker_next_action_id],
         },
         {
             "id": "full_load_child_direct_probe",
@@ -1513,6 +1537,12 @@ def _hip_consistency_proof_assessment(
         blockers.append("hip_consistency_proof_gate_not_passed")
     worker_contract = payload.get("production_rocm_hip_residual_jvp_worker")
     worker_contract = worker_contract if isinstance(worker_contract, dict) else {}
+    worker_terminal_gate_partition = worker_contract.get("terminal_gate_partition")
+    worker_terminal_gate_partition = (
+        worker_terminal_gate_partition
+        if isinstance(worker_terminal_gate_partition, dict)
+        else {}
+    )
     if not worker_contract:
         blockers.append("hip_consistency_proof_worker_contract_missing")
     else:
@@ -1587,6 +1617,7 @@ def _hip_consistency_proof_assessment(
             "g1_closure_gate_blockers": _string_list(
                 worker_contract.get("g1_closure_gate_blockers")
             ),
+            "terminal_gate_partition": worker_terminal_gate_partition,
         },
         "receipt_blockers": proof_blockers if isinstance(proof_blockers, list) else [],
         "runtime_blockers": runtime_blockers_list,
