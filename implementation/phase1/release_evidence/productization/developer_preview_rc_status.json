@@ -483,7 +483,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-01T07:46:59.856334+00:00",
+  "generated_at": "2026-07-01T08:22:01.069709+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:15ea6b45c751e70c0102cb1f08381ea94eda186e0b3d090ff950090bf4257a32",
@@ -2111,6 +2111,26 @@
       ],
       "operator_next_actions": [
         {
+          "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+          "clears_blockers": [
+            "medium_structural_models_current_below_required:2/5"
+          ],
+          "current_candidate_case_count": 2,
+          "evidence_artifacts": [
+            "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+            "operator-attached source/license/reference/normalization rows for each added case"
+          ],
+          "id": "select_additional_medium_model_cases",
+          "owner": "benchmark_operator",
+          "remaining_case_count": 3,
+          "required_candidate_case_count": 5,
+          "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+            "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check"
+          ]
+        },
+        {
           "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
           "clears_blockers": [
             "license_review_pending"
@@ -2649,6 +2669,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
+  "source_commit_sha": "c2d870dc960cc9df3b85172896accb671a09dd72",
   "status": "blocked"
 }

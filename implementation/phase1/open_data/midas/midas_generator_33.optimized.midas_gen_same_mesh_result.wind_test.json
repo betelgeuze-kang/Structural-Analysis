@@ -1,6 +1,6 @@
 {
   "schema_version": "midas-gen-same-mesh-result.v1",
-  "generated_at": "2026-06-30T18:04:13.365442+00:00",
+  "generated_at": "2026-07-01T08:19:58.191022+00:00",
   "source": {
     "kind": "model_derived_wind_estimate",
     "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",

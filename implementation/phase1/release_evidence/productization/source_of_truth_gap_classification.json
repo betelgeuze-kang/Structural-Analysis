@@ -3,7 +3,7 @@
   "claim_boundary": "This artifact classifies the five remaining source-of-truth gap candidates. It records freshness policy and live artifact checks, but does not promote aggregator rollups or replace the heavy validation receipts themselves.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T08:06:55.771168+00:00",
+  "generated_at": "2026-07-01T08:21:07.237162+00:00",
   "input_checksums": {
     "docs/source-of-truth-gap-classification.md": "sha256:d4cd1134e78f6acedaf39c09c5ff2fc0fcbf62451e60e6530686269b855a8c09",
     "implementation/phase1/real_accuracy_validation_report.json": "sha256:1e63a32c3d0d95e3e34f58aea661e989646088d66cf086da7340bb8dfc8ab46c",
@@ -11,7 +11,7 @@
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d8eb5aac9e8200086880864926319fc9d2acfcc45df616298cc8c65466f675b4",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:0f61d1cc1d5c668400ba5b2e67571e8b1539a8bf4882459e646a3a97a70090a5",
     "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json": "sha256:f2f8a0335a2068bc5c231f86b719a6b7a196d6b614ea9dbf6f514cb622f041a8",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:ed0cfa2bd0257ca4fa7b2e8235f52cd070775b805ff62e46745b4b6185a9fbf0",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:68f96b0af33df965a4975b366a62c5c5eb888f42c62a3bd5e956f0ec235b98d7",
     "scripts/build_source_of_truth_gap_classification.py": "sha256:8c5639933496df1a1951eb662c765d8c2bd3a9d327218bd86fddf97de1face23",
     "scripts/report_release_evidence_freshness.py": "sha256:54de81963eaa183ec470d6000d7ce79b4fa2dd2b04f589d3613b44138ea32c25"
   },
@@ -175,7 +175,7 @@
     }
   ],
   "schema_version": "source-of-truth-gap-classification.v1",
-  "source_commit_sha": "2e1d18b54ce66e469a7b730b918ddfe985a2158d",
+  "source_commit_sha": "c2d870dc960cc9df3b85172896accb671a09dd72",
   "status": "ready",
   "summary": {
     "aggregator_review_count": 3,
