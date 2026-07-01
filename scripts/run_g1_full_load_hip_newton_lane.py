@@ -33,6 +33,9 @@ DEFAULT_CHILD_OUT = PRODUCTIZATION / "g1_full_load_hip_newton_direct_probe.json"
 DEFAULT_HIP_CONSISTENCY_PROOF = (
     PRODUCTIZATION / "mgt_residual_jacobian_consistency_hip_required_probe.json"
 )
+DEFAULT_CAUSE_NARROWING_STATUS = (
+    PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
+)
 DIRECT_PROBE = Path("implementation/phase1/run_mgt_direct_residual_newton_probe.py")
 ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 HIP_RESIDUAL_REPLAY_BACKENDS = {
@@ -839,6 +842,7 @@ def _g1_lane_next_actions(
     checkpoint_resolution_gate: dict[str, Any],
     workspace_checkpoint_inventory: dict[str, Any] | None = None,
     hip_consistency_proof: dict[str, Any],
+    cause_narrowing_context: dict[str, Any],
     child_gate_evidence: dict[str, Any],
     child_hip_residual_refresh_evidence: dict[str, Any],
     command: list[str],
@@ -914,23 +918,43 @@ def _g1_lane_next_actions(
         hip_consistency_proof.get("consistent_residual_jacobian_newton_gate_passed")
         is not True
     ):
-        actions.append(
-            {
-                "id": "close_consistent_residual_jacobian_newton_gate",
-                "reason": "hip_consistency_proof_gate_not_passed",
-                "worker_id": worker.get("worker_id"),
-                "worker_residual_jvp_path_ready": worker.get(
-                    "residual_jvp_worker_path_ready"
-                ),
-                "worker_g1_closure_gate_ready": worker.get("g1_closure_gate_ready"),
-                "receipt_blockers": _string_list(
-                    hip_consistency_proof.get("receipt_blockers")
-                ),
-                "worker_g1_closure_gate_blockers": _string_list(
-                    worker.get("g1_closure_gate_blockers")
-                ),
-            }
-        )
+        action = {
+            "id": "close_consistent_residual_jacobian_newton_gate",
+            "reason": "hip_consistency_proof_gate_not_passed",
+            "worker_id": worker.get("worker_id"),
+            "worker_residual_jvp_path_ready": worker.get(
+                "residual_jvp_worker_path_ready"
+            ),
+            "worker_g1_closure_gate_ready": worker.get("g1_closure_gate_ready"),
+            "receipt_blockers": _string_list(
+                hip_consistency_proof.get("receipt_blockers")
+            ),
+            "worker_g1_closure_gate_blockers": _string_list(
+                worker.get("g1_closure_gate_blockers")
+            ),
+        }
+        if cause_narrowing_context.get("present") is True:
+            action.update(
+                {
+                    "cause_narrowing_primary_next_lane": (
+                        cause_narrowing_context.get("primary_next_lane")
+                    ),
+                    "cause_narrowing_support_or_link_row_gap_disfavored": (
+                        cause_narrowing_context.get(
+                            "support_or_link_row_gap_disfavored"
+                        )
+                    ),
+                    "cause_narrowing_row_only_correction_loop_stopped": (
+                        cause_narrowing_context.get(
+                            "row_only_correction_loop_stopped"
+                        )
+                    ),
+                    "cause_narrowing_required_next_receipts": (
+                        cause_narrowing_context.get("required_next_receipts")
+                    ),
+                }
+            )
+        actions.append(action)
     if (
         checkpoint_resolution_gate.get("passed") is True
         and hip_consistency_proof.get("consistent_residual_jacobian_newton_gate_passed")
@@ -1298,6 +1322,76 @@ def _string_list(value: Any) -> list[str]:
     return [item for item in value if isinstance(item, str) and item]
 
 
+def _cause_narrowing_context(status_path: Path) -> dict[str, Any]:
+    payload = _load_json_payload(status_path)
+    if not payload:
+        return {
+            "schema_version": "g1-full-load-cause-narrowing-context.v1",
+            "path": str(status_path),
+            "present": False,
+            "ready": False,
+            "primary_next_lane": "not_available",
+            "consistent_newton_rocm_lane_prioritized": False,
+            "support_or_link_row_gap_disfavored": None,
+            "row_only_correction_loop_stopped": None,
+            "required_next_receipts": [],
+            "blockers": ["cause_narrowing_status_missing_or_unreadable"],
+            "claim_boundary": (
+                "This context only routes the next G1 diagnostic slice. It does "
+                "not close G1, prove full-load 1.0 equilibrium, or promote HIP "
+                "Newton readiness."
+            ),
+        }
+
+    evidence_signals = payload.get("evidence_signals")
+    evidence_signals = evidence_signals if isinstance(evidence_signals, dict) else {}
+    decision_record = payload.get("decision_record")
+    decision_record = decision_record if isinstance(decision_record, dict) else {}
+    primary_next_lane = str(
+        decision_record.get("primary_next_lane")
+        or evidence_signals.get("global_connectivity_primary_next_lane")
+        or "not_recorded"
+    )
+    required_next_receipts = _string_list(decision_record.get("required_next_receipts"))
+    if not required_next_receipts:
+        required_next_receipts = _string_list(
+            evidence_signals.get("global_connectivity_required_next_receipts")
+        )
+    row_only_correction_loop_stopped = decision_record.get(
+        "stop_row_only_support_or_elastic_link_correction_loop"
+    )
+    if row_only_correction_loop_stopped is None:
+        row_only_correction_loop_stopped = evidence_signals.get(
+            "row_only_correction_loop_stopped_by_global_connectivity"
+        )
+
+    return {
+        "schema_version": "g1-full-load-cause-narrowing-context.v1",
+        "path": str(status_path),
+        "present": True,
+        "ready": payload.get("status") == "ready"
+        and not _string_list(payload.get("blockers")),
+        "status": payload.get("status"),
+        "source_commit_sha": payload.get("source_commit_sha"),
+        "summary_line": payload.get("summary_line"),
+        "primary_next_lane": primary_next_lane,
+        "consistent_newton_rocm_lane_prioritized": (
+            primary_next_lane == "consistent_residual_jacobian_newton_rocm_worker"
+        ),
+        "support_or_link_row_gap_disfavored": evidence_signals.get(
+            "support_or_link_row_gap_disfavored"
+        ),
+        "row_only_correction_loop_stopped": row_only_correction_loop_stopped,
+        "required_next_receipts": required_next_receipts,
+        "blockers": _string_list(payload.get("blockers")),
+        "claim_boundary": (
+            "This context only routes the next G1 diagnostic slice. It does not "
+            "close G1, prove full-load 1.0 equilibrium, or promote HIP Newton "
+            "readiness."
+        ),
+    }
+
+
 def _frontier_non_promoting_evidence_context(
     evidence_sources: tuple[Path, ...],
 ) -> dict[str, Any]:
@@ -1509,6 +1603,7 @@ def build_lane_report(
     dry_run: bool = False,
     evidence_sources: tuple[Path, ...] = CHECKPOINT_EVIDENCE_SOURCES,
     hip_consistency_proof_json: Path = DEFAULT_HIP_CONSISTENCY_PROOF,
+    cause_narrowing_status_path: Path = DEFAULT_CAUSE_NARROWING_STATUS,
     workspace_checkpoint_scan_root: Path | None = None,
 ) -> tuple[dict[str, Any], int]:
     generated_at = _now_utc_iso()
@@ -1568,6 +1663,7 @@ def build_lane_report(
         proof_json=hip_consistency_proof_json,
         lane_source_commit_sha=source_commit_sha,
     )
+    cause_narrowing = _cause_narrowing_context(cause_narrowing_status_path)
     workspace_checkpoint_inventory = _workspace_checkpoint_inventory(
         scan_root=workspace_checkpoint_scan_root,
         required_load_scale=float(required_load_scale),
@@ -1579,7 +1675,13 @@ def build_lane_report(
     checksum_inputs = [
         *(
             path
-            for path in (checkpoint_npz, resolved_checkpoint, mgt_path, hip_consistency_proof_json)
+            for path in (
+                checkpoint_npz,
+                resolved_checkpoint,
+                mgt_path,
+                hip_consistency_proof_json,
+                cause_narrowing_status_path,
+            )
             if path is not None
         ),
         *evidence_sources,
@@ -1604,6 +1706,7 @@ def build_lane_report(
         checkpoint_resolution_gate=checkpoint_resolution_gate,
         workspace_checkpoint_inventory=workspace_checkpoint_inventory,
         hip_consistency_proof=hip_consistency_proof,
+        cause_narrowing_context=cause_narrowing,
         child_gate_evidence=initial_child_gate_evidence,
         child_hip_residual_refresh_evidence=initial_child_hip_residual_refresh_evidence,
         command=command,
@@ -1635,6 +1738,7 @@ def build_lane_report(
         "load_path_provenance_pass": load_path_provenance_pass,
         "workspace_checkpoint_inventory": workspace_checkpoint_inventory,
         "frontier_non_promoting_evidence": frontier_non_promoting_context,
+        "f2g_f2h_cause_narrowing_context": cause_narrowing,
         "dry_run": bool(dry_run),
         "command": command,
         "hip_consistency_proof": hip_consistency_proof,
@@ -1750,6 +1854,7 @@ def build_lane_report(
         checkpoint_resolution_gate=checkpoint_resolution_gate,
         workspace_checkpoint_inventory=workspace_checkpoint_inventory,
         hip_consistency_proof=hip_consistency_proof,
+        cause_narrowing_context=cause_narrowing,
         child_gate_evidence=child_gate_evidence,
         child_hip_residual_refresh_evidence=child_hip_residual_refresh_evidence,
         command=command,
@@ -2093,6 +2198,15 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--cause-narrowing-status",
+        type=Path,
+        default=DEFAULT_CAUSE_NARROWING_STATUS,
+        help=(
+            "Non-promoting F2g/F2h cause-narrowing status used to route the next "
+            "G1 diagnostic slice."
+        ),
+    )
+    parser.add_argument(
         "--workspace-checkpoint-scan-root",
         type=Path,
         default=PRODUCTIZATION,
@@ -2122,6 +2236,7 @@ def main(argv: list[str] | None = None) -> int:
         full_load_tolerance=args.full_load_tolerance,
         dry_run=args.dry_run,
         hip_consistency_proof_json=args.hip_consistency_proof_json,
+        cause_narrowing_status_path=args.cause_narrowing_status,
         workspace_checkpoint_scan_root=(
             None
             if args.skip_workspace_checkpoint_inventory

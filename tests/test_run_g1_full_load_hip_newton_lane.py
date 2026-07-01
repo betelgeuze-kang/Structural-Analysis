@@ -448,6 +448,91 @@ def test_partial_hip_consistency_proof_blocks_lane_promotion(
     assert not child.exists()
 
 
+def test_cause_narrowing_context_routes_consistent_newton_rocm_action(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    proof = tmp_path / "hip-proof.json"
+    cause_status = tmp_path / "cause-narrowing.json"
+
+    def fake_run(command: list[str], *, check: bool) -> Any:
+        raise AssertionError("child probe must not run while HIP proof is blocked")
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=False,
+        blockers=["consistent_residual_jacobian_newton_not_proven"],
+    )
+    cause_status.write_text(
+        json.dumps(
+            {
+                "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
+                "status": "ready",
+                "source_commit_sha": run_g1_full_load_hip_newton_lane._git_head(),
+                "summary_line": (
+                    "G1 F2g/F2h cause narrowing: READY | next="
+                    "consistent_residual_jacobian_newton_rocm_worker"
+                ),
+                "blockers": [],
+                "evidence_signals": {
+                    "support_or_link_row_gap_disfavored": True,
+                    "row_only_correction_loop_stopped_by_global_connectivity": True,
+                    "global_connectivity_primary_next_lane": (
+                        "consistent_residual_jacobian_newton_rocm_worker"
+                    ),
+                    "global_connectivity_required_next_receipts": [
+                        "implementation/phase1/release_evidence/productization/"
+                        "mgt_residual_jacobian_consistency_hip_required_probe.json"
+                    ],
+                },
+                "decision_record": {
+                    "schema_version": "g1-f2g-f2h-next-lane-decision.v1",
+                    "stop_row_only_support_or_elastic_link_correction_loop": True,
+                    "primary_next_lane": (
+                        "consistent_residual_jacobian_newton_rocm_worker"
+                    ),
+                    "required_next_receipts": [
+                        "implementation/phase1/release_evidence/productization/"
+                        "mgt_residual_jacobian_consistency_hip_required_probe.json"
+                    ],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+        cause_narrowing_status_path=cause_status,
+    )
+
+    assert exit_code == 1
+    context = payload["f2g_f2h_cause_narrowing_context"]
+    assert context["present"] is True
+    assert context["ready"] is True
+    assert context["support_or_link_row_gap_disfavored"] is True
+    assert context["row_only_correction_loop_stopped"] is True
+    assert (
+        context["primary_next_lane"]
+        == "consistent_residual_jacobian_newton_rocm_worker"
+    )
+    assert context["consistent_newton_rocm_lane_prioritized"] is True
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    close_action = next_actions["close_consistent_residual_jacobian_newton_gate"]
+    assert (
+        close_action["cause_narrowing_primary_next_lane"]
+        == "consistent_residual_jacobian_newton_rocm_worker"
+    )
+    assert close_action["cause_narrowing_support_or_link_row_gap_disfavored"] is True
+    assert close_action["cause_narrowing_row_only_correction_loop_stopped"] is True
+
+
 def test_cpu_diagnostic_hip_consistency_proof_blocks_lane_promotion(
     tmp_path: Path,
     monkeypatch: Any,
