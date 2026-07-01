@@ -1,6 +1,6 @@
 # PM Release Gate
 
-- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/16 | measured_cases=304`
+- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
 - `recommended_scope`: Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.
 - `paid_pilot_candidate`: `True`
 - `limited_commercial_milestone_ready`: `True`
@@ -15,11 +15,11 @@
 - `commercial_solver_gap_ready`: `False`
 - `ai_engine_gap_ready`: `False`
 - `release_allowed`: `False`
-- `blocked_release_count`: `8`
+- `blocked_release_count`: `5`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `15`
+- `operator_action_count`: `14`
 - `approval_token_count`: `4`
-- `stale_artifact_count`: `1`
+- `stale_artifact_count`: `0`
 - `evidence_surface_count`: `12`
 - `missing_evidence_surface_count`: `1`
 - `locked_evidence_surface_count`: `3`
@@ -47,7 +47,7 @@
 |---|---|---|
 | basic_ci Basic CI | blocked | pr_ci_30_consecutive_pass_evidence_missing, nightly_ci_30_consecutive_pass_evidence_missing |
 | strict_ci Strict CI | pass | none |
-| evidence_freshness Evidence Freshness | blocked | public_benchmark_harness_bundle::input_dependency_newer_than_artifact |
+| evidence_freshness Evidence Freshness | pass | none |
 | core_engine Core Engine | pass | none |
 | ndtha NDTHA | pass | none |
 | residual Residual | pass | none |
@@ -60,4 +60,4 @@
 | ux UX | blocked | human_new_user_observation_missing_or_failed, human_new_user_30min_sample_evidence_missing |
 | support Support | pass | none |
 | security Security | blocked | license_status_not_configured |
-| github_sync GitHub Development Sync | blocked | github_sync_preflight::worktree_not_clean, github_sync_preflight_not_synced |
+| github_sync GitHub Development Sync | pass | none |

@@ -36,7 +36,7 @@
           "casf_pdbbind_ligand_symmetry_contracts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-01T06:00:01.023169+00:00",
+        "generated_at": "2026-07-01T06:00:09.703198+00:00",
         "ready_values": {
           "materialized_case_count": 0,
           "public_benchmark_ready": false,
@@ -113,7 +113,7 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-01T06:00:01.026500+00:00",
+        "generated_at": "2026-07-01T06:00:09.706256+00:00",
         "ready_values": {
           "real_benchmark_case_count": 0
         },
@@ -155,7 +155,7 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-01T06:00:01.029036+00:00",
+        "generated_at": "2026-07-01T06:00:09.709170+00:00",
         "ready_values": {
           "dry_run_case_count": 1,
           "real_benchmark_case_count": 0
@@ -202,7 +202,7 @@
           "public_benchmark_pose_success_harness_rows_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-01T06:00:01.031592+00:00",
+        "generated_at": "2026-07-01T06:00:09.711570+00:00",
         "ready_values": {
           "pose_success_count": 1,
           "pose_success_harness_ready": false,
@@ -259,7 +259,7 @@
           "dud_e_lit_pcba_active_decoy_labels_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-01T06:00:01.033920+00:00",
+        "generated_at": "2026-07-01T06:00:09.713785+00:00",
         "ready_values": {
           "public_benchmark_enrichment_ready": false,
           "real_enrichment_target_count": 0
@@ -303,7 +303,7 @@
           "vina_gnina_external_receipts_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-01T06:00:01.036164+00:00",
+        "generated_at": "2026-07-01T06:00:09.716174+00:00",
         "ready_values": {
           "public_benchmark_engine_comparison_ready": false,
           "real_comparison_case_count": 0
@@ -426,7 +426,7 @@
           "public_benchmark_external_receipts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-01T06:00:01.042859+00:00",
+        "generated_at": "2026-07-01T06:00:09.723046+00:00",
         "ready_values": {
           "blocker_count": 10,
           "public_benchmark_ready": false,
@@ -506,7 +506,7 @@
         "casf_pdbbind_ligand_symmetry_contracts_missing"
       ],
       "contract_pass": true,
-      "generated_at": "2026-07-01T06:00:01.023169+00:00",
+      "generated_at": "2026-07-01T06:00:09.703198+00:00",
       "ready_values": {
         "materialized_case_count": 0,
         "public_benchmark_ready": false,
@@ -839,9 +839,9 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-07-01T06:00:09.720471+00:00",
+  "generated_at": "2026-07-01T06:06:16.060258+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a708400e99def5bc793842ae808bfcf2fcbea91ede8cc82a29451dfc0f8dcb77",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:3be55b1c2dfc66993609cab11d54f9fdf6ac24d9e039f617ba5d570dde4557f8",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d4cd7091185ef46a3fef3d546d1a670b7911b0e4de2f60703391a2cc757912b0",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:754b0f3b0516078ed8336a5fb6838f6840ae93dc9aa8aaac1a76412a2266781f",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
@@ -1860,7 +1860,7 @@
   ],
   "route": "/product/public-benchmark/operator-intake",
   "schema_version": "public-benchmark-operator-intake-packet.v1",
-  "source_commit_sha": "ebf1aff2969b52a3d883fcafd96afebd537dda78",
+  "source_commit_sha": "95b342f13f1ef24cb4e098996b605bcea8cf05f7",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {
