@@ -234,6 +234,11 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
         checksum.startswith("sha256:")
         for checksum in reproducibility_bundle["stable_artifact_checksums"].values()
     )
+    normalization = reproducibility_bundle["stable_checksum_normalization"]
+    assert "source_commit_sha" in normalization["excluded_keys"]
+    assert "source_file_acquired" in normalization["excluded_keys"]
+    assert "execution" in normalization["excluded_keys"]
+    assert "ignored local corpora" in normalization["rationale"]
     assert reproducibility_bundle["expected_scorecard"] == {
         "status": "pass",
         "case_count": 30,
