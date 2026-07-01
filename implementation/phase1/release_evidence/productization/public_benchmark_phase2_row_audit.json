@@ -107,11 +107,11 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T00:44:50.037550+00:00",
+  "generated_at": "2026-07-01T01:44:30.442378+00:00",
   "input_checksums": {
-    "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:ddebd330fc2b8bb84dbb180b0678cafa9b1e06ef381ea881bd212b8e8333c7d6",
+    "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:834f1805a04cfa443914f5c89aa595d9bf7f6212c6e8fdb30767f8df87db4887",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:bfcdb5b479f355f1bfd6a13938ff41cfe09280950f58bcf1fbff2891c4e4c500"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:0361bdbe51fa557983d8529db3c86f1dd2efe9c3e42ebc8f5a66589047cbd874"
   },
   "missing_row_inputs": [
     "subset_rows",
@@ -120,6 +120,119 @@
     "vina_gnina_rows"
   ],
   "outputs": {},
+  "phase2_exit_gate": {
+    "claim": "public_benchmark_harness_phase2_exit_gate",
+    "component_count": 5,
+    "criteria": [
+      {
+        "artifact_role": "pose_success_harness",
+        "blockers": [
+          "subset_rows_not_provided",
+          "pose_rows_not_provided"
+        ],
+        "component_id": "casf_pdbbind_pose_success_harness",
+        "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+        "current": {
+          "contract_pass": false,
+          "ready": false,
+          "real_benchmark_case_count": 0
+        },
+        "pass": false,
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
+        }
+      },
+      {
+        "artifact_role": "rmsd_scorecard",
+        "blockers": [
+          "pose_rows_not_provided"
+        ],
+        "component_id": "symmetry_aware_ligand_rmsd",
+        "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+        "current": {
+          "contract_pass": false,
+          "ready": false,
+          "real_benchmark_case_count": 0
+        },
+        "pass": false,
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
+        }
+      },
+      {
+        "artifact_role": "pose_validity_packet",
+        "blockers": [
+          "pose_rows_not_provided"
+        ],
+        "component_id": "posebusters_style_pose_validity",
+        "criterion_id": "posebusters_style_pose_validity_ready",
+        "current": {
+          "contract_pass": false,
+          "ready": false,
+          "real_benchmark_case_count": 0
+        },
+        "pass": false,
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_benchmark_case_count": 12
+        }
+      },
+      {
+        "artifact_role": "vina_gnina_comparison_adapter",
+        "blockers": [
+          "vina_gnina_rows_not_provided"
+        ],
+        "component_id": "vina_gnina_comparison_adapter",
+        "criterion_id": "vina_gnina_comparison_ready",
+        "current": {
+          "contract_pass": false,
+          "ready": false,
+          "real_comparison_case_count": 0
+        },
+        "pass": false,
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_comparison_case_count": 1
+        }
+      },
+      {
+        "artifact_role": "enrichment_scorecard",
+        "blockers": [
+          "enrichment_rows_not_provided"
+        ],
+        "component_id": "dud_e_or_lit_pcba_enrichment",
+        "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+        "current": {
+          "contract_pass": false,
+          "ready": false,
+          "real_enrichment_target_count": 0
+        },
+        "pass": false,
+        "required": {
+          "contract_pass": true,
+          "ready": true,
+          "real_enrichment_target_count": 1
+        }
+      }
+    ],
+    "failed_criteria": [
+      "casf_pdbbind_pose_success_harness_ready",
+      "symmetry_aware_ligand_rmsd_ready",
+      "posebusters_style_pose_validity_ready",
+      "vina_gnina_comparison_ready",
+      "dud_e_or_lit_pcba_enrichment_ready"
+    ],
+    "failed_criterion_count": 5,
+    "ready_component_count": 0,
+    "required_component_count": 5,
+    "status": "blocked"
+  },
   "phase2_ready": false,
   "phase2_requirement_summary": {
     "blocked_component_count": 5,
@@ -795,6 +908,39 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "15f4b9e85274e507490e9711127a8ddad1659b38",
-  "status": "operator_evidence_required"
+  "source_commit_sha": "d7d70c5862f8d4c8ecfdabe7c43101d2e27f0ba7",
+  "status": "operator_evidence_required",
+  "summary": {
+    "blocked_component_ids": [
+      "casf_pdbbind_pose_success_harness",
+      "symmetry_aware_ligand_rmsd",
+      "posebusters_style_pose_validity",
+      "vina_gnina_comparison_adapter",
+      "dud_e_or_lit_pcba_enrichment"
+    ],
+    "blocked_requirement_count": 5,
+    "blocker_count": 6,
+    "component_blocked_count": 5,
+    "component_count": 5,
+    "component_ready_count": 0,
+    "missing_row_input_count": 4,
+    "missing_row_inputs": [
+      "subset_rows",
+      "pose_rows",
+      "enrichment_rows",
+      "vina_gnina_rows"
+    ],
+    "phase2_exit_gate_status": "blocked",
+    "phase2_failed_criteria": [
+      "casf_pdbbind_pose_success_harness_ready",
+      "symmetry_aware_ligand_rmsd_ready",
+      "posebusters_style_pose_validity_ready",
+      "vina_gnina_comparison_ready",
+      "dud_e_or_lit_pcba_enrichment_ready"
+    ],
+    "phase2_failed_criterion_count": 5,
+    "phase2_ready": false,
+    "ready_requirement_count": 0,
+    "requirement_count": 5
+  }
 }
