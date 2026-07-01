@@ -50,10 +50,10 @@
     "promote_broad_gpcr_claim",
     "infer_missing_target_values"
   ],
-  "generated_at": "2026-07-01T10:02:05.471954+00:00",
+  "generated_at": "2026-07-01T11:32:17.102667+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:7c902b6c655576c14789108a44638ed3a42b0819014482b58edd7579d6d5e4bd",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:16edb0beeec404cadd5eefe82de5850fc47f518462e1f6c88dda96af84f03284",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:a0e2f1d52c2a527ae257b015bebb15567b6c5553bc8d5e4b12f8c26310273593",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:4c2899092d42e8c5e182864766bf74370e45a82a0519f7e7f223fa10f5031592",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:ddc979982fa76ec9757fe56c8be0a1215f74474363d190d689940a986e3ad712",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:184b563a18d475ba631a971e9b3e2d1cb8a293009c534c0df95bc8bf32f168a4",
@@ -795,7 +795,7 @@
     "OPRM1:positive_out_anchored_by_top_decoys_required"
   ],
   "science_claim_status": "blocked",
-  "source_commit_sha": "ef71af2fc897b4668568e2e6894a4d8bfa9cc22c",
+  "source_commit_sha": "9dbeeb2ba069af74de802c24c8914fd1e5d51f48",
   "status": "ready_science_claim_blocked",
   "summary": {
     "first_blocked_target": "DRD2",

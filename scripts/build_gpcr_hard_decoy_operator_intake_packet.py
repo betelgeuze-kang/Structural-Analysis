@@ -380,6 +380,71 @@ def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
     ]
 
 
+def _phase3_raw_row_closure_matrix(
+    *,
+    import_command: str,
+    materialize_command: str,
+) -> list[dict[str, Any]]:
+    criteria = list(PHASE3_EXIT_CRITERIA_BY_FIELD.values())
+    rows: list[dict[str, Any]] = []
+    for target_id in REQUIRED_TARGETS:
+        rows.append(
+            {
+                "row_input_id": "gpcr_hard_decoy_rows",
+                "target_id": target_id,
+                "slot_id": f"{target_id.lower()}_hard_decoy_metrics",
+                "status": "operator_input_required",
+                "default_row_path_candidates": list(DEFAULT_RAW_ROW_INPUT_CANDIDATES),
+                "accepted_formats": ["json", "jsonl", "ndjson", "csv", "tsv"],
+                "required_flat_row_fields": [
+                    "target_id",
+                    *RAW_HARD_DECOY_ROW_FIELDS,
+                ],
+                "required_target_values": {
+                    "target_id": target_id,
+                    "score_direction": "higher_is_better or lower_is_better",
+                    "hard_decoy_rows": (
+                        "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+                    ),
+                },
+                "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
+                "row_source_receipt_requirements": dict(
+                    ROW_SOURCE_RECEIPT_REQUIREMENTS
+                ),
+                "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
+                "closes_phase3_criteria": criteria,
+                "criterion_by_field": dict(PHASE3_EXIT_CRITERIA_BY_FIELD),
+                "thresholds": {
+                    "ranking_pr_auc_ci_low": f">={EXIT_CRITERIA['ranking_pr_auc_ci_low_min']}",
+                    "top20_hit_rate": f">={EXIT_CRITERIA['top20_hit_rate_min']}",
+                    "decoys_above_positive_count": f"<={EXIT_CRITERIA['decoys_above_positive_count_max']}",
+                    "positive_out_anchored_by_top_decoys": EXIT_CRITERIA[
+                        "positive_out_anchored_by_top_decoys_allowed"
+                    ],
+                    "hard_decoy_rows": (
+                        "computed_from_raw_hard_decoy_rows_with_quality_minimums"
+                    ),
+                },
+                "materialization_chain": [
+                    "materialize_gpcr_hard_decoy_operator_template_from_rows",
+                    "materialize_gpcr_hard_decoy_suite_report",
+                    "refresh_gpcr_hard_decoy_product_report",
+                    "refresh_product_capabilities_surface",
+                    "refresh_goal_bottleneck_roadmap_surface",
+                ],
+                "import_command": import_command,
+                "materialization_command": materialize_command,
+                "claim_boundary": (
+                    "This matrix row maps operator-attached raw hard-decoy rows to "
+                    "the target-specific Phase 3 criteria they can unblock. It is not "
+                    "actual closure evidence until source receipts verify and the suite "
+                    "materializer computes passing metrics for every required target."
+                ),
+            }
+        )
+    return rows
+
+
 def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
     template = _load_json(repo_root, DEFAULT_OPERATOR_TEMPLATE)
     suite = _load_json(repo_root, DEFAULT_SUITE_REPORT)
@@ -417,6 +482,10 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         f"--out {DEFAULT_GOAL_BOTTLENECK}"
     )
     gate_unblock_plan = _gate_unblock_plan(materialize_command=materialize_command)
+    phase3_raw_row_closure_matrix = _phase3_raw_row_closure_matrix(
+        import_command=import_template_command,
+        materialize_command=materialize_command,
+    )
     target_execution_preflight = _target_execution_preflight_checklist(
         template=template,
         suite=suite,
@@ -456,6 +525,8 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "required_slot_count": len(REQUIRED_TARGETS),
         "gate_unblock_plan": gate_unblock_plan,
         "gate_unblock_plan_count": len(gate_unblock_plan),
+        "phase3_raw_row_closure_matrix": phase3_raw_row_closure_matrix,
+        "phase3_raw_row_closure_matrix_count": len(phase3_raw_row_closure_matrix),
         "target_execution_preflight": target_execution_preflight,
         "target_execution_preflight_count": len(target_execution_preflight),
         "first_target_execution_preflight_blocker": first_target_preflight_blocker,
@@ -480,6 +551,8 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
                 "python3 scripts/materialize_science_actual_closure_from_rows.py "
                 "--fail-blocked"
             ),
+            "closure_matrix_ref": "phase3_raw_row_closure_matrix",
+            "closes_phase3_criteria": list(PHASE3_EXIT_CRITERIA_BY_FIELD.values()),
             "required_row_fields": list(RAW_HARD_DECOY_ROW_FIELDS),
             "required_flat_row_fields": [
                 "target_id",
@@ -571,6 +644,9 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "summary": {
             "required_slot_count": len(REQUIRED_TARGETS),
             "gate_unblock_plan_count": len(gate_unblock_plan),
+            "phase3_raw_row_closure_matrix_count": len(
+                phase3_raw_row_closure_matrix
+            ),
             "minimum_target_count": len(REQUIRED_TARGETS),
             "minimum_metric_field_count_per_target": 4,
             "current_blocker_count": len(blockers),
@@ -623,6 +699,28 @@ def _markdown(payload: dict[str, Any]) -> str:
         )
         minimum = json.dumps(row["minimum_evidence"], ensure_ascii=False, sort_keys=True)
         lines.append(f"| `{row['target_id']}` | {criteria} | `{minimum}` |")
+    lines.extend(
+        [
+            "",
+            "## Phase 3 Raw Row Closure Matrix",
+            "",
+            "| Target | Row Input | Closes Criteria | Minimum Rows |",
+            "|---|---|---|---|",
+        ]
+    )
+    for row in payload["phase3_raw_row_closure_matrix"]:
+        criteria = ", ".join(
+            f"`{criterion}`" for criterion in row["closes_phase3_criteria"]
+        )
+        minimums = json.dumps(
+            row["raw_row_quality_minimums"],
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        lines.append(
+            f"| `{row['target_id']}` | `{row['row_input_id']}` | "
+            f"{criteria} | `{minimums}` |"
+        )
     lines.extend(
         [
             "",

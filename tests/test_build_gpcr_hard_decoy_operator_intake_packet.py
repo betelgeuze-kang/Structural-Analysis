@@ -66,6 +66,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "OPRM1",
     ]
     assert packet["gate_unblock_plan_count"] == 3
+    assert packet["phase3_raw_row_closure_matrix_count"] == 3
     assert packet["target_execution_preflight_count"] == 3
     assert packet["first_target_execution_preflight_blocker"]["target_id"] == "DRD2"
     assert packet["first_target_execution_preflight_blocker"]["first_blocker"] == (
@@ -189,6 +190,56 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     assert gate_plan["DRD2"]["validation_command"] == gate_plan["DRD2"][
         "materialization_command"
     ]
+    closure_matrix = {
+        row["target_id"]: row for row in packet["phase3_raw_row_closure_matrix"]
+    }
+    assert set(closure_matrix) == {"DRD2", "HTR2A", "OPRM1"}
+    assert closure_matrix["DRD2"]["row_input_id"] == "gpcr_hard_decoy_rows"
+    assert closure_matrix["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
+    assert closure_matrix["DRD2"]["accepted_formats"] == [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+        "tsv",
+    ]
+    assert closure_matrix["DRD2"]["required_flat_row_fields"] == [
+        "target_id",
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
+        "source_checksum",
+        "provenance_ref",
+    ]
+    assert closure_matrix["DRD2"]["raw_row_quality_minimums"] == {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24,
+    }
+    assert closure_matrix["DRD2"]["closes_phase3_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
+    ]
+    assert closure_matrix["DRD2"]["criterion_by_field"] == (
+        gate_plan["DRD2"]["minimum_evidence"]["criterion_by_field"]
+    )
+    assert closure_matrix["DRD2"]["thresholds"] == (
+        gate_plan["DRD2"]["minimum_evidence"]["thresholds"]
+    )
+    assert closure_matrix["DRD2"]["default_row_path_candidates"][0] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_rows.json"
+    )
+    assert "materialize_gpcr_hard_decoy_operator_template_from_rows" in (
+        closure_matrix["DRD2"]["import_command"]
+    )
+    assert "materialize_gpcr_hard_decoy_suite_report.py" in (
+        closure_matrix["DRD2"]["materialization_command"]
+    )
     assert packet["current_suite_status"]["first_blocked_target"] == "DRD2"
     assert packet["current_suite_status"]["blocker_count"] == 15
     assert packet["summary"]["target_execution_preflight_count"] == 3
@@ -262,6 +313,16 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "python3 scripts/materialize_science_actual_closure_from_rows.py "
         "--fail-blocked"
     )
+    assert packet["raw_row_import"]["closure_matrix_ref"] == (
+        "phase3_raw_row_closure_matrix"
+    )
+    assert packet["raw_row_import"]["closes_phase3_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
+    ]
     assert packet["next_actions"][:3] == [
         "attach_gpcr_hard_decoy_raw_row_file",
         "materialize_gpcr_hard_decoy_operator_template_from_rows",
@@ -297,6 +358,8 @@ def test_gpcr_hard_decoy_operator_intake_packet_cli_writes_json_and_markdown(
     assert payload["packet_id"] == "gpcr_hard_decoy_operator_intake_packet"
     assert "# GPCR Hard-Decoy Operator Intake Packet" in markdown
     assert "## Gate Unblock Plan" in markdown
+    assert "## Phase 3 Raw Row Closure Matrix" in markdown
+    assert "`DRD2` | `gpcr_hard_decoy_rows`" in markdown
     assert "## Raw Row Import" in markdown
     assert "## Target Execution Preflight" in markdown
     assert "materialize_gpcr_hard_decoy_operator_template_from_rows" in markdown

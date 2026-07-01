@@ -596,12 +596,12 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-07-01T10:02:05.432565+00:00",
+  "generated_at": "2026-07-01T11:32:17.064721+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:ddc979982fa76ec9757fe56c8be0a1215f74474363d190d689940a986e3ad712",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:184b563a18d475ba631a971e9b3e2d1cb8a293009c534c0df95bc8bf32f168a4",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:3b8a06940a79511aeb2d75114f94306a1083608c101f89dc6febb0042cf90e4a",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:cc276ddc070e43a525ae89c45335e5f85e002fb4b38a9356963bdea4df73e3f5",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:2e144fbb69c76a239fe89f132042db246745bf3938f4c49db722f0d0f63b8c2f"
   },
@@ -681,6 +681,414 @@
   },
   "owner_input_required": true,
   "packet_id": "gpcr_hard_decoy_operator_intake_packet",
+  "phase3_raw_row_closure_matrix": [
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+        "tsv"
+      ],
+      "claim_boundary": "This matrix row maps operator-attached raw hard-decoy rows to the target-specific Phase 3 criteria they can unblock. It is not actual closure evidence until source receipts verify and the suite materializer computes passing metrics for every required target.",
+      "closes_phase3_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
+      ],
+      "criterion_by_field": {
+        "decoys_above_positive_count": "decoys_above_positive_count_max",
+        "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
+        "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+        "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate": "top20_hit_rate_min"
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.tsv"
+      ],
+      "import_command": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+      "materialization_chain": [
+        "materialize_gpcr_hard_decoy_operator_template_from_rows",
+        "materialize_gpcr_hard_decoy_suite_report",
+        "refresh_gpcr_hard_decoy_product_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface"
+      ],
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
+      },
+      "required_flat_row_fields": [
+        "target_id",
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "required_target_values": {
+        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
+        "score_direction": "higher_is_better or lower_is_better",
+        "target_id": "DRD2"
+      },
+      "row_input_id": "gpcr_hard_decoy_rows",
+      "row_source_receipt_requirements": {
+        "placeholder_provenance_prefixes_rejected": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
+        ],
+        "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+        "required_row_fields": [
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+      },
+      "slot_id": "drd2_hard_decoy_metrics",
+      "source_receipt_requirements": {
+        "mode": "raw_hard_decoy_rows",
+        "placeholder_block_policy": {
+          "text_markers": [
+            "<operator",
+            "fixture",
+            "synthetic",
+            "mock",
+            "placeholder",
+            "dummy",
+            "example",
+            "unit-test",
+            "test-only"
+          ],
+          "url_markers": [
+            "://example.",
+            ".example/",
+            ".invalid",
+            ".test/",
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0"
+          ],
+          "url_prefixes": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ]
+        },
+        "required_fields": [
+          "source_id",
+          "source_url",
+          "source_license",
+          "source_artifact",
+          "source_artifact_sha256"
+        ],
+        "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+      },
+      "status": "operator_input_required",
+      "target_id": "DRD2",
+      "thresholds": {
+        "decoys_above_positive_count": "<=0",
+        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
+        "positive_out_anchored_by_top_decoys": false,
+        "ranking_pr_auc_ci_low": ">=0.45",
+        "top20_hit_rate": ">=0.2"
+      }
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+        "tsv"
+      ],
+      "claim_boundary": "This matrix row maps operator-attached raw hard-decoy rows to the target-specific Phase 3 criteria they can unblock. It is not actual closure evidence until source receipts verify and the suite materializer computes passing metrics for every required target.",
+      "closes_phase3_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
+      ],
+      "criterion_by_field": {
+        "decoys_above_positive_count": "decoys_above_positive_count_max",
+        "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
+        "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+        "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate": "top20_hit_rate_min"
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.tsv"
+      ],
+      "import_command": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+      "materialization_chain": [
+        "materialize_gpcr_hard_decoy_operator_template_from_rows",
+        "materialize_gpcr_hard_decoy_suite_report",
+        "refresh_gpcr_hard_decoy_product_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface"
+      ],
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
+      },
+      "required_flat_row_fields": [
+        "target_id",
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "required_target_values": {
+        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
+        "score_direction": "higher_is_better or lower_is_better",
+        "target_id": "HTR2A"
+      },
+      "row_input_id": "gpcr_hard_decoy_rows",
+      "row_source_receipt_requirements": {
+        "placeholder_provenance_prefixes_rejected": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
+        ],
+        "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+        "required_row_fields": [
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+      },
+      "slot_id": "htr2a_hard_decoy_metrics",
+      "source_receipt_requirements": {
+        "mode": "raw_hard_decoy_rows",
+        "placeholder_block_policy": {
+          "text_markers": [
+            "<operator",
+            "fixture",
+            "synthetic",
+            "mock",
+            "placeholder",
+            "dummy",
+            "example",
+            "unit-test",
+            "test-only"
+          ],
+          "url_markers": [
+            "://example.",
+            ".example/",
+            ".invalid",
+            ".test/",
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0"
+          ],
+          "url_prefixes": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ]
+        },
+        "required_fields": [
+          "source_id",
+          "source_url",
+          "source_license",
+          "source_artifact",
+          "source_artifact_sha256"
+        ],
+        "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+      },
+      "status": "operator_input_required",
+      "target_id": "HTR2A",
+      "thresholds": {
+        "decoys_above_positive_count": "<=0",
+        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
+        "positive_out_anchored_by_top_decoys": false,
+        "ranking_pr_auc_ci_low": ">=0.45",
+        "top20_hit_rate": ">=0.2"
+      }
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+        "tsv"
+      ],
+      "claim_boundary": "This matrix row maps operator-attached raw hard-decoy rows to the target-specific Phase 3 criteria they can unblock. It is not actual closure evidence until source receipts verify and the suite materializer computes passing metrics for every required target.",
+      "closes_phase3_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure"
+      ],
+      "criterion_by_field": {
+        "decoys_above_positive_count": "decoys_above_positive_count_max",
+        "hard_decoy_rows": "raw_hard_decoy_rows_actual_closure",
+        "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+        "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate": "top20_hit_rate_min"
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.tsv"
+      ],
+      "import_command": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+      "materialization_chain": [
+        "materialize_gpcr_hard_decoy_operator_template_from_rows",
+        "materialize_gpcr_hard_decoy_suite_report",
+        "refresh_gpcr_hard_decoy_product_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface"
+      ],
+      "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
+      "raw_row_quality_minimums": {
+        "min_decoy_count_per_target": 20,
+        "min_positive_count_per_target": 4,
+        "min_total_row_count_per_target": 24
+      },
+      "required_flat_row_fields": [
+        "target_id",
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "required_target_values": {
+        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
+        "score_direction": "higher_is_better or lower_is_better",
+        "target_id": "OPRM1"
+      },
+      "row_input_id": "gpcr_hard_decoy_rows",
+      "row_source_receipt_requirements": {
+        "placeholder_provenance_prefixes_rejected": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
+        ],
+        "provenance_ref_policy": "provenance_ref must be nonblank and must not use local, fixture, mock, synthetic, placeholder, test, or file-only provenance prefixes",
+        "required_row_fields": [
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
+      },
+      "slot_id": "oprm1_hard_decoy_metrics",
+      "source_receipt_requirements": {
+        "mode": "raw_hard_decoy_rows",
+        "placeholder_block_policy": {
+          "text_markers": [
+            "<operator",
+            "fixture",
+            "synthetic",
+            "mock",
+            "placeholder",
+            "dummy",
+            "example",
+            "unit-test",
+            "test-only"
+          ],
+          "url_markers": [
+            "://example.",
+            ".example/",
+            ".invalid",
+            ".test/",
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0"
+          ],
+          "url_prefixes": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ]
+        },
+        "required_fields": [
+          "source_id",
+          "source_url",
+          "source_license",
+          "source_artifact",
+          "source_artifact_sha256"
+        ],
+        "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+      },
+      "status": "operator_input_required",
+      "target_id": "OPRM1",
+      "thresholds": {
+        "decoys_above_positive_count": "<=0",
+        "hard_decoy_rows": "computed_from_raw_hard_decoy_rows_with_quality_minimums",
+        "positive_out_anchored_by_top_decoys": false,
+        "ranking_pr_auc_ci_low": ">=0.45",
+        "top20_hit_rate": ">=0.2"
+      }
+    }
+  ],
+  "phase3_raw_row_closure_matrix_count": 3,
   "raw_row_import": {
     "accepted_formats": [
       "csv",
@@ -689,6 +1097,14 @@
     ],
     "auto_detecting_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
     "claim_boundary": "This import step only groups operator-attached raw ranking rows into the template. The suite materializer still computes all metrics and keeps Phase 3 locked unless every target passes.",
+    "closes_phase3_criteria": [
+      "ranking_pr_auc_ci_low_min",
+      "top20_hit_rate_min",
+      "decoys_above_positive_count_max",
+      "no_positive_out_anchored_by_top_decoys",
+      "raw_hard_decoy_rows_actual_closure"
+    ],
+    "closure_matrix_ref": "phase3_raw_row_closure_matrix",
     "command": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
     "default_row_path_candidates": [
       "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
@@ -835,7 +1251,7 @@
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "ef71af2fc897b4668568e2e6894a4d8bfa9cc22c",
+  "source_commit_sha": "9dbeeb2ba069af74de802c24c8914fd1e5d51f48",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
@@ -846,6 +1262,7 @@
     "gate_unblock_plan_count": 3,
     "minimum_metric_field_count_per_target": 4,
     "minimum_target_count": 3,
+    "phase3_raw_row_closure_matrix_count": 3,
     "required_slot_count": 3,
     "target_execution_preflight_count": 3
   },
