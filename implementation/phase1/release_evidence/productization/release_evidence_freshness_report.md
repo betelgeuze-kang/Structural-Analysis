@@ -1,9 +1,9 @@
 # Release Evidence Freshness
 
-- `contract_pass`: `False`
-- `reason_code`: `ERR_RELEASE_EVIDENCE_FRESHNESS`
-- `current_source_commit_sha`: `2f007d0df7fff892eb3234ea0a1a061229acac35`
-- `blockers`: `fresh_full_validation_lane_status::source_commit_mismatch, science_actual_closure_row_audit::source_commit_mismatch`
+- `contract_pass`: `True`
+- `reason_code`: `PASS`
+- `current_source_commit_sha`: `a63076d75e0884ad2eddd9c9a72fbc7aff85c50c`
+- `blockers`: `none`
 
 | Artifact | Status | Blockers | Newer Dependencies |
 |---|---|---|---|
@@ -13,7 +13,7 @@
 | `real_project_corpus_measured_status` | `pass` | `none` | none |
 | `customer_shadow_evidence_status` | `pass` | `none` | none |
 | `customer_shadow_evidence_intake_packet` | `pass` | `none` | none |
-| `fresh_full_validation_lane_status` | `blocked` | `source_commit_mismatch` | none |
+| `fresh_full_validation_lane_status` | `pass` | `none` | none |
 | `residual_level3_status` | `pass` | `none` | none |
 | `g1_direct_residual_terminal_gate_report` | `pass` | `none` | none |
 | `g1_shell_material_budgeted_continuation_status` | `pass` | `none` | none |
@@ -24,4 +24,4 @@
 | `public_benchmark_phase2_row_audit` | `pass` | `none` | none |
 | `accuracy_parity_scorecard` | `pass` | `none` | none |
 | `product_production_ai_checkpoint_readiness` | `pass` | `none` | none |
-| `science_actual_closure_row_audit` | `blocked` | `source_commit_mismatch` | none |
+| `science_actual_closure_row_audit` | `pass` | `none` | none |

@@ -586,7 +586,7 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T05:40:16.091452+00:00",
+  "generated_at": "2026-07-01T05:41:51.661135+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:f38f01e52f00f6d514616b761a5ae2e206b3ec9e5aa07e1ce5f37b011cac953c",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:ab4d8500bc6b9214a10a5c588e5b659d03f27a94f6a95245a3b7c7b5279d3e80",
@@ -845,7 +845,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "d40775d696f49d649cf1095c627124b8673fdbab",
+  "source_commit_sha": "a63076d75e0884ad2eddd9c9a72fbc7aff85c50c",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,
