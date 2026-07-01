@@ -14,10 +14,10 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-01T20:35:03.788520+00:00",
+  "generated_at": "2026-07-01T20:37:44.132331+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:f3002506f6dc4a229d08476dbc9fb8f26f18d41bbde9297a9e05c51474f3190e",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9d805c75ef76f51dd0d81a1848e1bf489ee590962c231d0ae2c7fa381e12372c",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8e8263d47d889f63e8ab1c76f750c538f9587c253ae1ae9946e79f4dd7da0b0c",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:17bb3fd0ff37c979e87c6ea69a6a196e8fb7a7cde2c9e08f32d7d7e6a46bb076",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6932084dfe505170186b91e5177b5ad44b8887e1e576cd1072f95ac6d5af9358",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:2d8b3ff07849e743f8a21ab11cf4f8de610f026ff9bd3a03061fb595bc50d242",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:bb47e5d1d69ed17a4d80cbff9924fee9264ea2d38e3e806e51d9bb5be102e8d7",
@@ -432,7 +432,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "9b87797927508a21532302ddf7e6db88a223f0a7",
+  "source_commit_sha": "d61b43dd8e64e6be44d9f6c9162d2fdd24433a09",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
