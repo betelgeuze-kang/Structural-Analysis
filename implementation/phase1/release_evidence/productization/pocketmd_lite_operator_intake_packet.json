@@ -84,9 +84,77 @@
           1,
           2
         ],
+        "row_value_contract": {
+          "boolean_value_policy": {
+            "local_min_survived": "must parse to a boolean value"
+          },
+          "integer_value_policy": {
+            "clash_count_after": "must parse to a non-negative integer",
+            "clash_count_before": "must parse to a non-negative integer"
+          },
+          "numeric_value_policy": {
+            "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+            "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "rate_value_policy": {
+            "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+            "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+          },
+          "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+          "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+          "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+          "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
+        },
+        "source_receipt_requirements": {
+          "mode": "raw_top_k_refinement_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "operator_supplied",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
         },
         "top_k_candidate_count": 6,
         "top_k_rank_coverage_per_case": 2,
@@ -126,7 +194,75 @@
         },
         "output_intake": "<operator-pocketmd-lite-intake.json>",
         "required_output_key": "cases",
+        "row_value_contract": {
+          "boolean_value_policy": {
+            "local_min_survived": "must parse to a boolean value"
+          },
+          "integer_value_policy": {
+            "clash_count_after": "must parse to a non-negative integer",
+            "clash_count_before": "must parse to a non-negative integer"
+          },
+          "numeric_value_policy": {
+            "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+            "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "rate_value_policy": {
+            "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+            "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+          },
+          "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+          "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+          "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+          "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+        },
         "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+        "source_receipt_requirements": {
+          "mode": "raw_top_k_refinement_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "operator_supplied",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
+        },
         "status": "ready_for_raw_operator_rows",
         "supported_source_formats": [
           "csv",
@@ -141,7 +277,8 @@
           "min_real_refinement_case_count": 3,
           "min_top_k_rank_coverage_per_case": 2,
           "min_total_top_k_candidate_count": 6
-        }
+        },
+        "top_k_scope_policy": "Operator import is bounded to supplied upstream top-k candidates; top_k_rank must be between 1 and 20."
       },
       "slot_id": "top_k_refinement_rows",
       "status": "operator_input_required",
@@ -161,10 +298,10 @@
     }
   ],
   "gate_unblock_plan_count": 1,
-  "generated_at": "2026-07-01T07:34:30.504335+00:00",
+  "generated_at": "2026-07-01T09:44:46.101476+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:c95d3613bc538e66ed7c54c191e813019e40ddfd728272e11d3cb2ef1ac877f0",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:b2ef5184ad1829b26eef93bc6630f9d6ab4be87c976442bb2a641f15706ab605",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:3c4b450b1810e63b74a61bbe3d591a42b54e07bae40ad943bf5c50b01c160ab0",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:1f38620572d248b8514c68695432794505576be67c825896dbf0d20aa7d68d74",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24ee81b77e8d5650e97dd6ca7fe7745933a475b959adc915cefaa68fc66ef3f1"
   },
   "input_slots": [
@@ -206,7 +343,75 @@
         },
         "output_intake": "<operator-pocketmd-lite-intake.json>",
         "required_output_key": "cases",
+        "row_value_contract": {
+          "boolean_value_policy": {
+            "local_min_survived": "must parse to a boolean value"
+          },
+          "integer_value_policy": {
+            "clash_count_after": "must parse to a non-negative integer",
+            "clash_count_before": "must parse to a non-negative integer"
+          },
+          "numeric_value_policy": {
+            "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+            "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "rate_value_policy": {
+            "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+            "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+          },
+          "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+          "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+          "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+          "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+        },
         "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+        "source_receipt_requirements": {
+          "mode": "raw_top_k_refinement_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "operator_supplied",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
+        },
         "status": "ready_for_raw_operator_rows",
         "supported_source_formats": [
           "csv",
@@ -221,7 +426,8 @@
           "min_real_refinement_case_count": 3,
           "min_top_k_rank_coverage_per_case": 2,
           "min_total_top_k_candidate_count": 6
-        }
+        },
+        "top_k_scope_policy": "Operator import is bounded to supplied upstream top-k candidates; top_k_rank must be between 1 and 20."
       },
       "required": true,
       "required_case_fields": [
@@ -350,7 +556,75 @@
     },
     "output_intake": "<operator-pocketmd-lite-intake.json>",
     "required_output_key": "cases",
+    "row_value_contract": {
+      "boolean_value_policy": {
+        "local_min_survived": "must parse to a boolean value"
+      },
+      "integer_value_policy": {
+        "clash_count_after": "must parse to a non-negative integer",
+        "clash_count_before": "must parse to a non-negative integer"
+      },
+      "numeric_value_policy": {
+        "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+        "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+      },
+      "rate_value_policy": {
+        "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+        "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+      },
+      "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+      "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+      "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+      "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+      "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+    },
     "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+    "source_receipt_requirements": {
+      "mode": "raw_top_k_refinement_rows",
+      "placeholder_block_policy": {
+        "text_markers": [
+          "<operator",
+          "fixture",
+          "synthetic",
+          "mock",
+          "placeholder",
+          "dummy",
+          "example",
+          "operator_supplied",
+          "unit-test",
+          "test-only"
+        ],
+        "url_markers": [
+          "://example.",
+          ".example/",
+          ".invalid",
+          ".test/",
+          "localhost",
+          "127.0.0.1",
+          "0.0.0.0"
+        ],
+        "url_prefixes": [
+          "operator://",
+          "local-evidence://",
+          "local://",
+          "fixture://",
+          "mock://",
+          "synthetic://",
+          "placeholder://",
+          "test://",
+          "unit-test://",
+          "file://"
+        ]
+      },
+      "required_fields": [
+        "source_id",
+        "source_url",
+        "source_license",
+        "source_artifact",
+        "source_artifact_sha256"
+      ],
+      "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
+    },
     "status": "ready_for_raw_operator_rows",
     "supported_source_formats": [
       "csv",
@@ -365,7 +639,8 @@
       "min_real_refinement_case_count": 3,
       "min_top_k_rank_coverage_per_case": 2,
       "min_total_top_k_candidate_count": 6
-    }
+    },
+    "top_k_scope_policy": "Operator import is bounded to supplied upstream top-k candidates; top_k_rank must be between 1 and 20."
   },
   "read_model": {
     "alternate_routes": [
@@ -407,7 +682,7 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/operator-intake",
   "schema_version": "pocketmd-lite-operator-intake-packet.v1",
-  "source_commit_sha": "a1ad46cb53bb63c0644d7ef6dc74b313ba7a17a7",
+  "source_commit_sha": "a62cf93cfd55d701bc01de81c4ca888f9022ab64",
   "status": "ready_for_operator_input",
   "summary": {
     "current_blocker_count": 6,

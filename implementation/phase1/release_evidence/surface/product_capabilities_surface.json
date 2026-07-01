@@ -127,13 +127,19 @@
             "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
             "top20_hit_rate": "top20_hit_rate_min"
           },
-          "numeric_value_policy": {
-            "score": "must parse to a finite float; NaN and Infinity are rejected"
-          },
           "raw_row_quality_minimums": {
             "min_decoy_count_per_target": 20,
             "min_positive_count_per_target": 4,
             "min_total_row_count_per_target": 24
+          },
+          "raw_row_value_contract": {
+            "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+            "numeric_value_policy": {
+              "score": "must parse to a finite float; NaN and Infinity are rejected"
+            },
+            "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+            "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+            "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
           },
           "required_hard_decoy_row_fields": [
             "molecule_id",
@@ -150,6 +156,51 @@
             "score_direction",
             "hard_decoy_rows"
           ],
+          "source_receipt_requirements": {
+            "mode": "raw_hard_decoy_rows",
+            "placeholder_block_policy": {
+              "text_markers": [
+                "<operator",
+                "fixture",
+                "synthetic",
+                "mock",
+                "placeholder",
+                "dummy",
+                "example",
+                "unit-test",
+                "test-only"
+              ],
+              "url_markers": [
+                "://example.",
+                ".example/",
+                ".invalid",
+                ".test/",
+                "localhost",
+                "127.0.0.1",
+                "0.0.0.0"
+              ],
+              "url_prefixes": [
+                "operator://",
+                "local-evidence://",
+                "local://",
+                "fixture://",
+                "mock://",
+                "synthetic://",
+                "placeholder://",
+                "test://",
+                "unit-test://",
+                "file://"
+              ]
+            },
+            "required_fields": [
+              "source_id",
+              "source_url",
+              "source_license",
+              "source_artifact",
+              "source_artifact_sha256"
+            ],
+            "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+          },
           "target_id": "DRD2",
           "thresholds": {
             "decoys_above_positive_count": "<=0",
@@ -259,9 +310,77 @@
             1,
             2
           ],
+          "row_value_contract": {
+            "boolean_value_policy": {
+              "local_min_survived": "must parse to a boolean value"
+            },
+            "integer_value_policy": {
+              "clash_count_after": "must parse to a non-negative integer",
+              "clash_count_before": "must parse to a non-negative integer"
+            },
+            "numeric_value_policy": {
+              "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+              "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+            },
+            "rate_value_policy": {
+              "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+              "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+            },
+            "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+            "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+            "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+            "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+            "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+          },
           "source_checksum_policy": {
             "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
             "required_receipt_field": "source_checksum"
+          },
+          "source_receipt_requirements": {
+            "mode": "raw_top_k_refinement_rows",
+            "placeholder_block_policy": {
+              "text_markers": [
+                "<operator",
+                "fixture",
+                "synthetic",
+                "mock",
+                "placeholder",
+                "dummy",
+                "example",
+                "operator_supplied",
+                "unit-test",
+                "test-only"
+              ],
+              "url_markers": [
+                "://example.",
+                ".example/",
+                ".invalid",
+                ".test/",
+                "localhost",
+                "127.0.0.1",
+                "0.0.0.0"
+              ],
+              "url_prefixes": [
+                "operator://",
+                "local-evidence://",
+                "local://",
+                "fixture://",
+                "mock://",
+                "synthetic://",
+                "placeholder://",
+                "test://",
+                "unit-test://",
+                "file://"
+              ]
+            },
+            "required_fields": [
+              "source_id",
+              "source_url",
+              "source_license",
+              "source_artifact",
+              "source_artifact_sha256"
+            ],
+            "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
           },
           "top_k_candidate_count": 6,
           "top_k_rank_coverage_per_case": 2,
@@ -678,6 +797,48 @@
                 "is_active",
                 "score"
               ],
+              "row_validation_policies": {
+                "active_decoy_policy": {
+                  "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+                },
+                "boolean_label_policy": {
+                  "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+                },
+                "numeric_value_policy": {
+                  "score": "must parse to a finite float; NaN and Infinity are rejected"
+                },
+                "row_integrity_policy": {
+                  "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+                  "required_unique_row_keys": {
+                    "target_scored_molecules": [
+                      "molecule_id"
+                    ],
+                    "targets": [
+                      "target_id"
+                    ]
+                  }
+                },
+                "score_direction_policy": {
+                  "accepted_aliases": {
+                    "higher_is_better": [
+                      "higher",
+                      "higher_is_better",
+                      "descending"
+                    ],
+                    "lower_is_better": [
+                      "lower",
+                      "lower_is_better",
+                      "ascending"
+                    ]
+                  },
+                  "accepted_values": [
+                    "higher_is_better",
+                    "lower_is_better"
+                  ],
+                  "blank_values": "rejected; no implicit default is applied",
+                  "required": true
+                }
+              },
               "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum"
@@ -719,6 +880,60 @@
                 "vina",
                 "gnina"
               ],
+              "row_validation_policies": {
+                "boolean_value_policy": {
+                  "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+                },
+                "engine_pair_policy": {
+                  "duplicate_docking_run_ids_rejected": true,
+                  "duplicate_engine_ids_rejected": true,
+                  "per_case_required_engines": [
+                    "vina",
+                    "gnina"
+                  ]
+                },
+                "numeric_value_policy": {
+                  "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+                  "score": "must parse to a finite float; NaN and Infinity are rejected",
+                  "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+                },
+                "pose_success_policy": {
+                  "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+                  "threshold_default_angstrom": 2.0
+                },
+                "row_integrity_policy": {
+                  "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+                  "required_unique_row_keys": {
+                    "case_engine_runs": [
+                      "engine_id",
+                      "docking_run_id"
+                    ],
+                    "cases": [
+                      "case_id"
+                    ]
+                  }
+                },
+                "score_direction_policy": {
+                  "accepted_aliases": {
+                    "higher_is_better": [
+                      "higher",
+                      "higher_is_better",
+                      "descending"
+                    ],
+                    "lower_is_better": [
+                      "lower",
+                      "lower_is_better",
+                      "ascending"
+                    ]
+                  },
+                  "accepted_values": [
+                    "higher_is_better",
+                    "lower_is_better"
+                  ],
+                  "blank_values": "rejected; no implicit default is applied",
+                  "required": true
+                }
+              },
               "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum"
@@ -851,6 +1066,48 @@
                 "is_active",
                 "score"
               ],
+              "row_validation_policies": {
+                "active_decoy_policy": {
+                  "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+                },
+                "boolean_label_policy": {
+                  "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+                },
+                "numeric_value_policy": {
+                  "score": "must parse to a finite float; NaN and Infinity are rejected"
+                },
+                "row_integrity_policy": {
+                  "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+                  "required_unique_row_keys": {
+                    "target_scored_molecules": [
+                      "molecule_id"
+                    ],
+                    "targets": [
+                      "target_id"
+                    ]
+                  }
+                },
+                "score_direction_policy": {
+                  "accepted_aliases": {
+                    "higher_is_better": [
+                      "higher",
+                      "higher_is_better",
+                      "descending"
+                    ],
+                    "lower_is_better": [
+                      "lower",
+                      "lower_is_better",
+                      "ascending"
+                    ]
+                  },
+                  "accepted_values": [
+                    "higher_is_better",
+                    "lower_is_better"
+                  ],
+                  "blank_values": "rejected; no implicit default is applied",
+                  "required": true
+                }
+              },
               "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum"
@@ -896,6 +1153,60 @@
                 "vina",
                 "gnina"
               ],
+              "row_validation_policies": {
+                "boolean_value_policy": {
+                  "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+                },
+                "engine_pair_policy": {
+                  "duplicate_docking_run_ids_rejected": true,
+                  "duplicate_engine_ids_rejected": true,
+                  "per_case_required_engines": [
+                    "vina",
+                    "gnina"
+                  ]
+                },
+                "numeric_value_policy": {
+                  "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+                  "score": "must parse to a finite float; NaN and Infinity are rejected",
+                  "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+                },
+                "pose_success_policy": {
+                  "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+                  "threshold_default_angstrom": 2.0
+                },
+                "row_integrity_policy": {
+                  "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+                  "required_unique_row_keys": {
+                    "case_engine_runs": [
+                      "engine_id",
+                      "docking_run_id"
+                    ],
+                    "cases": [
+                      "case_id"
+                    ]
+                  }
+                },
+                "score_direction_policy": {
+                  "accepted_aliases": {
+                    "higher_is_better": [
+                      "higher",
+                      "higher_is_better",
+                      "descending"
+                    ],
+                    "lower_is_better": [
+                      "lower",
+                      "lower_is_better",
+                      "ascending"
+                    ]
+                  },
+                  "accepted_values": [
+                    "higher_is_better",
+                    "lower_is_better"
+                  ],
+                  "blank_values": "rejected; no implicit default is applied",
+                  "required": true
+                }
+              },
               "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum"
@@ -1029,6 +1340,48 @@
                 "is_active",
                 "score"
               ],
+              "row_validation_policies": {
+                "active_decoy_policy": {
+                  "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+                },
+                "boolean_label_policy": {
+                  "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+                },
+                "numeric_value_policy": {
+                  "score": "must parse to a finite float; NaN and Infinity are rejected"
+                },
+                "row_integrity_policy": {
+                  "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+                  "required_unique_row_keys": {
+                    "target_scored_molecules": [
+                      "molecule_id"
+                    ],
+                    "targets": [
+                      "target_id"
+                    ]
+                  }
+                },
+                "score_direction_policy": {
+                  "accepted_aliases": {
+                    "higher_is_better": [
+                      "higher",
+                      "higher_is_better",
+                      "descending"
+                    ],
+                    "lower_is_better": [
+                      "lower",
+                      "lower_is_better",
+                      "ascending"
+                    ]
+                  },
+                  "accepted_values": [
+                    "higher_is_better",
+                    "lower_is_better"
+                  ],
+                  "blank_values": "rejected; no implicit default is applied",
+                  "required": true
+                }
+              },
               "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum"
@@ -1083,6 +1436,60 @@
                 "vina",
                 "gnina"
               ],
+              "row_validation_policies": {
+                "boolean_value_policy": {
+                  "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+                },
+                "engine_pair_policy": {
+                  "duplicate_docking_run_ids_rejected": true,
+                  "duplicate_engine_ids_rejected": true,
+                  "per_case_required_engines": [
+                    "vina",
+                    "gnina"
+                  ]
+                },
+                "numeric_value_policy": {
+                  "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+                  "score": "must parse to a finite float; NaN and Infinity are rejected",
+                  "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+                },
+                "pose_success_policy": {
+                  "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+                  "threshold_default_angstrom": 2.0
+                },
+                "row_integrity_policy": {
+                  "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+                  "required_unique_row_keys": {
+                    "case_engine_runs": [
+                      "engine_id",
+                      "docking_run_id"
+                    ],
+                    "cases": [
+                      "case_id"
+                    ]
+                  }
+                },
+                "score_direction_policy": {
+                  "accepted_aliases": {
+                    "higher_is_better": [
+                      "higher",
+                      "higher_is_better",
+                      "descending"
+                    ],
+                    "lower_is_better": [
+                      "lower",
+                      "lower_is_better",
+                      "ascending"
+                    ]
+                  },
+                  "accepted_values": [
+                    "higher_is_better",
+                    "lower_is_better"
+                  ],
+                  "blank_values": "rejected; no implicit default is applied",
+                  "required": true
+                }
+              },
               "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum"
@@ -1377,13 +1784,19 @@
                 "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
                 "top20_hit_rate": "top20_hit_rate_min"
               },
-              "numeric_value_policy": {
-                "score": "must parse to a finite float; NaN and Infinity are rejected"
-              },
               "raw_row_quality_minimums": {
                 "min_decoy_count_per_target": 20,
                 "min_positive_count_per_target": 4,
                 "min_total_row_count_per_target": 24
+              },
+              "raw_row_value_contract": {
+                "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+                "numeric_value_policy": {
+                  "score": "must parse to a finite float; NaN and Infinity are rejected"
+                },
+                "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+                "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+                "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
               },
               "required_hard_decoy_row_fields": [
                 "molecule_id",
@@ -1400,6 +1813,51 @@
                 "score_direction",
                 "hard_decoy_rows"
               ],
+              "source_receipt_requirements": {
+                "mode": "raw_hard_decoy_rows",
+                "placeholder_block_policy": {
+                  "text_markers": [
+                    "<operator",
+                    "fixture",
+                    "synthetic",
+                    "mock",
+                    "placeholder",
+                    "dummy",
+                    "example",
+                    "unit-test",
+                    "test-only"
+                  ],
+                  "url_markers": [
+                    "://example.",
+                    ".example/",
+                    ".invalid",
+                    ".test/",
+                    "localhost",
+                    "127.0.0.1",
+                    "0.0.0.0"
+                  ],
+                  "url_prefixes": [
+                    "operator://",
+                    "local-evidence://",
+                    "local://",
+                    "fixture://",
+                    "mock://",
+                    "synthetic://",
+                    "placeholder://",
+                    "test://",
+                    "unit-test://",
+                    "file://"
+                  ]
+                },
+                "required_fields": [
+                  "source_id",
+                  "source_url",
+                  "source_license",
+                  "source_artifact",
+                  "source_artifact_sha256"
+                ],
+                "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+              },
               "target_id": "DRD2",
               "thresholds": {
                 "decoys_above_positive_count": "<=0",
@@ -1438,13 +1896,19 @@
                 "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
                 "top20_hit_rate": "top20_hit_rate_min"
               },
-              "numeric_value_policy": {
-                "score": "must parse to a finite float; NaN and Infinity are rejected"
-              },
               "raw_row_quality_minimums": {
                 "min_decoy_count_per_target": 20,
                 "min_positive_count_per_target": 4,
                 "min_total_row_count_per_target": 24
+              },
+              "raw_row_value_contract": {
+                "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+                "numeric_value_policy": {
+                  "score": "must parse to a finite float; NaN and Infinity are rejected"
+                },
+                "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+                "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+                "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
               },
               "required_hard_decoy_row_fields": [
                 "molecule_id",
@@ -1461,6 +1925,51 @@
                 "score_direction",
                 "hard_decoy_rows"
               ],
+              "source_receipt_requirements": {
+                "mode": "raw_hard_decoy_rows",
+                "placeholder_block_policy": {
+                  "text_markers": [
+                    "<operator",
+                    "fixture",
+                    "synthetic",
+                    "mock",
+                    "placeholder",
+                    "dummy",
+                    "example",
+                    "unit-test",
+                    "test-only"
+                  ],
+                  "url_markers": [
+                    "://example.",
+                    ".example/",
+                    ".invalid",
+                    ".test/",
+                    "localhost",
+                    "127.0.0.1",
+                    "0.0.0.0"
+                  ],
+                  "url_prefixes": [
+                    "operator://",
+                    "local-evidence://",
+                    "local://",
+                    "fixture://",
+                    "mock://",
+                    "synthetic://",
+                    "placeholder://",
+                    "test://",
+                    "unit-test://",
+                    "file://"
+                  ]
+                },
+                "required_fields": [
+                  "source_id",
+                  "source_url",
+                  "source_license",
+                  "source_artifact",
+                  "source_artifact_sha256"
+                ],
+                "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+              },
               "target_id": "HTR2A",
               "thresholds": {
                 "decoys_above_positive_count": "<=0",
@@ -1499,13 +2008,19 @@
                 "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
                 "top20_hit_rate": "top20_hit_rate_min"
               },
-              "numeric_value_policy": {
-                "score": "must parse to a finite float; NaN and Infinity are rejected"
-              },
               "raw_row_quality_minimums": {
                 "min_decoy_count_per_target": 20,
                 "min_positive_count_per_target": 4,
                 "min_total_row_count_per_target": 24
+              },
+              "raw_row_value_contract": {
+                "boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.",
+                "numeric_value_policy": {
+                  "score": "must parse to a finite float; NaN and Infinity are rejected"
+                },
+                "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.",
+                "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.",
+                "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."
               },
               "required_hard_decoy_row_fields": [
                 "molecule_id",
@@ -1522,6 +2037,51 @@
                 "score_direction",
                 "hard_decoy_rows"
               ],
+              "source_receipt_requirements": {
+                "mode": "raw_hard_decoy_rows",
+                "placeholder_block_policy": {
+                  "text_markers": [
+                    "<operator",
+                    "fixture",
+                    "synthetic",
+                    "mock",
+                    "placeholder",
+                    "dummy",
+                    "example",
+                    "unit-test",
+                    "test-only"
+                  ],
+                  "url_markers": [
+                    "://example.",
+                    ".example/",
+                    ".invalid",
+                    ".test/",
+                    "localhost",
+                    "127.0.0.1",
+                    "0.0.0.0"
+                  ],
+                  "url_prefixes": [
+                    "operator://",
+                    "local-evidence://",
+                    "local://",
+                    "fixture://",
+                    "mock://",
+                    "synthetic://",
+                    "placeholder://",
+                    "test://",
+                    "unit-test://",
+                    "file://"
+                  ]
+                },
+                "required_fields": [
+                  "source_id",
+                  "source_url",
+                  "source_license",
+                  "source_artifact",
+                  "source_artifact_sha256"
+                ],
+                "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"
+              },
               "target_id": "OPRM1",
               "thresholds": {
                 "decoys_above_positive_count": "<=0",
@@ -1780,9 +2340,77 @@
               1,
               2
             ],
+            "row_value_contract": {
+              "boolean_value_policy": {
+                "local_min_survived": "must parse to a boolean value"
+              },
+              "integer_value_policy": {
+                "clash_count_after": "must parse to a non-negative integer",
+                "clash_count_before": "must parse to a non-negative integer"
+              },
+              "numeric_value_policy": {
+                "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+                "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+              },
+              "rate_value_policy": {
+                "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+                "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+              },
+              "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+              "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+              "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+              "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+              "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+            },
             "source_checksum_policy": {
               "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
               "required_receipt_field": "source_checksum"
+            },
+            "source_receipt_requirements": {
+              "mode": "raw_top_k_refinement_rows",
+              "placeholder_block_policy": {
+                "text_markers": [
+                  "<operator",
+                  "fixture",
+                  "synthetic",
+                  "mock",
+                  "placeholder",
+                  "dummy",
+                  "example",
+                  "operator_supplied",
+                  "unit-test",
+                  "test-only"
+                ],
+                "url_markers": [
+                  "://example.",
+                  ".example/",
+                  ".invalid",
+                  ".test/",
+                  "localhost",
+                  "127.0.0.1",
+                  "0.0.0.0"
+                ],
+                "url_prefixes": [
+                  "operator://",
+                  "local-evidence://",
+                  "local://",
+                  "fixture://",
+                  "mock://",
+                  "synthetic://",
+                  "placeholder://",
+                  "test://",
+                  "unit-test://",
+                  "file://"
+                ]
+              },
+              "required_fields": [
+                "source_id",
+                "source_url",
+                "source_license",
+                "source_artifact",
+                "source_artifact_sha256"
+              ],
+              "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
             },
             "top_k_candidate_count": 6,
             "top_k_rank_coverage_per_case": 2,
@@ -1823,7 +2451,75 @@
             },
             "output_intake": "<operator-pocketmd-lite-intake.json>",
             "required_output_key": "cases",
+            "row_value_contract": {
+              "boolean_value_policy": {
+                "local_min_survived": "must parse to a boolean value"
+              },
+              "integer_value_policy": {
+                "clash_count_after": "must parse to a non-negative integer",
+                "clash_count_before": "must parse to a non-negative integer"
+              },
+              "numeric_value_policy": {
+                "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+                "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+              },
+              "rate_value_policy": {
+                "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+                "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+              },
+              "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+              "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+              "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+              "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+              "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+            },
             "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+            "source_receipt_requirements": {
+              "mode": "raw_top_k_refinement_rows",
+              "placeholder_block_policy": {
+                "text_markers": [
+                  "<operator",
+                  "fixture",
+                  "synthetic",
+                  "mock",
+                  "placeholder",
+                  "dummy",
+                  "example",
+                  "operator_supplied",
+                  "unit-test",
+                  "test-only"
+                ],
+                "url_markers": [
+                  "://example.",
+                  ".example/",
+                  ".invalid",
+                  ".test/",
+                  "localhost",
+                  "127.0.0.1",
+                  "0.0.0.0"
+                ],
+                "url_prefixes": [
+                  "operator://",
+                  "local-evidence://",
+                  "local://",
+                  "fixture://",
+                  "mock://",
+                  "synthetic://",
+                  "placeholder://",
+                  "test://",
+                  "unit-test://",
+                  "file://"
+                ]
+              },
+              "required_fields": [
+                "source_id",
+                "source_url",
+                "source_license",
+                "source_artifact",
+                "source_artifact_sha256"
+              ],
+              "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
+            },
             "status": "ready_for_raw_operator_rows",
             "supported_source_formats": [
               "csv",
@@ -1838,7 +2534,8 @@
               "min_real_refinement_case_count": 3,
               "min_top_k_rank_coverage_per_case": 2,
               "min_total_top_k_candidate_count": 6
-            }
+            },
+            "top_k_scope_policy": "Operator import is bounded to supplied upstream top-k candidates; top_k_rank must be between 1 and 20."
           },
           "slot_id": "top_k_refinement_rows",
           "slot_priority": 1,
@@ -1907,9 +2604,77 @@
                 1,
                 2
               ],
+              "row_value_contract": {
+                "boolean_value_policy": {
+                  "local_min_survived": "must parse to a boolean value"
+                },
+                "integer_value_policy": {
+                  "clash_count_after": "must parse to a non-negative integer",
+                  "clash_count_before": "must parse to a non-negative integer"
+                },
+                "numeric_value_policy": {
+                  "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+                  "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+                },
+                "rate_value_policy": {
+                  "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+                  "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+                },
+                "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+                "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+                "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+                "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+                "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+              },
               "source_checksum_policy": {
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum"
+              },
+              "source_receipt_requirements": {
+                "mode": "raw_top_k_refinement_rows",
+                "placeholder_block_policy": {
+                  "text_markers": [
+                    "<operator",
+                    "fixture",
+                    "synthetic",
+                    "mock",
+                    "placeholder",
+                    "dummy",
+                    "example",
+                    "operator_supplied",
+                    "unit-test",
+                    "test-only"
+                  ],
+                  "url_markers": [
+                    "://example.",
+                    ".example/",
+                    ".invalid",
+                    ".test/",
+                    "localhost",
+                    "127.0.0.1",
+                    "0.0.0.0"
+                  ],
+                  "url_prefixes": [
+                    "operator://",
+                    "local-evidence://",
+                    "local://",
+                    "fixture://",
+                    "mock://",
+                    "synthetic://",
+                    "placeholder://",
+                    "test://",
+                    "unit-test://",
+                    "file://"
+                  ]
+                },
+                "required_fields": [
+                  "source_id",
+                  "source_url",
+                  "source_license",
+                  "source_artifact",
+                  "source_artifact_sha256"
+                ],
+                "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
               },
               "top_k_candidate_count": 6,
               "top_k_rank_coverage_per_case": 2,
@@ -2129,28 +2894,28 @@
   "first_blocked_capability_id": "public_benchmark_harness",
   "first_blocked_capability_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
   "first_blocked_target": "",
-  "generated_at": "2026-07-01T08:57:08.187696+00:00",
+  "generated_at": "2026-07-01T09:44:39.247535+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:49edd929ef9afde606d0653c9cded207c353a131a0502fcc42ec157c838db8a5",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:6aa1d42df85498fc9cfaf58c3e693f7575ea2e241d9e91b75f8affd4a2768a3d",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:f861484dabf263a4888683e86d038ce32424632574abde1f11bec327037076fd",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:a8fbaa8b9ed050c0c558a0d3f1b14e85ec98a98b5f9dad4626fb07f936424c54",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:1379ca75ad08399aac8d2872ca4436288c0c3470e287afc7f06ab54e259e3d17",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json": "sha256:9621d05ff0cf781897321f8b5000cd4620c88972b98c7c852f795ab171abeb3b",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md": "sha256:4e8a44624068cda8110c2986014663a2bddb61333cc5e81d90e77d8477d0401e",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:3f478851332228ffc2bee11235f47b88ba7597454150f23cab5756cef4b49521",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:d20edb05ba698d5d228209ef8813d8b056d2f10b78c9d36238dfc13b1bb62fc9",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:02abc7a94a6de76e1eba7768f94d2da8ca0e8899d4ffa39e61b41a55317930e5",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:c3d084be87b8af31707e078d055cee46d33e928380dc51e689a31d355b916935",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:9749393639ab111968930351f319add1b7d3570f73946e5ff73ecb720e1a3d9a",
-    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:4989fa82ea5dda9805eb35482492706b4a53f6ddb6f3c8602332a3e418c752f3",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:c659909feb7eb7c9aab2cf1b9461bccc53e39a88acf6f1f9f8a8fdcbc496a523",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md": "sha256:efe343c12bbdcd5e93d33c0190e88a1846be1020183f977485977121092ff726",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:6df45fffe9689716a43ab2c16965e144ca953e9068b97758a2a89adc407faadc",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:27c91e20d4571abf9877e9e86cebc821549a6ae4232bd94cf592909a4ca4efe4",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:ec0e2e0609f808d3c98d462ff7875ffba5fce958e0ca5341e9fbf9b8e34b270d",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:6da78b8f019ed4b755328db78f3ac45e88ce4c197f17a505521320a4cdf142e0",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:01a76dd96e7888c11f8876915dc089d0478add8125bc1167ff7d9a6c27b1390d",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:05daa71b74633815a0a312112d25cc3b31a6de0ff54fa8f0de905bb02ad3c746",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:f2841bdffc20c5fbd49be3f88214e5266bc5d0d41fd048353a50058178ebf61f",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:22153922982b7a95f574e17ac1aba56aebe5e90530e1800e5a0eae9a1afb819b",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md": "sha256:642d502e91419721d706df27cf36b52ca2b41656ac89074e39537ecfae58c400",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:aaefee160908d05985b2831e8661b137e0ff92b65681bb465d43b14d39c2f0f1",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:24983ed914879fdc1a9155172826c00c1e8018349a6be2bc8a224d8f895c87f3",
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:0d57c89df5c33d8fba0557d7f8cf421c301ed4bfe754a95b892df3abecaca0ed",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
-    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:8acc2e20495616a760e73df604c7230c8d8862a88aebe9a492e99d51e9089819",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:4eeadd2528878e68d25e376ba55f2b68d1827120937b28082fda10db180e1bce",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
@@ -2177,7 +2942,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "07fc560f00b06b1730b189e5a042dffff053147a",
+  "source_commit_sha": "a62cf93cfd55d701bc01de81c4ca888f9022ab64",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
