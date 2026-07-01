@@ -57,6 +57,8 @@
       ],
       "real_refinement_case_count": 3,
       "receipt_fields": [
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
         "provenance_ref",
         "source_checksum",
         "operator_input_source.source_artifact",
@@ -70,6 +72,8 @@
         "source_family",
         "top_k_rank",
         "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
         "pre_refinement_energy_proxy",
         "post_refinement_energy_proxy",
         "local_min_survived",
@@ -105,7 +109,8 @@
         "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
         "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
         "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+        "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
       },
       "source_checksum_policy": {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
@@ -164,7 +169,12 @@
         "min_real_refinement_case_count": 3,
         "min_top_k_rank_coverage_per_case": 2,
         "min_total_top_k_candidate_count": 6
-      }
+      },
+      "upstream_top_k_receipt_fields": [
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum"
+      ],
+      "upstream_top_k_receipt_policy": "Rows must prove the candidate came from the upstream ranked top-k set before Lite refinement."
     },
     "phase4_blocked": true,
     "preserves_phase4_criteria": [
@@ -216,7 +226,8 @@
         "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
         "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
         "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+        "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
       },
       "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
       "source_receipt_requirements": {
@@ -288,7 +299,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T09:44:46.099558+00:00",
+  "generated_at": "2026-07-01T10:10:33.289257+00:00",
   "goal_roadmap_linkage": {
     "bottleneck": "pocketmd_lite_science_product_surface_locked",
     "next_goal_actions": [
@@ -303,9 +314,9 @@
     "roadmap_item": "PocketMD Lite science product surface"
   },
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:3c4b450b1810e63b74a61bbe3d591a42b54e07bae40ad943bf5c50b01c160ab0",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:1f38620572d248b8514c68695432794505576be67c825896dbf0d20aa7d68d74",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24ee81b77e8d5650e97dd6ca7fe7745933a475b959adc915cefaa68fc66ef3f1"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:5af874042dc4fe3d5436ea7540bceb56907bab1036cfb4680ac499d15a1c12d0",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:adde929084eb2ecbc686c83b46f6a7665807d88664d1de0a9dcbd80b41aa76ad"
   },
   "linked_artifacts": {
     "contract": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
@@ -370,7 +381,8 @@
         "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
         "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
         "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+        "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
       },
       "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
       "source_receipt_requirements": {
@@ -494,6 +506,8 @@
         ],
         "real_refinement_case_count": 3,
         "receipt_fields": [
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
           "provenance_ref",
           "source_checksum",
           "operator_input_source.source_artifact",
@@ -507,6 +521,8 @@
           "source_family",
           "top_k_rank",
           "candidate_id",
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
           "pre_refinement_energy_proxy",
           "post_refinement_energy_proxy",
           "local_min_survived",
@@ -542,7 +558,8 @@
           "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
           "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
           "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+          "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
         },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
@@ -601,7 +618,12 @@
           "min_real_refinement_case_count": 3,
           "min_top_k_rank_coverage_per_case": 2,
           "min_total_top_k_candidate_count": 6
-        }
+        },
+        "upstream_top_k_receipt_fields": [
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum"
+        ],
+        "upstream_top_k_receipt_policy": "Rows must prove the candidate came from the upstream ranked top-k set before Lite refinement."
       },
       "phase4_blocked": true,
       "preserves_phase4_criteria": [
@@ -653,7 +675,8 @@
           "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
           "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
           "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+          "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
         },
         "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
         "source_receipt_requirements": {
@@ -759,6 +782,8 @@
         ],
         "real_refinement_case_count": 3,
         "receipt_fields": [
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
           "provenance_ref",
           "source_checksum",
           "operator_input_source.source_artifact",
@@ -772,6 +797,8 @@
           "source_family",
           "top_k_rank",
           "candidate_id",
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
           "pre_refinement_energy_proxy",
           "post_refinement_energy_proxy",
           "local_min_survived",
@@ -807,7 +834,8 @@
           "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
           "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
           "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+          "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
         },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
@@ -866,7 +894,12 @@
           "min_real_refinement_case_count": 3,
           "min_top_k_rank_coverage_per_case": 2,
           "min_total_top_k_candidate_count": 6
-        }
+        },
+        "upstream_top_k_receipt_fields": [
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum"
+        ],
+        "upstream_top_k_receipt_policy": "Rows must prove the candidate came from the upstream ranked top-k set before Lite refinement."
       },
       "preserves_phase4_criteria": [
         "broad_all_atom_fep_claims_locked"
@@ -917,7 +950,8 @@
           "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
           "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
           "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+          "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
         },
         "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
         "source_receipt_requirements": {
@@ -1037,6 +1071,8 @@
       ],
       "real_refinement_case_count": 3,
       "receipt_fields": [
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
         "provenance_ref",
         "source_checksum",
         "operator_input_source.source_artifact",
@@ -1050,6 +1086,8 @@
         "source_family",
         "top_k_rank",
         "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
         "pre_refinement_energy_proxy",
         "post_refinement_energy_proxy",
         "local_min_survived",
@@ -1085,7 +1123,8 @@
         "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
         "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
         "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+        "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
       },
       "source_checksum_policy": {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
@@ -1144,7 +1183,12 @@
         "min_real_refinement_case_count": 3,
         "min_top_k_rank_coverage_per_case": 2,
         "min_total_top_k_candidate_count": 6
-      }
+      },
+      "upstream_top_k_receipt_fields": [
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum"
+      ],
+      "upstream_top_k_receipt_policy": "Rows must prove the candidate came from the upstream ranked top-k set before Lite refinement."
     },
     "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
     "required_slot_count": 1,
@@ -1359,7 +1403,7 @@
   ],
   "schema_version": "pocketmd-lite-science-product-surface.v1",
   "science_surface_family": "pocketmd_lite",
-  "source_commit_sha": "a62cf93cfd55d701bc01de81c4ca888f9022ab64",
+  "source_commit_sha": "a8268a235511234d5a2d25011837fabaf34a0ad5",
   "status": "locked",
   "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
   "surface_id": "pocketmd_lite_science_product_surface",

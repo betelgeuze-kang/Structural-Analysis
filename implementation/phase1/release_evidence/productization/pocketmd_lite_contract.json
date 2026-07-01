@@ -8,11 +8,11 @@
   "claim_boundary": "PocketMD Lite is a bounded top-k refinement surface. It reports local-min survival, contact persistence, H-bond persistence, clash relief, and uncertainty for already-ranked candidates only. It does not claim broad all-atom MD, FEP, long-timescale dynamics, or autonomous docking accuracy.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T09:44:46.089985+00:00",
+  "generated_at": "2026-07-01T10:10:33.279802+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:3c4b450b1810e63b74a61bbe3d591a42b54e07bae40ad943bf5c50b01c160ab0",
-    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:1f38620572d248b8514c68695432794505576be67c825896dbf0d20aa7d68d74",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:24ee81b77e8d5650e97dd6ca7fe7745933a475b959adc915cefaa68fc66ef3f1"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:5af874042dc4fe3d5436ea7540bceb56907bab1036cfb4680ac499d15a1c12d0",
+    "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:adde929084eb2ecbc686c83b46f6a7665807d88664d1de0a9dcbd80b41aa76ad"
   },
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -67,7 +67,8 @@
         "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
         "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
         "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+        "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
       },
       "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
       "source_receipt_requirements": {
@@ -197,7 +198,8 @@
         "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
         "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
         "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+        "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
       },
       "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
       "source_receipt_requirements": {
@@ -268,6 +270,8 @@
       "source_family",
       "top_k_rank",
       "candidate_id",
+      "upstream_top_k_provenance_ref",
+      "upstream_top_k_source_checksum",
       "pre_refinement_energy_proxy",
       "post_refinement_energy_proxy",
       "local_min_survived",
@@ -299,7 +303,8 @@
       "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
       "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
       "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
-      "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit."
+      "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+      "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
     },
     "source_checksum_policy": {
       "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
@@ -369,7 +374,9 @@
         "high": null,
         "low": null,
         "unit": "energy_proxy_delta"
-      }
+      },
+      "upstream_top_k_provenance_ref": "",
+      "upstream_top_k_source_checksum": ""
     },
     "top_k_only_policy": "Only candidates selected in the upstream top-k pose or design ranking may be included. Broad all-atom rescoring, long MD, FEP, and de novo docking claims remain out of scope.",
     "top_k_rank_prefix_policy": "For each case, supplied ranks must form a contiguous prefix starting at rank 1; cherry-picked gaps are not valid top-k refinement input.",
@@ -379,7 +386,12 @@
       "min_top_k_rank_coverage_per_case": 2,
       "min_total_top_k_candidate_count": 6
     },
-    "top_k_scope_policy": "Operator import is bounded to supplied upstream top-k candidates; top_k_rank must be between 1 and 20."
+    "top_k_scope_policy": "Operator import is bounded to supplied upstream top-k candidates; top_k_rank must be between 1 and 20.",
+    "upstream_top_k_receipt_fields": [
+      "upstream_top_k_provenance_ref",
+      "upstream_top_k_source_checksum"
+    ],
+    "upstream_top_k_receipt_policy": "Each refinement row must carry upstream top-k provenance and checksum for the ranked candidate set that selected the candidate before Lite refinement."
   },
   "product_capability_id": "pocketmd_lite_top_k_refinement",
   "product_surface_ready": false,
@@ -419,7 +431,7 @@
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-contract.v1",
   "scope": "top_k_lite_refinement_only",
-  "source_commit_sha": "a62cf93cfd55d701bc01de81c4ca888f9022ab64",
+  "source_commit_sha": "a8268a235511234d5a2d25011837fabaf34a0ad5",
   "status": "contract_ready_operator_evidence_required",
   "top_k_policy": {
     "candidate_scope": "top_k_candidates_only",
