@@ -17,6 +17,7 @@ if str(SCRIPT_DIR) not in sys.path:
 import materialize_public_benchmark_harness_bundle as harness_bundle  # noqa: E402
 import materialize_public_benchmark_enrichment_scorecard as enrichment_scorecard  # noqa: E402
 import materialize_public_benchmark_operator_bundle_from_rows as row_bundle  # noqa: E402
+import materialize_public_benchmark_posebusters_validity_packet as posebusters_packet  # noqa: E402
 import materialize_public_benchmark_pose_validity_input as pose_validity_input  # noqa: E402
 import materialize_public_benchmark_subset_manifest as subset_manifest  # noqa: E402
 import materialize_public_benchmark_vina_gnina_comparison_adapter as vina_gnina_adapter  # noqa: E402
@@ -242,6 +243,19 @@ def _row_intake_contracts(
                 "symmetry_permutation_contract",
                 "receptor_context",
             ],
+            "posebusters_style_check_contract": {
+                "packet_schema_version": posebusters_packet.PACKET_SCHEMA_VERSION,
+                "materializer_schema_version": posebusters_packet.SCHEMA_VERSION,
+                "required_check_ids": [
+                    str(row["check_id"])
+                    for row in posebusters_packet.CHECK_DEFINITIONS
+                    if bool(row.get("required"))
+                ],
+                "check_definitions": [
+                    dict(row) for row in posebusters_packet.CHECK_DEFINITIONS
+                ],
+                "all_checks_required": True,
+            },
             "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
             "default_rmsd_threshold_angstrom": DEFAULT_THRESHOLD_ANGSTROM,
             "minimum_phase2_component_counts": minimum_component_counts,
