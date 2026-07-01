@@ -184,6 +184,16 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 ],
             },
         ),
+        "structural_scope_owner_review_packet": _write_json(
+            tmp_path / "structural-scope-owner-review-packet.json",
+            {
+                "schema_version": "structural-scope-owner-review-packet.v1",
+                "contract_pass": True,
+                "evidence_closure_pass": False,
+                "owner_decision_pending_count": 2,
+                "release_surface_excluded_path_count": 2,
+            },
+        ),
         "ci_streak_intake_packet": _write_json(
             tmp_path / "ci-streak-intake-packet.json",
             {
@@ -460,6 +470,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         assert "redacted/pm_release_gate_completion_audit.json" in members
         assert "redacted/pm_release_gate_reviewer_handoff.json" in members
         assert "redacted/pm_owner_evidence_request_packet.json" in members
+        assert "redacted/structural_scope_owner_review_packet.json" in members
         assert "redacted/license_status_closure_report.json" in members
         assert "redacted/license_status_template.json" in members
         assert "redacted/independent_vv_attestation_template.json" in members
@@ -489,6 +500,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "pm_release_gate_completion_audit" in payload["optional_sections"]
     assert "pm_release_gate_reviewer_handoff" in payload["optional_sections"]
     assert "pm_owner_evidence_request_packet" in payload["optional_sections"]
+    assert "structural_scope_owner_review_packet" in payload["optional_sections"]
     assert "ci_streak_intake_packet" in payload["optional_sections"]
     assert "ci_streak_manifest" in payload["optional_sections"]
     assert "github_actions_ci_streak_evidence" in payload["optional_sections"]

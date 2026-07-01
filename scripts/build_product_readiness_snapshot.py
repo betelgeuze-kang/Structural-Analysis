@@ -103,6 +103,7 @@ class SnapshotInputPaths:
         PRODUCTIZATION / "external_benchmark_submission_updates.json"
     )
     structural_scope_contamination: Path = PRODUCTIZATION / "structural_scope_contamination_audit.json"
+    structural_scope_owner_review: Path = PRODUCTIZATION / "structural_scope_owner_review_packet.json"
     phase3_release_control_cleanup_plan: Path = PRODUCTIZATION / "phase3_release_control_cleanup_plan.json"
     self_hosted_runner_status: Path = PRODUCTIZATION / "github_actions_self_hosted_runner_status.json"
     package_json: Path = Path("package.json")
@@ -310,6 +311,7 @@ def _receipt_commit_allowed_paths(
         "external_benchmark_submission_readiness",
         "external_benchmark_submission_updates",
         "structural_scope_contamination",
+        "structural_scope_owner_review",
         "phase3_release_control_cleanup_plan",
         "self_hosted_runner_status",
     }
@@ -1692,6 +1694,11 @@ def build_snapshot(
         paths.structural_scope_contamination,
         blockers,
     )
+    structural_scope_owner_review = _load_json(
+        repo_root,
+        paths.structural_scope_owner_review,
+        blockers,
+    )
     phase3_release_control_cleanup_plan = _load_json(
         repo_root,
         paths.phase3_release_control_cleanup_plan,
@@ -1778,6 +1785,7 @@ def build_snapshot(
         "external_benchmark_submission_readiness": external_benchmark_readiness,
         "external_benchmark_submission_updates": external_benchmark_updates,
         "structural_scope_contamination_audit": structural_scope,
+        "structural_scope_owner_review_packet": structural_scope_owner_review,
     }
     schema_artifacts = {
         **metadata_artifacts,
@@ -2631,6 +2639,51 @@ def build_snapshot(
                 ],
                 "blockers": _as_list(structural_scope.get("blockers")),
                 "ready": structural_scope_ready,
+            },
+            "structural_scope_owner_review": {
+                "contract_pass": bool(structural_scope_owner_review.get("contract_pass")),
+                "evidence_closure_pass": bool(
+                    structural_scope_owner_review.get("evidence_closure_pass")
+                ),
+                "status": str(structural_scope_owner_review.get("status", "")),
+                "owner_review_required": bool(
+                    structural_scope_owner_review.get("owner_review_required")
+                ),
+                "owner_decision_pending_count": _as_int(
+                    structural_scope_owner_review.get("owner_decision_pending_count"),
+                    0,
+                ),
+                "quarantined_path_count": _as_int(
+                    structural_scope_owner_review.get("quarantined_path_count"),
+                    0,
+                ),
+                "release_surface_excluded_path_count": _as_int(
+                    structural_scope_owner_review.get("release_surface_excluded_path_count"),
+                    0,
+                ),
+                "unquarantined_non_structural_path_count": _as_int(
+                    structural_scope_owner_review.get("unquarantined_non_structural_path_count"),
+                    0,
+                ),
+                "path_area_counts": _as_dict(
+                    structural_scope_owner_review.get("path_area_counts")
+                ),
+                "family_counts": _as_dict(structural_scope_owner_review.get("family_counts")),
+                "review_group_count": _as_int(
+                    structural_scope_owner_review.get("review_group_count"),
+                    0,
+                ),
+                "allowed_owner_decisions": [
+                    str(item)
+                    for item in _as_list(
+                        structural_scope_owner_review.get("allowed_owner_decisions")
+                    )
+                ],
+                "blockers": _as_list(structural_scope_owner_review.get("blockers")),
+                "ready": bool(
+                    structural_scope_owner_review.get("contract_pass")
+                    and not _as_list(structural_scope_owner_review.get("blockers"))
+                ),
             },
             "g1": {
                 "contract_pass": bool(g1.get("contract_pass")),

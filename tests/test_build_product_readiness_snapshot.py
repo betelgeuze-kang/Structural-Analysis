@@ -174,6 +174,7 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         external_benchmark_submission_readiness=Path("external_benchmark_submission_readiness.json"),
         external_benchmark_submission_updates=Path("external_benchmark_submission_updates.json"),
         structural_scope_contamination=Path("structural_scope_contamination_audit.json"),
+        structural_scope_owner_review=Path("structural_scope_owner_review_packet.json"),
         phase3_release_control_cleanup_plan=Path("phase3_release_control_cleanup_plan.json"),
         self_hosted_runner_status=Path("github_actions_self_hosted_runner_status.json"),
         package_json=Path("package.json"),
@@ -309,6 +310,35 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "git_state_counts": {},
         "blockers": [],
         "non_structural_rows": [],
+    })
+    _write_json(tmp_path / "structural_scope_owner_review_packet.json", {
+        "schema_version": "structural-scope-owner-review-packet.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "structural_scope_contamination_audit.json": "sha256:abc123",
+            "structural_scope_quarantine_manifest.json": "sha256:def456",
+        },
+        "reused_evidence": False,
+        "reuse_policy": "structural_scope_owner_review_packet_from_quarantine_audit",
+        "status": "complete",
+        "contract_pass": True,
+        "evidence_closure_pass": True,
+        "owner_review_required": False,
+        "owner_decision_pending_count": 0,
+        "quarantined_path_count": 0,
+        "release_surface_excluded_path_count": 0,
+        "unquarantined_non_structural_path_count": 0,
+        "path_area_counts": {},
+        "family_counts": {},
+        "review_group_count": 0,
+        "allowed_owner_decisions": [
+            "delete_from_structural_repository",
+            "extract_to_molecular_or_science_repository",
+            "retain_quarantined_with_signed_owner_exception",
+        ],
+        "blockers": [],
     })
     _write_json(tmp_path / "phase1_core_api_contract_summary.json", {
         "schema_version": "phase1-core-api-contract-artifacts.v1",
@@ -4295,6 +4325,35 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
             },
         ],
     })
+    _write_json(tmp_path / "structural_scope_owner_review_packet.json", {
+        "schema_version": "structural-scope-owner-review-packet.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": source_commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "structural_scope_contamination_audit.json": "sha256:abc123",
+            "structural_scope_quarantine_manifest.json": "sha256:def456",
+        },
+        "reused_evidence": False,
+        "reuse_policy": "structural_scope_owner_review_packet_from_quarantine_audit",
+        "status": "ready_for_owner_review",
+        "contract_pass": True,
+        "evidence_closure_pass": False,
+        "owner_review_required": True,
+        "owner_decision_pending_count": 2,
+        "quarantined_path_count": 2,
+        "release_surface_excluded_path_count": 2,
+        "unquarantined_non_structural_path_count": 0,
+        "path_area_counts": {"productization_evidence": 1, "script": 1},
+        "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
+        "review_group_count": 2,
+        "allowed_owner_decisions": [
+            "delete_from_structural_repository",
+            "extract_to_molecular_or_science_repository",
+            "retain_quarantined_with_signed_owner_exception",
+        ],
+        "blockers": [],
+    })
     _commit_all(tmp_path, "receipt")
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -4316,6 +4375,12 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
         "structural_scope_not_clean"
         not in payload["components"]["assisted_service_pilot"]["blockers"]
     )
+    owner_review = payload["components"]["structural_scope_owner_review"]
+    assert owner_review["ready"] is True
+    assert owner_review["evidence_closure_pass"] is False
+    assert owner_review["owner_decision_pending_count"] == 2
+    assert owner_review["release_surface_excluded_path_count"] == 2
+    assert owner_review["unquarantined_non_structural_path_count"] == 0
 
 
 def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Path) -> None:
