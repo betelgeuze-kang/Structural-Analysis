@@ -67,19 +67,81 @@
       "python3 scripts/build_developer_preview_rc_status.py --check"
     ]
   },
+  "case_readiness_ledger": {
+    "case_ready_count": 0,
+    "case_rows": [
+      {
+        "authoritative_source_pass": true,
+        "blockers": [
+          "license_review_pending",
+          "reference_outputs_missing",
+          "normalization_not_implemented",
+          "opensees_medium_scorecard_execution_missing",
+          "medium_model_pass_or_review_missing"
+        ],
+        "case_id": "SCBF16B",
+        "family_id": "sac_scbf16b",
+        "license_approval_pass": false,
+        "normalization_pass": false,
+        "parser_contract_pass": true,
+        "pass_or_approved_review": false,
+        "ready_for_medium_scorecard_credit": false,
+        "reference_outputs_pass": false,
+        "scorecard_execution_pass": false,
+        "scorecard_receipt_path": null,
+        "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+        "source_sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80"
+      },
+      {
+        "authoritative_source_pass": true,
+        "blockers": [
+          "license_review_pending",
+          "reference_outputs_missing",
+          "normalization_not_implemented",
+          "opensees_medium_scorecard_execution_missing",
+          "medium_model_pass_or_review_missing"
+        ],
+        "case_id": "SCBF16B_shell_beam_mix",
+        "family_id": "sac_scbf16b_shell_beam_mix",
+        "license_approval_pass": false,
+        "normalization_pass": false,
+        "parser_contract_pass": true,
+        "pass_or_approved_review": false,
+        "ready_for_medium_scorecard_credit": false,
+        "reference_outputs_pass": false,
+        "scorecard_execution_pass": false,
+        "scorecard_receipt_path": null,
+        "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+        "source_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc"
+      }
+    ],
+    "claim_boundary": "This ledger is case-level readiness accounting. It does not create new source files, license approvals, reference outputs, normalization receipts, scorecard executions, or PASS/REVIEW decisions.",
+    "local_candidate_case_count": 2,
+    "missing_candidate_case_count": 3,
+    "required_case_count": 5,
+    "schema_version": "phase3-medium-model-case-readiness-ledger.v1",
+    "selection_gate": {
+      "blockers": [
+        "medium_structural_models_current_below_required:2/5"
+      ],
+      "contract_pass": false,
+      "current_candidate_case_count": 2,
+      "required_candidate_case_count": 5
+    }
+  },
   "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command, but it does not prove product license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": false,
   "current_medium_model_scorecard_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-07-01T06:23:00.746811+00:00",
+  "generated_at": "2026-07-01T08:17:01.801658+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
     "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:c3aa9b261fc2f6d90b71898399db38fc0c31650a29dae5645b2bacb2f1379975",
-    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:1b65a825d70b7750b3ebdae6ebf4f98c63496546742dc1483fec488ec9e0270d",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:f4cc4277e3e84797213de2edfc8505f9c073ebd834f5b02114a0d6f017314a86",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
     "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
@@ -174,6 +236,7 @@
     }
   ],
   "next_actions": [
+    "select_additional_medium_model_cases",
     "complete_product_legal_license_review",
     "attach_medium_reference_outputs",
     "record_medium_canonical_normalization",
@@ -181,6 +244,26 @@
     "attach_medium_pass_or_approved_review_decisions"
   ],
   "operator_next_actions": [
+    {
+      "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+      "clears_blockers": [
+        "medium_structural_models_current_below_required:2/5"
+      ],
+      "current_candidate_case_count": 2,
+      "evidence_artifacts": [
+        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        "operator-attached source/license/reference/normalization rows for each added case"
+      ],
+      "id": "select_additional_medium_model_cases",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 3,
+      "required_candidate_case_count": 5,
+      "validation_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
     {
       "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
       "clears_blockers": [
@@ -265,6 +348,26 @@
   "pass_or_approved_review_count": 0,
   "phase3_closure_claim": false,
   "recommended_next_actions": [
+    {
+      "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+      "clears_blockers": [
+        "medium_structural_models_current_below_required:2/5"
+      ],
+      "current_candidate_case_count": 2,
+      "evidence_artifacts": [
+        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        "operator-attached source/license/reference/normalization rows for each added case"
+      ],
+      "id": "select_additional_medium_model_cases",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 3,
+      "required_candidate_case_count": 5,
+      "validation_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
     {
       "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
       "clears_blockers": [
@@ -474,7 +577,7 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "0d8611d00aa52041fc80c23565ff455a5dd9e16c",
+  "source_commit_sha": "3297fd8d5fa62e9547d6ec31cb9e3f73e1213508",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
   "source_url_verified": true,

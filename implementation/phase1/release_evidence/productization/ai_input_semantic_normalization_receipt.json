@@ -1,12 +1,12 @@
 {
   "schema_version": "ai-input-semantic-normalization-receipt.v1",
-  "generated_at": "2026-06-30T18:00:40.631272+00:00",
+  "generated_at": "2026-07-01T08:18:10.245956+00:00",
   "status": "ready",
   "input_semantic_normalization_ready": true,
   "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
   "source_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
   "source_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-  "roundtrip_sha256": "aee000b6631d3936227df97449250b1d8162c2a21d8680d3e6159790ac979202",
+  "roundtrip_sha256": "f2175dcb82f1e99ec7441756b0c65896e3759161134b42e7a1b78ba2e3d98ca2",
   "entity_families": [
     {
       "family": "nodes",
