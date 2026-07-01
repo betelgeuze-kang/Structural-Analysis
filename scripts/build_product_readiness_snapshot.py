@@ -499,6 +499,12 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         "phase1_core_api_contract": {
             "scripts/build_phase1_core_api_contract_artifacts.py",
         },
+        "structural_scope_contamination": {
+            "scripts/check_structural_scope_contamination.py",
+        },
+        "structural_scope_contamination_audit": {
+            "scripts/check_structural_scope_contamination.py",
+        },
         "pm_release_gate_report": {
             "scripts/check_github_development_sync_preflight.py",
             "scripts/report_pm_release_gate.py",
