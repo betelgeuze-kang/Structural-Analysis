@@ -22,6 +22,14 @@ assert spec.loader is not None
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
+PHASE2_COMPONENT_IDS = {
+    "casf_pdbbind_pose_success_harness",
+    "symmetry_aware_ligand_rmsd",
+    "posebusters_style_pose_validity",
+    "vina_gnina_comparison_adapter",
+    "dud_e_or_lit_pcba_enrichment",
+}
+
 
 def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     artifacts = module.build_public_benchmark_artifacts(repo_root=REPO_ROOT)
@@ -207,6 +215,51 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "external receipts before Tier beta can be claimed."
         ),
     }
+    assert {row["component_id"] for row in source["phase2_requirements"]} == (
+        PHASE2_COMPONENT_IDS
+    )
+    assert source["phase2_requirement_summary"] == {
+        "required_component_count": 5,
+        "ready_component_count": 0,
+        "blocked_component_count": 5,
+        "materialized_component_count": 5,
+        "operator_evidence_required_count": 5,
+        "missing_row_input_count": 4,
+        "missing_row_inputs": [
+            "enrichment_rows",
+            "pose_rows",
+            "subset_rows",
+            "vina_gnina_rows",
+        ],
+        "phase2_ready": False,
+        "blocked_component_ids": [
+            "casf_pdbbind_pose_success_harness",
+            "symmetry_aware_ligand_rmsd",
+            "posebusters_style_pose_validity",
+            "vina_gnina_comparison_adapter",
+            "dud_e_or_lit_pcba_enrichment",
+        ],
+    }
+    phase2_requirements = {
+        row["component_id"]: row for row in source["phase2_requirements"]
+    }
+    assert phase2_requirements["casf_pdbbind_pose_success_harness"][
+        "required_row_inputs"
+    ] == ["subset_rows", "pose_rows"]
+    assert phase2_requirements["casf_pdbbind_pose_success_harness"][
+        "related_operator_slot_ids"
+    ] == ["casf_pdbbind_subset_intake", "pose_coordinate_intake"]
+    assert phase2_requirements["vina_gnina_comparison_adapter"][
+        "required_minimum_count"
+    ] == 1
+    assert phase2_requirements["dud_e_or_lit_pcba_enrichment"][
+        "blockers"
+    ] == [
+        "dud_e_lit_pcba_enrichment_targets_missing",
+        "dud_e_lit_pcba_scored_molecules_missing",
+        "dud_e_lit_pcba_active_decoy_labels_missing",
+        "real_enrichment_target_count_below_required:0<1",
+    ]
     pose_blocked_slice = {
         row["slice_id"]: row for row in source["blocked_slices"]
     }["real_pose_coordinate_materialization"]
@@ -1125,6 +1178,18 @@ def test_public_benchmark_source_of_truth_ready_is_derived_from_gate() -> None:
     assert source["operator_handoff_queue_count"] == 0
     assert source["materialization_progress"]["blocked_slice_count"] == 0
     assert source["materialization_progress"]["next_unblock_slice_id"] == ""
+    assert source["phase2_requirement_summary"] == {
+        "required_component_count": 5,
+        "ready_component_count": 5,
+        "blocked_component_count": 0,
+        "materialized_component_count": 5,
+        "operator_evidence_required_count": 0,
+        "missing_row_input_count": 0,
+        "missing_row_inputs": [],
+        "phase2_ready": True,
+        "blocked_component_ids": [],
+    }
+    assert all(row["ready"] for row in source["phase2_requirements"])
     assert source["subset_manifest_validation"]["public_benchmark_ready"] is True
     assert source["subset_manifest_summary"]["source_material_coverage"][
         "source_file_checksum_case_count"

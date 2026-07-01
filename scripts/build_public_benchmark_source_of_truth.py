@@ -138,6 +138,10 @@ def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
 def _as_int(value: Any, default: int = 0) -> int:
     try:
         return int(value)
@@ -1002,6 +1006,199 @@ PHASE2_SLICE_NEXT_ACTION = {
     )
 }
 
+PHASE2_REQUIREMENT_ROWS = (
+    {
+        "component_id": "casf_pdbbind_pose_success_harness",
+        "requirement": "CASF/PDBBind pose-success harness",
+        "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+        "artifact_role": "pose_success_harness",
+        "ready_field": "pose_success_harness_ready",
+        "count_field": "real_benchmark_case_count",
+        "required_row_inputs": ["subset_rows", "pose_rows"],
+        "related_operator_slot_ids": [
+            "casf_pdbbind_subset_intake",
+            "pose_coordinate_intake",
+        ],
+    },
+    {
+        "component_id": "symmetry_aware_ligand_rmsd",
+        "requirement": "Symmetry-aware ligand RMSD scorecard",
+        "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+        "artifact_role": "rmsd_scorecard",
+        "ready_field": "scorecard_ready",
+        "count_field": "real_benchmark_case_count",
+        "required_row_inputs": ["pose_rows"],
+        "related_operator_slot_ids": ["pose_coordinate_intake"],
+    },
+    {
+        "component_id": "posebusters_style_pose_validity",
+        "requirement": "PoseBusters-style pose validity packet",
+        "criterion_id": "posebusters_style_pose_validity_ready",
+        "artifact_role": "pose_validity_packet",
+        "ready_field": "posebusters_validity_ready",
+        "count_field": "real_benchmark_case_count",
+        "required_row_inputs": ["pose_rows"],
+        "related_operator_slot_ids": ["pose_coordinate_intake"],
+    },
+    {
+        "component_id": "vina_gnina_comparison_adapter",
+        "requirement": "Vina/GNINA comparison adapter",
+        "criterion_id": "vina_gnina_comparison_ready",
+        "artifact_role": "vina_gnina_comparison_adapter",
+        "ready_field": "public_benchmark_engine_comparison_ready",
+        "count_field": "real_comparison_case_count",
+        "required_minimum_count": 1,
+        "required_row_inputs": ["vina_gnina_rows"],
+        "related_operator_slot_ids": ["vina_gnina_comparison_intake"],
+    },
+    {
+        "component_id": "dud_e_or_lit_pcba_enrichment",
+        "requirement": "DUD-E or LIT-PCBA enrichment scorecard",
+        "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+        "artifact_role": "enrichment_scorecard",
+        "ready_field": "public_benchmark_enrichment_ready",
+        "count_field": "real_enrichment_target_count",
+        "required_minimum_count": 1,
+        "required_row_inputs": ["enrichment_rows"],
+        "related_operator_slot_ids": ["dud_e_lit_pcba_enrichment_intake"],
+    },
+)
+
+
+def _ready_field_value(payload: dict[str, Any], ready_field: str) -> bool:
+    if ready_field in payload:
+        return bool(payload.get(ready_field))
+    if payload.get("contract_pass") is False:
+        return False
+    return str(payload.get("status") or "") == "ready"
+
+
+def _phase2_requirement_rows(
+    *,
+    target_subset_case_count: int,
+    pose_validity_packet: dict[str, Any],
+    rmsd_scorecard: dict[str, Any],
+    pose_success_harness: dict[str, Any],
+    enrichment_scorecard: dict[str, Any],
+    vina_gnina_comparison_adapter: dict[str, Any],
+) -> list[dict[str, Any]]:
+    payload_by_role = {
+        "pose_validity_packet": pose_validity_packet,
+        "rmsd_scorecard": rmsd_scorecard,
+        "pose_success_harness": pose_success_harness,
+        "enrichment_scorecard": enrichment_scorecard,
+        "vina_gnina_comparison_adapter": vina_gnina_comparison_adapter,
+    }
+    rows: list[dict[str, Any]] = []
+    for requirement in PHASE2_REQUIREMENT_ROWS:
+        role = str(requirement["artifact_role"])
+        payload = payload_by_role.get(role, {})
+        count_field = str(requirement["count_field"])
+        current_count = _as_int(payload.get(count_field))
+        if role == "pose_validity_packet":
+            current_count = _pose_packet_real_case_count(payload)
+        required_minimum_count = _as_int(
+            requirement.get("required_minimum_count"),
+            default=target_subset_case_count,
+        )
+        source_artifact_contract_pass = payload.get("contract_pass") is True
+        source_artifact_ready = _ready_field_value(
+            payload,
+            str(requirement["ready_field"]),
+        )
+        if role == "pose_validity_packet":
+            source_artifact_ready = bool(
+                source_artifact_contract_pass or _pose_packet_validation_ready(payload)
+            )
+        blockers = [
+            str(blocker) for blocker in _as_list(payload.get("blockers")) if str(blocker)
+        ]
+        if current_count < required_minimum_count:
+            blockers.append(
+                f"{count_field}_below_required:"
+                f"{current_count}<{required_minimum_count}"
+            )
+        blockers = list(dict.fromkeys(blockers))
+        ready = bool(
+            source_artifact_ready
+            and source_artifact_contract_pass
+            and current_count >= required_minimum_count
+            and not blockers
+        )
+        missing_row_inputs = (
+            [] if ready else [str(row) for row in requirement["required_row_inputs"]]
+        )
+        status = str(payload.get("status") or "operator_evidence_required")
+        if blockers and any(
+            blocker.startswith(f"{count_field}_below_required:")
+            for blocker in blockers
+        ):
+            status = "phase2_count_incomplete"
+        elif blockers:
+            status = "operator_evidence_required"
+        rows.append(
+            {
+                "component_id": str(requirement["component_id"]),
+                "requirement": str(requirement["requirement"]),
+                "criterion_id": str(requirement["criterion_id"]),
+                "artifact_role": role,
+                "status": status,
+                "contract_pass": ready,
+                "source_artifact_contract_pass": source_artifact_contract_pass,
+                "source_artifact_ready": source_artifact_ready,
+                "ready_field": str(requirement["ready_field"]),
+                "ready": ready,
+                "materialized": True,
+                "operator_evidence_required": not ready,
+                "count_field": count_field,
+                "current_count": current_count,
+                "required_minimum_count": required_minimum_count,
+                "required_row_inputs": [
+                    str(row) for row in requirement["required_row_inputs"]
+                ],
+                "missing_row_inputs": missing_row_inputs,
+                "expected_rows_mode": "operator_attached_public_benchmark_rows",
+                "related_operator_slot_ids": [
+                    str(row) for row in requirement["related_operator_slot_ids"]
+                ],
+                "blocker_count": len(blockers),
+                "blockers": blockers,
+            }
+        )
+    return rows
+
+
+def _phase2_requirement_summary(
+    requirement_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    blocked_component_ids = [
+        str(row["component_id"]) for row in requirement_rows if not row["ready"]
+    ]
+    missing_row_inputs = sorted(
+        {
+            str(input_id)
+            for row in requirement_rows
+            for input_id in _as_list(row.get("missing_row_inputs"))
+        }
+    )
+    ready_component_count = sum(1 for row in requirement_rows if row["ready"])
+    return {
+        "required_component_count": len(requirement_rows),
+        "ready_component_count": ready_component_count,
+        "blocked_component_count": len(blocked_component_ids),
+        "materialized_component_count": sum(
+            1 for row in requirement_rows if row.get("materialized")
+        ),
+        "operator_evidence_required_count": sum(
+            1 for row in requirement_rows if row.get("operator_evidence_required")
+        ),
+        "missing_row_input_count": len(missing_row_inputs),
+        "missing_row_inputs": missing_row_inputs,
+        "phase2_ready": bool(requirement_rows)
+        and ready_component_count == len(requirement_rows),
+        "blocked_component_ids": blocked_component_ids,
+    }
+
 
 def _operator_context_by_slice(
     *,
@@ -1655,6 +1852,15 @@ def build_source_of_truth(
         operator_evidence_gap_register=operator_evidence_gap_register,
         operator_blocker_detail_register=operator_blocker_detail_register,
     )
+    phase2_requirements = _phase2_requirement_rows(
+        target_subset_case_count=target_subset_case_count,
+        pose_validity_packet=pose_validity_packet,
+        rmsd_scorecard=rmsd_scorecard,
+        pose_success_harness=pose_success_harness,
+        enrichment_scorecard=enrichment_scorecard,
+        vina_gnina_comparison_adapter=vina_gnina_comparison_adapter,
+    )
+    phase2_requirement_summary = _phase2_requirement_summary(phase2_requirements)
     return {
         "schema_version": SCHEMA_VERSION,
         **metadata,
@@ -1704,6 +1910,8 @@ def build_source_of_truth(
         "completed_slices": slice_progress["completed_slices"],
         "blocked_slices": slice_progress["blocked_slices"],
         "materialization_progress": slice_progress["materialization_progress"],
+        "phase2_requirements": phase2_requirements,
+        "phase2_requirement_summary": phase2_requirement_summary,
         "operator_handoff_summary": operator_handoff_summary,
         "operator_handoff_queue_count": len(operator_handoff_queue),
         "first_operator_handoff": (
