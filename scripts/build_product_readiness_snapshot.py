@@ -346,6 +346,14 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         return True
     if path.startswith("docs/ai/dispatch/") and path.endswith(".md"):
         return True
+    if (
+        path.startswith(
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions"
+        )
+        and path.endswith(".csv")
+    ):
+        return True
     if path.startswith("implementation/phase1/release_evidence/productization/"):
         return path.endswith((".json", ".md"))
     if path.startswith("implementation/phase1/release_evidence/surface/") and path.endswith(".json"):
