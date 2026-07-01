@@ -263,6 +263,34 @@ def test_gpcr_hard_decoy_suite_blocks_placeholder_source_receipt(
     ]
 
 
+def test_gpcr_hard_decoy_suite_blocks_placeholder_molecule_ids(
+    tmp_path: Path,
+) -> None:
+    intake = _passing_intake(tmp_path)
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    drd2 = targets[0]
+    assert isinstance(drd2, dict)
+    rows = drd2["hard_decoy_rows"]
+    assert isinstance(rows, list)
+    first_row = rows[0]
+    assert isinstance(first_row, dict)
+    first_row["molecule_id"] = "fixture_positive_1"
+
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["first_blocked_target"] == "DRD2"
+    assert "hard_decoy_row_actuality_required" in report["root_cause_tags"]
+    assert "DRD2:fixture_positive_1:molecule_id_placeholder" in report["blockers"]
+    assert "raw_hard_decoy_rows_actual_closure" in report["phase3_exit_gate"][
+        "failed_criteria"
+    ]
+
+
 def test_gpcr_hard_decoy_suite_blocks_local_source_url(
     tmp_path: Path,
 ) -> None:

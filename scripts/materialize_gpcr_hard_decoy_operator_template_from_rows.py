@@ -16,6 +16,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from materialize_gpcr_hard_decoy_suite_report import (  # noqa: E402
+    PLACEHOLDER_SOURCE_TEXT_MARKERS,
     RAW_RANKING_ROW_FIELDS,
     REQUIRED_TARGETS,
 )
@@ -75,6 +76,11 @@ def _score_direction(value: Any) -> str:
     if token in {"lower", "lower_is_better", "ascending"}:
         return "lower_is_better"
     return token
+
+
+def _contains_marker(value: str, markers: tuple[str, ...]) -> bool:
+    lowered = value.lower()
+    return any(marker in lowered for marker in markers)
 
 
 def _raw_rows_from_target(row: dict[str, Any]) -> list[dict[str, Any]]:
@@ -161,6 +167,8 @@ def _normalize_flat_row(raw_row: dict[str, Any], *, row_index: int) -> tuple[str
     molecule_id = str(raw_row.get("molecule_id") or "").strip()
     if not molecule_id:
         raise ValueError(f"row_{row_index}:molecule_id_required")
+    if _contains_marker(molecule_id, PLACEHOLDER_SOURCE_TEXT_MARKERS):
+        raise ValueError(f"row_{row_index}:{molecule_id}:molecule_id_placeholder")
     score = _score_value(raw_row.get("score"))
     if score is None:
         raise ValueError(f"row_{row_index}:{molecule_id}:score_invalid")

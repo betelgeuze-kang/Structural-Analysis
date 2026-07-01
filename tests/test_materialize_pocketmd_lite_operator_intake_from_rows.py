@@ -413,6 +413,32 @@ def test_materializes_operator_intake_from_ndjson_rows(tmp_path: Path) -> None:
     assert report["phase4_exit_gate"]["failed_criteria"] == []
 
 
+def test_blocks_placeholder_row_identifiers(tmp_path: Path) -> None:
+    rows = tmp_path / "pocketmd_lite_rows.jsonl"
+    row = _row(
+        case_id="case_a",
+        candidate_id="pose_1",
+        top_k_rank=1,
+        local_min_survived=True,
+        contact_rate=0.9,
+        h_bond_rate=0.8,
+        clash_before=4,
+        clash_after=1,
+    )
+    row["source_family"] = "fixture benchmark source"
+    _write_jsonl(rows, [row])
+
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "row_1:case_a:source_family_placeholder"
+    else:
+        raise AssertionError("expected placeholder source family error")
+
+
 def test_blocks_invalid_checksum_and_non_topk_rank(tmp_path: Path) -> None:
     rows = tmp_path / "pocketmd_lite_rows.json"
     bad_row = _row(

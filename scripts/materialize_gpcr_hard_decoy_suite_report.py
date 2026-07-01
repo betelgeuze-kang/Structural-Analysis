@@ -63,6 +63,7 @@ RAW_RANKING_ROW_FIELDS = ("molecule_id", "score", "is_positive", "is_decoy")
 RANKING_PR_AUC_CI_CONFIDENCE_LEVEL = 0.95
 RANKING_PR_AUC_BOOTSTRAP_REPLICATES = 512
 PLACEHOLDER_SOURCE_TEXT_MARKERS = (
+    "<operator",
     "fixture",
     "synthetic",
     "mock",
@@ -522,6 +523,9 @@ def _computed_hard_decoy_metrics(
         if "molecule_id" in raw_row and not molecule_id:
             blockers.append(f"{target_id}:{row_key}:molecule_id_blank")
             root_cause_tags.append("operator_values_required")
+        elif molecule_id and _contains_marker(molecule_id, PLACEHOLDER_SOURCE_TEXT_MARKERS):
+            blockers.append(f"{target_id}:{row_key}:molecule_id_placeholder")
+            root_cause_tags.append("hard_decoy_row_actuality_required")
         if "score" in raw_row and score is None:
             blockers.append(f"{target_id}:{row_key}:score_invalid")
             root_cause_tags.append("operator_values_required")

@@ -256,6 +256,14 @@ def _normalize_candidate_row(row: dict[str, Any], index: int) -> dict[str, Any]:
         if field in row and not value:
             blockers.append(f"{row_key}:{field}_blank")
             root_cause_tags.append("operator_values_required")
+        elif (
+            field in row
+            and field in {"case_id", "source_family", "candidate_id"}
+            and value
+            and _contains_marker(value, PLACEHOLDER_SOURCE_TEXT_MARKERS)
+        ):
+            blockers.append(f"{row_key}:{field}_placeholder")
+            root_cause_tags.append("operator_values_required")
     if (
         "source_checksum" in row
         and source_checksum

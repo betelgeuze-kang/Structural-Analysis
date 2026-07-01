@@ -259,6 +259,13 @@ def _normalize_row(
     case_id = _required_string(raw_row, field="case_id", row_index=row_index)
     source_family = _required_string(raw_row, field="source_family", row_index=row_index)
     candidate_id = _required_string(raw_row, field="candidate_id", row_index=row_index)
+    for field_name, value in (
+        ("case_id", case_id),
+        ("source_family", source_family),
+        ("candidate_id", candidate_id),
+    ):
+        if _contains_marker(value, PLACEHOLDER_SOURCE_TEXT_MARKERS):
+            raise ValueError(f"row_{row_index}:{case_id}:{field_name}_placeholder")
     provenance_ref = _required_string(raw_row, field="provenance_ref", row_index=row_index)
     source_checksum = _required_string(raw_row, field="source_checksum", row_index=row_index)
     if not SOURCE_CHECKSUM_PATTERN.fullmatch(source_checksum):
