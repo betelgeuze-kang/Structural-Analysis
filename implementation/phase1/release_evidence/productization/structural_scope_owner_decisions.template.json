@@ -19,6 +19,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -45,6 +46,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -71,6 +73,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -97,6 +100,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -123,6 +127,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -149,6 +154,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -175,6 +181,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -201,6 +208,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -227,6 +235,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -253,6 +262,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -279,6 +289,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -305,6 +316,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -331,6 +343,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -357,6 +370,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -383,6 +397,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -409,6 +424,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -435,6 +451,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -461,6 +478,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -487,6 +505,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -513,6 +532,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -539,6 +559,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -566,6 +587,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -592,6 +614,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -618,6 +641,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -644,6 +668,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -670,6 +695,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -696,6 +722,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -722,6 +749,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -748,6 +776,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -774,6 +803,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -800,6 +830,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -826,6 +857,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -854,6 +886,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -882,6 +915,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -910,6 +944,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -936,6 +971,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -962,6 +998,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -988,6 +1025,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1014,6 +1052,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1040,6 +1079,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1066,6 +1106,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1092,6 +1133,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1118,6 +1160,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1144,6 +1187,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1170,6 +1214,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1196,6 +1241,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1222,6 +1268,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1248,6 +1295,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1274,6 +1322,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1300,6 +1349,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1326,6 +1376,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1352,6 +1403,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1378,6 +1430,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1404,6 +1457,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1430,6 +1484,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1456,6 +1511,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1482,6 +1538,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1508,6 +1565,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1534,6 +1592,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1560,6 +1619,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1586,6 +1646,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1613,6 +1674,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1639,6 +1701,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1667,6 +1730,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1693,6 +1757,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1720,6 +1785,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1746,6 +1812,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1772,6 +1839,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1798,6 +1866,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1824,6 +1893,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1850,6 +1920,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1876,6 +1947,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -1902,6 +1974,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1928,6 +2001,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -1954,6 +2028,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -1980,6 +2055,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_dynamics"
       ],
@@ -2006,6 +2082,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -2032,6 +2109,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -2058,6 +2136,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -2084,6 +2163,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -2111,6 +2191,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -2137,6 +2218,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -2165,6 +2247,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_science_evidence"
       ],
@@ -2191,6 +2274,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -2218,6 +2302,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -2244,6 +2329,7 @@
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
       "evidence_reference": "",
+      "external_archive_reference": "",
       "families": [
         "molecular_docking"
       ],
@@ -2264,10 +2350,10 @@
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-01T19:00:38.976977+00:00",
+  "generated_at": "2026-07-01T20:26:37.120137+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:620342250c1cfa86e1a499f14595d51d274e5fe9d7e11ee32bd4ae5009527c04",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:a1142b7560e544ad3e26e20d2511b157d833ce08be2af5ba65f6b0e58dfadac9"
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:b747d8af08453e0a3602faf1c44c7903315062e89ba4cca8d21c23a13d3e81b7",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:f7448df7bcecedc9d5b4e9decefa56b7e0cb0778af167cf29853df70a834da0e"
   },
   "owner_decision_required_count": 86,
   "required_closure_evidence": [
@@ -2275,11 +2361,12 @@
     "decision_timestamp_utc",
     "per_path_decision",
     "evidence_reference",
+    "external_archive_reference_for_extract_decisions",
     "post_decision_structural_scope_audit"
   ],
   "reuse_policy": "structural_scope_owner_decision_template_from_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decisions.v1",
-  "source_commit_sha": "e40d7d69c8b61a75afb6f63eec1bfe80ca08ce76",
+  "source_commit_sha": "c6cd46627fa1b12aa6554eae39cc289b376fd8cb",
   "status": "pending_owner_decisions"
 }

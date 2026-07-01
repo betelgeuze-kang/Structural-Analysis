@@ -95,6 +95,7 @@ def _decision_row(path: str, decision: str, index: int) -> dict:
         "owner_role": "product_owner",
         "decision_timestamp_utc": "2026-07-02T00:00:00Z",
         "evidence_reference": f"owner-review://scope-cleanup/{index:03d}",
+        "external_archive_reference": f"archive://molecular-scope/{index:03d}",
     }
 
 
@@ -277,7 +278,8 @@ def test_application_plan_accepts_owner_decision_csv(tmp_path: Path) -> None:
                     "delete_from_structural_repository,"
                     "extract_to_molecular_or_science_repository,scope-owner,"
                     "product_owner,2026-07-02T00:00:00Z,"
-                    "owner-review://scope-cleanup/001"
+                    "owner-review://scope-cleanup/001,"
+                    "archive://molecular-scope/md3bead_soa"
                 ),
                 (
                     "row-2,"
@@ -289,7 +291,7 @@ def test_application_plan_accepts_owner_decision_csv(tmp_path: Path) -> None:
                     "extract_to_molecular_or_science_repository,"
                     "delete_from_structural_repository,scope-owner,product_owner,"
                     "2026-07-02T00:00:00Z,"
-                    "owner-review://scope-cleanup/002"
+                    "owner-review://scope-cleanup/002,"
                 ),
                 "",
             ]

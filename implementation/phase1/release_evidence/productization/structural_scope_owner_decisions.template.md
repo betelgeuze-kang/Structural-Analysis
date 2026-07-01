@@ -3,6 +3,7 @@
 - `status`: `pending_owner_decisions`
 - `contract_pass`: `True`
 - `decision_pending_count`: `86`
+- `external_archive_reference`: required when `owner_decision` is `extract_to_molecular_or_science_repository`
 
 | Row | Path | Recommended Decision |
 |---|---|---|

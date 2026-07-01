@@ -22,12 +22,12 @@
     "molecular_dynamics": 25,
     "molecular_science_evidence": 13
   },
-  "generated_at": "2026-07-01T19:51:22.844011+00:00",
+  "generated_at": "2026-07-01T20:26:37.114237+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:a5366e9f82f020d6d276ba335af7c297815fafd658e00404d25d88103735c947",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:3503fc1fc7a411b25c20db770068491b2ba716289e343fe6cea5aa3a87f431d9",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:a1142b7560e544ad3e26e20d2511b157d833ce08be2af5ba65f6b0e58dfadac9"
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:f7448df7bcecedc9d5b4e9decefa56b7e0cb0778af167cf29853df70a834da0e"
   },
   "manifest_absent_path_count": 0,
   "owner_decision_pending_count": 86,
@@ -73,6 +73,7 @@
     "decision_timestamp_utc",
     "per_path_decision",
     "evidence_reference",
+    "external_archive_reference_for_extract_decisions",
     "post_decision_structural_scope_audit"
   ],
   "reuse_policy": "structural_scope_owner_review_packet_from_quarantine_audit",
@@ -282,6 +283,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -301,6 +303,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -328,6 +331,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -347,6 +351,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -374,6 +379,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -393,6 +399,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -420,6 +427,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -439,6 +447,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -466,6 +475,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -485,6 +495,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -512,6 +523,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -531,6 +543,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -558,6 +571,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -577,6 +591,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -604,6 +619,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -623,6 +639,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -650,6 +667,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -669,6 +687,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -696,6 +715,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -715,6 +735,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -742,6 +763,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -761,6 +783,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -788,6 +811,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -807,6 +831,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -834,6 +859,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -853,6 +879,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -880,6 +907,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -899,6 +927,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -926,6 +955,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -945,6 +975,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -972,6 +1003,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -991,6 +1023,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1018,6 +1051,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1037,6 +1071,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1064,6 +1099,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1083,6 +1119,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1110,6 +1147,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1129,6 +1167,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1156,6 +1195,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1175,6 +1215,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1202,6 +1243,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1222,6 +1264,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1249,6 +1292,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1268,6 +1312,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1295,6 +1340,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1314,6 +1360,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1341,6 +1388,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1360,6 +1408,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1387,6 +1436,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1406,6 +1456,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1433,6 +1484,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1452,6 +1504,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1479,6 +1532,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1498,6 +1552,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1525,6 +1580,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1544,6 +1600,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1571,6 +1628,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1590,6 +1648,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1617,6 +1676,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1636,6 +1696,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1663,6 +1724,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1682,6 +1744,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1709,6 +1772,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1730,6 +1794,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1757,6 +1822,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1778,6 +1844,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1805,6 +1872,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1826,6 +1894,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1853,6 +1922,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1872,6 +1942,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1899,6 +1970,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1918,6 +1990,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1945,6 +2018,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1964,6 +2038,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1991,6 +2066,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2010,6 +2086,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2037,6 +2114,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2056,6 +2134,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2083,6 +2162,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2102,6 +2182,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2129,6 +2210,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2148,6 +2230,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2175,6 +2258,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2194,6 +2278,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2221,6 +2306,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2240,6 +2326,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2267,6 +2354,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2286,6 +2374,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2313,6 +2402,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2332,6 +2422,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2359,6 +2450,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2378,6 +2470,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2405,6 +2498,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2424,6 +2518,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2451,6 +2546,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2470,6 +2566,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2497,6 +2594,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2516,6 +2614,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2543,6 +2642,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2562,6 +2662,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2589,6 +2690,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2608,6 +2710,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2635,6 +2738,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2654,6 +2758,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2681,6 +2786,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2700,6 +2806,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2727,6 +2834,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2746,6 +2854,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2773,6 +2882,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2792,6 +2902,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2819,6 +2930,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2838,6 +2950,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2865,6 +2978,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2884,6 +2998,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2911,6 +3026,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2930,6 +3046,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2957,6 +3074,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2976,6 +3094,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3003,6 +3122,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3022,6 +3142,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3049,6 +3170,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3069,6 +3191,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3096,6 +3219,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3115,6 +3239,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3142,6 +3267,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3163,6 +3289,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3190,6 +3317,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3209,6 +3337,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3236,6 +3365,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3256,6 +3386,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3283,6 +3414,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3302,6 +3434,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3329,6 +3462,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3348,6 +3482,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3375,6 +3510,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3394,6 +3530,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3421,6 +3558,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3440,6 +3578,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3467,6 +3606,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3486,6 +3626,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3513,6 +3654,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3532,6 +3674,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3559,6 +3702,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3578,6 +3722,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3605,6 +3750,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3624,6 +3770,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3651,6 +3798,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3670,6 +3818,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3697,6 +3846,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3716,6 +3866,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3743,6 +3894,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3762,6 +3914,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3789,6 +3942,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3808,6 +3962,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3835,6 +3990,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3854,6 +4010,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3881,6 +4038,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3900,6 +4058,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3927,6 +4086,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3947,6 +4107,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3974,6 +4135,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3993,6 +4155,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4020,6 +4183,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4041,6 +4205,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4068,6 +4233,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4087,6 +4253,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4114,6 +4281,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4134,6 +4302,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4161,6 +4330,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4180,6 +4350,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4207,6 +4378,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4226,6 +4398,7 @@
         "decision_timestamp_utc",
         "per_path_decision",
         "evidence_reference",
+        "external_archive_reference_for_extract_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4244,7 +4417,7 @@
     }
   ],
   "schema_version": "structural-scope-owner-review-packet.v1",
-  "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
+  "source_commit_sha": "c6cd46627fa1b12aa6554eae39cc289b376fd8cb",
   "status": "ready_for_owner_review",
   "summary_line": "Structural scope owner review: READY_FOR_OWNER_REVIEW | pending=86 | cleanup_pending=0 | excluded=86/86 | unquarantined=0",
   "unquarantined_non_structural_path_count": 0,

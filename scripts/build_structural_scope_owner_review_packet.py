@@ -42,6 +42,7 @@ REQUIRED_CLOSURE_EVIDENCE = (
     "decision_timestamp_utc",
     "per_path_decision",
     "evidence_reference",
+    "external_archive_reference_for_extract_decisions",
     "post_decision_structural_scope_audit",
 )
 OWNER_DECISION_COLUMNS = (
@@ -58,6 +59,7 @@ OWNER_DECISION_COLUMNS = (
     "owner_role",
     "decision_timestamp_utc",
     "evidence_reference",
+    "external_archive_reference",
 )
 OWNER_DECISION_REQUIRED_COLUMNS = (
     "path",
@@ -307,6 +309,7 @@ def _owner_decision_overlay(
     owner_role = _text(decision_row.get("owner_role"))
     decision_timestamp_utc = _text(decision_row.get("decision_timestamp_utc"))
     evidence_reference = _text(decision_row.get("evidence_reference"))
+    external_archive_reference = _text(decision_row.get("external_archive_reference"))
     missing: list[str] = []
     if owner_decision not in ALLOWED_OWNER_DECISIONS:
         missing.append("per_path_decision")
@@ -318,6 +321,11 @@ def _owner_decision_overlay(
         missing.append("decision_timestamp_utc")
     if not evidence_reference:
         missing.append("evidence_reference")
+    if (
+        owner_decision == "extract_to_molecular_or_science_repository"
+        and not external_archive_reference
+    ):
+        missing.append("external_archive_reference")
     valid = not missing
     cleanup_required = owner_decision in {
         "delete_from_structural_repository",
@@ -340,6 +348,7 @@ def _owner_decision_overlay(
         "owner_role": owner_role,
         "decision_timestamp_utc": decision_timestamp_utc,
         "decision_evidence_reference": evidence_reference,
+        "external_archive_reference": external_archive_reference,
         "post_decision_cleanup_required": cleanup_required,
         "post_decision_cleanup_pending": cleanup_pending,
     }
@@ -405,6 +414,7 @@ def build_owner_decision_template(
                 "owner_role": "",
                 "decision_timestamp_utc": "",
                 "evidence_reference": "",
+                "external_archive_reference": "",
                 "post_decision_required_action": (
                     "delete_or_extract_path_then_rerun_scope_audit"
                     if _text(row.get("recommended_owner_decision")).startswith(
@@ -511,6 +521,10 @@ def build_owner_review_packet(
                 "decision_timestamp_utc": overlay.get("decision_timestamp_utc", ""),
                 "decision_evidence_reference": overlay.get(
                     "decision_evidence_reference",
+                    "",
+                ),
+                "external_archive_reference": overlay.get(
+                    "external_archive_reference",
                     "",
                 ),
                 "post_decision_cleanup_applied": True,
@@ -768,6 +782,10 @@ def _decision_template_markdown(payload: dict[str, Any]) -> str:
         f"- `status`: `{payload['status']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `decision_pending_count`: `{payload['decision_pending_count']}`",
+        (
+            "- `external_archive_reference`: required when `owner_decision` is "
+            "`extract_to_molecular_or_science_repository`"
+        ),
         "",
         "| Row | Path | Recommended Decision |",
         "|---|---|---|",
