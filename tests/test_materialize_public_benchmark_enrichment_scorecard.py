@@ -195,6 +195,29 @@ def test_public_benchmark_enrichment_materializer_blocks_bad_rows() -> None:
     assert "bad_target:molecule_0:score_invalid" in scorecard["blockers"]
 
 
+def test_public_benchmark_enrichment_materializer_blocks_non_finite_scores() -> None:
+    intake = _valid_intake()
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    first_target = targets[0]
+    assert isinstance(first_target, dict)
+    molecules = first_target["scored_molecules"]
+    assert isinstance(molecules, list)
+    first_molecule = molecules[0]
+    assert isinstance(first_molecule, dict)
+    first_molecule["score"] = float("nan")
+
+    scorecard = module.materialize_enrichment_scorecard(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert scorecard["status"] == "operator_evidence_required"
+    assert scorecard["contract_pass"] is False
+    assert "aa2ar:molecule_0:score_invalid" in scorecard["blockers"]
+    assert "operator_values_required" in scorecard["root_cause_tags"]
+
+
 def test_public_benchmark_enrichment_materializer_blocks_invalid_checksum() -> None:
     intake = _valid_intake()
     targets = intake["targets"]

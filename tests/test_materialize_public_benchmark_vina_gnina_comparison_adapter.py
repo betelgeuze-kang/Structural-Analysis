@@ -193,6 +193,39 @@ def test_vina_gnina_comparison_adapter_blocks_pose_success_rmsd_mismatch() -> No
     assert "pose_success_rmsd_inconsistent" in adapter["root_cause_tags"]
 
 
+def test_vina_gnina_comparison_adapter_blocks_non_finite_numeric_fields() -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    engine_runs = first_case["engine_runs"]
+    assert isinstance(engine_runs, list)
+    first_run = engine_runs[0]
+    assert isinstance(first_run, dict)
+    first_run["symmetry_aware_rmsd_angstrom"] = float("inf")
+    first_run["score"] = float("-inf")
+    first_run["pose_success_rmsd_threshold_angstrom"] = float("nan")
+
+    adapter = module.materialize_vina_gnina_comparison_adapter(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert adapter["status"] == "operator_evidence_required"
+    assert adapter["contract_pass"] is False
+    assert (
+        "case_a:engine_run_0:symmetry_aware_rmsd_angstrom_invalid"
+        in adapter["blockers"]
+    )
+    assert "case_a:engine_run_0:score_invalid" in adapter["blockers"]
+    assert (
+        "case_a:engine_run_0:pose_success_rmsd_threshold_angstrom_invalid"
+        in adapter["blockers"]
+    )
+    assert "operator_values_required" in adapter["root_cause_tags"]
+
+
 def test_vina_gnina_comparison_adapter_blocks_invalid_checksum() -> None:
     intake = _valid_intake()
     cases = intake["cases"]

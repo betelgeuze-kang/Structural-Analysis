@@ -569,6 +569,75 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     assert artifact_bundle["phase2_exit_gate"]["status"] == "ready"
 
 
+def test_public_benchmark_phase2_row_audit_blocks_non_finite_numeric_rows(
+    tmp_path: Path,
+) -> None:
+    rows = _write_phase2_rows(tmp_path)
+    enrichment_payload = json.loads(rows["enrichment"].read_text(encoding="utf-8"))
+    vina_payload = json.loads(rows["vina_gnina"].read_text(encoding="utf-8"))
+    enrichment_payload["targets"][0]["scored_molecules"][0]["score"] = float("nan")
+    vina_payload["cases"][0]["engine_runs"][0][
+        "symmetry_aware_rmsd_angstrom"
+    ] = float("inf")
+    vina_payload["cases"][0]["engine_runs"][0]["score"] = float("-inf")
+    vina_payload["cases"][0]["engine_runs"][0][
+        "pose_success_rmsd_threshold_angstrom"
+    ] = float("nan")
+    _write_json(rows["enrichment"], enrichment_payload)
+    _write_json(rows["vina_gnina"], vina_payload)
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        subset_rows_path=rows["subset"],
+        pose_rows_path=rows["pose"],
+        enrichment_rows_path=rows["enrichment"],
+        vina_gnina_rows_path=rows["vina_gnina"],
+        target_subset_case_count=module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["contract_pass"] is False
+    assert audit["phase2_ready"] is False
+    blocked_components = {
+        row["component_id"]: row for row in audit["components"] if not row["ready"]
+    }
+    assert "dud_e_or_lit_pcba_enrichment" in blocked_components
+    assert "vina_gnina_comparison_adapter" in blocked_components
+    assert (
+        "enrichment_scorecard:AA2AR:molecule_0:score_invalid"
+        in audit["blockers"]
+    )
+    assert (
+        "vina_gnina_comparison_adapter:case_01:engine_run_0:"
+        "symmetry_aware_rmsd_angstrom_invalid"
+    ) in audit["blockers"]
+    assert (
+        "vina_gnina_comparison_adapter:case_01:engine_run_0:score_invalid"
+        in audit["blockers"]
+    )
+    assert (
+        "vina_gnina_comparison_adapter:case_01:engine_run_0:"
+        "pose_success_rmsd_threshold_angstrom_invalid"
+    ) in audit["blockers"]
+    operator_bundle = json.loads((tmp_path / "operator_bundle.json").read_text())
+    assert (
+        operator_bundle["dud_e_lit_pcba_enrichment_intake"]["targets"][0][
+            "scored_molecules"
+        ][0]["score"]
+        == "nan"
+    )
+    assert (
+        operator_bundle["vina_gnina_comparison_intake"]["cases"][0]["engine_runs"][0][
+            "symmetry_aware_rmsd_angstrom"
+        ]
+        == "inf"
+    )
+
+
 def test_public_benchmark_phase2_row_audit_blocks_failed_source_actuality_contract(
     tmp_path: Path,
     monkeypatch,
