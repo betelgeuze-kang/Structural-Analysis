@@ -26,6 +26,11 @@ IGNORED_WORKTREE_STATUS_PREFIXES = (
     "implementation/phase1/release_evidence/productization/",
     "implementation/phase1/release_evidence/surface/",
 )
+IGNORED_WORKTREE_STATUS_PATHS = frozenset(
+    {
+        "implementation/phase1/support_bundle_manifest.json",
+    }
+)
 
 
 def _git_output(args: list[str], *, cwd: Path = Path(".")) -> str:
@@ -88,7 +93,9 @@ def _status_path(line: str) -> str:
 
 def _ignored_worktree_status_line(line: str) -> bool:
     path = _status_path(line)
-    return any(path.startswith(prefix) for prefix in IGNORED_WORKTREE_STATUS_PREFIXES)
+    return path in IGNORED_WORKTREE_STATUS_PATHS or any(
+        path.startswith(prefix) for prefix in IGNORED_WORKTREE_STATUS_PREFIXES
+    )
 
 
 def split_worktree_status(status_short: str) -> tuple[str, str]:

@@ -236,7 +236,8 @@ def test_sync_preflight_ignores_release_evidence_dirty_for_sync_gate() -> None:
                 " M implementation/phase1/release_evidence/productization/"
                 "structural_product_development_roadmap.json\n"
                 " M implementation/phase1/release_evidence/surface/"
-                "product_capabilities_surface.json"
+                "product_capabilities_surface.json\n"
+                " M implementation/phase1/support_bundle_manifest.json"
             ),
         )
     )
@@ -250,6 +251,7 @@ def test_sync_preflight_ignores_release_evidence_dirty_for_sync_gate() -> None:
     assert "developer_preview_rc_status.json" in payload["state"]["ignored_worktree_status_short"]
     assert "pm_release_gate_report.json" in payload["state"]["ignored_worktree_status_short"]
     assert "product_capabilities_surface.json" in payload["state"]["ignored_worktree_status_short"]
+    assert "support_bundle_manifest.json" in payload["state"]["ignored_worktree_status_short"]
 
 
 def test_sync_preflight_blocks_wrong_remote_even_with_approval() -> None:
