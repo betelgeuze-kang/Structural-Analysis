@@ -309,6 +309,47 @@ def test_build_register_prioritizes_ci_job_start_blocker_state(tmp_path: Path) -
     assert row["owner_action"].startswith("Resolve the pr GitHub Actions job-start blocker")
 
 
+def test_build_register_prioritizes_ci_self_hosted_runner_offline_state(
+    tmp_path: Path,
+) -> None:
+    report = _pm_report(tmp_path / "pm_release_gate_report.json")
+    payload = json.loads(report.read_text(encoding="utf-8"))
+    basic_ci = payload["release_area_matrix"][0]
+    basic_ci["summary"]["ci_runner_precondition_evaluated"] = True
+    basic_ci["summary"]["ci_runner_precondition_pass"] = False
+    basic_ci["summary"]["ci_runner_status"] = "blocked"
+    basic_ci["summary"]["ci_runner_required_labels"] = [
+        "self-hosted",
+        "linux",
+        "x64",
+    ]
+    basic_ci["summary"]["ci_runner_matching_runner_count"] = 1
+    basic_ci["summary"]["ci_runner_online_matching_runner_count"] = 0
+    basic_ci["summary"]["ci_runner_ready_runner_count"] = 0
+    basic_ci["summary"]["pr_owner_action"] = (
+        "Bring at least one GitHub Actions self-hosted runner online with labels "
+        "self-hosted, linux, x64, then collect 30 PR passes."
+    )
+    report.write_text(json.dumps(payload), encoding="utf-8")
+
+    register = build_register_module.build_register(pm_report=report)
+    row = register["rows"][0]
+
+    assert row["blocker_id"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    assert row["evidence_status"]["state"] == "self_hosted_runner_offline"
+    assert row["evidence_status"]["runner_precondition_evaluated"] is True
+    assert row["evidence_status"]["runner_precondition_pass"] is False
+    assert row["evidence_status"]["runner_required_labels"] == [
+        "self-hosted",
+        "linux",
+        "x64",
+    ]
+    assert row["evidence_status"]["runner_matching_runner_count"] == 1
+    assert row["evidence_status"]["runner_online_matching_runner_count"] == 0
+    assert row["evidence_status"]["runner_ready_runner_count"] == 0
+    assert "self-hosted runner online" in row["owner_action"]
+
+
 def test_build_register_guides_frontend_dependency_audit_blocker(tmp_path: Path) -> None:
     report = _write_json(
         tmp_path / "pm_release_gate_report.json",

@@ -698,11 +698,19 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
         pull_request_source_present = summary.get("pr_pull_request_run_source_present")
         job_start_blocker_count = int(summary.get(f"{lane}_github_actions_job_start_blocker_count", 0) or 0)
         streak_source = str(summary.get(f"{lane}_streak_source", "") or "")
+        runner_precondition_evaluated = bool(
+            summary.get("ci_runner_precondition_evaluated", False)
+        )
+        runner_precondition_pass = bool(
+            summary.get("ci_runner_precondition_pass", True)
+        )
         state = "ready_for_pm_regeneration" if release_count >= required else "missing_tracked_ci_streak_evidence"
         if lane == "pr" and pull_request_source_present is False and release_count < required:
             state = "no_pull_request_run_source"
         if job_start_blocker_count > 0 or streak_source == "github_actions_job_start_blocked":
             state = "github_actions_job_start_blocked"
+        if runner_precondition_evaluated and not runner_precondition_pass:
+            state = "self_hosted_runner_offline"
         return {
             "state": state,
             "lane": lane,
@@ -714,6 +722,23 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "local_consecutive_pass_count": local_count,
             "missing_consecutive_pass_count": missing,
             "pull_request_run_source_present": pull_request_source_present,
+            "runner_precondition_evaluated": runner_precondition_evaluated,
+            "runner_precondition_pass": runner_precondition_pass,
+            "runner_status": str(summary.get("ci_runner_status", "") or ""),
+            "runner_required_labels": [
+                str(item)
+                for item in _as_list(summary.get("ci_runner_required_labels"))
+                if str(item)
+            ],
+            "runner_matching_runner_count": _as_int(
+                summary.get("ci_runner_matching_runner_count"), 0
+            ),
+            "runner_online_matching_runner_count": _as_int(
+                summary.get("ci_runner_online_matching_runner_count"), 0
+            ),
+            "runner_ready_runner_count": _as_int(
+                summary.get("ci_runner_ready_runner_count"), 0
+            ),
             "source_policy": "github_actions_required",
         }
     if namespace == "security" and "license" in code:

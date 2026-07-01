@@ -325,6 +325,104 @@ def test_ci_streak_intake_packet_preserves_observed_partial_github_streak(tmp_pa
     assert "Observed Streak" in markdown
 
 
+def test_ci_streak_intake_packet_surfaces_offline_self_hosted_runner(
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    manifest = _write_json(
+        tmp_path / "ci_consecutive_pass_manifest.json",
+        {
+            "contract_pass": False,
+            "threshold": 30,
+            "lanes": {
+                "pr": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "owner_action": "Collect 30 PR passes.",
+                    "blockers": ["pr_ci_30_consecutive_pass_evidence_missing"],
+                },
+                "nightly": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "owner_action": "Collect 30 nightly passes.",
+                    "blockers": ["nightly_ci_30_consecutive_pass_evidence_missing"],
+                },
+            },
+        },
+    )
+    github_actions = _write_json(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "generated_at": now.isoformat(),
+            "threshold": 30,
+            "workflow_discovery": {"query_error": ""},
+            "lanes": {
+                "pr": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "run_count": 30,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_required_trigger_present": True,
+                    "local_pull_request_trigger_present": True,
+                    "query_error": "",
+                    "pull_request_run_source_present": True,
+                },
+                "nightly": {
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "run_count": 30,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_required_trigger_present": True,
+                    "local_schedule_trigger_present": True,
+                    "query_error": "",
+                },
+            },
+        },
+    )
+    runner_status = _write_json(
+        tmp_path / "github_actions_self_hosted_runner_status.json",
+        {
+            "schema_version": "github-actions-self-hosted-runner-status.v1",
+            "contract_pass": False,
+            "status": "blocked",
+            "blockers": ["self_hosted_runner_matching_labels_not_online"],
+            "required_labels": ["self-hosted", "linux", "x64"],
+            "matching_runner_count": 1,
+            "online_matching_runner_count": 0,
+            "ready_runner_count": 0,
+        },
+    )
+
+    payload = build_ci_streak_intake_packet.build_packet(
+        manifest_path=manifest,
+        github_actions_evidence_path=github_actions,
+        runner_status_path=runner_status,
+        now=now,
+    )
+    markdown = build_ci_streak_intake_packet._markdown(payload)
+
+    assert payload["contract_pass"] is False
+    assert payload["runner_precondition"]["evaluated"] is True
+    assert payload["runner_precondition"]["contract_pass"] is False
+    assert payload["summary"]["runner_precondition_pass"] is False
+    assert payload["summary"]["runner_online_matching_runner_count"] == 0
+    assert (
+        "runner:self_hosted_runner_matching_labels_not_online"
+        in payload["current_blockers"]
+    )
+    assert "Runner Precondition" in markdown
+    assert "self-hosted, linux, x64" in payload["runner_precondition"]["owner_action"]
+
+
 def test_ci_streak_intake_packet_passes_closed_manifest_with_valid_source_evidence(tmp_path: Path) -> None:
     now = datetime(2026, 6, 16, tzinfo=timezone.utc)
     manifest = _write_json(
