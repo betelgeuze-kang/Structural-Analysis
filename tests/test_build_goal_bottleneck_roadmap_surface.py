@@ -270,6 +270,39 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "phase_3_gpcr_hard_decoy_closure",
         "phase_4_pocketmd_lite",
     ]
+    assert {
+        row["phase_id"]: (
+            row["capability_id"],
+            row["actual_closure_component_id"],
+        )
+        for row in surface["operator_evidence_handoff_queue"]
+    } == {
+        "phase_2_public_benchmark_harness": ("public_benchmark_harness", ""),
+        "phase_3_gpcr_hard_decoy_closure": (
+            "gpcr_hard_decoy_evidence",
+            "gpcr_hard_decoy_actual_closure",
+        ),
+        "phase_4_pocketmd_lite": (
+            "pocketmd_lite_top_k_refinement",
+            "pocketmd_lite_topk_actual_closure",
+        ),
+    }
+    assert {
+        row["phase_id"]: row["capability_id"]
+        for row in surface["operator_evidence_handoff_queue"]
+    } == {
+        "phase_2_public_benchmark_harness": "public_benchmark_harness",
+        "phase_3_gpcr_hard_decoy_closure": "gpcr_hard_decoy_evidence",
+        "phase_4_pocketmd_lite": "pocketmd_lite_top_k_refinement",
+    }
+    assert {
+        row["phase_id"]: row["actual_closure_component_id"]
+        for row in surface["operator_evidence_handoff_queue"]
+    } == {
+        "phase_2_public_benchmark_harness": "",
+        "phase_3_gpcr_hard_decoy_closure": "gpcr_hard_decoy_actual_closure",
+        "phase_4_pocketmd_lite": "pocketmd_lite_topk_actual_closure",
+    }
     assert surface["operator_evidence_handoff_slot_scope"] == (
         "all_blocked_operator_slots_per_blocked_phase"
     )
@@ -286,6 +319,36 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "oprm1_hard_decoy_metrics",
         "top_k_refinement_rows",
     ]
+    slot_capabilities = {
+        row["slot_id"]: row["capability_id"]
+        for row in surface["operator_evidence_handoff_slot_queue"]
+    }
+    assert slot_capabilities["casf_pdbbind_subset_intake"] == "public_benchmark_harness"
+    assert slot_capabilities["pose_coordinate_intake"] == "public_benchmark_harness"
+    assert slot_capabilities["drd2_hard_decoy_metrics"] == "gpcr_hard_decoy_evidence"
+    assert slot_capabilities["htr2a_hard_decoy_metrics"] == "gpcr_hard_decoy_evidence"
+    assert slot_capabilities["oprm1_hard_decoy_metrics"] == "gpcr_hard_decoy_evidence"
+    assert slot_capabilities["top_k_refinement_rows"] == (
+        "pocketmd_lite_top_k_refinement"
+    )
+    slot_actual_closure_components = {
+        row["slot_id"]: row["actual_closure_component_id"]
+        for row in surface["operator_evidence_handoff_slot_queue"]
+    }
+    assert slot_actual_closure_components["casf_pdbbind_subset_intake"] == ""
+    assert slot_actual_closure_components["pose_coordinate_intake"] == ""
+    assert slot_actual_closure_components["drd2_hard_decoy_metrics"] == (
+        "gpcr_hard_decoy_actual_closure"
+    )
+    assert slot_actual_closure_components["htr2a_hard_decoy_metrics"] == (
+        "gpcr_hard_decoy_actual_closure"
+    )
+    assert slot_actual_closure_components["oprm1_hard_decoy_metrics"] == (
+        "gpcr_hard_decoy_actual_closure"
+    )
+    assert slot_actual_closure_components["top_k_refinement_rows"] == (
+        "pocketmd_lite_topk_actual_closure"
+    )
     handoff_ids = {
         row["slot_id"]: row["handoff_id"]
         for row in surface["operator_evidence_handoff_slot_queue"]
@@ -301,6 +364,37 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     )
     assert handoff_ids["top_k_refinement_rows"] == (
         "pocketmd_lite::top_k_refinement_rows"
+    )
+    slot_capabilities = {
+        row["slot_id"]: (
+            row["capability_id"],
+            row["actual_closure_component_id"],
+        )
+        for row in surface["operator_evidence_handoff_slot_queue"]
+    }
+    assert slot_capabilities["casf_pdbbind_subset_intake"] == (
+        "public_benchmark_harness",
+        "",
+    )
+    assert slot_capabilities["pose_coordinate_intake"] == (
+        "public_benchmark_harness",
+        "",
+    )
+    assert slot_capabilities["drd2_hard_decoy_metrics"] == (
+        "gpcr_hard_decoy_evidence",
+        "gpcr_hard_decoy_actual_closure",
+    )
+    assert slot_capabilities["htr2a_hard_decoy_metrics"] == (
+        "gpcr_hard_decoy_evidence",
+        "gpcr_hard_decoy_actual_closure",
+    )
+    assert slot_capabilities["oprm1_hard_decoy_metrics"] == (
+        "gpcr_hard_decoy_evidence",
+        "gpcr_hard_decoy_actual_closure",
+    )
+    assert slot_capabilities["top_k_refinement_rows"] == (
+        "pocketmd_lite_top_k_refinement",
+        "pocketmd_lite_topk_actual_closure",
     )
     assert surface["first_operator_evidence_handoff_slot"]["slot_id"] == (
         "casf_pdbbind_subset_intake"

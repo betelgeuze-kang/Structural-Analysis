@@ -55,6 +55,15 @@ DEFAULT_UX_OBSERVATION_INTAKE_PACKET = (
 DEFAULT_OUT = PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json"
 
 SCHEMA_VERSION = "goal-bottleneck-roadmap-surface.v1"
+PHASE_CAPABILITY_IDS = {
+    "phase_2_public_benchmark_harness": "public_benchmark_harness",
+    "phase_3_gpcr_hard_decoy_closure": "gpcr_hard_decoy_evidence",
+    "phase_4_pocketmd_lite": "pocketmd_lite_top_k_refinement",
+}
+PHASE_ACTUAL_CLOSURE_COMPONENT_IDS = {
+    "phase_3_gpcr_hard_decoy_closure": "gpcr_hard_decoy_actual_closure",
+    "phase_4_pocketmd_lite": "pocketmd_lite_topk_actual_closure",
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -141,6 +150,14 @@ def _operator_handoff_id(
         return f"{namespace or phase_id}::{slot}"
     phase = str(phase_id or "")
     return f"{namespace}::{phase}" if namespace and phase else phase
+
+
+def _phase_capability_id(phase_id: str) -> str:
+    return PHASE_CAPABILITY_IDS.get(str(phase_id or ""), "")
+
+
+def _phase_actual_closure_component_id(phase_id: str) -> str:
+    return PHASE_ACTUAL_CLOSURE_COMPONENT_IDS.get(str(phase_id or ""), "")
 
 
 def _first_gate_blocker(gate: dict[str, Any]) -> str:
@@ -1125,6 +1142,7 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
         first_gap = _as_dict(summary.get("first_operator_evidence_gap"))
         if not first_gap:
             continue
+        phase_id = str(row.get("phase_id") or "")
         blocked_criteria = (
             _as_list(first_gap.get("blocked_tier_beta_criteria"))
             or _as_list(first_gap.get("blocked_phase3_criteria"))
@@ -1135,11 +1153,15 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
                 "queue_priority": index,
                 "handoff_id": _operator_handoff_id(
                     namespace=str(row.get("bottleneck") or ""),
-                    phase_id=str(row.get("phase_id") or ""),
+                    phase_id=phase_id,
                     slot_id=str(first_gap.get("slot_id") or ""),
                     fallback=first_gap.get("handoff_id"),
                 ),
-                "phase_id": str(row.get("phase_id") or ""),
+                "phase_id": phase_id,
+                "capability_id": _phase_capability_id(phase_id),
+                "actual_closure_component_id": _phase_actual_closure_component_id(
+                    phase_id
+                ),
                 "phase_label": str(row.get("phase_label") or ""),
                 "roadmap_item": str(row.get("roadmap_item") or ""),
                 "bottleneck": str(row.get("bottleneck") or ""),
@@ -1181,6 +1203,7 @@ def _operator_evidence_handoff_slot_queue(
     queue: list[dict[str, Any]] = []
     for phase_index, row in enumerate(blocked_rows, start=1):
         summary = _as_dict(row.get("summary"))
+        phase_id = str(row.get("phase_id") or "")
         slot_rows = [
             _as_dict(slot)
             for slot in _as_list(
@@ -1205,7 +1228,11 @@ def _operator_evidence_handoff_slot_queue(
                     "queue_priority": len(queue) + 1,
                     "phase_queue_priority": phase_index,
                     "slot_queue_priority": slot_index,
-                    "phase_id": str(row.get("phase_id") or ""),
+                    "phase_id": phase_id,
+                    "capability_id": _phase_capability_id(phase_id),
+                    "actual_closure_component_id": _phase_actual_closure_component_id(
+                        phase_id
+                    ),
                     "phase_label": str(row.get("phase_label") or ""),
                     "roadmap_item": str(row.get("roadmap_item") or ""),
                     "bottleneck": str(row.get("bottleneck") or ""),
@@ -1216,7 +1243,7 @@ def _operator_evidence_handoff_slot_queue(
                     ],
                     "handoff_id": _operator_handoff_id(
                         namespace=str(row.get("bottleneck") or ""),
-                        phase_id=str(row.get("phase_id") or ""),
+                        phase_id=phase_id,
                         slot_id=str(slot.get("slot_id") or ""),
                         fallback=slot.get("handoff_id"),
                     ),
