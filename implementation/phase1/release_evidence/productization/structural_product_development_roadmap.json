@@ -11,24 +11,24 @@
     "pm_milestones": "5/5",
     "pm_release_areas": "12/16",
     "release_ready": false,
-    "snapshot_blocker_count": 42,
+    "snapshot_blocker_count": 53,
     "snapshot_status": "stale_or_inconsistent",
     "workstation_delivery_ready": true
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 60.4,
-  "generated_at": "2026-07-01T10:54:08.704638+00:00",
+  "generated_at": "2026-07-01T10:56:40.953001+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:414115e105acebde0d1b39db6cb9e746cbee8adca064a1099cc0603bb455486c",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d61804a3527203f67209a2002fcc6fbedaf42881b73332e2a4b0c64e54fe6a52",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:f8ba0f4c413dd5e12b881fa0c4f6db7978fdd34b82b5146652ee4df006525c96",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:cfdbfead9a1c3936ab5a558b5a90e719f6f586bf0cd5b39c8cab81f4dad21ac2",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:5035b57d5f9193f0e56a97ac6d3753a81562c1a0a4142337bd46d701d56c286f",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:79c2406660fa2fa3219cb9d50b3067567b2c24b3078f0644a1679f3044d58a89",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:82fbf59aa4018bda91e0a14b5cbc6984071cd7a8bd9189789a44061671361089",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:67a305ab16130930967bf96625c992bfe0fc5e88ee237622e4d9e1dc3dd3486b",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:30833896477b599b9511f4bd7c66f90ddfe78220877ea2023ab98de41d4ba5cf",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:aa33df04efd987bccb830e8c0c58edb1eeaf5f0f6653910070eafe871eeb1020",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5f4b610b8ed20cd1ae89dce1e6d6c1d2802d7bcd6a87ffe1ca1f8e90254f6fba",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:73723864eef4322742c53f88de899fe1e3b56ca82bf38a593ac61ec46c237b95",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a2a96c95a80ffbda19ed072f59669742a9ea1d4c50246cf566d6be1530bf6ca7",
     "scripts/build_structural_product_development_roadmap.py": "sha256:7fefa7570e85ee2d5a4c130fcd9bd12577146739ced51a2da9a15b6d115a302a"
   },
   "passed_evidence_requirement_count": 29,
@@ -168,7 +168,7 @@
       "summary": {
         "fresh_artifact_count": 18,
         "fresh_artifact_pass_count": 18,
-        "snapshot_blocker_count": 42,
+        "snapshot_blocker_count": 53,
         "stale_or_inconsistent": true
       }
     },
@@ -179,7 +179,6 @@
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::worktree_not_clean",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
@@ -383,7 +382,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "9ee0c24fa28f156760aa53e1cb289f42df1cb7b7",
+  "source_commit_sha": "56483d10ee6fdaa676c8729b6cb1847728a27440",
   "stage_average_progress_percent": 45.9,
   "stage_count": 7,
   "status": "blocked",

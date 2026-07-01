@@ -41,7 +41,7 @@
     "terminal_checkpoint_gate_ready": true
   },
   "full_g1_closure_ready": false,
-  "generated_at": "2026-07-01T09:21:06.870206+00:00",
+  "generated_at": "2026-07-01T10:58:22.702063+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup365_gate_replay_probe.json": "sha256:fb2c3f776b89365c83b7c81316ab120edd087c83debd21d14b43830fc427ceb6",
     "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup375_structural_terminal_increment_gate_probe.json": "sha256:ca5e4cb716bebd694776f357faf563bb72b0a3999384b0d3dbe0ef79499be202",
@@ -59,7 +59,7 @@
   "reuse_policy": "status_rebuilt_from_existing_g1_terminal_gate_receipts",
   "reused_evidence": true,
   "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-  "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+  "source_commit_sha": "56483d10ee6fdaa676c8729b6cb1847728a27440",
   "status": "ready",
   "summary_line": "G1 direct residual terminal gate: PASS | direct_residual=1.787703126865381e-06 | increment=0.0",
   "thresholds": {
