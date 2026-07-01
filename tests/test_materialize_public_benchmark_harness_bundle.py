@@ -223,7 +223,22 @@ def test_public_benchmark_harness_bundle_materializes_tier_beta_ready_artifacts(
     assert {row["component_id"] for row in report["components"]} == (
         PHASE2_COMPONENT_IDS
     )
+    assert {row["component_id"] for row in report["phase2_requirements"]} == (
+        PHASE2_COMPONENT_IDS
+    )
+    assert report["phase2_requirement_summary"] == {
+        "required_component_count": 5,
+        "ready_component_count": 5,
+        "blocked_component_count": 0,
+        "materialized_component_count": 5,
+        "operator_evidence_required_count": 0,
+        "missing_row_input_count": 0,
+        "missing_row_inputs": [],
+        "phase2_ready": True,
+        "blocked_component_ids": [],
+    }
     assert all(row["ready"] for row in report["components"])
+    assert all(row["ready"] for row in report["phase2_requirements"])
     assert report["ready_artifact_count"] == len(report["artifact_summaries"])
     for artifact in report["artifact_outputs"].values():
         assert (tmp_path / artifact).exists()
@@ -253,6 +268,13 @@ def test_public_benchmark_harness_bundle_blocks_one_case_smoke_as_phase2_ready(
     assert report["real_pose_success_harness_case_count"] == 1
     assert report["phase2_ready"] is False
     assert report["phase2_blocked_component_count"] == 3
+    assert report["phase2_requirement_summary"]["ready_component_count"] == 2
+    assert report["phase2_requirement_summary"]["blocked_component_count"] == 3
+    assert report["phase2_requirement_summary"]["blocked_component_ids"] == [
+        "casf_pdbbind_pose_success_harness",
+        "symmetry_aware_ligand_rmsd",
+        "posebusters_style_pose_validity",
+    ]
     assert report["phase2_exit_gate"]["failed_criteria"] == [
         "casf_pdbbind_pose_success_harness_ready",
         "symmetry_aware_ligand_rmsd_ready",
@@ -326,6 +348,11 @@ def test_public_benchmark_harness_bundle_blocks_empty_bundle(tmp_path: Path) -> 
     assert report["phase2_exit_gate"]["status"] == "blocked"
     assert report["phase2_exit_gate"]["failed_criterion_count"] > 0
     assert report["phase2_blocked_component_count"] > 0
+    assert {row["component_id"] for row in report["phase2_requirements"]} == (
+        PHASE2_COMPONENT_IDS
+    )
+    assert report["phase2_requirement_summary"]["required_component_count"] == 5
+    assert report["phase2_requirement_summary"]["phase2_ready"] is False
     assert any("subset_manifest:" in blocker for blocker in report["blockers"])
 
 
@@ -370,6 +397,11 @@ def test_public_benchmark_harness_artifact_bundle_indexes_phase2_gate(
     assert {row["component_id"] for row in bundle["components"]} == (
         PHASE2_COMPONENT_IDS
     )
+    assert {row["component_id"] for row in bundle["phase2_requirements"]} == (
+        PHASE2_COMPONENT_IDS
+    )
+    assert bundle["phase2_requirement_summary"]["ready_component_count"] == 5
+    assert bundle["phase2_requirement_summary"]["blocked_component_count"] == 0
     assert all(row["ready"] for row in bundle["components"])
 
 
