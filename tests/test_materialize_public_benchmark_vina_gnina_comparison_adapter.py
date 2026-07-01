@@ -166,6 +166,20 @@ def test_vina_gnina_comparison_adapter_blocks_bad_rows() -> None:
     assert "bad_case:gnina_engine_run_missing" in adapter["blockers"]
 
 
+def test_vina_gnina_comparison_adapter_blocks_blank_score_direction() -> None:
+    intake = _valid_intake()
+    first_run = intake["cases"][0]["engine_runs"][0]
+    first_run["score_direction"] = " "
+
+    adapter = module.materialize_vina_gnina_comparison_adapter(intake)
+
+    assert adapter["contract_pass"] is False
+    assert "case_a:engine_run_0:score_direction_invalid" in adapter["blockers"]
+    assert adapter["score_direction_policy"]["blank_values"] == (
+        "rejected; no implicit default is applied"
+    )
+
+
 def test_vina_gnina_comparison_adapter_blocks_pose_success_rmsd_mismatch() -> None:
     intake = _valid_intake()
     cases = intake["cases"]

@@ -74,6 +74,26 @@ ROW_INTEGRITY_POLICY = {
         "Public Benchmark enrichment coverage or active/decoy counts."
     ),
 }
+SCORE_DIRECTION_POLICY = {
+    "required": True,
+    "accepted_values": ["higher_is_better", "lower_is_better"],
+    "accepted_aliases": {
+        "higher_is_better": ["higher", "higher_is_better", "descending"],
+        "lower_is_better": ["lower", "lower_is_better", "ascending"],
+    },
+    "blank_values": "rejected; no implicit default is applied",
+}
+BOOLEAN_LABEL_POLICY = {
+    "is_active": "must be a JSON boolean true/false; strings and numbers are rejected",
+}
+NUMERIC_VALUE_POLICY = {
+    "score": "must parse to a finite float; NaN and Infinity are rejected",
+}
+ACTIVE_DECOY_POLICY = {
+    "per_target_requirement": (
+        "each target must contain at least one active molecule and one decoy molecule"
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -133,7 +153,7 @@ def _family(value: Any) -> str:
 
 def _direction(value: Any) -> str:
     token = _string(value).lower()
-    if token in {"", "higher", "higher_is_better", "descending"}:
+    if token in {"higher", "higher_is_better", "descending"}:
         return "higher_is_better"
     if token in {"lower", "lower_is_better", "ascending"}:
         return "lower_is_better"
@@ -485,6 +505,10 @@ def materialize_enrichment_scorecard(
         "required_target_fields": list(REQUIRED_TARGET_FIELDS),
         "required_molecule_fields": list(REQUIRED_MOLECULE_FIELDS),
         "row_integrity_policy": ROW_INTEGRITY_POLICY,
+        "score_direction_policy": SCORE_DIRECTION_POLICY,
+        "boolean_label_policy": BOOLEAN_LABEL_POLICY,
+        "numeric_value_policy": NUMERIC_VALUE_POLICY,
+        "active_decoy_policy": ACTIVE_DECOY_POLICY,
         "supported_benchmark_families": list(SUPPORTED_FAMILIES),
         "first_blocked_target": first_blocked_target,
         "root_cause_tags": root_cause_tags,

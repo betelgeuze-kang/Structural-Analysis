@@ -195,6 +195,19 @@ def test_public_benchmark_enrichment_materializer_blocks_bad_rows() -> None:
     assert "bad_target:molecule_0:score_invalid" in scorecard["blockers"]
 
 
+def test_public_benchmark_enrichment_materializer_blocks_blank_score_direction() -> None:
+    intake = _valid_intake()
+    intake["targets"][0]["score_direction"] = " "
+
+    scorecard = module.materialize_enrichment_scorecard(intake)
+
+    assert scorecard["contract_pass"] is False
+    assert "aa2ar:score_direction_invalid" in scorecard["blockers"]
+    assert scorecard["score_direction_policy"]["blank_values"] == (
+        "rejected; no implicit default is applied"
+    )
+
+
 def test_public_benchmark_enrichment_materializer_blocks_non_finite_scores() -> None:
     intake = _valid_intake()
     targets = intake["targets"]

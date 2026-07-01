@@ -471,12 +471,80 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         "LIT-PCBA",
     ]
     assert "scored_molecules" in enrichment_contract["required_target_fields"]
+    assert enrichment_contract["score_direction_policy"] == {
+        "required": True,
+        "accepted_values": ["higher_is_better", "lower_is_better"],
+        "accepted_aliases": {
+            "higher_is_better": ["higher", "higher_is_better", "descending"],
+            "lower_is_better": ["lower", "lower_is_better", "ascending"],
+        },
+        "blank_values": "rejected; no implicit default is applied",
+    }
+    assert enrichment_contract["boolean_label_policy"] == {
+        "is_active": (
+            "must be a JSON boolean true/false; strings and numbers are rejected"
+        )
+    }
+    assert enrichment_contract["numeric_value_policy"] == {
+        "score": "must parse to a finite float; NaN and Infinity are rejected"
+    }
+    assert enrichment_contract["active_decoy_policy"] == {
+        "per_target_requirement": (
+            "each target must contain at least one active molecule and one decoy "
+            "molecule"
+        )
+    }
+    assert enrichment_contract["row_integrity_policy"]["required_unique_row_keys"] == {
+        "targets": ["target_id"],
+        "target_scored_molecules": ["molecule_id"],
+    }
     vina_contract = contracts["vina_gnina_rows"]
     assert vina_contract["default_row_path_candidates"][0].endswith(
         "public_benchmark_vina_gnina_rows.json"
     )
     assert vina_contract["supported_engines"] == ["vina", "gnina"]
     assert "engine_runs" in vina_contract["required_case_fields"]
+    assert vina_contract["score_direction_policy"] == {
+        "required": True,
+        "accepted_values": ["higher_is_better", "lower_is_better"],
+        "accepted_aliases": {
+            "higher_is_better": ["higher", "higher_is_better", "descending"],
+            "lower_is_better": ["lower", "lower_is_better", "ascending"],
+        },
+        "blank_values": "rejected; no implicit default is applied",
+    }
+    assert vina_contract["boolean_value_policy"] == {
+        "pose_success": (
+            "must be a JSON boolean true/false; strings and numbers are rejected"
+        )
+    }
+    assert vina_contract["numeric_value_policy"] == {
+        "symmetry_aware_rmsd_angstrom": (
+            "must parse to a finite non-negative float; NaN, Infinity, and "
+            "negative RMSD values are rejected"
+        ),
+        "score": "must parse to a finite float; NaN and Infinity are rejected",
+        "pose_success_rmsd_threshold_angstrom": (
+            "must parse to a finite positive float; NaN, Infinity, zero, and "
+            "negative thresholds are rejected"
+        ),
+    }
+    assert vina_contract["pose_success_policy"] == {
+        "threshold_default_angstrom": 2.0,
+        "consistency_rule": (
+            "pose_success must equal symmetry_aware_rmsd_angstrom <= "
+            "pose_success_rmsd_threshold_angstrom"
+        ),
+    }
+    assert vina_contract["engine_pair_policy"] == {
+        "per_case_required_engines": ["vina", "gnina"],
+        "duplicate_engine_ids_rejected": True,
+        "duplicate_docking_run_ids_rejected": True,
+    }
+    assert vina_contract["row_integrity_policy"]["required_unique_row_keys"] == {
+        "cases": ["case_id"],
+        "case_engine_runs": ["engine_id", "docking_run_id"],
+    }
     assert "casf_pdbbind_pose_success_harness::subset_rows_not_provided" in audit["blockers"]
     assert "dud_e_or_lit_pcba_enrichment::enrichment_rows_not_provided" in audit["blockers"]
     assert not (tmp_path / "operator_bundle.json").exists()

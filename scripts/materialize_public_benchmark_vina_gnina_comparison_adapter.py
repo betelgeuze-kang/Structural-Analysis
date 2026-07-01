@@ -91,6 +91,41 @@ ROW_INTEGRITY_POLICY = {
         "case coverage, engine coverage, or pose-success summaries."
     ),
 }
+SCORE_DIRECTION_POLICY = {
+    "required": True,
+    "accepted_values": ["higher_is_better", "lower_is_better"],
+    "accepted_aliases": {
+        "higher_is_better": ["higher", "higher_is_better", "descending"],
+        "lower_is_better": ["lower", "lower_is_better", "ascending"],
+    },
+    "blank_values": "rejected; no implicit default is applied",
+}
+BOOLEAN_VALUE_POLICY = {
+    "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected",
+}
+NUMERIC_VALUE_POLICY = {
+    "symmetry_aware_rmsd_angstrom": (
+        "must parse to a finite non-negative float; NaN, Infinity, and negative "
+        "RMSD values are rejected"
+    ),
+    "score": "must parse to a finite float; NaN and Infinity are rejected",
+    "pose_success_rmsd_threshold_angstrom": (
+        "must parse to a finite positive float; NaN, Infinity, zero, and negative "
+        "thresholds are rejected"
+    ),
+}
+POSE_SUCCESS_POLICY = {
+    "threshold_default_angstrom": DEFAULT_POSE_SUCCESS_RMSD_THRESHOLD_ANGSTROM,
+    "consistency_rule": (
+        "pose_success must equal symmetry_aware_rmsd_angstrom <= "
+        "pose_success_rmsd_threshold_angstrom"
+    ),
+}
+ENGINE_PAIR_POLICY = {
+    "per_case_required_engines": list(SUPPORTED_ENGINES),
+    "duplicate_engine_ids_rejected": True,
+    "duplicate_docking_run_ids_rejected": True,
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -145,7 +180,7 @@ def _engine_id(value: Any) -> str:
 
 def _direction(value: Any) -> str:
     token = _string(value).lower()
-    if token in {"", "higher", "higher_is_better", "descending"}:
+    if token in {"higher", "higher_is_better", "descending"}:
         return "higher_is_better"
     if token in {"lower", "lower_is_better", "ascending"}:
         return "lower_is_better"
@@ -526,6 +561,11 @@ def materialize_vina_gnina_comparison_adapter(
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
         "required_engine_run_fields": list(REQUIRED_ENGINE_RUN_FIELDS),
         "row_integrity_policy": ROW_INTEGRITY_POLICY,
+        "score_direction_policy": SCORE_DIRECTION_POLICY,
+        "boolean_value_policy": BOOLEAN_VALUE_POLICY,
+        "numeric_value_policy": NUMERIC_VALUE_POLICY,
+        "pose_success_policy": POSE_SUCCESS_POLICY,
+        "engine_pair_policy": ENGINE_PAIR_POLICY,
         "supported_engines": list(SUPPORTED_ENGINES),
         "supported_benchmark_splits": list(SUPPORTED_BENCHMARK_SPLITS),
         "first_blocked_target": first_blocked_target,

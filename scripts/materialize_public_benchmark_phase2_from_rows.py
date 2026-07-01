@@ -292,6 +292,11 @@ def _row_intake_contracts(
             "supported_benchmark_families": list(
                 enrichment_scorecard.SUPPORTED_FAMILIES
             ),
+            "row_integrity_policy": enrichment_scorecard.ROW_INTEGRITY_POLICY,
+            "score_direction_policy": enrichment_scorecard.SCORE_DIRECTION_POLICY,
+            "boolean_label_policy": enrichment_scorecard.BOOLEAN_LABEL_POLICY,
+            "numeric_value_policy": enrichment_scorecard.NUMERIC_VALUE_POLICY,
+            "active_decoy_policy": enrichment_scorecard.ACTIVE_DECOY_POLICY,
             "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
             "source_receipt_required_fields": common_source_receipt_fields,
             "source_actuality_policy": row_bundle.SOURCE_ACTUALITY_POLICY,
@@ -330,6 +335,12 @@ def _row_intake_contracts(
             "supported_benchmark_splits": list(
                 vina_gnina_adapter.SUPPORTED_BENCHMARK_SPLITS
             ),
+            "row_integrity_policy": vina_gnina_adapter.ROW_INTEGRITY_POLICY,
+            "score_direction_policy": vina_gnina_adapter.SCORE_DIRECTION_POLICY,
+            "boolean_value_policy": vina_gnina_adapter.BOOLEAN_VALUE_POLICY,
+            "numeric_value_policy": vina_gnina_adapter.NUMERIC_VALUE_POLICY,
+            "pose_success_policy": vina_gnina_adapter.POSE_SUCCESS_POLICY,
+            "engine_pair_policy": vina_gnina_adapter.ENGINE_PAIR_POLICY,
             "default_pose_success_rmsd_threshold_angstrom": (
                 vina_gnina_adapter.DEFAULT_POSE_SUCCESS_RMSD_THRESHOLD_ANGSTROM
             ),
