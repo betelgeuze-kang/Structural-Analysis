@@ -21,9 +21,7 @@
   "execution_preflight_checklist": [
     {
       "artifact_blockers": [
-        "casf_pdbbind_source_material_not_attached",
-        "casf_pdbbind_case_checksums_missing",
-        "casf_pdbbind_ligand_symmetry_contracts_missing"
+        "materialized_case_count_below_target"
       ],
       "claim_boundary": "This row is a read-only execution preflight over current local artifacts and source-of-truth blockers. It does not run the materializer or create benchmark evidence.",
       "command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
@@ -31,32 +29,28 @@
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "artifact_exists": true,
         "blockers": [
-          "casf_pdbbind_source_material_not_attached",
-          "casf_pdbbind_case_checksums_missing",
-          "casf_pdbbind_ligand_symmetry_contracts_missing"
+          "materialized_case_count_below_target"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-01T04:32:59.754701+00:00",
+        "generated_at": "2026-07-01T04:56:37.696021+00:00",
         "ready_values": {
           "materialized_case_count": 0,
           "public_benchmark_ready": false,
           "target_subset_case_count": 12
         },
         "schema_version": "public-benchmark-subset-manifest.v1",
-        "source_commit_sha": "03296687da1667f983eb2c47d97c9c2341aa5927",
+        "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
         "status": "source_material_required"
       },
       "current_ready": false,
       "dependency_ready": true,
       "dependency_states": [],
       "depends_on": [],
-      "first_blocker": "casf_pdbbind_source_material_not_attached",
+      "first_blocker": "materialized_case_count_below_target",
       "operator_slot_id": "casf_pdbbind_subset_intake",
       "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
       "source_of_truth_blockers": [
-        "casf_pdbbind_source_material_not_attached",
-        "casf_pdbbind_case_checksums_missing",
-        "casf_pdbbind_ligand_symmetry_contracts_missing",
+        "materialized_case_count_below_target",
         "public_benchmark_external_receipts_missing"
       ],
       "status": "operator_input_required",
@@ -105,21 +99,28 @@
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json"
     },
     {
-      "artifact_blockers": [],
+      "artifact_blockers": [
+        "pose_validity_input_cases_missing",
+        "pose_validity_input_not_ready"
+      ],
       "claim_boundary": "This row is a read-only execution preflight over current local artifacts and source-of-truth blockers. It does not run the materializer or create benchmark evidence.",
       "command": "python3 scripts/materialize_public_benchmark_posebusters_validity_packet.py --pose-validity-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-packet implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_posebusters_validity_materialization_report.json --fail-blocked",
       "current_artifact": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
         "artifact_exists": true,
-        "blockers": [],
-        "contract_pass": true,
-        "generated_at": "2026-07-01T04:32:59.757750+00:00",
+        "blockers": [
+          "pose_validity_input_cases_missing",
+          "pose_validity_input_not_ready"
+        ],
+        "contract_pass": false,
+        "generated_at": "2026-07-01T04:56:37.700129+00:00",
         "ready_values": {
+          "posebusters_validity_ready": false,
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-pose-validity-packet.v1",
-        "source_commit_sha": "03296687da1667f983eb2c47d97c9c2341aa5927",
-        "status": "ready_for_dry_run"
+        "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
+        "status": "posebusters_validity_materialization_required"
       },
       "current_ready": false,
       "dependency_ready": false,
@@ -147,22 +148,29 @@
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json"
     },
     {
-      "artifact_blockers": [],
+      "artifact_blockers": [
+        "pose_validity_input_cases_missing",
+        "pose_validity_input_not_ready"
+      ],
       "claim_boundary": "This row is a read-only execution preflight over current local artifacts and source-of-truth blockers. It does not run the materializer or create benchmark evidence.",
       "command": "python3 scripts/materialize_public_benchmark_rmsd_scorecard.py --pose-validity-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_materialization_report.json --fail-blocked",
       "current_artifact": {
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
         "artifact_exists": true,
-        "blockers": [],
-        "contract_pass": true,
-        "generated_at": "2026-07-01T04:32:59.760229+00:00",
+        "blockers": [
+          "pose_validity_input_cases_missing",
+          "pose_validity_input_not_ready"
+        ],
+        "contract_pass": false,
+        "generated_at": "2026-07-01T04:56:37.702065+00:00",
         "ready_values": {
-          "dry_run_case_count": 1,
-          "real_benchmark_case_count": 0
+          "dry_run_case_count": 0,
+          "real_benchmark_case_count": 0,
+          "scorecard_ready": false
         },
         "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
-        "source_commit_sha": "03296687da1667f983eb2c47d97c9c2341aa5927",
-        "status": "ready"
+        "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
+        "status": "rmsd_materialization_required"
       },
       "current_ready": false,
       "dependency_ready": false,
@@ -191,7 +199,8 @@
     },
     {
       "artifact_blockers": [
-        "public_benchmark_pose_success_harness_rows_missing"
+        "pose_validity_packet_case_rows_missing",
+        "symmetry_rmsd_scorecard_rows_missing"
       ],
       "claim_boundary": "This row is a read-only execution preflight over current local artifacts and source-of-truth blockers. It does not run the materializer or create benchmark evidence.",
       "command": "python3 scripts/materialize_public_benchmark_pose_success_harness.py --pose-validity-packet implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json --rmsd-scorecard implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json --out-harness implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness_materialization_report.json --fail-blocked",
@@ -199,18 +208,19 @@
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
         "artifact_exists": true,
         "blockers": [
-          "public_benchmark_pose_success_harness_rows_missing"
+          "pose_validity_packet_case_rows_missing",
+          "symmetry_rmsd_scorecard_rows_missing"
         ],
-        "contract_pass": true,
-        "generated_at": "2026-07-01T04:32:59.762412+00:00",
+        "contract_pass": false,
+        "generated_at": "2026-07-01T04:56:37.703874+00:00",
         "ready_values": {
-          "pose_success_count": 1,
+          "pose_success_count": 0,
           "pose_success_harness_ready": false,
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-pose-success-harness.v1",
-        "source_commit_sha": "03296687da1667f983eb2c47d97c9c2341aa5927",
-        "status": "ready_for_real_benchmark_rows"
+        "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
+        "status": "pose_success_harness_materialization_required"
       },
       "current_ready": false,
       "dependency_ready": false,
@@ -259,13 +269,13 @@
           "dud_e_lit_pcba_active_decoy_labels_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-01T04:32:59.764863+00:00",
+        "generated_at": "2026-07-01T04:56:37.705656+00:00",
         "ready_values": {
           "public_benchmark_enrichment_ready": false,
           "real_enrichment_target_count": 0
         },
         "schema_version": "public-benchmark-enrichment-scorecard.v1",
-        "source_commit_sha": "03296687da1667f983eb2c47d97c9c2341aa5927",
+        "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -303,13 +313,13 @@
           "vina_gnina_external_receipts_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-01T04:32:59.767187+00:00",
+        "generated_at": "2026-07-01T04:56:37.707357+00:00",
         "ready_values": {
           "public_benchmark_engine_comparison_ready": false,
           "real_comparison_case_count": 0
         },
         "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-        "source_commit_sha": "03296687da1667f983eb2c47d97c9c2341aa5927",
+        "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -397,9 +407,7 @@
     },
     {
       "artifact_blockers": [
-        "casf_pdbbind_source_material_not_attached",
-        "casf_pdbbind_case_checksums_missing",
-        "casf_pdbbind_ligand_symmetry_contracts_missing",
+        "materialized_case_count_below_target",
         "public_benchmark_real_pose_predictions_missing",
         "public_benchmark_real_pose_validity_rows_missing",
         "public_benchmark_real_rmsd_rows_missing",
@@ -414,9 +422,7 @@
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
         "artifact_exists": true,
         "blockers": [
-          "casf_pdbbind_source_material_not_attached",
-          "casf_pdbbind_case_checksums_missing",
-          "casf_pdbbind_ligand_symmetry_contracts_missing",
+          "materialized_case_count_below_target",
           "public_benchmark_real_pose_predictions_missing",
           "public_benchmark_real_pose_validity_rows_missing",
           "public_benchmark_real_rmsd_rows_missing",
@@ -426,14 +432,14 @@
           "public_benchmark_external_receipts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-01T04:32:59.773828+00:00",
+        "generated_at": "2026-07-01T04:56:37.713391+00:00",
         "ready_values": {
-          "blocker_count": 10,
+          "blocker_count": 8,
           "public_benchmark_ready": false,
           "tier_beta_ready": false
         },
         "schema_version": "public-benchmark-source-of-truth.v1",
-        "source_commit_sha": "03296687da1667f983eb2c47d97c9c2341aa5927",
+        "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
         "status": "seed_ready_materialization_blocked"
       },
       "current_ready": false,
@@ -477,7 +483,7 @@
         "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json"
       ],
-      "first_blocker": "casf_pdbbind_source_material_not_attached",
+      "first_blocker": "materialized_case_count_below_target",
       "operator_slot_id": "",
       "produces": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
       "source_of_truth_blockers": [],
@@ -491,9 +497,7 @@
   "first_blocked_target": "casf_pdbbind_subset_intake",
   "first_execution_preflight_blocker": {
     "artifact_blockers": [
-      "casf_pdbbind_source_material_not_attached",
-      "casf_pdbbind_case_checksums_missing",
-      "casf_pdbbind_ligand_symmetry_contracts_missing"
+      "materialized_case_count_below_target"
     ],
     "claim_boundary": "This row is a read-only execution preflight over current local artifacts and source-of-truth blockers. It does not run the materializer or create benchmark evidence.",
     "command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
@@ -501,32 +505,28 @@
       "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
       "artifact_exists": true,
       "blockers": [
-        "casf_pdbbind_source_material_not_attached",
-        "casf_pdbbind_case_checksums_missing",
-        "casf_pdbbind_ligand_symmetry_contracts_missing"
+        "materialized_case_count_below_target"
       ],
       "contract_pass": true,
-      "generated_at": "2026-07-01T04:32:59.754701+00:00",
+      "generated_at": "2026-07-01T04:56:37.696021+00:00",
       "ready_values": {
         "materialized_case_count": 0,
         "public_benchmark_ready": false,
         "target_subset_case_count": 12
       },
       "schema_version": "public-benchmark-subset-manifest.v1",
-      "source_commit_sha": "03296687da1667f983eb2c47d97c9c2341aa5927",
+      "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
       "status": "source_material_required"
     },
     "current_ready": false,
     "dependency_ready": true,
     "dependency_states": [],
     "depends_on": [],
-    "first_blocker": "casf_pdbbind_source_material_not_attached",
+    "first_blocker": "materialized_case_count_below_target",
     "operator_slot_id": "casf_pdbbind_subset_intake",
     "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
     "source_of_truth_blockers": [
-      "casf_pdbbind_source_material_not_attached",
-      "casf_pdbbind_case_checksums_missing",
-      "casf_pdbbind_ligand_symmetry_contracts_missing",
+      "materialized_case_count_below_target",
       "public_benchmark_external_receipts_missing"
     ],
     "status": "operator_input_required",
@@ -839,11 +839,11 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-07-01T04:33:28.626909+00:00",
+  "generated_at": "2026-07-01T04:58:26.424499+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:2a289519f800574e11febcd2be05af0009ee3f01b9747bb913d898746bec5628",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:0672b727838a337c6c8c7356f4eb421b88c4aa043d62c39799a53ce03546fa63",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d4cd7091185ef46a3fef3d546d1a670b7911b0e4de2f60703391a2cc757912b0",
-    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:edd2e1f2c560695f83e4f6dc30489379d16fe7a798541e82179cb5b933a6bf72",
+    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:709a8b0241c1a7ed960ea617660aaf0cd6bc41bfc3347a0fe20dd011d7f43bb1",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:f4c9d5e080f8f1d0326e22342b37f3995297a9b70feeef17c5b265ac698184d4",
     "scripts/materialize_public_benchmark_pose_success_harness.py": "sha256:b1031511d159a8dcd03c16abaf49ed894db43dda58978fae32239ba47f28f4a9",
@@ -1860,7 +1860,7 @@
   ],
   "route": "/product/public-benchmark/operator-intake",
   "schema_version": "public-benchmark-operator-intake-packet.v1",
-  "source_commit_sha": "5a3760aea5081106c84b5d66e9039ed8a3d57e6d",
+  "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {
@@ -2169,9 +2169,7 @@
     }
   ],
   "source_of_truth_blockers": [
-    "casf_pdbbind_source_material_not_attached",
-    "casf_pdbbind_case_checksums_missing",
-    "casf_pdbbind_ligand_symmetry_contracts_missing",
+    "materialized_case_count_below_target",
     "public_benchmark_real_pose_predictions_missing",
     "public_benchmark_real_pose_validity_rows_missing",
     "public_benchmark_real_rmsd_rows_missing",
@@ -2277,7 +2275,7 @@
   "summary": {
     "execution_preflight_checklist_count": 9,
     "first_blocked_target": "casf_pdbbind_subset_intake",
-    "first_execution_preflight_blocker": "casf_pdbbind_source_material_not_attached",
+    "first_execution_preflight_blocker": "materialized_case_count_below_target",
     "first_execution_preflight_step_id": "materialize_subset_manifest",
     "first_manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
     "first_operator_evidence_gap": {
@@ -2345,11 +2343,11 @@
       "operator_source_material_required",
       "operator_receipts_required"
     ],
-    "source_of_truth_blocker_count": 10,
+    "source_of_truth_blocker_count": 8,
     "source_of_truth_blocker_detail_count": 4,
     "source_of_truth_status": "seed_ready_materialization_blocked"
   },
-  "summary_line": "Public benchmark operator intake packet: READY | slots=4 | source_blockers=10",
+  "summary_line": "Public benchmark operator intake packet: READY | slots=4 | source_blockers=8",
   "supported_comparison_engines": [
     "vina",
     "gnina"

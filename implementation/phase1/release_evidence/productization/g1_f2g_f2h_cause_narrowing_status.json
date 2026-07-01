@@ -106,7 +106,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-06-30T23:28:58.522627+00:00",
+  "generated_at": "2026-07-01T04:57:12.190472+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -165,7 +165,7 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:4f72a8fc36405ae4cbc65647f97b94adb6537dcc5b343fa9ee9a796037cab2e0",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e5a6dc32e9c56d96099e5df09092b228aca08670e4a4cd76610ea55aef4f1204",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f202bce31695efb78d7d706f61131f2168296287fbbc89b0a1d5be3643ab2f5b",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:850ebe4c2a26151813761d5ff05f7f28afbedae4efcf3adec2cb9b83ffab83f8",
     "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:d0b088b95c3e1202bc0899d970f159898a4d6ffde41fca5730f8838ecc792379"
@@ -264,7 +264,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "5cc16eeb18bd3757839ccc850705bb40a90438d4",
+  "source_commit_sha": "b4b244fba9a79d8c92ebf910da1aaee2242c7732",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
