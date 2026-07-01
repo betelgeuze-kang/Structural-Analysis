@@ -364,6 +364,56 @@ def test_ux_new_user_observation_rejects_generated_gate_artifact_evidence_ref(tm
     assert payload["checks"]["evidence_ref_not_generated_gate_artifact_pass"] is False
 
 
+def test_ux_new_user_observation_rejects_product_readiness_snapshot_evidence_ref(tmp_path: Path) -> None:
+    generated_snapshot = _write_json(
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release_evidence"
+        / "productization"
+        / "product_readiness_snapshot.json",
+        {"status": "blocked"},
+    )
+    record = _passing_observation()
+    record["evidence_ref"] = str(generated_snapshot)
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(
+        observation_path=observation,
+        repo_root=tmp_path,
+    )
+
+    assert payload["contract_pass"] is False
+    assert "evidence_ref_generated_gate_artifact" in payload["blockers"]
+    assert payload["checks"]["evidence_ref_resolvable_pass"] is True
+    assert payload["checks"]["evidence_ref_not_generated_gate_artifact_pass"] is False
+
+
+def test_ux_new_user_observation_rejects_automated_browser_receipt_evidence_ref(tmp_path: Path) -> None:
+    browser_receipt = _write_json(
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release_evidence"
+        / "productization"
+        / "phase5_task_based_ux_browser_execution_receipt.json",
+        {"contract_pass": True},
+    )
+    record = _passing_observation()
+    record["evidence_ref"] = str(browser_receipt)
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(
+        observation_path=observation,
+        repo_root=tmp_path,
+    )
+
+    assert payload["contract_pass"] is False
+    assert "evidence_ref_generated_gate_artifact" in payload["blockers"]
+    assert payload["checks"]["evidence_ref_resolvable_pass"] is True
+    assert payload["checks"]["evidence_ref_not_generated_gate_artifact_pass"] is False
+
+
 def test_ux_new_user_observation_rejects_placeholder_and_slow_completion(tmp_path: Path) -> None:
     record = _passing_observation()
     record["observer"] = "TODO"
