@@ -346,6 +346,51 @@ def _components_from_report(report: dict[str, Any]) -> list[dict[str, Any]]:
     return components
 
 
+def _phase2_audit_summary(
+    *,
+    phase2_ready: bool,
+    missing_row_inputs: list[str],
+    components: list[dict[str, Any]],
+    phase2_requirements: list[dict[str, Any]],
+    phase2_requirement_summary: dict[str, Any],
+    phase2_exit_gate: dict[str, Any],
+    blockers: list[str],
+) -> dict[str, Any]:
+    failed_criteria = [
+        str(item) for item in phase2_exit_gate.get("failed_criteria", [])
+    ]
+    blocked_component_ids = [
+        str(item)
+        for item in phase2_requirement_summary.get("blocked_component_ids", [])
+    ]
+    return {
+        "phase2_ready": bool(phase2_ready),
+        "component_count": len(components),
+        "component_ready_count": sum(
+            1 for component in components if component.get("ready")
+        ),
+        "component_blocked_count": sum(
+            1 for component in components if not component.get("ready")
+        ),
+        "requirement_count": len(phase2_requirements),
+        "ready_requirement_count": sum(
+            1 for row in phase2_requirements if row.get("ready")
+        ),
+        "blocked_requirement_count": sum(
+            1 for row in phase2_requirements if not row.get("ready")
+        ),
+        "blocked_component_ids": blocked_component_ids,
+        "missing_row_input_count": len(missing_row_inputs),
+        "missing_row_inputs": [str(input_id) for input_id in missing_row_inputs],
+        "phase2_exit_gate_status": str(phase2_exit_gate.get("status") or ""),
+        "phase2_failed_criterion_count": int(
+            phase2_exit_gate.get("failed_criterion_count") or len(failed_criteria)
+        ),
+        "phase2_failed_criteria": failed_criteria,
+        "blocker_count": len(blockers),
+    }
+
+
 def build_public_benchmark_phase2_row_audit(
     *,
     repo_root: Path = ROOT,
@@ -390,11 +435,23 @@ def build_public_benchmark_phase2_row_audit(
         phase2_requirement_summary = (
             harness_bundle.build_phase2_requirement_summary(phase2_requirements)
         )
+        phase2_exit_gate = harness_bundle.build_phase2_exit_gate(
+            phase2_requirements
+        )
         blockers = [
             f"{component['component_id']}::{blocker}"
             for component in components
             for blocker in component["blockers"]
         ]
+        summary = _phase2_audit_summary(
+            phase2_ready=False,
+            missing_row_inputs=missing_input_ids,
+            components=components,
+            phase2_requirements=phase2_requirements,
+            phase2_requirement_summary=phase2_requirement_summary,
+            phase2_exit_gate=phase2_exit_gate,
+            blockers=blockers,
+        )
         return {
             "schema_version": SCHEMA_VERSION,
             **release_evidence_metadata(
@@ -407,12 +464,14 @@ def build_public_benchmark_phase2_row_audit(
             "contract_pass": False,
             "phase2_ready": False,
             "missing_row_inputs": missing_input_ids,
+            "summary": summary,
             "row_input_contract": ROW_INPUTS,
             "row_intake_contracts": row_intake_contracts,
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
             "components": components,
+            "phase2_exit_gate": phase2_exit_gate,
             "phase2_requirements": phase2_requirements,
             "phase2_requirement_summary": phase2_requirement_summary,
             "outputs": {},
@@ -461,10 +520,22 @@ def build_public_benchmark_phase2_row_audit(
         phase2_requirement_summary = (
             harness_bundle.build_phase2_requirement_summary(phase2_requirements)
         )
+        phase2_exit_gate = harness_bundle.build_phase2_exit_gate(
+            phase2_requirements
+        )
         blockers = [
             f"{components[0]['component_id']}::{blocker}"
             for blocker in components[0]["blockers"]
         ]
+        summary = _phase2_audit_summary(
+            phase2_ready=False,
+            missing_row_inputs=[],
+            components=components,
+            phase2_requirements=phase2_requirements,
+            phase2_requirement_summary=phase2_requirement_summary,
+            phase2_exit_gate=phase2_exit_gate,
+            blockers=blockers,
+        )
         return {
             "schema_version": SCHEMA_VERSION,
             **release_evidence_metadata(
@@ -477,12 +548,14 @@ def build_public_benchmark_phase2_row_audit(
             "contract_pass": False,
             "phase2_ready": False,
             "missing_row_inputs": [],
+            "summary": summary,
             "row_input_contract": ROW_INPUTS,
             "row_intake_contracts": row_intake_contracts,
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
             "components": components,
+            "phase2_exit_gate": phase2_exit_gate,
             "phase2_requirements": phase2_requirements,
             "phase2_requirement_summary": phase2_requirement_summary,
             "outputs": {},
@@ -515,7 +588,9 @@ def build_public_benchmark_phase2_row_audit(
     )
     phase2_exit_gate = materialization_report.get("phase2_exit_gate")
     if not isinstance(phase2_exit_gate, dict):
-        phase2_exit_gate = {}
+        phase2_exit_gate = harness_bundle.build_phase2_exit_gate(
+            phase2_requirements
+        )
     failed_criteria = [
         str(item) for item in phase2_exit_gate.get("failed_criteria", [])
     ]
@@ -535,6 +610,15 @@ def build_public_benchmark_phase2_row_audit(
         for blocker in component.get("blockers", [])
     )
     blockers = sorted(dict.fromkeys(blockers))
+    summary = _phase2_audit_summary(
+        phase2_ready=phase2_ready,
+        missing_row_inputs=[],
+        components=components,
+        phase2_requirements=phase2_requirements,
+        phase2_requirement_summary=phase2_requirement_summary,
+        phase2_exit_gate=phase2_exit_gate,
+        blockers=blockers,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -548,10 +632,11 @@ def build_public_benchmark_phase2_row_audit(
         "phase2_ready": phase2_ready,
         "tier_beta_ready": bool(materialization_report.get("tier_beta_ready")),
         "missing_row_inputs": [],
+        "summary": summary,
         "row_input_contract": ROW_INPUTS,
         "row_intake_contracts": row_intake_contracts,
-            "operator_bundle_materialization_report": operator_materialization_report,
-            "operator_bundle_source_actuality_check": source_actuality_check,
+        "operator_bundle_materialization_report": operator_materialization_report,
+        "operator_bundle_source_actuality_check": source_actuality_check,
         "phase2_exit_gate": phase2_exit_gate,
         "blockers": blockers,
         "component_count": len(components),

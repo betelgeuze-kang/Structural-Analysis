@@ -32,6 +32,14 @@ PHASE2_COMPONENT_IDS = {
     "dud_e_or_lit_pcba_enrichment",
 }
 
+PHASE2_FAILED_CRITERIA = [
+    "casf_pdbbind_pose_success_harness_ready",
+    "symmetry_aware_ligand_rmsd_ready",
+    "posebusters_style_pose_validity_ready",
+    "vina_gnina_comparison_ready",
+    "dud_e_or_lit_pcba_enrichment_ready",
+]
+
 
 def _checksum(seed: str) -> str:
     return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
@@ -240,6 +248,56 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
             "dud_e_or_lit_pcba_enrichment",
         ],
     }
+    assert audit["summary"] == {
+        "phase2_ready": False,
+        "component_count": 5,
+        "component_ready_count": 0,
+        "component_blocked_count": 5,
+        "requirement_count": 5,
+        "ready_requirement_count": 0,
+        "blocked_requirement_count": 5,
+        "blocked_component_ids": [
+            "casf_pdbbind_pose_success_harness",
+            "symmetry_aware_ligand_rmsd",
+            "posebusters_style_pose_validity",
+            "vina_gnina_comparison_adapter",
+            "dud_e_or_lit_pcba_enrichment",
+        ],
+        "missing_row_input_count": 4,
+        "missing_row_inputs": [
+            "subset_rows",
+            "pose_rows",
+            "enrichment_rows",
+            "vina_gnina_rows",
+        ],
+        "phase2_exit_gate_status": "blocked",
+        "phase2_failed_criterion_count": 5,
+        "phase2_failed_criteria": PHASE2_FAILED_CRITERIA,
+        "blocker_count": 6,
+    }
+    assert audit["phase2_exit_gate"]["claim"] == (
+        "public_benchmark_harness_phase2_exit_gate"
+    )
+    assert audit["phase2_exit_gate"]["status"] == "blocked"
+    assert audit["phase2_exit_gate"]["failed_criteria"] == PHASE2_FAILED_CRITERIA
+    phase2_exit_criteria = {
+        row["component_id"]: row for row in audit["phase2_exit_gate"]["criteria"]
+    }
+    assert phase2_exit_criteria["casf_pdbbind_pose_success_harness"][
+        "blockers"
+    ] == ["subset_rows_not_provided", "pose_rows_not_provided"]
+    assert phase2_exit_criteria["symmetry_aware_ligand_rmsd"]["blockers"] == [
+        "pose_rows_not_provided"
+    ]
+    assert phase2_exit_criteria["posebusters_style_pose_validity"]["blockers"] == [
+        "pose_rows_not_provided"
+    ]
+    assert phase2_exit_criteria["vina_gnina_comparison_adapter"]["blockers"] == [
+        "vina_gnina_rows_not_provided"
+    ]
+    assert phase2_exit_criteria["dud_e_or_lit_pcba_enrichment"]["blockers"] == [
+        "enrichment_rows_not_provided"
+    ]
     missing_requirement = {
         row["component_id"]: row for row in audit["phase2_requirements"]
     }
@@ -335,6 +393,11 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
         "phase2_ready": True,
         "blocked_component_ids": [],
     }
+    assert audit["summary"]["phase2_ready"] is True
+    assert audit["summary"]["ready_requirement_count"] == 5
+    assert audit["summary"]["blocked_requirement_count"] == 0
+    assert audit["summary"]["phase2_failed_criteria"] == []
+    assert audit["summary"]["blocker_count"] == 0
     assert all(row["ready"] for row in audit["phase2_requirements"])
     assert audit["row_intake_contracts"]["phase2_outputs"]["operator_bundle"] == (
         str(tmp_path / "operator_bundle.json")

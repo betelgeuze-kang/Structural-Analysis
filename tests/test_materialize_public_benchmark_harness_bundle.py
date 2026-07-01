@@ -217,6 +217,9 @@ def test_public_benchmark_harness_bundle_materializes_tier_beta_ready_artifacts(
     assert report["phase2_blocked_component_count"] == 0
     assert report["phase2_exit_gate"]["failed_criteria"] == []
     assert report["phase2_exit_gate"]["status"] == "ready"
+    assert module.build_phase2_exit_gate(report["phase2_requirements"])["status"] == (
+        "ready"
+    )
     assert {row["component_id"] for row in report["required_components"]} == (
         PHASE2_COMPONENT_IDS
     )

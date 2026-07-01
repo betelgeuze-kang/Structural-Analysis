@@ -380,6 +380,11 @@ def _build_phase2_exit_gate(
     }
 
 
+def build_phase2_exit_gate(component_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return the public Phase 2 exit gate for component-like requirement rows."""
+    return _build_phase2_exit_gate(component_rows)
+
+
 def build_phase2_requirement_rows(
     component_rows: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
