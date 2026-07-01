@@ -195,6 +195,68 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "gpcr_hard_decoy_actual_closure",
         "pocketmd_lite_topk_actual_closure",
     ]
+    component_summaries = {
+        row["component_id"]: row["requirement_summary"]
+        for row in audit["components"]
+    }
+    assert audit["component_requirement_summaries"] == [
+        component_summaries["gpcr_hard_decoy_actual_closure"],
+        component_summaries["pocketmd_lite_topk_actual_closure"],
+    ]
+    assert component_summaries["gpcr_hard_decoy_actual_closure"] == {
+        "actual_closure_ready": False,
+        "blocked_requirement_count": 5,
+        "blocker_count": 15,
+        "component_id": "gpcr_hard_decoy_actual_closure",
+        "failed_criteria": [
+            "ranking_pr_auc_ci_low_min",
+            "top20_hit_rate_min",
+            "decoys_above_positive_count_max",
+            "no_positive_out_anchored_by_top_decoys",
+            "raw_hard_decoy_rows_actual_closure",
+        ],
+        "failed_criterion_count": 5,
+        "passing_requirement_count": 0,
+        "requirement_count": 5,
+    }
+    assert audit["components"][0]["actual_closure_ready"] is False
+    assert audit["components"][0]["failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
+    ]
+    assert component_summaries["pocketmd_lite_topk_actual_closure"] == {
+        "actual_closure_ready": False,
+        "blocked_requirement_count": 8,
+        "blocker_count": 13,
+        "component_id": "pocketmd_lite_topk_actual_closure",
+        "failed_criteria": [
+            "top_k_refinement_rows_present",
+            "top_k_refinement_case_coverage",
+            "local_min_survival_materialized",
+            "contact_persistence_materialized",
+            "h_bond_persistence_materialized",
+            "clash_relief_materialized",
+            "uncertainty_summary_materialized",
+            "report_blockers_resolved",
+        ],
+        "failed_criterion_count": 8,
+        "passing_requirement_count": 1,
+        "requirement_count": 9,
+    }
+    assert audit["components"][1]["actual_closure_ready"] is False
+    assert audit["components"][1]["failed_criteria"] == [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
     gpcr_requirements = [
         row
         for row in audit["actual_closure_requirements"]
@@ -340,8 +402,36 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     assert gpcr["phase3_exit_gate_status"] == "ready"
     assert len(gpcr["phase3_exit_gate_criteria"]) == 5
     assert gpcr["target_pass_count"] == 3
+    assert gpcr["actual_closure_ready"] is True
+    assert gpcr["failed_criteria"] == []
+    assert gpcr["requirement_summary"] == {
+        "actual_closure_ready": True,
+        "blocked_requirement_count": 0,
+        "blocker_count": 0,
+        "component_id": "gpcr_hard_decoy_actual_closure",
+        "failed_criteria": [],
+        "failed_criterion_count": 0,
+        "passing_requirement_count": 5,
+        "requirement_count": 5,
+    }
     assert pocketmd["phase4_exit_gate_status"] == "ready"
     assert len(pocketmd["phase4_exit_gate_criteria"]) == 9
     assert pocketmd["real_refinement_case_count"] == 3
+    assert pocketmd["actual_closure_ready"] is True
+    assert pocketmd["failed_criteria"] == []
+    assert pocketmd["requirement_summary"] == {
+        "actual_closure_ready": True,
+        "blocked_requirement_count": 0,
+        "blocker_count": 0,
+        "component_id": "pocketmd_lite_topk_actual_closure",
+        "failed_criteria": [],
+        "failed_criterion_count": 0,
+        "passing_requirement_count": 9,
+        "requirement_count": 9,
+    }
+    assert audit["component_requirement_summaries"] == [
+        gpcr["requirement_summary"],
+        pocketmd["requirement_summary"],
+    ]
     assert (tmp_path / "gpcr_surface.json").exists()
     assert (tmp_path / "pocketmd_surface.json").exists()

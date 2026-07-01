@@ -395,6 +395,68 @@ def _actual_closure_requirement_summary(
     }
 
 
+def _component_requirement_summary(
+    requirements: list[dict[str, Any]],
+    *,
+    component_id: str,
+) -> dict[str, Any]:
+    rows = [
+        row
+        for row in requirements
+        if str(row.get("component_id") or "") == component_id
+    ]
+    failed_criteria = [
+        str(row.get("criterion_id") or "")
+        for row in rows
+        if not bool(row.get("pass"))
+    ]
+    blocker_count = sum(
+        len([blocker for blocker in row.get("blockers", []) if str(blocker)])
+        for row in rows
+    )
+    return {
+        "component_id": component_id,
+        "requirement_count": len(rows),
+        "passing_requirement_count": sum(1 for row in rows if bool(row.get("pass"))),
+        "blocked_requirement_count": len(failed_criteria),
+        "failed_criteria": failed_criteria,
+        "failed_criterion_count": len(failed_criteria),
+        "blocker_count": blocker_count,
+        "actual_closure_ready": bool(rows) and not failed_criteria,
+    }
+
+
+def _attach_component_requirement_summaries(
+    components: list[dict[str, Any]],
+    requirements: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    enriched: list[dict[str, Any]] = []
+    for component in components:
+        component_id = str(component.get("component_id") or "")
+        component_requirements = [
+            row
+            for row in requirements
+            if str(row.get("component_id") or "") == component_id
+        ]
+        enriched.append(
+            {
+                **component,
+                "actual_closure_ready": bool(component_requirements)
+                and all(bool(row.get("pass")) for row in component_requirements),
+                "failed_criteria": [
+                    str(row.get("criterion_id") or "")
+                    for row in component_requirements
+                    if not bool(row.get("pass"))
+                ],
+                "requirement_summary": _component_requirement_summary(
+                    requirements,
+                    component_id=component_id,
+                ),
+            }
+        )
+    return enriched
+
+
 def _component_error(component_id: str, exc: Exception, expected_mode: str) -> dict[str, Any]:
     return {
         "component_id": component_id,
@@ -634,6 +696,15 @@ def build_science_actual_closure_audit(
         if rows_path is None
     ]
     actual_closure_requirements = _actual_closure_requirements(components)
+    components = _attach_component_requirement_summaries(
+        components,
+        actual_closure_requirements,
+    )
+    component_requirement_summaries = [
+        component["requirement_summary"]
+        for component in components
+        if isinstance(component.get("requirement_summary"), dict)
+    ]
     requirement_summary = _actual_closure_requirement_summary(
         actual_closure_requirements,
         missing_row_inputs=missing_row_inputs,
@@ -679,6 +750,7 @@ def build_science_actual_closure_audit(
         "components": components,
         "missing_row_inputs": missing_row_inputs,
         "row_intake_contracts": row_intake_contracts,
+        "component_requirement_summaries": component_requirement_summaries,
         "actual_closure_requirements": actual_closure_requirements,
         "actual_closure_requirement_summary": requirement_summary,
         "required_actual_closures": [
