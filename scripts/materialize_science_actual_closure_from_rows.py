@@ -170,6 +170,24 @@ def _gpcr_row_intake_contract(
         "numeric_value_policy": {
             "score": "must parse to a finite float; NaN and Infinity are rejected",
         },
+        "boolean_label_policy": {
+            "is_positive": (
+                "must parse to a boolean; exactly one of is_positive/is_decoy "
+                "must be true per molecule row"
+            ),
+            "is_decoy": (
+                "must parse to a boolean; exactly one of is_positive/is_decoy "
+                "must be true per molecule row"
+            ),
+        },
+        "score_direction_policy": (
+            "Each target must use one consistent score_direction value; mixed "
+            "higher_is_better/lower_is_better rows for the same target are rejected."
+        ),
+        "unexpected_target_policy": (
+            "Rows for targets outside the required DRD2/HTR2A/OPRM1 set are "
+            "recorded as unexpected_targets and do not count toward actual closure."
+        ),
         "phase3_exit_criteria": dict(gpcr_suite.EXIT_CRITERIA),
         "actual_closure_criterion_id": gpcr_suite.ACTUAL_CLOSURE_CRITERION_ID,
         "expected_outputs": {
@@ -233,6 +251,17 @@ def _pocketmd_row_intake_contract(
             "uncertainty_interval.high": (
                 "must parse to a finite float and be >= low; NaN and Infinity are rejected"
             ),
+        },
+        "integer_value_policy": {
+            "top_k_rank": (
+                "must parse to a positive integer <= max_top_k and form a "
+                "contiguous rank prefix starting at 1 for each case"
+            ),
+            "clash_count_before": "must parse to a non-negative integer",
+            "clash_count_after": "must parse to a non-negative integer",
+        },
+        "boolean_value_policy": {
+            "local_min_survived": "must parse to a boolean value",
         },
         "required_summary_metrics": list(pocketmd_survival.REQUIRED_SUMMARY_METRICS),
         "required_component_metrics": list(pocketmd_survival.REQUIRED_METRICS),

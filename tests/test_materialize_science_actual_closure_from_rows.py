@@ -325,6 +325,22 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert gpcr_contract["numeric_value_policy"] == {
         "score": "must parse to a finite float; NaN and Infinity are rejected",
     }
+    assert gpcr_contract["boolean_label_policy"] == {
+        "is_decoy": (
+            "must parse to a boolean; exactly one of is_positive/is_decoy "
+            "must be true per molecule row"
+        ),
+        "is_positive": (
+            "must parse to a boolean; exactly one of is_positive/is_decoy "
+            "must be true per molecule row"
+        ),
+    }
+    assert gpcr_contract["score_direction_policy"].startswith(
+        "Each target must use one consistent score_direction value"
+    )
+    assert gpcr_contract["unexpected_target_policy"].startswith(
+        "Rows for targets outside the required DRD2/HTR2A/OPRM1 set"
+    )
     assert gpcr_contract["row_integrity_policy"]["required_unique_row_keys"] == {
         "raw_hard_decoy_rows": ["target_id", "molecule_id"],
     }
@@ -399,6 +415,17 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "uncertainty_interval.low": (
             "must parse to a finite float; NaN and Infinity are rejected"
         ),
+    }
+    assert pocketmd_contract["integer_value_policy"] == {
+        "clash_count_after": "must parse to a non-negative integer",
+        "clash_count_before": "must parse to a non-negative integer",
+        "top_k_rank": (
+            "must parse to a positive integer <= max_top_k and form a "
+            "contiguous rank prefix starting at 1 for each case"
+        ),
+    }
+    assert pocketmd_contract["boolean_value_policy"] == {
+        "local_min_survived": "must parse to a boolean value",
     }
     assert pocketmd_contract["row_integrity_policy"]["required_unique_row_keys"] == {
         "top_k_refinement_rows": [
@@ -580,6 +607,61 @@ def test_science_actual_closure_audit_blocks_placeholder_source_receipts(
     assert pocketmd["contract_pass"] is False
     assert "raw_hard_decoy_rows_actual_closure" in gpcr["failed_criteria"]
     assert "report_blockers_resolved" in pocketmd["failed_criteria"]
+
+
+def test_science_actual_closure_audit_blocks_invalid_actual_rows(
+    tmp_path: Path,
+) -> None:
+    gpcr_rows = tmp_path / "gpcr_rows.csv"
+    pocketmd_rows = tmp_path / "pocketmd_rows.json"
+    pocketmd_contract = tmp_path / "pocketmd_contract.json"
+    _write_gpcr_rows(gpcr_rows)
+    _write_pocketmd_rows(pocketmd_rows)
+    pocketmd_contract.write_text(
+        json.dumps(
+            {"schema_version": "pocketmd-lite-contract.v1", "contract_pass": True}
+        ),
+        encoding="utf-8",
+    )
+
+    with gpcr_rows.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        fieldnames = reader.fieldnames or []
+        rows = list(reader)
+    rows[0]["score"] = "nan"
+    with gpcr_rows.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    pocketmd_payload = json.loads(pocketmd_rows.read_text(encoding="utf-8"))
+    pocketmd_payload["top_k_refinement_rows"][0]["top_k_rank"] = 21
+    pocketmd_rows.write_text(json.dumps(pocketmd_payload), encoding="utf-8")
+
+    audit = module.build_science_actual_closure_audit(
+        repo_root=REPO_ROOT,
+        gpcr_rows_path=gpcr_rows,
+        pocketmd_rows_path=pocketmd_rows,
+        gpcr_template_out=tmp_path / "gpcr_template.json",
+        gpcr_report_out=tmp_path / "gpcr_report.json",
+        gpcr_surface_out=tmp_path / "gpcr_surface.json",
+        pocketmd_intake_out=tmp_path / "pocketmd_intake.json",
+        pocketmd_report_out=tmp_path / "pocketmd_report.json",
+        pocketmd_surface_out=tmp_path / "pocketmd_surface.json",
+        pocketmd_contract_path=pocketmd_contract,
+        source_id="operator_attached_science_actual_closure_rows",
+        source_url="https://zenodo.org/records/2468135",
+        source_license="CC-BY-4.0",
+    )
+
+    assert audit["status"] == "operator_evidence_required"
+    assert audit["contract_pass"] is False
+    assert audit["component_ready_count"] == 0
+    assert any("score_invalid" in blocker for blocker in audit["blockers"])
+    assert any("top_k_rank_exceeds_max:20" in blocker for blocker in audit["blockers"])
+    assert audit["components"][0]["materialized"] is False
+    assert audit["components"][1]["materialized"] is False
+    assert audit["actual_closure_requirement_summary"]["actual_closure_ready"] is False
 
 
 def test_science_actual_closure_audit_autodetects_default_row_paths(
