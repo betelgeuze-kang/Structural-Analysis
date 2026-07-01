@@ -407,6 +407,9 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         "unit-test://",
         "file://",
     ]
+    assert subset_contract["source_actuality_policy"][
+        "row_file_artifact_sha256_policy"
+    ].startswith("Every operator row file materialized by this importer")
     pose_contract = contracts["pose_rows"]
     assert pose_contract["default_row_path_candidates"][0].endswith(
         "public_benchmark_pose_rows.json"
@@ -542,6 +545,21 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     }
     assert audit["operator_bundle_source_actuality_check"]["contract_pass"] is True
     assert audit["operator_bundle_source_actuality_check"]["blockers"] == []
+    row_file_receipts = audit["operator_bundle_materialization_report"][
+        "row_file_artifact_receipts"
+    ]
+    assert row_file_receipts["subset_rows"]["source_artifact_sha256"] == (
+        module.row_bundle.file_sha256(rows["subset"])
+    )
+    assert row_file_receipts["pose_rows"]["source_artifact_sha256"] == (
+        module.row_bundle.file_sha256(rows["pose"])
+    )
+    assert row_file_receipts["enrichment_rows"]["source_artifact_sha256"] == (
+        module.row_bundle.file_sha256(rows["enrichment"])
+    )
+    assert row_file_receipts["vina_gnina_rows"]["source_artifact_sha256"] == (
+        module.row_bundle.file_sha256(rows["vina_gnina"])
+    )
 
     assert (tmp_path / "operator_bundle.json").exists()
     assert (tmp_path / "harness_report.json").exists()

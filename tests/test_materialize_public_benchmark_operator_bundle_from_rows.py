@@ -245,7 +245,32 @@ def test_public_benchmark_operator_bundle_from_row_files_groups_flat_rows(
     }
     assert report["source_actuality_check"]["contract_pass"] is True
     assert report["source_actuality_check"]["blockers"] == []
+    assert report["source_actuality_check"]["policy"][
+        "row_file_artifact_sha256_policy"
+    ].startswith("Every operator row file materialized by this importer")
     assert report["source_actuality_blockers"] == []
+    row_file_receipts = report["row_file_artifact_receipts"]
+    assert set(row_file_receipts) == {
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+    }
+    assert row_file_receipts["subset_rows"] == {
+        "row_input_id": "subset_rows",
+        "path": str(subset_rows),
+        "format": "jsonl",
+        "source_artifact_sha256": module.file_sha256(subset_rows),
+    }
+    assert row_file_receipts["pose_rows"]["source_artifact_sha256"] == (
+        module.file_sha256(pose_rows)
+    )
+    assert row_file_receipts["enrichment_rows"]["source_artifact_sha256"] == (
+        module.file_sha256(enrichment_rows)
+    )
+    assert row_file_receipts["vina_gnina_rows"]["source_artifact_sha256"] == (
+        module.file_sha256(vina_gnina_rows)
+    )
 
 
 def test_public_benchmark_operator_bundle_from_rows_flags_placeholder_sources(

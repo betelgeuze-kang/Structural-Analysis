@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -93,6 +94,10 @@ SOURCE_ACTUALITY_POLICY = {
         "predicted_ligand_path_or_pose_ref"
     ],
     "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+    "row_file_artifact_sha256_policy": (
+        "Every operator row file materialized by this importer is recorded with "
+        "sha256:<64 hex> in materialization_report.row_file_artifact_receipts."
+    ),
     "placeholder_markers_rejected": list(PLACEHOLDER_SOURCE_TEXT_MARKERS),
     "placeholder_provenance_prefixes_rejected": list(PLACEHOLDER_PROVENANCE_PREFIXES),
 }
@@ -162,6 +167,24 @@ def _is_repeated_placeholder_checksum(value: Any) -> bool:
         return False
     digest = text.split(":", 1)[1].lower()
     return len(set(digest)) == 1
+
+
+def file_sha256(path: Path) -> str:
+    return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
+
+
+def _row_file_artifact_receipts(
+    row_files: dict[str, Path],
+) -> dict[str, dict[str, Any]]:
+    receipts: dict[str, dict[str, Any]] = {}
+    for row_input_id, path in row_files.items():
+        receipts[row_input_id] = {
+            "row_input_id": row_input_id,
+            "path": str(path),
+            "format": path.suffix.lower().lstrip(".") or "unknown",
+            "source_artifact_sha256": file_sha256(path),
+        }
+    return receipts
 
 
 def _source_receipt_actuality_blockers(
@@ -416,6 +439,14 @@ def build_public_benchmark_operator_bundle_from_rows(
     vina_gnina_rows = _load_rows(vina_gnina_rows_path)
     enrichment_targets = _build_enrichment_targets(enrichment_rows)
     vina_gnina_cases = _build_vina_gnina_cases(vina_gnina_rows)
+    row_file_artifact_receipts = _row_file_artifact_receipts(
+        {
+            "subset_rows": subset_rows_path,
+            "pose_rows": pose_rows_path,
+            "enrichment_rows": enrichment_rows_path,
+            "vina_gnina_rows": vina_gnina_rows_path,
+        }
+    )
     source_actuality_check = _source_actuality_check(
         subset_rows=subset_rows,
         pose_rows=pose_rows,
@@ -471,6 +502,7 @@ def build_public_benchmark_operator_bundle_from_rows(
             "vina_gnina_row_count": len(vina_gnina_rows),
             "vina_gnina_case_count": len(vina_gnina_cases),
             "accepted_row_formats": ["json", "jsonl", "ndjson", "csv"],
+            "row_file_artifact_receipts": row_file_artifact_receipts,
             "source_actuality_check": source_actuality_check,
             "source_actuality_blockers": source_actuality_check["blockers"],
             "phase2_harness_inputs": {
