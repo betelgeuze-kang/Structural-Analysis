@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-01T05:15:37.452964+00:00",
+  "generated_at": "2026-07-01T05:18:04.889293+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -104,7 +104,7 @@
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:8213bc9f03f65d7e47c5590d5d82fc3072fe23904fa486efbb00ad66b91dce6f",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:c1317d0931a5c9854d133cb915f3750d9eccb49255fc81915751e0db0eaf281e",
-    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:e134a48f7c0b4685c4cfddb2efd48dbcf500481b475d9e05dc0ce9b1a6a13b54",
+    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:ee75704a7112b02a019098845cfb631589b61f49b23d889cc29b5a318f18882b",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:3d2d71d9f064a6f3f55db02dafb7b3c7ef9452dc3268bcee6f298c73df5be8db",
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
@@ -116,7 +116,7 @@
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:3399f5474f46cfd708ff0d4bf1031029eb54d270665d8e0a85a7364faec05f6b",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:8643edb6652be3d33d4c2509366776a5615d33dde5c7659c443800ca3bb8074a",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:c846d235c33232e907623f4c3d2b2d3be5fb69ac7a73f9e432f709c14fceb7ba",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -528,7 +528,7 @@
       "summary": {
         "artifact_count": 18,
         "blocker_count": 0,
-        "current_source_commit_sha": "3a813d10529e27694b9e896bcf82a526fa42dfc8",
+        "current_source_commit_sha": "1ca252d49eebf3e90d48af4d3db87a4b5019ce30",
         "max_age_days": 30.0,
         "pass_count": 18
       },
@@ -944,7 +944,7 @@
         "github_sync_main_synced_to_head": true,
         "github_sync_preflight_artifact_present": true,
         "github_sync_preflight_clean": true,
-        "github_sync_preflight_head_matches_current": false,
+        "github_sync_preflight_head_matches_current": true,
         "github_sync_preflight_source_state_fresh": true,
         "github_sync_preflight_status": "synced",
         "github_sync_remote_mutation_approval_pending": false,
@@ -956,17 +956,8 @@
       "ok": true,
       "status": "pass",
       "summary": {
-        "changed_paths_since_preflight_head": [
-          "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-          "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
-        ],
-        "current_head_sha": "3a813d10529e27694b9e896bcf82a526fa42dfc8",
+        "changed_paths_since_preflight_head": [],
+        "current_head_sha": "1ca252d49eebf3e90d48af4d3db87a4b5019ce30",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -974,8 +965,8 @@
         "pending_remote_update_actions": [],
         "pending_remote_update_count": 0,
         "pending_remote_update_targets": [],
-        "preflight_local_head_sha": "827432daf4f7b784699502a7ab3a571219cb404e",
-        "preflight_source_state_kind": "evidence_only_delta",
+        "preflight_local_head_sha": "1ca252d49eebf3e90d48af4d3db87a4b5019ce30",
+        "preflight_source_state_kind": "exact",
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
@@ -1595,6 +1586,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "3a813d10529e27694b9e896bcf82a526fa42dfc8",
+  "source_commit_sha": "1ca252d49eebf3e90d48af4d3db87a4b5019ce30",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }
