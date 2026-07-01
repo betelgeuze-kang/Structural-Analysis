@@ -662,6 +662,152 @@ def _attach_component_requirement_summaries(
     return enriched
 
 
+def _criteria_for_component(
+    requirements: list[dict[str, Any]],
+    *,
+    component_id: str,
+) -> list[str]:
+    return [
+        str(row.get("criterion_id") or "")
+        for row in requirements
+        if str(row.get("component_id") or "") == component_id
+        and str(row.get("criterion_id") or "")
+    ]
+
+
+def _public_row_closure_rows(public: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for row in public.get("phase2_row_closure_matrix", []):
+        if not isinstance(row, dict):
+            continue
+        row_input_id = str(row.get("row_input_id") or "")
+        phase2_blockers = [
+            str(item) for item in row.get("operator_blockers_if_missing", []) if str(item)
+        ]
+        rows.append(
+            {
+                **row,
+                "actual_closure_component_id": PUBLIC_BENCHMARK_COMPONENT_ID,
+                "expected_rows_mode": "operator_attached_public_benchmark_rows",
+                "closes_actual_closure_criteria": [
+                    str(item)
+                    for item in row.get("closes_phase2_criteria", [])
+                    if str(item)
+                ],
+                "phase2_operator_blockers_if_missing": phase2_blockers,
+                "operator_blockers_if_missing": [
+                    f"{PUBLIC_BENCHMARK_COMPONENT_ID}::{blocker}"
+                    for blocker in phase2_blockers
+                ],
+                "row_contract_ref": f"row_intake_contracts.{row_input_id}",
+            }
+        )
+    return rows
+
+
+def _science_row_closure_matrix(
+    *,
+    public: dict[str, Any],
+    row_input_resolution: dict[str, dict[str, Any]],
+    row_intake_contracts: dict[str, Any],
+    actual_closure_requirements: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows = _public_row_closure_rows(public)
+    component_specs = [
+        (
+            "gpcr_rows",
+            GPCR_COMPONENT_ID,
+            "GPCR hard-decoy raw ranking rows",
+            "raw_hard_decoy_rows",
+            [
+                "materialize_gpcr_hard_decoy_operator_template_from_rows",
+                "materialize_gpcr_hard_decoy_suite_report",
+                "build_gpcr_evidence_surface",
+            ],
+        ),
+        (
+            "pocketmd_rows",
+            POCKETMD_COMPONENT_ID,
+            "PocketMD Lite top-k refinement rows",
+            "raw_top_k_refinement_rows",
+            [
+                "materialize_pocketmd_lite_operator_intake_from_rows",
+                "materialize_pocketmd_lite_topk_survival_report",
+                "build_pocketmd_lite_science_product_surface",
+            ],
+        ),
+    ]
+    for (
+        row_input_id,
+        component_id,
+        description,
+        expected_rows_mode,
+        materialization_chain,
+    ) in component_specs:
+        resolution = row_input_resolution.get(row_input_id, {})
+        if not isinstance(resolution, dict):
+            resolution = {}
+        contract = row_intake_contracts.get(row_input_id, {})
+        if not isinstance(contract, dict):
+            contract = {}
+        missing = bool(resolution.get("missing"))
+        criteria = _criteria_for_component(
+            actual_closure_requirements,
+            component_id=component_id,
+        )
+        rows.append(
+            {
+                "row_input_id": row_input_id,
+                "description": description,
+                "status": "missing" if missing else "provided",
+                "missing": missing,
+                "provided_path": str(resolution.get("resolved_path") or ""),
+                "resolved_path": str(resolution.get("resolved_path") or ""),
+                "auto_detected": bool(resolution.get("auto_detected")),
+                "default_row_path_candidates": list(
+                    contract.get("default_row_path_candidates")
+                    or _candidate_path_strings(row_input_id)
+                ),
+                "accepted_formats": list(contract.get("accepted_formats") or []),
+                "actual_closure_component_id": component_id,
+                "expected_rows_mode": expected_rows_mode,
+                "closes_actual_closure_criteria": criteria,
+                "materialization_chain": materialization_chain,
+                "row_contract_ref": f"row_intake_contracts.{row_input_id}",
+                "operator_blockers_if_missing": [
+                    f"{component_id}::{row_input_id}_not_provided"
+                ],
+                "claim_boundary": (
+                    "This row documents which science closure criteria a real "
+                    "operator-attached row file can unblock; it is not evidence by "
+                    "itself."
+                ),
+            }
+        )
+    return rows
+
+
+def _operator_next_actions(
+    *,
+    missing_row_inputs: list[str],
+    contract_pass: bool,
+    blockers: list[str],
+) -> list[str]:
+    if contract_pass:
+        return [
+            "review_ready_science_actual_closure_row_audit",
+            "refresh_release_freshness_after_science_closure",
+        ]
+    attach_actions = [f"attach_{row_input_id}" for row_input_id in missing_row_inputs]
+    follow_up_actions = [
+        "run_science_actual_closure_row_materializer",
+        "review_science_actual_closure_row_audit",
+    ]
+    if blockers and not missing_row_inputs:
+        follow_up_actions.insert(0, "resolve_science_actual_closure_row_blockers")
+    return attach_actions + follow_up_actions
+
+
 def _materialize_public_benchmark(
     *,
     subset_rows_path: Path | None,
@@ -1072,6 +1218,17 @@ def build_science_actual_closure_audit(
         for blocker in component.get("blockers", [])
     ]
     contract_pass = all(bool(component.get("contract_pass")) for component in components)
+    row_closure_matrix = _science_row_closure_matrix(
+        public=public,
+        row_input_resolution=row_input_resolution,
+        row_intake_contracts=row_intake_contracts,
+        actual_closure_requirements=actual_closure_requirements,
+    )
+    operator_next_actions = _operator_next_actions(
+        missing_row_inputs=missing_row_inputs,
+        contract_pass=contract_pass,
+        blockers=blockers,
+    )
     input_paths = [
         Path("scripts/materialize_science_actual_closure_from_rows.py"),
         Path("scripts/materialize_public_benchmark_phase2_from_rows.py"),
@@ -1119,6 +1276,9 @@ def build_science_actual_closure_audit(
         "missing_row_inputs": missing_row_inputs,
         "row_input_resolution": row_input_resolution,
         "row_intake_contracts": row_intake_contracts,
+        "row_closure_matrix": row_closure_matrix,
+        "row_closure_matrix_count": len(row_closure_matrix),
+        "operator_next_actions": operator_next_actions,
         "component_requirement_summaries": component_requirement_summaries,
         "actual_closure_requirements": actual_closure_requirements,
         "actual_closure_requirement_summary": requirement_summary,

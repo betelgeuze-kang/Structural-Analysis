@@ -446,6 +446,65 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "gpcr_rows",
         "pocketmd_rows",
     ]
+    assert audit["row_closure_matrix_count"] == 6
+    row_matrix = {row["row_input_id"]: row for row in audit["row_closure_matrix"]}
+    assert list(row_matrix) == [
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+        "gpcr_rows",
+        "pocketmd_rows",
+    ]
+    assert row_matrix["subset_rows"]["actual_closure_component_id"] == (
+        "public_benchmark_phase2_actual_closure"
+    )
+    assert row_matrix["subset_rows"]["status"] == "missing"
+    assert row_matrix["subset_rows"]["closes_actual_closure_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready"
+    ]
+    assert row_matrix["subset_rows"]["phase2_operator_blockers_if_missing"] == [
+        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+    ]
+    assert row_matrix["subset_rows"]["operator_blockers_if_missing"] == [
+        "public_benchmark_phase2_actual_closure::"
+        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+    ]
+    assert row_matrix["pose_rows"]["closes_actual_closure_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready",
+    ]
+    assert row_matrix["gpcr_rows"]["actual_closure_component_id"] == (
+        "gpcr_hard_decoy_actual_closure"
+    )
+    assert row_matrix["gpcr_rows"]["expected_rows_mode"] == "raw_hard_decoy_rows"
+    assert row_matrix["gpcr_rows"]["closes_actual_closure_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+        "raw_hard_decoy_rows_actual_closure",
+    ]
+    assert row_matrix["pocketmd_rows"]["actual_closure_component_id"] == (
+        "pocketmd_lite_topk_actual_closure"
+    )
+    assert row_matrix["pocketmd_rows"]["expected_rows_mode"] == (
+        "raw_top_k_refinement_rows"
+    )
+    assert "uncertainty_summary_materialized" in (
+        row_matrix["pocketmd_rows"]["closes_actual_closure_criteria"]
+    )
+    assert audit["operator_next_actions"] == [
+        "attach_subset_rows",
+        "attach_pose_rows",
+        "attach_enrichment_rows",
+        "attach_vina_gnina_rows",
+        "attach_gpcr_rows",
+        "attach_pocketmd_rows",
+        "run_science_actual_closure_row_materializer",
+        "review_science_actual_closure_row_audit",
+    ]
     assert audit["row_input_resolution"]["subset_rows"]["missing"] is True
     assert audit["row_input_resolution"]["pose_rows"]["missing"] is True
     assert audit["row_input_resolution"]["enrichment_rows"]["missing"] is True
@@ -796,6 +855,12 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     assert audit["component_ready_count"] == 3
     assert audit["blockers"] == []
     assert audit["missing_row_inputs"] == []
+    assert audit["row_closure_matrix_count"] == 6
+    assert all(row["status"] == "provided" for row in audit["row_closure_matrix"])
+    assert audit["operator_next_actions"] == [
+        "review_ready_science_actual_closure_row_audit",
+        "refresh_release_freshness_after_science_closure",
+    ]
     assert audit["actual_closure_requirement_summary"] == {
         "actual_closure_ready": True,
         "blocked_component_ids": [],
