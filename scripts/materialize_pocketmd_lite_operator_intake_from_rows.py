@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any
@@ -55,9 +56,10 @@ def _number(value: Any) -> float | None:
     if not token:
         return None
     try:
-        return float(token)
+        parsed = float(token)
     except ValueError:
         return None
+    return parsed if math.isfinite(parsed) else None
 
 
 def _integer(value: Any) -> int | None:

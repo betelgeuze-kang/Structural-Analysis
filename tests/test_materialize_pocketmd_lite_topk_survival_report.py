@@ -353,6 +353,34 @@ def test_pocketmd_lite_materializer_blocks_invalid_checksum(tmp_path: Path) -> N
     assert "operator_receipts_required" in report["root_cause_tags"]
 
 
+def test_pocketmd_lite_materializer_blocks_non_finite_numeric_values(
+    tmp_path: Path,
+) -> None:
+    intake = _with_source_receipt(_valid_intake(), tmp_path)
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    first_case["contact_persistence_rate"] = float("nan")
+    first_case["uncertainty_interval"] = {
+        "low": 0.0,
+        "high": float("inf"),
+        "unit": "energy_proxy_delta",
+    }
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["product_surface_ready"] is False
+    assert "case_a:contact_persistence_rate_invalid" in report["blockers"]
+    assert "case_a:uncertainty_interval_invalid" in report["blockers"]
+    assert "operator_values_required" in report["root_cause_tags"]
+
+
 def test_pocketmd_lite_materializer_blocks_placeholder_row_receipts(
     tmp_path: Path,
 ) -> None:

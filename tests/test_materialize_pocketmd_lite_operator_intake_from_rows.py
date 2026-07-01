@@ -477,6 +477,50 @@ def test_blocks_invalid_checksum_and_non_topk_rank(tmp_path: Path) -> None:
         raise AssertionError("expected max top-k error")
 
 
+def test_blocks_non_finite_numeric_values(tmp_path: Path) -> None:
+    rows = tmp_path / "pocketmd_lite_rows.json"
+    bad_row = _row(
+        case_id="case_bad",
+        candidate_id="pose_bad",
+        top_k_rank=1,
+        local_min_survived=True,
+        contact_rate=0.9,
+        h_bond_rate=0.5,
+        clash_before=3,
+        clash_after=1,
+    )
+    bad_row["contact_persistence_rate"] = "nan"
+    rows.write_text(json.dumps([bad_row]), encoding="utf-8")
+
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "row_1:contact_persistence_rate_invalid"
+    else:
+        raise AssertionError("expected non-finite contact rate error")
+
+    bad_row["contact_persistence_rate"] = 0.9
+    bad_row["uncertainty_interval"] = {
+        "low": 0.0,
+        "high": "Infinity",
+        "unit": "energy_proxy_delta",
+    }
+    rows.write_text(json.dumps([bad_row]), encoding="utf-8")
+
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "row_1:uncertainty_interval_invalid"
+    else:
+        raise AssertionError("expected non-finite uncertainty interval error")
+
+
 def test_blocks_non_contiguous_topk_rank_prefix(tmp_path: Path) -> None:
     rows = tmp_path / "pocketmd_lite_rows.json"
     rows.write_text(

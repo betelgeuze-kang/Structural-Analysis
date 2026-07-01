@@ -153,6 +153,8 @@ def _hip_required_direct_probe_kwargs(
 def _assess_hip_required_direct_probe_payload(
     child_payload: dict[str, Any],
 ) -> dict[str, Any]:
+    checkpoint = child_payload.get("checkpoint")
+    checkpoint = checkpoint if isinstance(checkpoint, dict) else {}
     residual_contract = child_payload.get("residual_contract")
     residual_contract = residual_contract if isinstance(residual_contract, dict) else {}
     gate_assessment = child_payload.get("gate_assessment")
@@ -238,6 +240,23 @@ def _assess_hip_required_direct_probe_payload(
         "hip_residual_engine_contract_passed": hip_contract_passed,
         "consistent_residual_jacobian_newton_gate_passed": consistent_gate_passed,
         "blockers": sorted(dict.fromkeys(blockers)),
+        "checkpoint": {
+            "load_scale": (
+                float(checkpoint["load_scale"])
+                if checkpoint.get("load_scale") is not None
+                else None
+            ),
+            "full_load_required": True,
+            "full_load_candidate": (
+                checkpoint.get("load_scale") is not None
+                and float(checkpoint.get("load_scale") or 0.0) >= 1.0
+            ),
+            "gap_to_full_load": (
+                max(0.0, 1.0 - float(checkpoint["load_scale"]))
+                if checkpoint.get("load_scale") is not None
+                else None
+            ),
+        },
         "hip_residual_engine_contract": {
             "required": hip_required,
             "passed": hip_contract_passed,
@@ -354,6 +373,84 @@ def _assess_hip_required_direct_probe_payload(
                 or 0
             ),
         },
+    }
+
+
+def _worker_terminal_gate_partition(
+    *,
+    proof: dict[str, Any],
+    residual_jvp_worker_path_ready: bool,
+    residual_jvp_worker_path_blockers: list[str],
+    g1_closure_gate_blockers: list[str],
+) -> dict[str, Any]:
+    gate = proof.get("gate_assessment")
+    gate = gate if isinstance(gate, dict) else {}
+    checkpoint = proof.get("checkpoint")
+    checkpoint = checkpoint if isinstance(checkpoint, dict) else {}
+    full_load_candidate = bool(checkpoint.get("full_load_candidate"))
+    full_load_closure_passed = bool(gate.get("full_load_closure_passed"))
+    direct_residual_gate_passed = bool(gate.get("direct_residual_gate_passed"))
+    consistent_gate_passed = bool(
+        proof.get("consistent_residual_jacobian_newton_gate_passed")
+    )
+
+    if not residual_jvp_worker_path_ready:
+        next_action = "repair_production_rocm_hip_residual_jvp_worker_path"
+        next_action_blockers = list(residual_jvp_worker_path_blockers)
+    elif not full_load_candidate or not full_load_closure_passed:
+        next_action = "generate_full_load_1p0_checkpoint_candidate"
+        next_action_blockers = []
+        if not full_load_candidate:
+            next_action_blockers.append("full_load_checkpoint_candidate_missing")
+        if not full_load_closure_passed:
+            next_action_blockers.append("full_load_closure_gate_not_passed")
+    elif not direct_residual_gate_passed:
+        next_action = "close_direct_residual_gate_on_full_load_checkpoint"
+        next_action_blockers = ["direct_residual_gate_not_passed"]
+    elif not consistent_gate_passed:
+        next_action = "close_consistent_residual_jacobian_newton_gate"
+        next_action_blockers = list(g1_closure_gate_blockers)
+    else:
+        next_action = "rerun_g1_full_load_hip_newton_lane"
+        next_action_blockers = []
+
+    return {
+        "schema_version": "production-rocm-hip-worker-terminal-gate-partition.v1",
+        "worker_path": {
+            "ready": bool(residual_jvp_worker_path_ready),
+            "blockers": residual_jvp_worker_path_blockers,
+        },
+        "g1_closure_gate": {
+            "ready": not g1_closure_gate_blockers,
+            "blockers": g1_closure_gate_blockers,
+            "consistent_residual_jacobian_newton_gate_passed": consistent_gate_passed,
+        },
+        "checkpoint_gate": {
+            "full_load_required": True,
+            "load_scale": checkpoint.get("load_scale"),
+            "full_load_candidate": full_load_candidate,
+            "gap_to_full_load": checkpoint.get("gap_to_full_load"),
+            "full_load_closure_passed": full_load_closure_passed,
+        },
+        "direct_residual_gate": {
+            "passed": direct_residual_gate_passed,
+            "relative_increment_gate_passed": bool(
+                gate.get("relative_increment_gate_passed")
+            ),
+            "material_newton_breadth_passed": bool(
+                gate.get("material_newton_breadth_passed")
+            ),
+            "fallback_zero_passed": bool(gate.get("fallback_zero_passed")),
+        },
+        "next_action": {
+            "id": next_action,
+            "blockers": sorted(dict.fromkeys(next_action_blockers)),
+        },
+        "claim_boundary": (
+            "Partition only: this separates the HIP residual/JVP worker path "
+            "from the remaining full-load and consistent Newton G1 closure "
+            "gates. It does not promote G1 readiness."
+        ),
     }
 
 
@@ -482,6 +579,12 @@ def _production_rocm_hip_residual_jvp_worker_contract(
         blocker for blocker in blockers if blocker not in set(g1_closure_gate_blockers)
     ]
     residual_jvp_worker_path_ready = not residual_jvp_worker_path_blockers
+    terminal_gate_partition = _worker_terminal_gate_partition(
+        proof=proof,
+        residual_jvp_worker_path_ready=residual_jvp_worker_path_ready,
+        residual_jvp_worker_path_blockers=residual_jvp_worker_path_blockers,
+        g1_closure_gate_blockers=g1_closure_gate_blockers,
+    )
     return {
         "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
         "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
@@ -493,6 +596,7 @@ def _production_rocm_hip_residual_jvp_worker_contract(
         "residual_jvp_worker_path_blockers": residual_jvp_worker_path_blockers,
         "g1_closure_gate_ready": not g1_closure_gate_blockers,
         "g1_closure_gate_blockers": g1_closure_gate_blockers,
+        "terminal_gate_partition": terminal_gate_partition,
         "required_for_g1_closure": True,
         "promotes_g1_closure": False,
         "cpu_fallback_allowed": False,

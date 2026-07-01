@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 from scipy.sparse import coo_matrix
 
 
@@ -800,8 +801,13 @@ def test_hip_required_probe_can_pass_only_with_strict_child_hip_contract(
                 "consistent_residual_jacobian_newton_blockers": [],
             },
             "gate_assessment": {
+                "direct_residual_gate_passed": True,
+                "relative_increment_gate_passed": True,
+                "full_load_closure_passed": True,
                 "consistent_residual_jacobian_newton_passed": True,
                 "consistent_residual_jacobian_newton_blockers": [],
+                "material_newton_breadth_passed": True,
+                "material_newton_breadth_blockers": [],
                 "fallback_zero_passed": True,
             },
             "matrix_free_global_krylov": {
@@ -852,6 +858,11 @@ def test_hip_required_probe_can_pass_only_with_strict_child_hip_contract(
     assert worker["residual_jvp_worker_path_blockers"] == []
     assert worker["g1_closure_gate_ready"] is True
     assert worker["g1_closure_gate_blockers"] == []
+    partition = worker["terminal_gate_partition"]
+    assert partition["worker_path"]["ready"] is True
+    assert partition["g1_closure_gate"]["ready"] is True
+    assert partition["checkpoint_gate"]["full_load_candidate"] is True
+    assert partition["next_action"]["id"] == "rerun_g1_full_load_hip_newton_lane"
     assert payload["hip_direct_probe"]["direct_residual_newton_ready"] is False
     assert payload["hip_direct_probe"]["hip_residual_engine_contract"]["passed"] is True
     assert payload["hip_direct_probe"]["gate_assessment"][
@@ -1035,6 +1046,22 @@ def test_hip_required_probe_separates_worker_path_from_consistent_newton_gate(
     assert worker["g1_closure_gate_ready"] is False
     assert worker["g1_closure_gate_blockers"] == [
         "consistent_residual_jacobian_newton_gate_not_passed"
+    ]
+    partition = worker["terminal_gate_partition"]
+    assert partition["worker_path"] == {"ready": True, "blockers": []}
+    assert partition["g1_closure_gate"]["ready"] is False
+    assert partition["g1_closure_gate"]["blockers"] == [
+        "consistent_residual_jacobian_newton_gate_not_passed"
+    ]
+    assert partition["checkpoint_gate"]["load_scale"] == 0.656
+    assert partition["checkpoint_gate"]["full_load_candidate"] is False
+    assert partition["checkpoint_gate"]["gap_to_full_load"] == pytest.approx(0.344)
+    assert partition["checkpoint_gate"]["full_load_closure_passed"] is False
+    assert partition["direct_residual_gate"]["passed"] is False
+    assert partition["next_action"]["id"] == "generate_full_load_1p0_checkpoint_candidate"
+    assert partition["next_action"]["blockers"] == [
+        "full_load_checkpoint_candidate_missing",
+        "full_load_closure_gate_not_passed",
     ]
     direct = payload["hip_direct_probe"]
     assert direct["hip_residual_engine_contract"]["passed"] is True
