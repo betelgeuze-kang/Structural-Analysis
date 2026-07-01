@@ -4,11 +4,17 @@
 - `contract_pass`: `True`
 - `application_ready`: `False`
 - `evidence_closure_pass`: `False`
+- `owner_decision_validation_pass`: `False`
 - `owner_decision_pending_count`: `86`
 - `post_decision_cleanup_pending_count`: `0`
 - `delete_decision_count`: `0`
 - `extract_decision_count`: `0`
 - `retain_quarantined_exception_count`: `0`
+
+## Owner Decision Validation Blockers
+
+- `owner_decisions_missing`
+- `owner_decision_pending_count=86`
 
 ## Plan Blockers
 
