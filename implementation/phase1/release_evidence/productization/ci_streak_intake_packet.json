@@ -9,9 +9,10 @@
     "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
     "nightly:github_actions_lane_threshold_not_pass",
     "nightly:github_actions_lane_streak_below_threshold",
-    "nightly:github_actions_filtered_run_count_below_threshold"
+    "nightly:github_actions_filtered_run_count_below_threshold",
+    "runner:self_hosted_runner_matching_labels_not_online"
   ],
-  "generated_at": "2026-07-01T03:29:36.330451+00:00",
+  "generated_at": "2026-07-01T03:34:51.446906+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -107,9 +108,30 @@
     }
   ],
   "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
+  "runner_precondition": {
+    "blockers": [
+      "self_hosted_runner_matching_labels_not_online"
+    ],
+    "claim_boundary": "This is read-only GitHub Actions self-hosted runner metadata. PASS only means at least one runner with the required labels is online and idle at collection time; it does not create CI streak evidence, mutate billing, or register a runner.",
+    "contract_pass": false,
+    "evaluated": true,
+    "matching_runner_count": 1,
+    "online_matching_runner_count": 0,
+    "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak.",
+    "path": "implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json",
+    "present": true,
+    "ready_runner_count": 0,
+    "required_labels": [
+      "self-hosted",
+      "linux",
+      "x64"
+    ],
+    "schema_version": "github-actions-self-hosted-runner-status.v1",
+    "status": "blocked"
+  },
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 0.007,
+    "age_hours": 0.003,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -119,7 +141,7 @@
     ],
     "contract_pass": false,
     "freshness_pass": true,
-    "generated_at": "2026-07-01T03:29:12.519219+00:00",
+    "generated_at": "2026-07-01T03:34:41.177096+00:00",
     "lanes": {
       "nightly": {
         "blockers": [
@@ -210,21 +232,34 @@
     "nightly_local_workflow_present": true,
     "nightly_missing_consecutive_pass_count": 30,
     "nightly_source_threshold_pass": false,
-    "open_blocker_count": 7,
+    "open_blocker_count": 8,
     "pr_github_actions_workflow_registered": true,
     "pr_github_actions_workflow_state": "active",
     "pr_local_required_trigger_present": true,
     "pr_missing_consecutive_pass_count": 30,
     "pr_pull_request_run_source_present": true,
     "pr_source_threshold_pass": false,
-    "source_evidence_age_hours": 0.007,
+    "runner_matching_runner_count": 1,
+    "runner_online_matching_runner_count": 0,
+    "runner_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak.",
+    "runner_precondition_evaluated": true,
+    "runner_precondition_pass": false,
+    "runner_ready_runner_count": 0,
+    "runner_required_labels": [
+      "self-hosted",
+      "linux",
+      "x64"
+    ],
+    "runner_status": "blocked",
+    "source_evidence_age_hours": 0.003,
     "source_evidence_freshness_pass": true,
-    "source_evidence_generated_at": "2026-07-01T03:29:12.519219+00:00",
+    "source_evidence_generated_at": "2026-07-01T03:34:41.177096+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
     "threshold": 30
   },
   "validation_commands": [
+    "python3 scripts/check_github_actions_self_hosted_runner_status.py --out implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json",
     "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
     "python3 scripts/build_ci_consecutive_pass_manifest.py --out implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
     "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
