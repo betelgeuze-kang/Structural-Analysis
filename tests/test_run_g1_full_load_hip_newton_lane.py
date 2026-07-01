@@ -631,7 +631,6 @@ def test_missing_hip_worker_contract_blocks_lane_promotion(
         "residual_jvp_worker_path_blockers": [],
         "g1_closure_gate_ready": None,
         "g1_closure_gate_blockers": [],
-        "terminal_gate_partition": {},
     }
     assert payload["child_exit_code"] is None
     assert not child.exists()
