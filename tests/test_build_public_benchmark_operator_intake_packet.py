@@ -186,6 +186,23 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_subset_manifest.json"
     )
+    assert pose["minimum_evidence"]["posebusters_style_check_contract"][
+        "packet_schema_version"
+    ] == "public-benchmark-pose-validity-packet.v1"
+    assert pose["minimum_evidence"]["posebusters_style_check_contract"][
+        "required_check_ids"
+    ] == [
+        "coordinate_finiteness",
+        "atom_count_and_order_contract",
+        "pose_success_metric_contract",
+        "symmetry_permutation_contract",
+        "minimum_interatomic_distance_guard",
+        "receptor_ligand_context_present",
+        "symmetry_aware_ligand_rmsd_angstrom",
+    ]
+    assert pose["row_validation_policies"]["posebusters_style_check_contract"] == (
+        pose["minimum_evidence"]["posebusters_style_check_contract"]
+    )
     assert (
         "materialize_public_benchmark_pose_validity_input.py"
         in pose["materialization_command"]
