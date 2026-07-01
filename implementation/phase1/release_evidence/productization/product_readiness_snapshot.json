@@ -126,7 +126,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 9,
+      "blocker_count": 8,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -135,18 +135,16 @@
         "human_ux::observation_file_missing",
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-        "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-        "stale_or_inconsistent:worktree_dirty"
+        "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
       ],
       "description": "Developer Preview productization evidence: release freshness/sync, CI/runner streaks, generated artifact consistency, and human UX workflow observation.",
       "root_streams": [
         "CI runner/streak",
-        "human UX",
-        "release freshness/sync"
+        "human UX"
       ]
     }
   },
-  "blocker_count": 37,
+  "blocker_count": 36,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -183,8 +181,7 @@
     "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "pm_release::security::license_status_not_configured",
-    "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-    "stale_or_inconsistent:worktree_dirty"
+    "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
   ],
   "claim_boundary": {
     "assisted_service_pilot": "assisted_service_pilot_ready is the engineer-review workstation service track. It requires workstation delivery 8/8, supported-scope guard, full quality, clean GitHub sync, real human UX observation, product/legal license approval, acceptance package, and explicit proxy/fallback/engineer-review boundaries. It does not relax solver_product gates.",
@@ -203,9 +200,8 @@
   "components": {
     "assisted_service_pilot": {
       "acceptance_package_ready": true,
-      "blocker_count": 4,
+      "blocker_count": 3,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "full_quality_not_ready",
         "human_ux_observation_not_ready",
         "license_approval_not_ready"
@@ -226,7 +222,7 @@
       "human_ux_observation_ready": false,
       "license_approval_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false,
+      "snapshot_source_state_consistent": true,
       "supported_scope_guard_ready": true,
       "workstation_delivery_8_of_8": true
     },
@@ -2843,22 +2839,21 @@
       "cleanup_plan_status": "ready",
       "cleanup_plan_track_or_add_required_path_count": 0,
       "codex_commit_or_push_performed": false,
-      "dirty_path_count": 1,
+      "dirty_path_count": 0,
       "human_git_action_required": false,
       "human_handoff_next_action": "rerun_git_clean_clone_reproduction",
       "human_handoff_push_or_release_command_included": false,
       "human_handoff_status": "ready",
       "human_handoff_suggested_command_count": 3,
-      "local_worktree_dirty": true,
-      "non_receipt_dirty_path_count": 1,
+      "local_worktree_dirty": false,
+      "non_receipt_dirty_path_count": 0,
       "remote_github_sync_blocker_count": 0,
       "remote_github_sync_blockers": [],
       "remote_github_sync_clean": true
     },
     "solver_product": {
-      "blocker_count": 6,
+      "blocker_count": 5,
       "blockers": [
-        "snapshot_source_state_not_consistent",
         "independent_product_not_ready",
         "g1_full_mesh_full_load_not_ready",
         "g1_full_load_hip_newton_lane_not_ready",
@@ -2872,13 +2867,13 @@
       "g1_full_mesh_full_load_ready": false,
       "independent_product_ready": false,
       "ready": false,
-      "snapshot_source_state_consistent": false
+      "snapshot_source_state_consistent": true
     }
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_fresh": false,
+  "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T06:53:43.288532+00:00",
+  "generated_at": "2026-07-01T06:58:53.980719+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:3769c1744ee7cb481d48780cb256c1581a3f943df27e9b8690423a761eb61c49",
@@ -2891,7 +2886,7 @@
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:1f00cf05868d5506d5ab471dd8c410c623fe97b125cb3b7272959f42034bf278",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:86906234ba077ed3a8c48ab99f636ad153a91eb81c53f00b2f805371da08bfdb",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:7403c829c1d43a78993b8100489442b925544e418c9938f6390c0134fa245dab",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:e58976c97d9bf8fe69813c045e8f62ccf982d1fc8d72a991b4e8234882952ae7",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:79c04ecd5eba76e2b455e12233face25161b211dfcbe4f662b0f060f7fcdf0fc",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:ba62012ebe3fc03770ad17094ebff5291dff419f5b67dc17efde202c20ce7887",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:268ca8182d5d777cc3dae909bf330a0259d05d5dcb430eb6f1c873a76c70333a",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:dcc03479458eefaec12315e205acb90c726b0112230c974622e6b7ed65e7538d",
@@ -2903,7 +2898,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:3e314f04e317b435ec8145ecf9f26ce1d9fcf76b36ae3ac50b75a99965e24bbd",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5c8308fa4966ba623a5dc4fd7d14b809210f90bba58857cef7cb6245f4e49550",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:980db67992608de0d66e4c0b3593574651b36e83169238df191bd7ae97b57d21",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:18df89e2face5793306281e389ab06733428860a1c16cbd82bf8847aeb28953c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:4c543d49be5dfc870da4955c7a0fd60c541783e339a00a888e09a5ed9ea8b223",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:edb1b631e5393fba15f74e6ea88fb4f8ef508498cb55015a556592a301b2f940",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2912,7 +2907,7 @@
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
-  "reason_code": "STALE_OR_INCONSISTENT",
+  "reason_code": "BLOCKED",
   "release_decision": {
     "approval_token_count": 4,
     "blocked_release_count": 5,
@@ -3550,19 +3545,17 @@
       ]
     },
     "release freshness/sync": {
-      "blocked": true,
-      "blocker_count": 1,
-      "blockers": [
-        "stale_or_inconsistent:worktree_dirty"
-      ]
+      "blocked": false,
+      "blocker_count": 0,
+      "blockers": []
     }
   },
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "snapshot_source_state_consistent": false,
+  "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "064fd0b110a99e3d91f2aead7561c2dd03fc33ee",
-  "stale_or_inconsistent": true,
+  "source_commit_sha": "e57a508a9011d1301563a97db5c0c7dfb1957841",
+  "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -3650,24 +3643,22 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [
-          "scripts/materialize_public_benchmark_harness_bundle.py",
-          "tests/test_materialize_public_benchmark_harness_bundle.py"
-        ],
-        "generated_at": "2026-07-01T06:38:33.640315+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-01T06:58:41.299318+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "84d8b4b89ec3c139b070b84af6e759c60e27efc2",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "e57a508a9011d1301563a97db5c0c7dfb1957841",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -3676,6 +3667,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -3697,6 +3689,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -3705,6 +3698,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -3726,6 +3720,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -3734,6 +3729,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -3755,6 +3751,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -3763,6 +3760,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -3784,11 +3782,13 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_science_actual_closure_from_rows.py"
@@ -3807,11 +3807,13 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_science_actual_closure_from_rows.py"
@@ -3827,31 +3829,22 @@
       },
       {
         "artifact": "fresh_full_validation_lane_status",
-        "changed_paths_since_source_commit": [
-          "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-          "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
-        ],
-        "generated_at": "2026-07-01T06:46:57.679405+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-01T06:58:31.301629+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "242c0e51e125c9bc18f5821655a90870ea9ac41e",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "e57a508a9011d1301563a97db5c0c7dfb1957841",
         "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_kind": "exact"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -3860,6 +3853,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -3881,6 +3875,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -3889,6 +3884,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -3910,6 +3906,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -3918,6 +3915,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -3939,6 +3937,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -3947,6 +3946,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -3968,6 +3968,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -3976,6 +3977,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -3997,6 +3999,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -4005,6 +4008,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -4026,6 +4030,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -4034,6 +4039,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -4055,6 +4061,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -4063,6 +4070,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -4084,6 +4092,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -4092,6 +4101,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -4113,6 +4123,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -4121,6 +4132,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -4142,6 +4154,7 @@
         "changed_paths_since_source_commit": [
           "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
           "scripts/materialize_pocketmd_lite_topk_survival_report.py",
           "scripts/materialize_public_benchmark_harness_bundle.py",
           "scripts/materialize_public_benchmark_pose_success_harness.py",
@@ -4150,6 +4163,7 @@
           "scripts/materialize_science_actual_closure_from_rows.py",
           "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
           "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_pose_success_harness.py",
@@ -4187,19 +4201,21 @@
       ]
     },
     "worktree": {
-      "dirty": true,
+      "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
-        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
         "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        "scripts/materialize_gpcr_hard_decoy_suite_report.py"
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
       ],
-      "non_receipt_dirty_paths": [
-        "scripts/materialize_gpcr_hard_decoy_suite_report.py"
-      ],
+      "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
         "candidate_set_scope": "Phase 3 seed git-clean-clone reproduction required-input set only; it is not an exhaustive current-worktree dirty-path inventory.",
@@ -4222,16 +4238,20 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
-        " M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
+        " M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        " M implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+        " M implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+        " M implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
         " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        " M scripts/materialize_gpcr_hard_decoy_suite_report.py"
+        " M implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        " M implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        " M implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
       ]
     }
   },
-  "status": "stale_or_inconsistent",
+  "status": "blocked",
   "workstation_delivery_ready": true
 }

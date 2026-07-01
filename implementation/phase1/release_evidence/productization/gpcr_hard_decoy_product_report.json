@@ -50,13 +50,13 @@
     "promote_broad_gpcr_claim",
     "infer_missing_target_values"
   ],
-  "generated_at": "2026-07-01T06:55:51.953326+00:00",
+  "generated_at": "2026-07-01T06:58:06.791977+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:9fd72c12e70d9558d3919e2eb869b8dcf02c42854029d892b6d95949b4008c8d",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:95ead44fab7cdfdf68cb2c7fe550932332860c93ebfd1fbce3476bb3bfdc5153",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:838d4cdde0ce19f045dcbf379236ac8e99307f398a9275e81f66da42f20792ce",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:ff74ac2aa825bdf23f5acbbb60d8b26c44fe13d075c99c1c0ab8dec7046c8b81",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:9b3c1c335670d310a2efa21b2a7af78b24ca396d7329990735e9d117207a5921",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:30d2b6a86da1915602bc647de024eece488f243636888b685fcd601591e7660a",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:24983ed914879fdc1a9155172826c00c1e8018349a6be2bc8a224d8f895c87f3",
     "scripts/build_gpcr_hard_decoy_product_report.py": "sha256:8b13fa660ffe12221fba3f3a81745fb923223316a3369cdbb89340aefc702aee",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8e20830c6f997a0e1da07217233c8cdd90f6fbe0bfc20894cea44ae39f0c70d9"
   },
@@ -491,7 +491,7 @@
     "OPRM1:positive_out_anchored_by_top_decoys_required"
   ],
   "science_claim_status": "blocked",
-  "source_commit_sha": "064fd0b110a99e3d91f2aead7561c2dd03fc33ee",
+  "source_commit_sha": "e57a508a9011d1301563a97db5c0c7dfb1957841",
   "status": "ready_science_claim_blocked",
   "summary": {
     "first_blocked_target": "DRD2",
