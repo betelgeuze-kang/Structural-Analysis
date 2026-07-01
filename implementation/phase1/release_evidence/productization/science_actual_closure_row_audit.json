@@ -586,13 +586,13 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T05:41:51.661135+00:00",
+  "generated_at": "2026-07-01T06:30:45.696618+00:00",
   "input_checksums": {
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:f38f01e52f00f6d514616b761a5ae2e206b3ec9e5aa07e1ce5f37b011cac953c",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:ab4d8500bc6b9214a10a5c588e5b659d03f27a94f6a95245a3b7c7b5279d3e80",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:901204e8a2c4f20693a6ec22d288f8333aee72c373fdce5fe07ca75d3a882048",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:b38110a12eeb1057133dd701c32e09d3bb89a1317f140d4c0374b9d2e3e7c4be",
-    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:a239d98d5aa67e0734bb657868a8cd9d9dad5c575cfb3352d60f9a719d819ee7"
+    "scripts/materialize_science_actual_closure_from_rows.py": "sha256:82d6eab34534fb5e8edf5c8aa082191688f7984e13d54a8f38e204aecf0ffdc8"
   },
   "missing_row_inputs": [
     "gpcr_rows",
@@ -692,6 +692,15 @@
         "OPRM1"
       ],
       "row_input_id": "gpcr_rows",
+      "row_integrity_policy": {
+        "purpose": "Duplicate molecules within a GPCR target cannot be used to inflate positive/decoy counts or Phase 3 hard-decoy ranking metrics.",
+        "required_unique_row_keys": {
+          "raw_hard_decoy_rows": [
+            "target_id",
+            "molecule_id"
+          ]
+        }
+      },
       "source_actuality_policy": {
         "placeholder_source_text_markers_rejected": [
           "<operator",
@@ -823,6 +832,21 @@
         "uncertainty_width_median"
       ],
       "row_input_id": "pocketmd_rows",
+      "row_integrity_policy": {
+        "purpose": "Duplicate PocketMD Lite top-k ranks or candidate identities cannot be used to inflate case, candidate, or survival counts.",
+        "required_unique_row_keys": {
+          "top_k_refinement_rows": [
+            [
+              "case_id",
+              "top_k_rank"
+            ],
+            [
+              "case_id",
+              "candidate_id"
+            ]
+          ]
+        }
+      },
       "source_receipt_required_fields": [
         "source_id",
         "source_url",
@@ -845,7 +869,7 @@
     }
   },
   "schema_version": "science-actual-closure-row-audit.v1",
-  "source_commit_sha": "a63076d75e0884ad2eddd9c9a72fbc7aff85c50c",
+  "source_commit_sha": "08649cdefe65aa3f184b9625f42cfa84d33ce232",
   "status": "operator_evidence_required",
   "summary": {
     "actual_closure_ready": false,

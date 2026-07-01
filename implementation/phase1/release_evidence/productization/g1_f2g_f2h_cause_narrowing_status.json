@@ -106,7 +106,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-07-01T05:23:17.097418+00:00",
+  "generated_at": "2026-07-01T06:30:45.641861+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -164,10 +164,10 @@
     }
   ],
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:4f72a8fc36405ae4cbc65647f97b94adb6537dcc5b343fa9ee9a796037cab2e0",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:94059bb4d342929cec6ff4e6eb82637bb1b5d4f7def7de2a531ce064cc6fd4f4",
+    "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:ba62012ebe3fc03770ad17094ebff5291dff419f5b67dc17efde202c20ce7887",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
-    "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:850ebe4c2a26151813761d5ff05f7f28afbedae4efcf3adec2cb9b83ffab83f8",
+    "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:8b437a017f328f541ca1a99edc6ff3302ea02cefed1dced8c9d2f62f4111645c",
     "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:d0b088b95c3e1202bc0899d970f159898a4d6ffde41fca5730f8838ecc792379"
   },
   "next_actions": [
@@ -264,7 +264,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "fca13ed5080a8ce606d7a6c15698dff3dd502e26",
+  "source_commit_sha": "08649cdefe65aa3f184b9625f42cfa84d33ce232",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
