@@ -323,10 +323,10 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T10:01:37.614985+00:00",
+  "generated_at": "2026-07-01T10:19:42.924303+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
-    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:8fcd3dd11225cc788bac2278acf53cb77be5d230dfe2d8202eda5df8e5d05a22",
+    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:1dcb68a1b0866a0235313cabe2d52a77c2eb9cb0a2764be91e1a27f429b1d2ec"
   },
   "missing_row_inputs": [
@@ -870,8 +870,23 @@
         "required_vina_engine_run_pose_ref_fields": [
           "predicted_ligand_path_or_pose_ref"
         ],
+        "required_vina_engine_run_receipt_fields": [
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref"
+        ],
         "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
-        "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+        "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+        "vina_engine_run_checksum_fields": [
+          "predicted_ligand_checksum",
+          "engine_config_checksum"
+        ],
+        "vina_engine_run_provenance_fields": [
+          "predicted_ligand_path_or_pose_ref",
+          "engine_run_provenance_ref"
+        ]
       },
       "source_checksum_policy": {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
@@ -1184,8 +1199,23 @@
         "required_vina_engine_run_pose_ref_fields": [
           "predicted_ligand_path_or_pose_ref"
         ],
+        "required_vina_engine_run_receipt_fields": [
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref"
+        ],
         "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
-        "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+        "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+        "vina_engine_run_checksum_fields": [
+          "predicted_ligand_checksum",
+          "engine_config_checksum"
+        ],
+        "vina_engine_run_provenance_fields": [
+          "predicted_ligand_path_or_pose_ref",
+          "engine_run_provenance_ref"
+        ]
       },
       "source_checksum_policy": {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
@@ -1290,6 +1320,10 @@
         "engine_id",
         "docking_run_id",
         "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_version",
+        "engine_config_checksum",
+        "engine_run_provenance_ref",
         "symmetry_aware_rmsd_angstrom",
         "pose_success",
         "score",
@@ -1368,8 +1402,23 @@
         "required_vina_engine_run_pose_ref_fields": [
           "predicted_ligand_path_or_pose_ref"
         ],
+        "required_vina_engine_run_receipt_fields": [
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref"
+        ],
         "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
-        "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
+        "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
+        "vina_engine_run_checksum_fields": [
+          "predicted_ligand_checksum",
+          "engine_config_checksum"
+        ],
+        "vina_engine_run_provenance_fields": [
+          "predicted_ligand_path_or_pose_ref",
+          "engine_run_provenance_ref"
+        ]
       },
       "source_checksum_policy": {
         "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
@@ -1393,7 +1442,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "ef71af2fc897b4668568e2e6894a4d8bfa9cc22c",
+  "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
