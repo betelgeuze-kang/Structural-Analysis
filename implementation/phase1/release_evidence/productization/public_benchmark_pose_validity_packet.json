@@ -101,7 +101,7 @@
     "status": "pass"
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T01:44:11.138172+00:00",
+  "generated_at": "2026-07-01T01:51:11.980087+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:987c65882b572a415c1dcd4941fc8adfc055b2e673d114bbe90caa5b02f777d8",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:b8672153f8fb53601b0620c4c2bf00c5f293b4124ebf8244ec0bd85c4116e409",
@@ -130,7 +130,7 @@
   "reuse_policy": "pose_validity_packet_generated_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-pose-validity-packet.v1",
-  "source_commit_sha": "d7d70c5862f8d4c8ecfdabe7c43101d2e27f0ba7",
+  "source_commit_sha": "73813b5dfbd55627309f0b951b7937e7a0ce2cab",
   "status": "ready_for_dry_run",
   "validator": {
     "materialization_command": "python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked",
