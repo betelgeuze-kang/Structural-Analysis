@@ -23,9 +23,12 @@ DEFAULT_OUT = PRODUCTIZATION / "structural_scope_contamination_audit.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_QUARANTINE_MANIFEST = PRODUCTIZATION / "structural_scope_quarantine_manifest.json"
 QUARANTINE_SCHEMA_VERSION = "structural-scope-quarantine-manifest.v1"
-RELEASE_SURFACE_TEXT_GUARD_PATHS: tuple[Path, ...] = (
+RELEASE_SURFACE_TEXT_GUARD_SEED_PATHS: tuple[Path, ...] = (
     Path("implementation/phase1/release_evidence/surface/product_capabilities_surface.json"),
     PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json",
+)
+RELEASE_SURFACE_TEXT_GUARD_DIRS: tuple[str, ...] = (
+    "implementation/phase1/release_evidence/surface/",
 )
 RELEASE_SURFACE_TEXT_LEAK_TOKENS: tuple[str, ...] = (
     "pocketmd",
@@ -284,9 +287,35 @@ def _scope_blockers(rows: list[dict[str, Any]], *, prefix: str = "unquarantined"
     return blockers
 
 
-def _release_surface_text_leak_rows(*, repo_root: Path) -> list[dict[str, Any]]:
+def _release_surface_text_guard_paths(
+    *,
+    repo_root: Path,
+    tracked_paths: list[str],
+    quarantined_paths: set[str],
+) -> tuple[list[Path], list[str]]:
+    guard_paths = {
+        path.as_posix()
+        for path in RELEASE_SURFACE_TEXT_GUARD_SEED_PATHS
+        if _resolve(repo_root, path).exists()
+    }
+    skipped_quarantined: list[str] = []
+    for path in tracked_paths:
+        if not any(path.startswith(prefix) for prefix in RELEASE_SURFACE_TEXT_GUARD_DIRS):
+            continue
+        if path in quarantined_paths:
+            skipped_quarantined.append(path)
+            continue
+        guard_paths.add(path)
+    return [Path(path) for path in sorted(guard_paths)], sorted(skipped_quarantined)
+
+
+def _release_surface_text_leak_rows(
+    *,
+    repo_root: Path,
+    guard_paths: list[Path],
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for path in RELEASE_SURFACE_TEXT_GUARD_PATHS:
+    for path in guard_paths:
         resolved = _resolve(repo_root, path)
         if not resolved.exists():
             continue
@@ -347,7 +376,17 @@ def build_audit(
     unquarantined_git_state_counts = _counts_by_key(unquarantined_rows, "git_state")
     quarantined_area_counts = _counts_by_key(quarantined_rows, "path_area")
     quarantined_family_counts = _family_counts(quarantined_rows)
-    release_surface_text_leak_rows = _release_surface_text_leak_rows(repo_root=repo_root)
+    release_surface_text_guard_paths, release_surface_text_guard_skipped_quarantined_paths = (
+        _release_surface_text_guard_paths(
+            repo_root=repo_root,
+            tracked_paths=tracked_paths,
+            quarantined_paths=quarantined_paths,
+        )
+    )
+    release_surface_text_leak_rows = _release_surface_text_leak_rows(
+        repo_root=repo_root,
+        guard_paths=release_surface_text_guard_paths,
+    )
 
     blockers = [f"quarantine_manifest::{item}" for item in manifest_blockers]
     tracked_non_structural_count = git_state_counts.get("tracked", 0)
@@ -373,7 +412,7 @@ def build_audit(
             input_paths=[
                 Path("scripts/check_structural_scope_contamination.py"),
                 quarantine_manifest,
-                *RELEASE_SURFACE_TEXT_GUARD_PATHS,
+                *release_surface_text_guard_paths,
             ],
             reused_evidence=False,
             reuse_policy=(
@@ -408,9 +447,16 @@ def build_audit(
         "unquarantined_family_counts": unquarantined_family_counts,
         "unquarantined_git_state_counts": unquarantined_git_state_counts,
         "quarantine_manifest": quarantine_summary,
+        "release_surface_text_guard_path_count": len(release_surface_text_guard_paths),
         "release_surface_text_guard_paths": [
-            path.as_posix() for path in RELEASE_SURFACE_TEXT_GUARD_PATHS
+            path.as_posix() for path in release_surface_text_guard_paths
         ],
+        "release_surface_text_guard_skipped_quarantined_path_count": len(
+            release_surface_text_guard_skipped_quarantined_paths
+        ),
+        "release_surface_text_guard_skipped_quarantined_paths": (
+            release_surface_text_guard_skipped_quarantined_paths
+        ),
         "release_surface_text_leak_path_count": len(release_surface_text_leak_rows),
         "release_surface_text_leak_rows": release_surface_text_leak_rows,
         "blockers": blockers,

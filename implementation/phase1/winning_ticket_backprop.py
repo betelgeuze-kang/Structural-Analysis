@@ -59,7 +59,7 @@ def _runtime_truthfulness(*, runtime_mode: str, production_seed_runtime: dict | 
     return build_runtime_truthfulness(
         path_role="top_level_training_eval_branch_selection",
         reduced_kind="explicit_reduced_order_relaxation_branching",
-        reduced_backend="md3bead_soa_relaxation",
+        reduced_backend="structural_reduced_order_relaxation",
         reduced_reason="explicit reduced-order physical relaxation path declared without surrogate runtime markers",
         runtime_policy=runtime_mode,
         production_seed_runtime=production_seed_runtime,

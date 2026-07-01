@@ -237,6 +237,7 @@ def test_scope_audit_blocks_release_surface_text_leak(tmp_path: Path) -> None:
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
     assert payload["non_structural_path_count"] == 0
+    assert payload["release_surface_text_guard_path_count"] == 1
     assert payload["release_surface_text_leak_path_count"] == 1
     assert payload["release_surface_text_leak_rows"] == [
         {
@@ -255,6 +256,95 @@ def test_scope_audit_blocks_release_surface_text_leak(tmp_path: Path) -> None:
     assert payload["next_actions"] == [
         "remove_non_structural_tokens_from_structural_release_surface_outputs",
         "regenerate_release_freshness_pm_snapshot_after_scope_cleanup",
+    ]
+
+
+def test_scope_audit_blocks_dynamic_release_surface_text_leak(tmp_path: Path) -> None:
+    _git("init", cwd=tmp_path)
+    _tracked(tmp_path / "src" / "structural_analysis" / "solver.py")
+    _tracked(
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release_evidence"
+        / "surface"
+        / "structural_solver_claim_surface.json",
+        json.dumps(
+            {
+                "surface_id": "structural_solver_claim_surface",
+                "claim_boundary": "No GPCR hard-decoy claims here.",
+            }
+        )
+        + "\n",
+    )
+    _git("add", ".", cwd=tmp_path)
+
+    payload = scope_audit.build_audit(repo_root=tmp_path)
+
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["non_structural_path_count"] == 0
+    assert payload["release_surface_text_guard_path_count"] == 1
+    assert payload["release_surface_text_leak_path_count"] == 1
+    assert payload["release_surface_text_leak_rows"][0] == {
+        "path": (
+            "implementation/phase1/release_evidence/surface/"
+            "structural_solver_claim_surface.json"
+        ),
+        "read_error": "",
+        "matched_tokens": ["gpcr"],
+    }
+
+
+def test_scope_audit_skips_quarantined_release_surface_text_guard(tmp_path: Path) -> None:
+    _git("init", cwd=tmp_path)
+    _tracked(
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release_evidence"
+        / "surface"
+        / "gpcr_hard_decoy_evidence_surface.json",
+        json.dumps({"surface_id": "gpcr_hard_decoy_evidence_surface"})
+        + "\n",
+    )
+    _git("add", ".", cwd=tmp_path)
+    manifest = tmp_path / "scope_quarantine.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": scope_audit.QUARANTINE_SCHEMA_VERSION,
+                "status": "active",
+                "paths": [
+                    {
+                        "path": (
+                            "implementation/phase1/release_evidence/surface/"
+                            "gpcr_hard_decoy_evidence_surface.json"
+                        ),
+                        "excluded_from_structural_release_surface": True,
+                    },
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    payload = scope_audit.build_audit(
+        repo_root=tmp_path,
+        quarantine_manifest=manifest,
+    )
+
+    assert payload["status"] == "quarantined"
+    assert payload["contract_pass"] is True
+    assert payload["release_surface_text_leak_path_count"] == 0
+    assert payload["release_surface_text_guard_skipped_quarantined_path_count"] == 1
+    assert payload["release_surface_text_guard_skipped_quarantined_paths"] == [
+        (
+            "implementation/phase1/release_evidence/surface/"
+            "gpcr_hard_decoy_evidence_surface.json"
+        )
     ]
 
 
