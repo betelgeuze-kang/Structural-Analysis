@@ -2556,7 +2556,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T21:17:40.742313+00:00",
+  "generated_at": "2026-07-01T21:22:51.810216+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2582,7 +2582,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:1f29bc76149986c99a57e1d655ed1203d6305a7b930763a2019d986962d63a8e",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:07152ec5ca5c871bc73ba154f5eb14a3c882e42e95bf2eb98002346bb371900e",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2a2629bc98ba2bccc7d1be26e7fb1269d119fc19c31192aee31feea91a9e3c03",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:a5366e9f82f020d6d276ba335af7c297815fafd658e00404d25d88103735c947",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:e1ffb7c74e4f108766360554f78bd95c3d7d738637e85b1d297508c964f5c454",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:bb47e5d1d69ed17a4d80cbff9924fee9264ea2d38e3e806e51d9bb5be102e8d7",
@@ -2828,7 +2828,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "c53ed64d684f957ab4f126e640edce86d44c1daf",
+  "source_commit_sha": "1f0d213ed95e23e449526f2ab14541f552a43f49",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2918,12 +2918,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T21:17:32.012430+00:00",
+        "generated_at": "2026-07-01T21:22:51.633397+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "c53ed64d684f957ab4f126e640edce86d44c1daf",
+        "source_commit_sha": "1f0d213ed95e23e449526f2ab14541f552a43f49",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -2941,6 +2941,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -2952,7 +2954,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:51:22.996495+00:00",
         "input_checksum_present": true,
@@ -2977,6 +2981,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -2988,7 +2994,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:51:11.580138+00:00",
         "input_checksum_present": true,
@@ -3013,6 +3021,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3024,7 +3034,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:51:22.886984+00:00",
         "input_checksum_present": true,
@@ -3049,6 +3061,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3060,7 +3074,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:40.294577+00:00",
         "input_checksum_present": true,
@@ -3085,6 +3101,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3096,7 +3114,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:57:59.491161+00:00",
         "input_checksum_present": true,
@@ -3111,7 +3131,11 @@
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
           "scripts/build_product_readiness_snapshot.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T21:12:10.206114+00:00",
         "input_checksum_present": true,
@@ -3136,6 +3160,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3147,7 +3173,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:39.951163+00:00",
         "input_checksum_present": true,
@@ -3172,6 +3200,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3183,7 +3213,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:39.037282+00:00",
         "input_checksum_present": true,
@@ -3208,6 +3240,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3219,7 +3253,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:39.109137+00:00",
         "input_checksum_present": true,
@@ -3244,6 +3280,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3255,7 +3293,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:22.757270+00:00",
         "input_checksum_present": true,
@@ -3280,6 +3320,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3291,7 +3333,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:22.731204+00:00",
         "input_checksum_present": true,
@@ -3316,6 +3360,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3327,7 +3373,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:23.687442+00:00",
         "input_checksum_present": true,
@@ -3352,6 +3400,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3363,7 +3413,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T10:19:19.231347+00:00",
         "input_checksum_present": true,
@@ -3384,6 +3436,8 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
@@ -3392,7 +3446,9 @@
           "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py"
+          "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T20:32:06.147542+00:00",
         "input_checksum_present": true,
@@ -3417,6 +3473,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3428,7 +3486,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:22.735187+00:00",
         "input_checksum_present": true,
@@ -3453,6 +3513,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3464,7 +3526,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:53:44.685029+00:00",
         "input_checksum_present": true,
@@ -3489,6 +3553,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3500,7 +3566,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:22.782544+00:00",
         "input_checksum_present": true,
@@ -3525,6 +3593,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3536,7 +3606,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:50:39.089083+00:00",
         "input_checksum_present": true,
@@ -3561,6 +3633,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3572,7 +3646,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:51:11.419371+00:00",
         "input_checksum_present": true,
@@ -3588,9 +3664,13 @@
         "changed_paths_since_source_commit": [
           "scripts/build_phase6_silent_import_loss_status.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_phase6_silent_import_loss_status.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T21:02:11.057793+00:00",
         "input_checksum_present": true,
@@ -3615,6 +3695,8 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/check_github_development_sync_preflight.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
@@ -3626,7 +3708,9 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_check_github_development_sync_preflight.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T19:59:30.794344+00:00",
         "input_checksum_present": true,
