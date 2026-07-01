@@ -202,7 +202,7 @@
     "row_input_id": "subset_rows",
     "status": "operator_input_required"
   },
-  "generated_at": "2026-07-01T12:45:52.615577+00:00",
+  "generated_at": "2026-07-01T12:48:49.548380+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json": "sha256:d72f9746d943cd6955bc1294389af0d4661593b326ac8203abdc780c6b490281",
     "scripts/build_science_actual_closure_operator_handoff.py": "sha256:6ceca1ef844a1e17b88972c169fcd1bd0c98b74668b2b17bec362bb16a859614"
@@ -1106,7 +1106,7 @@
   "schema_version": "science-actual-closure-operator-handoff.v1",
   "science_actual_closure_contract_pass": false,
   "science_actual_closure_status": "operator_evidence_required",
-  "source_commit_sha": "7d5c52fc2a6990d1f65ff155bd8084b76379eafb",
+  "source_commit_sha": "2e261af2e8fceb064efa6098251bb9f8cd9b0e96",
   "status": "operator_rows_required",
   "summary": {
     "closes_actual_closure_criteria_count": 19,

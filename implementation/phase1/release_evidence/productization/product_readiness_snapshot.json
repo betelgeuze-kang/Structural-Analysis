@@ -2500,7 +2500,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T12:45:59.443427+00:00",
+  "generated_at": "2026-07-01T12:48:56.271429+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2525,7 +2525,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:14327c6edc77e0116542440f5a8588b03d96db126dec09f6e5f2d61dd2d9c1ec",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:e5075f0024f86ad795e8c8c683362294c00e190d8ebb047db04b6d8518f6420a",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2b20bfc9521e0de813935088d89561c81d6f1da88f442453797db40dbd8258df",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:29eead02022e98451a84040b9d185e2ced948dabfb6d28b6c311e967588bb54a",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:56e7773bf677da83d00b40b6e84101925056c330db03e70999a8f0e7fee19868",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:0a039b00834ed75b02dedf493240f56d9f8d8262cd1b1191ad1e73b07ea1e2e5",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2768,7 +2768,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "7d5c52fc2a6990d1f65ff155bd8084b76379eafb",
+  "source_commit_sha": "2e261af2e8fceb064efa6098251bb9f8cd9b0e96",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2858,12 +2858,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T12:45:52.936954+00:00",
+        "generated_at": "2026-07-01T12:48:49.862293+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "7d5c52fc2a6990d1f65ff155bd8084b76379eafb",
+        "source_commit_sha": "2e261af2e8fceb064efa6098251bb9f8cd9b0e96",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
