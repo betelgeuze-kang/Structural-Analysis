@@ -266,6 +266,55 @@ def test_build_packet_maps_open_blockers_to_blocked_release_tiers(tmp_path: Path
     assert "`release_tier.limited_commercial_full_gate_ready`" in markdown
 
 
+def test_build_packet_maps_milestone_blockers_to_technical_paid_pilot_tier(tmp_path: Path) -> None:
+    row = _row(
+        "M5::pm_blocker_closure_board_count_mismatch",
+        owner="release_owner",
+        owner_action="Regenerate PM release evidence.",
+        intake_path="",
+    )
+    row["scope"] = "milestone"
+    row["title"] = "Commercial Packaging"
+    row["handoff"] = {}
+    row["evidence_artifacts"] = {}
+    row["external_input_required"] = False
+    row["owner_input_required"] = False
+    action_register = _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "pm_summary_line": "PM release gate: BLOCKED",
+            "summary": {"open_blocker_count": 1},
+            "rows": [row],
+        },
+    )
+    reviewer_handoff = _write_json(
+        tmp_path / "pm_release_gate_reviewer_handoff.json",
+        {
+            "release_tier_rows": [
+                {
+                    "requirement_id": "release_tier.technical_paid_pilot_candidate",
+                    "status": "blocked",
+                    "blockers": ["technical_paid_pilot_candidate_false"],
+                    "next_action": "Regenerate the PM release gate after milestone evidence changes.",
+                    "claim_boundary": "Technical paid pilot candidate depends on milestone evidence.",
+                }
+            ]
+        },
+    )
+
+    payload = build_packet_module.build_packet(
+        action_register=action_register,
+        reviewer_handoff=reviewer_handoff,
+    )
+    request_row = payload["owner_packets"][0]["request_rows"][0]
+
+    assert payload["summary"]["release_tier_impact_contract_pass"] is True
+    assert payload["summary"]["missing_release_tier_impact_count"] == 0
+    assert request_row["blocked_release_tiers"] == [
+        "release_tier.technical_paid_pilot_candidate"
+    ]
+
+
 def test_build_packet_blocks_when_reviewer_handoff_omits_release_tier_impact(tmp_path: Path) -> None:
     action_register = _write_json(
         tmp_path / "pm_release_blocker_action_register.json",

@@ -1,6 +1,6 @@
 {
   "schema_version": "rh-signed-closure-packet.v1",
-  "generated_at": "2026-07-01T08:20:00.193073+00:00",
+  "generated_at": "2026-07-01T10:31:48.084125+00:00",
   "status": "signed",
   "work_id": "RH-003",
   "claim": "Signed RH closure packet for productization gate (not a legal authority substitute).",
@@ -9,12 +9,12 @@
     "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
     "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/story_model_reanalysis.json",
     "supplementary_evidence_sha256": "078f4745ff78e32ea1b4717fac06c61cf85cdcaa846dc59447dfde395ea4a079",
-    "delivery_bundle_digest_sha256": "6321c65fb7d14fee6285eeaec239ca276a8c9242dbf45e42accfa6b20151a7c7",
+    "delivery_bundle_digest_sha256": "aee8261d284b47ee379a1295526f2e2b1b69fa8f2508aeab248ef81ac0f136ab",
     "reviewer_name": "Structural Productization Gate",
     "reviewer_organization": "Engineer-in-loop automated attest",
-    "reviewed_at_utc": "2026-07-01T08:20:00.193053+00:00",
+    "reviewed_at_utc": "2026-07-01T10:31:48.084101+00:00",
     "signature_method": "bundle_digest_hmac_v1",
     "scope_statement": "Engineer-in-loop closure: supplementary delivery evidence reviewed; holdout item may be marked closed when signature verifies."
   },
-  "signature": "33b8a6d98edebae6922fed7023afde318d3a5b5229f7f54dac49d3e2d79655fb"
+  "signature": "fbcc1cf96300f7aabf2462400d5bb637bed31e1da322dff7177d27e53aaebbfd"
 }

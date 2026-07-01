@@ -1,18 +1,18 @@
 {
   "schema_version": "ai-physics-guard-contract.v1",
-  "generated_at": "2026-07-01T08:24:39.149742+00:00",
-  "source_commit_sha": "23a8ed59fe5b846a60aefd6c796b31794fbd0b3f",
+  "generated_at": "2026-07-01T10:36:29.655583+00:00",
+  "source_commit_sha": "2d73a4626b704f6a38484a88684852b991a1d999",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "implementation/phase1/build_ai_engine_productization_contracts.py": "sha256:7c757be26d0b45e66dfa65c9595e03413ff307d9cdbae73a6954a88cefe43ab8",
     "scripts/build_ai_engine_productization_contracts.py": "sha256:9bc61510ffda7c006813745cb7f7764d7cb5314619c498271129201058dbc2a0",
-    "implementation/phase1/release_evidence/productization/ml_multi_objective_status.json": "sha256:2c585f4aeb9c2cc574e4925e5bfa63d3a5369316fae65867453f01820deacd57",
-    "implementation/phase1/release/ml_surrogate/checkpoint.pt": "sha256:acd1deb7c31e46b3692fb93ffccf118e9e7514a9ed94d8034ce40233d06a4db9",
-    "implementation/phase1/release/ml_surrogate/dataset_card.json": "sha256:fe1422b2c94704072ea6e996d21e064b01e6db9a558a943700792b7bf3b063df",
-    "implementation/phase1/release/ml_surrogate/model_card.json": "sha256:e00dbb412dfec460b7a3d818aa2b48566951e41ddbddc4cfc3b2e4d38ad7e0a2",
-    "implementation/phase1/release/ml_surrogate/validation_receipt.json": "sha256:cc51e05ba9a1831869b9a15243ce64e36c9508293d3194f85cc7a4c2c018b693",
-    "implementation/phase1/release/ml_surrogate/ood_gate.json": "sha256:5cecbc305d4f91a097722e268607350d9873d9066edbbac5f0a69fa03be267e7",
-    "implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json": "sha256:c63af7ace30ed21f83e2b79281373977cc4e80d1c418f28459aac0f895dde921"
+    "implementation/phase1/release_evidence/productization/ml_multi_objective_status.json": "sha256:7a04022671f1aff54caa3bae3216e6393e4c37ff166c440d58140dcff247b43b",
+    "implementation/phase1/release/ml_surrogate/checkpoint.pt": "sha256:bda6a7e7aee510a624ac72685ec49fa0a06d5f16120d20b703cd87f2108ed16f",
+    "implementation/phase1/release/ml_surrogate/dataset_card.json": "sha256:956fb2937d32ccebce533ea1c8c147b76e75a994783191771d25a016283be74c",
+    "implementation/phase1/release/ml_surrogate/model_card.json": "sha256:89fa10e5aeb8386000dc543671880329c34bf453351325edd49b2e5b6f10cd8b",
+    "implementation/phase1/release/ml_surrogate/validation_receipt.json": "sha256:94d2a98be19224cb4dbe62addf111ee8c1c4bb94d1e5e262648cbb707e2204e4",
+    "implementation/phase1/release/ml_surrogate/ood_gate.json": "sha256:39ce7b6a35358ef67f4e2185f8664585c13a758d412bb3bd1f50548699b8a74e",
+    "implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json": "sha256:217e961ddf97e83cea46ca8d3186f55a73c03f20c828a151b6cd7450278d3dfa"
   },
   "reused_evidence": true,
   "reuse_policy": "ai_engine_productization_contracts_aggregate_ml_checkpoint_receipts",

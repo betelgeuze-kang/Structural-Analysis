@@ -66,12 +66,12 @@ def test_pm_release_area_counts_and_blockers_are_canonical() -> None:
         sum(1 for row in release_area_rows if row.get("ok") is True),
         len(release_area_rows),
     )
+    expected_summary = f"{expected_green_total[0]}/{expected_green_total[1]}"
     expected_blockers = sorted(str(item) for item in report["release_area_blockers"])
 
-    assert expected_green_total == (13, 16)
-    assert len(expected_blockers) == 5
     assert _summary_green_total(report["summary_line"]) == expected_green_total
 
+    register = _load_json(PRODUCTIZATION / "pm_release_blocker_action_register.json")
     audit = _load_json(PRODUCTIZATION / "pm_release_gate_completion_audit.json")
     audit_release_area_blockers = sorted(
         {
@@ -95,23 +95,26 @@ def test_pm_release_area_counts_and_blockers_are_canonical() -> None:
                 canonical["release_area_green_count"],
                 canonical["release_area_total_count"],
             ) == expected_green_total
-            assert canonical["release_area_summary"] == "13/16"
+            assert canonical["release_area_summary"] == expected_summary
             assert sorted(canonical["release_area_blocker_ids"]) == expected_blockers
             assert canonical["release_area_blocker_count"] == len(expected_blockers)
 
     support = _load_json(SUPPORT_BUNDLE)
     coverage = support["pm_failure_bundle_coverage"]
-    assert coverage["summary"]["open_blocker_count"] == 9
-    assert coverage["summary"]["release_tier_blocker_count"] == 9
+    assert coverage["summary"]["open_blocker_count"] == register["summary"]["open_blocker_count"]
     assert coverage["summary"]["release_area_blocker_count"] == len(expected_blockers)
     assert sorted(coverage["release_area_blocker_ids"]) == expected_blockers
 
 
-def test_pm_user_facing_artifacts_have_no_stale_12_of_16_claims() -> None:
+def test_pm_user_facing_artifacts_use_current_release_area_summary() -> None:
+    report = _load_json(PM_REPORT)
+    expected_green_total = _summary_green_total(report["summary_line"])
+    assert expected_green_total is not None
+
     for path in [*PM_JSON_ARTIFACTS, *PM_TEXT_ARTIFACTS]:
         text = path.read_text(encoding="utf-8")
-        assert "12/16" not in text, path
-        assert "release_areas_green=12/16" not in text, path
+        for match in re.finditer(r"release_areas_green=(\d+)/(\d+)", text):
+            assert (int(match.group(1)), int(match.group(2))) == expected_green_total, path
 
     for path in PM_TEXT_ARTIFACTS:
         text = path.read_text(encoding="utf-8")

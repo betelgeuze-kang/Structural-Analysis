@@ -1,6 +1,6 @@
 {
   "schema_version": "ai-code-reasoning-guard.v1",
-  "generated_at": "2026-07-01T08:18:10.245956+00:00",
+  "generated_at": "2026-07-01T10:26:58.324698+00:00",
   "status": "ready",
   "code_reasoning_guard_ready": true,
   "claim_boundary": "deterministic rule/citation guard only; no autonomous legal approval",

@@ -34,6 +34,7 @@ OWNER_ORDER = (
     "customer_success_ops_owner",
 )
 INTAKE_ROW_PREVIEW_LIMIT = 12
+MILESTONE_SCOPE_TIER_IMPACT_KEY = "__milestone_scope__"
 
 
 def _now_utc_iso() -> str:
@@ -217,10 +218,14 @@ def _release_tier_impacts_from_handoff(reviewer_handoff: Path | None) -> dict[st
         requirement_id = str(row.get("requirement_id", "") or "")
         if not requirement_id:
             continue
-        for blocker in _as_list(row.get("blockers")):
-            blocker_id = str(blocker)
-            if blocker_id:
-                impacts.setdefault(blocker_id, []).append(requirement_id)
+        blockers = [str(blocker) for blocker in _as_list(row.get("blockers")) if str(blocker)]
+        if (
+            requirement_id == "release_tier.technical_paid_pilot_candidate"
+            and "technical_paid_pilot_candidate_false" in blockers
+        ):
+            impacts.setdefault(MILESTONE_SCOPE_TIER_IMPACT_KEY, []).append(requirement_id)
+        for blocker_id in blockers:
+            impacts.setdefault(blocker_id, []).append(requirement_id)
     return {blocker: _dedupe(requirements) for blocker, requirements in impacts.items()}
 
 
@@ -231,11 +236,15 @@ def _request_row(row: dict[str, Any], *, release_tier_impacts: dict[str, list[st
     expected_intake_path = str(evidence_artifacts.get(expected_intake_artifact, "") or "")
     expected_intake_detail = _expected_intake_detail(expected_intake_path)
     blocker_id = str(row.get("blocker_id", "") or "")
+    scope = str(row.get("scope", "") or "")
+    blocked_release_tiers = list((release_tier_impacts or {}).get(blocker_id, []))
+    if not blocked_release_tiers and scope == "milestone":
+        blocked_release_tiers = list((release_tier_impacts or {}).get(MILESTONE_SCOPE_TIER_IMPACT_KEY, []))
     return {
         "blocker_id": blocker_id,
-        "scope": str(row.get("scope", "") or ""),
+        "scope": scope,
         "title": str(row.get("title", "") or ""),
-        "blocked_release_tiers": _dedupe((release_tier_impacts or {}).get(blocker_id, [])),
+        "blocked_release_tiers": _dedupe(blocked_release_tiers),
         "evidence_state": str(_as_dict(row.get("evidence_status")).get("state", "") or ""),
         "handoff_state": str(row.get("handoff_state", "") or ""),
         "next_action": str(row.get("next_action", "") or row.get("owner_action", "") or ""),
