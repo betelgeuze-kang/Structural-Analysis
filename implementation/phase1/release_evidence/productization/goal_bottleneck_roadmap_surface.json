@@ -14,14 +14,14 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-01T13:04:20.247081+00:00",
+  "generated_at": "2026-07-01T13:21:07.244069+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7e6821c62a9ee7520a8c3b154e0738778d1e2ec34f8560c9d7bc15cb6656c915",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8017e3fba1d739cdab1a9cd92317eadc9524d4bce2f19bb6f03feaf65400c064",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:7cdc2b63aa796679fecbd7359b7ce232a5919073dfb5863b4e3399f9eb9bbe41",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:80cff8cd3655140071f17b747458a6a07199c5a519c5b0c139e8c6bf5f7c86b8",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:72858e99d3f956a6bd680339dfc35eaf384a62d65a13932936a3039400686729",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:f1d349767c211fde2b05f72376c19af8fa80d4ba0583cd44888d6de9158f36a7",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:56e7773bf677da83d00b40b6e84101925056c330db03e70999a8f0e7fee19868",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:5dcb1c4a3117bc04731c44a1c44e0579ba82004ebc4ea1c38370e4aad7cbd465",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:3afeeacd10c337af07fc6b841f8d001a65976d499f99abea3a030594ce51be8a",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:3149db5e586d1c69801459866eb06e8ac19fcd864207ca8f797adf2f424bc8d9"
   },
   "mutation_allowed": false,
@@ -352,13 +352,13 @@
   "read_model_ready": true,
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
-    "approval_token_count": 6,
+    "approval_token_count": 7,
     "blocked_release_count": 8,
     "evidence_surface_count": 8,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 10,
+    "operator_action_count": 12,
     "public_benchmark_ready": true,
     "release_allowed": false,
     "stale_artifact_count": 0
@@ -481,10 +481,10 @@
       "state": "blocked",
       "summary": {
         "action_register_contract_pass": false,
-        "approval_token_count": 6,
+        "approval_token_count": 7,
         "blocked_capability_count": 0,
         "blocked_release_count": 8,
-        "operator_action_count": 10,
+        "operator_action_count": 12,
         "product_capability_count": 1,
         "release_allowed": false
       }
@@ -494,7 +494,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "5c56f7cb9a50ac0e9fd8b7868113fcef258c7204",
+  "source_commit_sha": "7a2e4b047c89cd7e4bea0fb94b4ee76c67e4c26f",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
