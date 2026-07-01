@@ -182,12 +182,12 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T04:10:21.052408+00:00",
+  "generated_at": "2026-07-01T04:12:49.031893+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:014c798a693c620e1e7e9e534d27d6fe0503ced1438813612204c490ce9d3dd1",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:bd56e693994082c699cbb47be1649806b14d30a9827fdd04be0815bacb8a44b9",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:58dbdf0ecd2db13e685d66f0d287d4cd45d788cbb83ef110d7bde25c946f88a1",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c7a3e05c0185eacb2bab20f896759ee9a6308ca1727714726f94e46acb2a79a3",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:66fa7d7e62c36c2a76bd67d7fc178556a68f4bea5715949f54f5e6b86a3349b2",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:64a656f74d9abb47b486fa11fc64f1e03907ee930e1b3288076943a3015cdbeb",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:8cc7371c637c6542331dc39dccc4a6bee4a5d02b3d02de40ef245f96d86b50ef",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:c3d084be87b8af31707e078d055cee46d33e928380dc51e689a31d355b916935",
@@ -4283,7 +4283,7 @@
       ]
     }
   },
-  "source_commit_sha": "555209d496906cd09afa3a7e911327d90443ea9f",
+  "source_commit_sha": "d3d3d2c63f2657b96b045df5aa5c547040f78d82",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
