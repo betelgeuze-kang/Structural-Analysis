@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 from pathlib import Path
 import sys
@@ -44,6 +45,8 @@ DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
 DEFAULT_GOAL_BOTTLENECK = PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json"
 DEFAULT_OUT = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_ROW_TEMPLATE_DIR = PRODUCTIZATION
+DEFAULT_RAW_ROW_TEMPLATE_FILENAME = "gpcr_hard_decoy_rows_template.csv"
 DEFAULT_RAW_ROW_INPUT_CANDIDATES = [
     str(PRODUCTIZATION / f"gpcr_hard_decoy_rows.{suffix}")
     for suffix in ("json", "jsonl", "ndjson", "csv", "tsv")
@@ -123,6 +126,14 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _csv_cell(value: Any) -> Any:
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+    if value is None:
+        return ""
+    return value
+
+
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
@@ -151,6 +162,58 @@ def _input_paths() -> list[Path]:
         DEFAULT_SUITE_REPORT,
         DEFAULT_EVIDENCE_SURFACE,
     ]
+
+
+def _raw_row_template_path(row_template_dir: Path) -> Path:
+    return row_template_dir / DEFAULT_RAW_ROW_TEMPLATE_FILENAME
+
+
+def _raw_row_template_headers() -> list[str]:
+    return [
+        "target_id",
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
+        "score_direction",
+        "source_checksum",
+        "provenance_ref",
+    ]
+
+
+def _raw_row_template_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    positive_count = int(RAW_ROW_QUALITY_CRITERIA["min_positive_count_per_target"])
+    decoy_count = int(RAW_ROW_QUALITY_CRITERIA["min_decoy_count_per_target"])
+    for target_id in REQUIRED_TARGETS:
+        target_key = target_id.lower()
+        for index in range(1, positive_count + 1):
+            rows.append(
+                {
+                    "target_id": target_id,
+                    "molecule_id": f"{target_key}_positive_{index:03d}",
+                    "score": None,
+                    "is_positive": True,
+                    "is_decoy": False,
+                    "score_direction": "higher_is_better",
+                    "source_checksum": None,
+                    "provenance_ref": None,
+                }
+            )
+        for index in range(1, decoy_count + 1):
+            rows.append(
+                {
+                    "target_id": target_id,
+                    "molecule_id": f"{target_key}_decoy_{index:03d}",
+                    "score": None,
+                    "is_positive": False,
+                    "is_decoy": True,
+                    "score_direction": "higher_is_better",
+                    "source_checksum": None,
+                    "provenance_ref": None,
+                }
+            )
+    return [{key: _csv_cell(value) for key, value in row.items()} for row in rows]
 
 
 def _target_template(target_id: str) -> dict[str, Any]:
@@ -384,6 +447,7 @@ def _phase3_raw_row_closure_matrix(
     *,
     import_command: str,
     materialize_command: str,
+    row_template_artifact: str,
 ) -> list[dict[str, Any]]:
     criteria = list(PHASE3_EXIT_CRITERIA_BY_FIELD.values())
     rows: list[dict[str, Any]] = []
@@ -395,6 +459,7 @@ def _phase3_raw_row_closure_matrix(
                 "slot_id": f"{target_id.lower()}_hard_decoy_metrics",
                 "status": "operator_input_required",
                 "default_row_path_candidates": list(DEFAULT_RAW_ROW_INPUT_CANDIDATES),
+                "row_template_artifact": row_template_artifact,
                 "accepted_formats": ["json", "jsonl", "ndjson", "csv", "tsv"],
                 "required_flat_row_fields": [
                     "target_id",
@@ -445,7 +510,11 @@ def _phase3_raw_row_closure_matrix(
     return rows
 
 
-def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
+def build_gpcr_hard_decoy_operator_intake_packet(
+    *,
+    repo_root: Path = ROOT,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
+) -> dict[str, Any]:
     template = _load_json(repo_root, DEFAULT_OPERATOR_TEMPLATE)
     suite = _load_json(repo_root, DEFAULT_SUITE_REPORT)
     surface = _load_json(repo_root, DEFAULT_EVIDENCE_SURFACE)
@@ -469,6 +538,10 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "--rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> "
         f"--out {DEFAULT_OPERATOR_TEMPLATE}"
     )
+    row_template_artifact = str(_raw_row_template_path(row_template_dir))
+    row_template_artifacts = {
+        "gpcr_hard_decoy_rows": row_template_artifact,
+    }
     refresh_product_report_command = (
         "python3 scripts/build_gpcr_hard_decoy_product_report.py "
         f"--out {DEFAULT_PRODUCT_REPORT}"
@@ -485,6 +558,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
     phase3_raw_row_closure_matrix = _phase3_raw_row_closure_matrix(
         import_command=import_template_command,
         materialize_command=materialize_command,
+        row_template_artifact=row_template_artifact,
     )
     target_execution_preflight = _target_execution_preflight_checklist(
         template=template,
@@ -527,6 +601,8 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "gate_unblock_plan_count": len(gate_unblock_plan),
         "phase3_raw_row_closure_matrix": phase3_raw_row_closure_matrix,
         "phase3_raw_row_closure_matrix_count": len(phase3_raw_row_closure_matrix),
+        "row_template_artifact_count": len(row_template_artifacts),
+        "row_template_artifacts": row_template_artifacts,
         "target_execution_preflight": target_execution_preflight,
         "target_execution_preflight_count": len(target_execution_preflight),
         "first_target_execution_preflight_blocker": first_target_preflight_blocker,
@@ -565,11 +641,24 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             "optional_row_fields": ["score_direction"],
             "required_targets": list(REQUIRED_TARGETS),
             "default_score_direction": "higher_is_better",
+            "row_template_artifacts": row_template_artifacts,
+            "row_template_headers": _raw_row_template_headers(),
             "claim_boundary": (
                 "This import step only groups operator-attached raw ranking rows into "
                 "the template. The suite materializer still computes all metrics and "
                 "keeps Phase 3 locked unless every target passes."
             ),
+        },
+        "raw_row_dropzone": {
+            "status": "ready_for_operator_rows",
+            "auto_detection_policy": (
+                "Place real GPCR hard-decoy row files at the default paths, then run "
+                "the raw-row importer followed by the suite materializer."
+            ),
+            "default_row_path_candidates": DEFAULT_RAW_ROW_INPUT_CANDIDATES,
+            "row_template_artifacts": row_template_artifacts,
+            "materialization_command": import_template_command,
+            "required_row_inputs": ["gpcr_hard_decoy_rows"],
         },
         "current_suite_status": {
             "artifact": str(DEFAULT_SUITE_REPORT),
@@ -630,6 +719,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             "product_report": str(DEFAULT_PRODUCT_REPORT),
             "product_capabilities_surface": str(DEFAULT_PRODUCT_CAPABILITIES),
             "goal_bottleneck_roadmap_surface": str(DEFAULT_GOAL_BOTTLENECK),
+            "row_templates": row_template_artifacts,
         },
         "next_actions": [
             "attach_gpcr_hard_decoy_raw_row_file",
@@ -647,6 +737,8 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             "phase3_raw_row_closure_matrix_count": len(
                 phase3_raw_row_closure_matrix
             ),
+            "row_template_artifact_count": len(row_template_artifacts),
+            "row_template_artifacts": row_template_artifacts,
             "minimum_target_count": len(REQUIRED_TARGETS),
             "minimum_metric_field_count_per_target": 4,
             "current_blocker_count": len(blockers),
@@ -704,8 +796,8 @@ def _markdown(payload: dict[str, Any]) -> str:
             "",
             "## Phase 3 Raw Row Closure Matrix",
             "",
-            "| Target | Row Input | Closes Criteria | Minimum Rows |",
-            "|---|---|---|---|",
+            "| Target | Row Input | Closes Criteria | Minimum Rows | CSV Starter |",
+            "|---|---|---|---|---|",
         ]
     )
     for row in payload["phase3_raw_row_closure_matrix"]:
@@ -719,7 +811,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         )
         lines.append(
             f"| `{row['target_id']}` | `{row['row_input_id']}` | "
-            f"{criteria} | `{minimums}` |"
+            f"{criteria} | `{minimums}` | `{row['row_template_artifact']}` |"
         )
     lines.extend(
         [
@@ -733,6 +825,8 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"{json.dumps(payload['raw_row_import']['raw_row_value_contract'], ensure_ascii=False, sort_keys=True)}`",
             f"- `source_receipt_requirements`: `"
             f"{json.dumps(payload['raw_row_import']['source_receipt_requirements'], ensure_ascii=False, sort_keys=True)}`",
+            f"- `row_template_artifacts`: `"
+            f"{json.dumps(payload['raw_row_import']['row_template_artifacts'], ensure_ascii=False, sort_keys=True)}`",
         ]
     )
     lines.extend(
@@ -762,19 +856,46 @@ def _markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def write_gpcr_hard_decoy_row_template_csv(
+    *,
+    packet: dict[str, Any],
+    repo_root: Path = ROOT,
+) -> dict[str, Path]:
+    raw_paths = _as_dict(packet.get("row_template_artifacts"))
+    raw_path = str(raw_paths.get("gpcr_hard_decoy_rows") or "")
+    if not raw_path:
+        return {}
+    path = Path(raw_path)
+    resolved = path if path.is_absolute() else repo_root / path
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    headers = _raw_row_template_headers()
+    rows = _raw_row_template_rows()
+    with resolved.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=headers)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({header: row.get(header, "") for header in headers})
+    return {"gpcr_hard_decoy_rows": resolved}
+
+
 def write_gpcr_hard_decoy_operator_intake_packet(
     *,
     repo_root: Path = ROOT,
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> dict[str, Any]:
-    payload = build_gpcr_hard_decoy_operator_intake_packet(repo_root=repo_root)
+    payload = build_gpcr_hard_decoy_operator_intake_packet(
+        repo_root=repo_root,
+        row_template_dir=row_template_dir,
+    )
     resolved_out = out if out.is_absolute() else repo_root / out
     resolved_out.parent.mkdir(parents=True, exist_ok=True)
     resolved_out.write_text(_json_text(payload), encoding="utf-8")
     resolved_md = out_md if out_md.is_absolute() else repo_root / out_md
     resolved_md.parent.mkdir(parents=True, exist_ok=True)
     resolved_md.write_text(_markdown(payload), encoding="utf-8")
+    write_gpcr_hard_decoy_row_template_csv(packet=payload, repo_root=repo_root)
     return payload
 
 
@@ -783,6 +904,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--repo-root", type=Path, default=ROOT)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument("--row-template-dir", type=Path, default=DEFAULT_ROW_TEMPLATE_DIR)
     parser.add_argument("--json", action="store_true")
     return parser
 
@@ -793,6 +915,7 @@ def main(argv: list[str] | None = None) -> int:
         repo_root=args.repo_root,
         out=args.out,
         out_md=args.out_md,
+        row_template_dir=args.row_template_dir,
     )
     print(_json_text(payload), end="") if args.json else print(payload["summary_line"])
     return 0

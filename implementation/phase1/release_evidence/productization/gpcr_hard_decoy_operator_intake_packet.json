@@ -596,14 +596,14 @@
     }
   ],
   "gate_unblock_plan_count": 3,
-  "generated_at": "2026-07-01T11:32:17.064721+00:00",
+  "generated_at": "2026-07-01T13:56:04.550449+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:9b88df9031923bd4d55d5a72f3b24a88427e1631a3d51570bebb1917f626e3b7",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:ddc979982fa76ec9757fe56c8be0a1215f74474363d190d689940a986e3ad712",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:184b563a18d475ba631a971e9b3e2d1cb8a293009c534c0df95bc8bf32f168a4",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:cc276ddc070e43a525ae89c45335e5f85e002fb4b38a9356963bdea4df73e3f5",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:352761100828448d288c3a6cce69151da70c5da55918c9e1022f978c8c11b06d",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:e987ceb5b02a847709d17886810257e923c2b27da2fd03a8264a935cd6aaa2e1",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:64852f5bd48b2c2b8b8607accb86a7ee1689e4bf201e99c31eb4bf96cee31157",
     "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py": "sha256:177424cfc68f7449d0b35292f1ce658018b675e7aaa08a0c71d3b4d9bff8c261",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:2e144fbb69c76a239fe89f132042db246745bf3938f4c49db722f0d0f63b8c2f"
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8824e14602faf05a39d841d8367d5773c76a23ffbf8f614ee99f926a8ff478a6"
   },
   "linked_artifacts": {
     "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -611,6 +611,9 @@
     "operator_template": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
     "product_capabilities_surface": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
     "product_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+    "row_templates": {
+      "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
+    },
     "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json"
   },
   "materialization_sequence": [
@@ -761,6 +764,7 @@
         ],
         "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
       },
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
       "slot_id": "drd2_hard_decoy_metrics",
       "source_receipt_requirements": {
         "mode": "raw_hard_decoy_rows",
@@ -896,6 +900,7 @@
         ],
         "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
       },
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
       "slot_id": "htr2a_hard_decoy_metrics",
       "source_receipt_requirements": {
         "mode": "raw_hard_decoy_rows",
@@ -1031,6 +1036,7 @@
         ],
         "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
       },
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
       "slot_id": "oprm1_hard_decoy_metrics",
       "source_receipt_requirements": {
         "mode": "raw_hard_decoy_rows",
@@ -1089,6 +1095,24 @@
     }
   ],
   "phase3_raw_row_closure_matrix_count": 3,
+  "raw_row_dropzone": {
+    "auto_detection_policy": "Place real GPCR hard-decoy row files at the default paths, then run the raw-row importer followed by the suite materializer.",
+    "default_row_path_candidates": [
+      "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+      "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
+      "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.ndjson",
+      "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+      "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.tsv"
+    ],
+    "materialization_command": "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py --rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+    "required_row_inputs": [
+      "gpcr_hard_decoy_rows"
+    ],
+    "row_template_artifacts": {
+      "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
+    },
+    "status": "ready_for_operator_rows"
+  },
   "raw_row_import": {
     "accepted_formats": [
       "csv",
@@ -1174,6 +1198,19 @@
       ],
       "source_checksum_policy": "source_checksum must be sha256:<64 hex> and not a repeated placeholder digest"
     },
+    "row_template_artifacts": {
+      "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
+    },
+    "row_template_headers": [
+      "target_id",
+      "molecule_id",
+      "score",
+      "is_positive",
+      "is_decoy",
+      "score_direction",
+      "source_checksum",
+      "provenance_ref"
+    ],
     "source_receipt_requirements": {
       "mode": "raw_hard_decoy_rows",
       "placeholder_block_policy": {
@@ -1250,8 +1287,12 @@
   "reuse_policy": "gpcr_hard_decoy_operator_intake_packet_from_template_and_suite_contracts",
   "reused_evidence": true,
   "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
+  "row_template_artifact_count": 1,
+  "row_template_artifacts": {
+    "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
+  },
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "9dbeeb2ba069af74de802c24c8914fd1e5d51f48",
+  "source_commit_sha": "c6fb1fe6c43f2e81816743a9ee4b0f293571aebc",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,
@@ -1264,6 +1305,10 @@
     "minimum_target_count": 3,
     "phase3_raw_row_closure_matrix_count": 3,
     "required_slot_count": 3,
+    "row_template_artifact_count": 1,
+    "row_template_artifacts": {
+      "gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"
+    },
     "target_execution_preflight_count": 3
   },
   "summary_line": "GPCR hard-decoy operator intake packet: READY | targets=3 | first_blocked_target=DRD2",

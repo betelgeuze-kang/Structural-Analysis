@@ -22,11 +22,11 @@
 
 ## Phase 3 Raw Row Closure Matrix
 
-| Target | Row Input | Closes Criteria | Minimum Rows |
-|---|---|---|---|
-| `DRD2` | `gpcr_hard_decoy_rows` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys`, `raw_hard_decoy_rows_actual_closure` | `{"min_decoy_count_per_target": 20, "min_positive_count_per_target": 4, "min_total_row_count_per_target": 24}` |
-| `HTR2A` | `gpcr_hard_decoy_rows` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys`, `raw_hard_decoy_rows_actual_closure` | `{"min_decoy_count_per_target": 20, "min_positive_count_per_target": 4, "min_total_row_count_per_target": 24}` |
-| `OPRM1` | `gpcr_hard_decoy_rows` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys`, `raw_hard_decoy_rows_actual_closure` | `{"min_decoy_count_per_target": 20, "min_positive_count_per_target": 4, "min_total_row_count_per_target": 24}` |
+| Target | Row Input | Closes Criteria | Minimum Rows | CSV Starter |
+|---|---|---|---|---|
+| `DRD2` | `gpcr_hard_decoy_rows` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys`, `raw_hard_decoy_rows_actual_closure` | `{"min_decoy_count_per_target": 20, "min_positive_count_per_target": 4, "min_total_row_count_per_target": 24}` | `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv` |
+| `HTR2A` | `gpcr_hard_decoy_rows` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys`, `raw_hard_decoy_rows_actual_closure` | `{"min_decoy_count_per_target": 20, "min_positive_count_per_target": 4, "min_total_row_count_per_target": 24}` | `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv` |
+| `OPRM1` | `gpcr_hard_decoy_rows` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys`, `raw_hard_decoy_rows_actual_closure` | `{"min_decoy_count_per_target": 20, "min_positive_count_per_target": 4, "min_total_row_count_per_target": 24}` | `implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv` |
 
 ## Raw Row Import
 
@@ -34,6 +34,7 @@
 - `required_flat_row_fields`: `target_id, molecule_id, score, is_positive, is_decoy, source_checksum, provenance_ref`
 - `raw_row_value_contract`: `{"boolean_label_policy": "is_positive and is_decoy must parse to booleans and be mutually exclusive.", "numeric_value_policy": {"score": "must parse to a finite float; NaN and Infinity are rejected"}, "row_integrity_policy": "molecule_id must be nonblank, non-placeholder, and unique within each target.", "score_direction_policy": "score_direction must be higher_is_better or lower_is_better, with exactly one direction per target.", "target_id_policy": "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows are rejected before suite materialization."}`
 - `source_receipt_requirements`: `{"mode": "raw_hard_decoy_rows", "placeholder_block_policy": {"text_markers": ["<operator", "fixture", "synthetic", "mock", "placeholder", "dummy", "example", "unit-test", "test-only"], "url_markers": ["://example.", ".example/", ".invalid", ".test/", "localhost", "127.0.0.1", "0.0.0.0"], "url_prefixes": ["operator://", "local-evidence://", "local://", "fixture://", "mock://", "synthetic://", "placeholder://", "test://", "unit-test://", "file://"]}, "required_fields": ["source_id", "source_url", "source_license", "source_artifact", "source_artifact_sha256"], "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached raw row artifact"}`
+- `row_template_artifacts`: `{"gpcr_hard_decoy_rows": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv"}`
 
 ## Target Execution Preflight
 

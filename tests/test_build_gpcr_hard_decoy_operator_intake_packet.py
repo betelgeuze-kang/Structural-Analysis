@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import importlib.util
 import json
 from pathlib import Path
@@ -67,6 +68,13 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     ]
     assert packet["gate_unblock_plan_count"] == 3
     assert packet["phase3_raw_row_closure_matrix_count"] == 3
+    assert packet["row_template_artifact_count"] == 1
+    assert packet["row_template_artifacts"] == {
+        "gpcr_hard_decoy_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_rows_template.csv"
+        )
+    }
     assert packet["target_execution_preflight_count"] == 3
     assert packet["first_target_execution_preflight_blocker"]["target_id"] == "DRD2"
     assert packet["first_target_execution_preflight_blocker"]["first_blocker"] == (
@@ -234,6 +242,10 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "implementation/phase1/release_evidence/productization/"
         "gpcr_hard_decoy_rows.json"
     )
+    assert closure_matrix["DRD2"]["row_template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_rows_template.csv"
+    )
     assert "materialize_gpcr_hard_decoy_operator_template_from_rows" in (
         closure_matrix["DRD2"]["import_command"]
     )
@@ -299,6 +311,19 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
     assert packet["raw_row_import"]["source_receipt_requirements"]["mode"] == (
         "raw_hard_decoy_rows"
     )
+    assert packet["raw_row_import"]["row_template_artifacts"] == packet[
+        "row_template_artifacts"
+    ]
+    assert packet["raw_row_import"]["row_template_headers"] == [
+        "target_id",
+        "molecule_id",
+        "score",
+        "is_positive",
+        "is_decoy",
+        "score_direction",
+        "source_checksum",
+        "provenance_ref",
+    ]
     assert packet["raw_row_import"]["row_source_receipt_requirements"][
         "source_checksum_policy"
     ].startswith("source_checksum must be sha256:")
@@ -316,6 +341,33 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
     assert packet["raw_row_import"]["closure_matrix_ref"] == (
         "phase3_raw_row_closure_matrix"
     )
+    assert packet["raw_row_dropzone"] == {
+        "auto_detection_policy": (
+            "Place real GPCR hard-decoy row files at the default paths, then run "
+            "the raw-row importer followed by the suite materializer."
+        ),
+        "default_row_path_candidates": [
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.ndjson",
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.tsv",
+        ],
+        "materialization_command": (
+            "python3 scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py "
+            "--rows <gpcr_hard_decoy_raw_rows.csv|json|tsv> "
+            "--out implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_template.json"
+        ),
+        "required_row_inputs": ["gpcr_hard_decoy_rows"],
+        "row_template_artifacts": {
+            "gpcr_hard_decoy_rows": (
+                "implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_rows_template.csv"
+            )
+        },
+        "status": "ready_for_operator_rows",
+    }
     assert packet["raw_row_import"]["closes_phase3_criteria"] == [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
@@ -332,6 +384,9 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "implementation/phase1/release_evidence/productization/"
         "gpcr_hard_decoy_operator_template.json"
     )
+    assert packet["linked_artifacts"]["row_templates"] == packet[
+        "row_template_artifacts"
+    ]
     assert packet["target_slots"][0]["template_artifact"] == (
         "implementation/phase1/release_evidence/productization/"
         "gpcr_hard_decoy_operator_template.json"
@@ -347,18 +402,57 @@ def test_gpcr_hard_decoy_operator_intake_packet_cli_writes_json_and_markdown(
 ) -> None:
     out = tmp_path / "gpcr_hard_decoy_operator_intake_packet.json"
     out_md = tmp_path / "gpcr_hard_decoy_operator_intake_packet.md"
+    template_dir = tmp_path / "templates"
 
-    assert module.main(["--repo-root", str(REPO_ROOT), "--out", str(out), "--out-md", str(out_md)]) == 0
+    assert (
+        module.main(
+            [
+                "--repo-root",
+                str(REPO_ROOT),
+                "--out",
+                str(out),
+                "--out-md",
+                str(out_md),
+                "--row-template-dir",
+                str(template_dir),
+            ]
+        )
+        == 0
+    )
 
     payload = json.loads(out.read_text(encoding="utf-8"))
     markdown = out_md.read_text(encoding="utf-8")
+    csv_template = template_dir / "gpcr_hard_decoy_rows_template.csv"
     assert payload["input_checksums"][
         "scripts/build_gpcr_hard_decoy_operator_intake_packet.py"
     ].startswith("sha256:")
     assert payload["packet_id"] == "gpcr_hard_decoy_operator_intake_packet"
+    assert payload["row_template_artifacts"]["gpcr_hard_decoy_rows"] == str(
+        csv_template
+    )
+    assert csv_template.exists()
+    rows = list(csv.DictReader(csv_template.open(encoding="utf-8")))
+    assert len(rows) == 72
+    assert rows[0] == {
+        "target_id": "DRD2",
+        "molecule_id": "drd2_positive_001",
+        "score": "",
+        "is_positive": "True",
+        "is_decoy": "False",
+        "score_direction": "higher_is_better",
+        "source_checksum": "",
+        "provenance_ref": "",
+    }
+    assert rows[23]["target_id"] == "DRD2"
+    assert rows[23]["molecule_id"] == "drd2_decoy_020"
+    assert rows[24]["target_id"] == "HTR2A"
+    assert rows[-1]["target_id"] == "OPRM1"
+    assert rows[-1]["molecule_id"] == "oprm1_decoy_020"
     assert "# GPCR Hard-Decoy Operator Intake Packet" in markdown
     assert "## Gate Unblock Plan" in markdown
     assert "## Phase 3 Raw Row Closure Matrix" in markdown
+    assert "CSV Starter" in markdown
+    assert str(csv_template) in markdown
     assert "`DRD2` | `gpcr_hard_decoy_rows`" in markdown
     assert "## Raw Row Import" in markdown
     assert "## Target Execution Preflight" in markdown
