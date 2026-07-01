@@ -44,6 +44,14 @@ def _engine_run(
         "predicted_ligand_path_or_pose_ref": (
             _provenance_ref("public-benchmark", "vina-gnina", f"{engine_id}.sdf")
         ),
+        "predicted_ligand_checksum": _checksum(f"{engine_id}-predicted-ligand"),
+        "engine_version": f"{engine_id} 1.2.3",
+        "engine_config_checksum": _checksum(f"{engine_id}-config"),
+        "engine_run_provenance_ref": _provenance_ref(
+            "public-benchmark",
+            "vina-gnina",
+            f"{engine_id}-run.json",
+        ),
         "symmetry_aware_rmsd_angstrom": rmsd,
         "pose_success": pose_success,
         "score": score,
@@ -100,6 +108,13 @@ def test_vina_gnina_comparison_adapter_materializes_engine_summary() -> None:
         "PDBBind-core",
         "PDBBind-refined",
         "PDBBind-general",
+    ]
+    assert adapter["engine_run_receipt_policy"]["required_fields"] == [
+        "predicted_ligand_path_or_pose_ref",
+        "predicted_ligand_checksum",
+        "engine_version",
+        "engine_config_checksum",
+        "engine_run_provenance_ref",
     ]
     summaries = {row["engine_id"]: row for row in adapter["engine_summaries"]}
     assert summaries["vina"]["run_count"] == 2
@@ -323,6 +338,43 @@ def test_vina_gnina_comparison_adapter_blocks_local_proxy_receipts() -> None:
         "case_a:engine_run_0:predicted_ligand_path_or_pose_ref_placeholder"
         in adapter["blockers"]
     )
+    assert "operator_receipts_required" in adapter["root_cause_tags"]
+
+
+def test_vina_gnina_comparison_adapter_blocks_engine_run_receipt_gaps() -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    assert isinstance(first_case, dict)
+    engine_runs = first_case["engine_runs"]
+    assert isinstance(engine_runs, list)
+    first_run = engine_runs[0]
+    assert isinstance(first_run, dict)
+    first_run.pop("engine_run_provenance_ref")
+    first_run["predicted_ligand_checksum"] = "sha256:not-a-real-digest"
+    first_run["engine_config_checksum"] = "sha256:" + "0" * 64
+    first_run["engine_version"] = "operator_supplied_vina_version"
+
+    adapter = module.materialize_vina_gnina_comparison_adapter(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert adapter["status"] == "operator_evidence_required"
+    assert adapter["contract_pass"] is False
+    assert (
+        "case_a:engine_run_0:engine_run_provenance_ref_missing"
+        in adapter["blockers"]
+    )
+    assert "case_a:engine_run_0:predicted_ligand_checksum_invalid" in adapter[
+        "blockers"
+    ]
+    assert (
+        "case_a:engine_run_0:engine_config_checksum_placeholder_digest"
+        in adapter["blockers"]
+    )
+    assert "case_a:engine_run_0:engine_version_placeholder" in adapter["blockers"]
     assert "operator_receipts_required" in adapter["root_cause_tags"]
 
 

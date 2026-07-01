@@ -716,6 +716,12 @@ def _vina_gnina_case_template() -> dict[str, Any]:
                 "predicted_ligand_path_or_pose_ref": (
                     "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/vina_pose.sdf"
                 ),
+                "predicted_ligand_checksum": "sha256:operator_supplied_vina_pose_checksum",
+                "engine_version": "operator_supplied_vina_version",
+                "engine_config_checksum": "sha256:operator_supplied_vina_config_checksum",
+                "engine_run_provenance_ref": (
+                    "operator_supplied_vina_run_receipt"
+                ),
                 "symmetry_aware_rmsd_angstrom": None,
                 "pose_success": None,
                 "score": None,
@@ -726,6 +732,12 @@ def _vina_gnina_case_template() -> dict[str, Any]:
                 "docking_run_id": "SOURCE_COMPLEX_ID_gnina_run",
                 "predicted_ligand_path_or_pose_ref": (
                     "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/gnina_pose.sdf"
+                ),
+                "predicted_ligand_checksum": "sha256:operator_supplied_gnina_pose_checksum",
+                "engine_version": "operator_supplied_gnina_version",
+                "engine_config_checksum": "sha256:operator_supplied_gnina_config_checksum",
+                "engine_run_provenance_ref": (
+                    "operator_supplied_gnina_run_receipt"
                 ),
                 "symmetry_aware_rmsd_angstrom": None,
                 "pose_success": None,

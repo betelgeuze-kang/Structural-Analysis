@@ -188,6 +188,19 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                                     "vina.sdf",
                                 )
                             ),
+                            "predicted_ligand_checksum": _checksum(
+                                f"{case_ids[0]}-vina-pose"
+                            ),
+                            "engine_version": "vina 1.2.5",
+                            "engine_config_checksum": _checksum(
+                                f"{case_ids[0]}-vina-config"
+                            ),
+                            "engine_run_provenance_ref": _provenance_ref(
+                                "public-benchmark",
+                                "vina-gnina",
+                                case_ids[0],
+                                "vina-run.json",
+                            ),
                             "symmetry_aware_rmsd_angstrom": 1.4,
                             "pose_success": True,
                             "score": -7.2,
@@ -203,6 +216,19 @@ def _write_phase2_rows(root: Path, *, case_count: int | None = None) -> dict[str
                                     case_ids[0],
                                     "gnina.sdf",
                                 )
+                            ),
+                            "predicted_ligand_checksum": _checksum(
+                                f"{case_ids[0]}-gnina-pose"
+                            ),
+                            "engine_version": "gnina 1.3.0",
+                            "engine_config_checksum": _checksum(
+                                f"{case_ids[0]}-gnina-config"
+                            ),
+                            "engine_run_provenance_ref": _provenance_ref(
+                                "public-benchmark",
+                                "vina-gnina",
+                                case_ids[0],
+                                "gnina-run.json",
                             ),
                             "symmetry_aware_rmsd_angstrom": 1.6,
                             "pose_success": True,

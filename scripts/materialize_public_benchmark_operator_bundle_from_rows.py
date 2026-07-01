@@ -47,11 +47,30 @@ VINA_ENGINE_FIELDS = (
     "engine_id",
     "docking_run_id",
     "predicted_ligand_path_or_pose_ref",
+    "predicted_ligand_checksum",
+    "engine_version",
+    "engine_config_checksum",
+    "engine_run_provenance_ref",
     "symmetry_aware_rmsd_angstrom",
     "pose_success",
     "score",
     "score_direction",
     "pose_success_rmsd_threshold_angstrom",
+)
+VINA_ENGINE_RUN_RECEIPT_FIELDS = (
+    "predicted_ligand_path_or_pose_ref",
+    "predicted_ligand_checksum",
+    "engine_version",
+    "engine_config_checksum",
+    "engine_run_provenance_ref",
+)
+VINA_ENGINE_RUN_CHECKSUM_FIELDS = (
+    "predicted_ligand_checksum",
+    "engine_config_checksum",
+)
+VINA_ENGINE_RUN_PROVENANCE_FIELDS = (
+    "predicted_ligand_path_or_pose_ref",
+    "engine_run_provenance_ref",
 )
 SOURCE_RECEIPT_FIELDS = (
     "source_license_or_accession",
@@ -94,6 +113,9 @@ SOURCE_ACTUALITY_POLICY = {
     "required_vina_engine_run_pose_ref_fields": [
         "predicted_ligand_path_or_pose_ref"
     ],
+    "required_vina_engine_run_receipt_fields": list(VINA_ENGINE_RUN_RECEIPT_FIELDS),
+    "vina_engine_run_checksum_fields": list(VINA_ENGINE_RUN_CHECKSUM_FIELDS),
+    "vina_engine_run_provenance_fields": list(VINA_ENGINE_RUN_PROVENANCE_FIELDS),
     "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest",
     "row_file_artifact_sha256_policy": (
         "Every operator row file materialized by this importer is recorded with "
@@ -258,7 +280,7 @@ def _pose_source_actuality_blockers(row: dict[str, Any], *, row_key: str) -> lis
     return blockers
 
 
-def _vina_engine_pose_ref_actuality_blockers(
+def _vina_engine_run_receipt_actuality_blockers(
     row: dict[str, Any],
     *,
     row_key: str,
@@ -270,17 +292,24 @@ def _vina_engine_pose_ref_actuality_blockers(
     for index, run in enumerate(raw_runs):
         if not isinstance(run, dict):
             continue
-        pose_ref = _string(run.get("predicted_ligand_path_or_pose_ref"))
-        if not pose_ref:
-            continue
-        if _contains_placeholder_marker(pose_ref) or _has_placeholder_provenance_prefix(
-            pose_ref
-        ):
-            blockers.append(
-                "vina_gnina_rows:"
-                f"{row_key}:engine_run_{index}:"
-                "predicted_ligand_path_or_pose_ref_placeholder"
-            )
+        prefix = f"vina_gnina_rows:{row_key}:engine_run_{index}"
+        for field in VINA_ENGINE_RUN_RECEIPT_FIELDS:
+            text = _string(run.get(field))
+            if not text:
+                blockers.append(f"{prefix}:{field}_missing")
+                continue
+            if _contains_placeholder_marker(text):
+                blockers.append(f"{prefix}:{field}_placeholder")
+            if field in VINA_ENGINE_RUN_CHECKSUM_FIELDS:
+                if not _is_sha256_ref(text):
+                    blockers.append(f"{prefix}:{field}_invalid")
+                elif _is_repeated_placeholder_checksum(text):
+                    blockers.append(f"{prefix}:{field}_placeholder_digest")
+            if (
+                field in VINA_ENGINE_RUN_PROVENANCE_FIELDS
+                and _has_placeholder_provenance_prefix(text)
+            ):
+                blockers.append(f"{prefix}:{field}_placeholder")
     return blockers
 
 
@@ -470,7 +499,9 @@ def _source_actuality_check(
                 row_key=row_key,
             )
         )
-        blockers.extend(_vina_engine_pose_ref_actuality_blockers(row, row_key=row_key))
+        blockers.extend(
+            _vina_engine_run_receipt_actuality_blockers(row, row_key=row_key)
+        )
     blockers = sorted(dict.fromkeys(blockers))
     return {
         "contract_pass": not blockers,

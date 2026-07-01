@@ -47,10 +47,29 @@ REQUIRED_ENGINE_RUN_FIELDS = (
     "engine_id",
     "docking_run_id",
     "predicted_ligand_path_or_pose_ref",
+    "predicted_ligand_checksum",
+    "engine_version",
+    "engine_config_checksum",
+    "engine_run_provenance_ref",
     "symmetry_aware_rmsd_angstrom",
     "pose_success",
     "score",
     "score_direction",
+)
+ENGINE_RUN_RECEIPT_FIELDS = (
+    "predicted_ligand_path_or_pose_ref",
+    "predicted_ligand_checksum",
+    "engine_version",
+    "engine_config_checksum",
+    "engine_run_provenance_ref",
+)
+ENGINE_RUN_CHECKSUM_FIELDS = (
+    "predicted_ligand_checksum",
+    "engine_config_checksum",
+)
+ENGINE_RUN_PROVENANCE_FIELDS = (
+    "predicted_ligand_path_or_pose_ref",
+    "engine_run_provenance_ref",
 )
 SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
 PLACEHOLDER_SOURCE_TEXT_MARKERS = (
@@ -125,6 +144,15 @@ ENGINE_PAIR_POLICY = {
     "per_case_required_engines": list(SUPPORTED_ENGINES),
     "duplicate_engine_ids_rejected": True,
     "duplicate_docking_run_ids_rejected": True,
+}
+ENGINE_RUN_RECEIPT_POLICY = {
+    "required_fields": list(ENGINE_RUN_RECEIPT_FIELDS),
+    "checksum_fields": list(ENGINE_RUN_CHECKSUM_FIELDS),
+    "provenance_fields": list(ENGINE_RUN_PROVENANCE_FIELDS),
+    "purpose": (
+        "Each Vina/GNINA engine run must carry enough receipts to trace the produced "
+        "pose artifact, engine version, run configuration, and external run record."
+    ),
 }
 
 
@@ -223,11 +251,18 @@ def _normalize_engine_run(
     for field in REQUIRED_ENGINE_RUN_FIELDS:
         if field not in row:
             blockers.append(f"{run_key}:{field}_missing")
-            root_cause_tags.append("operator_values_required")
+            if field in ENGINE_RUN_RECEIPT_FIELDS:
+                root_cause_tags.append("operator_receipts_required")
+            else:
+                root_cause_tags.append("operator_values_required")
 
     engine_id = _engine_id(row.get("engine_id"))
     docking_run_id = _string(row.get("docking_run_id"))
     pose_ref = _string(row.get("predicted_ligand_path_or_pose_ref"))
+    predicted_ligand_checksum = _string(row.get("predicted_ligand_checksum"))
+    engine_version = _string(row.get("engine_version"))
+    engine_config_checksum = _string(row.get("engine_config_checksum"))
+    engine_run_provenance_ref = _string(row.get("engine_run_provenance_ref"))
     rmsd = _number(row.get("symmetry_aware_rmsd_angstrom"))
     pose_success = _boolean(row.get("pose_success"))
     score = _number(row.get("score"))
@@ -247,7 +282,7 @@ def _normalize_engine_run(
         root_cause_tags.append("operator_values_required")
     if "predicted_ligand_path_or_pose_ref" in row and not pose_ref:
         blockers.append(f"{run_key}:predicted_ligand_path_or_pose_ref_blank")
-        root_cause_tags.append("operator_values_required")
+        root_cause_tags.append("operator_receipts_required")
     elif (
         "predicted_ligand_path_or_pose_ref" in row
         and pose_ref
@@ -257,6 +292,42 @@ def _normalize_engine_run(
         )
     ):
         blockers.append(f"{run_key}:predicted_ligand_path_or_pose_ref_placeholder")
+        root_cause_tags.append("operator_receipts_required")
+    for field, value in {
+        "predicted_ligand_checksum": predicted_ligand_checksum,
+        "engine_version": engine_version,
+        "engine_config_checksum": engine_config_checksum,
+        "engine_run_provenance_ref": engine_run_provenance_ref,
+    }.items():
+        if field in row and not value:
+            blockers.append(f"{run_key}:{field}_blank")
+            root_cause_tags.append("operator_receipts_required")
+    for field, value in {
+        "predicted_ligand_checksum": predicted_ligand_checksum,
+        "engine_config_checksum": engine_config_checksum,
+    }.items():
+        if field in row and value and not _is_sha256_ref(value):
+            blockers.append(f"{run_key}:{field}_invalid")
+            root_cause_tags.append("operator_receipts_required")
+        elif field in row and value and _is_repeated_placeholder_checksum(value):
+            blockers.append(f"{run_key}:{field}_placeholder_digest")
+            root_cause_tags.append("operator_receipts_required")
+    if (
+        "engine_version" in row
+        and engine_version
+        and _contains_placeholder_marker(engine_version)
+    ):
+        blockers.append(f"{run_key}:engine_version_placeholder")
+        root_cause_tags.append("operator_receipts_required")
+    if (
+        "engine_run_provenance_ref" in row
+        and engine_run_provenance_ref
+        and (
+            _has_placeholder_provenance_prefix(engine_run_provenance_ref)
+            or _contains_placeholder_marker(engine_run_provenance_ref)
+        )
+    ):
+        blockers.append(f"{run_key}:engine_run_provenance_ref_placeholder")
         root_cause_tags.append("operator_receipts_required")
     if "symmetry_aware_rmsd_angstrom" in row and (rmsd is None or rmsd < 0.0):
         blockers.append(f"{run_key}:symmetry_aware_rmsd_angstrom_invalid")
@@ -289,6 +360,10 @@ def _normalize_engine_run(
             "engine_id": engine_id,
             "docking_run_id": docking_run_id,
             "predicted_ligand_path_or_pose_ref": pose_ref,
+            "predicted_ligand_checksum": predicted_ligand_checksum,
+            "engine_version": engine_version,
+            "engine_config_checksum": engine_config_checksum,
+            "engine_run_provenance_ref": engine_run_provenance_ref,
             "symmetry_aware_rmsd_angstrom": rmsd,
             "pose_success": pose_success,
             "score": score,
@@ -566,6 +641,7 @@ def materialize_vina_gnina_comparison_adapter(
         "numeric_value_policy": NUMERIC_VALUE_POLICY,
         "pose_success_policy": POSE_SUCCESS_POLICY,
         "engine_pair_policy": ENGINE_PAIR_POLICY,
+        "engine_run_receipt_policy": ENGINE_RUN_RECEIPT_POLICY,
         "supported_engines": list(SUPPORTED_ENGINES),
         "supported_benchmark_splits": list(SUPPORTED_BENCHMARK_SPLITS),
         "first_blocked_target": first_blocked_target,

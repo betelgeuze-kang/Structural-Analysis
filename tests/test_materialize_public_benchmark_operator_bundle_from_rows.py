@@ -148,6 +148,12 @@ def test_public_benchmark_operator_bundle_from_row_files_groups_flat_rows(
                         "public-benchmark", "vina-gnina", "case_a", "vina.sdf"
                     )
                 ),
+                "predicted_ligand_checksum": _checksum("case_a-vina-pose"),
+                "engine_version": "vina 1.2.5",
+                "engine_config_checksum": _checksum("case_a-vina-config"),
+                "engine_run_provenance_ref": _provenance_ref(
+                    "public-benchmark", "vina-gnina", "case_a", "vina-run.json"
+                ),
                 "symmetry_aware_rmsd_angstrom": "1.4",
                 "pose_success": "true",
                 "score": "-7.2",
@@ -170,6 +176,12 @@ def test_public_benchmark_operator_bundle_from_row_files_groups_flat_rows(
                     _provenance_ref(
                         "public-benchmark", "vina-gnina", "case_a", "gnina.sdf"
                     )
+                ),
+                "predicted_ligand_checksum": _checksum("case_a-gnina-pose"),
+                "engine_version": "gnina 1.3.0",
+                "engine_config_checksum": _checksum("case_a-gnina-config"),
+                "engine_run_provenance_ref": _provenance_ref(
+                    "public-benchmark", "vina-gnina", "case_a", "gnina-run.json"
                 ),
                 "symmetry_aware_rmsd_angstrom": "1.6",
                 "pose_success": "true",
@@ -208,6 +220,9 @@ def test_public_benchmark_operator_bundle_from_row_files_groups_flat_rows(
         "vina",
         "gnina",
     ]
+    assert comparison_cases[0]["engine_runs"][0]["engine_config_checksum"].startswith(
+        "sha256:"
+    )
     report = payload["materialization_report"]
     assert {
         key: report[key]
@@ -340,6 +355,12 @@ def test_public_benchmark_operator_bundle_from_rows_flags_placeholder_sources(
                                 "predicted_ligand_path_or_pose_ref": (
                                     "operator://poses/vina.sdf"
                                 ),
+                                "predicted_ligand_checksum": "sha256:" + "0" * 64,
+                                "engine_version": "operator_supplied_vina_version",
+                                "engine_config_checksum": "sha256:not-a-real-digest",
+                                "engine_run_provenance_ref": (
+                                    "operator://vina-gnina/run.json"
+                                ),
                             }
                         ],
                     }
@@ -368,6 +389,14 @@ def test_public_benchmark_operator_bundle_from_rows_flags_placeholder_sources(
     assert (
         "vina_gnina_rows:case_a:engine_run_0:"
         "predicted_ligand_path_or_pose_ref_placeholder"
+    ) in source_check["blockers"]
+    assert (
+        "vina_gnina_rows:case_a:engine_run_0:"
+        "engine_config_checksum_invalid"
+    ) in source_check["blockers"]
+    assert (
+        "vina_gnina_rows:case_a:engine_run_0:"
+        "engine_run_provenance_ref_placeholder"
     ) in source_check["blockers"]
 
 
@@ -447,6 +476,17 @@ def test_public_benchmark_operator_bundle_from_rows_flags_local_proxy_sources(
                                     "local-evidence://public-benchmark/vina-gnina/"
                                     "case_a/vina.sdf"
                                 ),
+                                "predicted_ligand_checksum": _checksum(
+                                    "case_a-vina-pose"
+                                ),
+                                "engine_version": "vina 1.2.5",
+                                "engine_config_checksum": _checksum(
+                                    "case_a-vina-config"
+                                ),
+                                "engine_run_provenance_ref": (
+                                    "local-evidence://public-benchmark/vina-gnina/"
+                                    "case_a/vina-run.json"
+                                ),
                             }
                         ],
                     }
@@ -489,6 +529,10 @@ def test_public_benchmark_operator_bundle_from_rows_flags_local_proxy_sources(
     assert (
         "vina_gnina_rows:case_a:engine_run_0:"
         "predicted_ligand_path_or_pose_ref_placeholder"
+    ) in source_check["blockers"]
+    assert (
+        "vina_gnina_rows:case_a:engine_run_0:"
+        "engine_run_provenance_ref_placeholder"
     ) in source_check["blockers"]
 
 
