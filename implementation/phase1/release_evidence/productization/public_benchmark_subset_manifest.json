@@ -57,10 +57,10 @@
   "claim_boundary": "This manifest is a Tier beta source-of-truth seed. It defines the minimum CASF/PDBBind subset contract, operator slots, case-row schema, and validation command, but it does not attach or redistribute public benchmark source files and does not claim benchmark results.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T00:33:52.280961+00:00",
+  "generated_at": "2026-07-01T00:44:49.989996+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:987c65882b572a415c1dcd4941fc8adfc055b2e673d114bbe90caa5b02f777d8",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:b8ffd0d2b46dcd1803b3ed07aae28dd038706ab0ffce26dd7d8d7e7a786347c6",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:b8672153f8fb53601b0620c4c2bf00c5f293b4124ebf8244ec0bd85c4116e409",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:edd2e1f2c560695f83e4f6dc30489379d16fe7a798541e82179cb5b933a6bf72",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:ddebd330fc2b8bb84dbb180b0678cafa9b1e06ef381ea881bd212b8e8333c7d6",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:834f1805a04cfa443914f5c89aa595d9bf7f6212c6e8fdb30767f8df87db4887",
@@ -138,7 +138,7 @@
       "status": "source_material_required"
     }
   ],
-  "source_commit_sha": "d7e0452267dc4fd846dc7a3a5c107da06171eb7e",
+  "source_commit_sha": "15f4b9e85274e507490e9711127a8ddad1659b38",
   "source_families": [
     "CASF/PDBBind"
   ],
