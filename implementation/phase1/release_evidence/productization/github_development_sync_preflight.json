@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-01T06:38:15.330911+00:00",
+  "generated_at": "2026-07-01T06:49:37.721138+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -41,13 +41,13 @@
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
     "ignored_worktree_status_short": "",
-    "local_head_sha": "84d8b4b89ec3c139b070b84af6e759c60e27efc2",
+    "local_head_sha": "254a1fcae6b6205659ea21d41601c82f642461e3",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "84d8b4b89ec3c139b070b84af6e759c60e27efc2",
+    "remote_feature_sha": "254a1fcae6b6205659ea21d41601c82f642461e3",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "84d8b4b89ec3c139b070b84af6e759c60e27efc2",
+    "remote_main_sha": "254a1fcae6b6205659ea21d41601c82f642461e3",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
