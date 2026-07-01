@@ -482,7 +482,10 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     }
     assert science_rows["gpcr"]["bottleneck"] == "broad_gpcr_family_claim_locked"
     assert science_rows["gpcr"]["first_blocked_target"] == "DRD2"
-    assert science_rows["gpcr"]["root_cause_tags"] == ["operator_values_required"]
+    assert science_rows["gpcr"]["root_cause_tags"] == [
+        "hard_decoy_rows_required",
+        "operator_values_required",
+    ]
     assert science_rows["gpcr"]["first_next_action"] == (
         "fill_gpcr_hard_decoy_operator_intake_packet"
     )
