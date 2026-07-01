@@ -149,7 +149,7 @@
           "reference_and_normalization": {
             "blocker_count": 2,
             "blockers": [
-              "normalization_not_implemented",
+              "normalization_receipts_missing",
               "reference_outputs_missing"
             ],
             "description": "Reference output and canonical-normalization prerequisites.",
@@ -172,7 +172,7 @@
         "medium_structural_models_current_below_required:0/5",
         "license_review_pending",
         "medium_model_pass_or_review_missing",
-        "normalization_not_implemented",
+        "normalization_receipts_missing",
         "opensees_medium_scorecard_execution_missing",
         "reference_outputs_missing",
         "medium_model_pass_or_review_below_required:0/5"
@@ -483,14 +483,14 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-01T14:29:56.939998+00:00",
+  "generated_at": "2026-07-01T15:43:51.838963+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:a3d185bd1c4f27417c74172f8cb0ed17a362e36c95ac1ad041ffb41bd0d38f2b",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:5afa364695868673f5d3739ebcc745f0668c845a03abdb0b9ac237d3633c2b9d",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:fb9a28ebad9ca5db0c0e4104f3a755ea2fbed1942b2ec4afcea4ebd669e8aeb7",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:582b0bbcb3192864312b62e7a3b13bfdf02fbf43037e09d6f05ad8476b251604",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:5db9df8887be1b6d53815802a4cb515d4c0867288db5cf673ac786af92320d1a",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:14327c6edc77e0116542440f5a8588b03d96db126dec09f6e5f2d61dd2d9c1ec",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:9d5e64875534a41dac9148ce6936299190b48ab61c5857f86ec2252e4faba723",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:2d3fd50ad43bed838d61a6527750819eb5474283cb3c5143562958a6feca9712",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:fd123502c0ba1dbe040509aed3e042a11fe7bf91bac52c52152e8fa18801db28",
@@ -503,7 +503,7 @@
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:dfab62a2935d4de859f6b63085ee33d16a1b1a61043ad5509bd4acf6201cafa1",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
-    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:cefb901137776ee4932e182d2379e32c027c987c129e058af6454ac56c60306b",
+    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:5073619c169a3e437e5309621b13967156b1466f79e48fb410fe6239b4615620",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:9e61ef1db0ab2e01a3917d1e410a9677e8e5170aa5b9fb7ccc344bc98ee30cdd",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:a341b5565e060d4dd7410f8402b378ee4e6ac8bbe1b99b22ad8364707a155ade",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:170d2b4fa8fc0fe606258580623263e9b52a041b9cef84293d2279c348e81775",
@@ -517,7 +517,7 @@
     "benchmark_quantity_handoff": {
       "acquisition_plan": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
       "benchmark_scale_blocker_grouping": {
-        "blocker_count": 9,
+        "blocker_count": 10,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
@@ -555,9 +555,10 @@
             "scope": "medium_model_scorecard_execution"
           },
           "reference_and_normalization": {
-            "blocker_count": 2,
+            "blocker_count": 3,
             "blockers": [
               "normalization_not_implemented",
+              "normalization_receipts_missing",
               "reference_outputs_missing"
             ],
             "description": "Reference output and canonical-normalization prerequisites.",
@@ -793,7 +794,7 @@
           "acquisition_blockers": [
             "license_review_pending",
             "medium_model_pass_or_review_missing",
-            "normalization_not_implemented",
+            "normalization_receipts_missing",
             "opensees_medium_scorecard_execution_missing",
             "reference_outputs_missing"
           ],
@@ -835,7 +836,7 @@
                 "reference_and_normalization": {
                   "blocker_count": 2,
                   "blockers": [
-                    "normalization_not_implemented",
+                    "normalization_receipts_missing",
                     "reference_outputs_missing"
                   ],
                   "description": "Reference output and canonical-normalization prerequisites.",
@@ -859,12 +860,12 @@
               "medium_model_pass_or_review_below_required:0/5",
               "medium_model_pass_or_review_missing",
               "medium_structural_models_current_below_required:0/5",
-              "normalization_not_implemented",
+              "normalization_receipts_missing",
               "opensees_medium_scorecard_execution_missing",
               "reference_outputs_missing"
             ],
             "case_ready_count": 0,
-            "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command, but it does not prove product license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
+            "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
             "contract_pass": false,
             "current_medium_model_scorecard_count": 0,
             "local_candidate_artifact_count": 2,
@@ -925,17 +926,19 @@
                 ]
               },
               {
-                "action": "Record units, coordinate transforms, node/member mapping coverage, and normalization receipt paths for all selected medium cases.",
+                "action": "Attach one validated medium normalization receipt per selected case, including canonical units, coordinate transforms, and node/member mapping coverage.",
                 "clears_blockers": [
-                  "normalization_not_implemented"
+                  "normalization_receipts_missing"
                 ],
                 "evidence_artifacts": [
                   "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
                 ],
                 "id": "record_medium_canonical_normalization",
                 "lane": "opensees-medium",
+                "minimum_mapping_coverage": 0.99,
                 "owner": "benchmark_operator",
                 "remaining_case_count": 5,
+                "schema_version_required": "phase3-medium-normalization-receipt.v1",
                 "validation_commands": [
                   "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
                 ]
@@ -1031,7 +1034,7 @@
           "scorecard_blockers": [
             "license_review_pending",
             "medium_model_pass_or_review_missing",
-            "normalization_not_implemented",
+            "normalization_receipts_missing",
             "opensees_medium_scorecard_execution_missing",
             "reference_outputs_missing"
           ],
@@ -1270,13 +1273,16 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 5,
+    "developer_preview_blocker_count": 8,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "human_ux::observation_file_missing"
+      "human_ux::observation_file_missing",
+      "pm_release::evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact",
+      "stale_or_inconsistent:open_blocker_count_conflict",
+      "stale_or_inconsistent:release_area_count_conflict"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -2212,7 +2218,7 @@
           "reference_and_normalization": {
             "blocker_count": 2,
             "blockers": [
-              "normalization_not_implemented",
+              "normalization_receipts_missing",
               "reference_outputs_missing"
             ],
             "description": "Reference output and canonical-normalization prerequisites.",
@@ -2270,7 +2276,7 @@
             "reference_and_normalization": {
               "blocker_count": 2,
               "blockers": [
-                "normalization_not_implemented",
+                "normalization_receipts_missing",
                 "reference_outputs_missing"
               ],
               "description": "Reference output and canonical-normalization prerequisites.",
@@ -2294,12 +2300,12 @@
           "medium_model_pass_or_review_below_required:0/5",
           "medium_model_pass_or_review_missing",
           "medium_structural_models_current_below_required:0/5",
-          "normalization_not_implemented",
+          "normalization_receipts_missing",
           "opensees_medium_scorecard_execution_missing",
           "reference_outputs_missing"
         ],
         "case_ready_count": 0,
-        "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command, but it does not prove product license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
+        "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
         "contract_pass": false,
         "current_medium_model_scorecard_count": 0,
         "local_candidate_artifact_count": 2,
@@ -2360,17 +2366,19 @@
             ]
           },
           {
-            "action": "Record units, coordinate transforms, node/member mapping coverage, and normalization receipt paths for all selected medium cases.",
+            "action": "Attach one validated medium normalization receipt per selected case, including canonical units, coordinate transforms, and node/member mapping coverage.",
             "clears_blockers": [
-              "normalization_not_implemented"
+              "normalization_receipts_missing"
             ],
             "evidence_artifacts": [
               "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
             ],
             "id": "record_medium_canonical_normalization",
             "lane": "opensees-medium",
+            "minimum_mapping_coverage": 0.99,
             "owner": "benchmark_operator",
             "remaining_case_count": 5,
+            "schema_version_required": "phase3-medium-normalization-receipt.v1",
             "validation_commands": [
               "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
             ]
@@ -2464,7 +2472,7 @@
       "blockers": [
         "license_review_pending",
         "medium_model_pass_or_review_missing",
-        "normalization_not_implemented",
+        "normalization_receipts_missing",
         "opensees_medium_scorecard_execution_missing",
         "reference_outputs_missing"
       ],
@@ -2502,7 +2510,7 @@
           },
           {
             "field": "normalization_receipt",
-            "required_artifact": "units/coordinates/mapping normalization receipt",
+            "required_artifact": "units/coordinates/mapping normalization receipt passing phase3-medium-normalization-receipt.v1",
             "runner_argument": "receipt_field"
           }
         ],
@@ -2522,7 +2530,7 @@
           "python3 scripts/build_developer_preview_rc_status.py --check"
         ]
       },
-      "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command, but it does not prove product license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
+      "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
       "current_medium_model_scorecard_count": 0,
       "local_candidate_artifact_count": 2,
       "local_parser_boundary": {
@@ -2567,10 +2575,11 @@
           "status": "missing"
         },
         {
-          "blocker": "normalization_not_implemented",
+          "blocker": "normalization_receipts_missing",
           "current_case_count": 0,
           "evidence_type": "operator_attached",
           "id": "canonical_normalization",
+          "minimum_mapping_coverage": 0.99,
           "remaining_case_count": 5,
           "required": "Canonical model normalization with units, coordinates, and mapping coverage.",
           "required_artifacts": [
@@ -2579,6 +2588,7 @@
             "normalization receipt per selected case"
           ],
           "required_case_count": 5,
+          "schema_version_required": "phase3-medium-normalization-receipt.v1",
           "status": "missing"
         },
         {
@@ -2661,16 +2671,18 @@
           ]
         },
         {
-          "action": "Record units, coordinate transforms, node/member mapping coverage, and normalization receipt paths for all selected medium cases.",
+          "action": "Attach one validated medium normalization receipt per selected case, including canonical units, coordinate transforms, and node/member mapping coverage.",
           "clears_blockers": [
-            "normalization_not_implemented"
+            "normalization_receipts_missing"
           ],
           "evidence_artifacts": [
             "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
           ],
           "id": "record_medium_canonical_normalization",
+          "minimum_mapping_coverage": 0.99,
           "owner": "benchmark_operator",
           "remaining_case_count": 5,
+          "schema_version_required": "phase3-medium-normalization-receipt.v1",
           "validation_commands": [
             "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
           ]
@@ -2761,10 +2773,10 @@
       "modeling_assumption_diagnosis_execution_missing",
       "modeling_convention_declarations_missing",
       "normalization_not_implemented",
+      "normalization_receipts_missing",
       "opensees_medium_scorecard_execution_missing",
       "operator_comparison_trace_rows_missing",
-      "operator_file_checksums_missing",
-      "operator_files_missing"
+      "operator_file_checksums_missing"
     ],
     "phase5_gui_workflow_handoff": {
       "actual_gui_workflow_step_partial_count": 0,
@@ -3168,6 +3180,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "e4a55df56dcee389977062d04e30776c33cdc488",
+  "source_commit_sha": "b737f323f6c1614b64b8bccc732d8b90ef42c5a9",
   "status": "blocked"
 }

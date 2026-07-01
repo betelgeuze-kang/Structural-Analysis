@@ -18,6 +18,7 @@
     "modeling_assumption_diagnosis_execution_missing",
     "modeling_convention_declarations_missing",
     "normalization_not_implemented",
+    "normalization_receipts_missing",
     "opensees_medium_scorecard_execution_missing",
     "operator_comparison_trace_rows_missing",
     "operator_file_checksums_missing",
@@ -39,7 +40,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-07-01T10:43:53.766935+00:00",
+  "generated_at": "2026-07-01T15:42:23.904144+00:00",
   "ifc_import_case_requirement": {
     "blocker": "phase3_ifc_import_case_quantity_credit_missing",
     "claim_boundary": "The Phase 3 roadmap requires at least 10 clean/dirty IFC import cases. Current acquisition evidence contains two clean buildingSMART expected import-health contracts and eight dirty/negative expected block contracts, but zero quantity-credit-ready IFC cases.",
@@ -63,7 +64,7 @@
     "scripts/build_phase3_ifc_query_gui_readiness_receipt.py": "sha256:b6c47721aa4d13ad865c2d6232f64d8e5907f749623492f6a6925927ccf75d99",
     "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
     "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:8a9e393a1c0d9c40ca51648a74ae2de0ea514cf4e12d696d1671fcd3680d469c",
-    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:f4cc4277e3e84797213de2edfc8505f9c073ebd834f5b02114a0d6f017314a86",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:3010d611350dc38e8385ed5474253a48acec7b71e84da33ac59b09bc2cc40620",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
     "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py": "sha256:500bbc5fe5a32797e47d6887e42b08f18213907f6ae07e2cadbf77cdb8f910db",
@@ -71,7 +72,7 @@
     "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
     "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
     "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82"
   },
   "lanes": [
     "buildingsmart-clean-ifc",
@@ -93,12 +94,12 @@
       "blockers": [
         "license_review_pending",
         "reference_outputs_missing",
-        "normalization_not_implemented",
+        "normalization_receipts_missing",
         "opensees_medium_scorecard_execution_missing",
         "medium_model_pass_or_review_missing"
       ],
       "checksum_status": "local_candidate_checksum_attached_upstream_sha256_verified",
-      "claim_boundary": "OpenSees medium lane has local SCBF16B candidate artifacts and topology parser evidence. The upstream GitHub source URL, raw checksum, and GPL-3.0 license identity are identified, but product legal review, redistribution rights, commercial use rights, reference output ingest, normalization, and OpenSees medium scorecard execution are still not closed.",
+      "claim_boundary": "OpenSees medium lane has local SCBF16B candidate artifacts and topology parser evidence. The upstream GitHub source URL, raw checksum, and GPL-3.0 license identity are identified, but product legal review, redistribution rights, commercial use rights, reference output ingest, normalization, and OpenSees medium scorecard execution are still not closed. The medium normalization receipt schema is implemented, but operator-attached per-case normalization receipts are still missing.",
       "commercial_use_allowed": false,
       "existing_receipts": [
         {
@@ -151,7 +152,7 @@
           "source_of_checksum": "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
         }
       ],
-      "normalization_status": "not_started",
+      "normalization_status": "receipt_contract_ready_evidence_missing",
       "ready_for_phase3_quantity_credit": false,
       "redistribution_allowed": false,
       "reference_result_status": "not_ingested",
@@ -462,6 +463,7 @@
       "modeling_assumption_diagnosis_execution_missing",
       "modeling_convention_declarations_missing",
       "normalization_not_implemented",
+      "normalization_receipts_missing",
       "opensees_medium_scorecard_execution_missing",
       "operator_comparison_trace_rows_missing",
       "operator_file_checksums_missing",
@@ -484,7 +486,7 @@
     "writes_default_artifact_command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py"
   },
   "schema_version": "phase3-benchmark-acquisition-plan.v1",
-  "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+  "source_commit_sha": "b737f323f6c1614b64b8bccc732d8b90ef42c5a9",
   "source_license_receipt_source_count": 4,
   "status": "blocked",
   "topology_receipt_source_count": 6

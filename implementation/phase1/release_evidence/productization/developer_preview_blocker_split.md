@@ -6,22 +6,22 @@ This page separates Developer Preview RC blockers from Commercial Release blocke
 
 | Track | Source | Current status |
 |---|---|---|
-| Canonical Commercial Release snapshot | `product_readiness_snapshot.json` | `blocked`, `blocker_count=34` |
-| Developer Preview readiness bar | `developer_preview_readiness.json` | `blocked`, `blocker_count=5`, `future_commercial_blocker_count=29` |
-| Developer Preview RC final gates | `developer_preview_rc_status.json` | `blocked`, deliverables `10/10`, final gates `3/9`, active RC blockers `6` |
+| Canonical Commercial Release snapshot | `product_readiness_snapshot.json` | `blocked`, `blocker_count=36` |
+| Developer Preview readiness bar | `developer_preview_readiness.json` | `blocked`, `blocker_count=5`, `future_commercial_blocker_count=31` |
+| Developer Preview RC final gates | `developer_preview_rc_status.json` | `blocked`, deliverables `10/10`, final gates `6/9`, active RC blockers `3` |
 
-The historical `42` release blocker count is no longer the stored canonical count after the current snapshot regeneration; the canonical Commercial Release blocker total is now `34`. Use `product_readiness_snapshot.json` for release blocker totals, and use the RC final-gate rows below for the six Developer Preview blockers.
+The historical `42` release blocker count is no longer the stored canonical count after the current snapshot regeneration; the canonical Commercial Release blocker total is now `36`. Use `product_readiness_snapshot.json` for release blocker totals, and use the RC final-gate rows below for the three active Developer Preview RC blockers.
 
 ## Developer Preview RC Blockers
 
 | Candidate item | DP RC blocker? | Current evidence boundary |
 |---|---:|---|
-| Selected medium models | Yes | Needs selected medium OpenSees/reference model PASS or approved REVIEW evidence. Parser/topology evidence alone does not count. |
-| Large crash/OOM-free execution | Yes | Needs acquired large-model sources, runner or nightly lane evidence, and crash/OOM-free execution receipts. |
-| Silent import loss zero | Yes | Needs acquired and checksummed IFC files, license review, import-health execution, and negative/import-hardening checks. |
-| Linux/Windows reproducibility | Yes | Needs direct Linux/Windows replay receipts. Clean-clone spillover stays in the clean-checkout gate. |
+| Selected medium models | Yes | Needs selected medium OpenSees/reference model PASS or approved REVIEW evidence. Parser/topology evidence alone does not count; medium normalization now has a receipt schema, but per-case normalization receipts are still missing. |
+| Large crash/OOM-free execution | No | Current RC evidence is pass for this final gate; it still does not close full benchmark parity or commercial claim scope. |
+| Silent import loss zero | No | Current RC evidence is pass for this final gate; it still does not close all import/benchmark/license commercial gates. |
+| Linux/Windows reproducibility | Yes | Needs direct Windows replay receipt. Clean-clone spillover stays in the clean-checkout gate. |
 | Human new-user workflow observation | Yes | Needs a real human new-user observation record. Automated browser/task evidence is rehearsal evidence only. |
-| Git clean-clone benchmark regeneration | Yes | Needs clean-checkout benchmark regeneration plus tracked/committed required inputs and release-control handoff closure. |
+| Git clean-clone benchmark regeneration | No | Current RC evidence is pass for this final gate; it remains non-promoting and does not close Phase 3 or commercial release. |
 
 ## Future Commercial Release Blockers
 

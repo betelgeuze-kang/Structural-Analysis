@@ -4,13 +4,16 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 5,
+  "blocker_count": 8,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
-    "human_ux::observation_file_missing"
+    "human_ux::observation_file_missing",
+    "pm_release::evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact",
+    "stale_or_inconsistent:open_blocker_count_conflict",
+    "stale_or_inconsistent:release_area_count_conflict"
   ],
   "categories": {
     "benchmark": {
@@ -20,7 +23,7 @@
     },
     "future commercial": {
       "blocked": true,
-      "blocker_count": 31,
+      "blocker_count": 32,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -51,6 +54,7 @@
         "license_server::operation_readiness_missing",
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
         "pm_release::security::license_status_not_configured",
         "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
       ]
@@ -67,9 +71,12 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 1,
+      "blocker_count": 4,
       "blockers": [
-        "human_ux::observation_file_missing"
+        "human_ux::observation_file_missing",
+        "pm_release::evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact",
+        "stale_or_inconsistent:open_blocker_count_conflict",
+        "stale_or_inconsistent:release_area_count_conflict"
       ]
     }
   },
@@ -84,7 +91,7 @@
   },
   "developer_preview_ready": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "future_commercial_blocker_count": 31,
+  "future_commercial_blocker_count": 32,
   "future_commercial_blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -115,6 +122,7 @@
     "license_server::operation_readiness_missing",
     "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
     "pm_release::security::license_status_not_configured",
     "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
   ],
@@ -192,7 +200,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-01T11:27:12.183612+00:00",
+  "generated_at": "2026-07-01T15:43:45.506013+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -211,22 +219,22 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:e2c0881bdf2106f0074408b172adacec950df2f6b459efef49033b355464dbdc",
+      "input_checksum": "sha256:f2d0fff0c8c0669a2b15352f37f6039a322227e2e0693728af9dbbfb0a96e364",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "ea976e0d97acdca565442712c8e0c9be86acb191",
-      "status": "blocked"
+      "source_commit_sha": "b737f323f6c1614b64b8bccc732d8b90ef42c5a9",
+      "status": "stale_or_inconsistent"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:14327c6edc77e0116542440f5a8588b03d96db126dec09f6e5f2d61dd2d9c1ec",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:e2c0881bdf2106f0074408b172adacec950df2f6b459efef49033b355464dbdc"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:f2d0fff0c8c0669a2b15352f37f6039a322227e2e0693728af9dbbfb0a96e364"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
-  "product_snapshot_status": "blocked",
+  "product_snapshot_status": "stale_or_inconsistent",
   "reason_code": "ERR_DEVELOPER_PREVIEW_BLOCKED",
   "reuse_policy": "derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence",
   "reused_evidence": false,
@@ -1690,56 +1698,33 @@
           "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_test.json",
           "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
           "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
-          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_phase3_benchmark_factory_artifacts.py",
           "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
           "scripts/build_pm_owner_evidence_request_packet.py",
-          "scripts/build_pocketmd_lite_product_surface.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
           "scripts/build_public_benchmark_source_of_truth.py",
           "scripts/build_source_of_truth_gap_classification.py",
-          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
-          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
-          "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
-          "scripts/materialize_pocketmd_lite_topk_survival_report.py",
-          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
-          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
-          "scripts/materialize_science_actual_closure_from_rows.py",
           "scripts/report_pm_release_gate.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
-          "scripts/score_symmetry_aware_ligand_rmsd.py",
-          "scripts/validate_public_benchmark_pose_validity.py",
           "tests/ai-verify-contract.test.mjs",
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
-          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_phase3_benchmark_factory_artifacts.py",
           "tests/test_build_phase3_ifc_source_license_receipt.py",
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_pm_owner_evidence_request_packet.py",
-          "tests/test_build_pocketmd_lite_product_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
           "tests/test_build_source_of_truth_gap_classification.py",
-          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
-          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
-          "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
-          "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
-          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_harness_bundle.py",
           "tests/test_materialize_public_benchmark_operator_bundle_from_rows.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
-          "tests/test_materialize_public_benchmark_pose_validity_input.py",
           "tests/test_materialize_public_benchmark_rmsd_scorecard.py",
-          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
-          "tests/test_materialize_science_actual_closure_from_rows.py",
           "tests/test_pm_canonical_release_area_sync.py",
           "tests/test_report_pm_release_gate.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_score_symmetry_aware_ligand_rmsd.py",
-          "tests/test_validate_public_benchmark_pose_validity.py"
+          "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
@@ -1920,6 +1905,16 @@
         ]
       },
       "release freshness/sync": {
+        "blocked": true,
+        "blocker_count": 4,
+        "blockers": [
+          "pm_release::evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact",
+          "pm_release::github_sync::github_sync_preflight::local_head_mismatch",
+          "stale_or_inconsistent:open_blocker_count_conflict",
+          "stale_or_inconsistent:release_area_count_conflict"
+        ]
+      },
+      "structural scope": {
         "blocked": false,
         "blocker_count": 0,
         "blockers": []
@@ -2118,6 +2113,6 @@
       }
     }
   },
-  "source_commit_sha": "ea976e0d97acdca565442712c8e0c9be86acb191",
+  "source_commit_sha": "b737f323f6c1614b64b8bccc732d8b90ef42c5a9",
   "status": "blocked"
 }
