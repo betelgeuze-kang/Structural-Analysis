@@ -3,20 +3,23 @@
   "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
   "contract_pass": false,
   "current_blockers": [
+    "pr:pr_github_actions_job_start_blocked",
     "pr:pr_ci_30_consecutive_pass_evidence_missing",
     "pr:github_actions_lane_threshold_not_pass",
     "pr:github_actions_lane_streak_below_threshold",
+    "nightly:nightly_github_actions_job_start_blocked",
     "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
     "nightly:github_actions_lane_threshold_not_pass",
     "nightly:github_actions_lane_streak_below_threshold",
     "nightly:github_actions_filtered_run_count_below_threshold",
     "runner:self_hosted_runner_matching_labels_not_online"
   ],
-  "generated_at": "2026-07-01T03:34:51.446906+00:00",
+  "generated_at": "2026-07-01T04:22:13.075920+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
       "blockers": [
+        "pr_github_actions_job_start_blocked",
         "pr_ci_30_consecutive_pass_evidence_missing",
         "github_actions_lane_threshold_not_pass",
         "github_actions_lane_streak_below_threshold"
@@ -49,7 +52,7 @@
       "manifest_consecutive_pass_count": 0,
       "manifest_threshold_pass": false,
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "pull_request_run_source_present": true,
       "source_evidence_blockers": [
         "github_actions_lane_threshold_not_pass",
@@ -57,12 +60,13 @@
       ],
       "source_evidence_release_credit_pass": false,
       "source_observation_usable": true,
-      "streak_source": "missing_tracked_ci_evidence",
+      "streak_source": "github_actions_job_start_blocked",
       "threshold": 30,
       "threshold_pass": false
     },
     {
       "blockers": [
+        "nightly_github_actions_job_start_blocked",
         "nightly_ci_30_consecutive_pass_evidence_missing",
         "github_actions_lane_threshold_not_pass",
         "github_actions_lane_streak_below_threshold",
@@ -73,7 +77,7 @@
       "github_actions_consecutive_pass_count": 0,
       "github_actions_filtered_run_count": 12,
       "github_actions_ignored_event_names": [],
-      "github_actions_queried_run_count": 11,
+      "github_actions_queried_run_count": 12,
       "github_actions_query_error": "",
       "github_actions_threshold_pass": false,
       "github_actions_workflow_active": true,
@@ -93,7 +97,7 @@
       "manifest_consecutive_pass_count": 0,
       "manifest_threshold_pass": false,
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "pull_request_run_source_present": null,
       "source_evidence_blockers": [
         "github_actions_lane_threshold_not_pass",
@@ -102,7 +106,7 @@
       ],
       "source_evidence_release_credit_pass": false,
       "source_observation_usable": true,
-      "streak_source": "missing_tracked_ci_evidence",
+      "streak_source": "github_actions_job_start_blocked",
       "threshold": 30,
       "threshold_pass": false
     }
@@ -131,7 +135,7 @@
   },
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 0.003,
+    "age_hours": 0.02,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -141,7 +145,7 @@
     ],
     "contract_pass": false,
     "freshness_pass": true,
-    "generated_at": "2026-07-01T03:34:41.177096+00:00",
+    "generated_at": "2026-07-01T04:21:01.004479+00:00",
     "lanes": {
       "nightly": {
         "blockers": [
@@ -232,7 +236,7 @@
     "nightly_local_workflow_present": true,
     "nightly_missing_consecutive_pass_count": 30,
     "nightly_source_threshold_pass": false,
-    "open_blocker_count": 8,
+    "open_blocker_count": 10,
     "pr_github_actions_workflow_registered": true,
     "pr_github_actions_workflow_state": "active",
     "pr_local_required_trigger_present": true,
@@ -251,9 +255,9 @@
       "x64"
     ],
     "runner_status": "blocked",
-    "source_evidence_age_hours": 0.003,
+    "source_evidence_age_hours": 0.02,
     "source_evidence_freshness_pass": true,
-    "source_evidence_generated_at": "2026-07-01T03:34:41.177096+00:00",
+    "source_evidence_generated_at": "2026-07-01T04:21:01.004479+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
     "threshold": 30

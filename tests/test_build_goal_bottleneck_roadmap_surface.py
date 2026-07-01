@@ -149,7 +149,10 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert "Bring at least one GitHub Actions self-hosted runner online" in ci_handoff[
         "owner_action"
     ]
-    assert "Collect 30 additional consecutive successful PR CI run" in ci_handoff[
+    assert "rerun the workflow" in ci_handoff[
+        "owner_action"
+    ]
+    assert "collect 30 additional consecutive successful CI run" in ci_handoff[
         "owner_action"
     ]
     assert ci_handoff["acceptance_criteria_count"] == 4

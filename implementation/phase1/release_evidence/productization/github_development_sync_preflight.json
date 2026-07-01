@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-01T04:12:34.384731+00:00",
+  "generated_at": "2026-07-01T04:22:09.642821+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -40,14 +40,14 @@
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-    "local_head_sha": "d3d3d2c63f2657b96b045df5aa5c547040f78d82",
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json\n M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json\n M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md\n M implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json\n M implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+    "local_head_sha": "26c49d41a2e59792ccf25fef8a8d4c9906185562",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "d3d3d2c63f2657b96b045df5aa5c547040f78d82",
+    "remote_feature_sha": "26c49d41a2e59792ccf25fef8a8d4c9906185562",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "d3d3d2c63f2657b96b045df5aa5c547040f78d82",
+    "remote_main_sha": "26c49d41a2e59792ccf25fef8a8d4c9906185562",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +61,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json\n M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json\n M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md\n M implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json\n M implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
   },
   "status": "synced"
 }

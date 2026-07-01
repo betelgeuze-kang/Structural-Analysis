@@ -1,6 +1,8 @@
 {
   "blockers": [
+    "pr:pr_github_actions_job_start_blocked",
     "pr:pr_ci_30_consecutive_pass_evidence_missing",
+    "nightly:nightly_github_actions_job_start_blocked",
     "nightly:nightly_ci_30_consecutive_pass_evidence_missing"
   ],
   "contract_pass": false,
@@ -12,20 +14,33 @@
     "local_pr_report_count": 2,
     "release_streak_source_policy": "github_actions_required"
   },
-  "generated_at": "2026-06-30T19:29:34.707198+00:00",
+  "generated_at": "2026-07-01T04:22:13.043331+00:00",
   "lanes": {
     "nightly": {
       "blockers": [
+        "nightly_github_actions_job_start_blocked",
         "nightly_ci_30_consecutive_pass_evidence_missing"
       ],
       "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
-      "github_actions_filtered_run_count": 11,
+      "github_actions_filtered_run_count": 12,
       "github_actions_ignored_event_names": [],
-      "github_actions_job_start_blocker_count": 0,
-      "github_actions_job_start_blockers": [],
-      "github_actions_queried_run_count": 11,
+      "github_actions_job_start_blocker_count": 1,
+      "github_actions_job_start_blockers": [
+        {
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "7079101466cb50831e4d81298512cd7eefb99b6c",
+          "message": "nightly workflow run has remained queued for 480.3 minutes on a self-hosted runner lane.",
+          "queued_minutes": 480.3,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28473310506,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28473310506"
+        }
+      ],
+      "github_actions_queried_run_count": 12,
       "github_actions_query_error": "",
       "github_actions_workflow_registered": true,
       "lane": "nightly",
@@ -40,7 +55,7 @@
         "workflow_dispatch"
       ],
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "pass_count": 230,
       "pull_request_run_source_present": null,
       "release_consecutive_pass_count": 0,
@@ -1658,23 +1673,80 @@
           "reason_code": "PASS"
         }
       ],
-      "streak_source": "missing_tracked_ci_evidence",
+      "streak_source": "github_actions_job_start_blocked",
       "threshold": 30,
       "threshold_pass": false
     },
     "pr": {
       "blockers": [
+        "pr_github_actions_job_start_blocked",
         "pr_ci_30_consecutive_pass_evidence_missing"
       ],
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
-      "github_actions_filtered_run_count": 74,
+      "github_actions_filtered_run_count": 106,
       "github_actions_ignored_event_names": [
         "push"
       ],
-      "github_actions_job_start_blocker_count": 0,
-      "github_actions_job_start_blockers": [],
+      "github_actions_job_start_blocker_count": 5,
+      "github_actions_job_start_blockers": [
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "fc6ba0f860d0edd8f4b1d661aad9734c643a864e",
+          "message": "pr workflow run has remained queued for 306.8 minutes on a self-hosted runner lane.",
+          "queued_minutes": 306.8,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481977838,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481977838"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "a49c4151f01a92f9b92f088b66e1c7480a121989",
+          "message": "pr workflow run has remained queued for 311.2 minutes on a self-hosted runner lane.",
+          "queued_minutes": 311.2,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481792430,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481792430"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "e27064f14285901d7999bdec2244a9901bb724e1",
+          "message": "pr workflow run has remained queued for 312.4 minutes on a self-hosted runner lane.",
+          "queued_minutes": 312.4,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481741944,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481741944"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "c26924c10254504ebab89f10c19d288387c582f3",
+          "message": "pr workflow run has remained queued for 318.5 minutes on a self-hosted runner lane.",
+          "queued_minutes": 318.5,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28481469423,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28481469423"
+        },
+        {
+          "event": "pull_request",
+          "head_branch": "codex/seed-pr-ci-source-evidence",
+          "head_sha": "d2e14ab688f917aba703844d28610b06eeb662a0",
+          "message": "pr workflow run has remained queued for 331.1 minutes on a self-hosted runner lane.",
+          "queued_minutes": 331.1,
+          "queued_threshold_minutes": 15,
+          "reason_code": "github_actions_self_hosted_runner_queued_timeout",
+          "run_id": 28480922171,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28480922171"
+        }
+      ],
       "github_actions_queried_run_count": 500,
       "github_actions_query_error": "",
       "github_actions_workflow_registered": true,
@@ -1691,7 +1763,7 @@
         "workflow_dispatch"
       ],
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "pass_count": 2,
       "pull_request_run_source_present": true,
       "release_consecutive_pass_count": 0,
@@ -1713,7 +1785,7 @@
           "reason_code": "PASS"
         }
       ],
-      "streak_source": "missing_tracked_ci_evidence",
+      "streak_source": "github_actions_job_start_blocked",
       "threshold": 30,
       "threshold_pass": false
     }
@@ -1722,19 +1794,19 @@
   "schema_version": "ci-consecutive-pass-manifest.v1",
   "summary": {
     "github_actions_nightly_consecutive_pass_count": 0,
-    "github_actions_nightly_job_start_blocker_count": 0,
+    "github_actions_nightly_job_start_blocker_count": 1,
     "github_actions_nightly_local_workflow_present": true,
     "github_actions_nightly_workflow_registered": true,
     "github_actions_pr_consecutive_pass_count": 0,
-    "github_actions_pr_job_start_blocker_count": 0,
+    "github_actions_pr_job_start_blocker_count": 5,
     "github_actions_pr_workflow_registered": true,
     "nightly_consecutive_pass_count": 0,
     "nightly_missing_consecutive_pass_count": 30,
-    "nightly_owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "nightly_owner_action": "Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "nightly_threshold_pass": false,
     "pr_consecutive_pass_count": 0,
     "pr_missing_consecutive_pass_count": 30,
-    "pr_owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "pr_owner_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "pr_pull_request_run_source_present": true,
     "pr_threshold_pass": false
   },

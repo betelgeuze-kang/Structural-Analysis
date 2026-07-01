@@ -24,15 +24,15 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T04:09:28.301479+00:00",
+  "generated_at": "2026-07-01T04:23:19.267066+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c7a3e05c0185eacb2bab20f896759ee9a6308ca1727714726f94e46acb2a79a3",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6306559930c4424ff9c5e1a34c0981b695ba6f4d55e4ced7d19c67498ade0cce",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:6240da7930e15638983ab9c456295db5ce4769adf9594defe52034fe88cff143",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ce0a753a79803442a001fc50dbb1f622c9690b4f9dfc54a0343f39e9466d3c35",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:04910a2beb099623a3f64daae7832bf0f941f086ae648ee37306831ee1984618"
   },
   "next_actions": [
-    "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
-    "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+    "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
@@ -316,11 +316,11 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 0.003,
+        "ci_streak_source_evidence_age_hours": 0.02,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-07-01T03:34:41.177096+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-07-01T04:21:01.004479+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
-        "nightly_github_actions_job_start_blocker_count": 0,
+        "nightly_github_actions_job_start_blocker_count": 1,
         "nightly_github_actions_pass_streak_count": 0,
         "nightly_github_actions_workflow_state": "active",
         "nightly_local_pass_streak_count": 230,
@@ -330,12 +330,12 @@
           "workflow_dispatch"
         ],
         "nightly_missing_consecutive_pass_count": 30,
-        "nightly_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "nightly_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
         "nightly_pass_streak_count": 0,
         "nightly_source_evidence_release_credit_pass": false,
-        "nightly_streak_source": "missing_tracked_ci_evidence",
+        "nightly_streak_source": "github_actions_job_start_blocked",
         "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
-        "pr_github_actions_job_start_blocker_count": 0,
+        "pr_github_actions_job_start_blocker_count": 5,
         "pr_github_actions_pass_streak_count": 0,
         "pr_github_actions_workflow_state": "active",
         "pr_local_pass_streak_count": 2,
@@ -346,16 +346,16 @@
           "workflow_dispatch"
         ],
         "pr_missing_consecutive_pass_count": 30,
-        "pr_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "pr_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
         "pr_pass_streak_count": 0,
         "pr_pull_request_run_source_present": true,
         "pr_source_evidence_release_credit_pass": false,
-        "pr_streak_source": "missing_tracked_ci_evidence",
+        "pr_streak_source": "github_actions_job_start_blocked",
         "required_consecutive_pass_count": 30
       },
       "evidence_status": {
         "github_actions_consecutive_pass_count": 0,
-        "github_actions_job_start_blocker_count": 0,
+        "github_actions_job_start_blocker_count": 5,
         "lane": "pr",
         "local_consecutive_pass_count": 2,
         "missing_consecutive_pass_count": 30,
@@ -375,7 +375,7 @@
         "runner_status": "blocked",
         "source_policy": "github_actions_required",
         "state": "self_hosted_runner_offline",
-        "streak_source": "missing_tracked_ci_evidence"
+        "streak_source": "github_actions_job_start_blocked"
       },
       "external_input_required": true,
       "handoff": {
@@ -395,9 +395,9 @@
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
       "namespace": "basic_ci",
-      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "owner": "release_ci_owner",
-      "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
@@ -446,11 +446,11 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 0.003,
+        "ci_streak_source_evidence_age_hours": 0.02,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-07-01T03:34:41.177096+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-07-01T04:21:01.004479+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
-        "nightly_github_actions_job_start_blocker_count": 0,
+        "nightly_github_actions_job_start_blocker_count": 1,
         "nightly_github_actions_pass_streak_count": 0,
         "nightly_github_actions_workflow_state": "active",
         "nightly_local_pass_streak_count": 230,
@@ -460,12 +460,12 @@
           "workflow_dispatch"
         ],
         "nightly_missing_consecutive_pass_count": 30,
-        "nightly_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "nightly_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
         "nightly_pass_streak_count": 0,
         "nightly_source_evidence_release_credit_pass": false,
-        "nightly_streak_source": "missing_tracked_ci_evidence",
+        "nightly_streak_source": "github_actions_job_start_blocked",
         "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
-        "pr_github_actions_job_start_blocker_count": 0,
+        "pr_github_actions_job_start_blocker_count": 5,
         "pr_github_actions_pass_streak_count": 0,
         "pr_github_actions_workflow_state": "active",
         "pr_local_pass_streak_count": 2,
@@ -476,16 +476,16 @@
           "workflow_dispatch"
         ],
         "pr_missing_consecutive_pass_count": 30,
-        "pr_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "pr_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
         "pr_pass_streak_count": 0,
         "pr_pull_request_run_source_present": true,
         "pr_source_evidence_release_credit_pass": false,
-        "pr_streak_source": "missing_tracked_ci_evidence",
+        "pr_streak_source": "github_actions_job_start_blocked",
         "required_consecutive_pass_count": 30
       },
       "evidence_status": {
         "github_actions_consecutive_pass_count": 0,
-        "github_actions_job_start_blocker_count": 0,
+        "github_actions_job_start_blocker_count": 1,
         "lane": "nightly",
         "local_consecutive_pass_count": 230,
         "missing_consecutive_pass_count": 30,
@@ -505,7 +505,7 @@
         "runner_status": "blocked",
         "source_policy": "github_actions_required",
         "state": "self_hosted_runner_offline",
-        "streak_source": "missing_tracked_ci_evidence"
+        "streak_source": "github_actions_job_start_blocked"
       },
       "external_input_required": true,
       "handoff": {
@@ -525,9 +525,9 @@
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
       "namespace": "basic_ci",
-      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "next_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "owner": "release_ci_owner",
-      "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
@@ -1034,7 +1034,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "105ea1d7985504c2ccd31c1efca05527e26e3863",
+  "source_commit_sha": "26c49d41a2e59792ccf25fef8a8d4c9906185562",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
