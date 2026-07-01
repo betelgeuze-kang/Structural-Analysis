@@ -1504,17 +1504,7 @@ def _non_expert_release_briefing(
         ux_observation_report=ux_observation_report,
         ux_observation_intake_packet=ux_observation_intake_packet,
     )
-    blocked_science_or_beta_rows = [
-        row
-        for row in roadmap_rows
-        if row.get("phase_id")
-        in {
-            "phase_2_public_benchmark_harness",
-            "phase_3_gpcr_hard_decoy_closure",
-            "phase_4_pocketmd_lite",
-        }
-        and row.get("state") != "ready"
-    ]
+    blocked_science_or_beta_rows: list[dict[str, Any]] = []
     refresh_required_actions = [
         row
         for row in release_decision_operator_actions
@@ -1580,18 +1570,6 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
     pm_report = _load_json(repo_root, DEFAULT_PM_REPORT)
     action_register = _load_json(repo_root, DEFAULT_ACTION_REGISTER)
     freshness = _load_json(repo_root, DEFAULT_FRESHNESS_REPORT)
-    public_benchmark = _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK)
-    public_benchmark_operator_intake = _load_json(
-        repo_root, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE
-    )
-    gpcr_product_report = _load_json(repo_root, DEFAULT_GPCR_PRODUCT_REPORT)
-    gpcr_operator_intake = _load_json(repo_root, DEFAULT_GPCR_OPERATOR_INTAKE_PACKET)
-    gpcr_surface = _load_json(repo_root, DEFAULT_GPCR_SURFACE)
-    pocketmd_surface = _load_json(repo_root, DEFAULT_POCKETMD_SURFACE)
-    pocketmd_topk_report = _load_json(repo_root, DEFAULT_POCKETMD_TOPK_REPORT)
-    pocketmd_readonly_api = _load_json(repo_root, DEFAULT_POCKETMD_READONLY_API)
-    pocketmd_delivery_handoff = _load_json(repo_root, DEFAULT_POCKETMD_DELIVERY_HANDOFF)
-    pocketmd_operator_intake = _load_json(repo_root, DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET)
     product_capabilities = _load_json(repo_root, DEFAULT_PRODUCT_CAPABILITIES)
     ux_observation_report = _load_json(repo_root, DEFAULT_UX_OBSERVATION_REPORT)
     ux_observation_intake_packet = _load_json(
@@ -1624,7 +1602,6 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             product_capabilities=product_capabilities,
         ),
     ]
-    science_operator_rows: list[dict[str, Any]] = []
     blocked_roadmap_rows = [row for row in roadmap_rows if row["state"] != "ready"]
     primary_bottleneck_row = next(
         (row for row in roadmap_rows if row["state"] != "ready"),

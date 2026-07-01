@@ -242,6 +242,43 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert surface["operator_evidence_handoff_slot_queue"] == []
 
 
+def test_goal_bottleneck_surface_does_not_read_molecular_release_artifacts(
+    monkeypatch,
+) -> None:
+    original_load_json = module._load_json
+    loaded_paths: list[str] = []
+
+    def tracking_load_json(repo_root: Path, path: Path) -> dict[str, object]:
+        loaded_paths.append(path.as_posix())
+        return original_load_json(repo_root, path)
+
+    monkeypatch.setattr(module, "_load_json", tracking_load_json)
+
+    surface = module.build_goal_bottleneck_roadmap_surface(repo_root=REPO_ROOT)
+    forbidden_tokens = ("gpcr", "pocketmd", "md3bead")
+
+    assert not any(
+        token in path.lower()
+        for path in loaded_paths
+        for token in forbidden_tokens
+    )
+    surface_text = json.dumps(
+        {
+            "roadmap_rows": surface["roadmap_rows"],
+            "science_evidence_surface_status": surface[
+                "science_evidence_surface_status"
+            ],
+            "science_evidence_surface_bottlenecks": surface[
+                "science_evidence_surface_bottlenecks"
+            ],
+            "capability_summary_rows": surface["capability_summary_rows"],
+            "non_expert_release_briefing": surface["non_expert_release_briefing"],
+        },
+        ensure_ascii=False,
+    ).lower()
+    assert not any(token in surface_text for token in forbidden_tokens)
+
+
 def test_goal_bottleneck_roadmap_surface_promotes_stale_refresh_operator_action(
     monkeypatch,
 ) -> None:

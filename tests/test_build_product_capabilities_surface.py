@@ -92,6 +92,10 @@ def test_product_capabilities_surface_exposes_structural_solver_row() -> None:
     )
     assert "structural analysis solver product" in surface["claim_boundary"]
     assert "Non-structural product domains" in surface["claim_boundary"]
+    surface_text = json.dumps(surface, ensure_ascii=False).lower()
+    assert not any(
+        token in surface_text for token in ("gpcr", "pocketmd", "md3bead")
+    )
 
 
 def test_product_capabilities_surface_cli_writes_pm_visible_ready_surface(
