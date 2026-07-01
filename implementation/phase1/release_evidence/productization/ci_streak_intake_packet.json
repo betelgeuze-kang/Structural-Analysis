@@ -88,7 +88,7 @@
     "status": "external_runner_recovery_required"
   },
   "first_workflow_queue_backlog": {},
-  "generated_at": "2026-07-01T23:49:31.013350+00:00",
+  "generated_at": "2026-07-01T23:53:54.683605+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "job_start_blocker_queue": [
     {
@@ -383,7 +383,7 @@
   },
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 13.503,
+    "age_hours": 13.577,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -579,7 +579,7 @@
       "x64"
     ],
     "runner_status": "blocked",
-    "source_evidence_age_hours": 13.503,
+    "source_evidence_age_hours": 13.577,
     "source_evidence_freshness_pass": true,
     "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
     "source_evidence_pass": false,
