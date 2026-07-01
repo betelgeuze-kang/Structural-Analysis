@@ -608,6 +608,13 @@ def _as_float(value: Any, default: float = 0.0) -> float:
         return default
 
 
+def _float_or_none(value: Any) -> float | None:
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
 def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
@@ -623,6 +630,38 @@ def _contract_pass(payload: dict[str, Any]) -> bool:
         or str(payload.get("status", "")).lower() == "ready"
         or str(payload.get("reason_code", "")).upper() == "PASS"
     )
+
+
+def _g1_lane_observed_load_scale(payload: dict[str, Any]) -> tuple[float, str]:
+    checkpoint = _as_dict(payload.get("checkpoint"))
+    checkpoint_load = _float_or_none(checkpoint.get("load_scale"))
+    if checkpoint_load is not None:
+        return checkpoint_load, "checkpoint"
+
+    checkpoint_gate = _as_dict(payload.get("checkpoint_resolution_gate"))
+    gate_load = _float_or_none(checkpoint_gate.get("highest_observed_load_scale"))
+    if gate_load is not None:
+        return gate_load, "checkpoint_resolution_gate"
+
+    for action in _as_list(payload.get("lane_next_actions")):
+        if not isinstance(action, dict):
+            continue
+        if action.get("id") != "build_consistent_newton_full_load_checkpoint_candidate_runner":
+            continue
+        action_load = _float_or_none(action.get("highest_observed_load_scale"))
+        if action_load is not None:
+            return action_load, str(
+                action.get("highest_observed_load_scale_source") or "lane_next_action"
+            )
+
+    workspace_inventory = _as_dict(payload.get("workspace_checkpoint_inventory"))
+    workspace_load = _float_or_none(
+        workspace_inventory.get("highest_observed_load_scale")
+    )
+    if workspace_load is not None:
+        return workspace_load, "workspace_checkpoint_inventory"
+
+    return -1.0, "missing"
 
 
 def _release_area_counts_from_pm(pm_report: dict[str, Any]) -> tuple[int, int]:
@@ -2078,8 +2117,9 @@ def build_snapshot(
     if not g1_full_mesh_ready:
         g1_suppressed_detail_blockers.append("g1_full_mesh_full_load_not_closed")
         blockers.extend(g1_root_blockers)
-    g1_lane_checkpoint = _as_dict(g1_full_load_lane.get("checkpoint"))
-    g1_lane_observed_load = _as_float(g1_lane_checkpoint.get("load_scale"), default=-1.0)
+    g1_lane_observed_load, g1_lane_observed_load_source = (
+        _g1_lane_observed_load_scale(g1_full_load_lane)
+    )
     g1_lane_required_load = _as_float(g1_full_load_lane.get("required_load_scale"), default=1.0)
     g1_lane_load_tolerance = _as_float(g1_full_load_lane.get("full_load_tolerance"), default=1.0e-12)
     g1_lane_reused_ok = g1_full_load_lane.get("reused_evidence") is False
@@ -2813,6 +2853,9 @@ def build_snapshot(
                 "full_load_hip_newton_lane_reused_evidence": g1_full_load_lane.get("reused_evidence"),
                 "full_load_hip_newton_lane_full_load_input_pass": g1_lane_full_load_input_pass,
                 "full_load_hip_newton_lane_observed_load_scale": g1_lane_observed_load,
+                "full_load_hip_newton_lane_observed_load_scale_source": (
+                    g1_lane_observed_load_source
+                ),
                 "full_load_hip_newton_lane_required_load_scale": g1_lane_required_load,
                 "full_load_hip_newton_frontier_non_promoting_evidence": (
                     g1_full_load_lane.get("frontier_non_promoting_evidence")
