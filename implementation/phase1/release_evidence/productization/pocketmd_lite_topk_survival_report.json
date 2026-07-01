@@ -298,9 +298,9 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T10:10:33.283890+00:00",
+  "generated_at": "2026-07-01T11:43:17.210356+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:5af874042dc4fe3d5436ea7540bceb56907bab1036cfb4680ac499d15a1c12d0",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:273d78b800a336b7abf059cb8cc01def2df6d245e46d1d8ef31210fd1c9f1299",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:adde929084eb2ecbc686c83b46f6a7665807d88664d1de0a9dcbd80b41aa76ad"
   },
@@ -1379,6 +1379,344 @@
     "status": "blocked",
     "top_k_candidate_count": 0
   },
+  "phase4_topk_row_closure_matrix": [
+    {
+      "accepted_formats": [
+        "csv",
+        "tsv",
+        "json",
+        "jsonl",
+        "ndjson"
+      ],
+      "claim_boundary": "This matrix row maps operator-attached top-k refinement rows to the bounded PocketMD Lite Phase 4 criteria they can unblock. It is not closure evidence until source receipts verify and the survival materializer computes passing local-min, contact, H-bond, clash, and uncertainty metrics.",
+      "closes_phase4_criteria": [
+        "top_k_refinement_rows_present",
+        "top_k_refinement_case_coverage",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized"
+      ],
+      "criterion_by_field": {
+        "candidate_id": "top_k_refinement_rows_present",
+        "case_id": "top_k_refinement_case_coverage",
+        "clash_count_after": "clash_relief_materialized",
+        "clash_count_before": "clash_relief_materialized",
+        "contact_persistence_rate": "contact_persistence_materialized",
+        "h_bond_persistence_rate": "h_bond_persistence_materialized",
+        "local_min_survived": "local_min_survival_materialized",
+        "operator_input_source": "report_blockers_resolved",
+        "post_refinement_energy_proxy": "report_blockers_resolved",
+        "pre_refinement_energy_proxy": "report_blockers_resolved",
+        "provenance_ref": "report_blockers_resolved",
+        "source_checksum": "report_blockers_resolved",
+        "source_family": "top_k_refinement_case_coverage",
+        "top_k_rank": "top_k_refinement_case_coverage",
+        "uncertainty_high": "uncertainty_summary_materialized",
+        "uncertainty_interval": "uncertainty_summary_materialized",
+        "uncertainty_low": "uncertainty_summary_materialized",
+        "uncertainty_unit": "uncertainty_summary_materialized",
+        "upstream_top_k_provenance_ref": "top_k_refinement_rows_present",
+        "upstream_top_k_source_checksum": "top_k_refinement_rows_present"
+      },
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+      ],
+      "description": "PocketMD Lite top-k refinement rows",
+      "import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
+      "materialization_chain": [
+        "materialize_pocketmd_lite_operator_intake_from_rows",
+        "materialize_pocketmd_lite_topk_survival_report",
+        "refresh_pocketmd_lite_science_product_surface",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface"
+      ],
+      "materialization_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
+      "minimum_evidence": {
+        "candidate_count_per_case": 2,
+        "candidate_scope": "upstream_ranked_top_k_candidates_only",
+        "operator_input_source_receipt_policy": {
+          "required_mode": "raw_top_k_refinement_rows",
+          "required_operator_input_source_fields": [
+            "mode",
+            "source_artifact",
+            "source_artifact_sha256",
+            "source_id",
+            "source_url",
+            "source_license"
+          ],
+          "source_artifact_sha256_policy": "sha256:<64 lowercase or uppercase hex characters>"
+        },
+        "raw_row_supported_formats": [
+          "csv",
+          "tsv",
+          "json",
+          "jsonl",
+          "ndjson"
+        ],
+        "real_refinement_case_count": 3,
+        "receipt_fields": [
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
+          "provenance_ref",
+          "source_checksum",
+          "operator_input_source.source_artifact",
+          "operator_input_source.source_artifact_sha256",
+          "operator_input_source.source_id",
+          "operator_input_source.source_url",
+          "operator_input_source.source_license"
+        ],
+        "required_case_fields": [
+          "case_id",
+          "source_family",
+          "top_k_rank",
+          "candidate_id",
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
+          "pre_refinement_energy_proxy",
+          "post_refinement_energy_proxy",
+          "local_min_survived",
+          "contact_persistence_rate",
+          "h_bond_persistence_rate",
+          "clash_count_before",
+          "clash_count_after",
+          "uncertainty_interval",
+          "provenance_ref",
+          "source_checksum"
+        ],
+        "required_rank_span_per_case": [
+          1,
+          2
+        ],
+        "row_value_contract": {
+          "boolean_value_policy": {
+            "local_min_survived": "must parse to a boolean value"
+          },
+          "integer_value_policy": {
+            "clash_count_after": "must parse to a non-negative integer",
+            "clash_count_before": "must parse to a non-negative integer"
+          },
+          "numeric_value_policy": {
+            "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+            "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "rate_value_policy": {
+            "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+            "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+          },
+          "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+          "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+          "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+          "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+          "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+          "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
+        },
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        },
+        "source_receipt_requirements": {
+          "mode": "raw_top_k_refinement_rows",
+          "placeholder_block_policy": {
+            "text_markers": [
+              "<operator",
+              "fixture",
+              "synthetic",
+              "mock",
+              "placeholder",
+              "dummy",
+              "example",
+              "operator_supplied",
+              "unit-test",
+              "test-only"
+            ],
+            "url_markers": [
+              "://example.",
+              ".example/",
+              ".invalid",
+              ".test/",
+              "localhost",
+              "127.0.0.1",
+              "0.0.0.0"
+            ],
+            "url_prefixes": [
+              "operator://",
+              "local-evidence://",
+              "local://",
+              "fixture://",
+              "mock://",
+              "synthetic://",
+              "placeholder://",
+              "test://",
+              "unit-test://",
+              "file://"
+            ]
+          },
+          "required_fields": [
+            "source_id",
+            "source_url",
+            "source_license",
+            "source_artifact",
+            "source_artifact_sha256"
+          ],
+          "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
+        },
+        "top_k_candidate_count": 6,
+        "top_k_rank_coverage_per_case": 2,
+        "top_k_row_quality_minimums": {
+          "min_candidate_count_per_case": 2,
+          "min_real_refinement_case_count": 3,
+          "min_top_k_rank_coverage_per_case": 2,
+          "min_total_top_k_candidate_count": 6
+        },
+        "upstream_top_k_receipt_fields": [
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum"
+        ],
+        "upstream_top_k_receipt_policy": "Rows must prove the candidate came from the upstream ranked top-k set before Lite refinement."
+      },
+      "must_resolve_guard_criteria": [
+        "report_blockers_resolved"
+      ],
+      "operator_input_source_receipt_policy": {
+        "required_mode": "raw_top_k_refinement_rows",
+        "required_operator_input_source_fields": [
+          "mode",
+          "source_artifact",
+          "source_artifact_sha256",
+          "source_id",
+          "source_url",
+          "source_license"
+        ],
+        "source_artifact_sha256_policy": "sha256:<64 lowercase or uppercase hex characters>"
+      },
+      "preserves_phase4_criteria": [
+        "broad_all_atom_fep_claims_locked"
+      ],
+      "required_case_fields": [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_interval",
+        "provenance_ref",
+        "source_checksum"
+      ],
+      "required_flat_row_fields": [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_interval_or_uncertainty_low_high_unit",
+        "provenance_ref",
+        "source_checksum"
+      ],
+      "row_input_id": "pocketmd_lite_topk_rows",
+      "row_value_contract": {
+        "boolean_value_policy": {
+          "local_min_survived": "must parse to a boolean value"
+        },
+        "integer_value_policy": {
+          "clash_count_after": "must parse to a non-negative integer",
+          "clash_count_before": "must parse to a non-negative integer"
+        },
+        "numeric_value_policy": {
+          "post_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected",
+          "pre_refinement_energy_proxy": "must parse to a finite float; NaN and Infinity are rejected"
+        },
+        "rate_value_policy": {
+          "contact_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0",
+          "h_bond_persistence_rate": "must parse to a finite fraction from 0.0 to 1.0"
+        },
+        "row_integrity_policy": "case_id, source_family, and candidate_id must be nonblank and non-placeholder; candidate_id and top_k_rank must be unique per case.",
+        "row_receipt_policy": "provenance_ref must be non-placeholder and source_checksum must be a non-placeholder sha256:<hex> row receipt.",
+        "top_k_rank_policy": "top_k_rank must parse to a positive integer not exceeding max_top_k (20); ranks within each case must form a contiguous prefix starting at 1.",
+        "top_k_survival_scope_policy": "PocketMD Lite refinement rows are bounded to upstream top-k candidates only; top_k_rank must be between 1 and 20.",
+        "uncertainty_interval_policy": "uncertainty_interval or uncertainty_low/high must parse to finite numbers with high >= low and a nonblank unit.",
+        "upstream_top_k_receipt_policy": "Each refinement row must include upstream_top_k_provenance_ref and upstream_top_k_source_checksum proving the candidate came from the upstream ranked top-k set; local, fixture, mock, synthetic, placeholder, test, and file-only provenance are rejected."
+      },
+      "slot_id": "top_k_refinement_rows",
+      "source_receipt_requirements": {
+        "mode": "raw_top_k_refinement_rows",
+        "placeholder_block_policy": {
+          "text_markers": [
+            "<operator",
+            "fixture",
+            "synthetic",
+            "mock",
+            "placeholder",
+            "dummy",
+            "example",
+            "operator_supplied",
+            "unit-test",
+            "test-only"
+          ],
+          "url_markers": [
+            "://example.",
+            ".example/",
+            ".invalid",
+            ".test/",
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0"
+          ],
+          "url_prefixes": [
+            "operator://",
+            "local-evidence://",
+            "local://",
+            "fixture://",
+            "mock://",
+            "synthetic://",
+            "placeholder://",
+            "test://",
+            "unit-test://",
+            "file://"
+          ]
+        },
+        "required_fields": [
+          "source_id",
+          "source_url",
+          "source_license",
+          "source_artifact",
+          "source_artifact_sha256"
+        ],
+        "source_artifact_sha256_policy": "must be a sha256:<hex> reference matching the attached top-k row artifact"
+      },
+      "status": "operator_input_required",
+      "top_k_rank_prefix_policy": "For each case, supplied ranks must form a contiguous prefix starting at rank 1; cherry-picked gaps are not valid top-k refinement input.",
+      "top_k_row_quality_minimums": {
+        "min_candidate_count_per_case": 2,
+        "min_real_refinement_case_count": 3,
+        "min_top_k_rank_coverage_per_case": 2,
+        "min_total_top_k_candidate_count": 6
+      },
+      "top_k_scope_policy": "Operator import is bounded to supplied upstream top-k candidates; top_k_rank must be between 1 and 20."
+    }
+  ],
+  "phase4_topk_row_closure_matrix_count": 1,
   "product_surface_ready": false,
   "real_refinement_case_count": 0,
   "required_case_fields": [
@@ -1413,7 +1751,7 @@
   ],
   "rows": [],
   "schema_version": "pocketmd-lite-topk-survival-report.v1",
-  "source_commit_sha": "a8268a235511234d5a2d25011837fabaf34a0ad5",
+  "source_commit_sha": "598cc7e8d7858b6183b6ac98d5ba69470cfce2a9",
   "status": "operator_evidence_required",
   "summary": {
     "blocker_count": 6,
