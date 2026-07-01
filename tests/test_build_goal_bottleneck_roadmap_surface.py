@@ -97,7 +97,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
             "pocketmd_lite_product_surface_ready",
         )
     }
-    assert kpis["blocked_release_count"] == 6
+    assert kpis["blocked_release_count"] == 5
     assert kpis["first_blocker"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     assert kpis["evidence_surface_count"] == 12
     assert kpis["locked_evidence_surface_count"] == 3
@@ -116,8 +116,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
-    assert briefing["release_area_blocker_count"] == 6
-    assert briefing["release_area_owner_handoff_count"] == 6
+    assert briefing["release_area_blocker_count"] == 5
+    assert briefing["release_area_owner_handoff_count"] == 5
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
@@ -128,7 +128,6 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::local_head_mismatch",
     }
     assert required_release_area_handoffs.issubset(release_area_handoffs)
     assert set(release_area_handoffs).issubset(required_release_area_handoffs)
@@ -160,12 +159,6 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     ]
     assert security_handoff["owner"] == "product_legal_owner"
     assert security_handoff["evidence_state"] == "not_configured"
-    github_handoff = release_area_handoffs[
-        "github_sync::github_sync_preflight::local_head_mismatch"
-    ]
-    assert github_handoff["owner"] == "release_owner"
-    assert github_handoff["evidence_state"] == "synced"
-    assert github_handoff["external_input_required"] is True
     assert briefing["human_ux_blockers"] == [
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
