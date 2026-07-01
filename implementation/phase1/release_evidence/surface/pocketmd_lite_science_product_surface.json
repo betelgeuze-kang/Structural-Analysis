@@ -206,6 +206,29 @@
       },
       "output_intake": "<operator-pocketmd-lite-intake.json>",
       "required_output_key": "cases",
+      "row_template_artifacts": {
+        "pocketmd_lite_topk_rows": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv"
+      },
+      "row_template_headers": [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
+        "provenance_ref",
+        "source_checksum"
+      ],
       "row_value_contract": {
         "boolean_value_policy": {
           "local_min_survived": "must parse to a boolean value"
@@ -299,7 +322,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
     "validation_command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T13:43:04.983240+00:00",
+  "generated_at": "2026-07-01T14:05:37.544089+00:00",
   "goal_roadmap_linkage": {
     "bottleneck": "pocketmd_lite_science_product_surface_locked",
     "next_goal_actions": [
@@ -314,7 +337,7 @@
     "roadmap_item": "PocketMD Lite science product surface"
   },
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:b842484a9d01d2be4b545ccb1294348858198eb2cfc7d2a6d2d815de29e51f45",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:358f44d5d391f61f0b4ee15639636a3c195c413c23582c1d69313d743ad740ef",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:985edb154d586829d3ec221ee54d820e8b45b880bcfd99a348f1c7037958d6e0",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:161673d8ff036a7a31d657fb972764eeb4b62f6d55cc0840e26f398565707c6f"
   },
@@ -361,6 +384,29 @@
       },
       "output_intake": "<operator-pocketmd-lite-intake.json>",
       "required_output_key": "cases",
+      "row_template_artifacts": {
+        "pocketmd_lite_topk_rows": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv"
+      },
+      "row_template_headers": [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
+        "provenance_ref",
+        "source_checksum"
+      ],
       "row_value_contract": {
         "boolean_value_policy": {
           "local_min_survived": "must parse to a boolean value"
@@ -655,6 +701,29 @@
         },
         "output_intake": "<operator-pocketmd-lite-intake.json>",
         "required_output_key": "cases",
+        "row_template_artifacts": {
+          "pocketmd_lite_topk_rows": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv"
+        },
+        "row_template_headers": [
+          "case_id",
+          "source_family",
+          "top_k_rank",
+          "candidate_id",
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
+          "pre_refinement_energy_proxy",
+          "post_refinement_energy_proxy",
+          "local_min_survived",
+          "contact_persistence_rate",
+          "h_bond_persistence_rate",
+          "clash_count_before",
+          "clash_count_after",
+          "uncertainty_low",
+          "uncertainty_high",
+          "uncertainty_unit",
+          "provenance_ref",
+          "source_checksum"
+        ],
         "row_value_contract": {
           "boolean_value_policy": {
             "local_min_survived": "must parse to a boolean value"
@@ -930,6 +999,29 @@
         },
         "output_intake": "<operator-pocketmd-lite-intake.json>",
         "required_output_key": "cases",
+        "row_template_artifacts": {
+          "pocketmd_lite_topk_rows": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv"
+        },
+        "row_template_headers": [
+          "case_id",
+          "source_family",
+          "top_k_rank",
+          "candidate_id",
+          "upstream_top_k_provenance_ref",
+          "upstream_top_k_source_checksum",
+          "pre_refinement_energy_proxy",
+          "post_refinement_energy_proxy",
+          "local_min_survived",
+          "contact_persistence_rate",
+          "h_bond_persistence_rate",
+          "clash_count_before",
+          "clash_count_after",
+          "uncertainty_low",
+          "uncertainty_high",
+          "uncertainty_unit",
+          "provenance_ref",
+          "source_checksum"
+        ],
         "row_value_contract": {
           "boolean_value_policy": {
             "local_min_survived": "must parse to a boolean value"
@@ -1618,6 +1710,7 @@
         "source_checksum"
       ],
       "row_input_id": "pocketmd_lite_topk_rows",
+      "row_template_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
       "row_value_contract": {
         "boolean_value_policy": {
           "local_min_survived": "must parse to a boolean value"
@@ -1741,7 +1834,7 @@
   ],
   "schema_version": "pocketmd-lite-science-product-surface.v1",
   "science_surface_family": "pocketmd_lite",
-  "source_commit_sha": "58c87441a420a3be517697028bb40d9ba58aab02",
+  "source_commit_sha": "866f14d3d00de35e0a15b0672e8a46b11e092bd1",
   "status": "locked",
   "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
   "surface_id": "pocketmd_lite_science_product_surface",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import importlib.util
 import json
 from pathlib import Path
@@ -79,6 +80,32 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
                 "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
                 "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv",
+            ],
+            "row_template_artifacts": {
+                "pocketmd_lite_topk_rows": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "pocketmd_lite_topk_rows_template.csv"
+                )
+            },
+            "row_template_headers": [
+                "case_id",
+                "source_family",
+                "top_k_rank",
+                "candidate_id",
+                "upstream_top_k_provenance_ref",
+                "upstream_top_k_source_checksum",
+                "pre_refinement_energy_proxy",
+                "post_refinement_energy_proxy",
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_low",
+                "uncertainty_high",
+                "uncertainty_unit",
+                "provenance_ref",
+                "source_checksum",
             ],
             "auto_detecting_actual_closure_command": (
                 "python3 scripts/materialize_science_actual_closure_from_rows.py "
@@ -325,6 +352,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     survival_closure = survival["phase4_topk_row_closure_matrix"][0]
     assert survival_closure["row_input_id"] == "pocketmd_lite_topk_rows"
     assert survival_closure["slot_id"] == "top_k_refinement_rows"
+    assert survival_closure["row_template_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows_template.csv"
+    )
     assert survival_closure["accepted_formats"] == [
         "csv",
         "tsv",
@@ -513,12 +544,48 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["broad_fep_claim_safe"] is False
     assert operator["required_slot_count"] == 1
     assert operator["input_slots"][0]["slot_id"] == "top_k_refinement_rows"
+    assert operator["row_template_artifact_count"] == 1
+    assert operator["row_template_artifacts"] == {
+        "pocketmd_lite_topk_rows": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_rows_template.csv"
+        )
+    }
+    assert operator["raw_row_dropzone"] == {
+        "auto_detection_policy": (
+            "Place real PocketMD Lite top-k row files at the default paths, "
+            "then run the raw-row importer followed by the survival materializer."
+        ),
+        "default_row_path_candidates": [
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv",
+        ],
+        "materialization_command": (
+            "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
+            "--rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> "
+            "--out <operator-pocketmd-lite-intake.json> "
+            "--source-id <source-id> --source-url <source-url> "
+            "--source-license <license>"
+        ),
+        "required_row_inputs": ["pocketmd_lite_topk_rows"],
+        "row_template_artifacts": {
+            "pocketmd_lite_topk_rows": (
+                "implementation/phase1/release_evidence/productization/"
+                "pocketmd_lite_topk_rows_template.csv"
+            )
+        },
+        "status": "ready_for_operator_rows",
+    }
     assert operator["input_slots"][0]["template_artifact"].endswith(
         "pocketmd_lite_operator_template.json"
     )
     assert operator["gate_unblock_plan_count"] == 1
     assert operator["phase4_topk_row_closure_matrix_count"] == 1
     assert operator["summary"]["phase4_topk_row_closure_matrix_count"] == 1
+    assert operator["summary"]["row_template_artifact_count"] == 1
     assert operator["phase4_topk_row_closure_matrix"][0] == survival_closure
     assert operator["minimum_refinement_case_count"] == 3
     assert operator["minimum_top_k_candidate_count"] == 6
@@ -806,6 +873,8 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     operator_md_out = tmp_path / "pocketmd_lite_operator_intake_packet.md"
     operator_template_out = tmp_path / "pocketmd_lite_operator_template.json"
     surface_out = tmp_path / "surface" / "pocketmd_lite_science_product_surface.json"
+    row_template_dir = tmp_path / "templates"
+    row_template = row_template_dir / "pocketmd_lite_topk_rows_template.csv"
 
     assert (
         module.main(
@@ -830,6 +899,8 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
                 str(operator_template_out),
                 "--surface-out",
                 str(surface_out),
+                "--row-template-dir",
+                str(row_template_dir),
             ]
         )
         == 0
@@ -843,8 +914,18 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
         operator_out,
         operator_template_out,
         surface_out,
+        row_template,
     ):
         assert path.exists()
+    for path in (
+        contract_out,
+        survival_out,
+        api_out,
+        handoff_out,
+        operator_out,
+        operator_template_out,
+        surface_out,
+    ):
         payload = json.loads(path.read_text(encoding="utf-8"))
         assert payload["source_commit_sha"]
         assert payload["input_checksums"][
@@ -862,6 +943,33 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     assert "## Phase 4 Top-k Row Closure Matrix" in operator_md_out.read_text(
         encoding="utf-8"
     )
+    assert "CSV Starter" in operator_md_out.read_text(encoding="utf-8")
+    assert str(row_template) in operator_md_out.read_text(encoding="utf-8")
+    rows = list(csv.DictReader(row_template.open(encoding="utf-8")))
+    assert len(rows) == 6
+    assert rows[0] == {
+        "case_id": "pocketmd_lite_case_001",
+        "source_family": "CASF/PDBBind or GPCR operator intake",
+        "top_k_rank": "1",
+        "candidate_id": "pocketmd_lite_case_001_candidate_001",
+        "upstream_top_k_provenance_ref": "",
+        "upstream_top_k_source_checksum": "",
+        "pre_refinement_energy_proxy": "",
+        "post_refinement_energy_proxy": "",
+        "local_min_survived": "",
+        "contact_persistence_rate": "",
+        "h_bond_persistence_rate": "",
+        "clash_count_before": "",
+        "clash_count_after": "",
+        "uncertainty_low": "",
+        "uncertainty_high": "",
+        "uncertainty_unit": "energy_proxy_delta",
+        "provenance_ref": "",
+        "source_checksum": "",
+    }
+    assert rows[1]["top_k_rank"] == "2"
+    assert rows[-1]["case_id"] == "pocketmd_lite_case_003"
+    assert rows[-1]["candidate_id"] == "pocketmd_lite_case_003_candidate_002"
     survival_markdown = survival_md_out.read_text(encoding="utf-8")
     assert "# PocketMD Lite Top-K Survival Report" in survival_markdown
     assert "`top_k_refinement_rows_present`" in survival_markdown

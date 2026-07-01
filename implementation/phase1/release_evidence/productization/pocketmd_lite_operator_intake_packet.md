@@ -18,9 +18,9 @@
 
 ## Phase 4 Top-k Row Closure Matrix
 
-| Row Input | Slot | Closes Criteria | Minimum Evidence |
-|---|---|---|---|
-| `pocketmd_lite_topk_rows` | `top_k_refinement_rows` | `top_k_refinement_rows_present`, `top_k_refinement_case_coverage`, `local_min_survival_materialized`, `contact_persistence_materialized`, `h_bond_persistence_materialized`, `clash_relief_materialized`, `uncertainty_summary_materialized` | `{"min_candidate_count_per_case": 2, "min_real_refinement_case_count": 3, "min_top_k_rank_coverage_per_case": 2, "min_total_top_k_candidate_count": 6}` |
+| Row Input | Slot | Closes Criteria | Minimum Evidence | CSV Starter |
+|---|---|---|---|---|
+| `pocketmd_lite_topk_rows` | `top_k_refinement_rows` | `top_k_refinement_rows_present`, `top_k_refinement_case_coverage`, `local_min_survival_materialized`, `contact_persistence_materialized`, `h_bond_persistence_materialized`, `clash_relief_materialized`, `uncertainty_summary_materialized` | `{"min_candidate_count_per_case": 2, "min_real_refinement_case_count": 3, "min_top_k_rank_coverage_per_case": 2, "min_total_top_k_candidate_count": 6}` | `implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv` |
 
 ## Materialization Sequence
 

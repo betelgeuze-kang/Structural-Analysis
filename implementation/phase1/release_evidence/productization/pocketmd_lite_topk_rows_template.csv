@@ -1,0 +1,7 @@
+case_id,source_family,top_k_rank,candidate_id,upstream_top_k_provenance_ref,upstream_top_k_source_checksum,pre_refinement_energy_proxy,post_refinement_energy_proxy,local_min_survived,contact_persistence_rate,h_bond_persistence_rate,clash_count_before,clash_count_after,uncertainty_low,uncertainty_high,uncertainty_unit,provenance_ref,source_checksum
+pocketmd_lite_case_001,CASF/PDBBind or GPCR operator intake,1,pocketmd_lite_case_001_candidate_001,,,,,,,,,,,,energy_proxy_delta,,
+pocketmd_lite_case_001,CASF/PDBBind or GPCR operator intake,2,pocketmd_lite_case_001_candidate_002,,,,,,,,,,,,energy_proxy_delta,,
+pocketmd_lite_case_002,CASF/PDBBind or GPCR operator intake,1,pocketmd_lite_case_002_candidate_001,,,,,,,,,,,,energy_proxy_delta,,
+pocketmd_lite_case_002,CASF/PDBBind or GPCR operator intake,2,pocketmd_lite_case_002_candidate_002,,,,,,,,,,,,energy_proxy_delta,,
+pocketmd_lite_case_003,CASF/PDBBind or GPCR operator intake,1,pocketmd_lite_case_003_candidate_001,,,,,,,,,,,,energy_proxy_delta,,
+pocketmd_lite_case_003,CASF/PDBBind or GPCR operator intake,2,pocketmd_lite_case_003_candidate_002,,,,,,,,,,,,energy_proxy_delta,,

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 from pathlib import Path
 import sys
@@ -43,6 +44,8 @@ DEFAULT_OPERATOR_INTAKE_MD_OUT = DEFAULT_OPERATOR_INTAKE_OUT.with_suffix(".md")
 DEFAULT_OPERATOR_TEMPLATE_OUT = PRODUCTIZATION / "pocketmd_lite_operator_template.json"
 DEFAULT_SURFACE_OUT = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 RAW_ROW_IMPORTER_SCRIPT = Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py")
+DEFAULT_ROW_TEMPLATE_DIR = PRODUCTIZATION
+DEFAULT_TOPK_ROW_TEMPLATE_FILENAME = "pocketmd_lite_topk_rows_template.csv"
 DEFAULT_RAW_ROW_INPUT_CANDIDATES = [
     str(PRODUCTIZATION / f"pocketmd_lite_topk_rows.{suffix}")
     for suffix in ("json", "jsonl", "ndjson", "csv", "tsv")
@@ -139,6 +142,71 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _csv_cell(value: Any) -> Any:
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+    if value is None:
+        return ""
+    return value
+
+
+def _topk_row_template_path(row_template_dir: Path) -> Path:
+    return row_template_dir / DEFAULT_TOPK_ROW_TEMPLATE_FILENAME
+
+
+def _topk_row_template_headers() -> list[str]:
+    return [
+        "case_id",
+        "source_family",
+        "top_k_rank",
+        "candidate_id",
+        "upstream_top_k_provenance_ref",
+        "upstream_top_k_source_checksum",
+        "pre_refinement_energy_proxy",
+        "post_refinement_energy_proxy",
+        "local_min_survived",
+        "contact_persistence_rate",
+        "h_bond_persistence_rate",
+        "clash_count_before",
+        "clash_count_after",
+        "uncertainty_low",
+        "uncertainty_high",
+        "uncertainty_unit",
+        "provenance_ref",
+        "source_checksum",
+    ]
+
+
+def _topk_row_template_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for case_index in range(1, POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT + 1):
+        case_id = f"pocketmd_lite_case_{case_index:03d}"
+        for rank in range(1, POCKETMD_LITE_MINIMUM_TOP_K_RANK_COVERAGE_PER_CASE + 1):
+            rows.append(
+                {
+                    "case_id": case_id,
+                    "source_family": "CASF/PDBBind or GPCR operator intake",
+                    "top_k_rank": rank,
+                    "candidate_id": f"{case_id}_candidate_{rank:03d}",
+                    "upstream_top_k_provenance_ref": None,
+                    "upstream_top_k_source_checksum": None,
+                    "pre_refinement_energy_proxy": None,
+                    "post_refinement_energy_proxy": None,
+                    "local_min_survived": None,
+                    "contact_persistence_rate": None,
+                    "h_bond_persistence_rate": None,
+                    "clash_count_before": None,
+                    "clash_count_after": None,
+                    "uncertainty_low": None,
+                    "uncertainty_high": None,
+                    "uncertainty_unit": "energy_proxy_delta",
+                    "provenance_ref": None,
+                    "source_checksum": None,
+                }
+            )
+    return [{key: _csv_cell(value) for key, value in row.items()} for row in rows]
+
+
 def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_pocketmd_lite_product_surface.py"),
@@ -191,7 +259,9 @@ def _metric_contracts() -> list[dict[str, Any]]:
     ]
 
 
-def _materializer_contract() -> dict[str, Any]:
+def _materializer_contract(
+    *, row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR
+) -> dict[str, Any]:
     return {
         "schema_version": MATERIALIZER_SCHEMA_VERSION,
         "script": "scripts/materialize_pocketmd_lite_topk_survival_report.py",
@@ -203,7 +273,9 @@ def _materializer_contract() -> dict[str, Any]:
             "science_product_surface": str(DEFAULT_SURFACE_OUT),
         },
         "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
-        "raw_row_importer": _raw_row_importer_contract(),
+        "raw_row_importer": _raw_row_importer_contract(
+            row_template_dir=row_template_dir
+        ),
         "command": (
             "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
             "--intake <operator-pocketmd-lite-intake.json> "
@@ -215,12 +287,19 @@ def _materializer_contract() -> dict[str, Any]:
     }
 
 
-def _raw_row_importer_contract() -> dict[str, Any]:
+def _raw_row_importer_contract(
+    *, row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR
+) -> dict[str, Any]:
+    row_template_artifacts = {
+        "pocketmd_lite_topk_rows": str(_topk_row_template_path(row_template_dir)),
+    }
     return {
         "script": str(RAW_ROW_IMPORTER_SCRIPT),
         "status": "ready_for_raw_operator_rows",
         "supported_source_formats": ["csv", "tsv", "json", "jsonl", "ndjson"],
         "default_row_path_candidates": DEFAULT_RAW_ROW_INPUT_CANDIDATES,
+        "row_template_artifacts": row_template_artifacts,
+        "row_template_headers": _topk_row_template_headers(),
         "auto_detecting_actual_closure_command": (
             "python3 scripts/materialize_science_actual_closure_from_rows.py "
             "--fail-blocked"
@@ -247,7 +326,9 @@ def _raw_row_importer_contract() -> dict[str, Any]:
     }
 
 
-def _operator_intake_schema() -> dict[str, Any]:
+def _operator_intake_schema(
+    *, row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR
+) -> dict[str, Any]:
     return {
         "case_key": "cases",
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
@@ -272,7 +353,9 @@ def _operator_intake_schema() -> dict[str, Any]:
         "source_receipt_requirements": dict(RAW_ROW_SOURCE_RECEIPT_REQUIREMENTS),
         "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
         "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
-        "raw_row_importer": _raw_row_importer_contract(),
+        "raw_row_importer": _raw_row_importer_contract(
+            row_template_dir=row_template_dir
+        ),
         "template": {
             "case_id": "pocketmd_lite_case_001",
             "source_family": "CASF/PDBBind or GPCR operator intake",
@@ -305,8 +388,12 @@ def _required_flat_row_fields(required_case_fields: list[str]) -> list[str]:
     ]
 
 
-def _minimum_topk_evidence(required_case_fields: list[str]) -> dict[str, Any]:
-    raw_row_importer = _raw_row_importer_contract()
+def _minimum_topk_evidence(
+    required_case_fields: list[str],
+    *,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
+) -> dict[str, Any]:
+    raw_row_importer = _raw_row_importer_contract(row_template_dir=row_template_dir)
     return {
         "real_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
         "top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
@@ -350,8 +437,9 @@ def _operator_gate_unblock_plan(
     *,
     required_case_fields: list[str],
     materializer_command: str,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> list[dict[str, Any]]:
-    raw_row_importer = _raw_row_importer_contract()
+    raw_row_importer = _raw_row_importer_contract(row_template_dir=row_template_dir)
     return [
         {
             "slot_id": "top_k_refinement_rows",
@@ -369,7 +457,10 @@ def _operator_gate_unblock_plan(
             ],
             "preserves_phase4_criteria": ["broad_all_atom_fep_claims_locked"],
             "minimum_evidence": {
-                **_minimum_topk_evidence(required_case_fields)
+                **_minimum_topk_evidence(
+                    required_case_fields,
+                    row_template_dir=row_template_dir,
+                )
             },
             "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
             "raw_row_importer": raw_row_importer,
@@ -390,9 +481,13 @@ def _phase4_topk_row_closure_matrix(
     *,
     required_case_fields: list[str],
     materializer_command: str,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> list[dict[str, Any]]:
-    raw_row_importer = _raw_row_importer_contract()
+    raw_row_importer = _raw_row_importer_contract(row_template_dir=row_template_dir)
     import_command = raw_row_importer["command"]
+    row_template_artifact = str(
+        raw_row_importer["row_template_artifacts"]["pocketmd_lite_topk_rows"]
+    )
     return [
         {
             "row_input_id": "pocketmd_lite_topk_rows",
@@ -400,6 +495,7 @@ def _phase4_topk_row_closure_matrix(
             "slot_id": "top_k_refinement_rows",
             "status": "operator_input_required",
             "default_row_path_candidates": list(DEFAULT_RAW_ROW_INPUT_CANDIDATES),
+            "row_template_artifact": row_template_artifact,
             "accepted_formats": list(raw_row_importer["supported_source_formats"]),
             "required_flat_row_fields": _required_flat_row_fields(
                 required_case_fields
@@ -408,7 +504,10 @@ def _phase4_topk_row_closure_matrix(
             "top_k_scope_policy": raw_row_importer["top_k_scope_policy"],
             "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
             "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
-            "minimum_evidence": _minimum_topk_evidence(required_case_fields),
+            "minimum_evidence": _minimum_topk_evidence(
+                required_case_fields,
+                row_template_dir=row_template_dir,
+            ),
             "row_value_contract": raw_row_importer["row_value_contract"],
             "source_receipt_requirements": raw_row_importer[
                 "source_receipt_requirements"
@@ -445,10 +544,14 @@ def _operator_handoff_context(
     required_case_fields: list[str],
     first_blocker: str,
     first_blocked_target: str,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> dict[str, Any]:
     gate_unblock_plan = _operator_gate_unblock_plan(
         required_case_fields=required_case_fields,
-        materializer_command=_materializer_contract()["command"],
+        materializer_command=_materializer_contract(
+            row_template_dir=row_template_dir
+        )["command"],
+        row_template_dir=row_template_dir,
     )
     first_gate = gate_unblock_plan[0] if gate_unblock_plan else {}
     first_operator_evidence_gap = {
@@ -525,7 +628,11 @@ def _operator_handoff_context(
     }
 
 
-def build_contract(*, repo_root: Path = ROOT) -> dict[str, Any]:
+def build_contract(
+    *,
+    repo_root: Path = ROOT,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
+) -> dict[str, Any]:
     return {
         "schema_version": CONTRACT_SCHEMA_VERSION,
         **_metadata(
@@ -545,8 +652,10 @@ def build_contract(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "candidate_scope": "top_k_candidates_only",
         },
         "reported_metrics": _metric_contracts(),
-        "materializer": _materializer_contract(),
-        "operator_intake_schema": _operator_intake_schema(),
+        "materializer": _materializer_contract(row_template_dir=row_template_dir),
+        "operator_intake_schema": _operator_intake_schema(
+            row_template_dir=row_template_dir
+        ),
         "blocked_claims": [
             "broad_all_atom_md_claim",
             "free_energy_perturbation_claim",
@@ -562,20 +671,32 @@ def build_contract(*, repo_root: Path = ROOT) -> dict[str, Any]:
     }
 
 
-def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
+def build_topk_survival_report(
+    *,
+    repo_root: Path = ROOT,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
+) -> dict[str, Any]:
     blockers = list(POCKETMD_LITE_OPERATOR_EVIDENCE_BLOCKERS)
     first_blocker = blockers[0]
     first_blocked_target = "top_k_refinement_operator_intake"
     root_cause_tags = ["operator_refinement_rows_required"]
-    required_case_fields = list(_operator_intake_schema()["required_case_fields"])
+    required_case_fields = list(
+        _operator_intake_schema(row_template_dir=row_template_dir)[
+            "required_case_fields"
+        ]
+    )
     handoff_context = _operator_handoff_context(
         required_case_fields=required_case_fields,
         first_blocker=first_blocker,
         first_blocked_target=first_blocked_target,
+        row_template_dir=row_template_dir,
     )
     phase4_topk_row_closure_matrix = _phase4_topk_row_closure_matrix(
         required_case_fields=required_case_fields,
-        materializer_command=_materializer_contract()["command"],
+        materializer_command=_materializer_contract(
+            row_template_dir=row_template_dir
+        )["command"],
+        row_template_dir=row_template_dir,
     )
     summary = {
         "local_min_survival_rate": None,
@@ -633,7 +754,7 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "rows": [],
         "summary": summary,
         "case_refinement_summaries": [],
-        "materializer": _materializer_contract(),
+        "materializer": _materializer_contract(row_template_dir=row_template_dir),
         "required_metrics": [row["metric_id"] for row in _metric_contracts()],
         "required_case_fields": required_case_fields,
         "phase4_exit_gate": phase4_exit_gate,
@@ -755,7 +876,11 @@ def build_readonly_api(*, repo_root: Path = ROOT) -> dict[str, Any]:
     }
 
 
-def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
+def build_delivery_handoff(
+    *,
+    repo_root: Path = ROOT,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
+) -> dict[str, Any]:
     return {
         "schema_version": HANDOFF_SCHEMA_VERSION,
         **_metadata(
@@ -809,7 +934,9 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "source_artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
             "markdown_artifact": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
             "template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
-            "raw_row_importer": _raw_row_importer_contract(),
+            "raw_row_importer": _raw_row_importer_contract(
+                row_template_dir=row_template_dir
+            ),
             "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
             "required_slot_id": "top_k_refinement_rows",
             "case_key": "cases",
@@ -838,8 +965,10 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "science_product_surface.locked == false",
             "broad_all_atom_md_claim remains locked unless separately evidenced",
         ],
-        "materializer": _materializer_contract(),
-        "raw_row_importer": _raw_row_importer_contract(),
+        "materializer": _materializer_contract(row_template_dir=row_template_dir),
+        "raw_row_importer": _raw_row_importer_contract(
+            row_template_dir=row_template_dir
+        ),
         "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
         "claim_boundary": (
             "This handoff prepares the bounded PocketMD Lite evidence path only. It is "
@@ -852,11 +981,14 @@ def build_operator_template(
     *,
     contract: dict[str, Any],
     repo_root: Path = ROOT,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> dict[str, Any]:
     operator_schema = contract.get("operator_intake_schema", {})
     required_case_fields = list(operator_schema.get("required_case_fields", []))
     template = dict(operator_schema.get("template", {}))
-    materializer_command = _materializer_contract()["command"]
+    materializer_command = _materializer_contract(
+        row_template_dir=row_template_dir
+    )["command"]
     return {
         "schema_version": OPERATOR_TEMPLATE_SCHEMA_VERSION,
         **_metadata(
@@ -879,7 +1011,9 @@ def build_operator_template(
         "template": {
             operator_schema.get("case_key", "cases"): [template],
         },
-        "raw_row_importer": _raw_row_importer_contract(),
+        "raw_row_importer": _raw_row_importer_contract(
+            row_template_dir=row_template_dir
+        ),
         "materialization_command": materializer_command,
         "validation_command": materializer_command,
         "claim_boundary": (
@@ -896,6 +1030,7 @@ def build_operator_intake_packet(
     topk_survival_report: dict[str, Any],
     surface: dict[str, Any],
     repo_root: Path = ROOT,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> dict[str, Any]:
     operator_schema = contract.get("operator_intake_schema", {})
     required_case_fields = list(operator_schema.get("required_case_fields", []))
@@ -911,15 +1046,18 @@ def build_operator_intake_packet(
         f"--out-report {DEFAULT_SURVIVAL_REPORT_OUT} "
         f"--out-surface {DEFAULT_SURFACE_OUT} --fail-blocked"
     )
-    raw_row_importer = _raw_row_importer_contract()
+    raw_row_importer = _raw_row_importer_contract(row_template_dir=row_template_dir)
     gate_unblock_plan = _operator_gate_unblock_plan(
         required_case_fields=required_case_fields,
         materializer_command=materializer_command,
+        row_template_dir=row_template_dir,
     )
     phase4_topk_row_closure_matrix = _phase4_topk_row_closure_matrix(
         required_case_fields=required_case_fields,
         materializer_command=materializer_command,
+        row_template_dir=row_template_dir,
     )
+    row_template_artifacts = dict(raw_row_importer["row_template_artifacts"])
     return {
         "schema_version": OPERATOR_INTAKE_PACKET_SCHEMA_VERSION,
         **_metadata(
@@ -984,6 +1122,19 @@ def build_operator_intake_packet(
         "phase4_topk_row_closure_matrix_count": len(
             phase4_topk_row_closure_matrix
         ),
+        "row_template_artifact_count": len(row_template_artifacts),
+        "row_template_artifacts": row_template_artifacts,
+        "raw_row_dropzone": {
+            "status": "ready_for_operator_rows",
+            "auto_detection_policy": (
+                "Place real PocketMD Lite top-k row files at the default paths, "
+                "then run the raw-row importer followed by the survival materializer."
+            ),
+            "default_row_path_candidates": DEFAULT_RAW_ROW_INPUT_CANDIDATES,
+            "row_template_artifacts": row_template_artifacts,
+            "materialization_command": raw_row_importer["command"],
+            "required_row_inputs": ["pocketmd_lite_topk_rows"],
+        },
         "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
         "minimum_top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
         "minimum_candidate_count_per_case": (
@@ -1076,6 +1227,7 @@ def build_operator_intake_packet(
             "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
             "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
             "operator_raw_row_importer": str(RAW_ROW_IMPORTER_SCRIPT),
+            "row_templates": row_template_artifacts,
         },
         "next_actions": [
             "materialize_pocketmd_lite_operator_intake_from_rows",
@@ -1092,6 +1244,8 @@ def build_operator_intake_packet(
             "phase4_topk_row_closure_matrix_count": len(
                 phase4_topk_row_closure_matrix
             ),
+            "row_template_artifact_count": len(row_template_artifacts),
+            "row_template_artifacts": row_template_artifacts,
             "operator_template_artifact": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
             "raw_row_importer_script": str(RAW_ROW_IMPORTER_SCRIPT),
             "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
@@ -1126,6 +1280,7 @@ def build_surface(
     readonly_api: dict[str, Any],
     delivery_handoff: dict[str, Any],
     repo_root: Path = ROOT,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> dict[str, Any]:
     blockers = list(POCKETMD_LITE_SURFACE_BLOCKERS)
     phase4_exit_gate = topk_survival_report.get("phase4_exit_gate")
@@ -1143,11 +1298,15 @@ def build_surface(
         required_case_fields=required_case_fields,
         first_blocker="pocketmd_lite_topk_candidate_rows_missing",
         first_blocked_target="top_k_refinement_operator_intake",
+        row_template_dir=row_template_dir,
     )
     gate_unblock_plan = handoff_context["gate_unblock_plan"]
     phase4_topk_row_closure_matrix = _phase4_topk_row_closure_matrix(
         required_case_fields=required_case_fields,
-        materializer_command=_materializer_contract()["command"],
+        materializer_command=_materializer_contract(
+            row_template_dir=row_template_dir
+        )["command"],
+        row_template_dir=row_template_dir,
     )
     first_operator_evidence_gap = handoff_context["first_operator_evidence_gap"]
     operator_handoff_summary = handoff_context["operator_handoff_summary"]
@@ -1211,7 +1370,7 @@ def build_surface(
             "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
             "operator_template": str(DEFAULT_OPERATOR_TEMPLATE_OUT),
         },
-        "materializer": _materializer_contract(),
+        "materializer": _materializer_contract(row_template_dir=row_template_dir),
         "readiness_summary": {
             "contract_ready": bool(contract.get("contract_pass")),
             "readonly_api_ready": bool(readonly_api.get("contract_pass")),
@@ -1280,24 +1439,40 @@ def build_surface(
     }
 
 
-def build_pocketmd_lite_artifacts(*, repo_root: Path = ROOT) -> dict[str, dict[str, Any]]:
-    contract = build_contract(repo_root=repo_root)
-    operator_template = build_operator_template(contract=contract, repo_root=repo_root)
-    topk_survival_report = build_topk_survival_report(repo_root=repo_root)
+def build_pocketmd_lite_artifacts(
+    *,
+    repo_root: Path = ROOT,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
+) -> dict[str, dict[str, Any]]:
+    contract = build_contract(repo_root=repo_root, row_template_dir=row_template_dir)
+    operator_template = build_operator_template(
+        contract=contract,
+        repo_root=repo_root,
+        row_template_dir=row_template_dir,
+    )
+    topk_survival_report = build_topk_survival_report(
+        repo_root=repo_root,
+        row_template_dir=row_template_dir,
+    )
     readonly_api = build_readonly_api(repo_root=repo_root)
-    delivery_handoff = build_delivery_handoff(repo_root=repo_root)
+    delivery_handoff = build_delivery_handoff(
+        repo_root=repo_root,
+        row_template_dir=row_template_dir,
+    )
     surface = build_surface(
         contract=contract,
         topk_survival_report=topk_survival_report,
         readonly_api=readonly_api,
         delivery_handoff=delivery_handoff,
         repo_root=repo_root,
+        row_template_dir=row_template_dir,
     )
     operator_intake_packet = build_operator_intake_packet(
         contract=contract,
         topk_survival_report=topk_survival_report,
         surface=surface,
         repo_root=repo_root,
+        row_template_dir=row_template_dir,
     )
     return {
         "contract": contract,
@@ -1341,8 +1516,8 @@ def _operator_intake_markdown(payload: dict[str, Any]) -> str:
             "",
             "## Phase 4 Top-k Row Closure Matrix",
             "",
-            "| Row Input | Slot | Closes Criteria | Minimum Evidence |",
-            "|---|---|---|---|",
+            "| Row Input | Slot | Closes Criteria | Minimum Evidence | CSV Starter |",
+            "|---|---|---|---|---|",
         ]
     )
     for row in payload["phase4_topk_row_closure_matrix"]:
@@ -1356,7 +1531,7 @@ def _operator_intake_markdown(payload: dict[str, Any]) -> str:
         )
         lines.append(
             f"| `{row['row_input_id']}` | `{row['slot_id']}` | "
-            f"{criteria} | `{minimum}` |"
+            f"{criteria} | `{minimum}` | `{row['row_template_artifact']}` |"
         )
     lines.extend(["", "## Materialization Sequence", ""])
     for step in payload["materialization_sequence"]:
@@ -1366,6 +1541,30 @@ def _operator_intake_markdown(payload: dict[str, Any]) -> str:
         lines.append(f"- `{criterion}`")
     lines.append("")
     return "\n".join(lines)
+
+
+def write_pocketmd_lite_topk_row_template_csv(
+    *,
+    packet: dict[str, Any],
+    repo_root: Path = ROOT,
+) -> dict[str, Path]:
+    raw_paths = packet.get("row_template_artifacts")
+    if not isinstance(raw_paths, dict):
+        return {}
+    raw_path = str(raw_paths.get("pocketmd_lite_topk_rows") or "")
+    if not raw_path:
+        return {}
+    path = Path(raw_path)
+    resolved = path if path.is_absolute() else repo_root / path
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    headers = _topk_row_template_headers()
+    rows = _topk_row_template_rows()
+    with resolved.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=headers)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({header: row.get(header, "") for header in headers})
+    return {"pocketmd_lite_topk_rows": resolved}
 
 
 def write_pocketmd_lite_artifacts(
@@ -1380,8 +1579,12 @@ def write_pocketmd_lite_artifacts(
     operator_intake_md_out: Path = DEFAULT_OPERATOR_INTAKE_MD_OUT,
     operator_template_out: Path = DEFAULT_OPERATOR_TEMPLATE_OUT,
     surface_out: Path = DEFAULT_SURFACE_OUT,
+    row_template_dir: Path = DEFAULT_ROW_TEMPLATE_DIR,
 ) -> dict[str, dict[str, Any]]:
-    artifacts = build_pocketmd_lite_artifacts(repo_root=repo_root)
+    artifacts = build_pocketmd_lite_artifacts(
+        repo_root=repo_root,
+        row_template_dir=row_template_dir,
+    )
     outputs = {
         "contract": contract_out,
         "topk_survival_report": survival_report_out,
@@ -1417,6 +1620,10 @@ def write_pocketmd_lite_artifacts(
         _operator_intake_markdown(artifacts["operator_intake_packet"]),
         encoding="utf-8",
     )
+    write_pocketmd_lite_topk_row_template_csv(
+        packet=artifacts["operator_intake_packet"],
+        repo_root=repo_root,
+    )
     return artifacts
 
 
@@ -1431,6 +1638,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--operator-intake-md-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_MD_OUT)
     parser.add_argument("--operator-template-out", type=Path, default=DEFAULT_OPERATOR_TEMPLATE_OUT)
     parser.add_argument("--surface-out", type=Path, default=DEFAULT_SURFACE_OUT)
+    parser.add_argument("--row-template-dir", type=Path, default=DEFAULT_ROW_TEMPLATE_DIR)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
     parser.add_argument("--json", action="store_true")
     return parser
@@ -1449,6 +1657,7 @@ def main(argv: list[str] | None = None) -> int:
         operator_intake_md_out=args.operator_intake_md_out,
         operator_template_out=args.operator_template_out,
         surface_out=args.surface_out,
+        row_template_dir=args.row_template_dir,
     )
     if args.json:
         print(_json_text({"artifacts": artifacts}), end="")
