@@ -36,6 +36,34 @@ REQUIRED_TARGET_FIELDS = (
 )
 REQUIRED_MOLECULE_FIELDS = ("molecule_id", "is_active", "score")
 SOURCE_CHECKSUM_PATTERN = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
+PLACEHOLDER_SOURCE_TEXT_MARKERS = (
+    "<operator",
+    "dry-run",
+    "dummy",
+    "example.invalid",
+    "example://",
+    "fake",
+    "fixture",
+    "mock",
+    "operator_supplied",
+    "placeholder",
+    "synthetic",
+    "test-accession",
+    "todo",
+    "unit-test",
+)
+PLACEHOLDER_PROVENANCE_PREFIXES = (
+    "operator://",
+    "local-evidence://",
+    "local://",
+    "fixture://",
+    "mock://",
+    "synthetic://",
+    "placeholder://",
+    "test://",
+    "unit-test://",
+    "file://",
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -64,6 +92,23 @@ def _boolean(value: Any) -> bool | None:
 
 def _is_sha256_ref(value: str) -> bool:
     return bool(SOURCE_CHECKSUM_PATTERN.fullmatch(value))
+
+
+def _contains_placeholder_marker(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(marker in lowered for marker in PLACEHOLDER_SOURCE_TEXT_MARKERS)
+
+
+def _has_placeholder_provenance_prefix(value: Any) -> bool:
+    lowered = _string(value).lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_PROVENANCE_PREFIXES)
+
+
+def _is_repeated_placeholder_checksum(value: str) -> bool:
+    if not _is_sha256_ref(value):
+        return False
+    digest = value.split(":", 1)[1].lower()
+    return len(set(digest)) == 1
 
 
 def _family(value: Any) -> str:
@@ -209,6 +254,13 @@ def _score_target(row: dict[str, Any], *, index: int) -> dict[str, Any]:
     if "source_license_or_accession" in row and not source_license:
         blockers.append(f"{target_key}:source_license_or_accession_blank")
         root_cause_tags.append("operator_values_required")
+    elif (
+        "source_license_or_accession" in row
+        and source_license
+        and _contains_placeholder_marker(source_license)
+    ):
+        blockers.append(f"{target_key}:source_license_or_accession_placeholder")
+        root_cause_tags.append("operator_receipts_required")
     if "source_checksum" in row:
         if not source_checksum:
             blockers.append(f"{target_key}:source_checksum_blank")
@@ -216,9 +268,22 @@ def _score_target(row: dict[str, Any], *, index: int) -> dict[str, Any]:
         elif not _is_sha256_ref(source_checksum):
             blockers.append(f"{target_key}:source_checksum_invalid")
             root_cause_tags.append("operator_receipts_required")
+        elif _is_repeated_placeholder_checksum(source_checksum):
+            blockers.append(f"{target_key}:source_checksum_placeholder_digest")
+            root_cause_tags.append("operator_receipts_required")
     if "provenance_ref" in row and not provenance_ref:
         blockers.append(f"{target_key}:provenance_ref_blank")
         root_cause_tags.append("operator_values_required")
+    elif (
+        "provenance_ref" in row
+        and provenance_ref
+        and (
+            _has_placeholder_provenance_prefix(provenance_ref)
+            or _contains_placeholder_marker(provenance_ref)
+        )
+    ):
+        blockers.append(f"{target_key}:provenance_ref_placeholder")
+        root_cause_tags.append("operator_receipts_required")
 
     raw_molecules = _as_list(row.get("scored_molecules"))
     if not raw_molecules:

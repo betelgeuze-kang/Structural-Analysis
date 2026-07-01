@@ -37,12 +37,21 @@ def _target(
         "scored_molecules": scored_molecules,
         "source_license_or_accession": f"{benchmark_family}:{target_id}",
         "source_checksum": _checksum(f"{benchmark_family}:{target_id}"),
-        "provenance_ref": f"operator://{benchmark_family}/{target_id}",
+        "provenance_ref": _provenance_ref(
+            "public-benchmark",
+            "enrichment",
+            benchmark_family,
+            f"{target_id}.json",
+        ),
     }
 
 
 def _checksum(seed: str) -> str:
     return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
+
+
+def _provenance_ref(*parts: str) -> str:
+    return "https://zenodo.org/records/8642135/files/" + "/".join(parts)
 
 
 def _molecule(molecule_id: str, *, is_active: bool, score: float) -> dict[str, object]:
@@ -167,6 +176,44 @@ def test_public_benchmark_enrichment_materializer_blocks_invalid_checksum() -> N
     assert scorecard["contract_pass"] is False
     assert scorecard["first_blocked_target"] == "aa2ar"
     assert "aa2ar:source_checksum_invalid" in scorecard["blockers"]
+    assert "operator_receipts_required" in scorecard["root_cause_tags"]
+
+
+def test_public_benchmark_enrichment_materializer_blocks_placeholder_receipts() -> None:
+    intake = _valid_intake()
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    first_target = targets[0]
+    assert isinstance(first_target, dict)
+    first_target["source_license_or_accession"] = "DUD-E:test-accession"
+    first_target["source_checksum"] = "sha256:" + "a" * 64
+    first_target["provenance_ref"] = "operator://dud-e/aa2ar"
+
+    scorecard = module.materialize_enrichment_scorecard(intake, repo_root=REPO_ROOT)
+
+    assert scorecard["status"] == "operator_evidence_required"
+    assert scorecard["contract_pass"] is False
+    assert scorecard["first_blocked_target"] == "aa2ar"
+    assert "aa2ar:source_license_or_accession_placeholder" in scorecard["blockers"]
+    assert "aa2ar:source_checksum_placeholder_digest" in scorecard["blockers"]
+    assert "aa2ar:provenance_ref_placeholder" in scorecard["blockers"]
+    assert "operator_receipts_required" in scorecard["root_cause_tags"]
+
+
+def test_public_benchmark_enrichment_materializer_blocks_local_proxy_receipts() -> None:
+    intake = _valid_intake()
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    first_target = targets[0]
+    assert isinstance(first_target, dict)
+    first_target["provenance_ref"] = "local-evidence://public-benchmark/dud-e/aa2ar"
+
+    scorecard = module.materialize_enrichment_scorecard(intake, repo_root=REPO_ROOT)
+
+    assert scorecard["status"] == "operator_evidence_required"
+    assert scorecard["contract_pass"] is False
+    assert scorecard["first_blocked_target"] == "aa2ar"
+    assert "aa2ar:provenance_ref_placeholder" in scorecard["blockers"]
     assert "operator_receipts_required" in scorecard["root_cause_tags"]
 
 
