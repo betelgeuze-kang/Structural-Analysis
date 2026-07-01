@@ -942,7 +942,7 @@ def _markdown_value(value: Any) -> str:
     return str(value)
 
 
-def _markdown(payload: dict[str, Any]) -> str:
+def render_pocketmd_lite_topk_survival_markdown(payload: dict[str, Any]) -> str:
     summary = _as_dict(payload.get("summary"))
     gate = _as_dict(payload.get("phase4_exit_gate"))
     row_quality = _as_dict(payload.get("top_k_row_quality"))
@@ -1020,6 +1020,10 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(f"- `{action}`")
     lines.extend(["", str(payload.get("claim_boundary", "")), ""])
     return "\n".join(lines)
+
+
+def _markdown(payload: dict[str, Any]) -> str:
+    return render_pocketmd_lite_topk_survival_markdown(payload)
 
 
 def _resolve_out_md(out_report: Path, out_md: Path | None) -> Path:

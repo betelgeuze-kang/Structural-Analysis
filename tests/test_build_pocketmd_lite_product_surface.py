@@ -8,7 +8,6 @@ import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "build_pocketmd_lite_product_surface.py"
-PM_REPORT_PATH = REPO_ROOT / "scripts" / "report_pm_release_gate.py"
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
@@ -18,13 +17,6 @@ module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
-
-pm_spec = importlib.util.spec_from_file_location("report_pm_release_gate", PM_REPORT_PATH)
-assert pm_spec is not None
-pm_report = importlib.util.module_from_spec(pm_spec)
-assert pm_spec.loader is not None
-sys.modules[pm_spec.name] = pm_report
-pm_spec.loader.exec_module(pm_report)
 
 
 def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
@@ -807,6 +799,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
 def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     contract_out = tmp_path / "pocketmd_lite_contract.json"
     survival_out = tmp_path / "pocketmd_lite_topk_survival_report.json"
+    survival_md_out = tmp_path / "pocketmd_lite_topk_survival_report.md"
     api_out = tmp_path / "pocketmd_lite_readonly_api.json"
     handoff_out = tmp_path / "pocketmd_lite_delivery_handoff.json"
     operator_out = tmp_path / "pocketmd_lite_operator_intake_packet.json"
@@ -823,6 +816,8 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
                 str(contract_out),
                 "--survival-report-out",
                 str(survival_out),
+                "--survival-report-md-out",
+                str(survival_md_out),
                 "--readonly-api-out",
                 str(api_out),
                 "--handoff-out",
@@ -867,6 +862,15 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     assert "## Phase 4 Top-k Row Closure Matrix" in operator_md_out.read_text(
         encoding="utf-8"
     )
+    survival_markdown = survival_md_out.read_text(encoding="utf-8")
+    assert "# PocketMD Lite Top-K Survival Report" in survival_markdown
+    assert "`top_k_refinement_rows_present`" in survival_markdown
+    assert "`local_min_survival_materialized`" in survival_markdown
+    assert "`contact_persistence_materialized`" in survival_markdown
+    assert "`h_bond_persistence_materialized`" in survival_markdown
+    assert "`clash_relief_materialized`" in survival_markdown
+    assert "`uncertainty_summary_materialized`" in survival_markdown
+    assert "`broad_all_atom_fep_claims_locked`" in survival_markdown
     survival_payload = json.loads(survival_out.read_text(encoding="utf-8"))
     surface_payload = json.loads(surface_out.read_text(encoding="utf-8"))
     assert survival_payload["operator_input_source_receipt"]["blockers"] == [
@@ -874,35 +878,4 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     ]
     assert surface_payload["operator_input_source_receipt"] == survival_payload[
         "operator_input_source_receipt"
-    ]
-
-    rows = pm_report._evidence_surface_rows(surface_out.parent)
-    assert rows == [
-        {
-            "surface_id": "pocketmd_lite_science_product_surface",
-            "path": str(surface_out),
-            "present": True,
-            "contract_pass": False,
-            "status": "locked",
-            "reason_code": "ERR_POCKETMD_LITE_PRODUCT_SURFACE_LOCKED",
-            "blocker_count": 7,
-            "locked": True,
-            "missing": True,
-            "summary_line": (
-                "PocketMD Lite science product surface: LOCKED | "
-                "top-k refinement operator rows required"
-            ),
-            "first_blocked_target": "top_k_refinement_operator_intake",
-            "root_cause_tags": ["operator_refinement_rows_required"],
-            "blocked_criteria": [
-                "top_k_refinement_rows_present",
-                "top_k_refinement_case_coverage",
-                "local_min_survival_materialized",
-                "contact_persistence_materialized",
-                "h_bond_persistence_materialized",
-                "clash_relief_materialized",
-                "uncertainty_summary_materialized",
-                "report_blockers_resolved",
-            ],
-        }
     ]

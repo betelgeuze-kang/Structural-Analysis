@@ -22,6 +22,7 @@ from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
     UPSTREAM_TOP_K_RECEIPT_FIELDS,
     build_operator_input_source_receipt,
     build_phase4_exit_gate,
+    render_pocketmd_lite_topk_survival_markdown,
 )
 from materialize_pocketmd_lite_operator_intake_from_rows import (  # noqa: E402
     SOURCE_RECEIPT_REQUIREMENTS as RAW_ROW_SOURCE_RECEIPT_REQUIREMENTS,
@@ -34,6 +35,7 @@ SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
 
 DEFAULT_CONTRACT_OUT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 DEFAULT_SURVIVAL_REPORT_OUT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
+DEFAULT_SURVIVAL_REPORT_MD_OUT = DEFAULT_SURVIVAL_REPORT_OUT.with_suffix(".md")
 DEFAULT_READONLY_API_OUT = PRODUCTIZATION / "pocketmd_lite_readonly_api.json"
 DEFAULT_HANDOFF_OUT = PRODUCTIZATION / "pocketmd_lite_delivery_handoff.json"
 DEFAULT_OPERATOR_INTAKE_OUT = PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.json"
@@ -1371,6 +1373,7 @@ def write_pocketmd_lite_artifacts(
     repo_root: Path = ROOT,
     contract_out: Path = DEFAULT_CONTRACT_OUT,
     survival_report_out: Path = DEFAULT_SURVIVAL_REPORT_OUT,
+    survival_report_md_out: Path = DEFAULT_SURVIVAL_REPORT_MD_OUT,
     readonly_api_out: Path = DEFAULT_READONLY_API_OUT,
     handoff_out: Path = DEFAULT_HANDOFF_OUT,
     operator_intake_out: Path = DEFAULT_OPERATOR_INTAKE_OUT,
@@ -1392,6 +1395,18 @@ def write_pocketmd_lite_artifacts(
         path = raw_path if raw_path.is_absolute() else repo_root / raw_path
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(_json_text(artifacts[key]), encoding="utf-8")
+    survival_md_path = (
+        survival_report_md_out
+        if survival_report_md_out.is_absolute()
+        else repo_root / survival_report_md_out
+    )
+    survival_md_path.parent.mkdir(parents=True, exist_ok=True)
+    survival_md_path.write_text(
+        render_pocketmd_lite_topk_survival_markdown(
+            artifacts["topk_survival_report"]
+        ),
+        encoding="utf-8",
+    )
     md_path = (
         operator_intake_md_out
         if operator_intake_md_out.is_absolute()
@@ -1409,6 +1424,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--contract-out", type=Path, default=DEFAULT_CONTRACT_OUT)
     parser.add_argument("--survival-report-out", type=Path, default=DEFAULT_SURVIVAL_REPORT_OUT)
+    parser.add_argument("--survival-report-md-out", type=Path, default=DEFAULT_SURVIVAL_REPORT_MD_OUT)
     parser.add_argument("--readonly-api-out", type=Path, default=DEFAULT_READONLY_API_OUT)
     parser.add_argument("--handoff-out", type=Path, default=DEFAULT_HANDOFF_OUT)
     parser.add_argument("--operator-intake-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_OUT)
@@ -1426,6 +1442,7 @@ def main(argv: list[str] | None = None) -> int:
         repo_root=args.repo_root,
         contract_out=args.contract_out,
         survival_report_out=args.survival_report_out,
+        survival_report_md_out=args.survival_report_md_out,
         readonly_api_out=args.readonly_api_out,
         handoff_out=args.handoff_out,
         operator_intake_out=args.operator_intake_out,
