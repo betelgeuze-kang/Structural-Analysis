@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-01T09:07:57.906139+00:00",
+  "generated_at": "2026-07-01T09:17:34.935975+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -104,7 +104,7 @@
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:8f39d523434113e0e5c0ad453736c7d87875f59a5e102a4fb57b111d98bcb493",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:c34dc5c332cf7d8297e98db6d81da893e24938b8bf5f92a845056d943997b6a8",
-    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:ef372df4e3ca5f70a165406f4f66a964771a17f82478b9aaabfdff2d070b422a",
+    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:e838d56362246e5d2fb2d3b24aa70e639f7898cdd788a202785600db7c62a630",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:469577441df93a0a921e81d3c63cb953a1bbf25dc39316da3994074479b0b155",
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
@@ -116,7 +116,7 @@
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:8aba0f766243b006b17dea6c7b6c0409da42a9edaefb3b8503a9dc6f116f7d5c",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a444ebbde75c253a3aff8def030a93a09b4c12b4e7d1aed2915581df50d1960a",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d924344312a6b2b674826be70fde20b495099511b94907fba183298a17acabf9",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -528,7 +528,7 @@
       "summary": {
         "artifact_count": 18,
         "blocker_count": 0,
-        "current_source_commit_sha": "6b48e9305297d798ad68dca13b91aec1fc89a032",
+        "current_source_commit_sha": "f6ffed25e146e5f881bb440499e994b3416262e5",
         "max_age_days": 30.0,
         "pass_count": 18
       },
@@ -944,7 +944,7 @@
         "github_sync_main_synced_to_head": true,
         "github_sync_preflight_artifact_present": true,
         "github_sync_preflight_clean": true,
-        "github_sync_preflight_head_matches_current": false,
+        "github_sync_preflight_head_matches_current": true,
         "github_sync_preflight_source_state_fresh": true,
         "github_sync_preflight_status": "synced",
         "github_sync_remote_mutation_approval_pending": false,
@@ -956,29 +956,8 @@
       "ok": true,
       "status": "pass",
       "summary": {
-        "changed_paths_since_preflight_head": [
-          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-          "implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
-        ],
-        "current_head_sha": "6b48e9305297d798ad68dca13b91aec1fc89a032",
+        "changed_paths_since_preflight_head": [],
+        "current_head_sha": "d5380601a383f4ed066e0e0972916938b73844c2",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -986,14 +965,14 @@
         "pending_remote_update_actions": [],
         "pending_remote_update_count": 0,
         "pending_remote_update_targets": [],
-        "preflight_local_head_sha": "382dfd6b730a02ffbd6afa86af286e6d55baeb7b",
-        "preflight_source_state_kind": "evidence_only_delta",
+        "preflight_local_head_sha": "d5380601a383f4ed066e0e0972916938b73844c2",
+        "preflight_source_state_kind": "exact",
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
         "remote_main_ref": "origin/main",
         "remote_mutation_approval_pending": false,
-        "remote_mutation_approved": false,
+        "remote_mutation_approved": true,
         "remote_sync_needed": false,
         "status": "synced"
       },
@@ -1607,6 +1586,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "6b48e9305297d798ad68dca13b91aec1fc89a032",
+  "source_commit_sha": "d5380601a383f4ed066e0e0972916938b73844c2",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }
