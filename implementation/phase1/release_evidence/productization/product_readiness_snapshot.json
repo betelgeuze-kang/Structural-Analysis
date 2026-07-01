@@ -2908,7 +2908,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T09:37:09.999227+00:00",
+  "generated_at": "2026-07-01T09:41:57.039089+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2933,7 +2933,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:1c7f176aa1883fcaaca3c194a9ab8d37f9cabde983052cf123de16ebf37db6b2",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d8eb5aac9e8200086880864926319fc9d2acfcc45df616298cc8c65466f675b4",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:aecba0e86d0eaf04c7d000bc2c81e828ee04d68f40a09f395d7ee8e248dd2e8f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2912fc7a5d391e696ad075e8deb957f383ce4f83f933b59080d8f14cd7565ec0",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:75068315ad3d130570a45d117c96f3b1e326ff1437642f7f269d53b900c0c823",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:1413fdb7308adbdf534106a0dc1cbb63448c43f5a758fad851765ab10016e787",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -3589,7 +3589,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "9ea8b9bce089a5caa33c568495c9a6364dfd5e4e",
+  "source_commit_sha": "d026f82c8a459e4fae1c5e9b0368b208c74a2762",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3679,23 +3679,27 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T09:37:04.409594+00:00",
+        "generated_at": "2026-07-01T09:41:51.750208+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "9ea8b9bce089a5caa33c568495c9a6364dfd5e4e",
+        "source_commit_sha": "d026f82c8a459e4fae1c5e9b0368b208c74a2762",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3712,11 +3716,15 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3733,11 +3741,15 @@
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3754,11 +3766,15 @@
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3775,11 +3791,15 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3796,11 +3816,15 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3817,15 +3841,19 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
           "scripts/materialize_science_actual_closure_from_rows.py",
           "scripts/score_symmetry_aware_ligand_rmsd.py",
           "scripts/validate_public_benchmark_pose_validity.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_phase3_ifc_source_license_receipt.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_pose_validity_input.py",
@@ -3846,11 +3874,15 @@
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3867,11 +3899,15 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3888,11 +3924,15 @@
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3909,11 +3949,15 @@
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3930,23 +3974,10 @@
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md",
-          "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
-          "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py"
         ],
         "generated_at": "2026-07-01T09:31:05.609220+00:00",
         "input_checksum_present": true,
@@ -3955,16 +3986,20 @@
         "source_commit_matches_head": false,
         "source_commit_sha": "bc98a98d9a1e46cb2e91177f1a99b0c4cca59915",
         "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -3981,11 +4016,15 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -4002,11 +4041,15 @@
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -4023,11 +4066,15 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -4044,11 +4091,15 @@
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
@@ -4065,11 +4116,15 @@
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
