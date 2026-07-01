@@ -31,6 +31,23 @@ DEFAULT_OUT = Path(
 SCHEMA_VERSION = "gpcr-hard-decoy-operator-intake.v1"
 SUPPORTED_ROW_FORMATS = ("csv", "tsv", "json", "jsonl", "ndjson")
 DEFAULT_SCORE_DIRECTION = "higher_is_better"
+TARGET_ID_POLICY = (
+    "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target rows "
+    "are rejected before suite materialization."
+)
+SCORE_DIRECTION_POLICY = (
+    "score_direction must be higher_is_better or lower_is_better, with exactly "
+    "one direction per target."
+)
+BOOLEAN_LABEL_POLICY = (
+    "is_positive and is_decoy must parse to booleans and be mutually exclusive."
+)
+NUMERIC_VALUE_POLICY = {
+    "score": "must parse to a finite float; NaN and Infinity are rejected",
+}
+ROW_INTEGRITY_POLICY = (
+    "molecule_id must be nonblank, non-placeholder, and unique within each target."
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -230,6 +247,11 @@ def build_gpcr_hard_decoy_operator_template_from_rows(
         molecule_ids_by_target[target_id].add(molecule_id)
         rows_by_target[target_id].append(normalized_row)
 
+    if unexpected_targets:
+        raise ValueError(
+            "unexpected_gpcr_targets:" + ",".join(sorted(set(unexpected_targets)))
+        )
+
     missing_targets = [
         target_id for target_id, target_rows in rows_by_target.items() if not target_rows
     ]
@@ -293,6 +315,11 @@ def build_gpcr_hard_decoy_operator_template_from_rows(
                 for target_id in REQUIRED_TARGETS
                 if target_id in score_direction_by_target
             },
+            "target_id_policy": TARGET_ID_POLICY,
+            "score_direction_policy": SCORE_DIRECTION_POLICY,
+            "boolean_label_policy": BOOLEAN_LABEL_POLICY,
+            "numeric_value_policy": dict(NUMERIC_VALUE_POLICY),
+            "row_integrity_policy": ROW_INTEGRITY_POLICY,
         },
         "claim_boundary": (
             "Operator intake template materialized from raw hard-decoy ranking rows. "

@@ -18,6 +18,9 @@ from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from materialize_gpcr_hard_decoy_suite_report import (  # noqa: E402
     ACTUAL_CLOSURE_CRITERION_ID,
     EXIT_CRITERIA,
+    PLACEHOLDER_SOURCE_TEXT_MARKERS,
+    PLACEHOLDER_SOURCE_URL_MARKERS,
+    PLACEHOLDER_SOURCE_URL_PREFIXES,
     RAW_ROW_QUALITY_CRITERIA,
     REQUIRED_TARGETS,
     SCHEMA_VERSION as SUITE_REPORT_SCHEMA_VERSION,
@@ -63,6 +66,43 @@ PHASE3_EXIT_CRITERIA_BY_FIELD = {
     "hard_decoy_rows": ACTUAL_CLOSURE_CRITERION_ID,
 }
 RAW_HARD_DECOY_ROW_FIELDS = ("molecule_id", "score", "is_positive", "is_decoy")
+RAW_ROW_VALUE_CONTRACT = {
+    "target_id_policy": (
+        "target_id must be one of DRD2, HTR2A, or OPRM1; out-of-scope target "
+        "rows are rejected before suite materialization."
+    ),
+    "score_direction_policy": (
+        "score_direction must be higher_is_better or lower_is_better, with "
+        "exactly one direction per target."
+    ),
+    "numeric_value_policy": {
+        "score": "must parse to a finite float; NaN and Infinity are rejected",
+    },
+    "boolean_label_policy": (
+        "is_positive and is_decoy must parse to booleans and be mutually exclusive."
+    ),
+    "row_integrity_policy": (
+        "molecule_id must be nonblank, non-placeholder, and unique within each target."
+    ),
+}
+SOURCE_RECEIPT_REQUIREMENTS = {
+    "mode": "raw_hard_decoy_rows",
+    "required_fields": [
+        "source_id",
+        "source_url",
+        "source_license",
+        "source_artifact",
+        "source_artifact_sha256",
+    ],
+    "source_artifact_sha256_policy": (
+        "must be a sha256:<hex> reference matching the attached raw row artifact"
+    ),
+    "placeholder_block_policy": {
+        "text_markers": list(PLACEHOLDER_SOURCE_TEXT_MARKERS),
+        "url_markers": list(PLACEHOLDER_SOURCE_URL_MARKERS),
+        "url_prefixes": list(PLACEHOLDER_SOURCE_URL_PREFIXES),
+    },
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -260,11 +300,8 @@ def _target_execution_preflight_checklist(
                         ),
                     },
                     "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
-                    "numeric_value_policy": {
-                        "score": (
-                            "must parse to a finite float; NaN and Infinity are rejected"
-                        ),
-                    },
+                    "raw_row_value_contract": dict(RAW_ROW_VALUE_CONTRACT),
+                    "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
                 },
                 "materialization_command": materialize_command,
                 "validation_command": materialize_command,
@@ -303,11 +340,8 @@ def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
                     ),
                 },
                 "raw_row_quality_minimums": dict(RAW_ROW_QUALITY_CRITERIA),
-                "numeric_value_policy": {
-                    "score": (
-                        "must parse to a finite float; NaN and Infinity are rejected"
-                    ),
-                },
+                "raw_row_value_contract": dict(RAW_ROW_VALUE_CONTRACT),
+                "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
             },
             "materialization_steps": [
                 "materialize_gpcr_hard_decoy_suite_report",
@@ -428,9 +462,8 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
                 *RAW_HARD_DECOY_ROW_FIELDS,
             ],
             "minimum_row_quality_per_target": dict(RAW_ROW_QUALITY_CRITERIA),
-            "numeric_value_policy": {
-                "score": "must parse to a finite float; NaN and Infinity are rejected",
-            },
+            "raw_row_value_contract": dict(RAW_ROW_VALUE_CONTRACT),
+            "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
             "optional_row_fields": ["score_direction"],
             "required_targets": list(REQUIRED_TARGETS),
             "default_score_direction": "higher_is_better",
@@ -573,6 +606,10 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"- `command`: `{payload['raw_row_import']['command']}`",
             f"- `required_flat_row_fields`: `"
             f"{', '.join(payload['raw_row_import']['required_flat_row_fields'])}`",
+            f"- `raw_row_value_contract`: `"
+            f"{json.dumps(payload['raw_row_import']['raw_row_value_contract'], ensure_ascii=False, sort_keys=True)}`",
+            f"- `source_receipt_requirements`: `"
+            f"{json.dumps(payload['raw_row_import']['source_receipt_requirements'], ensure_ascii=False, sort_keys=True)}`",
         ]
     )
     lines.extend(
