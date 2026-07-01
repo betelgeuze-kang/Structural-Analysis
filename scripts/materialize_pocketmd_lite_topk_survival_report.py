@@ -24,6 +24,7 @@ SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
 
 DEFAULT_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 DEFAULT_REPORT_OUT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
+DEFAULT_REPORT_OUT_MD = DEFAULT_REPORT_OUT.with_suffix(".md")
 DEFAULT_SURFACE_OUT = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_READONLY_API = PRODUCTIZATION / "pocketmd_lite_readonly_api.json"
 DEFAULT_HANDOFF = PRODUCTIZATION / "pocketmd_lite_delivery_handoff.json"
@@ -138,6 +139,11 @@ PLACEHOLDER_SOURCE_URL_PREFIXES = (
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _comma_join(values: list[Any]) -> str:
+    rendered = [str(item) for item in values if str(item)]
+    return ", ".join(rendered) if rendered else "none"
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -928,6 +934,98 @@ def build_phase4_exit_gate(
     }
 
 
+def _markdown_value(value: Any) -> str:
+    if value is None:
+        return "missing"
+    if isinstance(value, bool):
+        return str(value)
+    return str(value)
+
+
+def _markdown(payload: dict[str, Any]) -> str:
+    summary = _as_dict(payload.get("summary"))
+    gate = _as_dict(payload.get("phase4_exit_gate"))
+    row_quality = _as_dict(payload.get("top_k_row_quality"))
+    lines = [
+        "# PocketMD Lite Top-K Survival Report",
+        "",
+        f"- `status`: `{payload.get('status', '')}`",
+        f"- `contract_pass`: `{payload.get('contract_pass', False)}`",
+        f"- `product_surface_ready`: `{payload.get('product_surface_ready', False)}`",
+        f"- `real_refinement_case_count`: `{payload.get('real_refinement_case_count', 0)}`",
+        f"- `top_k_candidate_count`: `{payload.get('top_k_candidate_count', 0)}`",
+        f"- `phase4_exit_gate`: `{gate.get('status', '')}`",
+        f"- `failed_criteria`: `{_comma_join(_as_list(gate.get('failed_criteria')))}`",
+        f"- `first_blocked_target`: `{payload.get('first_blocked_target') or 'none'}`",
+        f"- `first_blocker`: `{_as_list(payload.get('blockers'))[0] if _as_list(payload.get('blockers')) else 'none'}`",
+        "",
+        "| Metric | Current | Required |",
+        "|---|---|---|",
+        f"| `local_min_survival_rate` | `{_markdown_value(summary.get('local_min_survival_rate'))}` | `present` |",
+        f"| `contact_persistence_rate_median` | `{_markdown_value(summary.get('contact_persistence_rate_median'))}` | `present` |",
+        f"| `h_bond_persistence_rate_median` | `{_markdown_value(summary.get('h_bond_persistence_rate_median'))}` | `present` |",
+        f"| `clash_relief_rate` | `{_markdown_value(summary.get('clash_relief_rate'))}` | `present` |",
+        f"| `uncertainty_width_median` | `{_markdown_value(summary.get('uncertainty_width_median'))}` | `present` |",
+        "",
+        "| Criterion | Pass | Current | Required | Blockers |",
+        "|---|---|---|---|---|",
+    ]
+    for criterion in _as_list(gate.get("criteria")):
+        if not isinstance(criterion, dict):
+            continue
+        lines.append(
+            "| "
+            f"`{criterion.get('criterion_id', '')}` | "
+            f"`{criterion.get('pass', False)}` | "
+            f"`{_markdown_value(criterion.get('current'))}` | "
+            f"`{_markdown_value(criterion.get('required'))}` | "
+            f"`{_comma_join(_as_list(criterion.get('blockers')))}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "| Case | Candidates | Top-K Ranks | Local-Min Survival | Contact Median | H-Bond Median | Clash Relief | Uncertainty Median |",
+            "|---|---|---|---|---|---|---|---|",
+        ]
+    )
+    for case in _as_list(payload.get("case_refinement_summaries")):
+        if not isinstance(case, dict):
+            continue
+        lines.append(
+            "| "
+            f"`{case.get('case_id', '')}` | "
+            f"`{case.get('top_k_candidate_count', 0)}` | "
+            f"`{_comma_join(_as_list(case.get('top_k_ranks')))}` | "
+            f"`{_markdown_value(case.get('local_min_survival_rate'))}` | "
+            f"`{_markdown_value(case.get('contact_persistence_rate_median'))}` | "
+            f"`{_markdown_value(case.get('h_bond_persistence_rate_median'))}` | "
+            f"`{_markdown_value(case.get('clash_relief_rate'))}` | "
+            f"`{_markdown_value(case.get('uncertainty_width_median'))}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Top-K Row Quality",
+            "",
+            f"- `contract_pass`: `{row_quality.get('contract_pass', False)}`",
+            f"- `minimums`: `{TOPK_ROW_QUALITY_CRITERIA}`",
+            f"- `rank_policy`: `{TOP_K_RANK_PREFIX_POLICY}`",
+            f"- `scope_policy`: `{TOP_K_SCOPE_POLICY}`",
+            "",
+            "## Operator Next Actions",
+            "",
+        ]
+    )
+    for action in _as_list(payload.get("next_actions")):
+        lines.append(f"- `{action}`")
+    lines.extend(["", str(payload.get("claim_boundary", "")), ""])
+    return "\n".join(lines)
+
+
+def _resolve_out_md(out_report: Path, out_md: Path | None) -> Path:
+    return out_report.with_suffix(".md") if out_md is None else out_md
+
+
 def _input_paths(
     *,
     intake_path: Path | None,
@@ -1240,6 +1338,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--intake", type=Path, required=True)
     parser.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
     parser.add_argument("--out-report", type=Path, default=DEFAULT_REPORT_OUT)
+    parser.add_argument("--out-md", type=Path)
     parser.add_argument("--out-surface", type=Path, default=DEFAULT_SURFACE_OUT)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
     parser.add_argument("--fail-blocked", action="store_true")
@@ -1264,6 +1363,9 @@ def main(argv: list[str] | None = None) -> int:
     out_report = _resolve(repo_root, args.out_report)
     out_report.parent.mkdir(parents=True, exist_ok=True)
     out_report.write_text(_json_text(report), encoding="utf-8")
+    out_md = _resolve(repo_root, _resolve_out_md(args.out_report, args.out_md))
+    out_md.parent.mkdir(parents=True, exist_ok=True)
+    out_md.write_text(_markdown(report), encoding="utf-8")
 
     surface = build_pocketmd_lite_science_product_surface(
         report,

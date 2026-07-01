@@ -732,8 +732,17 @@ def test_pocketmd_lite_materializer_cli_writes_report_and_surface(tmp_path: Path
     )
 
     report = json.loads(out_report.read_text(encoding="utf-8"))
+    markdown = out_report.with_suffix(".md").read_text(encoding="utf-8")
     surface = json.loads(out_surface.read_text(encoding="utf-8"))
     assert report["product_surface_ready"] is True
+    assert "# PocketMD Lite Top-K Survival Report" in markdown
+    assert "`product_surface_ready`: `True`" in markdown
+    assert "`local_min_survival_rate`" in markdown
+    assert "`contact_persistence_rate_median`" in markdown
+    assert "`h_bond_persistence_rate_median`" in markdown
+    assert "`clash_relief_rate`" in markdown
+    assert "`uncertainty_width_median`" in markdown
+    assert "`broad_all_atom_fep_claims_locked`" in markdown
     assert surface["locked"] is False
     assert report["input_checksums"][
         "scripts/materialize_pocketmd_lite_topk_survival_report.py"
@@ -745,6 +754,7 @@ def test_pocketmd_lite_materializer_cli_fail_blocked_returns_one(tmp_path: Path)
     intake = tmp_path / "empty_pocketmd_lite_intake.json"
     intake.write_text(json.dumps({"cases": []}), encoding="utf-8")
     out_report = tmp_path / "pocketmd_lite_topk_survival_report.json"
+    out_md = tmp_path / "operator_pocketmd_lite_topk_survival_report.md"
     out_surface = tmp_path / "pocketmd_lite_science_product_surface.json"
 
     assert (
@@ -754,6 +764,8 @@ def test_pocketmd_lite_materializer_cli_fail_blocked_returns_one(tmp_path: Path)
                 str(intake),
                 "--out-report",
                 str(out_report),
+                "--out-md",
+                str(out_md),
                 "--out-surface",
                 str(out_surface),
                 "--repo-root",
@@ -765,7 +777,17 @@ def test_pocketmd_lite_materializer_cli_fail_blocked_returns_one(tmp_path: Path)
     )
 
     report = json.loads(out_report.read_text(encoding="utf-8"))
+    markdown = out_md.read_text(encoding="utf-8")
     assert report["product_surface_ready"] is False
+    assert "`product_surface_ready`: `False`" in markdown
+    assert "`top_k_refinement_rows_present`" in markdown
+    assert "`top_k_refinement_case_coverage`" in markdown
+    assert "`local_min_survival_materialized`" in markdown
+    assert "`contact_persistence_materialized`" in markdown
+    assert "`h_bond_persistence_materialized`" in markdown
+    assert "`clash_relief_materialized`" in markdown
+    assert "`uncertainty_summary_materialized`" in markdown
+    assert "`attach_top_k_candidate_refinement_rows`" in markdown
     assert report["blockers"] == [
         "pocketmd_lite_topk_candidate_rows_missing",
         "pocketmd_lite_local_min_survival_rows_missing",
