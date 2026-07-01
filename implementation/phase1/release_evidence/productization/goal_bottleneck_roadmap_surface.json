@@ -182,7 +182,7 @@
     "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-07-01T06:06:42.760026+00:00",
+  "generated_at": "2026-07-01T06:07:10.107262+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:740dc81c45d773418c451e8457bfae9953e0365f82a2dc30de7e7cc2407c379b",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:9974f6c2d75f9f9b1aeb87bf01ea554cde52106d45cdd948a8812bbdc62f8b29",
@@ -4289,7 +4289,7 @@
       ]
     }
   },
-  "source_commit_sha": "95b342f13f1ef24cb4e098996b605bcea8cf05f7",
+  "source_commit_sha": "cbff893e16ad3884019bbc60b36c5b5229273f3a",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
