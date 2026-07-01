@@ -488,6 +488,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         "public_benchmark_source_of_truth": {
             "scripts/build_public_benchmark_operator_intake_packet.py",
             "scripts/build_public_benchmark_source_of_truth.py",
+            "scripts/materialize_public_benchmark_enrichment_scorecard.py",
             "scripts/materialize_public_benchmark_harness_bundle.py",
             "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
             "scripts/materialize_public_benchmark_phase2_from_rows.py",
