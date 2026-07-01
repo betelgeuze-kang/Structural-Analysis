@@ -24,10 +24,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T17:47:58.445706+00:00",
+  "generated_at": "2026-07-01T18:05:16.150337+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9e8d3505678b0cf3b979b27fd42cd4a53980ac2c42d1a9ba80121bf8e9a199aa",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:338cddd8a4e8b3fce8dd7ab4235991e8f59ec11e9268f0509a1acb35ae3153a1",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d2d144bb4b4999891911eb815698b019a069e947188cfbc62bd386815a372a13",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6932084dfe505170186b91e5177b5ad44b8887e1e576cd1072f95ac6d5af9358",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:e47b01f6a35de18880f9e90ccb7d426440ae02744b3b9a9eff4ab8ba211b1ce2"
   },
   "next_actions": [
@@ -79,7 +79,7 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 1.557,
+        "ci_streak_source_evidence_age_hours": 7.702,
         "ci_streak_source_evidence_freshness_pass": true,
         "ci_streak_source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
@@ -209,7 +209,7 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 1.557,
+        "ci_streak_source_evidence_age_hours": 7.702,
         "ci_streak_source_evidence_freshness_pass": true,
         "ci_streak_source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
@@ -797,7 +797,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "e1dc4dd36d67e2c86fbaffa9804014ac6987d8fa",
+  "source_commit_sha": "5f4d9ffdbd6a7978e3000655165be7d200edafbb",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
