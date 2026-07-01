@@ -483,10 +483,10 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-01T11:25:24.750373+00:00",
+  "generated_at": "2026-07-01T11:27:12.243415+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:1ecbc07ae41b9cd3fbb2d6c49d82e5aa846ba05866b8f8a36fd3974fbec600eb",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:a3d185bd1c4f27417c74172f8cb0ed17a362e36c95ac1ad041ffb41bd0d38f2b",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:a8c36bd65f936f73815a0ef4ba7fc3af2b69282802624b93032d9b6ffdb64022",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:5db9df8887be1b6d53815802a4cb515d4c0867288db5cf673ac786af92320d1a",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:14327c6edc77e0116542440f5a8588b03d96db126dec09f6e5f2d61dd2d9c1ec",
@@ -2668,6 +2668,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "e1aba2aa0164d862cd0be65126d1f2537094be93",
+  "source_commit_sha": "ea976e0d97acdca565442712c8e0c9be86acb191",
   "status": "blocked"
 }
