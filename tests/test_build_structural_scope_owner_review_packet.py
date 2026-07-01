@@ -99,6 +99,9 @@ def _decision_payload(decision: str) -> dict:
                 "owner_role": "product_owner",
                 "decision_timestamp_utc": "2026-07-02T00:00:00Z",
                 "evidence_reference": "owner-review://scope-cleanup/001",
+                "signed_owner_exception_reference": (
+                    "signed-exception://scope-cleanup/001"
+                ),
                 "external_archive_reference": "archive://molecular-scope/md3bead_soa",
             },
             {
@@ -111,6 +114,9 @@ def _decision_payload(decision: str) -> dict:
                 "owner_role": "product_owner",
                 "decision_timestamp_utc": "2026-07-02T00:00:00Z",
                 "evidence_reference": "owner-review://scope-cleanup/002",
+                "signed_owner_exception_reference": (
+                    "signed-exception://scope-cleanup/002"
+                ),
                 "external_archive_reference": "archive://molecular-scope/gpcr_hard_decoy",
             },
         ],
@@ -208,6 +214,41 @@ def test_owner_review_packet_closes_with_signed_quarantine_exception_decisions(
     assert {
         row["owner_review_state"] for row in payload["review_rows"]
     } == {"owner_decision_recorded_retained_quarantined_signed_exception"}
+    assert {
+        row["signed_owner_exception_reference"] for row in payload["review_rows"]
+    } == {
+        "signed-exception://scope-cleanup/001",
+        "signed-exception://scope-cleanup/002",
+    }
+
+
+def test_owner_review_packet_requires_signed_reference_for_retain_exception(
+    tmp_path: Path,
+) -> None:
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(audit, _audit_payload())
+    _write_json(manifest, _manifest_payload())
+    payload = _decision_payload("retain_quarantined_with_signed_owner_exception")
+    for row in payload["decision_rows"]:
+        row["signed_owner_exception_reference"] = ""
+    _write_json(decisions, payload)
+
+    result = owner_review.build_owner_review_packet(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=decisions,
+    )
+
+    assert result["status"] == "ready_for_owner_review"
+    assert result["owner_decision_recorded_count"] == 0
+    assert result["owner_decision_pending_count"] == 2
+    assert {
+        tuple(row["owner_decision_missing_requirements"])
+        for row in result["review_rows"]
+    } == {("signed_owner_exception_reference",)}
 
 
 def test_owner_review_packet_routes_delete_decisions_to_post_cleanup(
@@ -259,6 +300,7 @@ def test_owner_review_packet_closes_after_delete_extract_cleanup_applied(
                     "owner_role": "product_owner",
                     "decision_timestamp_utc": "2026-07-02T00:00:00Z",
                     "evidence_reference": "owner-review://scope-cleanup/001",
+                    "signed_owner_exception_reference": "",
                     "external_archive_reference": "archive://molecular-scope/md3bead_soa",
                 },
                 {
@@ -271,6 +313,7 @@ def test_owner_review_packet_closes_after_delete_extract_cleanup_applied(
                     "owner_role": "product_owner",
                     "decision_timestamp_utc": "2026-07-02T00:00:00Z",
                     "evidence_reference": "owner-review://scope-cleanup/002",
+                    "signed_owner_exception_reference": "",
                     "external_archive_reference": "",
                 },
             ],
@@ -448,6 +491,7 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     rows = json.loads(template.read_text(encoding="utf-8"))["decision_rows"]
     assert rows[0]["owner_decision"] == ""
     assert rows[0]["owner_identity"] == ""
+    assert rows[0]["signed_owner_exception_reference"] == ""
     assert rows[0]["external_archive_reference"] == ""
     assert (
         rows[0]["recommended_owner_decision_primary"]
@@ -458,12 +502,14 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     )
     markdown = template_md.read_text(encoding="utf-8")
     assert "# Structural Scope Owner Decision Template" in markdown
+    assert "signed_owner_exception_reference" in markdown
     assert "external_archive_reference" in markdown
     assert "extract_to_molecular_or_science_repository" in markdown
     assert "implementation/phase1/md3bead_soa.py" in markdown
     csv_rows = list(csv.DictReader(template_csv.read_text(encoding="utf-8").splitlines()))
     assert csv_rows[0]["path"] == "implementation/phase1/md3bead_soa.py"
     assert csv_rows[0]["owner_decision"] == ""
+    assert csv_rows[0]["signed_owner_exception_reference"] == ""
     assert csv_rows[0]["external_archive_reference"] == ""
     assert csv_rows[0]["recommended_owner_decision"] == (
         "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
@@ -495,7 +541,7 @@ def test_owner_review_packet_accepts_owner_decision_csv(tmp_path: Path) -> None:
                     "delete_from_structural_repository,"
                     "extract_to_molecular_or_science_repository,scope-owner,"
                     "product_owner,2026-07-02T00:00:00Z,"
-                    "owner-review://scope-cleanup/001,"
+                    "owner-review://scope-cleanup/001,,"
                     "archive://molecular-scope/md3bead_soa"
                 ),
                 (
@@ -508,7 +554,7 @@ def test_owner_review_packet_accepts_owner_decision_csv(tmp_path: Path) -> None:
                     "extract_to_molecular_or_science_repository,"
                     "delete_from_structural_repository,scope-owner,product_owner,"
                     "2026-07-02T00:00:00Z,"
-                    "owner-review://scope-cleanup/002,"
+                    "owner-review://scope-cleanup/002,,"
                 ),
                 "",
             ]
@@ -548,6 +594,9 @@ def test_owner_review_packet_blocks_extra_and_duplicate_decision_paths(
             "owner_role": "product_owner",
             "decision_timestamp_utc": "2026-07-02T00:00:00Z",
             "evidence_reference": "owner-review://scope-cleanup/extra",
+            "signed_owner_exception_reference": (
+                "signed-exception://scope-cleanup/extra"
+            ),
             "external_archive_reference": "",
         }
     )

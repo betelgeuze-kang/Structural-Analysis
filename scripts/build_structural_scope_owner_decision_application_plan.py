@@ -137,6 +137,11 @@ def _plan_row(row: dict[str, Any]) -> dict[str, Any]:
         "owner_decision_valid": bool(row.get("owner_decision_valid")),
         "owner_review_state": _text(row.get("owner_review_state")),
         "post_decision_cleanup_pending": bool(row.get("post_decision_cleanup_pending")),
+        "signed_owner_exception_reference": _text(
+            row.get("signed_owner_exception_reference")
+        ),
+        "decision_evidence_reference": _text(row.get("decision_evidence_reference")),
+        "external_archive_reference": _text(row.get("external_archive_reference")),
         "recommended_owner_decision": _text(row.get("recommended_owner_decision")),
         "recommended_owner_decision_primary": _text(
             row.get("recommended_owner_decision_primary")

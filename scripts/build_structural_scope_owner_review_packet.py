@@ -43,6 +43,7 @@ REQUIRED_CLOSURE_EVIDENCE = (
     "per_path_decision",
     "evidence_reference",
     "external_archive_reference_for_extract_decisions",
+    "signed_owner_exception_reference_for_retain_decisions",
     "post_decision_structural_scope_audit",
 )
 OWNER_DECISION_COLUMNS = (
@@ -59,6 +60,7 @@ OWNER_DECISION_COLUMNS = (
     "owner_role",
     "decision_timestamp_utc",
     "evidence_reference",
+    "signed_owner_exception_reference",
     "external_archive_reference",
 )
 OWNER_DECISION_REQUIRED_COLUMNS = (
@@ -309,6 +311,9 @@ def _owner_decision_overlay(
     owner_role = _text(decision_row.get("owner_role"))
     decision_timestamp_utc = _text(decision_row.get("decision_timestamp_utc"))
     evidence_reference = _text(decision_row.get("evidence_reference"))
+    signed_owner_exception_reference = _text(
+        decision_row.get("signed_owner_exception_reference")
+    )
     external_archive_reference = _text(decision_row.get("external_archive_reference"))
     missing: list[str] = []
     if owner_decision not in ALLOWED_OWNER_DECISIONS:
@@ -326,6 +331,11 @@ def _owner_decision_overlay(
         and not external_archive_reference
     ):
         missing.append("external_archive_reference")
+    if (
+        owner_decision == "retain_quarantined_with_signed_owner_exception"
+        and not signed_owner_exception_reference
+    ):
+        missing.append("signed_owner_exception_reference")
     valid = not missing
     cleanup_required = owner_decision in {
         "delete_from_structural_repository",
@@ -348,6 +358,7 @@ def _owner_decision_overlay(
         "owner_role": owner_role,
         "decision_timestamp_utc": decision_timestamp_utc,
         "decision_evidence_reference": evidence_reference,
+        "signed_owner_exception_reference": signed_owner_exception_reference,
         "external_archive_reference": external_archive_reference,
         "post_decision_cleanup_required": cleanup_required,
         "post_decision_cleanup_pending": cleanup_pending,
@@ -414,6 +425,7 @@ def build_owner_decision_template(
                 "owner_role": "",
                 "decision_timestamp_utc": "",
                 "evidence_reference": "",
+                "signed_owner_exception_reference": "",
                 "external_archive_reference": "",
                 "post_decision_required_action": (
                     "delete_or_extract_path_then_rerun_scope_audit"
@@ -434,7 +446,8 @@ def build_owner_decision_template(
             "until every row has an allowed owner_decision, owner identity/role, "
             "decision timestamp, evidence reference, and any delete/extract "
             "decision has been applied and followed by a refreshed structural "
-            "scope audit."
+            "scope audit. Retain decisions require a signed owner-exception "
+            "reference."
         ),
     }
 
@@ -785,6 +798,10 @@ def _decision_template_markdown(payload: dict[str, Any]) -> str:
         (
             "- `external_archive_reference`: required when `owner_decision` is "
             "`extract_to_molecular_or_science_repository`"
+        ),
+        (
+            "- `signed_owner_exception_reference`: required when `owner_decision` "
+            "is `retain_quarantined_with_signed_owner_exception`"
         ),
         "",
         "| Row | Path | Recommended Decision |",
