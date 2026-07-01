@@ -36,6 +36,13 @@ REQUIRED_POSE_FIELDS = (
     "protein_structure_path",
     "receptor_context",
 )
+ROW_INTEGRITY_POLICY = {
+    "required_unique_row_keys": {"cases": ["case_id"]},
+    "purpose": (
+        "Duplicate pose-validity cases cannot be used to inflate real benchmark "
+        "pose-validity, RMSD, or pose-success case counts."
+    ),
+}
 NON_ACTUAL_SOURCE_FAMILY_MARKERS = (
     "dry_run",
     "dry-run",
@@ -242,7 +249,21 @@ def validate_pose_validity_payload(payload: dict[str, Any]) -> dict[str, Any]:
         cases = [payload]
     case_rows = [row for row in _as_list(cases) if isinstance(row, dict)]
     rows = [validate_pose_case(row) for row in case_rows]
-    blockers = [blocker for row in rows for blocker in row["blockers"]]
+    seen_case_ids: set[str] = set()
+    duplicate_case_blockers: list[str] = []
+    for index, row in enumerate(case_rows):
+        case_id = _string(row.get("case_id")) or f"case_{index + 1}"
+        if case_id in seen_case_ids:
+            duplicate_case_blockers.append(
+                f"{case_id}:case_id_duplicate:row_{index}"
+            )
+        seen_case_ids.add(case_id)
+    blockers = [
+        blocker
+        for row in rows
+        for blocker in row["blockers"]
+    ]
+    blockers.extend(duplicate_case_blockers)
     dry_run_case_count = sum(1 for row in case_rows if is_non_actual_pose_case(row))
     real_case_count = max(len(case_rows) - dry_run_case_count, 0)
     return {
@@ -253,6 +274,14 @@ def validate_pose_validity_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "case_count": len(rows),
         "dry_run_case_count": dry_run_case_count,
         "real_benchmark_case_count": real_case_count,
+        "unique_real_benchmark_case_count": len(
+            {
+                _string(row.get("case_id"))
+                for row in case_rows
+                if _string(row.get("case_id")) and not is_non_actual_pose_case(row)
+            }
+        ),
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "blocker_count": len(blockers),
         "blockers": blockers,
         "rows": rows,

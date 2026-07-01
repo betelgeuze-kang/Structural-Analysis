@@ -178,6 +178,28 @@ def test_materializer_blocks_unsupported_benchmark_split(tmp_path: Path) -> None
     assert manifest["materialization_report"]["materialization_blocker_count"] == 0
 
 
+def test_materializer_blocks_duplicate_case_ids(tmp_path: Path) -> None:
+    manifest = module.materialize_subset_manifest(
+        {
+            "target_subset_case_count": 2,
+            "cases": [
+                _case_descriptor(tmp_path, "case_a"),
+                _case_descriptor(tmp_path, "case_a"),
+            ],
+        },
+        repo_root=tmp_path,
+    )
+
+    assert manifest["public_benchmark_ready"] is False
+    assert manifest["row_integrity_policy"]["required_unique_row_keys"] == {
+        "case_rows": ["case_id"]
+    }
+    assert "case_id_not_unique" in manifest["blockers"]
+    assert "case_row_1:case_id_duplicate:case_a" in manifest["blockers"]
+    assert manifest["materialization_report"]["validation_blocker_count"] == 2
+    assert manifest["materialization_report"]["materialization_blocker_count"] == 0
+
+
 def test_materializer_cli_writes_manifest_and_report(tmp_path: Path) -> None:
     intake = tmp_path / "intake.json"
     intake.write_text(

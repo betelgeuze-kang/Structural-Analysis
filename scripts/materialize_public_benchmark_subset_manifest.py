@@ -29,6 +29,13 @@ from validate_public_benchmark_subset_manifest import (  # noqa: E402
 SCHEMA_VERSION = "public-benchmark-subset-materialization.v1"
 MANIFEST_SCHEMA_VERSION = "public-benchmark-subset-manifest.v1"
 DEFAULT_TARGET_SUBSET_CASE_COUNT = 12
+ROW_INTEGRITY_POLICY = {
+    "required_unique_row_keys": {"case_rows": ["case_id"]},
+    "purpose": (
+        "Duplicate CASF/PDBBind subset case rows cannot be used to inflate "
+        "Public Benchmark source-material coverage or Phase 2 case counts."
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -205,6 +212,7 @@ def materialize_subset_manifest(
                 "--manifest <materialized-subset-manifest.json> --fail-blocked"
             ),
         },
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "case_rows": rows,
         "blockers": blockers,
         "materialization_report": {

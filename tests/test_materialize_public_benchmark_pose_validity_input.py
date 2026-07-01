@@ -124,6 +124,28 @@ def test_pose_validity_input_materializer_blocks_placeholder_source_family() -> 
     assert "case_a:source_family_placeholder" in payload["blockers"]
 
 
+def test_pose_validity_input_materializer_blocks_duplicate_case_ids() -> None:
+    subset = _subset_manifest()
+    subset["target_subset_case_count"] = 2
+    subset["case_rows"].append({**subset["case_rows"][0]})
+
+    payload = module.materialize_pose_validity_input(
+        subset,
+        {"cases": [_pose_case(), _pose_case()]},
+        repo_root=REPO_ROOT,
+    )
+
+    assert payload["pose_validity_ready"] is False
+    assert payload["row_integrity_policy"]["required_unique_row_keys"] == {
+        "cases": ["case_id"]
+    }
+    assert payload["real_benchmark_case_count"] == 2
+    assert payload["unique_real_benchmark_case_count"] == 1
+    assert "case_a:case_id_duplicate:row_1" in payload["blockers"]
+    assert payload["validation"]["pose_validity_ready"] is False
+    assert payload["validation"]["unique_real_benchmark_case_count"] == 1
+
+
 def test_pose_validity_input_materializer_cli_writes_input_and_report(
     tmp_path: Path,
 ) -> None:

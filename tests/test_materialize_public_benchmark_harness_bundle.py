@@ -312,6 +312,35 @@ def test_public_benchmark_harness_bundle_blocks_duplicate_manual_bundle_rows(
     assert components["vina_gnina_comparison_adapter"]["ready"] is False
 
 
+def test_public_benchmark_harness_bundle_blocks_duplicate_pose_case_rows(
+    tmp_path: Path,
+) -> None:
+    bundle_path = tmp_path / "operator_bundle.json"
+    payload = _bundle(tmp_path)
+    pose_cases = payload["pose_coordinate_intake"]["cases"]
+    assert isinstance(pose_cases, list)
+    pose_cases[1]["case_id"] = pose_cases[0]["case_id"]
+    bundle_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = module.materialize_public_benchmark_harness_bundle(
+        payload,
+        repo_root=tmp_path,
+        bundle_path=bundle_path,
+        out_dir=tmp_path / "out",
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["public_benchmark_ready"] is False
+    assert "pose_validity_input:case_01:case_id_duplicate:row_1" in report[
+        "blockers"
+    ]
+    components = {row["component_id"]: row for row in report["components"]}
+    assert components["casf_pdbbind_pose_success_harness"]["ready"] is False
+    assert components["symmetry_aware_ligand_rmsd"]["ready"] is False
+    assert components["posebusters_style_pose_validity"]["ready"] is False
+
+
 def test_public_benchmark_harness_bundle_blocks_one_case_smoke_as_phase2_ready(
     tmp_path: Path,
 ) -> None:

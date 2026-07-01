@@ -107,6 +107,23 @@ def test_pose_validity_validator_blocks_invalid_pose_success_metric() -> None:
     assert "wrong_metric_pose:pose_success_metric_invalid" in result["blockers"]
 
 
+def test_pose_validity_validator_blocks_duplicate_case_rows() -> None:
+    case = _valid_pose_case("case_a")
+    case["source_family"] = "CASF/PDBBind"
+    case["benchmark_split"] = "CASF-core"
+
+    result = module.validate_pose_validity_payload({"cases": [case, dict(case)]})
+
+    assert result["status"] == "blocked"
+    assert result["pose_validity_ready"] is False
+    assert result["real_benchmark_case_count"] == 2
+    assert result["unique_real_benchmark_case_count"] == 1
+    assert result["row_integrity_policy"]["required_unique_row_keys"] == {
+        "cases": ["case_id"]
+    }
+    assert "case_a:case_id_duplicate:row_1" in result["blockers"]
+
+
 def test_pose_validity_validator_requires_benchmark_split() -> None:
     case = _valid_pose_case("missing_split_pose")
     case.pop("benchmark_split")

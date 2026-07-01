@@ -94,6 +94,22 @@ def test_validate_complete_manifest_ready() -> None:
     assert coverage["benchmark_split_counts"] == {"CASF-core": 2}
 
 
+def test_validate_manifest_rejects_duplicate_case_rows() -> None:
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 2,
+            "case_rows": [_complete_row("case_a"), _complete_row("case_a")],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert "case_id_not_unique" in result["blockers"]
+    assert "case_row_1:case_id_duplicate:case_a" in result["blockers"]
+    assert result["row_integrity_policy"]["required_unique_row_keys"] == {
+        "case_rows": ["case_id"]
+    }
+
+
 def test_validate_manifest_requires_explicit_ligand_atom_ids() -> None:
     row = _complete_row("case_a")
     row["ligand_atom_order_contract"] = {

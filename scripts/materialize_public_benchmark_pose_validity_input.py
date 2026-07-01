@@ -23,6 +23,13 @@ from validate_public_benchmark_pose_validity import (  # noqa: E402
 
 SCHEMA_VERSION = "public-benchmark-pose-validity-input-materialization.v1"
 POSE_INPUT_SCHEMA_VERSION = "public-benchmark-pose-validity-input.v1"
+ROW_INTEGRITY_POLICY = {
+    "required_unique_row_keys": {"cases": ["case_id"]},
+    "purpose": (
+        "Duplicate pose-coordinate rows cannot be used to inflate real benchmark "
+        "pose-validity, RMSD, or pose-success case counts."
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -141,8 +148,13 @@ def materialize_pose_validity_input(
         "contract_pass": ready,
         "pose_validity_ready": ready,
         "required_pose_fields": list(REQUIRED_POSE_FIELDS),
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "case_count": len(cases),
         "real_benchmark_case_count": real_benchmark_case_count,
+        "unique_real_benchmark_case_count": validation.get(
+            "unique_real_benchmark_case_count",
+            real_benchmark_case_count,
+        ),
         "real_pose_case_count": real_benchmark_case_count,
         "cases": cases,
         "validation": validation,

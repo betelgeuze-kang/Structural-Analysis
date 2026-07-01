@@ -39,6 +39,13 @@ REQUIRED_CASE_FIELDS = (
     "pose_success_metric",
     "rmsd_threshold_angstrom",
 )
+ROW_INTEGRITY_POLICY = {
+    "required_unique_row_keys": {"case_rows": ["case_id"]},
+    "purpose": (
+        "Duplicate CASF/PDBBind subset case rows cannot be used to inflate "
+        "Public Benchmark source-material coverage or Phase 2 case counts."
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -262,6 +269,17 @@ def _validate_case_row(row: dict[str, Any], *, index: int) -> list[str]:
 def validate_subset_manifest(payload: dict[str, Any]) -> dict[str, Any]:
     target_count = int(payload.get("target_subset_case_count") or 0)
     case_rows = [row for row in _as_list(payload.get("case_rows")) if isinstance(row, dict)]
+    seen_case_ids: set[str] = set()
+    duplicate_case_blockers: list[str] = []
+    for index, row in enumerate(case_rows):
+        case_id = str(row.get("case_id") or "").strip()
+        if not case_id:
+            continue
+        if case_id in seen_case_ids:
+            duplicate_case_blockers.append(
+                f"case_row_{index}:case_id_duplicate:{case_id}"
+            )
+        seen_case_ids.add(case_id)
     row_blockers = [
         blocker
         for index, row in enumerate(case_rows)
@@ -275,7 +293,7 @@ def validate_subset_manifest(payload: dict[str, Any]) -> dict[str, Any]:
         count_blockers.append("materialized_case_count_below_target")
     if len({str(row.get("case_id")) for row in case_rows}) != materialized_count:
         count_blockers.append("case_id_not_unique")
-    blockers = [*count_blockers, *row_blockers]
+    blockers = [*count_blockers, *duplicate_case_blockers, *row_blockers]
     ready = not blockers
     coverage = source_material_coverage_summary(
         case_rows,
@@ -289,6 +307,7 @@ def validate_subset_manifest(payload: dict[str, Any]) -> dict[str, Any]:
         "target_subset_case_count": target_count,
         "materialized_case_count": materialized_count,
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "source_material_coverage": coverage,
         "blocker_count": len(blockers),
         "blockers": blockers,
