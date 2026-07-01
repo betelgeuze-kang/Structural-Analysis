@@ -2611,7 +2611,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T17:48:09.408812+00:00",
+  "generated_at": "2026-07-01T17:57:11.056979+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2883,7 +2883,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "e1dc4dd36d67e2c86fbaffa9804014ac6987d8fa",
+  "source_commit_sha": "d9e15dcd16bcdcf9d6bbc90d65ffcb22ecb5e6d8",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2972,15 +2972,20 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_structural_product_development_roadmap.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py"
+        ],
         "generated_at": "2026-07-01T17:47:59.117369+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "e1dc4dd36d67e2c86fbaffa9804014ac6987d8fa",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_closure_status",
@@ -3130,15 +3135,20 @@
       },
       {
         "artifact": "developer_preview_rc_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_structural_product_development_roadmap.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py"
+        ],
         "generated_at": "2026-07-01T17:47:43.816034+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "e1dc4dd36d67e2c86fbaffa9804014ac6987d8fa",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
@@ -3368,26 +3378,35 @@
       },
       {
         "artifact": "ux_new_user_observation_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "scripts/build_structural_product_development_roadmap.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
+          "tests/test_build_structural_product_development_roadmap.py"
+        ],
         "generated_at": "2026-07-01T17:47:36.253267+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "e1dc4dd36d67e2c86fbaffa9804014ac6987d8fa",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
           "scripts/check_github_development_sync_preflight.py",
           "scripts/report_release_evidence_freshness.py",
           "tests/test_build_developer_preview_rc_status.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_check_github_development_sync_preflight.py",
@@ -3506,9 +3525,11 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_license_status_closure_report.py",
           "scripts/build_license_status_intake_packet.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
@@ -3516,9 +3537,11 @@
           "scripts/check_github_development_sync_preflight.py",
           "scripts/report_release_evidence_freshness.py",
           "tests/test_build_developer_preview_rc_status.py",
+          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_license_status_closure_report.py",
           "tests/test_build_license_status_intake_packet.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py",
@@ -3598,21 +3621,11 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
+        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.md",
-        "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
-        "implementation/phase1/support_bundle_manifest.json"
+        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -3637,21 +3650,11 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        " M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
+        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+        " M implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.md",
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        " M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-        " M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.md",
-        " M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
-        " M implementation/phase1/support_bundle_manifest.json"
+        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
       ]
     }
   },

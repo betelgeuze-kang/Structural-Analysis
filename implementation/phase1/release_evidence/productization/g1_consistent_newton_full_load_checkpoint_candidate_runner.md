@@ -21,6 +21,12 @@
 - `device_resident_residual_jvp_rows_retained`
 - `g1_full_load_hip_newton_lane_report_contract_passes_after_rerun`
 
+## Next Actions
+
+- `generate_full_load_1p0_checkpoint_candidate`: owner=`g1_solver_owner`, status=`required`
+- `close_consistent_residual_jacobian_newton_gate`: owner=`solver_numerics_owner`, status=`required`
+- `prove_production_rocm_hip_residual_jvp_worker`: owner=`runtime_rocm_owner`, status=`required`
+
 ## Closure Blockers
 
 - `checkpoint_load_scale_below_required_full_load`

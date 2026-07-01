@@ -28,7 +28,7 @@ Structural product roadmap: BLOCKED | evidence_progress=66.7% | stage_average=56
   - next action: `close_medium_model_pass_or_approved_review_gate`
 - `g1_solver_closure`: partial (1/2, 50.0%)
   - first blocker: `checkpoint_load_scale_below_required_full_load`
-  - next action: `build_consistent_newton_full_load_checkpoint_candidate_runner`
+  - next action: `generate_full_load_1p0_checkpoint_candidate`
 - `paid_pilot_readiness`: partial (1/4, 25.0%)
   - first blocker: `customer_shadow_below_required:0/3`
   - next action: `complete_3_customer_shadow_cases`
