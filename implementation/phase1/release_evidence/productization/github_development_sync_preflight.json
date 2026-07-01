@@ -1,5 +1,7 @@
 {
-  "blockers": [],
+  "blockers": [
+    "worktree_not_clean"
+  ],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
@@ -8,8 +10,8 @@
     "main_synced_to_head": true,
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
-    "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": true
+    "worktree_clean": false,
+    "worktree_only_ignored_evidence_dirty": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -17,10 +19,10 @@
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
-  "contract_pass": true,
-  "generated_at": "2026-07-01T03:55:36.641926+00:00",
+  "contract_pass": false,
+  "generated_at": "2026-07-01T04:05:11.909136+00:00",
   "pending_remote_updates": [],
-  "preflight_pass": true,
+  "preflight_pass": false,
   "r4_disclosure": {
     "action": "no remote mutation required",
     "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
@@ -29,7 +31,7 @@
     "target": [],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
-  "reason_code": "PASS",
+  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
   "remote_fetch_attempted": true,
   "remote_fetch_ok": true,
   "remote_mutation_approved": false,
@@ -37,17 +39,17 @@
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
-    "effective_worktree_status_short": "",
+    "effective_worktree_status_short": "M README.md",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-    "local_head_sha": "1791557bce977a6372933009ace7dbf7d959d0c9",
+    "ignored_worktree_status_short": "",
+    "local_head_sha": "c0a3c8fe44f4eac4ee9b8fd1592821f74fbc9a48",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "1791557bce977a6372933009ace7dbf7d959d0c9",
+    "remote_feature_sha": "c0a3c8fe44f4eac4ee9b8fd1592821f74fbc9a48",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "1791557bce977a6372933009ace7dbf7d959d0c9",
+    "remote_main_sha": "c0a3c8fe44f4eac4ee9b8fd1592821f74fbc9a48",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +63,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
+    "worktree_status_short": "M README.md"
   },
-  "status": "synced"
+  "status": "blocked"
 }
