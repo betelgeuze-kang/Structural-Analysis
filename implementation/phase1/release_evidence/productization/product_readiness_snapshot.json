@@ -2554,7 +2554,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T19:37:46.823523+00:00",
+  "generated_at": "2026-07-01T19:40:13.188369+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2565,8 +2565,8 @@
     "implementation/phase1/release/independent_product_readiness.json": "sha256:a1bcac46fa8863c846443a8e9878b65d5560a5426cfa1446d912634788f6dfda",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:2b905c9afda295a9c424213b60430ae57bf00f8f0fde09660fa849a4c3835f01",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:2e285c0ced9fb18cc2c29b182bcf6d032c6275ac65bfef6877634b4de7c001e4",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:1aed7b433d88c8b972baedd6acf137321371db22c971953a834af936181112bb",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:02bbb145da77797e359c2687e7eb74dae2149b8c2189ba10fafd7f2808b56273",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:02194db6b1c36cd2ec48939deb9bd4d520edba7831fa60b012c92d91da03f29d",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:99bb3203133928742ef40ca91df6b6b8a823b33640516f493f70527929d5be48",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:2961e1ff5696cc5985343dea89655ae8415bf6e892111a875b349f204bb0eba3",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:4c0f2b7a2969b01caea88e7cce0622ea244f583cfbca6f356dff936e9e06f02a",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:bb90b6e5f2fc0754f7f8a9ab4f5f8755160846cab066941c0317c7d33ce5c413",
@@ -2579,8 +2579,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:6aba5381246de5debd624bd0a061cd50d895a893ff38d34475a79c37f6059e51",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:14327c6edc77e0116542440f5a8588b03d96db126dec09f6e5f2d61dd2d9c1ec",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8ccf98606fbd24362fc093ebf777961efaa4bf09a66d68d999d83df2bde6ca35",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d534a7c8fa862d31a6bc28212c9ebe5c6fae4f144089cdb11b33e907bd5a3997",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7ca0038b1e90967870806f839de6337c950d96df2bbc7df87e6965af913b931c",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5ceb7458d56be44109e0d3ded2c3def47cf404cf852fad24392d563ec292b253",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:dbed17452186f2be09d834518c6fa2fed2d7b07121ce93758f0627c4c01bfa98",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:620342250c1cfa86e1a499f14595d51d274e5fe9d7e11ee32bd4ae5009527c04",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:a5e38c1cb3c6f6f61485ad810c3559d99ca54fa78eb9f312a4ee61e010cf37cd",
@@ -2826,7 +2826,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "ed9cababa6c4dc395ccbb51b4b25f5549ac67535",
+  "source_commit_sha": "036778b2159440f7c358c24d6b50e583d68d056b",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2916,12 +2916,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T19:36:56.633865+00:00",
+        "generated_at": "2026-07-01T19:40:07.521502+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "ed9cababa6c4dc395ccbb51b4b25f5549ac67535",
+        "source_commit_sha": "036778b2159440f7c358c24d6b50e583d68d056b",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3040,24 +3040,24 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T19:37:41.995212+00:00",
+        "generated_at": "2026-07-01T19:39:56.146500+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "ed9cababa6c4dc395ccbb51b4b25f5549ac67535",
+        "source_commit_sha": "036778b2159440f7c358c24d6b50e583d68d056b",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T19:37:41.822374+00:00",
+        "generated_at": "2026-07-01T19:39:56.208911+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "ed9cababa6c4dc395ccbb51b4b25f5549ac67535",
+        "source_commit_sha": "036778b2159440f7c358c24d6b50e583d68d056b",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3525,7 +3525,6 @@
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
         "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/support_bundle_manifest.json"
       ],
       "non_receipt_dirty_paths": [],
@@ -3564,7 +3563,6 @@
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
         " M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         " M implementation/phase1/support_bundle_manifest.json"
       ]
     }

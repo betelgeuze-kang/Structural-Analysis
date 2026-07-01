@@ -192,7 +192,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-01T19:37:41.995212+00:00",
+  "generated_at": "2026-07-01T19:39:56.146500+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -2064,6 +2064,6 @@
       }
     }
   },
-  "source_commit_sha": "ed9cababa6c4dc395ccbb51b4b25f5549ac67535",
+  "source_commit_sha": "036778b2159440f7c358c24d6b50e583d68d056b",
   "status": "blocked"
 }

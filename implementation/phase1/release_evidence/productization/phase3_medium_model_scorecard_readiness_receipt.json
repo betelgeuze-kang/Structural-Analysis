@@ -288,13 +288,13 @@
     }
   ],
   "gate_unblock_plan_count": 7,
-  "generated_at": "2026-07-01T19:36:39.633320+00:00",
+  "generated_at": "2026-07-01T19:39:55.925506+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
     "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:d5def43be6655852bafe22677ce5838ca865958b52d36f6d01ade554b86ba4fd",
-    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:bb738b491498c628301bc1798832dca1ea1f82d2d84ac24fad2ae80b3bbaeb78",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:c4c25ac809883599867b5f319449df0577c1a55283cb51ec0adec1f891659c41",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
     "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82"
@@ -758,7 +758,7 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "ed9cababa6c4dc395ccbb51b4b25f5549ac67535",
+  "source_commit_sha": "036778b2159440f7c358c24d6b50e583d68d056b",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
   "source_url_verified": true,
