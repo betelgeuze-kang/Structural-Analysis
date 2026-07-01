@@ -17,6 +17,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from validate_public_benchmark_pose_validity import (  # noqa: E402
     SCHEMA_VERSION as VALIDATOR_SCHEMA_VERSION,
+    is_non_actual_pose_case,
     validate_pose_validity_payload,
 )
 
@@ -69,10 +70,6 @@ def _json_text(payload: dict[str, Any]) -> str:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
-
-
-def _case_source_family(row: dict[str, Any]) -> str:
-    return str(row.get("source_family") or "").strip().lower()
 
 
 def _blocker_check_id(blocker: str) -> str:
@@ -205,9 +202,7 @@ def materialize_posebusters_validity_packet(
         blockers.append("pose_validity_input_not_ready")
     blockers.extend(str(blocker) for blocker in _as_list(validation.get("blockers")))
 
-    dry_run_case_count = sum(
-        1 for row in cases if _case_source_family(row) in {"synthetic", "dry_run"}
-    )
+    dry_run_case_count = sum(1 for row in cases if is_non_actual_pose_case(row))
     real_benchmark_case_count = max(len(cases) - dry_run_case_count, 0)
     if cases and real_benchmark_case_count == 0:
         blockers.append("real_benchmark_pose_cases_missing")

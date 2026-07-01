@@ -97,6 +97,23 @@ def test_posebusters_packet_materializer_blocks_dry_run_only_input() -> None:
     assert packet["blockers"] == ["real_benchmark_pose_cases_missing"]
 
 
+def test_posebusters_packet_materializer_blocks_placeholder_source_family() -> None:
+    packet = module.materialize_posebusters_validity_packet(
+        {
+            "pose_validity_ready": True,
+            "cases": [_pose_case(source_family="fixture benchmark source")],
+        },
+        repo_root=REPO_ROOT,
+    )
+
+    assert packet["posebusters_validity_ready"] is False
+    assert packet["real_benchmark_case_count"] == 0
+    assert packet["dry_run_case_count"] == 1
+    assert "case_a:source_family_placeholder" in packet["blockers"]
+    assert "real_benchmark_pose_cases_missing" in packet["blockers"]
+    assert packet["case_rows"][0]["status"] == "blocked"
+
+
 def test_posebusters_packet_materializer_blocks_invalid_pose_input() -> None:
     packet = module.materialize_posebusters_validity_packet(
         {"pose_validity_ready": False, "cases": []},

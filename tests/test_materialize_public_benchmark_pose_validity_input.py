@@ -108,6 +108,22 @@ def test_pose_validity_input_materializer_blocks_unknown_case_id() -> None:
     assert "unknown_case:protein_structure_path_missing" in payload["blockers"]
 
 
+def test_pose_validity_input_materializer_blocks_placeholder_source_family() -> None:
+    subset = _subset_manifest()
+    subset["case_rows"][0]["source_family"] = "fixture benchmark source"
+
+    payload = module.materialize_pose_validity_input(
+        subset,
+        {"cases": [_pose_case()]},
+        repo_root=REPO_ROOT,
+    )
+
+    assert payload["pose_validity_ready"] is False
+    assert payload["real_benchmark_case_count"] == 0
+    assert payload["real_pose_case_count"] == 0
+    assert "case_a:source_family_placeholder" in payload["blockers"]
+
+
 def test_pose_validity_input_materializer_cli_writes_input_and_report(
     tmp_path: Path,
 ) -> None:

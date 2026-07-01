@@ -9,7 +9,7 @@
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": false
+    "worktree_only_ignored_evidence_dirty": true
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-01T05:18:04.618418+00:00",
+  "generated_at": "2026-07-01T05:29:21.922086+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -40,14 +40,14 @@
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "",
-    "local_head_sha": "1ca252d49eebf3e90d48af4d3db87a4b5019ce30",
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json\n M implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json\n M implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json\n M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json\n M implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json\n M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json\n M implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json\n M implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json\n M implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json\n M implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json\n M implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json\n M implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json\n M implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json\n M implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+    "local_head_sha": "60d0d3e22c0ac1e322c9210a3dea7e08e44693ca",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "1ca252d49eebf3e90d48af4d3db87a4b5019ce30",
+    "remote_feature_sha": "60d0d3e22c0ac1e322c9210a3dea7e08e44693ca",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "1ca252d49eebf3e90d48af4d3db87a4b5019ce30",
+    "remote_main_sha": "60d0d3e22c0ac1e322c9210a3dea7e08e44693ca",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +61,7 @@
         ]
       }
     },
-    "worktree_status_short": ""
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json\n M implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json\n M implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json\n M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json\n M implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json\n M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json\n M implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json\n M implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json\n M implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json\n M implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json\n M implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json\n M implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json\n M implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json\n M implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
   },
   "status": "synced"
 }

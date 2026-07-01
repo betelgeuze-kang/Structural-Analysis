@@ -163,6 +163,21 @@ def test_pose_success_harness_blocks_dry_run_only_input() -> None:
     assert harness["blockers"] == ["real_benchmark_pose_success_cases_missing"]
 
 
+def test_pose_success_harness_blocks_placeholder_source_family() -> None:
+    harness = module.materialize_pose_success_harness(
+        _pose_packet(source_family="fixture benchmark source"),
+        _rmsd_scorecard(source_family="fixture benchmark source"),
+        repo_root=REPO_ROOT,
+    )
+
+    assert harness["pose_success_harness_ready"] is False
+    assert harness["real_benchmark_case_count"] == 0
+    assert harness["dry_run_case_count"] == 1
+    assert "case_a:source_family_placeholder" in harness["blockers"]
+    assert "real_benchmark_pose_success_cases_missing" in harness["blockers"]
+    assert harness["case_rows"][0]["status"] == "blocked"
+
+
 def test_pose_success_harness_cli_writes_harness_and_report(tmp_path: Path) -> None:
     pose_packet = tmp_path / "pose_packet.json"
     rmsd_scorecard = tmp_path / "rmsd_scorecard.json"

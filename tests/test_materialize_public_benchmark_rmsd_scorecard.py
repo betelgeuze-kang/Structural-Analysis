@@ -115,6 +115,22 @@ def test_rmsd_scorecard_materializer_blocks_dry_run_only_input() -> None:
     assert scorecard["materialization_report"]["scorecard_ready"] is False
 
 
+def test_rmsd_scorecard_materializer_blocks_placeholder_source_family() -> None:
+    placeholder_case = _pose_case()
+    placeholder_case["source_family"] = "fixture benchmark source"
+
+    scorecard = module.materialize_rmsd_scorecard(
+        {"pose_validity_ready": True, "cases": [placeholder_case]},
+        repo_root=REPO_ROOT,
+    )
+
+    assert scorecard["scorecard_ready"] is False
+    assert scorecard["real_benchmark_case_count"] == 0
+    assert scorecard["dry_run_case_count"] == 1
+    assert "case_a:source_family_placeholder" in scorecard["blockers"]
+    assert "real_benchmark_rmsd_cases_missing" in scorecard["blockers"]
+
+
 def test_rmsd_scorecard_materializer_cli_writes_scorecard_and_report(
     tmp_path: Path,
 ) -> None:

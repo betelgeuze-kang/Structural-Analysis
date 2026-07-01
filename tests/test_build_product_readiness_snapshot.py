@@ -2011,6 +2011,47 @@ def test_snapshot_accepts_receipt_only_commit_as_fresh(tmp_path: Path) -> None:
     ]
 
 
+def test_snapshot_scopes_public_benchmark_materializer_changes(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/materialize_public_benchmark_rmsd_scorecard.py",
+        "print('public benchmark rmsd materializer changed')\n",
+    )
+    _write_text(
+        tmp_path / "scripts/validate_public_benchmark_pose_validity.py",
+        "print('public benchmark pose validator changed')\n",
+    )
+    scoped_commit = _commit_all(tmp_path, "public benchmark source change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["source_commit_sha"] == scoped_commit
+    assert payload["snapshot_source_state_consistent"] is True
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "non_artifact_source_paths_changed"
+    )
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
 def test_snapshot_blocks_missing_input_checksum_on_head_generation(tmp_path: Path) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)

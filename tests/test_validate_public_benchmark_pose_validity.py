@@ -66,6 +66,20 @@ def test_pose_validity_validator_passes_synthetic_dry_run() -> None:
     assert row["rmsd_score"]["best_permutation"] == [0, 2, 1, 3]
 
 
+def test_pose_validity_validator_blocks_placeholder_source_family() -> None:
+    case = _valid_pose_case("case_a")
+    case["source_family"] = "fixture benchmark source"
+    case["benchmark_split"] = "CASF-core"
+
+    result = module.validate_pose_validity_payload({"cases": [case]})
+
+    assert result["status"] == "blocked"
+    assert result["pose_validity_ready"] is False
+    assert result["dry_run_case_count"] == 1
+    assert result["real_benchmark_case_count"] == 0
+    assert "case_a:source_family_placeholder" in result["blockers"]
+
+
 def test_pose_validity_validator_blocks_self_clash() -> None:
     case = _valid_pose_case("self_clash_pose")
     case["predicted_atoms"] = [
