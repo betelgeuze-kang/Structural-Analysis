@@ -503,6 +503,7 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "top_k_candidate_count": 0,
         "rows": [],
         "summary": summary,
+        "case_refinement_summaries": [],
         "materializer": _materializer_contract(),
         "required_metrics": [row["metric_id"] for row in _metric_contracts()],
         "required_case_fields": required_case_fields,
@@ -513,6 +514,22 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "first_operator_evidence_gap": handoff_context["first_operator_evidence_gap"],
         "operator_gate_unblock_plan": handoff_context["gate_unblock_plan"],
         "operator_handoff_summary": handoff_context["operator_handoff_summary"],
+        "materialization_report": {
+            "schema_version": MATERIALIZER_SCHEMA_VERSION,
+            "operator_intake_row_count": 0,
+            "case_refinement_summary_count": 0,
+            "real_refinement_case_count": 0,
+            "top_k_candidate_count": 0,
+            "top_k_row_quality_contract_pass": False,
+            "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
+            "metric_complete": False,
+            "blocker_count": len(blockers),
+            "product_surface_ready": False,
+            "phase4_exit_gate_status": phase4_exit_gate["status"],
+            "phase4_failed_criterion_count": phase4_exit_gate[
+                "failed_criterion_count"
+            ],
+        },
         "blockers": blockers,
         "next_actions": [
             "materialize_pocketmd_lite_operator_intake_from_rows",
@@ -1051,6 +1068,18 @@ def build_surface(
             ),
             "top_k_candidate_count": int(topk_survival_report.get("top_k_candidate_count") or 0),
             "blocked_claim_count": len(contract.get("blocked_claims", [])),
+            "case_refinement_summaries": [
+                row
+                for row in (
+                    topk_survival_report.get("case_refinement_summaries")
+                    if isinstance(
+                        topk_survival_report.get("case_refinement_summaries"),
+                        list,
+                    )
+                    else []
+                )
+                if isinstance(row, dict)
+            ],
             "phase4_exit_gate_status": str(phase4_exit_gate.get("status") or ""),
             "phase4_failed_criterion_count": int(
                 phase4_exit_gate.get("failed_criterion_count") or 0

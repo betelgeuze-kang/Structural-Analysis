@@ -151,6 +151,8 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert survival["root_cause_tags"] == ["operator_refinement_rows_required"]
     assert survival["real_refinement_case_count"] == 0
     assert survival["summary"]["local_min_survival_rate"] is None
+    assert survival["case_refinement_summaries"] == []
+    assert survival["materialization_report"]["case_refinement_summary_count"] == 0
     assert survival["blockers"] == [
         "pocketmd_lite_topk_candidate_rows_missing",
         "pocketmd_lite_local_min_survival_rows_missing",
