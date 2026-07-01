@@ -25,10 +25,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T20:18:08.772623+00:00",
+  "generated_at": "2026-07-01T20:35:54.567093+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:c3a5b56bd1061346e4d0650fc7c7917e25338c2ae07a7c4547f26258489c6e0a",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:107e6e637b5bd28db372159addad3bb30929dfecd728994cdb4656d65fe9e910",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8e8263d47d889f63e8ab1c76f750c538f9587c253ae1ae9946e79f4dd7da0b0c",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:17bb3fd0ff37c979e87c6ea69a6a196e8fb7a7cde2c9e08f32d7d7e6a46bb076",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:c1d51c93e91a69095fab5303dfe3d4331003c783b636386a2b9f26fa03b1d8e0"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -129,7 +129,7 @@
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "next_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
       "owner": "ux_research_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -168,7 +168,7 @@
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
-      "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "next_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
       "owner": "ux_research_owner",
       "owner_input_required": true,
       "primary_evidence_artifacts": {
@@ -373,7 +373,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "5cb807d7d97367a04fa2e67b7e7a44cb2f57e672",
+  "source_commit_sha": "9b87797927508a21532302ddf7e6db88a223f0a7",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,

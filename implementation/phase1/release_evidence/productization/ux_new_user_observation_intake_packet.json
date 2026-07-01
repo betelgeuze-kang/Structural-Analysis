@@ -29,6 +29,17 @@
     },
     {
       "current_value": "",
+      "field": "participant_ref",
+      "missing": true,
+      "owner_note": "Use an anonymized participant/session reference so reviewers can trace the observation without storing raw personal data.",
+      "placeholder": false,
+      "report_check": "required_fields_present",
+      "report_check_pass": false,
+      "required_value": "stable anonymized participant reference",
+      "template_value": "OWNER_INPUT_REQUIRED: anonymized participant or session reference, e.g. ux-participant-001"
+    },
+    {
+      "current_value": "",
       "field": "participant_role",
       "missing": true,
       "owner_note": "Participant must be new to the product workflow being released.",
@@ -262,6 +273,7 @@
   "gate_unblock_plan": [
     {
       "minimum_evidence": [
+        "participant_ref is a stable anonymized participant reference",
         "participant_role is new_user, first_time_user, or pilot_user",
         "new_to_product=true",
         "observer is a human observer or UX research owner",
@@ -336,7 +348,7 @@
     }
   ],
   "gate_unblock_plan_count": 5,
-  "generated_at": "2026-07-01T19:51:42.508013+00:00",
+  "generated_at": "2026-07-01T20:32:06.178317+00:00",
   "next_actions": [
     "fill_ux_new_user_observation_record_from_template",
     "run_30_minute_human_new_user_core_workflow_observation",
@@ -354,7 +366,7 @@
     "evidence_ref": "",
     "evidence_ref_kind": "missing",
     "evidence_ref_resolved_path": "",
-    "field_count": 22,
+    "field_count": 23,
     "field_pass_count": 0,
     "max_completion_minutes": 30.0,
     "missing_workflow_steps": [
@@ -367,7 +379,7 @@
     "not_passed_workflow_steps": [],
     "observation_blocker_count": 12,
     "observation_contract_pass": false,
-    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+    "owner_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "placeholder_workflow_steps": [],
     "required_workflow_step_count": 5,
     "required_workflow_steps": [
@@ -396,7 +408,7 @@
     "workflow_step_count": 0,
     "workflow_step_pass_count": 0
   },
-  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/22 | blockers=12",
+  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/23 | blockers=12",
   "template_path": "docs/templates/ux_new_user_observation.template.json",
   "validation_commands": [
     "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",

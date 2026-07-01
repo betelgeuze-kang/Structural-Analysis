@@ -125,7 +125,7 @@ Verdict change conditions:
 - Evidence state: `missing_human_new_user_observation`
 - External input required: `True`
 - Owner input required: `True`
-- Next action: Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
+- Next action: Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
 
 Acceptance criteria:
 - `ux_new_user_observation_report.json.contract_pass == true`
@@ -168,7 +168,7 @@ Verdict change conditions:
 - Evidence state: `missing_human_new_user_completion_evidence`
 - External input required: `True`
 - Owner input required: `True`
-- Next action: Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
+- Next action: Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
 
 Acceptance criteria:
 - `ux_new_user_observation_report.json.contract_pass == true`

@@ -133,9 +133,10 @@
     "handoff_id": "ux_new_user_observation::human_30min_sample",
     "intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
     "max_completion_minutes": 30,
-    "missing_field_count": 13,
+    "missing_field_count": 14,
     "missing_fields": [
       "contract_pass",
+      "participant_ref",
       "participant_role",
       "new_to_product",
       "sample_project_id",
@@ -159,7 +160,7 @@
     "observation_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
     "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
     "owner": "ux_research_owner",
-    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+    "owner_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "phase5_rehearsal_receipt": "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json",
     "queue_priority": 1,
     "release_area_blockers": [
@@ -200,7 +201,7 @@
       "python3 scripts/build_developer_preview_rc_status.py --check"
     ]
   },
-  "generated_at": "2026-07-01T19:51:42.538015+00:00",
+  "generated_at": "2026-07-01T20:35:03.695149+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -225,7 +226,7 @@
       "compare_report"
     ],
     "not_passed_workflow_steps": [],
-    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+    "owner_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "receipt": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
     "required_workflow_step_count": 5,
     "status": "blocked",
@@ -233,8 +234,8 @@
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:755194722497fdcaf9127bd4c94033e266f7462fa92737dcb5e3a0b19b3892eb",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:3b755fd61e6380a9b032e0b7cb06580f60c03c824f05568d65bc6046aa87fda7",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:2d8b3ff07849e743f8a21ab11cf4f8de610f026ff9bd3a03061fb595bc50d242",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:bb47e5d1d69ed17a4d80cbff9924fee9264ea2d38e3e806e51d9bb5be102e8d7",
     "scripts/build_phase6_ux_observation_status.py": "sha256:0ab501c22a8b0a5fbe70cd3271ab6be9c9265dc7fb3a1a4bc1b1bcdd9eec8a6a"
   },
   "intake_packet_gate": {
@@ -253,7 +254,7 @@
       "approval_decision_not_accepted"
     ],
     "contract_pass": false,
-    "field_count": 22,
+    "field_count": 23,
     "field_pass_count": 0,
     "receipt": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
     "status": "blocked",
@@ -297,9 +298,10 @@
       "handoff_id": "ux_new_user_observation::human_30min_sample",
       "intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
       "max_completion_minutes": 30,
-      "missing_field_count": 13,
+      "missing_field_count": 14,
       "missing_fields": [
         "contract_pass",
+        "participant_ref",
         "participant_role",
         "new_to_product",
         "sample_project_id",
@@ -323,7 +325,7 @@
       "observation_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
       "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
       "owner": "ux_research_owner",
-      "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "owner_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
       "phase5_rehearsal_receipt": "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json",
       "queue_priority": 1,
       "release_area_blockers": [
@@ -398,7 +400,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
+  "source_commit_sha": "9b87797927508a21532302ddf7e6db88a223f0a7",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=5/5 | browser=True"
 }

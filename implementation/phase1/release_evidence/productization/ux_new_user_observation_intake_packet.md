@@ -1,15 +1,16 @@
 # UX New-User Observation Intake Packet
 
-- `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/22 | blockers=12`
+- `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/23 | blockers=12`
 - `contract_pass`: `False`
 - `gate_unblock_plan_count`: `5`
 - `observation_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
 - `template_path`: `docs/templates/ux_new_user_observation.template.json`
-- `owner_action`: Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
+- `owner_action`: Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
 
 | Field | Current | Template | Required | Report Check |
 |---|---|---|---|---|
 | `contract_pass` | `` | `false` | true | `contract_signal_pass` = `False` |
+| `participant_ref` | `` | `OWNER_INPUT_REQUIRED: anonymized participant or session reference, e.g. ux-participant-001` | stable anonymized participant reference | `required_fields_present` = `False` |
 | `participant_role` | `` | `OWNER_INPUT_REQUIRED: new_user \| first_time_user \| pilot_user` | new_user \| first_time_user \| pilot_user | `participant_role_new_user_pass` = `False` |
 | `new_to_product` | `` | `OWNER_INPUT_REQUIRED: true` | true | `new_to_product_pass` = `False` |
 | `sample_project_id` | `` | `OWNER_INPUT_REQUIRED: sample project identifier` | sample project identifier used in the observed workflow | `required_fields_present` = `False` |

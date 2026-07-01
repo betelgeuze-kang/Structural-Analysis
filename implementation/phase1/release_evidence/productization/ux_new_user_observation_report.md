@@ -26,6 +26,7 @@
 ## Required Fields
 
 - `contract_pass`
+- `participant_ref`
 - `participant_role`
 - `new_to_product`
 - `sample_project_id`
