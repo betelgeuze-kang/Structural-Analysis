@@ -41,11 +41,16 @@ def test_phase6_ux_observation_status_blocks_without_human_and_execution_evidenc
     assert payload["phase5_workflow_gate"]["status"] == "blocked"
     assert payload["phase5_workflow_gate"]["workflow_shell_step_pass_count"] == 5
     assert payload["phase5_workflow_gate"]["execution_workflow_step_pass_count"] == 5
+    assert payload["phase5_workflow_gate"]["execution_rehearsal_status"] == "ready"
+    assert payload["phase5_workflow_gate"]["execution_rehearsal_pass"] is True
+    assert payload["phase5_workflow_gate"]["human_observation_spillover_only"] is True
+    assert payload["phase5_workflow_gate"]["non_human_blockers"] == []
     assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_passed"] is True
     assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_environment_blocker"] is False
     assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_blocker_reason_code"] == ""
     assert "human_new_user_observation_not_passed" in payload["blockers"]
     assert "human_observation_workflow_step_pass_count_below_required:0/5" in payload["blockers"]
+    assert "phase5_gui_workflow_readiness_not_passed" not in payload["blockers"]
     assert "phase5_workflow_execution_not_proven:0/5" not in payload["blockers"]
     assert "task_based_ux_browser_execution_not_passed" not in payload["blockers"]
     assert not any(
@@ -75,6 +80,7 @@ def test_phase6_ux_observation_status_blocks_without_human_and_execution_evidenc
         "human_observation_report_detail"
     ]["blockers"]
     assert grouping["groups"]["phase5_execution_detail"]["blockers"] == []
+    assert grouping["groups"]["phase5_execution_root"]["blockers"] == []
     assert grouping["groups"]["environment_spillover"]["blockers"] == []
     assert "phase5_gui_workflow:human_new_user_observation_not_passed" in grouping[
         "groups"

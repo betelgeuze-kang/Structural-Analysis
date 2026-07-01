@@ -1,6 +1,6 @@
 {
   "blocker_grouping_metadata": {
-    "blocker_count": 18,
+    "blocker_count": 17,
     "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
     "groups": {
       "duplicate_source_detail": {
@@ -61,10 +61,8 @@
         "scope": "phase5_execution_step_detail"
       },
       "phase5_execution_root": {
-        "blocker_count": 1,
-        "blockers": [
-          "phase5_gui_workflow_readiness_not_passed"
-        ],
+        "blocker_count": 0,
+        "blockers": [],
         "description": "Aggregate GUI execution and browser-test pass/fail blockers for the five-step workflow.",
         "scope": "phase5_execution_aggregate"
       }
@@ -90,7 +88,6 @@
     "observation_report:required_workflow_steps_missing",
     "observation_report:workflow_steps_missing",
     "phase5_gui_workflow:human_new_user_observation_not_passed",
-    "phase5_gui_workflow_readiness_not_passed",
     "ux_observation_intake_packet_not_passed"
   ],
   "claim_boundary": "This receipt aggregates human new-user observation, owner intake, and Phase 5 GUI execution evidence for the RC UX gate. The intake packet is only a handoff checklist, automated browser/task tests do not replace a human observation, and visible workflow shell coverage does not prove a successful new-user workflow.",
@@ -107,7 +104,7 @@
       "human observation evidence_ref is present and resolvable"
     ],
     "claim_boundary": "A real human new-user observation record is required. The intake packet and automated browser rehearsal are handoff/support evidence only and do not close this gate by themselves.",
-    "current_blocker_count": 18,
+    "current_blocker_count": 17,
     "current_blockers": [
       "human_new_user_observation_not_passed",
       "human_observation_required_workflow_steps_missing:5",
@@ -125,7 +122,6 @@
       "observation_report:required_workflow_steps_missing",
       "observation_report:workflow_steps_missing",
       "phase5_gui_workflow:human_new_user_observation_not_passed",
-      "phase5_gui_workflow_readiness_not_passed",
       "ux_observation_intake_packet_not_passed"
     ],
     "external_input_required": true,
@@ -201,7 +197,7 @@
       "python3 scripts/build_developer_preview_rc_status.py --check"
     ]
   },
-  "generated_at": "2026-07-01T22:32:06.499418+00:00",
+  "generated_at": "2026-07-01T23:27:06.963102+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -236,7 +232,7 @@
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:939e358f9b100d053214eac223586528655b7c0dce6e7eb103317ac9a60908a5",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:e3d4dd88493767108d5feba10291c04fe895ffe10c22c53e12c7b50e060d91a4",
-    "scripts/build_phase6_ux_observation_status.py": "sha256:3bb47ea142d5d075c7f291c417bded5e135abf98b9f213b8a7a46069b784d1c5"
+    "scripts/build_phase6_ux_observation_status.py": "sha256:871c654074772cfa0153dcff929d2bb7b1ad5ce9e1cac1a52228c8d1616edb89"
   },
   "intake_packet_gate": {
     "blockers": [
@@ -272,7 +268,7 @@
         "human observation evidence_ref is present and resolvable"
       ],
       "claim_boundary": "A real human new-user observation record is required. The intake packet and automated browser rehearsal are handoff/support evidence only and do not close this gate by themselves.",
-      "current_blocker_count": 18,
+      "current_blocker_count": 17,
       "current_blockers": [
         "human_new_user_observation_not_passed",
         "human_observation_required_workflow_steps_missing:5",
@@ -290,7 +286,6 @@
         "observation_report:required_workflow_steps_missing",
         "observation_report:workflow_steps_missing",
         "phase5_gui_workflow:human_new_user_observation_not_passed",
-        "phase5_gui_workflow_readiness_not_passed",
         "ux_observation_intake_packet_not_passed"
       ],
       "external_input_required": true,
@@ -379,8 +374,12 @@
       "human_new_user_observation_not_passed"
     ],
     "contract_pass": false,
+    "execution_rehearsal_pass": true,
+    "execution_rehearsal_status": "ready",
     "execution_workflow_step_pass_count": 5,
+    "human_observation_spillover_only": true,
     "missing_execution_workflow_steps": [],
+    "non_human_blockers": [],
     "receipt": "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json",
     "required_workflow_step_count": 5,
     "status": "blocked",
@@ -400,7 +399,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "3cdf1cb9cd031d9d4720fa24934a79d676cfddff",
+  "source_commit_sha": "e91f6c143f6237ebb85819ff87b120ddf3d3759d",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=5/5 | browser=True"
 }

@@ -16,10 +16,10 @@
   "evidence_closure_pass": false,
   "final_gate_count": 9,
   "final_gate_pass_count": 6,
-  "generated_at": "2026-07-01T23:03:23.390372+00:00",
+  "generated_at": "2026-07-01T23:27:18.281703+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:a41922125bc1fa4ea441b0d9a407d753812920cf64f5364ae18a09ff9906276a",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:a53bf6038113eb95bd927cbaa688cc626fe5566426fcb90a069b600526f5ff7b",
     "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:ff676eb35dd81e6456f067005cd13a20932ae19ce523b8508c15782abdbc08ff"
   },
   "owner_packet_count": 3,
@@ -197,7 +197,7 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 18,
+        "blocker_count": 17,
         "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
         "groups": {
           "duplicate_source_detail": {
@@ -258,10 +258,8 @@
             "scope": "phase5_execution_step_detail"
           },
           "phase5_execution_root": {
-            "blocker_count": 1,
-            "blockers": [
-              "phase5_gui_workflow_readiness_not_passed"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Aggregate GUI execution and browser-test pass/fail blockers for the five-step workflow.",
             "scope": "phase5_execution_aggregate"
           }
@@ -289,7 +287,6 @@
         "observation_report:required_workflow_steps_missing",
         "observation_report:workflow_steps_missing",
         "phase5_gui_workflow:human_new_user_observation_not_passed",
-        "phase5_gui_workflow_readiness_not_passed",
         "ux_observation_intake_packet_not_passed"
       ],
       "current_evidence_refs": [
@@ -348,7 +345,7 @@
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "9e906cb7861d92283965968ee81715658b2e541e",
+  "source_commit_sha": "e91f6c143f6237ebb85819ff87b120ddf3d3759d",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
 }

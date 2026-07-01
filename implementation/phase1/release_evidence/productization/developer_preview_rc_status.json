@@ -311,7 +311,7 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 18,
+        "blocker_count": 17,
         "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
         "groups": {
           "duplicate_source_detail": {
@@ -372,10 +372,8 @@
             "scope": "phase5_execution_step_detail"
           },
           "phase5_execution_root": {
-            "blocker_count": 1,
-            "blockers": [
-              "phase5_gui_workflow_readiness_not_passed"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Aggregate GUI execution and browser-test pass/fail blockers for the five-step workflow.",
             "scope": "phase5_execution_aggregate"
           }
@@ -401,7 +399,6 @@
         "observation_report:required_workflow_steps_missing",
         "observation_report:workflow_steps_missing",
         "phase5_gui_workflow:human_new_user_observation_not_passed",
-        "phase5_gui_workflow_readiness_not_passed",
         "ux_observation_intake_packet_not_passed"
       ],
       "contract_pass": false,
@@ -483,7 +480,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-01T23:03:18.883694+00:00",
+  "generated_at": "2026-07-01T23:27:18.120726+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:03f3beb6fd151ba5e3c49b4562b90a7a796bd6bf9e53247612c9f99224090021",
@@ -507,7 +504,7 @@
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:9e61ef1db0ab2e01a3917d1e410a9677e8e5170aa5b9fb7ccc344bc98ee30cdd",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:488361e49fe5163b558148eef3f1ff064287913638ea7fc8d7df175dbf5b0e5f",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:1da775e8d0cc6b97d1b7454f5b983a9d26660121753f8dfb0cc3b8d925f28291",
-    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:cba1b23c91dcd27947fea254fbba068e1718e7ffe09a8fcce79a5874729d4833",
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:979dcf24fcd257684a7119f2b878be771e9d60b14eaecd88f96baede5bdc23bd",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:939e358f9b100d053214eac223586528655b7c0dce6e7eb103317ac9a60908a5",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:e3d4dd88493767108d5feba10291c04fe895ffe10c22c53e12c7b50e060d91a4",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
@@ -3068,8 +3065,12 @@
           "human_new_user_observation_not_passed"
         ],
         "contract_pass": false,
+        "execution_rehearsal_pass": true,
+        "execution_rehearsal_status": "ready",
         "execution_workflow_step_pass_count": 5,
+        "human_observation_spillover_only": true,
         "missing_execution_workflow_steps": [],
+        "non_human_blockers": [],
         "receipt": "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json",
         "required_workflow_step_count": 5,
         "status": "blocked",
@@ -3082,7 +3083,7 @@
         "workflow_shell_step_pass_count": 5
       },
       "phase6_ux_blocker_grouping": {
-        "blocker_count": 18,
+        "blocker_count": 17,
         "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
         "groups": {
           "duplicate_source_detail": {
@@ -3143,10 +3144,8 @@
             "scope": "phase5_execution_step_detail"
           },
           "phase5_execution_root": {
-            "blocker_count": 1,
-            "blockers": [
-              "phase5_gui_workflow_readiness_not_passed"
-            ],
+            "blocker_count": 0,
+            "blockers": [],
             "description": "Aggregate GUI execution and browser-test pass/fail blockers for the five-step workflow.",
             "scope": "phase5_execution_aggregate"
           }
@@ -3172,7 +3171,6 @@
         "observation_report:required_workflow_steps_missing",
         "observation_report:workflow_steps_missing",
         "phase5_gui_workflow:human_new_user_observation_not_passed",
-        "phase5_gui_workflow_readiness_not_passed",
         "ux_observation_intake_packet_not_passed"
       ],
       "report_blockers": [
@@ -3227,6 +3225,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "9e906cb7861d92283965968ee81715658b2e541e",
+  "source_commit_sha": "e91f6c143f6237ebb85819ff87b120ddf3d3759d",
   "status": "blocked"
 }

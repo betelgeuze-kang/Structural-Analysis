@@ -11,7 +11,7 @@
 |---|---|---:|---|
 | `selected_medium_models_pass_or_approved_review` | `benchmark_validation_owner` | 7 | `five_PASS_or_explicit_APPROVED_REVIEW_rows` |
 | `linux_windows_reproducibility_confirmed` | `release_reproducibility_owner` | 1 | `direct_windows_replay_receipt_passes` |
-| `new_user_core_workflow_observation_passed` | `ux_research_owner` | 18 | `accepted_human_new_user_observation` |
+| `new_user_core_workflow_observation_passed` | `ux_research_owner` | 17 | `accepted_human_new_user_observation` |
 
 ## Verification Commands
 
