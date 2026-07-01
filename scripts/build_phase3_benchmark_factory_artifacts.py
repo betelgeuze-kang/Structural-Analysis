@@ -98,12 +98,38 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+STABLE_CHECKSUM_EXCLUDED_KEYS = {
+    "blockers",
+    "elapsed_seconds",
+    "execution",
+    "execution_attempted_count",
+    "generated_at",
+    "import_health_contract_pass",
+    "import_health_contract_pass_count",
+    "import_health_executed",
+    "input_checksums",
+    "quantity_credit_ready",
+    "quantity_credit_ready_count",
+    "silent_import_loss_gate",
+    "silent_import_loss_pass_count",
+    "source_checksum_attached_count",
+    "source_checksum_status",
+    "source_commit_sha",
+    "source_file_acquired",
+    "source_file_acquired_count",
+    "source_file_is_git_lfs_pointer",
+    "source_sha256",
+    "stderr_excerpt",
+    "stdout_excerpt",
+}
+
+
 def _strip_volatile(payload: Any) -> Any:
     if isinstance(payload, dict):
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key not in {"elapsed_seconds", "generated_at", "stderr_excerpt", "stdout_excerpt"}
+            if key not in STABLE_CHECKSUM_EXCLUDED_KEYS
         }
     if isinstance(payload, list):
         return [_strip_volatile(item) for item in payload]
@@ -550,6 +576,15 @@ def build_phase3_benchmark_factory_artifacts(
             "manifest": _stable_payload_checksum(manifest),
             "scorecard": _stable_payload_checksum(scorecard),
             "summary": _stable_payload_checksum(summary),
+        },
+        "stable_checksum_normalization": {
+            "excluded_keys": sorted(STABLE_CHECKSUM_EXCLUDED_KEYS),
+            "rationale": (
+                "Stable replay checksums exclude volatile provenance plus local-only "
+                "operator/private-corpus source acquisition and import execution fields. "
+                "Those fields remain visible in their receipts, but they must not make "
+                "minimal or git-clean checkout replay depend on ignored local corpora."
+            ),
         },
         "expected_scorecard": {
             "status": scorecard["status"],

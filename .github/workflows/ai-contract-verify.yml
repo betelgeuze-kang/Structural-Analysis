@@ -47,16 +47,16 @@ jobs:
     runs-on: ${{ fromJSON(vars.STRUCTURAL_AI_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: npm
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
@@ -65,7 +65,7 @@ jobs:
 
       - name: Upload AI verify receipt
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ai-verify-result-${{ github.run_id }}
           path: ${{ runner.temp }}/ai-verify-result.json
