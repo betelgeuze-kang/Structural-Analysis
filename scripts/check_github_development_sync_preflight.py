@@ -232,6 +232,7 @@ def build_report(
     return {
         "schema_version": "github-development-sync-preflight.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "source_commit_sha": local_head,
         "status": status,
         "contract_pass": remote_sync_authorized and not blockers,
         "preflight_pass": preflight_pass,
@@ -279,6 +280,16 @@ def build_report(
             "risk": r4_risk,
             "rollback": "; ".join(pending_rollbacks) if pending_rollbacks else "no rollback needed",
             "verification": "fetch origin and compare remote feature/main refs with local HEAD after push",
+        },
+        "receipt_commit_boundary": {
+            "source_commit_sha": local_head,
+            "post_receipt_commit_delta_policy": "productization_or_surface_receipts_only",
+            "claim_boundary": (
+                "This receipt records GitHub sync state at source_commit_sha. A later commit "
+                "that only refreshes productization/surface evidence can remain fresh in the "
+                "PM gate as an evidence-only delta; any source-code or non-evidence delta must "
+                "regenerate this preflight before claiming GitHub sync release credit."
+            ),
         },
         "claim_boundary": (
             "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. "

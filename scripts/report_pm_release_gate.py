@@ -1259,6 +1259,9 @@ def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]
             "remote_main_ref": str(state.get("remote_main_ref", "") or ""),
             "feature_synced_to_head": feature_synced,
             "main_synced_to_head": main_synced,
+            "preflight_source_commit_sha": str(
+                payload.get("source_commit_sha", "") or preflight_head
+            ),
             "preflight_local_head_sha": preflight_head,
             "current_head_sha": current_head,
             "preflight_source_state_kind": preflight_source_state_kind,

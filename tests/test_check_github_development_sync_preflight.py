@@ -137,9 +137,20 @@ def test_sync_preflight_passes_when_already_synced_without_remote_mutation() -> 
 
     assert payload["status"] == "synced"
     assert payload["contract_pass"] is True
+    assert payload["source_commit_sha"] == "abc1234"
     assert payload["remote_sync_needed"] is False
     assert payload["blockers"] == []
     assert payload["pending_remote_updates"] == []
+    assert payload["receipt_commit_boundary"] == {
+        "source_commit_sha": "abc1234",
+        "post_receipt_commit_delta_policy": "productization_or_surface_receipts_only",
+        "claim_boundary": (
+            "This receipt records GitHub sync state at source_commit_sha. A later commit "
+            "that only refreshes productization/surface evidence can remain fresh in the "
+            "PM gate as an evidence-only delta; any source-code or non-evidence delta must "
+            "regenerate this preflight before claiming GitHub sync release credit."
+        ),
+    }
     assert payload["r4_disclosure"]["action"] == "no remote mutation required"
     assert payload["r4_disclosure"]["risk"] == "No remote mutation remains."
 

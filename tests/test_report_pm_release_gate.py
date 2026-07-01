@@ -1891,6 +1891,7 @@ def test_pm_release_gate_github_sync_area_passes_when_preflight_is_synced(
         tmp_path / "synced_preflight.json",
         {
             "schema_version": "github-development-sync-preflight.v1",
+            "source_commit_sha": "synced-head",
             "status": "synced",
             "contract_pass": True,
             "preflight_pass": True,
@@ -1944,6 +1945,7 @@ def test_pm_release_gate_github_sync_area_passes_when_preflight_is_synced(
     assert synced_area["summary"]["pending_remote_update_actions"] == []
     assert synced_area["summary"]["feature_synced_to_head"] is True
     assert synced_area["summary"]["main_synced_to_head"] is True
+    assert synced_area["summary"]["preflight_source_commit_sha"] == "synced-head"
     assert synced_area["summary"]["status"] == "synced"
     assert "read-only" in synced_area["claim_boundary"]
     assert synced_area["artifacts"]["github_development_sync_preflight"].endswith(
