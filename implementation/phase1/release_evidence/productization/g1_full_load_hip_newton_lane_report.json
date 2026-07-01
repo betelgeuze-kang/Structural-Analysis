@@ -59,7 +59,42 @@
       "g1_closure_gate_ready": false,
       "ready": false,
       "residual_jvp_worker_path_blockers": [],
-      "residual_jvp_worker_path_ready": true
+      "residual_jvp_worker_path_ready": true,
+      "terminal_gate_partition": {
+        "checkpoint_gate": {
+          "full_load_candidate": false,
+          "full_load_closure_passed": false,
+          "full_load_required": true,
+          "gap_to_full_load": 0.344,
+          "load_scale": 0.656
+        },
+        "claim_boundary": "Partition only: this separates the HIP residual/JVP worker path from the remaining full-load and consistent Newton G1 closure gates. It does not promote G1 readiness.",
+        "direct_residual_gate": {
+          "fallback_zero_passed": true,
+          "material_newton_breadth_passed": false,
+          "passed": false,
+          "relative_increment_gate_passed": true
+        },
+        "g1_closure_gate": {
+          "blockers": [
+            "consistent_residual_jacobian_newton_gate_not_passed"
+          ],
+          "consistent_residual_jacobian_newton_gate_passed": false,
+          "ready": false
+        },
+        "next_action": {
+          "blockers": [
+            "full_load_checkpoint_candidate_missing",
+            "full_load_closure_gate_not_passed"
+          ],
+          "id": "generate_full_load_1p0_checkpoint_candidate"
+        },
+        "schema_version": "production-rocm-hip-worker-terminal-gate-partition.v1",
+        "worker_path": {
+          "blockers": [],
+          "ready": true
+        }
+      }
     },
     "schema_version": "g1-full-load-hip-newton-blocker-partition.v1"
   },
@@ -1512,26 +1547,11 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-01T07:36:41.242802+00:00",
+  "generated_at": "2026-07-01T07:41:11.882059+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
-      "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-      "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-      "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-      "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
-      "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
-      "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
-      "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
-      "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
-      "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
-      "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-      "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-      "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-      "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
-      "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-      "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-      "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
-      "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+      "scripts/run_g1_full_load_hip_newton_lane.py",
+      "tests/test_run_g1_full_load_hip_newton_lane.py"
     ],
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -1552,6 +1572,41 @@
       "residual_jvp_worker_path_blockers": [],
       "residual_jvp_worker_path_ready": true,
       "status": "blocked",
+      "terminal_gate_partition": {
+        "checkpoint_gate": {
+          "full_load_candidate": false,
+          "full_load_closure_passed": false,
+          "full_load_required": true,
+          "gap_to_full_load": 0.344,
+          "load_scale": 0.656
+        },
+        "claim_boundary": "Partition only: this separates the HIP residual/JVP worker path from the remaining full-load and consistent Newton G1 closure gates. It does not promote G1 readiness.",
+        "direct_residual_gate": {
+          "fallback_zero_passed": true,
+          "material_newton_breadth_passed": false,
+          "passed": false,
+          "relative_increment_gate_passed": true
+        },
+        "g1_closure_gate": {
+          "blockers": [
+            "consistent_residual_jacobian_newton_gate_not_passed"
+          ],
+          "consistent_residual_jacobian_newton_gate_passed": false,
+          "ready": false
+        },
+        "next_action": {
+          "blockers": [
+            "full_load_checkpoint_candidate_missing",
+            "full_load_closure_gate_not_passed"
+          ],
+          "id": "generate_full_load_1p0_checkpoint_candidate"
+        },
+        "schema_version": "production-rocm-hip-worker-terminal-gate-partition.v1",
+        "worker_path": {
+          "blockers": [],
+          "ready": true
+        }
+      },
       "worker_id": "consistent_residual_jacobian_newton_rocm_worker"
     },
     "receipt_blockers": [
@@ -1569,7 +1624,7 @@
     "runtime_blockers": [],
     "source_commit_sha": "a1ad46cb53bb63c0644d7ef6dc74b313ba7a17a7",
     "source_state_fresh": true,
-    "source_state_kind": "receipt_only_commit",
+    "source_state_kind": "non_g1_hip_paths_changed",
     "status": "partial"
   },
   "input_checksums": {
@@ -1638,7 +1693,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "72360da1c2ea554c41d82bb2021c79d3bb816ddc",
+  "source_commit_sha": "27c4c73df81bf273078ea8fc2f1d4496588959ba",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",
@@ -1695,7 +1750,7 @@
           "receipt_blocker_count": 8,
           "runtime_blocker_count": 0,
           "source_state_fresh": true,
-          "source_state_kind": "receipt_only_commit"
+          "source_state_kind": "non_g1_hip_paths_changed"
         },
         "ready": false,
         "rerun_command": "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py --require-hip-residual-engine --checkpoint-npz <full-load-checkpoint.npz> --output-json implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
@@ -1711,13 +1766,48 @@
         "id": "production_rocm_hip_residual_jvp_worker",
         "label": "Production ROCm/HIP residual/JVP worker",
         "next_action_ids": [
-          "close_consistent_residual_jacobian_newton_gate"
+          "generate_full_load_1p0_checkpoint_candidate"
         ],
         "observed": {
           "g1_closure_gate_ready": false,
           "ready": false,
           "residual_jvp_worker_path_ready": true,
           "status": "blocked",
+          "terminal_gate_partition": {
+            "checkpoint_gate": {
+              "full_load_candidate": false,
+              "full_load_closure_passed": false,
+              "full_load_required": true,
+              "gap_to_full_load": 0.344,
+              "load_scale": 0.656
+            },
+            "claim_boundary": "Partition only: this separates the HIP residual/JVP worker path from the remaining full-load and consistent Newton G1 closure gates. It does not promote G1 readiness.",
+            "direct_residual_gate": {
+              "fallback_zero_passed": true,
+              "material_newton_breadth_passed": false,
+              "passed": false,
+              "relative_increment_gate_passed": true
+            },
+            "g1_closure_gate": {
+              "blockers": [
+                "consistent_residual_jacobian_newton_gate_not_passed"
+              ],
+              "consistent_residual_jacobian_newton_gate_passed": false,
+              "ready": false
+            },
+            "next_action": {
+              "blockers": [
+                "full_load_checkpoint_candidate_missing",
+                "full_load_closure_gate_not_passed"
+              ],
+              "id": "generate_full_load_1p0_checkpoint_candidate"
+            },
+            "schema_version": "production-rocm-hip-worker-terminal-gate-partition.v1",
+            "worker_path": {
+              "blockers": [],
+              "ready": true
+            }
+          },
           "worker_id": "consistent_residual_jacobian_newton_rocm_worker"
         },
         "ready": false,
