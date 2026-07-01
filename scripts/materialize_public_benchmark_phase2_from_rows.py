@@ -551,6 +551,54 @@ def _attach_component_requirement_summaries(
     return enriched
 
 
+def _phase2_exit_gate_with_source_actuality(
+    phase2_exit_gate: dict[str, Any],
+    *,
+    source_actuality_contract_pass: bool,
+    source_actuality_blockers: list[str],
+) -> dict[str, Any]:
+    blockers = list(
+        dict.fromkeys(str(row) for row in source_actuality_blockers if str(row))
+    )
+    source_actuality_ready = bool(source_actuality_contract_pass and not blockers)
+    criteria = [
+        dict(row)
+        for row in phase2_exit_gate.get("criteria", [])
+        if isinstance(row, dict)
+    ]
+    criteria.append(
+        {
+            "criterion_id": "public_benchmark_source_actuality_ready",
+            "component_id": "operator_attached_source_actuality",
+            "artifact_role": "operator_bundle_source_actuality_check",
+            "pass": source_actuality_ready,
+            "current": {
+                "contract_pass": bool(source_actuality_contract_pass),
+                "blocker_count": len(blockers),
+            },
+            "required": {
+                "contract_pass": True,
+                "blocker_count": 0,
+            },
+            "blockers": blockers,
+        }
+    )
+    failed_criteria = [
+        str(row.get("criterion_id"))
+        for row in criteria
+        if isinstance(row, dict) and not bool(row.get("pass"))
+    ]
+    return {
+        **phase2_exit_gate,
+        "status": "ready" if not failed_criteria else "blocked",
+        "criteria": criteria,
+        "failed_criteria": failed_criteria,
+        "failed_criterion_count": len(failed_criteria),
+        "source_actuality_criterion_id": "public_benchmark_source_actuality_ready",
+        "source_actuality_ready": source_actuality_ready,
+    }
+
+
 def build_public_benchmark_phase2_row_audit(
     *,
     repo_root: Path = ROOT,
@@ -801,6 +849,11 @@ def build_public_benchmark_phase2_row_audit(
         phase2_exit_gate = harness_bundle.build_phase2_exit_gate(
             phase2_requirements
         )
+    phase2_exit_gate = _phase2_exit_gate_with_source_actuality(
+        phase2_exit_gate,
+        source_actuality_contract_pass=source_actuality_contract_pass,
+        source_actuality_blockers=source_actuality_blockers,
+    )
     failed_criteria = [
         str(item) for item in phase2_exit_gate.get("failed_criteria", [])
     ]

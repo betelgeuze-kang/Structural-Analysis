@@ -607,13 +607,25 @@ def test_public_benchmark_phase2_row_audit_blocks_failed_source_actuality_contra
     assert audit["status"] == "operator_evidence_required"
     assert audit["contract_pass"] is False
     assert audit["phase2_ready"] is False
-    assert audit["phase2_exit_gate"]["status"] == "ready"
+    assert audit["phase2_exit_gate"]["status"] == "blocked"
+    assert audit["phase2_exit_gate"]["source_actuality_ready"] is False
+    assert audit["phase2_exit_gate"]["source_actuality_criterion_id"] == (
+        "public_benchmark_source_actuality_ready"
+    )
+    assert audit["phase2_exit_gate"]["failed_criteria"] == [
+        "public_benchmark_source_actuality_ready"
+    ]
     assert audit["operator_bundle_source_actuality_check"]["contract_pass"] is False
     assert audit["operator_bundle_source_actuality_check"]["blockers"] == []
     assert audit["blockers"] == [
-        "operator_bundle_source_actuality::source_actuality_contract_failed"
+        "operator_bundle_source_actuality::source_actuality_contract_failed",
+        "phase2_exit_gate::public_benchmark_source_actuality_ready",
     ]
-    assert audit["summary"]["blocker_count"] == 1
+    assert audit["summary"]["phase2_exit_gate_status"] == "blocked"
+    assert audit["summary"]["phase2_failed_criteria"] == [
+        "public_benchmark_source_actuality_ready"
+    ]
+    assert audit["summary"]["blocker_count"] == 2
 
 
 def test_public_benchmark_phase2_row_audit_blocks_duplicate_case_rows(
