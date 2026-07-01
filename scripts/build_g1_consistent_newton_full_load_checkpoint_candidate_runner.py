@@ -185,6 +185,64 @@ def _closure_blockers(
     return unique
 
 
+def _next_actions(
+    *,
+    required_load_scale: float,
+    highest_observed: float,
+    g1_lane_path: Path,
+    hip_probe_path: Path,
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "id": "generate_full_load_1p0_checkpoint_candidate",
+            "owner": "g1_solver_owner",
+            "status": "required",
+            "current_observed_load_scale": highest_observed,
+            "required_load_scale": required_load_scale,
+            "gap_to_required_load_scale": max(
+                required_load_scale - highest_observed,
+                0.0,
+            ),
+            "required_receipts": [
+                "<full-load-checkpoint.npz>",
+                g1_lane_path.as_posix(),
+            ],
+            "acceptance": [
+                "checkpoint schema is mgt-direct-residual-newton-state.v1",
+                "checkpoint load_scale >= 1.0",
+                "g1_full_load_hip_newton_lane_report checkpoint_resolution_gate.passed == true",
+            ],
+        },
+        {
+            "id": "close_consistent_residual_jacobian_newton_gate",
+            "owner": "solver_numerics_owner",
+            "status": "required",
+            "required_receipts": [
+                hip_probe_path.as_posix(),
+            ],
+            "acceptance": [
+                "consistent_residual_jacobian_newton_gate_passed == true",
+                "regularized fixed-point residual is not used as the physical residual",
+                "direct residual gate closes without CPU diagnostic assembler substitution",
+            ],
+        },
+        {
+            "id": "prove_production_rocm_hip_residual_jvp_worker",
+            "owner": "runtime_rocm_owner",
+            "status": "required",
+            "required_receipts": [
+                hip_probe_path.as_posix(),
+                g1_lane_path.as_posix(),
+            ],
+            "acceptance": [
+                "production ROCm/HIP residual-JVP worker path is ready",
+                "worker has no CPU fallback in the claimed production path",
+                "device-resident residual/JVP rows are retained through terminal gate replay",
+            ],
+        },
+    ]
+
+
 def build_runner_packet(
     *,
     repo_root: Path = ROOT,
@@ -243,6 +301,12 @@ def build_runner_packet(
         checkpoint_gate.get("highest_observed_load_scale")
         or action.get("highest_observed_load_scale")
     )
+    next_actions = _next_actions(
+        required_load_scale=required_load_scale,
+        highest_observed=highest_observed,
+        g1_lane_path=g1_lane_path,
+        hip_probe_path=hip_probe_path,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -269,6 +333,43 @@ def build_runner_packet(
             f"observed_load={highest_observed:g}/{required_load_scale:g} | "
             f"closure_blockers={len(closure_blockers)}"
         ),
+        "summary": {
+            "contract_status": status,
+            "contract_pass": contract_pass,
+            "evidence_closure_pass": evidence_closure_pass,
+            "promotes_g1_closure": False,
+            "primary_next_lane": PRIMARY_NEXT_LANE,
+            "required_load_scale": required_load_scale,
+            "highest_observed_load_scale": highest_observed,
+            "highest_observed_gap_to_required_load_scale": max(
+                required_load_scale - highest_observed,
+                0.0,
+            ),
+            "full_load_candidate_count": _as_int(
+                checkpoint_gate.get("full_load_candidate_count")
+                or action.get("workspace_full_load_candidate_count")
+            ),
+            "contract_blocker_count": len(contract_blockers),
+            "closure_blocker_count": len(closure_blockers),
+            "residual_jvp_worker_path_ready": worker.get(
+                "residual_jvp_worker_path_ready"
+            )
+            is True,
+            "g1_closure_gate_ready": worker.get("g1_closure_gate_ready") is True,
+            "consistent_residual_jacobian_newton_gate_passed": hip_probe.get(
+                "consistent_residual_jacobian_newton_gate_passed"
+            )
+            is True,
+            "row_only_correction_loop_stopped": _row_only_loop_stopped(
+                cause_narrowing,
+                action,
+            ),
+            "support_or_link_row_gap_disfavored": _support_or_link_gap_disfavored(
+                cause_narrowing,
+                action,
+            ),
+            "next_action_ids": [str(row["id"]) for row in next_actions],
+        },
         "runner_contract": {
             "runner_id": RUNNER_ID,
             "preferred_candidate_generator": PREFERRED_GENERATOR,
@@ -377,6 +478,7 @@ def build_runner_packet(
             ),
             "python3 scripts/build_structural_product_development_roadmap.py",
         ],
+        "next_actions": next_actions,
         "blockers": contract_blockers,
         "closure_blockers": closure_blockers,
         "artifacts": {
@@ -417,6 +519,15 @@ def _markdown(payload: dict[str, Any]) -> str:
     ]
     for item in _as_list(contract.get("acceptance_criteria")):
         lines.append(f"- `{item}`")
+    if payload.get("next_actions"):
+        lines.extend(["", "## Next Actions", ""])
+        for item in _as_list(payload.get("next_actions")):
+            if not isinstance(item, dict):
+                continue
+            lines.append(
+                f"- `{item.get('id')}`: owner=`{item.get('owner')}`, "
+                f"status=`{item.get('status')}`"
+            )
     if payload["blockers"]:
         lines.extend(["", "## Contract Blockers", ""])
         lines.extend(f"- `{item}`" for item in payload["blockers"])

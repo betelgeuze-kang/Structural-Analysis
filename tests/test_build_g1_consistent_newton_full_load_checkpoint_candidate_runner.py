@@ -177,6 +177,15 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["contract_pass"] is True
     assert payload["evidence_closure_pass"] is False
     assert payload["promotes_g1_closure"] is False
+    assert payload["summary"]["contract_status"] == "ready_for_runner_implementation"
+    assert payload["summary"]["closure_blocker_count"] == len(
+        payload["closure_blockers"]
+    )
+    assert payload["summary"]["next_action_ids"] == [
+        "generate_full_load_1p0_checkpoint_candidate",
+        "close_consistent_residual_jacobian_newton_gate",
+        "prove_production_rocm_hip_residual_jvp_worker",
+    ]
     assert payload["runner_contract"]["runner_id"] == runner.RUNNER_ID
     assert (
         payload["runner_contract"]["preferred_candidate_generator"]
@@ -190,6 +199,10 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["checkpoint_gap"]["highest_observed_load_scale"] == 0.656
     assert payload["hip_worker_contract"]["residual_jvp_worker_path_ready"] is True
     assert payload["hip_worker_contract"]["g1_closure_gate_ready"] is False
+    assert payload["next_actions"][0]["gap_to_required_load_scale"] == 0.344
+    assert payload["next_actions"][1]["required_receipts"] == [
+        paths["hip"].as_posix()
+    ]
     assert "checkpoint_load_scale_gte_1p0" in payload["runner_contract"][
         "acceptance_criteria"
     ]
@@ -235,4 +248,6 @@ def test_runner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     markdown = out_md.read_text(encoding="utf-8")
     assert "# G1 Consistent Newton Full-Load Runner Contract" in markdown
     assert runner.RUNNER_ID in markdown
+    assert "## Next Actions" in markdown
+    assert "generate_full_load_1p0_checkpoint_candidate" in markdown
     assert payload["status"] == "ready_for_runner_implementation"
