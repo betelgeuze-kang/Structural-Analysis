@@ -100,17 +100,25 @@ def _json_text(payload: dict[str, Any]) -> str:
 
 STABLE_CHECKSUM_EXCLUDED_KEYS = {
     "blockers",
+    "checksum_status",
     "elapsed_seconds",
     "execution",
     "execution_attempted_count",
+    "expected_output_status",
     "generated_at",
+    "import_health_contract_ready",
     "import_health_contract_pass",
     "import_health_contract_pass_count",
+    "import_health_execution_count",
+    "import_health_execution_ready",
     "import_health_executed",
     "input_checksums",
     "quantity_credit_ready",
     "quantity_credit_ready_count",
+    "selected_file_checksums_ready",
     "silent_import_loss_gate",
+    "silent_import_loss_gate_executed",
+    "silent_import_loss_gate_pass_count",
     "silent_import_loss_pass_count",
     "source_checksum_attached_count",
     "source_checksum_status",
@@ -118,9 +126,11 @@ STABLE_CHECKSUM_EXCLUDED_KEYS = {
     "source_file_acquired",
     "source_file_acquired_count",
     "source_file_is_git_lfs_pointer",
+    "source_files_acquired",
     "source_sha256",
     "stderr_excerpt",
     "stdout_excerpt",
+    "visible_entity_accounting_case_count",
 }
 
 
