@@ -2556,7 +2556,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T20:50:45.088504+00:00",
+  "generated_at": "2026-07-01T21:02:57.346923+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2584,7 +2584,7 @@
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:1f29bc76149986c99a57e1d655ed1203d6305a7b930763a2019d986962d63a8e",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:653f958559fde10c3fd755e63050e57ca5268395930053529ff523c1a54831c8",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:a5366e9f82f020d6d276ba335af7c297815fafd658e00404d25d88103735c947",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:b747d8af08453e0a3602faf1c44c7903315062e89ba4cca8d21c23a13d3e81b7",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:e1ffb7c74e4f108766360554f78bd95c3d7d738637e85b1d297508c964f5c454",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:bb47e5d1d69ed17a4d80cbff9924fee9264ea2d38e3e806e51d9bb5be102e8d7",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:1e14dfca123e7f72932af68008d243781c33fe0dbfc3542cd74c49493b8e2863",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2828,7 +2828,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "7d0452c8fc858af6f2560b70d340e65371a967bf",
+  "source_commit_sha": "31e0fb6205b6b3d84a7f646ddff3800e1548ddea",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2918,8 +2918,15 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
-          "tests/test_build_phase6_linux_windows_parity_status.py"
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "scripts/build_structural_scope_owner_review_packet.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_build_phase6_linux_windows_parity_status.py",
+          "tests/test_build_product_capabilities_surface.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_structural_scope_owner_review_packet.py"
         ],
         "generated_at": "2026-07-01T20:41:00.918228+00:00",
         "input_checksum_present": true,
@@ -2935,6 +2942,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -2947,6 +2955,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -2967,6 +2976,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -2979,6 +2989,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -2999,6 +3010,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3011,6 +3023,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3031,6 +3044,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3043,6 +3057,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3063,6 +3078,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3075,6 +3091,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3092,21 +3109,30 @@
       },
       {
         "artifact": "developer_preview_rc_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "scripts/build_structural_scope_owner_review_packet.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_build_product_capabilities_surface.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_structural_scope_owner_review_packet.py"
+        ],
         "generated_at": "2026-07-01T20:50:41.806182+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "7d0452c8fc858af6f2560b70d340e65371a967bf",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3119,6 +3145,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3139,6 +3166,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3151,6 +3179,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3171,6 +3200,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3183,6 +3213,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3203,6 +3234,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3215,6 +3247,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3235,6 +3268,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3247,6 +3281,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3267,6 +3302,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3279,6 +3315,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3299,6 +3336,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3311,6 +3349,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3329,12 +3368,19 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "scripts/build_structural_scope_owner_review_packet.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "tests/test_build_product_capabilities_surface.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_structural_scope_owner_review_packet.py"
         ],
         "generated_at": "2026-07-01T20:32:06.147542+00:00",
         "input_checksum_present": true,
@@ -3350,6 +3396,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3362,6 +3409,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3382,6 +3430,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3394,6 +3443,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3414,6 +3464,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3426,6 +3477,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3446,6 +3498,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3458,6 +3511,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3478,6 +3532,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3490,6 +3545,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3508,37 +3564,27 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
-          "docs/templates/ux_new_user_observation.template.json",
-          "scripts/build_phase6_linux_windows_parity_status.py",
-          "scripts/build_phase6_ux_observation_status.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_review_packet.py",
-          "scripts/build_ux_new_user_observation_intake_packet.py",
-          "scripts/build_ux_new_user_observation_report.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_goal_bottleneck_roadmap_surface.py",
-          "tests/test_build_phase6_linux_windows_parity_status.py",
-          "tests/test_build_phase6_ux_observation_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py",
-          "tests/test_build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_report.py"
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.md",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
         ],
-        "generated_at": "2026-07-01T20:26:37.114237+00:00",
+        "generated_at": "2026-07-01T21:02:11.057793+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "c6cd46627fa1b12aa6554eae39cc289b376fd8cb",
+        "source_commit_sha": "9ce2dba31b734c6282447be17e4a99838b6a8af7",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_linux_windows_parity_status.py",
           "scripts/build_phase6_ux_observation_status.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3551,6 +3597,7 @@
           "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_linux_windows_parity_status.py",
           "tests/test_build_phase6_ux_observation_status.py",
+          "tests/test_build_product_capabilities_surface.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -3588,9 +3635,7 @@
     },
     "worktree": {
       "dirty": false,
-      "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
-      ],
+      "dirty_paths": [],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -3613,9 +3658,7 @@
         "status": "ready",
         "track_or_add_required_path_count": 0
       },
-      "status_rows": [
-        " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
-      ]
+      "status_rows": []
     }
   },
   "status": "blocked",
