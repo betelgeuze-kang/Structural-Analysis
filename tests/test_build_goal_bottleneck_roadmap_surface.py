@@ -837,7 +837,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_4["summary"]["operator_intake_slots"] == [
         {
             "required": True,
-            "required_case_field_count": 14,
+            "required_case_field_count": 16,
             "slot_id": "top_k_refinement_rows",
             "status": "operator_input_required",
             "template_artifact": (
