@@ -303,6 +303,126 @@ def test_row_only_frontier_exhaustion_routes_full_load_candidate_to_newton_runne
     )
 
 
+def test_cause_narrowing_consistent_newton_priority_routes_checkpoint_runner() -> None:
+    context = run_g1_full_load_hip_newton_lane._full_load_checkpoint_next_action_context(
+        frontier_non_promoting_context={
+            "same_operator_exhausted_at_latest_checkpoint": False,
+            "latest_frontier_operator_stop_reason": "not_exhausted_fixture",
+            "latest_frontier_operator_target_row_count": 64,
+            "latest_frontier_operator_support_column_count": 8,
+        },
+        cause_narrowing_context={
+            "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+            "consistent_newton_rocm_lane_prioritized": True,
+            "row_only_correction_loop_stopped": True,
+            "support_or_link_row_gap_disfavored": True,
+        },
+    )
+
+    assert context["id"] == (
+        "build_consistent_newton_full_load_checkpoint_candidate_runner"
+    )
+    assert context["routing_reason"] == (
+        "cause_narrowing_consistent_newton_rocm_lane_prioritized"
+    )
+    assert context["preferred_candidate_generator"] == (
+        "consistent_residual_jacobian_newton_rocm_full_load_candidate"
+    )
+    assert context["row_only_largest_rows_exhausted_at_latest_checkpoint"] is False
+    assert context["cause_narrowing_row_only_correction_loop_stopped"] is True
+    assert context["cause_narrowing_support_or_link_row_gap_disfavored"] is True
+    assert context["suppressed_retry_action_ids"] == [
+        "repeat_largest_rows_target128_support8_row_only_retuning"
+    ]
+
+
+def test_cause_narrowing_priority_routes_full_load_action_without_row_exhaustion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=0.656)
+    proof = tmp_path / "hip-proof.json"
+    cause_status = tmp_path / "cause-narrowing.json"
+
+    def fake_run(command: list[str], *, check: bool) -> Any:
+        raise AssertionError("child probe must not run without a full-load checkpoint")
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=False,
+        blockers=["consistent_residual_jacobian_newton_not_proven"],
+    )
+    cause_status.write_text(
+        json.dumps(
+            {
+                "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
+                "status": "ready",
+                "source_commit_sha": run_g1_full_load_hip_newton_lane._git_head(),
+                "blockers": [],
+                "evidence_signals": {
+                    "support_or_link_row_gap_disfavored": True,
+                    "row_only_correction_loop_stopped_by_global_connectivity": True,
+                    "global_connectivity_primary_next_lane": (
+                        "consistent_residual_jacobian_newton_rocm_worker"
+                    ),
+                },
+                "decision_record": {
+                    "schema_version": "g1-f2g-f2h-next-lane-decision.v1",
+                    "stop_row_only_support_or_elastic_link_correction_loop": True,
+                    "primary_next_lane": (
+                        "consistent_residual_jacobian_newton_rocm_worker"
+                    ),
+                    "required_next_receipts": [
+                        "implementation/phase1/release_evidence/productization/"
+                        "mgt_residual_jacobian_consistency_hip_required_probe.json"
+                    ],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=False,
+        evidence_sources=(),
+        hip_consistency_proof_json=proof,
+        cause_narrowing_status_path=cause_status,
+        workspace_checkpoint_scan_root=None,
+    )
+
+    assert exit_code == 1
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    assert "generate_full_load_1p0_checkpoint_candidate" not in next_actions
+    routed = next_actions["build_consistent_newton_full_load_checkpoint_candidate_runner"]
+    assert routed["reason"] == (
+        "cause_narrowing_consistent_newton_rocm_lane_prioritized"
+    )
+    assert routed["row_only_largest_rows_exhausted_at_latest_checkpoint"] is False
+    assert routed["cause_narrowing_row_only_correction_loop_stopped"] is True
+    assert routed["cause_narrowing_support_or_link_row_gap_disfavored"] is True
+    requirements = {
+        row["id"]: row
+        for row in payload["terminal_requirement_breakdown"]["requirements"]
+    }
+    checkpoint_requirement = requirements["full_load_checkpoint_1p0"]
+    assert checkpoint_requirement["next_action_ids"] == [
+        "build_consistent_newton_full_load_checkpoint_candidate_runner"
+    ]
+    assert checkpoint_requirement["observed"]["routing_reason"] == (
+        "cause_narrowing_consistent_newton_rocm_lane_prioritized"
+    )
+    assert (
+        checkpoint_requirement["observed"][
+            "cause_narrowing_row_only_correction_loop_stopped"
+        ]
+        is True
+    )
+
+
 def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Path) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     proof = tmp_path / "hip-proof.json"

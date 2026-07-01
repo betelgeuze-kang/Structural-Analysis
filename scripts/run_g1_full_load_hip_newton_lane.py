@@ -867,29 +867,42 @@ def _full_load_checkpoint_next_action_context(
         or cause_narrowing_context.get("primary_next_lane")
         == "consistent_residual_jacobian_newton_rocm_worker"
     )
-    use_consistent_newton_runner = row_only_exhausted
+    row_only_loop_stopped_by_cause = (
+        cause_narrowing_context.get("row_only_correction_loop_stopped") is True
+    )
+    support_or_link_gap_disfavored = (
+        cause_narrowing_context.get("support_or_link_row_gap_disfavored") is True
+    )
+    use_consistent_newton_runner = bool(
+        row_only_exhausted or consistent_newton_prioritized
+    )
     suppressed_retries = (
         ["repeat_largest_rows_target128_support8_row_only_retuning"]
         if row_only_exhausted
+        or row_only_loop_stopped_by_cause
+        or consistent_newton_prioritized
         else []
     )
+    routing_reason = "checkpoint_resolution_no_full_load_candidate"
+    if row_only_exhausted:
+        routing_reason = "row_only_largest_rows_operator_exhausted"
+    elif consistent_newton_prioritized:
+        routing_reason = "cause_narrowing_consistent_newton_rocm_lane_prioritized"
     return {
         "id": (
             CONSISTENT_NEWTON_FULL_LOAD_CHECKPOINT_ACTION_ID
             if use_consistent_newton_runner
             else GENERIC_FULL_LOAD_CHECKPOINT_ACTION_ID
         ),
-        "routing_reason": (
-            "row_only_largest_rows_operator_exhausted"
-            if row_only_exhausted
-            else "checkpoint_resolution_no_full_load_candidate"
-        ),
+        "routing_reason": routing_reason,
         "preferred_candidate_generator": (
             "consistent_residual_jacobian_newton_rocm_full_load_candidate"
             if use_consistent_newton_runner
             else "frontier_continuation_full_load_candidate"
         ),
         "row_only_largest_rows_exhausted_at_latest_checkpoint": row_only_exhausted,
+        "cause_narrowing_row_only_correction_loop_stopped": row_only_loop_stopped_by_cause,
+        "cause_narrowing_support_or_link_row_gap_disfavored": support_or_link_gap_disfavored,
         "suppressed_retry_action_ids": suppressed_retries,
         "frontier_operator_stop_reason": frontier_non_promoting_context.get(
             "latest_frontier_operator_stop_reason"
@@ -982,6 +995,16 @@ def _g1_lane_next_actions(
             "cause_narrowing_primary_next_lane": next_action_context[
                 "cause_narrowing_primary_next_lane"
             ],
+            "cause_narrowing_row_only_correction_loop_stopped": (
+                next_action_context[
+                    "cause_narrowing_row_only_correction_loop_stopped"
+                ]
+            ),
+            "cause_narrowing_support_or_link_row_gap_disfavored": (
+                next_action_context[
+                    "cause_narrowing_support_or_link_row_gap_disfavored"
+                ]
+            ),
             "claim_boundary": next_action_context["claim_boundary"],
         }
         if workspace_inventory.get("enabled") is True:
@@ -1269,6 +1292,16 @@ def _g1_lane_terminal_requirement_breakdown(
                 "suppressed_retry_action_ids": full_load_next_action_context[
                     "suppressed_retry_action_ids"
                 ],
+                "cause_narrowing_row_only_correction_loop_stopped": (
+                    full_load_next_action_context[
+                        "cause_narrowing_row_only_correction_loop_stopped"
+                    ]
+                ),
+                "cause_narrowing_support_or_link_row_gap_disfavored": (
+                    full_load_next_action_context[
+                        "cause_narrowing_support_or_link_row_gap_disfavored"
+                    ]
+                ),
                 "routing_reason": full_load_next_action_context["routing_reason"],
             },
             "blockers": checkpoint_blockers,
