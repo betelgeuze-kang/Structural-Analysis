@@ -33,6 +33,9 @@ G1_CONSISTENT_NEWTON_RUNNER = (
 )
 G1_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
 G1_F2G_F2H_CAUSE_NARROWING = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
+G1_LOAD_DEPENDENT_COMPARISON = (
+    PRODUCTIZATION / "g1_load_dependent_near_null_geometric_stiffness_comparison.json"
+)
 CUSTOMER_SHADOW = Path("implementation/phase1/customer_shadow_evidence_status.json")
 EXTERNAL_BENCHMARK_SUBMISSION = Path(
     "implementation/phase1/release/external_benchmark_submission_readiness.json"
@@ -198,6 +201,7 @@ def _source_paths() -> list[Path]:
         G1_CONSISTENT_NEWTON_RUNNER,
         G1_GLOBAL_CONNECTIVITY,
         G1_F2G_F2H_CAUSE_NARROWING,
+        G1_LOAD_DEPENDENT_COMPARISON,
         CUSTOMER_SHADOW,
         EXTERNAL_BENCHMARK_SUBMISSION,
     ]
@@ -245,6 +249,7 @@ def build_structural_product_development_roadmap(
     g1_consistent_newton_runner = _load_json(repo_root, G1_CONSISTENT_NEWTON_RUNNER)
     g1_global_connectivity = _load_json(repo_root, G1_GLOBAL_CONNECTIVITY)
     g1_cause_narrowing = _load_json(repo_root, G1_F2G_F2H_CAUSE_NARROWING)
+    g1_load_dependent_comparison = _load_json(repo_root, G1_LOAD_DEPENDENT_COMPARISON)
     customer_shadow = _load_json(repo_root, CUSTOMER_SHADOW)
     external_submission = _load_json(repo_root, EXTERNAL_BENCHMARK_SUBMISSION)
 
@@ -289,6 +294,7 @@ def build_structural_product_development_roadmap(
     g1_global_decision = _as_dict(g1_global_connectivity.get("decision_record"))
     g1_cause_signals = _as_dict(g1_cause_narrowing.get("evidence_signals"))
     g1_cause_decision = _as_dict(g1_cause_narrowing.get("decision_record"))
+    g1_load_dependent_summary = _as_dict(g1_load_dependent_comparison.get("summary"))
     g1_recommended_next_lane = str(
         g1_cause_decision.get("primary_next_lane")
         or g1_global_decision.get("primary_next_lane")
@@ -434,6 +440,7 @@ def build_structural_product_development_roadmap(
                 G1_CONSISTENT_NEWTON_RUNNER,
                 G1_GLOBAL_CONNECTIVITY,
                 G1_F2G_F2H_CAUSE_NARROWING,
+                G1_LOAD_DEPENDENT_COMPARISON,
             ],
             claim_boundary="Direct residual closure is only one G1 axis; full-load HIP/Newton closure remains required.",
             summary={
@@ -489,6 +496,20 @@ def build_structural_product_development_roadmap(
                 ),
                 "f2h_lightweight_0p1_0p2_0p4_ready": _as_bool(
                     g1_cause_signals.get("f2h_lightweight_0p1_0p2_0p4_ready")
+                ),
+                "load_dependent_near_null_geometric_stiffness_comparison_status": str(
+                    g1_load_dependent_comparison.get("status") or "missing"
+                ),
+                "load_dependent_near_null_packet_comparison_ready": _as_bool(
+                    g1_load_dependent_summary.get("near_null_packet_comparison_ready")
+                ),
+                "load_dependent_geometric_softening_signal": str(
+                    g1_load_dependent_summary.get("geometric_softening_signal")
+                    or g1_cause_signals.get("load_dependent_geometric_softening_signal")
+                    or "not_audited"
+                ),
+                "load_dependent_near_null_missing_packet_count": _as_int(
+                    g1_load_dependent_summary.get("missing_near_null_packet_count")
                 ),
                 "recommended_g1_next_direction": g1_recommended_next_lane,
                 "full_load_hip_newton_terminal_ready_requirements": (
@@ -673,6 +694,7 @@ def build_structural_product_development_roadmap(
                 str(G1_CONSISTENT_NEWTON_RUNNER),
                 str(G1_GLOBAL_CONNECTIVITY),
                 str(G1_F2G_F2H_CAUSE_NARROWING),
+                str(G1_LOAD_DEPENDENT_COMPARISON),
             ],
         },
         {

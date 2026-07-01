@@ -192,6 +192,18 @@ def _write_minimal_inputs(repo_root: Path) -> None:
         },
     )
     _write_json(
+        productization / "g1_load_dependent_near_null_geometric_stiffness_comparison.json",
+        {
+            "status": "blocked",
+            "contract_pass": False,
+            "summary": {
+                "near_null_packet_comparison_ready": False,
+                "geometric_softening_signal": "active_secondary",
+                "missing_near_null_packet_count": 2,
+            },
+        },
+    )
+    _write_json(
         repo_root / "implementation/phase1/customer_shadow_evidence_status.json",
         {"summary": {"completed_shadow_case_count": 1, "min_completed_shadow_cases": 3}},
     )
@@ -304,6 +316,24 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     )
     assert (
         stages["g1_solver_closure"]["summary"][
+            "load_dependent_near_null_geometric_stiffness_comparison_status"
+        ]
+        == "blocked"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "load_dependent_geometric_softening_signal"
+        ]
+        == "active_secondary"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "load_dependent_near_null_missing_packet_count"
+        ]
+        == 2
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
             "consistent_newton_full_load_runner_evidence_closure_pass"
         ]
         is False
@@ -326,6 +356,10 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     )
     assert (
         "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json"
+        in stages["g1_solver_closure"]["evidence_artifacts"]
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json"
         in stages["g1_solver_closure"]["evidence_artifacts"]
     )
     assert stages["paid_pilot_readiness"]["blockers"] == [
