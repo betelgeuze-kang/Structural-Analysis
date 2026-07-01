@@ -152,3 +152,24 @@ def test_phase6_ux_observation_status_check_detects_drift(tmp_path: Path) -> Non
 
     assert ok is False
     assert message == "phase6_ux_observation_status_mismatch"
+
+
+def test_phase6_ux_observation_status_check_ignores_source_commit_wrapper(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "ux.json"
+    module.write_phase6_ux_observation_status(repo_root=REPO_ROOT, out_path=out)
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["source_commit_sha"] = "older-evidence-commit"
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message = module.check_phase6_ux_observation_status(
+        repo_root=REPO_ROOT,
+        out_path=out,
+    )
+
+    assert ok is True
+    assert message == "phase6_ux_observation_status_consistent"
