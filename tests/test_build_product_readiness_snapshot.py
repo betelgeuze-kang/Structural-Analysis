@@ -2731,7 +2731,13 @@ def test_snapshot_science_actual_closure_materializer_does_not_stale_snapshot_le
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
-        == "non_artifact_source_paths_changed"
+        == "receipt_only_commit"
+    )
+    assert (
+        "scripts/materialize_science_actual_closure_from_rows.py"
+        not in metadata_rows["pm_release_gate_report"][
+            "changed_paths_since_source_commit"
+        ]
     )
     assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
     assert not [
@@ -2739,6 +2745,37 @@ def test_snapshot_science_actual_closure_materializer_does_not_stale_snapshot_le
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
     ]
+
+
+def test_snapshot_ignores_untracked_non_structural_science_actual_handoff(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(tmp_path / "scripts/.keep", "tracked scripts dir\n")
+    _write_text(tmp_path / "tests/.keep", "tracked tests dir\n")
+    _commit_all(tmp_path, "track source directories")
+    _write_text(
+        tmp_path / "scripts/build_science_actual_closure_operator_handoff.py",
+        "print('science handoff work in progress')\n",
+    )
+    _write_text(
+        tmp_path / "tests/test_build_science_actual_closure_operator_handoff.py",
+        "def test_placeholder():\n    assert True\n",
+    )
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+
+    assert "stale_or_inconsistent:worktree_dirty" not in payload["blockers"]
+    assert payload["state_consistency"]["worktree"]["dirty"] is False
+    assert payload["state_consistency"]["worktree"]["dirty_paths"] == []
+    assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == []
 
 
 def test_snapshot_license_builder_change_only_stales_license_receipt(
