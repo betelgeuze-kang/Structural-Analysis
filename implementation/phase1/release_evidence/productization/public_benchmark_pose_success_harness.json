@@ -26,9 +26,9 @@
   "contract_pass": true,
   "dry_run_case_count": 1,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T10:19:36.868234+00:00",
+  "generated_at": "2026-07-01T11:24:28.018875+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:194239de39ff4a820757f431e3e3edb10df3244926cdadb3527063fb89e710cf",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:ea9fbd1ba888a881cbb06a8126d391dea2861df2d75b2501d66dfe355a8e3111",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:c92fc3f07d00d7cdd7bd641027707ff7b57a01d1a7608d3e34441ab3801f3076",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
@@ -59,6 +59,6 @@
   "reuse_policy": "public_benchmark_pose_success_harness_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-pose-success-harness.v1",
-  "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+  "source_commit_sha": "e1aba2aa0164d862cd0be65126d1f2537094be93",
   "status": "ready_for_real_benchmark_rows"
 }

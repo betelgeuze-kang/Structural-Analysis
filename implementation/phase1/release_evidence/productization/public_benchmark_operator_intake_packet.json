@@ -36,14 +36,14 @@
           "casf_pdbbind_ligand_symmetry_contracts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-01T10:18:46.393904+00:00",
+        "generated_at": "2026-07-01T11:24:08.235730+00:00",
         "ready_values": {
           "materialized_case_count": 0,
           "public_benchmark_ready": false,
           "target_subset_case_count": 12
         },
         "schema_version": "public-benchmark-subset-manifest.v1",
-        "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+        "source_commit_sha": "d8bc60e16ce33f76e4c2cac3ecd9cb86094e2830",
         "status": "source_material_required"
       },
       "current_ready": false,
@@ -113,12 +113,12 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-01T10:18:46.397214+00:00",
+        "generated_at": "2026-07-01T11:24:08.239067+00:00",
         "ready_values": {
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-pose-validity-packet.v1",
-        "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+        "source_commit_sha": "d8bc60e16ce33f76e4c2cac3ecd9cb86094e2830",
         "status": "ready_for_dry_run"
       },
       "current_ready": false,
@@ -155,13 +155,13 @@
         "artifact_exists": true,
         "blockers": [],
         "contract_pass": true,
-        "generated_at": "2026-07-01T10:18:46.399873+00:00",
+        "generated_at": "2026-07-01T11:24:08.241606+00:00",
         "ready_values": {
           "dry_run_case_count": 1,
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
-        "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+        "source_commit_sha": "d8bc60e16ce33f76e4c2cac3ecd9cb86094e2830",
         "status": "ready"
       },
       "current_ready": false,
@@ -202,14 +202,14 @@
           "public_benchmark_pose_success_harness_rows_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-01T10:18:46.402229+00:00",
+        "generated_at": "2026-07-01T11:24:08.244277+00:00",
         "ready_values": {
           "pose_success_count": 1,
           "pose_success_harness_ready": false,
           "real_benchmark_case_count": 0
         },
         "schema_version": "public-benchmark-pose-success-harness.v1",
-        "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+        "source_commit_sha": "d8bc60e16ce33f76e4c2cac3ecd9cb86094e2830",
         "status": "ready_for_real_benchmark_rows"
       },
       "current_ready": false,
@@ -259,13 +259,13 @@
           "dud_e_lit_pcba_active_decoy_labels_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-01T10:18:46.404422+00:00",
+        "generated_at": "2026-07-01T11:24:08.246643+00:00",
         "ready_values": {
           "public_benchmark_enrichment_ready": false,
           "real_enrichment_target_count": 0
         },
         "schema_version": "public-benchmark-enrichment-scorecard.v1",
-        "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+        "source_commit_sha": "d8bc60e16ce33f76e4c2cac3ecd9cb86094e2830",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -303,13 +303,13 @@
           "vina_gnina_external_receipts_missing"
         ],
         "contract_pass": false,
-        "generated_at": "2026-07-01T10:18:46.406595+00:00",
+        "generated_at": "2026-07-01T11:24:08.248889+00:00",
         "ready_values": {
           "public_benchmark_engine_comparison_ready": false,
           "real_comparison_case_count": 0
         },
         "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-        "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+        "source_commit_sha": "d8bc60e16ce33f76e4c2cac3ecd9cb86094e2830",
         "status": "operator_evidence_required"
       },
       "current_ready": false,
@@ -426,14 +426,14 @@
           "public_benchmark_external_receipts_missing"
         ],
         "contract_pass": true,
-        "generated_at": "2026-07-01T10:18:46.413317+00:00",
+        "generated_at": "2026-07-01T11:24:08.256274+00:00",
         "ready_values": {
           "blocker_count": 10,
           "public_benchmark_ready": false,
           "tier_beta_ready": false
         },
         "schema_version": "public-benchmark-source-of-truth.v1",
-        "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+        "source_commit_sha": "d8bc60e16ce33f76e4c2cac3ecd9cb86094e2830",
         "status": "seed_ready_materialization_blocked"
       },
       "current_ready": false,
@@ -506,14 +506,14 @@
         "casf_pdbbind_ligand_symmetry_contracts_missing"
       ],
       "contract_pass": true,
-      "generated_at": "2026-07-01T10:18:46.393904+00:00",
+      "generated_at": "2026-07-01T11:24:08.235730+00:00",
       "ready_values": {
         "materialized_case_count": 0,
         "public_benchmark_ready": false,
         "target_subset_case_count": 12
       },
       "schema_version": "public-benchmark-subset-manifest.v1",
-      "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+      "source_commit_sha": "d8bc60e16ce33f76e4c2cac3ecd9cb86094e2830",
       "status": "source_material_required"
     },
     "current_ready": false,
@@ -1140,10 +1140,10 @@
     }
   ],
   "gate_unblock_plan_count": 4,
-  "generated_at": "2026-07-01T10:19:36.877661+00:00",
+  "generated_at": "2026-07-01T11:24:28.028311+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:e8f21f9dbabfe9c125c91ea70c3637c54130f741cf3948a76ef03e2f81a56405",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:194239de39ff4a820757f431e3e3edb10df3244926cdadb3527063fb89e710cf",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:6163cd42ed4666d12a982acb5ebe301da6003035e5de835f2c792a4c75c48224",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:ea9fbd1ba888a881cbb06a8126d391dea2861df2d75b2501d66dfe355a8e3111",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -2548,6 +2548,441 @@
   "operator_template_schema_version": "public-benchmark-operator-template.v1",
   "owner_input_required": true,
   "packet_id": "public_benchmark_operator_intake_packet",
+  "phase2_row_closure_matrix": [
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "claim_boundary": "This matrix row maps one operator row file to the Phase 2 criteria it can unblock; it is not benchmark evidence until real rows and receipts are materialized.",
+      "closes_phase2_criteria": [
+        "casf_pdbbind_pose_success_harness_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv"
+      ],
+      "description": "CASF/PDBBind subset rows",
+      "materialization_steps": [
+        "materialize_subset_manifest"
+      ],
+      "minimum_evidence": {
+        "case_count": 12,
+        "ligand_atom_order_contract_fields": [
+          "atom_count",
+          "atom_ids"
+        ],
+        "local_source_file_fields": [
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id"
+        ],
+        "materialized_manifest_fields": [
+          "source_file_checksums"
+        ],
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "source_family": "CASF/PDBBind",
+        "supported_benchmark_splits": [
+          "CASF-core",
+          "PDBBind-core",
+          "PDBBind-refined",
+          "PDBBind-general"
+        ],
+        "symmetry_permutation_contract_fields": [
+          "permutations"
+        ]
+      },
+      "operator_slot_id": "casf_pdbbind_subset_intake",
+      "required_by_components": [
+        {
+          "artifact_role": "pose_success_harness",
+          "component_id": "casf_pdbbind_pose_success_harness",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+          "ready_field": "pose_success_harness_ready",
+          "required_minimum_count": 12
+        }
+      ],
+      "row_contract_ref": "phase2_row_dropzone.default_row_path_candidates.subset_rows",
+      "row_input_id": "subset_rows",
+      "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
+      "unblocks_tier_beta_criteria": [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached"
+      ]
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "claim_boundary": "This matrix row maps one operator row file to the Phase 2 criteria it can unblock; it is not benchmark evidence until real rows and receipts are materialized.",
+      "closes_phase2_criteria": [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.csv"
+      ],
+      "description": "CASF/PDBBind pose-coordinate rows",
+      "materialization_steps": [
+        "materialize_pose_validity_input",
+        "materialize_posebusters_validity_packet",
+        "materialize_symmetry_rmsd_scorecard",
+        "materialize_pose_success_harness"
+      ],
+      "minimum_evidence": {
+        "benchmark_split_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "case_count": 12,
+        "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order",
+        "posebusters_style_check_contract": {
+          "all_checks_required": true,
+          "check_definitions": [
+            {
+              "check_id": "coordinate_finiteness",
+              "description": "reference and predicted ligand coordinates are finite 3D values",
+              "required": true
+            },
+            {
+              "check_id": "atom_count_and_order_contract",
+              "description": "reference/predicted ligand atoms share a declared atom-order contract",
+              "required": true
+            },
+            {
+              "check_id": "pose_success_metric_contract",
+              "description": "pose success metric is explicitly symmetry-aware ligand RMSD",
+              "required": true
+            },
+            {
+              "check_id": "symmetry_permutation_contract",
+              "description": "allowed symmetry permutations are explicit zero-based atom-index maps",
+              "required": true
+            },
+            {
+              "check_id": "minimum_interatomic_distance_guard",
+              "description": "predicted ligand coordinates must not contain impossible self-clashes",
+              "required": true
+            },
+            {
+              "check_id": "receptor_ligand_context_present",
+              "description": "protein structure and binding-site context are present",
+              "required": true
+            },
+            {
+              "check_id": "symmetry_aware_ligand_rmsd_angstrom",
+              "description": "pose success uses the best rigid-aligned RMSD over allowed symmetry permutations",
+              "required": true
+            }
+          ],
+          "materializer_schema_version": "public-benchmark-posebusters-style-validity-packet-materialization.v1",
+          "packet_schema_version": "public-benchmark-pose-validity-packet.v1",
+          "required_check_ids": [
+            "coordinate_finiteness",
+            "atom_count_and_order_contract",
+            "pose_success_metric_contract",
+            "symmetry_permutation_contract",
+            "minimum_interatomic_distance_guard",
+            "receptor_ligand_context_present",
+            "symmetry_aware_ligand_rmsd_angstrom"
+          ]
+        }
+      },
+      "operator_slot_id": "pose_coordinate_intake",
+      "required_by_components": [
+        {
+          "artifact_role": "pose_success_harness",
+          "component_id": "casf_pdbbind_pose_success_harness",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+          "ready_field": "pose_success_harness_ready",
+          "required_minimum_count": 12
+        },
+        {
+          "artifact_role": "rmsd_scorecard",
+          "component_id": "symmetry_aware_ligand_rmsd",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+          "ready_field": "scorecard_ready",
+          "required_minimum_count": 12
+        },
+        {
+          "artifact_role": "pose_validity_packet",
+          "component_id": "posebusters_style_pose_validity",
+          "count_field": "real_benchmark_case_count",
+          "criterion_id": "posebusters_style_pose_validity_ready",
+          "ready_field": "posebusters_validity_ready",
+          "required_minimum_count": 12
+        }
+      ],
+      "row_contract_ref": "phase2_row_dropzone.default_row_path_candidates.pose_rows",
+      "row_input_id": "pose_rows",
+      "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
+      "unblocks_tier_beta_criteria": [
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands",
+        "casf_pdbbind_pose_success_harness_ready"
+      ]
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "claim_boundary": "This matrix row maps one operator row file to the Phase 2 criteria it can unblock; it is not benchmark evidence until real rows and receipts are materialized.",
+      "closes_phase2_criteria": [
+        "dud_e_or_lit_pcba_enrichment_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.csv"
+      ],
+      "description": "DUD-E/LIT-PCBA enrichment rows",
+      "materialization_steps": [
+        "materialize_enrichment_scorecard"
+      ],
+      "minimum_evidence": {
+        "family_coverage_fields": [
+          "benchmark_family_target_counts",
+          "covered_supported_family_count",
+          "missing_supported_families"
+        ],
+        "ready_target_count": 1,
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_molecule_fields": [
+          "molecule_id",
+          "is_active",
+          "score"
+        ],
+        "row_validation_policies": {
+          "active_decoy_policy": {
+            "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+          },
+          "boolean_label_policy": {
+            "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+            "required_unique_row_keys": {
+              "target_scored_molecules": [
+                "molecule_id"
+              ],
+              "targets": [
+                "target_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        },
+        "supported_families": [
+          "DUD-E",
+          "LIT-PCBA"
+        ]
+      },
+      "operator_slot_id": "dud_e_lit_pcba_enrichment_intake",
+      "required_by_components": [
+        {
+          "artifact_role": "enrichment_scorecard",
+          "component_id": "dud_e_or_lit_pcba_enrichment",
+          "count_field": "real_enrichment_target_count",
+          "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+          "ready_field": "public_benchmark_enrichment_ready",
+          "required_minimum_count": 1
+        }
+      ],
+      "row_contract_ref": "phase2_row_dropzone.default_row_path_candidates.enrichment_rows",
+      "row_input_id": "enrichment_rows",
+      "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
+      "unblocks_tier_beta_criteria": [
+        "dud_e_lit_pcba_enrichment_ready",
+        "external_receipts_attached"
+      ]
+    },
+    {
+      "accepted_formats": [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv"
+      ],
+      "claim_boundary": "This matrix row maps one operator row file to the Phase 2 criteria it can unblock; it is not benchmark evidence until real rows and receipts are materialized.",
+      "closes_phase2_criteria": [
+        "vina_gnina_comparison_ready"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+      ],
+      "description": "Vina/GNINA engine comparison rows",
+      "materialization_steps": [
+        "materialize_vina_gnina_comparison_adapter"
+      ],
+      "minimum_evidence": {
+        "benchmark_split_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "comparison_case_count": 1,
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "predicted_ligand_checksum",
+          "engine_version",
+          "engine_config_checksum",
+          "engine_run_provenance_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "required_engines": [
+          "vina",
+          "gnina"
+        ],
+        "row_validation_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "engine_pair_policy": {
+            "duplicate_docking_run_ids_rejected": true,
+            "duplicate_engine_ids_rejected": true,
+            "per_case_required_engines": [
+              "vina",
+              "gnina"
+            ]
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "pose_success_policy": {
+            "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+            "threshold_default_angstrom": 2.0
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
+        "source_checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_receipt_field": "source_checksum"
+        },
+        "supported_benchmark_splits": [
+          "CASF-core",
+          "PDBBind-core",
+          "PDBBind-refined",
+          "PDBBind-general"
+        ]
+      },
+      "operator_slot_id": "vina_gnina_comparison_intake",
+      "required_by_components": [
+        {
+          "artifact_role": "vina_gnina_comparison_adapter",
+          "component_id": "vina_gnina_comparison_adapter",
+          "count_field": "real_comparison_case_count",
+          "criterion_id": "vina_gnina_comparison_ready",
+          "ready_field": "public_benchmark_engine_comparison_ready",
+          "required_minimum_count": 1
+        }
+      ],
+      "row_contract_ref": "phase2_row_dropzone.default_row_path_candidates.vina_gnina_rows",
+      "row_input_id": "vina_gnina_rows",
+      "status": "operator_input_required",
+      "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
+      "unblocks_tier_beta_criteria": [
+        "vina_gnina_comparison_ready",
+        "external_receipts_attached"
+      ]
+    }
+  ],
+  "phase2_row_closure_matrix_count": 4,
   "phase2_row_dropzone": {
     "auto_detection_policy": "Place real row files at these default paths, then run the Phase 2 row audit command without explicit row flags.",
     "default_row_path_candidates": {
@@ -2625,7 +3060,7 @@
   ],
   "route": "/product/public-benchmark/operator-intake",
   "schema_version": "public-benchmark-operator-intake-packet.v1",
-  "source_commit_sha": "cfab32764d612e5eea3a77bfa9c1daf91c3d6263",
+  "source_commit_sha": "e1aba2aa0164d862cd0be65126d1f2537094be93",
   "source_of_truth_blocker_detail_count": 4,
   "source_of_truth_blocker_detail_register": [
     {
@@ -3255,6 +3690,7 @@
       "pose_coordinate_intake": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
       "vina_gnina_comparison_intake": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json"
     },
+    "phase2_row_closure_matrix_count": 4,
     "public_benchmark_ready": false,
     "required_slot_count": 4,
     "root_cause_tags": [
