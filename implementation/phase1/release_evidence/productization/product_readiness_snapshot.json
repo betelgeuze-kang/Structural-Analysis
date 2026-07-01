@@ -2554,7 +2554,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T18:47:59.181596+00:00",
+  "generated_at": "2026-07-01T18:53:57.363612+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2582,7 +2582,7 @@
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:712c190fbd49a6a42d8a0d7156958c3c5c8ee315c9e4798e468443e36a653353",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d2d144bb4b4999891911eb815698b019a069e947188cfbc62bd386815a372a13",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:dbed17452186f2be09d834518c6fa2fed2d7b07121ce93758f0627c4c01bfa98",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:1b7a6542e26005e40d1ebf3d17bc929a829d74b664c8932cf44a7e2ee2ad2661",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:c7ac1353f2fec129925420cb6bd6a7a4e097a817d8be3ce584592c6394b1702c",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:5e764b0c2fd3e2cbaf5b8d936a46cf4da7d28229a072b90b137d8c4b28ca05d5",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:0a039b00834ed75b02dedf493240f56d9f8d8262cd1b1191ad1e73b07ea1e2e5",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2826,7 +2826,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "b09b011c70571f850ed38e3aa74960240a64e5cb",
+  "source_commit_sha": "0a068b1e3da5fc1e6011aadd40e1ede0f74ccd69",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3477,16 +3477,17 @@
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
           "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md"
         ],
-        "generated_at": "2026-07-01T18:47:11.835069+00:00",
+        "generated_at": "2026-07-01T18:53:10.275606+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "9c1ac260faf9585ac71bb41ddfd3e9a0b417438f",
+        "source_commit_sha": "ca7f7fecc94683583580164b2edd22efcf337a27",
         "source_state_fresh": true,
         "source_state_kind": "receipt_only_commit"
       },
