@@ -2610,7 +2610,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T17:13:19.248202+00:00",
+  "generated_at": "2026-07-01T17:19:20.660137+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2643,7 +2643,7 @@
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:0a039b00834ed75b02dedf493240f56d9f8d8262cd1b1191ad1e73b07ea1e2e5",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:80faa206a0bd43f88b3cb813227b640884e19e8f02ff82f6f95192ed406e1db5"
+    "scripts/build_product_readiness_snapshot.py": "sha256:3cc6c498665561d363fa8153c5cd29a8b1b58e10b630924e8b756cb0ce26768e"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -2882,7 +2882,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "83853d7ecb5b3f776013153f73a3d66f6037cf90",
+  "source_commit_sha": "021aa333fda7326ad816808b726925469bac87c6",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -2977,6 +2977,7 @@
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_support_bundle.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
@@ -2984,6 +2985,7 @@
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_support_bundle.py",
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
@@ -3026,10 +3028,12 @@
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
@@ -3093,6 +3097,7 @@
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_support_bundle.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
@@ -3100,6 +3105,7 @@
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_support_bundle.py",
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
@@ -3121,11 +3127,13 @@
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
@@ -3146,11 +3154,13 @@
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
@@ -3192,10 +3202,12 @@
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
@@ -3286,6 +3298,7 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_support_bundle.py",
           "scripts/check_structural_scope_contamination.py",
@@ -3304,6 +3317,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_support_bundle.py",
           "tests/test_check_structural_scope_contamination.py",
@@ -3432,11 +3446,13 @@
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
@@ -3453,7 +3469,11 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py"
         ],
         "generated_at": "2026-07-01T17:12:14.147922+00:00",
@@ -3472,11 +3492,13 @@
           "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
@@ -3512,7 +3534,9 @@
     },
     "worktree": {
       "dirty": false,
-      "dirty_paths": [],
+      "dirty_paths": [
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json"
+      ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -3535,7 +3559,9 @@
         "status": "ready",
         "track_or_add_required_path_count": 0
       },
-      "status_rows": []
+      "status_rows": [
+        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json"
+      ]
     }
   },
   "status": "blocked",

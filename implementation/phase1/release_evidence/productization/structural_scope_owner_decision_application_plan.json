@@ -1,0 +1,1597 @@
+{
+  "application_ready": false,
+  "claim_boundary": "This application plan is non-mutating. It never deletes or extracts files. It only classifies owner decisions into manual follow-up actions and keeps quarantined non-structural artifacts outside the building structural-analysis release surface until owner evidence and post-decision scope audit closure are present.",
+  "cleanup_rows": [],
+  "closure_blockers": [
+    "owner_decision_pending_count=86"
+  ],
+  "contract_pass": true,
+  "delete_decision_count": 0,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_closure_pass": false,
+  "extract_decision_count": 0,
+  "generated_at": "2026-07-01T17:19:09.169163+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:dbed17452186f2be09d834518c6fa2fed2d7b07121ce93758f0627c4c01bfa98",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
+    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:3503fc1fc7a411b25c20db770068491b2ba716289e343fe6cea5aa3a87f431d9",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:38a7b1376bea46b9e32448f147ebe13d1682ffcf1ff878bc2e8354e74abe1265",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:b6fc096b07318f1b73638297f9ed80f454c99672d94dc8ffce668891f63d0174"
+  },
+  "owner_decision_pending_count": 86,
+  "owner_decision_recorded_count": 0,
+  "owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+  "owner_decisions_present": false,
+  "pending_owner_decision_rows": [
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/md3bead_scientific_validity_report.md",
+      "path_area": "implementation_phase1",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/md3bead_soa.py",
+      "path_area": "implementation_phase1",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.md",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.md",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.md",
+      "path_area": "productization_evidence",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "path_area": "release_surface",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "path_area": "release_surface",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+      "path_area": "release_surface",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook.py",
+      "path_area": "implementation_phase1",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+      "path_area": "implementation_phase1",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+      "path_area": "implementation_phase1",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+      "path_area": "implementation_phase1",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/src/main.rs",
+      "path_area": "implementation_phase1",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/rust_md3bead_parity_report.json",
+      "path_area": "implementation_phase1",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "implementation/phase1/validate_md3bead_rust_parity.py",
+      "path_area": "implementation_phase1",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_gpcr_hard_decoy_product_report.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_h_bond_backmap_operator_intake_packet.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_pocketmd_lite_product_surface.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/build_science_actual_closure_operator_handoff.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_pocketmd_lite_topk_survival_report.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_pose_success_harness.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_pose_validity_input.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_subset_manifest.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/materialize_science_actual_closure_from_rows.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/score_symmetry_aware_ligand_rmsd.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/validate_public_benchmark_pose_validity.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "scripts/validate_public_benchmark_subset_manifest.py",
+      "path_area": "script",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_gpcr_hard_decoy_product_report.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_h_bond_backmap_operator_intake_packet.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_pocketmd_lite_product_surface.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_build_science_actual_closure_operator_handoff.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_dynamics"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_pose_success_harness.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_pose_validity_input.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_posebusters_validity_packet.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_subset_manifest.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_materialize_science_actual_closure_from_rows.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_score_symmetry_aware_ligand_rmsd.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_validate_public_benchmark_pose_validity.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    },
+    {
+      "families": [
+        "molecular_docking"
+      ],
+      "manual_application_required": true,
+      "owner_decision": "",
+      "owner_decision_valid": false,
+      "owner_review_state": "pending_owner_decision",
+      "path": "tests/test_validate_public_benchmark_subset_manifest.py",
+      "path_area": "test",
+      "post_apply_verification": [
+        "fill structural_scope_owner_decisions.json from the owner decision template",
+        "python3 scripts/build_structural_scope_owner_review_packet.py"
+      ],
+      "post_decision_cleanup_pending": false,
+      "required_action": "owner_decision_required",
+      "safe_to_auto_apply": false
+    }
+  ],
+  "plan_blockers": [
+    "owner_decision_pending_count=86"
+  ],
+  "post_decision_cleanup_pending_count": 0,
+  "quarantined_path_count": 86,
+  "release_surface_excluded_path_count": 86,
+  "retain_exception_rows": [],
+  "retain_quarantined_exception_count": 0,
+  "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
+  "reused_evidence": false,
+  "schema_version": "structural-scope-owner-decision-application-plan.v1",
+  "source_commit_sha": "021aa333fda7326ad816808b726925469bac87c6",
+  "status": "pending_owner_decisions",
+  "suggested_sequence": [
+    "fill structural_scope_owner_decisions.json from structural_scope_owner_decisions.template.json",
+    "rerun this application plan",
+    "for delete decisions, remove paths from this structural repository after owner confirmation",
+    "for extract decisions, preserve history/evidence externally before removing paths here",
+    "rerun structural scope audit and owner review packet",
+    "refresh product readiness snapshot"
+  ],
+  "unquarantined_non_structural_path_count": 0
+}
