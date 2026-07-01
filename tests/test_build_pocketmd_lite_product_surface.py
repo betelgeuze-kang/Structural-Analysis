@@ -105,6 +105,104 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "For each case, supplied ranks must form a contiguous prefix starting "
                 "at rank 1; cherry-picked gaps are not valid top-k refinement input."
             ),
+            "top_k_scope_policy": (
+                "Operator import is bounded to supplied upstream top-k candidates; "
+                "top_k_rank must be between 1 and 20."
+            ),
+            "row_value_contract": {
+                "boolean_value_policy": {
+                    "local_min_survived": "must parse to a boolean value"
+                },
+                "integer_value_policy": {
+                    "clash_count_after": "must parse to a non-negative integer",
+                    "clash_count_before": "must parse to a non-negative integer",
+                },
+                "numeric_value_policy": {
+                    "post_refinement_energy_proxy": (
+                        "must parse to a finite float; NaN and Infinity are rejected"
+                    ),
+                    "pre_refinement_energy_proxy": (
+                        "must parse to a finite float; NaN and Infinity are rejected"
+                    ),
+                },
+                "rate_value_policy": {
+                    "contact_persistence_rate": (
+                        "must parse to a finite fraction from 0.0 to 1.0"
+                    ),
+                    "h_bond_persistence_rate": (
+                        "must parse to a finite fraction from 0.0 to 1.0"
+                    ),
+                },
+                "row_integrity_policy": (
+                    "case_id, source_family, and candidate_id must be nonblank and "
+                    "non-placeholder; candidate_id and top_k_rank must be unique per case."
+                ),
+                "row_receipt_policy": (
+                    "provenance_ref must be non-placeholder and source_checksum must be a "
+                    "non-placeholder sha256:<hex> row receipt."
+                ),
+                "top_k_rank_policy": (
+                    "top_k_rank must parse to a positive integer not exceeding "
+                    "max_top_k (20); ranks within each case must form a contiguous "
+                    "prefix starting at 1."
+                ),
+                "top_k_survival_scope_policy": (
+                    "PocketMD Lite refinement rows are bounded to upstream top-k "
+                    "candidates only; top_k_rank must be between 1 and 20."
+                ),
+                "uncertainty_interval_policy": (
+                    "uncertainty_interval or uncertainty_low/high must parse to finite "
+                    "numbers with high >= low and a nonblank unit."
+                ),
+            },
+            "source_receipt_requirements": {
+                "mode": "raw_top_k_refinement_rows",
+                "placeholder_block_policy": {
+                    "text_markers": [
+                        "<operator",
+                        "fixture",
+                        "synthetic",
+                        "mock",
+                        "placeholder",
+                        "dummy",
+                        "example",
+                        "operator_supplied",
+                        "unit-test",
+                        "test-only",
+                    ],
+                    "url_markers": [
+                        "://example.",
+                        ".example/",
+                        ".invalid",
+                        ".test/",
+                        "localhost",
+                        "127.0.0.1",
+                        "0.0.0.0",
+                    ],
+                    "url_prefixes": [
+                        "operator://",
+                        "local-evidence://",
+                        "local://",
+                        "fixture://",
+                        "mock://",
+                        "synthetic://",
+                        "placeholder://",
+                        "test://",
+                        "unit-test://",
+                        "file://",
+                    ],
+                },
+                "required_fields": [
+                    "source_id",
+                    "source_url",
+                    "source_license",
+                    "source_artifact",
+                    "source_artifact_sha256",
+                ],
+                "source_artifact_sha256_policy": (
+                    "must be a sha256:<hex> reference matching the attached top-k row artifact"
+                ),
+            },
             "operator_input_source_receipt_policy": {
                 "required_mode": "raw_top_k_refinement_rows",
                 "source_artifact_sha256_policy": (
@@ -518,6 +616,10 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
                 "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
                 "required_receipt_field": "source_checksum",
             },
+            "row_value_contract": operator["raw_row_importer"]["row_value_contract"],
+            "source_receipt_requirements": operator["raw_row_importer"][
+                "source_receipt_requirements"
+            ],
             "operator_input_source_receipt_policy": {
                 "required_mode": "raw_top_k_refinement_rows",
                 "source_artifact_sha256_policy": (

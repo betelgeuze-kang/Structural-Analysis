@@ -21,6 +21,10 @@ from materialize_pocketmd_lite_topk_survival_report import (  # noqa: E402
     build_operator_input_source_receipt,
     build_phase4_exit_gate,
 )
+from materialize_pocketmd_lite_operator_intake_from_rows import (  # noqa: E402
+    SOURCE_RECEIPT_REQUIREMENTS as RAW_ROW_SOURCE_RECEIPT_REQUIREMENTS,
+    row_value_contract as raw_row_value_contract,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -189,6 +193,12 @@ def _raw_row_importer_contract() -> dict[str, Any]:
         "emits_operator_input_source_receipt": True,
         "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
+        "top_k_scope_policy": (
+            "Operator import is bounded to supplied upstream top-k candidates; "
+            "top_k_rank must be between 1 and 20."
+        ),
+        "row_value_contract": raw_row_value_contract(max_top_k=20),
+        "source_receipt_requirements": dict(RAW_ROW_SOURCE_RECEIPT_REQUIREMENTS),
         "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
         "command": (
             "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py "
@@ -225,7 +235,13 @@ def _operator_intake_schema() -> dict[str, Any]:
             "remain out of scope."
         ),
         "top_k_rank_prefix_policy": TOP_K_RANK_PREFIX_POLICY,
+        "top_k_scope_policy": (
+            "Operator import is bounded to supplied upstream top-k candidates; "
+            "top_k_rank must be between 1 and 20."
+        ),
+        "row_value_contract": raw_row_value_contract(max_top_k=20),
         "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+        "source_receipt_requirements": dict(RAW_ROW_SOURCE_RECEIPT_REQUIREMENTS),
         "operator_input_source_receipt_policy": OPERATOR_INPUT_SOURCE_RECEIPT_POLICY,
         "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
         "raw_row_importer": _raw_row_importer_contract(),
@@ -295,6 +311,10 @@ def _operator_gate_unblock_plan(
                     "operator_input_source.source_license",
                 ],
                 "source_checksum_policy": SOURCE_CHECKSUM_POLICY,
+                "row_value_contract": raw_row_importer["row_value_contract"],
+                "source_receipt_requirements": raw_row_importer[
+                    "source_receipt_requirements"
+                ],
                 "operator_input_source_receipt_policy": (
                     OPERATOR_INPUT_SOURCE_RECEIPT_POLICY
                 ),
