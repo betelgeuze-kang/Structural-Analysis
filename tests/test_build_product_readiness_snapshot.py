@@ -175,6 +175,9 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         external_benchmark_submission_updates=Path("external_benchmark_submission_updates.json"),
         structural_scope_contamination=Path("structural_scope_contamination_audit.json"),
         structural_scope_owner_review=Path("structural_scope_owner_review_packet.json"),
+        developer_preview_final_gate_owner_packet=Path(
+            "developer_preview_final_gate_owner_packet.json"
+        ),
         phase3_release_control_cleanup_plan=Path("phase3_release_control_cleanup_plan.json"),
         self_hosted_runner_status=Path("github_actions_self_hosted_runner_status.json"),
         package_json=Path("package.json"),
@@ -339,6 +342,30 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
             "retain_quarantined_with_signed_owner_exception",
         ],
         "blockers": [],
+    })
+    _write_json(tmp_path / "developer_preview_final_gate_owner_packet.json", {
+        "schema_version": "developer-preview-final-gate-owner-packet.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "developer_preview_rc_status.json": "sha256:abc123",
+            "docs/developer_preview_final_gate_action_register.md": "sha256:def456",
+        },
+        "reused_evidence": False,
+        "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
+        "status": "complete",
+        "contract_pass": True,
+        "evidence_closure_pass": True,
+        "owner_review_required": False,
+        "final_gate_count": 9,
+        "final_gate_pass_count": 9,
+        "blocked_final_gate_count": 0,
+        "blocked_gate_items": [],
+        "owner_packet_count": 0,
+        "owner_packets": [],
+        "blockers": [],
+        "claim_boundary": "Fixture owner packet only; no product claim.",
     })
     _write_json(tmp_path / "phase1_core_api_contract_summary.json", {
         "schema_version": "phase1-core-api-contract-artifacts.v1",
@@ -3094,6 +3121,40 @@ def test_snapshot_structural_scope_owner_review_helper_does_not_stale_leaf_recei
     ]
 
 
+def test_snapshot_developer_preview_owner_packet_helper_does_not_stale_leaf_receipts(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/build_developer_preview_final_gate_owner_packet.py",
+        "print('developer preview owner packet helper changed')\n",
+    )
+    _commit_all(tmp_path, "developer preview owner packet helper change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is True
+    assert metadata_rows["developer_preview_final_gate_owner_packet"][
+        "source_state_fresh"
+    ] is True
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
 def test_snapshot_support_bundle_helper_does_not_stale_leaf_receipts(
     tmp_path: Path,
 ) -> None:
@@ -4413,6 +4474,57 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     assert owner_review["owner_decision_pending_count"] == 2
     assert owner_review["release_surface_excluded_path_count"] == 2
     assert owner_review["unquarantined_non_structural_path_count"] == 0
+
+
+def test_snapshot_surfaces_developer_preview_final_gate_owner_packet(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _write_json(tmp_path / "developer_preview_final_gate_owner_packet.json", {
+        "schema_version": "developer-preview-final-gate-owner-packet.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": source_commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "developer_preview_rc_status.json": "sha256:abc123",
+            "docs/developer_preview_final_gate_action_register.md": "sha256:def456",
+        },
+        "reused_evidence": False,
+        "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
+        "status": "ready_for_owner_review",
+        "contract_pass": True,
+        "evidence_closure_pass": False,
+        "owner_review_required": True,
+        "final_gate_count": 9,
+        "final_gate_pass_count": 6,
+        "blocked_final_gate_count": 3,
+        "blocked_gate_items": [
+            "selected_medium_models_pass_or_approved_review",
+            "linux_windows_reproducibility_confirmed",
+            "new_user_core_workflow_observation_passed",
+        ],
+        "owner_packet_count": 3,
+        "blockers": [],
+        "claim_boundary": "Owner handoff only.",
+    })
+    _commit_all(tmp_path, "receipt")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+
+    component = payload["components"]["developer_preview_final_gate_owner_packet"]
+    assert component["ready"] is True
+    assert component["evidence_closure_pass"] is False
+    assert component["owner_review_required"] is True
+    assert component["final_gate_pass_count"] == 6
+    assert component["blocked_final_gate_count"] == 3
+    assert component["owner_packet_count"] == 3
+    assert "linux_windows_reproducibility_confirmed" in component["blocked_gate_items"]
 
 
 def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Path) -> None:

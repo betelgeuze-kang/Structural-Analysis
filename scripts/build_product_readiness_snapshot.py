@@ -104,6 +104,9 @@ class SnapshotInputPaths:
     )
     structural_scope_contamination: Path = PRODUCTIZATION / "structural_scope_contamination_audit.json"
     structural_scope_owner_review: Path = PRODUCTIZATION / "structural_scope_owner_review_packet.json"
+    developer_preview_final_gate_owner_packet: Path = (
+        PRODUCTIZATION / "developer_preview_final_gate_owner_packet.json"
+    )
     phase3_release_control_cleanup_plan: Path = PRODUCTIZATION / "phase3_release_control_cleanup_plan.json"
     self_hosted_runner_status: Path = PRODUCTIZATION / "github_actions_self_hosted_runner_status.json"
     package_json: Path = Path("package.json")
@@ -312,6 +315,7 @@ def _receipt_commit_allowed_paths(
         "external_benchmark_submission_updates",
         "structural_scope_contamination",
         "structural_scope_owner_review",
+        "developer_preview_final_gate_owner_packet",
         "phase3_release_control_cleanup_plan",
         "self_hosted_runner_status",
     }
@@ -451,6 +455,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         "docs/source-of-truth-gap-classification.md",
         "scripts/build_product_readiness_snapshot.py",
         "scripts/build_source_of_truth_gap_classification.py",
+        "scripts/build_developer_preview_final_gate_owner_packet.py",
         "scripts/build_support_bundle.py",
         "scripts/build_structural_scope_owner_review_packet.py",
     }
@@ -1700,6 +1705,11 @@ def build_snapshot(
         paths.structural_scope_owner_review,
         blockers,
     )
+    developer_preview_final_gate_owner_packet = _load_json(
+        repo_root,
+        paths.developer_preview_final_gate_owner_packet,
+        blockers,
+    )
     phase3_release_control_cleanup_plan = _load_json(
         repo_root,
         paths.phase3_release_control_cleanup_plan,
@@ -1787,6 +1797,9 @@ def build_snapshot(
         "external_benchmark_submission_updates": external_benchmark_updates,
         "structural_scope_contamination_audit": structural_scope,
         "structural_scope_owner_review_packet": structural_scope_owner_review,
+        "developer_preview_final_gate_owner_packet": (
+            developer_preview_final_gate_owner_packet
+        ),
     }
     schema_artifacts = {
         **metadata_artifacts,
@@ -2495,6 +2508,68 @@ def build_snapshot(
                 "blockers": _as_list(developer_preview_rc.get("blockers")),
                 "claim_boundary": str(developer_preview_rc.get("claim_boundary", "")),
                 "ready": bool(developer_preview_rc.get("contract_pass")),
+            },
+            "developer_preview_final_gate_owner_packet": {
+                "status": str(
+                    developer_preview_final_gate_owner_packet.get("status", "missing")
+                ),
+                "contract_pass": bool(
+                    developer_preview_final_gate_owner_packet.get("contract_pass")
+                ),
+                "evidence_closure_pass": bool(
+                    developer_preview_final_gate_owner_packet.get(
+                        "evidence_closure_pass"
+                    )
+                ),
+                "owner_review_required": bool(
+                    developer_preview_final_gate_owner_packet.get(
+                        "owner_review_required"
+                    )
+                ),
+                "final_gate_count": _as_int(
+                    developer_preview_final_gate_owner_packet.get("final_gate_count"),
+                    0,
+                ),
+                "final_gate_pass_count": _as_int(
+                    developer_preview_final_gate_owner_packet.get(
+                        "final_gate_pass_count"
+                    ),
+                    0,
+                ),
+                "blocked_final_gate_count": _as_int(
+                    developer_preview_final_gate_owner_packet.get(
+                        "blocked_final_gate_count"
+                    ),
+                    0,
+                ),
+                "owner_packet_count": _as_int(
+                    developer_preview_final_gate_owner_packet.get(
+                        "owner_packet_count"
+                    ),
+                    0,
+                ),
+                "blocked_gate_items": [
+                    str(item)
+                    for item in _as_list(
+                        developer_preview_final_gate_owner_packet.get(
+                            "blocked_gate_items"
+                        )
+                    )
+                ],
+                "blockers": _as_list(
+                    developer_preview_final_gate_owner_packet.get("blockers")
+                ),
+                "ready": bool(
+                    developer_preview_final_gate_owner_packet.get("contract_pass")
+                    and not _as_list(
+                        developer_preview_final_gate_owner_packet.get("blockers")
+                    )
+                ),
+                "claim_boundary": str(
+                    developer_preview_final_gate_owner_packet.get(
+                        "claim_boundary", ""
+                    )
+                ),
             },
             "fresh_full_validation": {
                 "contract_pass": bool(fresh.get("contract_pass")),

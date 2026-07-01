@@ -65,6 +65,9 @@ DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET = Path(
 DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET = Path(
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
 )
+DEFAULT_DEVELOPER_PREVIEW_FINAL_GATE_OWNER_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json"
+)
 DEFAULT_CI_STREAK_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json"
 )
@@ -712,6 +715,9 @@ def build_support_bundle(
     pm_release_gate_reviewer_handoff: Path | None = DEFAULT_PM_RELEASE_GATE_REVIEWER_HANDOFF,
     pm_owner_evidence_request_packet: Path | None = DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET,
     structural_scope_owner_review_packet: Path | None = DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET,
+    developer_preview_final_gate_owner_packet: Path | None = (
+        DEFAULT_DEVELOPER_PREVIEW_FINAL_GATE_OWNER_PACKET
+    ),
     ci_streak_intake_packet: Path | None = DEFAULT_CI_STREAK_INTAKE_PACKET,
     ci_streak_manifest: Path | None = DEFAULT_CI_STREAK_MANIFEST,
     github_actions_ci_streak_evidence: Path | None = DEFAULT_GITHUB_ACTIONS_CI_STREAK_EVIDENCE,
@@ -771,6 +777,10 @@ def build_support_bundle(
         ("pm_release_gate_reviewer_handoff", pm_release_gate_reviewer_handoff),
         ("pm_owner_evidence_request_packet", pm_owner_evidence_request_packet),
         ("structural_scope_owner_review_packet", structural_scope_owner_review_packet),
+        (
+            "developer_preview_final_gate_owner_packet",
+            developer_preview_final_gate_owner_packet,
+        ),
         ("ci_streak_intake_packet", ci_streak_intake_packet),
         ("ci_streak_manifest", ci_streak_manifest),
         ("github_actions_ci_streak_evidence", github_actions_ci_streak_evidence),
@@ -983,6 +993,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET,
     )
     parser.add_argument(
+        "--developer-preview-final-gate-owner-packet",
+        type=Path,
+        default=DEFAULT_DEVELOPER_PREVIEW_FINAL_GATE_OWNER_PACKET,
+    )
+    parser.add_argument(
         "--ci-streak-intake-packet",
         type=Path,
         default=DEFAULT_CI_STREAK_INTAKE_PACKET,
@@ -1138,6 +1153,9 @@ def main(argv: list[str] | None = None) -> int:
         pm_release_gate_reviewer_handoff=args.pm_release_gate_reviewer_handoff,
         pm_owner_evidence_request_packet=args.pm_owner_evidence_request_packet,
         structural_scope_owner_review_packet=args.structural_scope_owner_review_packet,
+        developer_preview_final_gate_owner_packet=(
+            args.developer_preview_final_gate_owner_packet
+        ),
         ci_streak_intake_packet=args.ci_streak_intake_packet,
         ci_streak_manifest=args.ci_streak_manifest,
         github_actions_ci_streak_evidence=args.github_actions_ci_streak_evidence,
