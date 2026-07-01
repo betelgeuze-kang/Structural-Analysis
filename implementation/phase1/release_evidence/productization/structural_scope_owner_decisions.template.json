@@ -5,7 +5,7 @@
     "retain_quarantined_with_signed_owner_exception"
   ],
   "blockers": [],
-  "claim_boundary": "This is a fill-in owner decision template. It is not approval, does not delete files, and does not close structural scope cleanup until every row has an allowed owner_decision, owner identity/role, decision timestamp, evidence reference, and any delete/extract decision has been applied and followed by a refreshed structural scope audit.",
+  "claim_boundary": "This is a fill-in owner decision template. It is not approval, does not delete files, and does not close structural scope cleanup until every row has an allowed owner_decision, owner identity/role, decision timestamp, evidence reference, and any delete/extract decision has been applied and followed by a refreshed structural scope audit. Retain decisions require a signed owner-exception reference.",
   "contract_pass": true,
   "decision_pending_count": 86,
   "decision_recorded_count": 0,
@@ -35,7 +35,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-001"
+      "row_id": "structural-scope-owner-001",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -62,7 +63,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-002"
+      "row_id": "structural-scope-owner-002",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -89,7 +91,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-003"
+      "row_id": "structural-scope-owner-003",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -116,7 +119,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-004"
+      "row_id": "structural-scope-owner-004",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -143,7 +147,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-005"
+      "row_id": "structural-scope-owner-005",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -170,7 +175,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-006"
+      "row_id": "structural-scope-owner-006",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -197,7 +203,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-007"
+      "row_id": "structural-scope-owner-007",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -224,7 +231,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-008"
+      "row_id": "structural-scope-owner-008",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -251,7 +259,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-009"
+      "row_id": "structural-scope-owner-009",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -278,7 +287,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-010"
+      "row_id": "structural-scope-owner-010",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -305,7 +315,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-011"
+      "row_id": "structural-scope-owner-011",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -332,7 +343,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-012"
+      "row_id": "structural-scope-owner-012",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -359,7 +371,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-013"
+      "row_id": "structural-scope-owner-013",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -386,7 +399,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-014"
+      "row_id": "structural-scope-owner-014",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -413,7 +427,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-015"
+      "row_id": "structural-scope-owner-015",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -440,7 +455,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-016"
+      "row_id": "structural-scope-owner-016",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -467,7 +483,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-017"
+      "row_id": "structural-scope-owner-017",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -494,7 +511,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-018"
+      "row_id": "structural-scope-owner-018",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -521,7 +539,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-019"
+      "row_id": "structural-scope-owner-019",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -548,7 +567,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-020"
+      "row_id": "structural-scope-owner-020",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -576,7 +596,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-021"
+      "row_id": "structural-scope-owner-021",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -603,7 +624,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-022"
+      "row_id": "structural-scope-owner-022",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -630,7 +652,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-023"
+      "row_id": "structural-scope-owner-023",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -657,7 +680,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-024"
+      "row_id": "structural-scope-owner-024",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -684,7 +708,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-025"
+      "row_id": "structural-scope-owner-025",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -711,7 +736,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-026"
+      "row_id": "structural-scope-owner-026",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -738,7 +764,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-027"
+      "row_id": "structural-scope-owner-027",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -765,7 +792,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-028"
+      "row_id": "structural-scope-owner-028",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -792,7 +820,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-029"
+      "row_id": "structural-scope-owner-029",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -819,7 +848,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-030"
+      "row_id": "structural-scope-owner-030",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -846,7 +876,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-031"
+      "row_id": "structural-scope-owner-031",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -875,7 +906,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-032"
+      "row_id": "structural-scope-owner-032",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -904,7 +936,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-033"
+      "row_id": "structural-scope-owner-033",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -933,7 +966,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-034"
+      "row_id": "structural-scope-owner-034",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -960,7 +994,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-035"
+      "row_id": "structural-scope-owner-035",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -987,7 +1022,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-036"
+      "row_id": "structural-scope-owner-036",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1014,7 +1050,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-037"
+      "row_id": "structural-scope-owner-037",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1041,7 +1078,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-038"
+      "row_id": "structural-scope-owner-038",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1068,7 +1106,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-039"
+      "row_id": "structural-scope-owner-039",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1095,7 +1134,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-040"
+      "row_id": "structural-scope-owner-040",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1122,7 +1162,8 @@
       "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
       "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
       "recommended_owner_decision_primary": "delete_from_structural_repository",
-      "row_id": "structural-scope-owner-041"
+      "row_id": "structural-scope-owner-041",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1149,7 +1190,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-042"
+      "row_id": "structural-scope-owner-042",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1176,7 +1218,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-043"
+      "row_id": "structural-scope-owner-043",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1203,7 +1246,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-044"
+      "row_id": "structural-scope-owner-044",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1230,7 +1274,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-045"
+      "row_id": "structural-scope-owner-045",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1257,7 +1302,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-046"
+      "row_id": "structural-scope-owner-046",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1284,7 +1330,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-047"
+      "row_id": "structural-scope-owner-047",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1311,7 +1358,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-048"
+      "row_id": "structural-scope-owner-048",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1338,7 +1386,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-049"
+      "row_id": "structural-scope-owner-049",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1365,7 +1414,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-050"
+      "row_id": "structural-scope-owner-050",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1392,7 +1442,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-051"
+      "row_id": "structural-scope-owner-051",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1419,7 +1470,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-052"
+      "row_id": "structural-scope-owner-052",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1446,7 +1498,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-053"
+      "row_id": "structural-scope-owner-053",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1473,7 +1526,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-054"
+      "row_id": "structural-scope-owner-054",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1500,7 +1554,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-055"
+      "row_id": "structural-scope-owner-055",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1527,7 +1582,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-056"
+      "row_id": "structural-scope-owner-056",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1554,7 +1610,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-057"
+      "row_id": "structural-scope-owner-057",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1581,7 +1638,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-058"
+      "row_id": "structural-scope-owner-058",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1608,7 +1666,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-059"
+      "row_id": "structural-scope-owner-059",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1635,7 +1694,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-060"
+      "row_id": "structural-scope-owner-060",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1663,7 +1723,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-061"
+      "row_id": "structural-scope-owner-061",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1690,7 +1751,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-062"
+      "row_id": "structural-scope-owner-062",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1719,7 +1781,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-063"
+      "row_id": "structural-scope-owner-063",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1746,7 +1809,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-064"
+      "row_id": "structural-scope-owner-064",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1774,7 +1838,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-065"
+      "row_id": "structural-scope-owner-065",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1801,7 +1866,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-066"
+      "row_id": "structural-scope-owner-066",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1828,7 +1894,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-067"
+      "row_id": "structural-scope-owner-067",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1855,7 +1922,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-068"
+      "row_id": "structural-scope-owner-068",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1882,7 +1950,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-069"
+      "row_id": "structural-scope-owner-069",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1909,7 +1978,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-070"
+      "row_id": "structural-scope-owner-070",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1936,7 +2006,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-071"
+      "row_id": "structural-scope-owner-071",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1963,7 +2034,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-072"
+      "row_id": "structural-scope-owner-072",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -1990,7 +2062,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-073"
+      "row_id": "structural-scope-owner-073",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2017,7 +2090,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-074"
+      "row_id": "structural-scope-owner-074",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2044,7 +2118,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-075"
+      "row_id": "structural-scope-owner-075",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2071,7 +2146,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-076"
+      "row_id": "structural-scope-owner-076",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2098,7 +2174,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-077"
+      "row_id": "structural-scope-owner-077",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2125,7 +2202,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-078"
+      "row_id": "structural-scope-owner-078",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2152,7 +2230,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-079"
+      "row_id": "structural-scope-owner-079",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2180,7 +2259,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-080"
+      "row_id": "structural-scope-owner-080",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2207,7 +2287,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-081"
+      "row_id": "structural-scope-owner-081",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2236,7 +2317,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-082"
+      "row_id": "structural-scope-owner-082",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2263,7 +2345,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-083"
+      "row_id": "structural-scope-owner-083",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2291,7 +2374,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-084"
+      "row_id": "structural-scope-owner-084",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2318,7 +2402,8 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-085"
+      "row_id": "structural-scope-owner-085",
+      "signed_owner_exception_reference": ""
     },
     {
       "allowed_owner_decisions": [
@@ -2345,15 +2430,16 @@
       "recommended_owner_decision": "extract_to_molecular_or_science_repository_or_delete_if_obsolete",
       "recommended_owner_decision_alternate": "delete_from_structural_repository",
       "recommended_owner_decision_primary": "extract_to_molecular_or_science_repository",
-      "row_id": "structural-scope-owner-086"
+      "row_id": "structural-scope-owner-086",
+      "signed_owner_exception_reference": ""
     }
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-01T20:26:37.120137+00:00",
+  "generated_at": "2026-07-01T21:02:11.063504+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:b747d8af08453e0a3602faf1c44c7903315062e89ba4cca8d21c23a13d3e81b7",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:f7448df7bcecedc9d5b4e9decefa56b7e0cb0778af167cf29853df70a834da0e"
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:e1ffb7c74e4f108766360554f78bd95c3d7d738637e85b1d297508c964f5c454",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:b6d7e6bd9fa121f9321f3dae4cc03fbf44cdf3d27d51a61466bf1b2b3a4bfedb"
   },
   "owner_decision_required_count": 86,
   "required_closure_evidence": [
@@ -2362,11 +2448,12 @@
     "per_path_decision",
     "evidence_reference",
     "external_archive_reference_for_extract_decisions",
+    "signed_owner_exception_reference_for_retain_decisions",
     "post_decision_structural_scope_audit"
   ],
   "reuse_policy": "structural_scope_owner_decision_template_from_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decisions.v1",
-  "source_commit_sha": "c6cd46627fa1b12aa6554eae39cc289b376fd8cb",
+  "source_commit_sha": "9ce2dba31b734c6282447be17e4a99838b6a8af7",
   "status": "pending_owner_decisions"
 }

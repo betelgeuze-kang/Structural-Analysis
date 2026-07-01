@@ -4,6 +4,7 @@
 - `contract_pass`: `True`
 - `decision_pending_count`: `86`
 - `external_archive_reference`: required when `owner_decision` is `extract_to_molecular_or_science_repository`
+- `signed_owner_exception_reference`: required when `owner_decision` is `retain_quarantined_with_signed_owner_exception`
 
 | Row | Path | Recommended Decision |
 |---|---|---|
@@ -96,4 +97,4 @@
 
 ## Claim Boundary
 
-This is a fill-in owner decision template. It is not approval, does not delete files, and does not close structural scope cleanup until every row has an allowed owner_decision, owner identity/role, decision timestamp, evidence reference, and any delete/extract decision has been applied and followed by a refreshed structural scope audit.
+This is a fill-in owner decision template. It is not approval, does not delete files, and does not close structural scope cleanup until every row has an allowed owner_decision, owner identity/role, decision timestamp, evidence reference, and any delete/extract decision has been applied and followed by a refreshed structural scope audit. Retain decisions require a signed owner-exception reference.

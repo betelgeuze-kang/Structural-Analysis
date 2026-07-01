@@ -22,12 +22,12 @@
     "molecular_dynamics": 25,
     "molecular_science_evidence": 13
   },
-  "generated_at": "2026-07-01T20:26:37.114237+00:00",
+  "generated_at": "2026-07-01T21:02:11.057793+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:a5366e9f82f020d6d276ba335af7c297815fafd658e00404d25d88103735c947",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:3503fc1fc7a411b25c20db770068491b2ba716289e343fe6cea5aa3a87f431d9",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:f7448df7bcecedc9d5b4e9decefa56b7e0cb0778af167cf29853df70a834da0e"
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:b6d7e6bd9fa121f9321f3dae4cc03fbf44cdf3d27d51a61466bf1b2b3a4bfedb"
   },
   "manifest_absent_path_count": 0,
   "owner_decision_pending_count": 86,
@@ -74,6 +74,7 @@
     "per_path_decision",
     "evidence_reference",
     "external_archive_reference_for_extract_decisions",
+    "signed_owner_exception_reference_for_retain_decisions",
     "post_decision_structural_scope_audit"
   ],
   "reuse_policy": "structural_scope_owner_review_packet_from_quarantine_audit",
@@ -284,6 +285,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -304,6 +306,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -332,6 +335,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -352,6 +356,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -380,6 +385,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -400,6 +406,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -428,6 +435,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -448,6 +456,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -476,6 +485,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -496,6 +506,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -524,6 +535,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -544,6 +556,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -572,6 +585,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -592,6 +606,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -620,6 +635,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -640,6 +656,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -668,6 +685,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -688,6 +706,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -716,6 +735,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -736,6 +756,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -764,6 +785,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -784,6 +806,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -812,6 +835,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -832,6 +856,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -860,6 +885,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -880,6 +906,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -908,6 +935,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -928,6 +956,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -956,6 +985,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -976,6 +1006,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1004,6 +1035,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1024,6 +1056,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1052,6 +1085,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1072,6 +1106,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1100,6 +1135,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1120,6 +1156,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1148,6 +1185,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1168,6 +1206,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1196,6 +1235,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1216,6 +1256,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1244,6 +1285,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1265,6 +1307,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1293,6 +1336,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1313,6 +1357,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1341,6 +1386,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1361,6 +1407,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1389,6 +1436,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1409,6 +1457,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1437,6 +1486,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1457,6 +1507,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1485,6 +1536,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1505,6 +1557,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1533,6 +1586,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1553,6 +1607,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1581,6 +1636,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1601,6 +1657,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1629,6 +1686,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1649,6 +1707,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1677,6 +1736,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1697,6 +1757,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1725,6 +1786,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1745,6 +1807,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1773,6 +1836,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1795,6 +1859,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1823,6 +1888,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1845,6 +1911,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1873,6 +1940,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1895,6 +1963,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1923,6 +1992,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1943,6 +2013,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -1971,6 +2042,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -1991,6 +2063,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2019,6 +2092,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2039,6 +2113,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2067,6 +2142,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2087,6 +2163,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2115,6 +2192,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2135,6 +2213,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2163,6 +2242,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2183,6 +2263,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2211,6 +2292,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2231,6 +2313,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2259,6 +2342,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2279,6 +2363,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2307,6 +2392,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2327,6 +2413,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2355,6 +2442,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2375,6 +2463,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2403,6 +2492,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2423,6 +2513,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2451,6 +2542,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2471,6 +2563,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2499,6 +2592,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2519,6 +2613,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2547,6 +2642,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2567,6 +2663,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2595,6 +2692,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2615,6 +2713,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2643,6 +2742,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2663,6 +2763,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2691,6 +2792,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2711,6 +2813,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2739,6 +2842,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2759,6 +2863,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2787,6 +2892,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2807,6 +2913,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2835,6 +2942,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2855,6 +2963,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2883,6 +2992,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2903,6 +3013,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2931,6 +3042,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2951,6 +3063,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -2979,6 +3092,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -2999,6 +3113,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3027,6 +3142,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3047,6 +3163,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3075,6 +3192,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3095,6 +3213,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3123,6 +3242,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3143,6 +3263,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3171,6 +3292,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3192,6 +3314,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3220,6 +3343,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3240,6 +3364,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3268,6 +3393,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3290,6 +3416,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3318,6 +3445,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3338,6 +3466,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3366,6 +3495,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3387,6 +3517,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3415,6 +3546,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3435,6 +3567,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3463,6 +3596,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3483,6 +3617,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3511,6 +3646,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3531,6 +3667,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3559,6 +3696,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3579,6 +3717,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3607,6 +3746,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3627,6 +3767,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3655,6 +3796,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3675,6 +3817,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3703,6 +3846,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3723,6 +3867,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3751,6 +3896,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3771,6 +3917,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3799,6 +3946,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3819,6 +3967,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3847,6 +3996,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3867,6 +4017,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3895,6 +4046,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3915,6 +4067,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3943,6 +4096,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -3963,6 +4117,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -3991,6 +4146,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4011,6 +4167,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4039,6 +4196,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4059,6 +4217,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4087,6 +4246,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4108,6 +4268,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4136,6 +4297,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4156,6 +4318,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4184,6 +4347,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4206,6 +4370,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4234,6 +4399,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4254,6 +4420,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4282,6 +4449,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4303,6 +4471,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4331,6 +4500,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4351,6 +4521,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4379,6 +4550,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
@@ -4399,6 +4571,7 @@
         "per_path_decision",
         "evidence_reference",
         "external_archive_reference_for_extract_decisions",
+        "signed_owner_exception_reference_for_retain_decisions",
         "post_decision_structural_scope_audit"
       ],
       "owner_decision_required": true,
@@ -4417,7 +4590,7 @@
     }
   ],
   "schema_version": "structural-scope-owner-review-packet.v1",
-  "source_commit_sha": "c6cd46627fa1b12aa6554eae39cc289b376fd8cb",
+  "source_commit_sha": "9ce2dba31b734c6282447be17e4a99838b6a8af7",
   "status": "ready_for_owner_review",
   "summary_line": "Structural scope owner review: READY_FOR_OWNER_REVIEW | pending=86 | cleanup_pending=0 | excluded=86/86 | unquarantined=0",
   "unquarantined_non_structural_path_count": 0,
