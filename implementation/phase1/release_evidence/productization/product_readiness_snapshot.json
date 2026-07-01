@@ -126,7 +126,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 23,
+      "blocker_count": 9,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -136,21 +136,7 @@
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness"
       ],
       "description": "Developer Preview productization evidence: release freshness/sync, CI/runner streaks, generated artifact consistency, and human UX workflow observation.",
       "root_streams": [
@@ -160,7 +146,7 @@
       ]
     }
   },
-  "blocker_count": 51,
+  "blocker_count": 37,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -198,21 +184,7 @@
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "pm_release::security::license_status_not_configured",
     "self_hosted_runner::self_hosted_runner_matching_labels_not_online",
-    "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-    "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-    "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-    "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-    "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-    "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-    "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-    "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-    "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-    "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-    "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-    "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-    "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-    "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+    "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness"
   ],
   "claim_boundary": {
     "assisted_service_pilot": "assisted_service_pilot_ready is the engineer-review workstation service track. It requires workstation delivery 8/8, supported-scope guard, full quality, clean GitHub sync, real human UX observation, product/legal license approval, acceptance package, and explicit proxy/fallback/engineer-review boundaries. It does not relax solver_product gates.",
@@ -366,12 +338,12 @@
       "status": "blocked"
     },
     "developer_preview_readiness": {
-      "blocker_count": 6,
+      "blocker_count": 19,
       "category_counts": {
         "benchmark": 0,
         "future commercial": 31,
-        "numerical": 4,
-        "software product": 2
+        "numerical": 6,
+        "software product": 13
       },
       "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.",
       "developer_preview_ready": false,
@@ -1889,20 +1861,56 @@
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
         "changed_paths_since_source_commit": [
+          ".github/workflows/ai-contract-verify.yml",
+          ".github/workflows/ci.yml",
+          ".github/workflows/deploy-pages.yml",
+          ".github/workflows/frontend-web-ci.yml",
+          ".github/workflows/viewer-browser-ci.yml",
+          ".github/workflows/workflow-contract-ci.yml",
           "docs/source-of-truth-gap-classification.md",
+          "implementation/phase1/open_data/korea/korean_source_catalog.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt_real_section_lateral_pushover_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.model_derived_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.wind_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_converted_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_test.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+          "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
+          "scripts/build_phase3_benchmark_factory_artifacts.py",
+          "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_source_of_truth_gap_classification.py",
+          "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+          "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
           "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "scripts/materialize_science_actual_closure_from_rows.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
+          "scripts/score_symmetry_aware_ligand_rmsd.py",
+          "scripts/validate_public_benchmark_pose_validity.py",
+          "tests/ai-verify-contract.test.mjs",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
+          "tests/test_build_phase3_benchmark_factory_artifacts.py",
+          "tests/test_build_phase3_ifc_source_license_receipt.py",
+          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_source_of_truth_gap_classification.py",
+          "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
+          "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
           "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_operator_bundle_from_rows.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_pose_validity_input.py",
           "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py"
+          "tests/test_materialize_science_actual_closure_from_rows.py",
+          "tests/test_run_g1_full_load_hip_newton_lane.py",
+          "tests/test_score_symmetry_aware_ligand_rmsd.py",
+          "tests/test_validate_public_benchmark_pose_validity.py"
         ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
@@ -2905,34 +2913,34 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-01T09:17:47.253588+00:00",
+  "generated_at": "2026-07-01T09:25:12.527394+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
     "README.md": "sha256:b87a4dbcd390b197122df3f65399da0c6eaf2c294f96b71e6df7a6f90d5c59e0",
     "docs/commercialization-gap-current-state.md": "sha256:a935f3bfe7268f2da846ef4e33052b112cc6b4ce64772485e681bba56c02a99a",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:bd871219eff57446b2aa60ac80b9f42fade901cd42f7114a3ebe46bd443c802f",
-    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:ceef6846339536a752e034fca8ac1ac3f3119c1b9378d464f6074af69d3ea4e6",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:414115e105acebde0d1b39db6cb9e746cbee8adca064a1099cc0603bb455486c",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d61804a3527203f67209a2002fcc6fbedaf42881b73332e2a4b0c64e54fe6a52",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:61cdd042397436c11a2c1b40d37e3fb6be1e17410afa9e83baa3b6a32e56fc4c",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:1db8c1625d478634745387352b6e2a651855a98ac507c0918958af3b74e927a6",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:7316151ef489a5e04716cbea68a6b56242d905fe1bb63f070eac876f8ed24f72",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:15ea6b45c751e70c0102cb1f08381ea94eda186e0b3d090ff950090bf4257a32",
-    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:43bcf6304589ae4a66cf3330d423689a79848824ddf99a29c30acf88439f6dff",
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:d34268f2786d59b54a71a372b88fa2e1db175ef4c96fbe34e32e08ba1066f096",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:1ad0154198b0a0128a55b4887189376ecb1b0e01d626a7471510f51388ba6491",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:b19c8491d225fcdf4266da9e362d2927fb39210fa4bf6d78e705832a0ed5caa8",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:b84de3f75279e33eb0d5f292d743081313cbb09f01c0078370bde1ef3d5453e2",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:cf2edda680f4f9a0283c3b099332862536a3b2fec19d6b8ee07fad517f94abcc",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:3f41178d0de3b0453c3de174f51a47a8d71a99adff550702a5f5e8b9eb7b5c80",
-    "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:8f39d523434113e0e5c0ad453736c7d87875f59a5e102a4fb57b111d98bcb493",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:de26b0cfee2956f533c3d2e907f5a6065270d1f75fa5b0d74b19af860112ba9e",
-    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:c34dc5c332cf7d8297e98db6d81da893e24938b8bf5f92a845056d943997b6a8",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:79c2406660fa2fa3219cb9d50b3067567b2c24b3078f0644a1679f3044d58a89",
+    "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:1d58053400e33e9a7edc676108ced5249e31872182b29e4cf9ea3ee2979d47b5",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:69494af6232a482062c9021a8606fdad380ae616ef55b53ae6c08b458eaad24c",
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:74ea0caf65b53a87f0006528d5266bc2b93f07f04cccbe8b891df253cf8aa36f",
     "implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json": "sha256:ef278e5e3e9e8fb5bdb5d516c68adfafbec47236a3d908fd76adb8f36e07baa2",
-    "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:469577441df93a0a921e81d3c63cb953a1bbf25dc39316da3994074479b0b155",
-    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:ca082aeb1bf12d755e3cb84a81cb9ba32f25c46d92ed1297e6a03aa3fca06306",
-    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:59dc2e9d718cd42e612fb4525aaca3ab2d1bca3d00b5412ce67c6d18c9b5ee13",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d7fb33f26e160febe9d83a471f7288e976770ce6e30a46ef0bc32d36733180d4",
+    "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:703212dc490ac513fba2afa062f9c03beffd85a33f4e87013fb69f066eaf6029",
+    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:82fbf59aa4018bda91e0a14b5cbc6984071cd7a8bd9189789a44061671361089",
+    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:7e1ffa6ec40063a30ad628352b13c790e57a8744ccbfb9ce195f8bcc732ef9e8",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:1c7f176aa1883fcaaca3c194a9ab8d37f9cabde983052cf123de16ebf37db6b2",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d8eb5aac9e8200086880864926319fc9d2acfcc45df616298cc8c65466f675b4",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0e1850cd8393fc83307aedd23f3126fb429066abde3b84256d9417e64936d4cb",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:63f8dbe11a9337b0e8e94cd1619fe2b0935cb7aa9aa226ff6c4fc61f774e02b7",
-    "implementation/phase1/workstation_delivery_readiness.json": "sha256:70b17342ca14c247a8eab30e58a298eed93f1baee7c4a4f5a0cee931484bf95f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:19bd49c64f56507799a184988d252459454fef6a8abb3d203e40685c4df5484e",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:75068315ad3d130570a45d117c96f3b1e326ff1437642f7f269d53b900c0c823",
+    "implementation/phase1/workstation_delivery_readiness.json": "sha256:1413fdb7308adbdf534106a0dc1cbb63448c43f5a758fad851765ab10016e787",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "scripts/build_product_readiness_snapshot.py": "sha256:3cefea30f4a0046cc203986a06f8297487a01b7d81c95d0d80ea1542fb715f79"
@@ -3578,23 +3586,9 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 15,
+      "blocker_count": 1,
       "blockers": [
-        "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
-        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
-        "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-        "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
-        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
-        "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
-        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
-        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
-        "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
-        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
-        "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
-        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness"
       ]
     }
   },
@@ -3602,7 +3596,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "d5380601a383f4ed066e0e0972916938b73844c2",
+  "source_commit_sha": "f960760f38f0e26c14ac4928fe888120b3a59014",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3692,140 +3686,143 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-01T09:17:34.935975+00:00",
+        "generated_at": "2026-07-01T09:25:02.443237+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "d5380601a383f4ed066e0e0972916938b73844c2",
+        "source_commit_sha": "f960760f38f0e26c14ac4928fe888120b3a59014",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T08:20:12.070403+00:00",
+        "generated_at": "2026-07-01T09:21:19.343199+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "c2d870dc960cc9df3b85172896accb671a09dd72",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:45:35.766338+00:00",
+        "generated_at": "2026-07-01T09:21:32.541038+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:45:07.584225+00:00",
+        "generated_at": "2026-07-01T09:21:18.998688+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:45:08.968595+00:00",
+        "generated_at": "2026-07-01T09:21:08.314716+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:45:51.051525+00:00",
+        "generated_at": "2026-07-01T09:22:16.114768+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
-          "scripts/materialize_science_actual_closure_from_rows.py",
-          "tests/test_materialize_science_actual_closure_from_rows.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T09:07:47.026353+00:00",
+        "generated_at": "2026-07-01T09:22:48.927483+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "6b48e9305297d798ad68dca13b91aec1fc89a032",
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
         "source_state_fresh": true,
         "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
           "scripts/materialize_science_actual_closure_from_rows.py",
           "scripts/score_symmetry_aware_ligand_rmsd.py",
           "scripts/validate_public_benchmark_pose_validity.py",
           "tests/test_build_phase3_ifc_source_license_receipt.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_public_benchmark_pose_validity_input.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
           "tests/test_materialize_science_actual_closure_from_rows.py",
           "tests/test_score_symmetry_aware_ligand_rmsd.py",
           "tests/test_validate_public_benchmark_pose_validity.py"
@@ -3842,82 +3839,78 @@
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:45:07.698997+00:00",
+        "generated_at": "2026-07-01T09:21:06.870206+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T08:05:27.923329+00:00",
+        "generated_at": "2026-07-01T09:21:06.967796+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "8ba36c1c3ed027e8453c25a749f0bcdd13c6f2fc",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:45:35.664639+00:00",
+        "generated_at": "2026-07-01T09:21:06.886227+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:44:54.554667+00:00",
+        "generated_at": "2026-07-01T09:21:06.904661+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "independent_product_readiness",
@@ -3942,117 +3935,116 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
         "generated_at": "2026-07-01T07:44:39.126273+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
-        "reused_evidence": false,
+        "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:44:54.223011+00:00",
+        "generated_at": "2026-07-01T09:21:18.700031+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:44:54.201992+00:00",
+        "generated_at": "2026-07-01T09:21:18.773419+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:44:54.221093+00:00",
+        "generated_at": "2026-07-01T09:21:18.856412+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/materialize_science_actual_closure_from_rows.py",
-          "tests/test_materialize_science_actual_closure_from_rows.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T09:04:57.460832+00:00",
+        "generated_at": "2026-07-01T09:21:32.373198+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "382dfd6b730a02ffbd6afa86af286e6d55baeb7b",
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
         "source_state_fresh": true,
         "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
-          ".github/workflows/ai-contract-verify.yml",
-          ".github/workflows/ci.yml",
-          ".github/workflows/deploy-pages.yml",
-          ".github/workflows/frontend-web-ci.yml",
-          ".github/workflows/viewer-browser-ci.yml",
-          ".github/workflows/workflow-contract-ci.yml",
-          "scripts/build_phase3_benchmark_factory_artifacts.py"
+          "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+          "scripts/materialize_public_benchmark_phase2_from_rows.py",
+          "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+          "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py"
         ],
-        "generated_at": "2026-07-01T07:45:35.743845+00:00",
+        "generated_at": "2026-07-01T09:21:18.881335+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_sha": "1c60b6e1af7af5e9ea137de8946ef27951a93c80",
+        "source_state_fresh": true,
+        "source_state_kind": "non_artifact_source_paths_changed"
       }
     ],
     "open_blocker_counts": {
@@ -4079,7 +4071,8 @@
       "dirty_paths": [
         "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
+        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4106,7 +4099,8 @@
       "status_rows": [
         " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
+        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
       ]
     }
   },
