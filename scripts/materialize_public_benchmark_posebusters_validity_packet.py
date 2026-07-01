@@ -16,6 +16,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 from validate_public_benchmark_pose_validity import (  # noqa: E402
+    ROW_INTEGRITY_POLICY,
     SCHEMA_VERSION as VALIDATOR_SCHEMA_VERSION,
     is_non_actual_pose_case,
     validate_pose_validity_payload,
@@ -204,6 +205,9 @@ def materialize_posebusters_validity_packet(
 
     dry_run_case_count = sum(1 for row in cases if is_non_actual_pose_case(row))
     real_benchmark_case_count = max(len(cases) - dry_run_case_count, 0)
+    unique_real_benchmark_case_count = int(
+        validation.get("unique_real_benchmark_case_count") or 0
+    )
     if cases and real_benchmark_case_count == 0:
         blockers.append("real_benchmark_pose_cases_missing")
 
@@ -242,7 +246,9 @@ def materialize_posebusters_validity_packet(
         "contract_pass": packet_ready,
         "posebusters_validity_ready": packet_ready,
         "validator_schema_version": VALIDATOR_SCHEMA_VERSION,
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "real_benchmark_case_count": real_benchmark_case_count,
+        "unique_real_benchmark_case_count": unique_real_benchmark_case_count,
         "dry_run_case_count": dry_run_case_count,
         "case_count": len(case_rows),
         "pose_success_count": pose_success_count,
@@ -257,6 +263,7 @@ def materialize_posebusters_validity_packet(
             "pose_validity_input_case_count": len(cases),
             "materialized_case_count": len(case_rows),
             "real_benchmark_case_count": real_benchmark_case_count,
+            "unique_real_benchmark_case_count": unique_real_benchmark_case_count,
             "dry_run_case_count": dry_run_case_count,
             "pose_success_count": pose_success_count,
             "pose_failure_count": max(len(case_rows) - pose_success_count, 0),

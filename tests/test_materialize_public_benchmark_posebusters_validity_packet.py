@@ -114,6 +114,26 @@ def test_posebusters_packet_materializer_blocks_placeholder_source_family() -> N
     assert packet["case_rows"][0]["status"] == "blocked"
 
 
+def test_posebusters_packet_materializer_blocks_duplicate_case_ids() -> None:
+    packet = module.materialize_posebusters_validity_packet(
+        {"pose_validity_ready": True, "cases": [_pose_case(), _pose_case()]},
+        repo_root=REPO_ROOT,
+    )
+
+    assert packet["posebusters_validity_ready"] is False
+    assert packet["status"] == "posebusters_validity_materialization_required"
+    assert packet["row_integrity_policy"]["required_unique_row_keys"] == {
+        "cases": ["case_id"],
+    }
+    assert packet["real_benchmark_case_count"] == 2
+    assert packet["unique_real_benchmark_case_count"] == 1
+    assert "case_a:case_id_duplicate:row_1" in packet["blockers"]
+    assert packet["validation"]["unique_real_benchmark_case_count"] == 1
+    assert (
+        packet["materialization_report"]["unique_real_benchmark_case_count"] == 1
+    )
+
+
 def test_posebusters_packet_materializer_blocks_invalid_pose_input() -> None:
     packet = module.materialize_posebusters_validity_packet(
         {"pose_validity_ready": False, "cases": []},
