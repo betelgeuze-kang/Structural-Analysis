@@ -105,7 +105,7 @@
         "evidence_ref is a ticket/jira/ux/user-study reference, https URL, or existing local evidence path",
         "evidence_ref is not the observation JSON itself",
         "evidence_ref is not docs/templates or a .template artifact",
-        "evidence_ref is not a generated UX report or intake artifact",
+        "evidence_ref is not a generated UX/PM/DP/readiness gate or automated browser-rehearsal artifact",
         "approval_decision is accepted, approved, pass, signed, or approved_for_release"
       ],
       "slot_id": "attach_separate_evidence_reference"
@@ -125,7 +125,7 @@
     }
   ],
   "gate_unblock_plan_count": 5,
-  "generated_at": "2026-07-01T21:43:58.507279+00:00",
+  "generated_at": "2026-07-01T22:31:56.887011+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ux_new_user_observation.json": "missing"
   },
@@ -177,7 +177,7 @@
   ],
   "reused_evidence": false,
   "schema_version": "ux-new-user-observation-report.v1",
-  "source_commit_sha": "f5afaad9132ea5c9b63e5a41ecc6cd0b2a9599f3",
+  "source_commit_sha": "3cdf1cb9cd031d9d4720fa24934a79d676cfddff",
   "status": "blocked",
   "summary": {
     "approval_decision": "",
