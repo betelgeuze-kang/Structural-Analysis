@@ -57,7 +57,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-01T12:22:29.874437+00:00",
+  "generated_at": "2026-07-01T12:36:43.216845+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -112,11 +112,11 @@
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:6aba5381246de5debd624bd0a061cd50d895a893ff38d34475a79c37f6059e51",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:e5075f0024f86ad795e8c8c683362294c00e190d8ebb047db04b6d8518f6420a",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:f5f465c60fa487328fd4f0f16e35540cff03560268040e4e7c6d848feda47de4",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:76dfdb590c363f963b1b3a86ca6982d1fefe1833f165c6cec858271cec768f70",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:2ba4342e3863a9036e7ed9aa533237a3094965b6c40e950f8a76682c8d3347f3",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:b1728d8c5c6714b7dfa89a27f0fa67a969e793a3bcbf1003655bb30fc435e059",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:44b083a4efa72cceda4f12b8b85c2c7eb4879b2afd5f738d6cf1993571e85a90",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -523,11 +523,11 @@
       "ok": true,
       "status": "pass",
       "summary": {
-        "artifact_count": 14,
+        "artifact_count": 18,
         "blocker_count": 0,
-        "current_source_commit_sha": "155c84f65ae89b42df5b2a2ba7defd79bb31e19d",
+        "current_source_commit_sha": "209a053ca5821717173233afa579ec54f614d720",
         "max_age_days": 30.0,
-        "pass_count": 14
+        "pass_count": 18
       },
       "title": "Evidence Freshness"
     },
@@ -965,18 +965,26 @@
           "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
           "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
           "implementation/phase1/support_bundle_manifest.json",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
           "scripts/build_phase6_benchmark_scale_status.py",
+          "scripts/build_product_capabilities_surface.py",
+          "scripts/build_product_readiness_snapshot.py",
           "scripts/build_public_benchmark_operator_intake_packet.py",
           "scripts/materialize_public_benchmark_phase2_from_rows.py",
           "scripts/materialize_science_actual_closure_from_rows.py",
+          "scripts/report_pm_release_gate.py",
           "scripts/report_release_evidence_freshness.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
+          "tests/test_build_product_capabilities_surface.py",
+          "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_public_benchmark_operator_intake_packet.py",
           "tests/test_materialize_public_benchmark_phase2_from_rows.py",
           "tests/test_materialize_science_actual_closure_from_rows.py",
+          "tests/test_report_pm_release_gate.py",
           "tests/test_report_release_evidence_freshness.py"
         ],
-        "current_head_sha": "04737d7b5c1c9a0a32c7438c972bfdd17a6df435",
+        "current_head_sha": "209a053ca5821717173233afa579ec54f614d720",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -1189,6 +1197,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "04737d7b5c1c9a0a32c7438c972bfdd17a6df435",
+  "source_commit_sha": "209a053ca5821717173233afa579ec54f614d720",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
