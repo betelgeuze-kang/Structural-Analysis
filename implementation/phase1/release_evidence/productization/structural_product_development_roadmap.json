@@ -11,24 +11,24 @@
     "pm_milestones": "5/5",
     "pm_release_areas": "13/16",
     "release_ready": false,
-    "snapshot_blocker_count": 52,
+    "snapshot_blocker_count": 37,
     "snapshot_status": "stale_or_inconsistent",
     "workstation_delivery_ready": true
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 62.5,
-  "generated_at": "2026-07-01T07:43:11.116196+00:00",
+  "generated_at": "2026-07-01T07:47:48.157888+00:00",
   "input_checksums": {
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:6daabccf41ec83b03fbefd505ff88bb5ee5af22610c51ed0c0126d4f66239044",
-    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:4b44b12f77358b2fbd3d4b0251762fd92803c08f3e1a1a8552a975f23083f213",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:1f00cf05868d5506d5ab471dd8c410c623fe97b125cb3b7272959f42034bf278",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:bd871219eff57446b2aa60ac80b9f42fade901cd42f7114a3ebe46bd443c802f",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:92cbd089d7918415dfb18d0d767755c50e429a8bdebd0cf11135bdba56910627",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:0374b53376311c9dbe9e8a9f7ee0964cff7f94f3aa57a64fc18ddf326b3eec3c",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:5035b57d5f9193f0e56a97ac6d3753a81562c1a0a4142337bd46d701d56c286f",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:50f35813d3a3186e0ae9e83874bc63881c5d4759693b0ec751c10b309261a552",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
-    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:3dd87004d8b5a9f26dce8231f775ec4000c3ed5c311f0afca14b52cbbbf2f6b0",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1b82740d02c4c43c6ae226ea7a1de56a34bb13845e1aa194556034b8c06e35d5",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:5ee809ff39d3a56143b16ac2751e53af30a603c01edaed03cfb074dfb894ba31",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:66841f5a131f883f84fdac9228cc5ff860863ac3c8f58b9125757f2fd9575209",
+    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:ca082aeb1bf12d755e3cb84a81cb9ba32f25c46d92ed1297e6a03aa3fca06306",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:df3b547949eea2b2b7b52e6cbd82c575c47e4decbfc63e0f95207c7db24ba591",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:6c55ebf8480874f94fb07756fc032595c88bf0da6a229e17d54665b3d00e0a4e",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:dc7a15727fa6ca3d7054627b2dd64633e5a60814b6aebda15987215841bfb1b6",
     "scripts/build_structural_product_development_roadmap.py": "sha256:7fefa7570e85ee2d5a4c130fcd9bd12577146739ced51a2da9a15b6d115a302a"
   },
   "passed_evidence_requirement_count": 30,
@@ -168,7 +168,7 @@
       "summary": {
         "fresh_artifact_count": 18,
         "fresh_artifact_pass_count": 18,
-        "snapshot_blocker_count": 52,
+        "snapshot_blocker_count": 37,
         "stale_or_inconsistent": true
       }
     },
@@ -379,7 +379,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "55c8bdddee6942571aca5197f4a8b507ffa15e83",
+  "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
   "stage_average_progress_percent": 46.5,
   "stage_count": 7,
   "status": "blocked",
