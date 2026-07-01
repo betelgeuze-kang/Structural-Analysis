@@ -211,8 +211,8 @@
       "bytes": 59343,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "ee76aeb326f5542d9cf8839fda8f71d7dc67142d186e759b025b215656491571",
-      "sha256": "ee76aeb326f5542d9cf8839fda8f71d7dc67142d186e759b025b215656491571",
+      "redacted_sha256": "827772001bb69a67237a1c0b2bf28ae1f8e7d1ceda7f39012436abc840082796",
+      "sha256": "827772001bb69a67237a1c0b2bf28ae1f8e7d1ceda7f39012436abc840082796",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
@@ -220,17 +220,17 @@
       "bytes": 35377,
       "label": "pm_release_blocker_closure_board",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
-      "redacted_sha256": "7d5da94b915edc574b0b840dfc8a4b4e903664e9c499df6410fcc593ce3ca926",
-      "sha256": "7d5da94b915edc574b0b840dfc8a4b4e903664e9c499df6410fcc593ce3ca926",
+      "redacted_sha256": "90d5e7ae4d2ea0356bd8392e5c4439b439e32433efa8853625386ca0e6cb7126",
+      "sha256": "90d5e7ae4d2ea0356bd8392e5c4439b439e32433efa8853625386ca0e6cb7126",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
     },
     {
       "available": true,
-      "bytes": 143710,
+      "bytes": 143678,
       "label": "pm_release_gate_completion_audit",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
-      "redacted_sha256": "e248137ff552300eb9f060ab70ef8225e74b370a007e5e11901b3d24459d667f",
-      "sha256": "e5977a4729ba1fbfec5c77fef9bdeaf27e461ba9475740020329f551e82780e2",
+      "redacted_sha256": "2ca23c4c7eaf6e9c8da598adaf9940e80343e65e02e526d2cfa8c5f811df48db",
+      "sha256": "7fbec9866d3488edb458108730d627935fcfa52d80a065ccd6488b405073361a",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
     },
     {
@@ -238,8 +238,8 @@
       "bytes": 42492,
       "label": "pm_release_gate_reviewer_handoff",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
-      "redacted_sha256": "6d8a03e07bf780b8d8c4387977941b647b3fda3f5a810817b9ca9e9b7c6d0e41",
-      "sha256": "6d8a03e07bf780b8d8c4387977941b647b3fda3f5a810817b9ca9e9b7c6d0e41",
+      "redacted_sha256": "f1683c0ed0dfb9824f107916bf27e818b4e98efab02ee47ede76aa8e60a4446e",
+      "sha256": "f1683c0ed0dfb9824f107916bf27e818b4e98efab02ee47ede76aa8e60a4446e",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
     },
     {
@@ -247,8 +247,8 @@
       "bytes": 162705,
       "label": "pm_owner_evidence_request_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
-      "redacted_sha256": "fb7795300d185c6c302fb2396c2d8f9d339e33458aee0e23620990a0c07af753",
-      "sha256": "fb7795300d185c6c302fb2396c2d8f9d339e33458aee0e23620990a0c07af753",
+      "redacted_sha256": "fa68521dd767c4cbe52ff0d3bd761cea0a8e8bcb784b201b22518bf586f77209",
+      "sha256": "fa68521dd767c4cbe52ff0d3bd761cea0a8e8bcb784b201b22518bf586f77209",
       "source_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"
     },
     {
@@ -415,20 +415,20 @@
     },
     {
       "available": true,
-      "bytes": 5825,
+      "bytes": 5879,
       "label": "ux_new_user_observation_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json",
-      "redacted_sha256": "56e7773bf677da83d00b40b6e84101925056c330db03e70999a8f0e7fee19868",
-      "sha256": "56e7773bf677da83d00b40b6e84101925056c330db03e70999a8f0e7fee19868",
+      "redacted_sha256": "5e764b0c2fd3e2cbaf5b8d936a46cf4da7d28229a072b90b137d8c4b28ca05d5",
+      "sha256": "5e764b0c2fd3e2cbaf5b8d936a46cf4da7d28229a072b90b137d8c4b28ca05d5",
       "source_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
     },
     {
       "available": true,
-      "bytes": 14057,
+      "bytes": 14551,
       "label": "ux_new_user_observation_intake_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json",
-      "redacted_sha256": "f1d349767c211fde2b05f72376c19af8fa80d4ba0583cd44888d6de9158f36a7",
-      "sha256": "f1d349767c211fde2b05f72376c19af8fa80d4ba0583cd44888d6de9158f36a7",
+      "redacted_sha256": "f2e13c7a69f4a261336eebe9568b55919b13716eb743588af602c9544cd79208",
+      "sha256": "f2e13c7a69f4a261336eebe9568b55919b13716eb743588af602c9544cd79208",
       "source_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
     },
     {
@@ -491,7 +491,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-07-01T17:33:17.722173+00:00",
+    "generated_at": "2026-07-01T17:47:58.960415+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -500,7 +500,7 @@
     "artifact_count": 53,
     "available_artifact_count": 53,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "2575f4d00d2fcfccd915f3ecaf959b4504e7e08954029e359112e369eec848f2"
+    "sha256": "99425fe3dca6a6ad91c7d30b347de37ec411cc14af49a86c0b86150d155be8eb"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -522,7 +522,7 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 465063,
+    "bytes": 465124,
     "error": "",
     "member_count": 57,
     "members": [
@@ -585,9 +585,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "91a5ead9e9baf40b3a354bf68a967e59011902bc4b28cd7864afbe54001363db"
+    "sha256": "f17d4f75d0bf999fa306c94b4c26a20783aa454b7c4501f59f1e6ed0750c99c0"
   },
-  "generated_at": "2026-07-01T17:33:17.781926+00:00",
+  "generated_at": "2026-07-01T17:47:59.020633+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -664,7 +664,7 @@
       "ux::human_new_user_30min_sample_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed"
     ],
-    "generated_at": "2026-07-01T17:33:17.724517+00:00",
+    "generated_at": "2026-07-01T17:47:58.962772+00:00",
     "missing_required_section_labels": [],
     "open_blocker_ids": [
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -844,7 +844,7 @@
       }
     ],
     "schema_version": "pm-failure-bundle-coverage.v1",
-    "sha256": "0d71d98d3414ec4706614fd4601d7cc54ccc17d4bdf24343bfbeb50f487c22ef",
+    "sha256": "bd2b48a7311e0281d66df1366409d534dd1f58bc54a9b41f3a56d7ec3585fe99",
     "source_artifacts": {
       "pm_owner_evidence_request_packet": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
       "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",

@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-01T17:31:51.134630+00:00",
+  "generated_at": "2026-07-01T17:47:43.871427+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -40,14 +40,14 @@
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-    "local_head_sha": "c8d4a6edfd6df4ba706355ffd49fd19482f1a5ed",
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.md\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json\n M implementation/phase1/support_bundle_manifest.json",
+    "local_head_sha": "e1dc4dd36d67e2c86fbaffa9804014ac6987d8fa",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "c8d4a6edfd6df4ba706355ffd49fd19482f1a5ed",
+    "remote_feature_sha": "e1dc4dd36d67e2c86fbaffa9804014ac6987d8fa",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "c8d4a6edfd6df4ba706355ffd49fd19482f1a5ed",
+    "remote_main_sha": "e1dc4dd36d67e2c86fbaffa9804014ac6987d8fa",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +61,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.md\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json\n M implementation/phase1/support_bundle_manifest.json"
   },
   "status": "synced"
 }

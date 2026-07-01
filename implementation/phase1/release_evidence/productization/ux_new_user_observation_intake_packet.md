@@ -1,6 +1,6 @@
 # UX New-User Observation Intake Packet
 
-- `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/21 | blockers=12`
+- `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/22 | blockers=12`
 - `contract_pass`: `False`
 - `observation_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
 - `template_path`: `docs/templates/ux_new_user_observation.template.json`
@@ -29,6 +29,7 @@
 | `evidence_ref_resolvable` | `ref=; kind=missing; resolved=` | `derived from observation timestamps` | https URL, ticket/jira/ux/user-study reference, or existing local evidence path | `evidence_ref_resolvable_pass` = `False` |
 | `evidence_ref_not_self_reference` | `` | `derived from observation timestamps` | evidence_ref must not point back to the observation JSON itself | `evidence_ref_not_self_reference_pass` = `False` |
 | `evidence_ref_not_template_reference` | `` | `derived from observation timestamps` | evidence_ref must not point to the UX observation template | `evidence_ref_not_template_reference_pass` = `False` |
+| `evidence_ref_not_template_artifact` | `` | `derived from observation timestamps` | evidence_ref must not point to docs/templates or a .template.* artifact | `evidence_ref_not_template_artifact_pass` = `False` |
 
 ## Validation Commands
 

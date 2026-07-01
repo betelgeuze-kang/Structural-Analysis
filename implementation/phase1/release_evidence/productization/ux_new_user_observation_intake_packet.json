@@ -246,9 +246,20 @@
       "report_check_pass": false,
       "required_value": "evidence_ref must not point to the UX observation template",
       "template_value": "derived from observation timestamps"
+    },
+    {
+      "current_value": "",
+      "field": "evidence_ref_not_template_artifact",
+      "missing": false,
+      "owner_note": "Any template-like file is rejected as human observation evidence.",
+      "placeholder": false,
+      "report_check": "evidence_ref_not_template_artifact_pass",
+      "report_check_pass": false,
+      "required_value": "evidence_ref must not point to docs/templates or a .template.* artifact",
+      "template_value": "derived from observation timestamps"
     }
   ],
-  "generated_at": "2026-07-01T05:39:11.098064+00:00",
+  "generated_at": "2026-07-01T17:47:36.269521+00:00",
   "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
   "observation_report_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
   "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
@@ -260,7 +271,7 @@
     "evidence_ref": "",
     "evidence_ref_kind": "missing",
     "evidence_ref_resolved_path": "",
-    "field_count": 21,
+    "field_count": 22,
     "field_pass_count": 0,
     "max_completion_minutes": 30.0,
     "missing_workflow_steps": [
@@ -302,7 +313,7 @@
     "workflow_step_count": 0,
     "workflow_step_pass_count": 0
   },
-  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/21 | blockers=12",
+  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/22 | blockers=12",
   "template_path": "docs/templates/ux_new_user_observation.template.json",
   "validation_commands": [
     "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",

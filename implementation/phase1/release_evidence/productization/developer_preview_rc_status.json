@@ -483,7 +483,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-01T16:23:21.595955+00:00",
+  "generated_at": "2026-07-01T17:47:43.816034+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:418ab89379b52ad124f8e5915078d542bd8b59a9104068f45966db12ba33265e",
@@ -508,8 +508,8 @@
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:a341b5565e060d4dd7410f8402b378ee4e6ac8bbe1b99b22ad8364707a155ade",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:170d2b4fa8fc0fe606258580623263e9b52a041b9cef84293d2279c348e81775",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:c5d8fe937875fc4bec09c517ba363e645ede968e92ab04b14c35c18c10cce1b5",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:f1d349767c211fde2b05f72376c19af8fa80d4ba0583cd44888d6de9158f36a7",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:56e7773bf677da83d00b40b6e84101925056c330db03e70999a8f0e7fee19868",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:f2e13c7a69f4a261336eebe9568b55919b13716eb743588af602c9544cd79208",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:5e764b0c2fd3e2cbaf5b8d936a46cf4da7d28229a072b90b137d8c4b28ca05d5",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
   },
@@ -2978,7 +2978,7 @@
         "status": "blocked",
         "workflow_step_pass_count": 0
       },
-      "intake_field_count": 21,
+      "intake_field_count": 22,
       "intake_field_pass_count": 0,
       "intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
       "intake_packet_gate": {
@@ -3177,6 +3177,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "dd09ee48341d2245cb0cb3557df5c48695726908",
+  "source_commit_sha": "e1dc4dd36d67e2c86fbaffa9804014ac6987d8fa",
   "status": "blocked"
 }
