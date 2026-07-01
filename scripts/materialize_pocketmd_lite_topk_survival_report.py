@@ -486,6 +486,87 @@ def _summary(
     }
 
 
+def _case_refinement_summaries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows_by_case: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        case_id = _string(row.get("case_id"))
+        if case_id:
+            rows_by_case.setdefault(case_id, []).append(row)
+
+    summaries: list[dict[str, Any]] = []
+    for case_id in sorted(rows_by_case):
+        case_rows = sorted(
+            rows_by_case[case_id],
+            key=lambda row: (
+                _integer(row.get("top_k_rank")) or 10**9,
+                _string(row.get("candidate_id")),
+            ),
+        )
+        local_min_rows = [
+            bool(row["local_min_survived"])
+            for row in case_rows
+            if row.get("local_min_survived") is not None
+        ]
+        contact_rates = [
+            float(row["contact_persistence_rate"])
+            for row in case_rows
+            if row.get("contact_persistence_rate") is not None
+        ]
+        h_bond_rates = [
+            float(row["h_bond_persistence_rate"])
+            for row in case_rows
+            if row.get("h_bond_persistence_rate") is not None
+        ]
+        clash_relief_rows = [
+            bool(row["clash_relief"])
+            for row in case_rows
+            if row.get("clash_relief") is not None
+        ]
+        uncertainty_widths = [
+            float(row["uncertainty_width"])
+            for row in case_rows
+            if row.get("uncertainty_width") is not None
+        ]
+        summaries.append(
+            {
+                "case_id": case_id,
+                "top_k_candidate_count": len(case_rows),
+                "top_k_ranks": [
+                    int(row["top_k_rank"])
+                    for row in case_rows
+                    if _integer(row.get("top_k_rank")) is not None
+                ],
+                "candidate_ids": [
+                    _string(row.get("candidate_id"))
+                    for row in case_rows
+                    if _string(row.get("candidate_id"))
+                ],
+                "local_min_survival_rate": (
+                    sum(1 for value in local_min_rows if value) / len(local_min_rows)
+                    if local_min_rows
+                    else None
+                ),
+                "contact_persistence_rate_median": _median(contact_rates),
+                "h_bond_persistence_rate_median": _median(h_bond_rates),
+                "clash_relief_rate": (
+                    sum(1 for value in clash_relief_rows if value)
+                    / len(clash_relief_rows)
+                    if clash_relief_rows
+                    else None
+                ),
+                "uncertainty_width_median": _median(uncertainty_widths),
+                "uncertainty_units": sorted(
+                    {
+                        _string(row.get("uncertainty_unit"))
+                        for row in case_rows
+                        if _string(row.get("uncertainty_unit"))
+                    }
+                ),
+            }
+        )
+    return summaries
+
+
 def _topk_integrity_blockers(rows: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
     blockers: list[str] = []
     root_cause_tags: list[str] = []
@@ -827,6 +908,7 @@ def materialize_pocketmd_lite_topk_survival_report(
     blockers = list(dict.fromkeys(blockers))
     root_cause_tags = list(dict.fromkeys(root_cause_tags))
     summary = _summary(rows, blockers, topk_row_quality=topk_row_quality)
+    case_refinement_summaries = _case_refinement_summaries(rows)
     metrics_complete = all(summary[metric] is not None for metric in REQUIRED_SUMMARY_METRICS)
     product_surface_ready = bool(
         rows and topk_row_quality["contract_pass"] and not blockers and metrics_complete
@@ -866,6 +948,7 @@ def materialize_pocketmd_lite_topk_survival_report(
         "top_k_candidate_count": summary["top_k_candidate_count"],
         "rows": rows,
         "summary": summary,
+        "case_refinement_summaries": case_refinement_summaries,
         "top_k_row_quality": topk_row_quality,
         "required_metrics": list(REQUIRED_METRICS),
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
@@ -892,6 +975,7 @@ def materialize_pocketmd_lite_topk_survival_report(
         "materialization_report": {
             "schema_version": MATERIALIZATION_SCHEMA_VERSION,
             "operator_intake_row_count": len(rows),
+            "case_refinement_summary_count": len(case_refinement_summaries),
             "real_refinement_case_count": summary["real_refinement_case_count"],
             "top_k_candidate_count": summary["top_k_candidate_count"],
             "top_k_row_quality_contract_pass": topk_row_quality["contract_pass"],
@@ -996,6 +1080,11 @@ def build_pocketmd_lite_science_product_surface(
             "top_k_candidate_count": int(report.get("top_k_candidate_count") or 0),
             "blocked_claim_count": len(BLOCKED_CLAIMS),
             "summary": report.get("summary", {}),
+            "case_refinement_summaries": [
+                row
+                for row in _as_list(report.get("case_refinement_summaries"))
+                if isinstance(row, dict)
+            ],
             "phase4_exit_gate_status": str(phase4_exit_gate.get("status") or ""),
             "phase4_failed_criterion_count": int(
                 phase4_exit_gate.get("failed_criterion_count") or 0

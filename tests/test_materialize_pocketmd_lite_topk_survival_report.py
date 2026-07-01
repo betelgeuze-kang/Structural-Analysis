@@ -246,6 +246,19 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary(
     assert report["phase4_exit_gate"]["status"] == "ready"
     assert report["phase4_exit_gate"]["failed_criterion_count"] == 0
     assert report["phase4_exit_gate"]["failed_criteria"] == []
+    assert report["materialization_report"]["case_refinement_summary_count"] == 3
+    assert report["case_refinement_summaries"][0] == {
+        "candidate_ids": ["pose_1", "pose_2"],
+        "case_id": "case_a",
+        "clash_relief_rate": 0.5,
+        "contact_persistence_rate_median": 0.75,
+        "h_bond_persistence_rate_median": 0.5,
+        "local_min_survival_rate": 0.5,
+        "top_k_candidate_count": 2,
+        "top_k_ranks": [1, 2],
+        "uncertainty_units": ["energy_proxy_delta"],
+        "uncertainty_width_median": 0.3,
+    }
     assert "free_energy_perturbation_claim" in report["blocked_claims"]
 
 
@@ -307,6 +320,7 @@ def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim(
     assert surface["phase4_exit_gate"]["status"] == "ready"
     assert surface["readiness_summary"]["phase4_exit_gate_status"] == "ready"
     assert surface["readiness_summary"]["phase4_failed_criterion_count"] == 0
+    assert len(surface["readiness_summary"]["case_refinement_summaries"]) == 3
     assert surface["goal_roadmap_linkage"]["bottleneck"] == (
         "pocketmd_lite_science_product_surface_ready"
     )
