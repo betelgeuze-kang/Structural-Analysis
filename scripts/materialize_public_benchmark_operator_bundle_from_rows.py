@@ -7,6 +7,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 import sys
@@ -134,15 +135,34 @@ def _parse_scalar(value: str) -> Any:
         return None
     if text[0:1] in {"{", "["}:
         try:
-            return json.loads(text)
+            return _normalize_value(json.loads(text))
         except json.JSONDecodeError:
             return text
     try:
         if any(token in text for token in (".", "e", "E")):
-            return float(text)
+            parsed = float(text)
+            return parsed if math.isfinite(parsed) else text
         return int(text)
     except ValueError:
         return text
+
+
+def _normalize_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return _parse_scalar(value)
+    if isinstance(value, bool) or value is None:
+        return value
+    if isinstance(value, float):
+        return value if math.isfinite(value) else str(value)
+    if isinstance(value, list):
+        return [_normalize_value(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            str(key): _normalize_value(item)
+            for key, item in value.items()
+            if key is not None
+        }
+    return value
 
 
 def _normalize_row(row: dict[str, Any]) -> dict[str, Any]:
@@ -150,10 +170,7 @@ def _normalize_row(row: dict[str, Any]) -> dict[str, Any]:
     for key, value in row.items():
         if key is None:
             continue
-        if isinstance(value, str):
-            normalized[str(key)] = _parse_scalar(value)
-        else:
-            normalized[str(key)] = value
+        normalized[str(key)] = _normalize_value(value)
     return normalized
 
 

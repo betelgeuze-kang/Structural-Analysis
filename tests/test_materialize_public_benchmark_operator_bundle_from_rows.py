@@ -660,6 +660,24 @@ def test_public_benchmark_operator_bundle_from_rows_flags_duplicate_row_identiti
     ) in source_check["blockers"]
 
 
+def test_public_benchmark_operator_bundle_normalizes_non_finite_nested_values() -> None:
+    normalized = module._normalize_row(
+        {
+            "case_id": "case_a",
+            "direct_nan": float("nan"),
+            "nested_json": '{"score": NaN, "values": [Infinity, -Infinity, 1.25]}',
+            "nested_list": [float("inf"), {"loss": float("-inf")}],
+        }
+    )
+
+    assert normalized["direct_nan"] == "nan"
+    assert normalized["nested_json"] == {
+        "score": "nan",
+        "values": ["inf", "-inf", 1.25],
+    }
+    assert normalized["nested_list"] == ["inf", {"loss": "-inf"}]
+
+
 def test_public_benchmark_operator_bundle_from_rows_cli_writes_bundle(
     tmp_path: Path,
 ) -> None:

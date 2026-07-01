@@ -407,6 +407,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
     snapshot_only_paths = {
         "docs/source-of-truth-gap-classification.md",
         "scripts/build_product_readiness_snapshot.py",
+        "scripts/build_source_of_truth_gap_classification.py",
     }
     if path in snapshot_only_paths:
         return False
