@@ -29,7 +29,9 @@
       "evidence": [
         "near-null packet is distributed translation/rotation-like",
         "F2h 0.1->0.2->0.4 status=ready",
-        "residual_trend=nondecreasing"
+        "residual_trend=nondecreasing",
+        "load_dependent_comparison_status=blocked",
+        "load_dependent_geometric_softening_signal=active_secondary"
       ],
       "hypothesis": "weak_restraint_or_geometric_softening",
       "next_action": "compare load-dependent near-null packets and geometric stiffness contributions at 0.2 and 0.4"
@@ -46,6 +48,7 @@
     {
       "classification": "required_for_production_residency",
       "evidence": [
+        "hip_consistency_proof_source_commit_sha_mismatch",
         "hip_consistency_proof_gate_not_passed",
         "hip_consistency_proof_worker_g1_closure_gate_not_ready",
         "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -103,10 +106,13 @@
       "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
     ],
     "global_frame_shell_tangent_integration_ready": false,
+    "load_dependent_geometric_softening_signal": "active_secondary",
+    "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
+    "load_dependent_near_null_packet_comparison_ready": false,
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-07-01T06:30:45.641861+00:00",
+  "generated_at": "2026-07-01T18:21:25.786390+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -136,7 +142,9 @@
       "evidence": [
         "near-null packet is distributed translation/rotation-like",
         "F2h 0.1->0.2->0.4 status=ready",
-        "residual_trend=nondecreasing"
+        "residual_trend=nondecreasing",
+        "load_dependent_comparison_status=blocked",
+        "load_dependent_geometric_softening_signal=active_secondary"
       ],
       "hypothesis": "weak_restraint_or_geometric_softening",
       "next_action": "compare load-dependent near-null packets and geometric stiffness contributions at 0.2 and 0.4"
@@ -153,6 +161,7 @@
     {
       "classification": "required_for_production_residency",
       "evidence": [
+        "hip_consistency_proof_source_commit_sha_mismatch",
         "hip_consistency_proof_gate_not_passed",
         "hip_consistency_proof_worker_g1_closure_gate_not_ready",
         "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
@@ -165,10 +174,11 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:ba62012ebe3fc03770ad17094ebff5291dff419f5b67dc17efde202c20ce7887",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:4c6943b630979b6825f237895ed3b481cb59334a40bb1ad050f47ce21e98f15c",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
+    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:ca58151d432993bb1851ff196a45a55c3dd80b6fe38b306b863cdf9a2fbdc7c2",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:8b437a017f328f541ca1a99edc6ff3302ea02cefed1dced8c9d2f62f4111645c",
-    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:d0b088b95c3e1202bc0899d970f159898a4d6ffde41fca5730f8838ecc792379"
+    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:dafa9b5f3ff30eb04c14a02bb97d5381242aa199a6aef9273b6318a3490448fb"
   },
   "next_actions": [
     "stop_row_only_support_or_elastic_link_correction_loop",
@@ -207,13 +217,14 @@
     },
     {
       "acceptance_evidence": [
+        "g1_load_dependent_near_null_geometric_stiffness_comparison.status == ready",
         "load-scale 0.2 and 0.4 near-null packet comparison",
         "geometric-stiffness contribution audit with stop reasons"
       ],
       "action_id": "compare_load_dependent_near_null_and_geometric_stiffness",
       "priority": 3,
       "rationale": "Residuals are nondecreasing over 0.1->0.2->0.4, so weak-restraint/geometric softening remains an active secondary diagnostic instead of a closure claim.",
-      "status": "secondary_diagnostic"
+      "status": "blocked_missing_load_dependent_near_null_packets"
     },
     {
       "acceptance_evidence": [
@@ -261,10 +272,13 @@
       "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
     ],
     "global_frame_shell_tangent_integration_ready": false,
+    "load_dependent_geometric_softening_signal": "active_secondary",
+    "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
+    "load_dependent_near_null_packet_comparison_ready": false,
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "08649cdefe65aa3f184b9625f42cfa84d33ce232",
+  "source_commit_sha": "0ce1036034a7a6cc9a68991ebf1f9693a7218c6a",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
@@ -275,6 +289,9 @@
     "f2h_max_converged_load_scale": 0.4,
     "f2h_residual_trend_across_increasing_load": "nondecreasing",
     "global_frame_shell_tangent_integration_ready": false,
+    "load_dependent_geometric_softening_signal": "active_secondary",
+    "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
+    "load_dependent_near_null_packet_comparison_ready": false,
     "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
     "promotes_g1_closure": false,
     "required_next_receipt_count": 2,
