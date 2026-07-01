@@ -498,6 +498,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         ),
         "dry_run_pose_validity_ready": True,
         "real_benchmark_case_count": 0,
+        "unique_real_benchmark_case_count": 0,
     }
     assert source["subset_manifest_validation"]["status"] == "source_material_required"
     assert source["subset_manifest_validation"]["public_benchmark_ready"] is False
@@ -915,6 +916,10 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "receptor_ligand_context_present",
     } <= check_ids
     assert pose_packet["real_benchmark_case_count"] == 0
+    assert pose_packet["unique_real_benchmark_case_count"] == 0
+    assert pose_packet["row_integrity_policy"]["required_unique_row_keys"] == {
+        "cases": ["case_id"],
+    }
     assert pose_packet["validator"]["required_pose_fields"] == [
         "case_id",
         "pose_success_metric",

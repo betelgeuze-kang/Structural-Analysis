@@ -33,6 +33,7 @@ from validate_public_benchmark_external_receipts import (  # noqa: E402
 )
 from validate_public_benchmark_pose_validity import (  # noqa: E402
     REQUIRED_POSE_FIELDS,
+    ROW_INTEGRITY_POLICY as POSE_ROW_INTEGRITY_POLICY,
     validate_pose_validity_payload,
 )
 from materialize_public_benchmark_subset_manifest import (  # noqa: E402
@@ -456,6 +457,8 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "status": "ready_for_dry_run",
         "contract_pass": True,
         "real_benchmark_case_count": 0,
+        "unique_real_benchmark_case_count": 0,
+        "row_integrity_policy": POSE_ROW_INTEGRITY_POLICY,
         "validator": {
             "schema_version": "public-benchmark-pose-validity-validation.v1",
             "required_pose_fields": list(REQUIRED_POSE_FIELDS),
@@ -1995,6 +1998,9 @@ def build_source_of_truth(
                 pose_validity_packet
             ),
             "real_benchmark_case_count": pose_real_case_count,
+            "unique_real_benchmark_case_count": _as_int(
+                pose_validity_packet.get("unique_real_benchmark_case_count")
+            ),
         },
         "symmetry_rmsd_scorecard_summary": symmetry_rmsd_scorecard_summary,
         "symmetry_rmsd_summary": symmetry_rmsd_scorecard_summary,
