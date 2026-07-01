@@ -26,13 +26,13 @@
   "contract_pass": true,
   "dry_run_case_count": 1,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T03:19:27.087766+00:00",
+  "generated_at": "2026-07-01T04:33:28.618657+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d4cd7091185ef46a3fef3d546d1a670b7911b0e4de2f60703391a2cc757912b0",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:b8672153f8fb53601b0620c4c2bf00c5f293b4124ebf8244ec0bd85c4116e409",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:edd2e1f2c560695f83e4f6dc30489379d16fe7a798541e82179cb5b933a6bf72",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
-    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:4bd5f69785cf7baa9ad2b567b1ba7c0d424ffd695f0f0440eec054ca2262b77d",
+    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:f4c9d5e080f8f1d0326e22342b37f3995297a9b70feeef17c5b265ac698184d4",
     "scripts/materialize_public_benchmark_pose_success_harness.py": "sha256:b1031511d159a8dcd03c16abaf49ed894db43dda58978fae32239ba47f28f4a9",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d0105e3fca20c9072fca8571a0d3ba417302b35c3c8196d2c5c9d36f32ac19a0",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:d965fae24ace310a8dac00208f8c4d8ff2b2ea356a21254da7b03966ced9678e",
@@ -59,6 +59,6 @@
   "reuse_policy": "public_benchmark_pose_success_harness_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-pose-success-harness.v1",
-  "source_commit_sha": "a68f86b82839d20a84c593688b47c34d04410121",
+  "source_commit_sha": "5a3760aea5081106c84b5d66e9039ed8a3d57e6d",
   "status": "ready_for_real_benchmark_rows"
 }

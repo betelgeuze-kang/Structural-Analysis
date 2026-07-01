@@ -323,10 +323,10 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T04:07:15.971982+00:00",
+  "generated_at": "2026-07-01T04:33:28.825566+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
-    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:4bd5f69785cf7baa9ad2b567b1ba7c0d424ffd695f0f0440eec054ca2262b77d",
+    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:f4c9d5e080f8f1d0326e22342b37f3995297a9b70feeef17c5b265ac698184d4",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:1259c56d65512d217e5ab43019728112483bcba88690115a9bbea8c3e84b8c47"
   },
   "missing_row_inputs": [
@@ -830,6 +830,7 @@
         "required_vina_engine_run_pose_ref_fields": [
           "predicted_ligand_path_or_pose_ref"
         ],
+        "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
         "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
       },
       "source_checksum_policy": {
@@ -1087,6 +1088,7 @@
         "required_vina_engine_run_pose_ref_fields": [
           "predicted_ligand_path_or_pose_ref"
         ],
+        "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
         "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
       },
       "source_checksum_policy": {
@@ -1218,6 +1220,7 @@
         "required_vina_engine_run_pose_ref_fields": [
           "predicted_ligand_path_or_pose_ref"
         ],
+        "row_file_artifact_sha256_policy": "Every operator row file materialized by this importer is recorded with sha256:<64 hex> in materialization_report.row_file_artifact_receipts.",
         "source_checksum_policy": "sha256:<64 hex> and not a repeated placeholder digest"
       },
       "source_checksum_policy": {
@@ -1242,7 +1245,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "105ea1d7985504c2ccd31c1efca05527e26e3863",
+  "source_commit_sha": "5a3760aea5081106c84b5d66e9039ed8a3d57e6d",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
