@@ -16,7 +16,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-07-01T16:01:02.383210+00:00",
+  "generated_at": "2026-07-01T17:33:10.519795+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -1496,7 +1496,7 @@
           "summary": {
             "closure_blocker_count": 10,
             "closure_contract_pass": false,
-            "field_count": 15,
+            "field_count": 16,
             "field_pass_count": 0,
             "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
             "placeholder_values_absent_pass": true,
@@ -1832,7 +1832,7 @@
             "summary": {
               "closure_blocker_count": 10,
               "closure_contract_pass": false,
-              "field_count": 15,
+              "field_count": 16,
               "field_pass_count": 0,
               "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
               "placeholder_values_absent_pass": true,
