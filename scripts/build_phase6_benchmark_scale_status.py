@@ -213,6 +213,42 @@ def _filter_satisfied_large_receipt_blockers(
     return filtered
 
 
+def _safe_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _safe_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _count_summary(
+    *,
+    current: int,
+    required: int,
+    label: str,
+) -> dict[str, Any]:
+    return {
+        "label": label,
+        "current": current,
+        "required": required,
+        "remaining": max(required - current, 0),
+        "contract_pass": current >= required,
+    }
+
+
+def _lane_operator_next_actions(
+    *, lane: str, payload: dict[str, Any]
+) -> list[dict[str, Any]]:
+    actions: list[dict[str, Any]] = []
+    for row in _safe_list(payload.get("operator_next_actions")):
+        if not isinstance(row, dict):
+            continue
+        action = dict(row)
+        action["lane"] = lane
+        actions.append(action)
+    return actions
+
+
 def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     medium = _load_json(repo_root, PHASE3_MEDIUM_MODEL_SCORECARD)
@@ -223,6 +259,11 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
     medium_required = int(medium.get("required_medium_model_count", 5) or 5)
     medium_current = int(medium.get("current_medium_model_scorecard_count", 0) or 0)
     medium_review = int(medium.get("pass_or_approved_review_count", 0) or 0)
+    medium_local_candidate_count = int(medium.get("local_candidate_artifact_count", 0) or 0)
+    medium_required_evidence_count = int(medium.get("required_evidence_count", 0) or 0)
+    medium_required_evidence_pass_count = int(medium.get("required_evidence_pass_count", 0) or 0)
+    medium_case_ledger = _safe_dict(medium.get("case_readiness_ledger"))
+    medium_case_ready_count = int(medium_case_ledger.get("case_ready_count", 0) or 0)
     medium_pass = bool(
         medium.get("contract_pass") is True
         and medium_current >= medium_required
@@ -233,6 +274,8 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
     large_execution = int(large.get("current_large_model_execution_receipt_count", 0) or 0)
     large_crash_oom_free = int(large.get("crash_oom_free_execution_count", 0) or 0)
     large_scorecard_or_review = int(large.get("scorecard_or_review_count", 0) or 0)
+    large_required_evidence_count = int(large.get("required_evidence_count", 0) or 0)
+    large_required_evidence_pass_count = int(large.get("required_evidence_pass_count", 0) or 0)
     large_pass = bool(
         large.get("contract_pass") is True
         and large_execution >= large_required
@@ -279,6 +322,87 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
     large_blockers = sorted(dict.fromkeys(large_blockers))
     all_blockers = sorted(dict.fromkeys([*medium_blockers, *large_blockers]))
     contract_pass = bool(medium_pass and large_pass)
+    medium_operator_next_actions = _lane_operator_next_actions(
+        lane="opensees-medium",
+        payload=medium,
+    )
+    large_operator_next_actions = _lane_operator_next_actions(
+        lane="opensees-large",
+        payload=large,
+    )
+    operator_next_actions = [
+        *medium_operator_next_actions,
+        *large_operator_next_actions,
+    ]
+    medium_progress_partition = {
+        "schema_version": "phase6-medium-benchmark-progress-partition.v1",
+        "required_medium_model_count": medium_required,
+        "local_candidate_selection": _count_summary(
+            current=medium_local_candidate_count,
+            required=medium_required,
+            label="parser/topology candidate cases selected",
+        ),
+        "scorecard_execution": _count_summary(
+            current=medium_current,
+            required=medium_required,
+            label="valid medium scorecard receipts",
+        ),
+        "pass_or_approved_review": _count_summary(
+            current=medium_review,
+            required=medium_required,
+            label="PASS or APPROVED_REVIEW decisions",
+        ),
+        "case_ready_for_credit": _count_summary(
+            current=medium_case_ready_count,
+            required=medium_required,
+            label="case rows with every medium credit prerequisite",
+        ),
+        "evidence_contract": _count_summary(
+            current=medium_required_evidence_pass_count,
+            required=medium_required_evidence_count,
+            label="medium readiness evidence rows passed",
+        ),
+        "case_readiness_ledger_ref": "case_readiness_ledger",
+        "claim_boundary": (
+            "Candidate parser/topology rows, scorecard execution receipts, and "
+            "PASS/APPROVED_REVIEW decisions are tracked separately. Only the "
+            "scorecard and review counts can close the RC medium-model gate."
+        ),
+    }
+    large_progress_partition = {
+        "schema_version": "phase6-large-benchmark-progress-partition.v1",
+        "required_large_model_count": large_required,
+        "source_identity": _count_summary(
+            current=large_source_models,
+            required=large_required,
+            label="large source models with verified URL identity",
+        ),
+        "execution_receipts": _count_summary(
+            current=large_execution,
+            required=large_required,
+            label="large execution receipts",
+        ),
+        "crash_oom_free": _count_summary(
+            current=large_crash_oom_free,
+            required=large_required,
+            label="crash/OOM-free large receipts",
+        ),
+        "scorecard_or_review": _count_summary(
+            current=large_scorecard_or_review,
+            required=large_required,
+            label="large scorecard or approved review decisions",
+        ),
+        "evidence_contract": _count_summary(
+            current=large_required_evidence_pass_count,
+            required=large_required_evidence_count,
+            label="large readiness evidence rows passed",
+        ),
+        "claim_boundary": (
+            "Large execution and crash/OOM receipts are separated from scorecard/"
+            "approved-review credit, so existing execution receipts cannot promote "
+            "the RC large-model gate without the review evidence."
+        ),
+    }
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -303,9 +427,13 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
             "required_medium_model_count": medium_required,
             "current_medium_model_scorecard_count": medium_current,
             "pass_or_approved_review_count": medium_review,
-            "local_candidate_artifact_count": int(medium.get("local_candidate_artifact_count", 0) or 0),
+            "local_candidate_artifact_count": medium_local_candidate_count,
             "local_topology_contract_pass": bool(medium.get("local_topology_contract_pass") is True),
-            "required_evidence_pass_count": int(medium.get("required_evidence_pass_count", 0) or 0),
+            "required_evidence_pass_count": medium_required_evidence_pass_count,
+            "required_evidence_count": medium_required_evidence_count,
+            "case_ready_count": medium_case_ready_count,
+            "progress_partition": medium_progress_partition,
+            "operator_next_actions": medium_operator_next_actions,
             "blockers": medium_blockers,
             "blocker_grouping_metadata": _benchmark_scale_blocker_grouping_metadata(
                 medium_blockers
@@ -323,7 +451,10 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
             "scorecard_or_review_count": large_scorecard_or_review,
             "source_url_verified_count": int(large.get("source_url_verified_count", 0) or 0),
             "source_checksum_count": int(large.get("source_checksum_count", 0) or 0),
-            "required_evidence_pass_count": int(large.get("required_evidence_pass_count", 0) or 0),
+            "required_evidence_pass_count": large_required_evidence_pass_count,
+            "required_evidence_count": large_required_evidence_count,
+            "progress_partition": large_progress_partition,
+            "operator_next_actions": large_operator_next_actions,
             "blockers": large_blockers,
             "blocker_grouping_metadata": _benchmark_scale_blocker_grouping_metadata(
                 large_blockers
@@ -340,6 +471,17 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
         },
         "blockers": all_blockers,
         "blocker_grouping_metadata": _benchmark_scale_blocker_grouping_metadata(all_blockers),
+        "operator_next_actions": operator_next_actions,
+        "next_actions": [str(row.get("id")) for row in operator_next_actions],
+        "summary": {
+            "medium_scorecard_receipts": f"{medium_current}/{medium_required}",
+            "medium_pass_or_review": f"{medium_review}/{medium_required}",
+            "medium_local_candidates": f"{medium_local_candidate_count}/{medium_required}",
+            "large_execution_receipts": f"{large_execution}/{large_required}",
+            "large_crash_oom_free": f"{large_crash_oom_free}/{large_required}",
+            "large_scorecard_or_review": f"{large_scorecard_or_review}/{large_required}",
+            "operator_next_action_count": len(operator_next_actions),
+        },
         "owner_action": (
             "Attach five medium-model scorecards with PASS or pre-approved REVIEW evidence, "
             "attach two licensed large-model crash/OOM-free execution receipts with scorecard "

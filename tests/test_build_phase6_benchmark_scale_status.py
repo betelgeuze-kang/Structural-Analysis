@@ -36,6 +36,39 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert medium["pass_or_approved_review_count"] == 0
     assert medium["local_candidate_artifact_count"] == 2
     assert medium["local_topology_contract_pass"] is True
+    assert medium["required_evidence_count"] == 9
+    assert medium["required_evidence_pass_count"] == 4
+    assert medium["case_ready_count"] == 0
+    medium_progress = medium["progress_partition"]
+    assert medium_progress["schema_version"] == (
+        "phase6-medium-benchmark-progress-partition.v1"
+    )
+    assert medium_progress["local_candidate_selection"] == {
+        "contract_pass": False,
+        "current": 2,
+        "label": "parser/topology candidate cases selected",
+        "remaining": 3,
+        "required": 5,
+    }
+    assert medium_progress["scorecard_execution"]["current"] == 0
+    assert medium_progress["scorecard_execution"]["remaining"] == 5
+    assert medium_progress["pass_or_approved_review"]["current"] == 0
+    assert medium_progress["case_ready_for_credit"]["current"] == 0
+    assert medium_progress["evidence_contract"]["current"] == 4
+    assert "Only the scorecard and review counts" in medium_progress["claim_boundary"]
+    medium_actions = {row["id"]: row for row in medium["operator_next_actions"]}
+    assert set(medium_actions) == {
+        "select_additional_medium_model_cases",
+        "complete_product_legal_license_review",
+        "attach_medium_reference_outputs",
+        "record_medium_canonical_normalization",
+        "run_medium_scorecard_receipts",
+        "attach_medium_pass_or_approved_review_decisions",
+    }
+    assert medium_actions["run_medium_scorecard_receipts"]["lane"] == "opensees-medium"
+    assert (
+        medium_actions["run_medium_scorecard_receipts"]["remaining_case_count"] == 5
+    )
     assert "medium_structural_models_current_below_required:0/5" in medium["blockers"]
     assert "medium_model_pass_or_review_below_required:0/5" in medium["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in medium["blockers"]
@@ -59,6 +92,29 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert large["scorecard_or_review_count"] == 0
     assert large["source_url_verified_count"] == 2
     assert large["source_checksum_count"] == 2
+    large_progress = large["progress_partition"]
+    assert large_progress["schema_version"] == (
+        "phase6-large-benchmark-progress-partition.v1"
+    )
+    assert large_progress["execution_receipts"]["contract_pass"] is True
+    assert large_progress["crash_oom_free"]["contract_pass"] is True
+    assert large_progress["scorecard_or_review"] == {
+        "contract_pass": False,
+        "current": 0,
+        "label": "large scorecard or approved review decisions",
+        "remaining": 2,
+        "required": 2,
+    }
+    large_actions = {row["id"]: row for row in large["operator_next_actions"]}
+    assert large_actions["attach_large_scorecard_or_approved_review"]["lane"] == (
+        "opensees-large"
+    )
+    assert (
+        large_actions["attach_large_scorecard_or_approved_review"][
+            "remaining_case_count"
+        ]
+        == 2
+    )
     assert "large_structural_models_current_below_required:0/2" not in large["blockers"]
     assert "large_model_execution_count_below_required:0/2" not in large["blockers"]
     assert "large_model_crash_oom_free_count_below_required:0/2" not in large["blockers"]
@@ -83,6 +139,18 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert grouping["blocker_count"] == len(payload["blockers"])
     assert grouping["unassigned_blockers"] == []
     assert grouping["groups"]["source_license_identity"]["blocker_count"] == 1
+    assert payload["summary"] == {
+        "large_crash_oom_free": "2/2",
+        "large_execution_receipts": "2/2",
+        "large_scorecard_or_review": "0/2",
+        "medium_local_candidates": "2/5",
+        "medium_pass_or_review": "0/5",
+        "medium_scorecard_receipts": "0/5",
+        "operator_next_action_count": 10,
+    }
+    assert "run_medium_scorecard_receipts" in payload["next_actions"]
+    assert "attach_large_scorecard_or_approved_review" in payload["next_actions"]
+    assert len(payload["operator_next_actions"]) == 10
     assert "parser-only topology evidence" in payload["claim_boundary"]
     assert "policy-only acquisition rows" in payload["claim_boundary"]
 
