@@ -329,6 +329,10 @@ def _source_of_truth_row(freshness: dict[str, Any]) -> dict[str, Any]:
                     "classification": str(row.get("classification") or ""),
                     "freshness_policy": str(row.get("freshness_policy") or ""),
                     "freshness_label": str(row.get("freshness_label") or ""),
+                    "validation_basis": [
+                        str(item)
+                        for item in _as_list(row.get("validation_basis"))
+                    ],
                 }
                 for row in classification_rows
             ],
@@ -1672,6 +1676,9 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             "freshness_label": str(row.get("freshness_label") or ""),
             "current_repo_match": str(row.get("current_repo_match") or ""),
             "decision": str(row.get("decision") or ""),
+            "validation_basis": [
+                str(item) for item in _as_list(row.get("validation_basis"))
+            ],
         }
         for row in _as_list(freshness.get("source_of_truth_gap_classification"))
         if isinstance(row, dict)

@@ -66,10 +66,16 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert classification["accuracy_parity_scorecard"]["freshness_label"] == (
         "accuracy_parity_scorecard"
     )
+    assert "science_scorecard_overall_pass_field" in classification[
+        "accuracy_parity_scorecard"
+    ]["validation_basis"]
     assert classification["goal_operator_action_board"]["classification"] == (
         "aggregator-review"
     )
     assert classification["goal_operator_action_board"]["freshness_label"] == ""
+    assert "not_closure_evidence_without_owner_receipts" in classification[
+        "goal_operator_action_board"
+    ]["validation_basis"]
 
     kpis = surface["release_decision_kpis"]
     pm_report = json.loads(
@@ -429,6 +435,13 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "classification": "fix",
         "freshness_policy": "direct_leaf_row",
         "freshness_label": "accuracy_parity_scorecard",
+        "validation_basis": [
+            "leaf_artifact_in_default_freshness_rows",
+            "science_scorecard_overall_pass_field",
+            "benchmark_contract_and_kpi_fields",
+            "public_hf_and_source_family_checks",
+            "stability_suite_pass_field",
+        ],
     }
     assert rows["phase_1_goal_release_cockpit"]["state"] == "ready"
     assert rows["phase_1_goal_release_cockpit"]["first_blocker"] == (
