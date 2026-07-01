@@ -15,11 +15,11 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_gap_ledger_ready": false,
-  "generated_at": "2026-07-01T06:03:13.260359+00:00",
+  "generated_at": "2026-07-01T06:12:46.127738+00:00",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:e404a91b760801ad4f8ac075653375e4cc0c68e05373181ec995bc758fad4d0d",
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:a51b27be5c5bfa791de694a2b05023b2d45ce0e4da376d55893d489402942f04",
     "scripts/build_gap_ledger_evidence_audit.py": "sha256:cce4f67978d3c2d7c4bced3ab6473157a062353fe5ee6f0994f3c0ee7ad34648"
   },
   "ledger_status": "open",
@@ -418,7 +418,7 @@
     }
   ],
   "schema_version": "gap-ledger-evidence-audit.v1",
-  "source_commit_sha": "9b663a4c35e6603630564de44a8f4f3cf3b68c60",
+  "source_commit_sha": "2ea0b1e47d2f54b71dce571d0b6589bc069e0d7f",
   "source_receipt_path_coverage": {
     "claim_boundary": "This checks only explicit source_receipts and *_source_receipts paths that the ledger status advertises as evidence or guard inputs. It does not require terminal closure-evidence paths that are intentionally absent for partial or external-blocked rows.",
     "source_receipt_absent_row_count": 0,
