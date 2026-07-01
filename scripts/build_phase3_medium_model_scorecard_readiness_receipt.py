@@ -28,6 +28,7 @@ MEDIUM_RECEIPT_DIR = PRODUCTIZATION / "medium_model_scorecard_receipts"
 MEDIUM_RECEIPT_SCHEMA_VERSION = "phase3-medium-model-scorecard-receipt.v1"
 NORMALIZATION_RECEIPT_SCHEMA_VERSION = "phase3-medium-normalization-receipt.v1"
 NORMALIZATION_MIN_MAPPING_COVERAGE = 0.99
+ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS = {"PASS", "APPROVED_REVIEW"}
 MEDIUM_MODEL_INPUTS = [
     Path("implementation/phase1/opensees_topology_report.json"),
     Path("implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"),
@@ -177,6 +178,61 @@ def _as_float(value: Any, *, default: float = 0.0) -> float:
         return default
 
 
+def _normalized_decision(value: Any) -> str:
+    return str(value or "").strip().upper().replace("-", "_").replace(" ", "_")
+
+
+def _scorecard_or_review_status(repo_root: Path, receipt_ref: str) -> dict[str, Any]:
+    if not receipt_ref:
+        return {
+            "path": "",
+            "present": False,
+            "contract_pass": False,
+            "decision": "",
+            "evidence_ref": "",
+            "reviewer": "",
+            "blockers": ["scorecard_or_review_missing"],
+        }
+    path = _resolve_receipt_path(repo_root, receipt_ref)
+    if not path.exists():
+        return {
+            "path": receipt_ref,
+            "present": False,
+            "contract_pass": False,
+            "decision": "",
+            "evidence_ref": "",
+            "reviewer": "",
+            "blockers": ["scorecard_or_review_path_missing"],
+        }
+    payload = _try_load_json(path)
+    decision = _normalized_decision(payload.get("decision") or payload.get("status"))
+    evidence_ref = str(
+        payload.get("evidence_ref")
+        or payload.get("review_evidence_ref")
+        or payload.get("scorecard_ref")
+        or ""
+    ).strip()
+    reviewer = str(payload.get("reviewer") or payload.get("approved_by") or "").strip()
+    blockers: list[str] = []
+    if not payload:
+        blockers.append("scorecard_or_review_json_invalid_or_empty")
+    if decision not in ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS:
+        blockers.append("scorecard_or_review_decision_not_accepted")
+    if not evidence_ref:
+        blockers.append("scorecard_or_review_evidence_ref_missing")
+    if not reviewer:
+        blockers.append("scorecard_or_review_reviewer_missing")
+    return {
+        "path": _relative_path(repo_root, path),
+        "present": True,
+        "contract_pass": not blockers,
+        "decision": decision,
+        "evidence_ref": evidence_ref,
+        "reviewer": reviewer,
+        "blockers": blockers,
+    }
+
+
 def _normalization_receipt_status(
     repo_root: Path,
     *,
@@ -252,6 +308,10 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         crashed = bool(payload.get("crashed") is True)
         oom = bool(payload.get("oom") is True)
         scorecard_or_review_path = str(payload.get("scorecard_or_review_path") or "")
+        scorecard_or_review_status = _scorecard_or_review_status(
+            repo_root,
+            scorecard_or_review_path,
+        )
         reference_output_sha256 = str(payload.get("reference_output_sha256") or "")
         normalization_receipt = str(payload.get("normalization_receipt") or "")
         normalization_status = _normalization_receipt_status(
@@ -266,7 +326,9 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
             and not crashed
             and not oom
         )
-        pass_or_review_pass = bool(scorecard_execution_pass and scorecard_or_review_path)
+        pass_or_review_pass = bool(
+            scorecard_execution_pass and scorecard_or_review_status["contract_pass"]
+        )
         if scorecard_execution_pass:
             valid_scorecard_case_ids.add(case_id)
         if pass_or_review_pass:
@@ -283,6 +345,8 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
                 "crashed": crashed,
                 "oom": oom,
                 "scorecard_or_review_path": scorecard_or_review_path,
+                "scorecard_or_review_contract_pass": scorecard_or_review_status["contract_pass"],
+                "scorecard_or_review_status": scorecard_or_review_status,
                 "reference_output_sha256": reference_output_sha256,
                 "normalization_receipt": normalization_receipt,
                 "normalization_receipt_contract_pass": normalization_status["contract_pass"],

@@ -25,6 +25,17 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _write_review(path: Path, *, index: int) -> None:
+    _write_json(
+        path,
+        {
+            "decision": "APPROVED_REVIEW",
+            "evidence_ref": f"operator-review://medium-{index}",
+            "reviewer": "release_owner",
+        },
+    )
+
+
 def _write_minimal_medium_readiness_inputs(repo_root: Path) -> None:
     _write_json(
         repo_root / "implementation/phase1/opensees_topology_report.json",
@@ -193,6 +204,7 @@ def test_medium_model_scorecard_readiness_counts_operator_scorecard_receipts(tmp
     _write_minimal_medium_readiness_inputs(tmp_path)
     receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
     for index in range(5):
+        _write_review(tmp_path / f"approved-review-{index}.json", index=index)
         _write_json(
             receipt_dir / f"medium-{index}.scorecard_receipt.json",
             {
@@ -236,6 +248,7 @@ def test_medium_model_scorecard_readiness_validates_normalization_receipts(tmp_p
     _write_minimal_medium_readiness_inputs(tmp_path)
     receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
     for index in range(5):
+        _write_review(tmp_path / f"approved-review-{index}.json", index=index)
         normalization_receipt = (
             module.MEDIUM_RECEIPT_DIR
             / f"medium-{index}.normalization_receipt.json"
@@ -282,6 +295,45 @@ def test_medium_model_scorecard_readiness_validates_normalization_receipts(tmp_p
         row["normalization_receipt_contract_pass"] is True
         for row in payload["scorecard_receipt_inventory"]["receipts"]
     )
+
+
+def test_medium_model_scorecard_readiness_rejects_invalid_review_payloads(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_medium_readiness_inputs(tmp_path)
+    receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
+    for index in range(5):
+        _write_json(tmp_path / f"invalid-review-{index}.json", {})
+        _write_json(
+            receipt_dir / f"medium-{index}.scorecard_receipt.json",
+            {
+                "schema_version": "phase3-medium-model-scorecard-receipt.v1",
+                "case_id": f"medium-{index}",
+                "contract_pass": True,
+                "validation_contract_pass": True,
+                "crashed": False,
+                "oom": False,
+                "scorecard_or_review_path": f"invalid-review-{index}.json",
+                "blockers": [],
+            },
+        )
+
+    payload = module.build_phase3_medium_model_scorecard_readiness_receipt(
+        repo_root=tmp_path,
+        source_commit_sha="test-sha",
+    )
+
+    assert payload["current_medium_model_scorecard_count"] == 5
+    assert payload["pass_or_approved_review_count"] == 0
+    assert "medium_model_pass_or_review_missing" in payload["blockers"]
+    assert all(
+        row["scorecard_or_review_contract_pass"] is False
+        for row in payload["scorecard_receipt_inventory"]["receipts"]
+    )
+    first = payload["scorecard_receipt_inventory"]["receipts"][0]
+    assert "scorecard_or_review_decision_not_accepted" in first[
+        "scorecard_or_review_status"
+    ]["blockers"]
 
 
 def test_medium_model_scorecard_readiness_check_detects_missing_output(tmp_path: Path) -> None:
