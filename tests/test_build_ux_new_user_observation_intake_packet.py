@@ -127,9 +127,18 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
     rows = {row["field"]: row for row in payload["field_rows"]}
 
     assert payload["contract_pass"] is False
+    assert payload["status"] == "blocked"
     assert payload["reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED"
     assert payload["summary"]["field_pass_count"] == 0
     assert payload["summary"]["observation_blocker_count"] == 2
+    assert payload["gate_unblock_plan_count"] == 2
+    assert payload["gate_unblock_plan"][0]["slot_id"] == "attach_observation_record"
+    assert "participant_role" in payload["gate_unblock_plan"][0]["failing_fields"]
+    assert payload["next_actions"] == [
+        "fill_ux_new_user_observation_record_from_template",
+        "run_30_minute_human_new_user_core_workflow_observation",
+        "rerun_ux_observation_validation_chain",
+    ]
     assert rows["participant_role"]["template_value"].startswith("OWNER_INPUT_REQUIRED")
     assert rows["completion_minutes"]["missing"] is True
     assert rows["completion_minutes"]["report_check_pass"] is False
@@ -210,9 +219,13 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
     )
 
     assert payload["contract_pass"] is True
+    assert payload["status"] == "ready"
     assert payload["reason_code"] == "PASS"
     assert payload["summary"]["field_pass_count"] == 22
     assert payload["summary"]["field_count"] == 22
+    assert payload["gate_unblock_plan"] == []
+    assert payload["gate_unblock_plan_count"] == 0
+    assert payload["next_actions"] == []
     assert payload["summary"]["elapsed_minutes"] == 24.0
     assert payload["summary"]["evidence_ref_kind"] == "external_reference"
     assert payload["summary"]["workflow_step_pass_count"] == 5
@@ -249,4 +262,38 @@ def test_ux_observation_intake_packet_cli_writes_markdown(tmp_path: Path, capsys
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["observation_blocker_count"] == 1
     markdown = out_md.read_text(encoding="utf-8")
     assert "new_user \\| first_time_user \\| pilot_user" in markdown
+    assert "Gate Unblock Plan" in markdown
     assert "Validation Commands" in markdown
+
+
+def test_ux_observation_intake_reuses_report_gate_unblock_plan(tmp_path: Path) -> None:
+    template = _write_json(tmp_path / "ux-template.json", _template())
+    report = _write_json(
+        tmp_path / "ux-report.json",
+        {
+            "contract_pass": False,
+            "blockers": ["observation_file_missing"],
+            "checks": {},
+            "summary": {},
+            "gate_unblock_plan": [
+                {
+                    "slot_id": "report_defined_slot",
+                    "minimum_evidence": ["report-owned unblock details"],
+                }
+            ],
+        },
+    )
+
+    payload = build_ux_new_user_observation_intake_packet.build_packet(
+        observation_path=tmp_path / "missing-observation.json",
+        template_path=template,
+        observation_report_path=report,
+    )
+
+    assert payload["gate_unblock_plan"] == [
+        {
+            "slot_id": "report_defined_slot",
+            "minimum_evidence": ["report-owned unblock details"],
+        }
+    ]
+    assert payload["gate_unblock_plan_count"] == 1

@@ -66,7 +66,18 @@ def test_ux_new_user_observation_blocks_when_missing(tmp_path: Path) -> None:
     assert payload["source_commit_sha"]
     assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
     assert payload["reused_evidence"] is False
+    assert payload["status"] == "blocked"
     assert payload["reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_REQUIRED"
+    assert payload["template_path"] == "docs/templates/ux_new_user_observation.template.json"
+    assert payload["gate_unblock_plan_count"] == 5
+    assert payload["next_actions"] == [
+        "fill_ux_new_user_observation_record_from_template",
+        "run_30_minute_human_new_user_core_workflow_observation",
+        "attach_non_template_observation_evidence_reference",
+        "rerun_ux_observation_report_and_release_gates",
+    ]
+    assert payload["gate_unblock_plan"][0]["slot_id"] == "attach_observation_record"
+    assert payload["gate_unblock_plan"][1]["slot_id"] == "observe_required_workflow_steps"
     assert "observation_file_missing" in payload["blockers"]
     assert "completion_minutes" in payload["summary"]["missing_fields"]
     assert "workflow_steps" in payload["summary"]["missing_fields"]
@@ -85,7 +96,11 @@ def test_ux_new_user_observation_passes_with_human_record(tmp_path: Path) -> Non
     assert payload["source_commit_sha"]
     assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
     assert payload["reused_evidence"] is False
+    assert payload["status"] == "ready"
     assert payload["reason_code"] == "PASS"
+    assert payload["gate_unblock_plan"] == []
+    assert payload["gate_unblock_plan_count"] == 0
+    assert payload["next_actions"] == []
     assert payload["checks"]["completion_30min_pass"] is True
     assert payload["checks"]["elapsed_30min_pass"] is True
     assert payload["checks"]["completion_minutes_elapsed_match_pass"] is True
@@ -341,4 +356,6 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert exit_code == 0
     assert "UX New-User Observation Report" in captured.out
     assert json.loads(out.read_text(encoding="utf-8"))["contract_pass"] is False
-    assert "Required Fields" in out_md.read_text(encoding="utf-8")
+    markdown = out_md.read_text(encoding="utf-8")
+    assert "Required Fields" in markdown
+    assert "Gate Unblock Plan" in markdown

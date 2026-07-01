@@ -239,6 +239,79 @@ def _is_template_like_path(path: Path, *, repo_root: Path) -> bool:
     return bool(".template." in name or name.endswith(".template"))
 
 
+def _next_actions(contract_pass: bool) -> list[str]:
+    if contract_pass:
+        return []
+    return [
+        "fill_ux_new_user_observation_record_from_template",
+        "run_30_minute_human_new_user_core_workflow_observation",
+        "attach_non_template_observation_evidence_reference",
+        "rerun_ux_observation_report_and_release_gates",
+    ]
+
+
+def _gate_unblock_plan(
+    *,
+    observation_path: Path,
+    template_path: Path,
+    validation_commands: list[str],
+    contract_pass: bool,
+) -> list[dict[str, Any]]:
+    if contract_pass:
+        return []
+    return [
+        {
+            "slot_id": "attach_observation_record",
+            "required_artifact": str(observation_path),
+            "template_artifact": str(template_path),
+            "minimum_evidence": [
+                "participant_role is new_user, first_time_user, or pilot_user",
+                "new_to_product=true",
+                "observer is a human observer or UX research owner",
+                "contract_pass=true in the observation record",
+            ],
+        },
+        {
+            "slot_id": "observe_required_workflow_steps",
+            "required_workflow_steps": list(REQUIRED_WORKFLOW_STEPS),
+            "minimum_evidence": [
+                "Import pass",
+                "Model Health pass",
+                "Analysis Setup pass",
+                "Run & Monitor pass",
+                "Compare & Report pass",
+            ],
+        },
+        {
+            "slot_id": "prove_30_minute_timing",
+            "minimum_evidence": [
+                "started_at_utc is timezone-aware",
+                "completed_at_utc is timezone-aware and not before start",
+                "completion_minutes <= 30.0",
+                "declared completion minutes matches elapsed minutes within tolerance",
+            ],
+        },
+        {
+            "slot_id": "attach_separate_evidence_reference",
+            "minimum_evidence": [
+                "evidence_ref is a ticket/jira/ux/user-study reference, https URL, or existing local evidence path",
+                "evidence_ref is not the observation JSON itself",
+                "evidence_ref is not docs/templates or a .template artifact",
+                "approval_decision is accepted, approved, pass, signed, or approved_for_release",
+            ],
+        },
+        {
+            "slot_id": "regenerate_release_gate_evidence",
+            "validation_commands": validation_commands,
+            "minimum_evidence": [
+                "ux_new_user_observation_report.json contract_pass=true",
+                "ux_new_user_observation_intake_packet.json contract_pass=true",
+                "developer_preview_rc_status no longer blocks new_user_core_workflow_observation_passed",
+            ],
+        },
+    ]
+
+
 def build_report(
     *,
     observation_path: Path = DEFAULT_OBSERVATION,
@@ -385,6 +458,14 @@ def build_report(
         *(["approval_decision_not_accepted"] if not checks["approval_decision_pass"] else []),
     ]
     contract_pass = not blockers
+    validation_commands = [
+        f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_OUT}",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py "
+        "--out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+        "python3 scripts/report_pm_release_gate.py "
+        "--out implementation/phase1/release_evidence/productization/pm_release_gate_report.json "
+        "--out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
@@ -395,9 +476,11 @@ def build_report(
             repo_root=repo_root,
         ),
         "reused_evidence": False,
+        "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
         "observation_path": str(observation_path),
+        "template_path": str(template_path),
         "checks": checks,
         "blockers": blockers,
         "summary_line": (
@@ -445,14 +528,15 @@ def build_report(
         },
         "required_fields": list(REQUIRED_FIELDS),
         "required_workflow_steps": list(REQUIRED_WORKFLOW_STEPS),
-        "validation_commands": [
-            f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_OUT}",
-            "python3 scripts/build_ux_new_user_observation_intake_packet.py "
-            "--out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-            "python3 scripts/report_pm_release_gate.py "
-            "--out implementation/phase1/release_evidence/productization/pm_release_gate_report.json "
-            "--out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        ],
+        "gate_unblock_plan": _gate_unblock_plan(
+            observation_path=observation_path,
+            template_path=template_path,
+            validation_commands=validation_commands,
+            contract_pass=contract_pass,
+        ),
+        "gate_unblock_plan_count": 0 if contract_pass else 5,
+        "next_actions": _next_actions(contract_pass),
+        "validation_commands": validation_commands,
         "claim_boundary": (
             "This report validates a human new-user observation record. Automated browser rehearsal evidence "
             "does not satisfy the PM UX release-area gate by itself."
@@ -467,6 +551,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `summary_line`: `{payload['summary_line']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `observation_path`: `{payload['observation_path']}`",
+        f"- `template_path`: `{payload['template_path']}`",
+        f"- `gate_unblock_plan_count`: `{payload['gate_unblock_plan_count']}`",
         "",
         "## Timing Checks",
         "",
@@ -493,6 +579,12 @@ def _markdown(payload: dict[str, Any]) -> str:
     ]
     for field in payload["required_fields"]:
         lines.append(f"- `{field}`")
+    lines.extend(["", "## Gate Unblock Plan", ""])
+    if payload["gate_unblock_plan"]:
+        for row in payload["gate_unblock_plan"]:
+            lines.append(f"- `{row['slot_id']}`")
+    else:
+        lines.append("- none")
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:
         lines.append(f"- `{command}`")

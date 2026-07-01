@@ -244,6 +244,65 @@ def _current_value(field: str, observation: dict[str, Any], summary: dict[str, A
     return observation.get(field)
 
 
+def _gate_unblock_plan(
+    *,
+    observation_path: Path,
+    template_path: Path,
+    observation_report_path: Path,
+    report: dict[str, Any],
+    field_rows: list[dict[str, Any]],
+    validation_commands: list[str],
+    contract_pass: bool,
+) -> list[dict[str, Any]]:
+    if contract_pass:
+        return []
+    report_plan = report.get("gate_unblock_plan")
+    if isinstance(report_plan, list) and report_plan:
+        return [
+            row
+            for row in report_plan
+            if isinstance(row, dict)
+        ]
+    failing_fields = [
+        str(row["field"])
+        for row in field_rows
+        if row.get("report_check_pass") is not True
+    ]
+    return [
+        {
+            "slot_id": "attach_observation_record",
+            "required_artifact": str(observation_path),
+            "template_artifact": str(template_path),
+            "observation_report": str(observation_report_path),
+            "failing_fields": failing_fields,
+            "minimum_evidence": [
+                "real human new-user observation record",
+                "all required fields populated without OWNER_INPUT_REQUIRED placeholders",
+                "contract_pass=true only after the observation is complete",
+            ],
+        },
+        {
+            "slot_id": "rerun_validation_chain",
+            "validation_commands": validation_commands,
+            "minimum_evidence": [
+                "ux_new_user_observation_report.json contract_pass=true",
+                "ux_new_user_observation_intake_packet.json contract_pass=true",
+                "PM release and Developer Preview RC gates refreshed",
+            ],
+        },
+    ]
+
+
+def _next_actions(contract_pass: bool) -> list[str]:
+    if contract_pass:
+        return []
+    return [
+        "fill_ux_new_user_observation_record_from_template",
+        "run_30_minute_human_new_user_core_workflow_observation",
+        "rerun_ux_observation_validation_chain",
+    ]
+
+
 def build_packet(
     *,
     observation_path: Path = DEFAULT_OBSERVATION,
@@ -279,9 +338,29 @@ def build_packet(
         )
 
     contract_pass = bool(report.get("contract_pass", False))
+    validation_commands = [
+        f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_OBSERVATION_REPORT}",
+        f"python3 scripts/build_ux_new_user_observation_intake_packet.py --out {DEFAULT_OUT}",
+        "python3 scripts/report_pm_release_gate.py "
+        "--out implementation/phase1/release_evidence/productization/pm_release_gate_report.json "
+        "--out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py "
+        "--out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json "
+        "--out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+    ]
+    gate_unblock_plan = _gate_unblock_plan(
+        observation_path=observation_path,
+        template_path=template_path,
+        observation_report_path=observation_report_path,
+        report=report,
+        field_rows=field_rows,
+        validation_commands=validation_commands,
+        contract_pass=contract_pass,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
         "observation_path": str(observation_path),
@@ -321,16 +400,10 @@ def build_packet(
         },
         "field_rows": field_rows,
         "current_blockers": blockers,
-        "validation_commands": [
-            f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_OBSERVATION_REPORT}",
-            f"python3 scripts/build_ux_new_user_observation_intake_packet.py --out {DEFAULT_OUT}",
-            "python3 scripts/report_pm_release_gate.py "
-            "--out implementation/phase1/release_evidence/productization/pm_release_gate_report.json "
-            "--out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py "
-            "--out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json "
-            "--out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-        ],
+        "gate_unblock_plan": gate_unblock_plan,
+        "gate_unblock_plan_count": len(gate_unblock_plan),
+        "next_actions": _next_actions(contract_pass),
+        "validation_commands": validation_commands,
         "claim_boundary": (
             "This intake packet is an owner handoff checklist. It does not create human observation evidence "
             "and does not make the PM UX release area pass until the observation report passes."
@@ -347,6 +420,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         "",
         f"- `summary_line`: `{payload['summary_line']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
+        f"- `gate_unblock_plan_count`: `{payload['gate_unblock_plan_count']}`",
         f"- `observation_path`: `{payload['observation_path']}`",
         f"- `template_path`: `{payload['template_path']}`",
         f"- `owner_action`: {payload['summary']['owner_action']}",
@@ -359,6 +433,12 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"| `{cell(row['field'])}` | `{cell(row['current_value'])}` | `{cell(row['template_value'])}` | "
             f"{cell(row['required_value'])} | `{cell(row['report_check'])}` = `{row['report_check_pass']}` |"
         )
+    lines.extend(["", "## Gate Unblock Plan", ""])
+    if payload["gate_unblock_plan"]:
+        for row in payload["gate_unblock_plan"]:
+            lines.append(f"- `{cell(row['slot_id'])}`")
+    else:
+        lines.append("- none")
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:
         lines.append(f"- `{command}`")
