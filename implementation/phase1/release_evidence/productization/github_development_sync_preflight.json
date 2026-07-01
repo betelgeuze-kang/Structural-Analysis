@@ -9,7 +9,7 @@
     "remote_fetch_ok": null,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": true
+    "worktree_only_ignored_evidence_dirty": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-01T19:56:11.287867+00:00",
+  "generated_at": "2026-07-01T20:14:55.771661+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -40,14 +40,14 @@
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-    "local_head_sha": "f16a1ce521e84563fb713a6e2f4f23fce713fe8d",
+    "ignored_worktree_status_short": "",
+    "local_head_sha": "d093e06f07fead918411d544826b0487c0154d81",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "f16a1ce521e84563fb713a6e2f4f23fce713fe8d",
+    "remote_feature_sha": "d093e06f07fead918411d544826b0487c0154d81",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "f16a1ce521e84563fb713a6e2f4f23fce713fe8d",
+    "remote_main_sha": "d093e06f07fead918411d544826b0487c0154d81",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +61,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
+    "worktree_status_short": ""
   },
   "status": "synced"
 }

@@ -24,9 +24,9 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T19:58:38.661945+00:00",
+  "generated_at": "2026-07-01T20:15:04.870591+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9e36e64ced293308e3722a8ea8e8e42f2c2ed075b47d5db8886e996ccf401293",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1db1e6105bb5ca1dc5df6d528c086f7e56abcf69e6e281bf3e189ebe2fe8b6cf",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6932084dfe505170186b91e5177b5ad44b8887e1e576cd1072f95ac6d5af9358",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:e47b01f6a35de18880f9e90ccb7d426440ae02744b3b9a9eff4ab8ba211b1ce2"
   },
@@ -79,7 +79,7 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 7.702,
+        "ci_streak_source_evidence_age_hours": 9.897,
         "ci_streak_source_evidence_freshness_pass": true,
         "ci_streak_source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
@@ -209,7 +209,7 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 7.702,
+        "ci_streak_source_evidence_age_hours": 9.897,
         "ci_streak_source_evidence_freshness_pass": true,
         "ci_streak_source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
@@ -797,7 +797,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "f16a1ce521e84563fb713a6e2f4f23fce713fe8d",
+  "source_commit_sha": "d093e06f07fead918411d544826b0487c0154d81",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 9,
