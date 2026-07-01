@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 from pathlib import Path
 import sys
@@ -108,6 +109,12 @@ DEFAULT_ENRICHMENT_OPERATOR_TEMPLATE = (
 DEFAULT_VINA_GNINA_OPERATOR_TEMPLATE = (
     DEFAULT_OPERATOR_TEMPLATE_DIR / "public_benchmark_vina_gnina_operator_template.json"
 )
+DEFAULT_PHASE2_ROW_TEMPLATE_FILENAMES = {
+    "subset_rows": "public_benchmark_subset_rows_template.csv",
+    "pose_rows": "public_benchmark_pose_rows_template.csv",
+    "enrichment_rows": "public_benchmark_enrichment_rows_template.csv",
+    "vina_gnina_rows": "public_benchmark_vina_gnina_rows_template.csv",
+}
 DEFAULT_PHASE2_ROW_INPUT_CANDIDATES = {
     "subset_rows": [
         str(PRODUCTIZATION / f"public_benchmark_subset_rows.{suffix}")
@@ -369,6 +376,103 @@ def _vina_gnina_case_template() -> dict[str, Any]:
         "source_license_or_accession": "operator_supplied_casf_pdbbind_accession",
         "source_checksum": "sha256:operator_supplied_vina_gnina_rows_checksum",
         "provenance_ref": "operator_supplied_vina_gnina_run_receipt",
+    }
+
+
+def _csv_cell(value: Any) -> Any:
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+    if value is None:
+        return ""
+    return value
+
+
+def _row_template_paths(row_template_dir: Path) -> dict[str, Path]:
+    return {
+        row_input_id: row_template_dir / filename
+        for row_input_id, filename in DEFAULT_PHASE2_ROW_TEMPLATE_FILENAMES.items()
+    }
+
+
+def _phase2_row_template_rows() -> dict[str, list[dict[str, Any]]]:
+    subset = _subset_case_template()
+    pose = _pose_case_template()
+    enrichment = _enrichment_target_template()
+    vina_gnina = _vina_gnina_case_template()
+    enrichment_target = {
+        key: enrichment[key]
+        for key in (
+            "benchmark_family",
+            "target_id",
+            "score_direction",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+        )
+    }
+    vina_gnina_case = {
+        key: vina_gnina[key]
+        for key in (
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+        )
+    }
+    return {
+        "subset_rows": [{key: _csv_cell(value) for key, value in subset.items()}],
+        "pose_rows": [{key: _csv_cell(value) for key, value in pose.items()}],
+        "enrichment_rows": [
+            {**enrichment_target, **molecule}
+            for molecule in enrichment["scored_molecules"]
+        ],
+        "vina_gnina_rows": [
+            {**vina_gnina_case, **engine_run}
+            for engine_run in vina_gnina["engine_runs"]
+        ],
+    }
+
+
+def _phase2_row_template_headers() -> dict[str, list[str]]:
+    return {
+        "subset_rows": list(_subset_case_template().keys()),
+        "pose_rows": list(_pose_case_template().keys()),
+        "enrichment_rows": [
+            "benchmark_family",
+            "target_id",
+            "score_direction",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "molecule_id",
+            "is_active",
+            "score",
+        ],
+        "vina_gnina_rows": [
+            "case_id",
+            "source_family",
+            "benchmark_split",
+            "complex_id",
+            "reference_pose_id",
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref",
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "predicted_ligand_checksum",
+            "engine_version",
+            "engine_config_checksum",
+            "engine_run_provenance_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction",
+        ],
     }
 
 
@@ -1208,6 +1312,10 @@ def build_public_benchmark_operator_intake_packet(
     operator_template_artifacts = {
         str(slot["slot_id"]): str(slot["template_artifact"]) for slot in slots
     }
+    row_template_artifacts = {
+        row_input_id: str(path)
+        for row_input_id, path in _row_template_paths(operator_template_dir).items()
+    }
     materialization_sequence = [
         {
             "step_id": "materialize_subset_manifest",
@@ -1333,6 +1441,8 @@ def build_public_benchmark_operator_intake_packet(
         "operator_template_schema_version": OPERATOR_TEMPLATE_SCHEMA_VERSION,
         "operator_template_artifact_count": len(operator_template_artifacts),
         "operator_template_artifacts": operator_template_artifacts,
+        "row_template_artifact_count": len(row_template_artifacts),
+        "row_template_artifacts": row_template_artifacts,
         "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
         "phase2_row_dropzone": {
             "status": "ready_for_operator_rows",
@@ -1341,6 +1451,7 @@ def build_public_benchmark_operator_intake_packet(
                 "Phase 2 row audit command without explicit row flags."
             ),
             "default_row_path_candidates": DEFAULT_PHASE2_ROW_INPUT_CANDIDATES,
+            "row_template_artifacts": row_template_artifacts,
             "materialization_command": phase2_row_audit_command,
             "produces": str(
                 PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
@@ -1434,6 +1545,7 @@ def build_public_benchmark_operator_intake_packet(
             "harness_bundle": str(DEFAULT_HARNESS_BUNDLE),
             "harness_bundle_report": str(DEFAULT_HARNESS_BUNDLE_REPORT),
             "operator_templates": operator_template_artifacts,
+            "row_templates": row_template_artifacts,
         },
         "next_actions": [
             "fill_public_benchmark_operator_intake_packet",
@@ -1461,6 +1573,7 @@ def build_public_benchmark_operator_intake_packet(
             "operator_evidence_gap_count": len(operator_evidence_gap_register),
             "first_operator_evidence_gap": first_operator_evidence_gap,
             "operator_template_artifact_count": len(operator_template_artifacts),
+            "row_template_artifact_count": len(row_template_artifacts),
             "operator_template_artifacts": operator_template_artifacts,
             "first_manifest_contract_id": casf_pdbbind_manifest_contract["contract_id"],
             "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
@@ -1525,17 +1638,22 @@ def _markdown(payload: dict[str, Any]) -> str:
             "",
             "## Phase 2 Row Closure Matrix",
             "",
-            "| Row Input | Slot | Closes Criteria | Template |",
-            "|---|---|---|---|",
+            "| Row Input | Slot | Closes Criteria | Template | CSV Starter |",
+            "|---|---|---|---|---|",
         ]
     )
     for row in payload["phase2_row_closure_matrix"]:
         criteria = ", ".join(
             f"`{criterion}`" for criterion in row["closes_phase2_criteria"]
         )
+        row_template_artifact = str(
+            _as_dict(payload.get("row_template_artifacts")).get(row["row_input_id"])
+            or ""
+        )
         lines.append(
             f"| `{row['row_input_id']}` | `{row['operator_slot_id']}` | "
-            f"{criteria} | `{row['template_artifact']}` |"
+            f"{criteria} | `{row['template_artifact']}` | "
+            f"`{row_template_artifact}` |"
         )
     lines.extend(
         [
@@ -1647,6 +1765,31 @@ def write_public_benchmark_operator_template_payloads(
     return written
 
 
+def write_public_benchmark_row_template_csvs(
+    *,
+    packet: dict[str, Any],
+    repo_root: Path = ROOT,
+) -> dict[str, Path]:
+    raw_paths = _as_dict(packet.get("row_template_artifacts"))
+    headers_by_input = _phase2_row_template_headers()
+    rows_by_input = _phase2_row_template_rows()
+    written: dict[str, Path] = {}
+    for row_input_id, raw_path in raw_paths.items():
+        path = Path(str(raw_path))
+        if not path:
+            continue
+        resolved = path if path.is_absolute() else repo_root / path
+        resolved.parent.mkdir(parents=True, exist_ok=True)
+        headers = headers_by_input[str(row_input_id)]
+        with resolved.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=headers)
+            writer.writeheader()
+            for row in rows_by_input[str(row_input_id)]:
+                writer.writerow({header: row.get(header, "") for header in headers})
+        written[str(row_input_id)] = resolved
+    return written
+
+
 def write_public_benchmark_operator_intake_packet(
     *,
     repo_root: Path = ROOT,
@@ -1671,6 +1814,7 @@ def write_public_benchmark_operator_intake_packet(
         repo_root=repo_root,
         source_of_truth_path=source_of_truth_path,
     )
+    write_public_benchmark_row_template_csvs(packet=payload, repo_root=repo_root)
     return payload
 
 

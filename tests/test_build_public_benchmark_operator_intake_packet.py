@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import importlib.util
 import json
 from pathlib import Path
@@ -591,6 +592,24 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
             "implementation/phase1/release_evidence/productization/"
             "public_benchmark_phase2_row_audit.json"
         ),
+        "row_template_artifacts": {
+            "enrichment_rows": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_enrichment_rows_template.csv"
+            ),
+            "pose_rows": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_pose_rows_template.csv"
+            ),
+            "subset_rows": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_subset_rows_template.csv"
+            ),
+            "vina_gnina_rows": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_vina_gnina_rows_template.csv"
+            ),
+        },
         "required_row_inputs": [
             "subset_rows",
             "pose_rows",
@@ -660,6 +679,14 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     vina_gnina_template_path = (
         template_dir / "public_benchmark_vina_gnina_operator_template.json"
     )
+    subset_rows_template_path = template_dir / "public_benchmark_subset_rows_template.csv"
+    pose_rows_template_path = template_dir / "public_benchmark_pose_rows_template.csv"
+    enrichment_rows_template_path = (
+        template_dir / "public_benchmark_enrichment_rows_template.csv"
+    )
+    vina_gnina_rows_template_path = (
+        template_dir / "public_benchmark_vina_gnina_rows_template.csv"
+    )
     template = json.loads(template_path.read_text(encoding="utf-8"))
     enrichment_template = json.loads(
         enrichment_template_path.read_text(encoding="utf-8")
@@ -674,6 +701,35 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     assert template["schema_version"] == "public-benchmark-operator-template.v1"
     assert template["status"] == "operator_template_seed"
     assert template["operator_values_filled"] is False
+    assert payload["row_template_artifact_count"] == 4
+    assert payload["row_template_artifacts"]["subset_rows"] == str(
+        subset_rows_template_path
+    )
+    assert payload["phase2_row_dropzone"]["row_template_artifacts"] == payload[
+        "row_template_artifacts"
+    ]
+    for path in (
+        subset_rows_template_path,
+        pose_rows_template_path,
+        enrichment_rows_template_path,
+        vina_gnina_rows_template_path,
+    ):
+        assert path.exists()
+    subset_rows = list(
+        csv.DictReader(subset_rows_template_path.open(encoding="utf-8"))
+    )
+    pose_rows = list(csv.DictReader(pose_rows_template_path.open(encoding="utf-8")))
+    enrichment_rows = list(
+        csv.DictReader(enrichment_rows_template_path.open(encoding="utf-8"))
+    )
+    vina_gnina_rows = list(
+        csv.DictReader(vina_gnina_rows_template_path.open(encoding="utf-8"))
+    )
+    assert subset_rows[0]["benchmark_split"] == "CASF-core"
+    assert "symmetry_permutation_contract" in subset_rows[0]
+    assert "reference_atoms" in pose_rows[0]
+    assert [row["is_active"] for row in enrichment_rows] == ["True", "False"]
+    assert [row["engine_id"] for row in vina_gnina_rows] == ["vina", "gnina"]
     assert enrichment_template["row_validation_policies"][
         "score_direction_policy"
     ]["blank_values"] == "rejected; no implicit default is applied"
@@ -682,6 +738,7 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     ]["consistency_rule"].startswith("pose_success must equal")
     assert "# Public Benchmark Operator Intake Packet" in markdown
     assert "## Phase 2 Row Closure Matrix" in markdown
+    assert "public_benchmark_pose_rows_template.csv" in markdown
     assert "`pose_rows` | `pose_coordinate_intake`" in markdown
     assert "materialize_subset_manifest" in markdown
 
