@@ -28,6 +28,9 @@ DEVELOPER_PREVIEW_RC = PRODUCTIZATION / "developer_preview_rc_status.json"
 RELEASE_FRESHNESS = PRODUCTIZATION / "release_evidence_freshness_report.json"
 G1_DIRECT_RESIDUAL = PRODUCTIZATION / "mgt_g1_direct_residual_terminal_gate_report.json"
 G1_FULL_LOAD_HIP = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
+G1_CONSISTENT_NEWTON_RUNNER = (
+    PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
+)
 G1_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
 G1_F2G_F2H_CAUSE_NARROWING = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
 CUSTOMER_SHADOW = Path("implementation/phase1/customer_shadow_evidence_status.json")
@@ -177,6 +180,7 @@ def _source_paths() -> list[Path]:
         RELEASE_FRESHNESS,
         G1_DIRECT_RESIDUAL,
         G1_FULL_LOAD_HIP,
+        G1_CONSISTENT_NEWTON_RUNNER,
         G1_GLOBAL_CONNECTIVITY,
         G1_F2G_F2H_CAUSE_NARROWING,
         CUSTOMER_SHADOW,
@@ -223,6 +227,7 @@ def build_structural_product_development_roadmap(
     freshness = _load_json(repo_root, RELEASE_FRESHNESS)
     g1_direct = _load_json(repo_root, G1_DIRECT_RESIDUAL)
     g1_full_load = _load_json(repo_root, G1_FULL_LOAD_HIP)
+    g1_consistent_newton_runner = _load_json(repo_root, G1_CONSISTENT_NEWTON_RUNNER)
     g1_global_connectivity = _load_json(repo_root, G1_GLOBAL_CONNECTIVITY)
     g1_cause_narrowing = _load_json(repo_root, G1_F2G_F2H_CAUSE_NARROWING)
     customer_shadow = _load_json(repo_root, CUSTOMER_SHADOW)
@@ -258,6 +263,12 @@ def build_structural_product_development_roadmap(
     g1_blockers = [str(row) for row in _as_list(g1_full_load.get("blockers"))]
     g1_terminal_breakdown = _as_dict(
         g1_full_load.get("terminal_requirement_breakdown")
+    )
+    g1_runner_contract = _as_dict(
+        g1_consistent_newton_runner.get("runner_contract")
+    )
+    g1_runner_checkpoint_gap = _as_dict(
+        g1_consistent_newton_runner.get("checkpoint_gap")
     )
     g1_global_summary = _as_dict(g1_global_connectivity.get("summary"))
     g1_global_decision = _as_dict(g1_global_connectivity.get("decision_record"))
@@ -404,6 +415,7 @@ def build_structural_product_development_roadmap(
             evidence_artifacts=[
                 G1_DIRECT_RESIDUAL,
                 G1_FULL_LOAD_HIP,
+                G1_CONSISTENT_NEWTON_RUNNER,
                 G1_GLOBAL_CONNECTIVITY,
                 G1_F2G_F2H_CAUSE_NARROWING,
             ],
@@ -411,6 +423,24 @@ def build_structural_product_development_roadmap(
             summary={
                 "direct_residual_terminal_gate_ready": g1_direct_ready,
                 "full_load_hip_newton_lane_ready": g1_full_ready,
+                "consistent_newton_full_load_runner_contract_status": str(
+                    g1_consistent_newton_runner.get("status") or "missing"
+                ),
+                "consistent_newton_full_load_runner_contract_pass": _as_bool(
+                    g1_consistent_newton_runner.get("contract_pass")
+                ),
+                "consistent_newton_full_load_runner_evidence_closure_pass": _as_bool(
+                    g1_consistent_newton_runner.get("evidence_closure_pass")
+                ),
+                "consistent_newton_full_load_runner_id": str(
+                    g1_runner_contract.get("runner_id") or ""
+                ),
+                "consistent_newton_full_load_runner_preferred_generator": str(
+                    g1_runner_contract.get("preferred_candidate_generator") or ""
+                ),
+                "consistent_newton_full_load_runner_required_load_scale": (
+                    g1_runner_checkpoint_gap.get("required_load_scale")
+                ),
                 "full_load_hip_observed_load_scale": _as_dict(components.get("g1")).get(
                     "full_load_hip_newton_lane_observed_load_scale"
                 ),
@@ -584,6 +614,15 @@ def build_structural_product_development_roadmap(
             "current_position": {
                 "direct_residual_terminal_gate_ready": g1_direct_ready,
                 "full_load_hip_newton_lane_ready": g1_full_ready,
+                "consistent_newton_full_load_runner_contract_status": str(
+                    g1_consistent_newton_runner.get("status") or "missing"
+                ),
+                "consistent_newton_full_load_runner_contract_pass": _as_bool(
+                    g1_consistent_newton_runner.get("contract_pass")
+                ),
+                "consistent_newton_full_load_runner_id": str(
+                    g1_runner_contract.get("runner_id") or ""
+                ),
                 "recommended_g1_next_direction": g1_recommended_next_lane,
                 "terminal_requirements": (
                     f"{_as_int(g1_terminal_breakdown.get('ready_requirement_count'))}/"
@@ -615,6 +654,7 @@ def build_structural_product_development_roadmap(
             "evidence_artifacts": [
                 str(G1_DIRECT_RESIDUAL),
                 str(G1_FULL_LOAD_HIP),
+                str(G1_CONSISTENT_NEWTON_RUNNER),
                 str(G1_GLOBAL_CONNECTIVITY),
                 str(G1_F2G_F2H_CAUSE_NARROWING),
             ],

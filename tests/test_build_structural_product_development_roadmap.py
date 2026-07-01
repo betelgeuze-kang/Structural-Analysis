@@ -131,6 +131,27 @@ def _write_minimal_inputs(repo_root: Path) -> None:
         },
     )
     _write_json(
+        productization / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+        {
+            "schema_version": (
+                "g1-consistent-newton-full-load-checkpoint-candidate-runner.v1"
+            ),
+            "status": "ready_for_runner_implementation",
+            "contract_pass": True,
+            "evidence_closure_pass": False,
+            "runner_contract": {
+                "runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
+                "preferred_candidate_generator": (
+                    "consistent_residual_jacobian_newton_rocm_full_load_candidate"
+                ),
+            },
+            "checkpoint_gap": {
+                "required_load_scale": 1.0,
+                "highest_observed_load_scale": 0.656,
+            },
+        },
+    )
+    _write_json(
         productization / "g1_global_connectivity_load_path_audit.json",
         {
             "status": "ready",
@@ -263,6 +284,24 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         == "full_load_checkpoint_1p0"
     )
     assert (
+        stages["g1_solver_closure"]["summary"][
+            "consistent_newton_full_load_runner_contract_status"
+        ]
+        == "ready_for_runner_implementation"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "consistent_newton_full_load_runner_contract_pass"
+        ]
+        is True
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "consistent_newton_full_load_runner_evidence_closure_pass"
+        ]
+        is False
+    )
+    assert (
         stages["g1_solver_closure"]["summary"]["row_only_correction_loop_stopped"]
         is True
     )
@@ -272,6 +311,10 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     ]
     assert (
         "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json"
+        in stages["g1_solver_closure"]["evidence_artifacts"]
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
         in stages["g1_solver_closure"]["evidence_artifacts"]
     )
     assert (
