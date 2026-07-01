@@ -81,6 +81,18 @@ PLACEHOLDER_SOURCE_URL_MARKERS = (
     "127.0.0.1",
     "0.0.0.0",
 )
+PLACEHOLDER_SOURCE_URL_PREFIXES = (
+    "operator://",
+    "local-evidence://",
+    "local://",
+    "fixture://",
+    "mock://",
+    "synthetic://",
+    "placeholder://",
+    "test://",
+    "unit-test://",
+    "file://",
+)
 
 
 def _slot_id_for_target(target_id: str) -> str:
@@ -340,6 +352,7 @@ def _operator_input_source_receipt(
             "blocked_marker_policy": {
                 "text_markers": list(PLACEHOLDER_SOURCE_TEXT_MARKERS),
                 "url_markers": list(PLACEHOLDER_SOURCE_URL_MARKERS),
+                "url_prefixes": list(PLACEHOLDER_SOURCE_URL_PREFIXES),
             },
         },
         "blockers": blockers,
@@ -356,6 +369,11 @@ def _contains_marker(value: str, markers: tuple[str, ...]) -> bool:
     return any(marker in lowered for marker in markers)
 
 
+def _has_placeholder_url_prefix(value: str) -> bool:
+    lowered = value.lower()
+    return any(lowered.startswith(prefix) for prefix in PLACEHOLDER_SOURCE_URL_PREFIXES)
+
+
 def _source_actuality_blockers(source: dict[str, Any]) -> list[str]:
     blockers: list[str] = []
     source_id = str(source.get("source_id") or "").strip()
@@ -366,7 +384,8 @@ def _source_actuality_blockers(source: dict[str, Any]) -> list[str]:
     if source_license and _contains_marker(source_license, PLACEHOLDER_SOURCE_TEXT_MARKERS):
         blockers.append("operator_input_source_source_license_placeholder")
     if source_url and (
-        _contains_marker(source_url, PLACEHOLDER_SOURCE_URL_MARKERS)
+        _has_placeholder_url_prefix(source_url)
+        or _contains_marker(source_url, PLACEHOLDER_SOURCE_URL_MARKERS)
         or _contains_marker(source_url, PLACEHOLDER_SOURCE_TEXT_MARKERS)
     ):
         blockers.append("operator_input_source_source_url_placeholder")

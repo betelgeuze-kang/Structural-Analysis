@@ -25,6 +25,13 @@ def _sha(seed: str) -> str:
     return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
+def _provenance_ref(case_id: str, candidate_id: str) -> str:
+    return (
+        "https://zenodo.org/records/2468135/files/"
+        f"pocketmd-lite-{case_id}-{candidate_id}.json#row"
+    )
+
+
 def _write_gpcr_rows(path: Path) -> None:
     fieldnames = [
         "target_id",
@@ -90,7 +97,7 @@ def _pocketmd_row(
         "uncertainty_low": -0.2 + rank / 10,
         "uncertainty_high": 0.2 + rank / 10,
         "uncertainty_unit": "energy_proxy_delta",
-        "provenance_ref": f"local-evidence://pocketmd-lite/{case_id}/{candidate_id}",
+        "provenance_ref": _provenance_ref(case_id, candidate_id),
         "source_checksum": _sha(f"{case_id}:{candidate_id}"),
     }
 
@@ -338,7 +345,17 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     ]
     assert pocketmd_contract["per_row_source_actuality_policy"][
         "placeholder_provenance_prefixes_rejected"
-    ] == ["operator://"]
+    ] == [
+        "operator://",
+        "local-evidence://",
+        "local://",
+        "fixture://",
+        "mock://",
+        "synthetic://",
+        "placeholder://",
+        "test://",
+        "unit-test://",
+    ]
     assert "broad_all_atom_md_claim" in (
         pocketmd_contract["blocked_claims_that_remain_locked"]
     )

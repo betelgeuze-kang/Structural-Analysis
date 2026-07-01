@@ -263,6 +263,29 @@ def test_gpcr_hard_decoy_suite_blocks_placeholder_source_receipt(
     ]
 
 
+def test_gpcr_hard_decoy_suite_blocks_local_source_url(
+    tmp_path: Path,
+) -> None:
+    intake = _passing_intake(tmp_path)
+    source = intake["operator_input_source"]
+    assert isinstance(source, dict)
+    source["source_url"] = "local-evidence://gpcr-hard-decoy/rows"
+
+    report = module.materialize_gpcr_hard_decoy_suite_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "locked"
+    assert report["operator_input_source_receipt"]["blockers"] == [
+        "operator_input_source_source_url_placeholder",
+    ]
+    assert "DRD2:operator_input_source_source_url_placeholder" in report["blockers"]
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "raw_hard_decoy_rows_actual_closure"
+    ]
+
+
 def test_gpcr_hard_decoy_suite_blocks_fixture_sized_raw_rows(
     tmp_path: Path,
 ) -> None:

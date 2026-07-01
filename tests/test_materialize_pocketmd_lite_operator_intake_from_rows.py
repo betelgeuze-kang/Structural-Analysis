@@ -38,6 +38,13 @@ def _checksum(seed: str) -> str:
     return f"sha256:{hashlib.sha256(seed.encode('utf-8')).hexdigest()}"
 
 
+def _provenance_ref(case_id: str, candidate_id: str) -> str:
+    return (
+        "https://zenodo.org/records/7654321/files/"
+        f"pocketmd-lite-{case_id}-{candidate_id}.json#row"
+    )
+
+
 def _row(
     *,
     case_id: str,
@@ -66,7 +73,7 @@ def _row(
             "high": 0.3,
             "unit": "energy_proxy_delta",
         },
-        "provenance_ref": f"local-evidence://pocketmd-lite/{case_id}/{candidate_id}",
+        "provenance_ref": _provenance_ref(case_id, candidate_id),
         "source_checksum": _checksum(f"{case_id}:{candidate_id}"),
     }
 
@@ -106,7 +113,7 @@ def _write_csv(path: Path) -> None:
             "-0.2",
             "0.2",
             "energy_proxy_delta",
-            "local-evidence://pocketmd-lite/case_a/pose_1",
+            _provenance_ref("case_a", "pose_1"),
             _checksum("case_a:pose_1"),
         ],
         [
@@ -124,7 +131,7 @@ def _write_csv(path: Path) -> None:
             "0.1",
             "0.3",
             "energy_proxy_delta",
-            "local-evidence://pocketmd-lite/case_a/pose_2",
+            _provenance_ref("case_a", "pose_2"),
             _checksum("case_a:pose_2"),
         ],
         [
@@ -142,7 +149,7 @@ def _write_csv(path: Path) -> None:
             "-0.1",
             "0.7",
             "energy_proxy_delta",
-            "local-evidence://pocketmd-lite/case_b/pose_1",
+            _provenance_ref("case_b", "pose_1"),
             _checksum("case_b:pose_1"),
         ],
         [
@@ -160,7 +167,7 @@ def _write_csv(path: Path) -> None:
             "0.1",
             "0.3",
             "energy_proxy_delta",
-            "local-evidence://pocketmd-lite/case_b/pose_2",
+            _provenance_ref("case_b", "pose_2"),
             _checksum("case_b:pose_2"),
         ],
         [
@@ -178,7 +185,7 @@ def _write_csv(path: Path) -> None:
             "-0.2",
             "0.2",
             "energy_proxy_delta",
-            "local-evidence://pocketmd-lite/case_c/pose_1",
+            _provenance_ref("case_c", "pose_1"),
             _checksum("case_c:pose_1"),
         ],
         [
@@ -196,7 +203,7 @@ def _write_csv(path: Path) -> None:
             "0.1",
             "0.3",
             "energy_proxy_delta",
-            "local-evidence://pocketmd-lite/case_c/pose_2",
+            _provenance_ref("case_c", "pose_2"),
             _checksum("case_c:pose_2"),
         ],
     ]
@@ -462,6 +469,19 @@ def test_blocks_placeholder_row_receipts(tmp_path: Path) -> None:
         raise AssertionError("expected placeholder provenance error")
 
     bad_row["provenance_ref"] = "local-evidence://pocketmd-lite/case_bad/pose_bad"
+    bad_row["source_checksum"] = _checksum("case_bad:pose_bad")
+    rows.write_text(json.dumps([bad_row]), encoding="utf-8")
+    try:
+        module.build_pocketmd_lite_operator_intake_from_rows(
+            rows_path=rows,
+            repo_root=REPO_ROOT,
+        )
+    except ValueError as exc:
+        assert str(exc) == "row_1:case_bad:provenance_ref_placeholder"
+    else:
+        raise AssertionError("expected local evidence provenance error")
+
+    bad_row["provenance_ref"] = _provenance_ref("case_bad", "pose_bad")
     bad_row["source_checksum"] = "sha256:" + "a" * 64
     rows.write_text(json.dumps([bad_row]), encoding="utf-8")
     try:

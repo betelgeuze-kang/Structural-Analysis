@@ -62,6 +62,18 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _dedupe_str(rows: list[Any]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for row in rows:
+        item = str(row or "")
+        if not item or item in seen:
+            continue
+        seen.add(item)
+        deduped.append(item)
+    return deduped
+
+
 def _blockers(payload: dict[str, Any]) -> list[str]:
     return [str(blocker) for blocker in _as_list(payload.get("blockers")) if str(blocker)]
 
@@ -223,6 +235,95 @@ def _phase6_ux_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
     }
 
 
+def _phase6_ux_operator_handoff_queue(
+    *,
+    contract_pass: bool,
+    observation: dict[str, Any],
+    intake: dict[str, Any],
+    phase5: dict[str, Any],
+    observation_summary: dict[str, Any],
+    intake_summary: dict[str, Any],
+    required_step_count: int,
+    missing_observation_steps: list[str],
+    blockers: list[str],
+) -> list[dict[str, Any]]:
+    validation_commands = _dedupe_str(
+        _as_list(observation.get("validation_commands"))
+        + _as_list(intake.get("validation_commands"))
+        + [
+            "python3 scripts/build_phase6_ux_observation_status.py",
+            "python3 scripts/build_developer_preview_rc_status.py --check",
+        ]
+    )
+    missing_fields = [
+        str(field)
+        for field in _as_list(observation_summary.get("missing_fields"))
+        if str(field)
+    ]
+    required_steps = [
+        {
+            "id": str(step.get("id") or ""),
+            "label": str(step.get("label") or step.get("id") or ""),
+        }
+        for step in _as_list(observation_summary.get("required_workflow_steps"))
+        if isinstance(step, dict)
+    ]
+    return [
+        {
+            "queue_priority": 1,
+            "handoff_id": "ux_new_user_observation::human_30min_sample",
+            "status": "ready" if contract_pass else "external_owner_input_required",
+            "gate_id": "new_user_core_workflow_observation_passed",
+            "release_area_blockers": [
+                "ux::human_new_user_observation_missing_or_failed",
+                "ux::human_new_user_30min_sample_evidence_missing",
+            ],
+            "external_input_required": not contract_pass,
+            "owner": "ux_research_owner",
+            "owner_action": str(
+                intake_summary.get("owner_action")
+                or observation_summary.get("owner_action")
+                or ""
+            ),
+            "observation_artifact": str(
+                observation.get("observation_path")
+                or intake.get("observation_path")
+                or ""
+            ),
+            "observation_report": UX_OBSERVATION.as_posix(),
+            "intake_packet": UX_OBSERVATION_INTAKE.as_posix(),
+            "template_artifact": str(intake.get("template_path") or ""),
+            "phase5_rehearsal_receipt": PHASE5_GUI_WORKFLOW.as_posix(),
+            "required_workflow_step_count": required_step_count,
+            "required_workflow_steps": required_steps,
+            "missing_workflow_steps": missing_observation_steps,
+            "missing_field_count": len(missing_fields),
+            "missing_fields": missing_fields,
+            "max_completion_minutes": int(
+                observation_summary.get("max_completion_minutes")
+                or intake_summary.get("max_completion_minutes")
+                or 30
+            ),
+            "current_blocker_count": len(blockers),
+            "current_blockers": blockers,
+            "acceptance_criteria": [
+                "ux_new_user_observation_report.json.contract_pass == true",
+                "phase6_ux_observation_status.json.contract_pass == true",
+                f"workflow_step_pass_count >= {required_step_count}",
+                "completion_minutes <= 30",
+                "approval_decision == accepted",
+                "human observation evidence_ref is present and resolvable",
+            ],
+            "validation_commands": validation_commands,
+            "claim_boundary": (
+                "A real human new-user observation record is required. The intake "
+                "packet and automated browser rehearsal are handoff/support evidence "
+                "only and do not close this gate by themselves."
+            ),
+        }
+    ]
+
+
 def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     observation = _load_json(repo_root, UX_OBSERVATION)
@@ -299,6 +400,17 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
         and phase5_execution_count >= required_step_count
         and not blockers
     )
+    operator_handoff_queue = _phase6_ux_operator_handoff_queue(
+        contract_pass=contract_pass,
+        observation=observation,
+        intake=intake,
+        phase5=phase5,
+        observation_summary=observation_summary,
+        intake_summary=intake_summary,
+        required_step_count=required_step_count,
+        missing_observation_steps=missing_observation_steps,
+        blockers=blockers,
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -369,6 +481,17 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
         },
         "blockers": blockers,
         "blocker_grouping_metadata": _phase6_ux_blocker_grouping_metadata(blockers),
+        "operator_next_actions": [
+            "attach_human_new_user_observation_record",
+            "rerun_phase6_ux_observation_status",
+            "refresh_developer_preview_rc_status",
+            "refresh_pm_release_gate",
+        ]
+        if not contract_pass
+        else [],
+        "operator_handoff_count": len(operator_handoff_queue),
+        "first_operator_handoff": operator_handoff_queue[0] if operator_handoff_queue else {},
+        "operator_handoff_queue": operator_handoff_queue,
         "owner_action": (
             "Attach a passing human new-user observation for all five workflow steps, "
             "keep the intake packet in sync, attach GUI execution/browser evidence, "

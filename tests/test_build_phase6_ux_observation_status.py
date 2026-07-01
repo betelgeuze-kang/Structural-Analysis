@@ -79,6 +79,54 @@ def test_phase6_ux_observation_status_blocks_without_human_and_execution_evidenc
     assert "phase5_gui_workflow:human_new_user_observation_not_passed" in grouping[
         "groups"
     ]["duplicate_source_detail"]["blockers"]
+    assert payload["operator_next_actions"] == [
+        "attach_human_new_user_observation_record",
+        "rerun_phase6_ux_observation_status",
+        "refresh_developer_preview_rc_status",
+        "refresh_pm_release_gate",
+    ]
+    assert payload["operator_handoff_count"] == 1
+    handoff = payload["first_operator_handoff"]
+    assert handoff == payload["operator_handoff_queue"][0]
+    assert handoff["handoff_id"] == "ux_new_user_observation::human_30min_sample"
+    assert handoff["status"] == "external_owner_input_required"
+    assert handoff["gate_id"] == "new_user_core_workflow_observation_passed"
+    assert handoff["release_area_blockers"] == [
+        "ux::human_new_user_observation_missing_or_failed",
+        "ux::human_new_user_30min_sample_evidence_missing",
+    ]
+    assert handoff["external_input_required"] is True
+    assert handoff["owner"] == "ux_research_owner"
+    assert handoff["template_artifact"] == (
+        "docs/templates/ux_new_user_observation.template.json"
+    )
+    assert handoff["observation_artifact"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "ux_new_user_observation.json"
+    )
+    assert handoff["required_workflow_step_count"] == 5
+    assert [row["id"] for row in handoff["required_workflow_steps"]] == [
+        "import",
+        "model_health",
+        "analysis_setup",
+        "run_monitor",
+        "compare_report",
+    ]
+    assert handoff["missing_workflow_steps"] == [
+        "import",
+        "model_health",
+        "analysis_setup",
+        "run_monitor",
+        "compare_report",
+    ]
+    assert handoff["missing_field_count"] == 13
+    assert "completion_minutes <= 30" in handoff["acceptance_criteria"]
+    assert "approval_decision == accepted" in handoff["acceptance_criteria"]
+    assert any(
+        "build_phase6_ux_observation_status.py" in command
+        for command in handoff["validation_commands"]
+    )
+    assert "automated browser rehearsal" in handoff["claim_boundary"]
     assert "intake packet is only a handoff checklist" in payload["claim_boundary"]
     assert "automated browser/task tests do not replace" in payload["claim_boundary"]
 

@@ -31,6 +31,13 @@ def _file_sha256(path: Path) -> str:
     return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
 
 
+def _provenance_ref(case_id: str, candidate_id: str) -> str:
+    return (
+        "https://zenodo.org/records/7654321/files/"
+        f"pocketmd-lite-{case_id}-{candidate_id}.json#row"
+    )
+
+
 def _valid_case(
     *,
     case_id: str,
@@ -61,7 +68,7 @@ def _valid_case(
             "high": uncertainty_high,
             "unit": "energy_proxy_delta",
         },
-        "provenance_ref": f"local-evidence://pocketmd-lite/{case_id}/{candidate_id}",
+        "provenance_ref": _provenance_ref(case_id, candidate_id),
         "source_checksum": _checksum(f"{case_id}:{candidate_id}"),
     }
 
@@ -389,6 +396,29 @@ def test_pocketmd_lite_materializer_blocks_placeholder_source_receipt(
     assert report["blockers"] == [
         "operator_input_source_source_id_placeholder",
         "operator_input_source_source_license_placeholder",
+        "operator_input_source_source_url_placeholder",
+    ]
+    assert report["phase4_exit_gate"]["failed_criteria"] == ["report_blockers_resolved"]
+
+
+def test_pocketmd_lite_materializer_blocks_local_source_url(
+    tmp_path: Path,
+) -> None:
+    intake = _with_source_receipt(_valid_intake(), tmp_path)
+    source = intake["operator_input_source"]
+    assert isinstance(source, dict)
+    source["source_url"] = "local-evidence://pocketmd-lite/topk-rows"
+
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["operator_input_source_receipt"]["blockers"] == [
+        "operator_input_source_source_url_placeholder",
+    ]
+    assert report["blockers"] == [
         "operator_input_source_source_url_placeholder",
     ]
     assert report["phase4_exit_gate"]["failed_criteria"] == ["report_blockers_resolved"]
