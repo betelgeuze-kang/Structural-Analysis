@@ -1,28 +1,27 @@
 {
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 6,
+    "release_area_blocker_count": 5,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
-      "security::license_status_not_configured",
-      "github_sync::github_sync_preflight::local_head_mismatch"
+      "security::license_status_not_configured"
     ],
-    "release_area_green_count": 12,
-    "release_area_summary": "12/16",
+    "release_area_green_count": 13,
+    "release_area_summary": "13/16",
     "release_area_total_count": 16
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-07-01T19:53:18.041887+00:00",
+  "generated_at": "2026-07-01T19:58:54.523270+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_completion_audit": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304",
   "reason_code": "PASS",
   "release_tier_rows": [
     {
@@ -59,8 +58,7 @@
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::local_head_mismatch"
+        "security::license_status_not_configured"
       ],
       "claim_boundary": "Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green.",
       "evidence_artifact_paths": {
@@ -84,8 +82,7 @@
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::local_head_mismatch"
+        "security::license_status_not_configured"
       ],
       "claim_boundary": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
       "evidence_artifact_paths": {
@@ -340,48 +337,6 @@
     },
     {
       "acceptance_criteria": [
-        "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
-        "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
-        "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
-        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
-      ],
-      "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
-      "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
-      "closure_state": "external_owner_input_ready",
-      "evidence_artifact_paths": {
-        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-      },
-      "evidence_state": "synced",
-      "external_input_required": true,
-      "handoff_state": "external_owner_input_ready",
-      "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
-      "owner": "release_owner",
-      "owner_input_required": true,
-      "release_area_requirement_id": "release_area.github_sync",
-      "release_area_status": "blocked_handoff_incomplete",
-      "reproduction_commands": [
-        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "verdict_change_conditions": [
-        "`release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`",
-        "`github_sync::github_sync_preflight::local_head_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`",
-        "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`, `github_sync_remote_mutation_approval_pending`, `github_sync_remote_sync_needed`"
-      ],
-      "verdict_requirement_group": "release_area",
-      "verdict_requirement_id": "release_area.github_sync",
-      "verdict_requirement_status": "blocked_handoff_incomplete",
-      "verification_commands": [
-        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
-    {
-      "acceptance_criteria": [
         "`ga_enterprise_readiness_report.json.contract_pass == true` or no `independent_vv_missing` blocker",
         "`ga_enterprise_signoff_intake_packet.json` shows independent V&V evidence accepted",
         "`independent_vv_missing` absent from `ga_enterprise_blockers`"
@@ -549,24 +504,24 @@
   ],
   "schema_version": "pm-release-gate-reviewer-handoff.v1",
   "summary": {
-    "external_input_required_count": 10,
+    "external_input_required_count": 9,
     "full_release_gate_ready": false,
-    "handoff_complete_count": 10,
+    "handoff_complete_count": 9,
     "handoff_incomplete_count": 0,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "open_blocker_count": 10,
-    "owner_input_required_count": 10,
+    "open_blocker_count": 9,
+    "owner_input_required_count": 9,
     "paid_pilot_candidate": true,
-    "release_area_blocker_count": 6,
+    "release_area_blocker_count": 5,
     "release_area_gate_ready": false,
-    "release_area_green_count": 12,
+    "release_area_green_count": 13,
     "release_area_total_count": 16,
     "release_tier_blocked_count": 2,
     "release_tier_count": 4,
     "release_tier_handoff_incomplete_count": 0,
     "release_tier_pass_count": 2
   },
-  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=10 | incomplete=0 | release_tiers=2/4"
+  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=9 | incomplete=0 | release_tiers=2/4"
 }
