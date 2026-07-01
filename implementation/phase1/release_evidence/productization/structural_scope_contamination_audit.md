@@ -9,6 +9,7 @@
 - `unquarantined_non_structural_path_count`: `0`
 - `first_non_structural_path`: `implementation/phase1/md3bead_scientific_validity_report.md`
 - `first_unquarantined_non_structural_path`: `none`
+- `release_surface_text_leak_path_count`: `0`
 
 ## Quarantine
 
@@ -33,6 +34,10 @@
 | `molecular_docking` | 48 |
 | `molecular_dynamics` | 25 |
 | `molecular_science_evidence` | 13 |
+
+## Release Surface Text Guard
+
+No guarded structural release surface text leaks detected.
 
 | Path | Git State | Area | Quarantine | Families | Tokens |
 |---|---|---|---|---|---|

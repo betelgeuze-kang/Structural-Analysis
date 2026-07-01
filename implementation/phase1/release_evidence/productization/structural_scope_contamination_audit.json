@@ -10,13 +10,15 @@
   },
   "first_non_structural_path": "implementation/phase1/md3bead_scientific_validity_report.md",
   "first_unquarantined_non_structural_path": "",
-  "generated_at": "2026-07-01T14:29:55.782140+00:00",
+  "generated_at": "2026-07-01T14:43:39.226446+00:00",
   "git_state_counts": {
     "tracked": 86
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:9cf90c9598ed8154da040e28b8c3e34b4f757af2ea71fb5b623115ea47494f53",
-    "scripts/check_structural_scope_contamination.py": "sha256:ee357632acf972152a35407e180f7a361586acd8ecaf25b22db0a179066076db"
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:04f41d77dfb4ffb144646ace105e3c28769cf50dc8d2d234ba551cc897975ecb",
+    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:ff031230a139eb7882bea4ffde4c8a2cab327cba45fb70d66d939a237b844b9f",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:af7f5171db08b818d01b7aa3c2ca68379e4f650c8801205c5d28539959f3e602",
+    "scripts/check_structural_scope_contamination.py": "sha256:d1cbfbb69753709c9667fb57be5d0175c7e4cfb7399da1628cbd91209285ed85"
   },
   "next_actions": [
     "keep_quarantine_manifest_exact_until_non_structural_paths_are_deleted_or_extracted",
@@ -2852,12 +2854,18 @@
     "script": 19,
     "test": 19
   },
+  "release_surface_text_guard_paths": [
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
+  ],
+  "release_surface_text_leak_path_count": 0,
+  "release_surface_text_leak_rows": [],
   "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths_with_release_surface_quarantine_manifest",
   "reused_evidence": false,
   "schema_version": "structural-scope-contamination-audit.v1",
-  "source_commit_sha": "e4a55df56dcee389977062d04e30776c33cdc488",
+  "source_commit_sha": "b4356e98d9f37651974679f47a4544d1ba99b879",
   "status": "quarantined",
-  "tracked_path_count": 5716,
+  "tracked_path_count": 5719,
   "unquarantined_family_counts": {},
   "unquarantined_git_state_counts": {},
   "unquarantined_non_structural_path_count": 0,
@@ -2865,5 +2873,5 @@
   "unquarantined_non_structural_tracked_path_count": 0,
   "unquarantined_non_structural_untracked_path_count": 0,
   "unquarantined_path_area_counts": {},
-  "untracked_path_count": 3
+  "untracked_path_count": 0
 }
