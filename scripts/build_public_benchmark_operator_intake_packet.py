@@ -136,6 +136,65 @@ SOURCE_CHECKSUM_POLICY = {
     "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
     "required_receipt_field": "source_checksum",
 }
+PHASE2_ROW_INPUT_DESCRIPTIONS = {
+    "subset_rows": "CASF/PDBBind subset rows",
+    "pose_rows": "CASF/PDBBind pose-coordinate rows",
+    "enrichment_rows": "DUD-E/LIT-PCBA enrichment rows",
+    "vina_gnina_rows": "Vina/GNINA engine comparison rows",
+}
+PHASE2_ROW_INPUT_SLOT_IDS = {
+    "subset_rows": "casf_pdbbind_subset_intake",
+    "pose_rows": "pose_coordinate_intake",
+    "enrichment_rows": "dud_e_lit_pcba_enrichment_intake",
+    "vina_gnina_rows": "vina_gnina_comparison_intake",
+}
+PHASE2_ROW_COMPONENTS = {
+    "subset_rows": ("casf_pdbbind_pose_success_harness",),
+    "pose_rows": (
+        "casf_pdbbind_pose_success_harness",
+        "symmetry_aware_ligand_rmsd",
+        "posebusters_style_pose_validity",
+    ),
+    "enrichment_rows": ("dud_e_or_lit_pcba_enrichment",),
+    "vina_gnina_rows": ("vina_gnina_comparison_adapter",),
+}
+PHASE2_COMPONENT_GATE_CRITERIA = {
+    "casf_pdbbind_pose_success_harness": {
+        "criterion_id": "casf_pdbbind_pose_success_harness_ready",
+        "artifact_role": "pose_success_harness",
+        "ready_field": "pose_success_harness_ready",
+        "count_field": "real_benchmark_case_count",
+        "required_minimum_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+    },
+    "symmetry_aware_ligand_rmsd": {
+        "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+        "artifact_role": "rmsd_scorecard",
+        "ready_field": "scorecard_ready",
+        "count_field": "real_benchmark_case_count",
+        "required_minimum_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+    },
+    "posebusters_style_pose_validity": {
+        "criterion_id": "posebusters_style_pose_validity_ready",
+        "artifact_role": "pose_validity_packet",
+        "ready_field": "posebusters_validity_ready",
+        "count_field": "real_benchmark_case_count",
+        "required_minimum_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+    },
+    "vina_gnina_comparison_adapter": {
+        "criterion_id": "vina_gnina_comparison_ready",
+        "artifact_role": "vina_gnina_comparison_adapter",
+        "ready_field": "public_benchmark_engine_comparison_ready",
+        "count_field": "real_comparison_case_count",
+        "required_minimum_count": 1,
+    },
+    "dud_e_or_lit_pcba_enrichment": {
+        "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+        "artifact_role": "enrichment_scorecard",
+        "ready_field": "public_benchmark_enrichment_ready",
+        "count_field": "real_enrichment_target_count",
+        "required_minimum_count": 1,
+    },
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -455,6 +514,52 @@ def _gate_unblock_plan(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "template_artifact": str(slot.get("template_artifact") or ""),
                 "materialization_steps": list(slot["materialization_steps"]),
                 "manifest_contract_id": str(manifest_contract.get("contract_id") or ""),
+            }
+        )
+    return rows
+
+
+def _phase2_row_closure_matrix(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    slot_by_id = {str(slot.get("slot_id") or ""): slot for slot in slots}
+    rows: list[dict[str, Any]] = []
+    for row_input_id, description in PHASE2_ROW_INPUT_DESCRIPTIONS.items():
+        slot_id = PHASE2_ROW_INPUT_SLOT_IDS[row_input_id]
+        slot = slot_by_id.get(slot_id, {})
+        required_components: list[dict[str, Any]] = []
+        for component_id in PHASE2_ROW_COMPONENTS[row_input_id]:
+            gate = dict(PHASE2_COMPONENT_GATE_CRITERIA[component_id])
+            required_components.append({"component_id": component_id, **gate})
+        rows.append(
+            {
+                "row_input_id": row_input_id,
+                "description": description,
+                "status": "operator_input_required",
+                "operator_slot_id": slot_id,
+                "template_artifact": str(slot.get("template_artifact") or ""),
+                "default_row_path_candidates": list(
+                    DEFAULT_PHASE2_ROW_INPUT_CANDIDATES[row_input_id]
+                ),
+                "accepted_formats": ["json", "jsonl", "ndjson", "csv"],
+                "required_by_components": required_components,
+                "closes_phase2_criteria": [
+                    row["criterion_id"] for row in required_components
+                ],
+                "unblocks_tier_beta_criteria": [
+                    str(row)
+                    for row in _as_list(slot.get("unblocks_tier_beta_criteria"))
+                ],
+                "materialization_steps": [
+                    str(row) for row in _as_list(slot.get("materialization_steps"))
+                ],
+                "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
+                "row_contract_ref": (
+                    f"phase2_row_dropzone.default_row_path_candidates.{row_input_id}"
+                ),
+                "claim_boundary": (
+                    "This matrix row maps one operator row file to the Phase 2 "
+                    "criteria it can unblock; it is not benchmark evidence until "
+                    "real rows and receipts are materialized."
+                ),
             }
         )
     return rows
@@ -1096,6 +1201,7 @@ def build_public_benchmark_operator_intake_packet(
         ),
     ]
     gate_unblock_plan = _gate_unblock_plan(slots)
+    phase2_row_closure_matrix = _phase2_row_closure_matrix(slots)
     operator_evidence_gap_register = _operator_evidence_gap_register(slots)
     first_operator_evidence_gap = operator_evidence_gap_register[0]
     manifest_contracts = [casf_pdbbind_manifest_contract]
@@ -1214,6 +1320,8 @@ def build_public_benchmark_operator_intake_packet(
         "first_manifest_contract": casf_pdbbind_manifest_contract,
         "gate_unblock_plan": gate_unblock_plan,
         "gate_unblock_plan_count": len(gate_unblock_plan),
+        "phase2_row_closure_matrix": phase2_row_closure_matrix,
+        "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
         "first_blocked_target": first_operator_evidence_gap["slot_id"],
         "root_cause_tags": [
             "operator_source_material_required",
@@ -1344,6 +1452,7 @@ def build_public_benchmark_operator_intake_packet(
         "summary": {
             "required_slot_count": len([slot for slot in slots if slot["required"]]),
             "gate_unblock_plan_count": len(gate_unblock_plan),
+            "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
             "first_blocked_target": first_operator_evidence_gap["slot_id"],
             "root_cause_tags": [
                 "operator_source_material_required",
@@ -1411,6 +1520,23 @@ def _markdown(payload: dict[str, Any]) -> str:
             row["minimum_evidence"], ensure_ascii=False, sort_keys=True
         )
         lines.append(f"| `{row['slot_id']}` | {criteria} | `{minimum}` |")
+    lines.extend(
+        [
+            "",
+            "## Phase 2 Row Closure Matrix",
+            "",
+            "| Row Input | Slot | Closes Criteria | Template |",
+            "|---|---|---|---|",
+        ]
+    )
+    for row in payload["phase2_row_closure_matrix"]:
+        criteria = ", ".join(
+            f"`{criterion}`" for criterion in row["closes_phase2_criteria"]
+        )
+        lines.append(
+            f"| `{row['row_input_id']}` | `{row['operator_slot_id']}` | "
+            f"{criteria} | `{row['template_artifact']}` |"
+        )
     lines.extend(
         [
             "",

@@ -300,6 +300,8 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         comparison["row_validation_policies"]
     )
     assert packet["gate_unblock_plan_count"] == 4
+    assert packet["phase2_row_closure_matrix_count"] == 4
+    assert packet["summary"]["phase2_row_closure_matrix_count"] == 4
     assert packet["minimum_subset_case_count"] == 12
     assert packet["execution_preflight_checklist_count"] == len(
         packet["materialization_sequence"]
@@ -416,6 +418,55 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert gate_plan["vina_gnina_comparison_intake"][
         "row_validation_policies"
     ] == comparison["row_validation_policies"]
+    row_matrix = {
+        row["row_input_id"]: row for row in packet["phase2_row_closure_matrix"]
+    }
+    assert row_matrix["subset_rows"]["operator_slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert row_matrix["subset_rows"]["closes_phase2_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready"
+    ]
+    assert row_matrix["subset_rows"]["default_row_path_candidates"][0] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_subset_rows.json"
+    )
+    assert row_matrix["pose_rows"]["operator_slot_id"] == "pose_coordinate_intake"
+    assert row_matrix["pose_rows"]["closes_phase2_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready",
+    ]
+    assert row_matrix["pose_rows"]["required_by_components"][1] == {
+        "artifact_role": "rmsd_scorecard",
+        "component_id": "symmetry_aware_ligand_rmsd",
+        "count_field": "real_benchmark_case_count",
+        "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+        "ready_field": "scorecard_ready",
+        "required_minimum_count": 12,
+    }
+    assert row_matrix["enrichment_rows"]["operator_slot_id"] == (
+        "dud_e_lit_pcba_enrichment_intake"
+    )
+    assert row_matrix["enrichment_rows"]["required_by_components"] == [
+        {
+            "artifact_role": "enrichment_scorecard",
+            "component_id": "dud_e_or_lit_pcba_enrichment",
+            "count_field": "real_enrichment_target_count",
+            "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+            "ready_field": "public_benchmark_enrichment_ready",
+            "required_minimum_count": 1,
+        }
+    ]
+    assert row_matrix["vina_gnina_rows"]["operator_slot_id"] == (
+        "vina_gnina_comparison_intake"
+    )
+    assert row_matrix["vina_gnina_rows"]["accepted_formats"] == [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+    ]
 
     gap_register = {
         row["slot_id"]: row for row in packet["operator_evidence_gap_register"]
@@ -630,6 +681,8 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
         "pose_success_policy"
     ]["consistency_rule"].startswith("pose_success must equal")
     assert "# Public Benchmark Operator Intake Packet" in markdown
+    assert "## Phase 2 Row Closure Matrix" in markdown
+    assert "`pose_rows` | `pose_coordinate_intake`" in markdown
     assert "materialize_subset_manifest" in markdown
 
 

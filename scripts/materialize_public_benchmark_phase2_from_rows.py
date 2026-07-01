@@ -567,6 +567,78 @@ def _component_requirement_summary(
     }
 
 
+def _phase2_row_closure_matrix(
+    *,
+    row_inputs: dict[str, Path | None],
+    row_input_resolution: dict[str, dict[str, Any]],
+    row_intake_contracts: dict[str, Any],
+) -> list[dict[str, Any]]:
+    required_by_component = {
+        str(row["component_id"]): dict(row)
+        for row in harness_bundle.PHASE2_REQUIRED_COMPONENTS
+    }
+    rows: list[dict[str, Any]] = []
+    for row_input_id, description in ROW_INPUTS.items():
+        provided_path = row_inputs.get(row_input_id)
+        required_components: list[dict[str, Any]] = []
+        for component_id, required_inputs in COMPONENT_ROW_INPUTS.items():
+            if row_input_id not in required_inputs:
+                continue
+            required = required_by_component.get(component_id, {})
+            required_components.append(
+                {
+                    "component_id": component_id,
+                    "criterion_id": str(required.get("criterion_id") or ""),
+                    "artifact_role": str(required.get("artifact_role") or ""),
+                    "ready_field": str(required.get("ready_field") or ""),
+                    "count_field": str(required.get("count_field") or ""),
+                    "required_minimum_count": int(
+                        required.get("required_minimum_count") or 0
+                    ),
+                }
+            )
+        contract = row_intake_contracts.get(row_input_id, {})
+        if not isinstance(contract, dict):
+            contract = {}
+        resolution = row_input_resolution.get(row_input_id, {})
+        if not isinstance(resolution, dict):
+            resolution = {}
+        rows.append(
+            {
+                "row_input_id": row_input_id,
+                "description": description,
+                "status": "provided" if provided_path is not None else "missing",
+                "missing": provided_path is None,
+                "provided_path": str(provided_path or ""),
+                "resolved_path": str(resolution.get("resolved_path") or ""),
+                "auto_detected": bool(resolution.get("auto_detected")),
+                "default_row_path_candidates": _candidate_path_strings(row_input_id),
+                "accepted_formats": list(ACCEPTED_ROW_FORMATS),
+                "feeds_components": list(contract.get("feeds_components", [])),
+                "required_by_components": required_components,
+                "closes_phase2_criteria": [
+                    row["criterion_id"]
+                    for row in required_components
+                    if row["criterion_id"]
+                ],
+                "materialization_chain": list(
+                    contract.get("materialization_chain", [])
+                ),
+                "row_contract_ref": f"row_intake_contracts.{row_input_id}",
+                "operator_blockers_if_missing": [
+                    f"{row['component_id']}::{row_input_id}_not_provided"
+                    for row in required_components
+                ],
+                "claim_boundary": (
+                    "This row documents which Phase 2 readiness criteria a real "
+                    "operator-attached row file can unblock; it is not evidence by "
+                    "itself."
+                ),
+            }
+        )
+    return rows
+
+
 def _attach_component_requirement_summaries(
     components: list[dict[str, Any]],
     requirements: list[dict[str, Any]],
@@ -690,6 +762,11 @@ def build_public_benchmark_phase2_row_audit(
         enrichment_rows_path=enrichment_rows_path,
         vina_gnina_rows_path=vina_gnina_rows_path,
     )
+    phase2_row_closure_matrix = _phase2_row_closure_matrix(
+        row_inputs=row_inputs,
+        row_input_resolution=row_input_resolution,
+        row_intake_contracts=row_intake_contracts,
+    )
     input_paths = [
         Path("scripts/materialize_public_benchmark_phase2_from_rows.py"),
         Path("scripts/materialize_public_benchmark_operator_bundle_from_rows.py"),
@@ -745,6 +822,8 @@ def build_public_benchmark_phase2_row_audit(
             "summary": summary,
             "row_input_contract": ROW_INPUTS,
             "row_intake_contracts": row_intake_contracts,
+            "phase2_row_closure_matrix": phase2_row_closure_matrix,
+            "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
@@ -837,6 +916,8 @@ def build_public_benchmark_phase2_row_audit(
             "summary": summary,
             "row_input_contract": ROW_INPUTS,
             "row_intake_contracts": row_intake_contracts,
+            "phase2_row_closure_matrix": phase2_row_closure_matrix,
+            "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
             "blockers": blockers,
             "component_count": len(components),
             "component_ready_count": 0,
@@ -938,6 +1019,8 @@ def build_public_benchmark_phase2_row_audit(
         "summary": summary,
         "row_input_contract": ROW_INPUTS,
         "row_intake_contracts": row_intake_contracts,
+        "phase2_row_closure_matrix": phase2_row_closure_matrix,
+        "phase2_row_closure_matrix_count": len(phase2_row_closure_matrix),
         "operator_bundle_materialization_report": operator_materialization_report,
         "operator_bundle_source_actuality_check": source_actuality_check,
         "phase2_exit_gate": phase2_exit_gate,

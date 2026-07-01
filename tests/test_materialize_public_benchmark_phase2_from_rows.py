@@ -273,6 +273,36 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     assert audit["row_input_resolution"]["pose_rows"]["missing"] is True
     assert audit["row_input_resolution"]["enrichment_rows"]["missing"] is True
     assert audit["row_input_resolution"]["vina_gnina_rows"]["missing"] is True
+    closure_matrix = {
+        row["row_input_id"]: row for row in audit["phase2_row_closure_matrix"]
+    }
+    assert audit["phase2_row_closure_matrix_count"] == 4
+    assert set(closure_matrix) == {
+        "subset_rows",
+        "pose_rows",
+        "enrichment_rows",
+        "vina_gnina_rows",
+    }
+    assert closure_matrix["subset_rows"]["missing"] is True
+    assert closure_matrix["subset_rows"]["closes_phase2_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready"
+    ]
+    assert closure_matrix["pose_rows"]["closes_phase2_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready",
+    ]
+    assert closure_matrix["enrichment_rows"]["closes_phase2_criteria"] == [
+        "dud_e_or_lit_pcba_enrichment_ready"
+    ]
+    assert closure_matrix["vina_gnina_rows"]["closes_phase2_criteria"] == [
+        "vina_gnina_comparison_ready"
+    ]
+    assert closure_matrix["pose_rows"]["operator_blockers_if_missing"] == [
+        "casf_pdbbind_pose_success_harness::pose_rows_not_provided",
+        "symmetry_aware_ligand_rmsd::pose_rows_not_provided",
+        "posebusters_style_pose_validity::pose_rows_not_provided",
+    ]
     assert {row["component_id"] for row in audit["phase2_requirements"]} == (
         PHASE2_COMPONENT_IDS
     )
@@ -405,6 +435,48 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         "casf_pdbbind_pose_success_harness_ready"
     ]
     contracts = audit["row_intake_contracts"]
+    assert audit["phase2_row_closure_matrix_count"] == 4
+    closure_matrix = {
+        row["row_input_id"]: row for row in audit["phase2_row_closure_matrix"]
+    }
+    assert closure_matrix["subset_rows"]["status"] == "missing"
+    assert closure_matrix["subset_rows"]["closes_phase2_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready"
+    ]
+    assert closure_matrix["subset_rows"]["operator_blockers_if_missing"] == [
+        "casf_pdbbind_pose_success_harness::subset_rows_not_provided"
+    ]
+    assert closure_matrix["pose_rows"]["closes_phase2_criteria"] == [
+        "casf_pdbbind_pose_success_harness_ready",
+        "symmetry_aware_ligand_rmsd_ready",
+        "posebusters_style_pose_validity_ready",
+    ]
+    assert closure_matrix["pose_rows"]["required_by_components"][1] == {
+        "artifact_role": "rmsd_scorecard",
+        "component_id": "symmetry_aware_ligand_rmsd",
+        "count_field": "real_benchmark_case_count",
+        "criterion_id": "symmetry_aware_ligand_rmsd_ready",
+        "ready_field": "scorecard_ready",
+        "required_minimum_count": (
+            module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT
+        ),
+    }
+    assert closure_matrix["enrichment_rows"]["required_by_components"] == [
+        {
+            "artifact_role": "enrichment_scorecard",
+            "component_id": "dud_e_or_lit_pcba_enrichment",
+            "count_field": "real_enrichment_target_count",
+            "criterion_id": "dud_e_or_lit_pcba_enrichment_ready",
+            "ready_field": "public_benchmark_enrichment_ready",
+            "required_minimum_count": 1,
+        }
+    ]
+    assert closure_matrix["vina_gnina_rows"]["accepted_formats"] == [
+        "json",
+        "jsonl",
+        "ndjson",
+        "csv",
+    ]
     subset_contract = contracts["subset_rows"]
     assert subset_contract["supported_source_families"] == ["CASF/PDBBind"]
     assert subset_contract["default_row_path_candidates"][0].endswith(
@@ -616,6 +688,15 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     assert audit["phase2_ready"] is True
     assert audit["component_ready_count"] == 5
     assert audit["blockers"] == []
+    closure_matrix = {
+        row["row_input_id"]: row for row in audit["phase2_row_closure_matrix"]
+    }
+    assert audit["phase2_row_closure_matrix_count"] == 4
+    assert closure_matrix["subset_rows"]["status"] == "provided"
+    assert closure_matrix["subset_rows"]["provided_path"] == str(rows["subset"])
+    assert closure_matrix["pose_rows"]["status"] == "provided"
+    assert closure_matrix["enrichment_rows"]["status"] == "provided"
+    assert closure_matrix["vina_gnina_rows"]["status"] == "provided"
     assert {row["component_id"] for row in audit["phase2_requirements"]} == (
         PHASE2_COMPONENT_IDS
     )
@@ -657,6 +738,18 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     )
     assert audit["row_intake_contracts"]["phase2_outputs"]["operator_bundle"] == (
         str(tmp_path / "operator_bundle.json")
+    )
+    closure_matrix = {
+        row["row_input_id"]: row for row in audit["phase2_row_closure_matrix"]
+    }
+    assert {row["status"] for row in closure_matrix.values()} == {"provided"}
+    assert closure_matrix["subset_rows"]["provided_path"] == str(rows["subset"])
+    assert closure_matrix["pose_rows"]["provided_path"] == str(rows["pose"])
+    assert closure_matrix["enrichment_rows"]["provided_path"] == str(
+        rows["enrichment"]
+    )
+    assert closure_matrix["vina_gnina_rows"]["provided_path"] == str(
+        rows["vina_gnina"]
     )
     assert audit["phase2_exit_gate"]["status"] == "ready"
     assert audit["operator_bundle_materialization_report"]["phase2_harness_inputs"] == {
