@@ -83,9 +83,21 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
     rows = {row["field"]: row for row in payload["field_rows"]}
 
     assert payload["contract_pass"] is False
+    assert payload["status"] == "blocked"
     assert payload["reason_code"] == "ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED"
+    assert payload["summary_line"] == "License status intake: BLOCKED | fields=0/16 | blockers=2"
     assert payload["summary"]["closure_blocker_count"] == 2
     assert payload["summary"]["placeholder_values_absent_pass"] is True
+    assert payload["gate_unblock_plan_count"] == 2
+    assert payload["gate_unblock_plan"][0]["slot_id"] == "attach_license_status_record"
+    assert "tier" in payload["gate_unblock_plan"][0]["failing_fields"]
+    assert payload["next_actions"] == [
+        "fill_license_status_record_from_template",
+        "attach_product_or_legal_approval_evidence",
+        "set_paid_pilot_or_limited_commercial_scope_boundary",
+        "prove_future_expiry_or_perpetual_approval",
+        "rerun_license_status_and_release_gates",
+    ]
     assert rows["status"]["current_value"] == "not_configured"
     assert rows["license_id"]["template_value"] == "LICENSE-ID"
     assert rows["approver_role"]["template_value"] == "APPROVER-ROLE"
@@ -103,6 +115,7 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
     assert rows["evidence_ref_not_template_reference"]["closure_check"] == "evidence_ref_not_template_reference_pass"
     assert rows["evidence_ref_not_template_artifact"]["closure_check"] == "evidence_ref_not_template_artifact_pass"
     assert any("build_license_status_closure_report.py" in command for command in payload["validation_commands"])
+    assert any("build_license_status_intake_packet.py" in command for command in payload["validation_commands"])
 
 
 def test_license_status_intake_packet_passes_through_closed_report(tmp_path: Path) -> None:
@@ -173,10 +186,48 @@ def test_license_status_intake_packet_passes_through_closed_report(tmp_path: Pat
     )
 
     assert payload["contract_pass"] is True
+    assert payload["status"] == "ready"
     assert payload["reason_code"] == "PASS"
     assert payload["summary"]["field_pass_count"] == 16
     assert payload["summary"]["provenance_complete_pass"] is True
     assert payload["current_blockers"] == []
+    assert payload["gate_unblock_plan"] == []
+    assert payload["gate_unblock_plan_count"] == 0
+    assert payload["next_actions"] == []
+
+
+def test_license_status_intake_packet_reuses_closure_gate_unblock_plan(tmp_path: Path) -> None:
+    license_status = _write_json(tmp_path / "license_status.json", {"status": "not_configured"})
+    template = _write_json(tmp_path / "license_status.template.json", {})
+    closure = _write_json(
+        tmp_path / "license_status_closure_report.json",
+        {
+            "contract_pass": False,
+            "blockers": ["license_status_not_active"],
+            "checks": {},
+            "summary": {},
+            "gate_unblock_plan": [
+                {
+                    "slot_id": "custom_license_owner_slot",
+                    "minimum_evidence": ["owner/license evidence"],
+                }
+            ],
+        },
+    )
+
+    payload = build_license_status_intake_packet.build_packet(
+        license_status_path=license_status,
+        template_path=template,
+        closure_report_path=closure,
+    )
+
+    assert payload["gate_unblock_plan"] == [
+        {
+            "slot_id": "custom_license_owner_slot",
+            "minimum_evidence": ["owner/license evidence"],
+        }
+    ]
+    assert payload["gate_unblock_plan_count"] == 1
 
 
 def test_license_status_intake_packet_cli_writes_markdown(tmp_path: Path, capsys) -> None:
@@ -209,3 +260,4 @@ def test_license_status_intake_packet_cli_writes_markdown(tmp_path: Path, capsys
     assert "License Status Intake Packet" in captured.out
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["closure_blocker_count"] == 1
     assert "Validation Commands" in out_md.read_text(encoding="utf-8")
+    assert "Gate Unblock Plan" in out_md.read_text(encoding="utf-8")

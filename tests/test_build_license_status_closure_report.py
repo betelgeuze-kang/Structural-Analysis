@@ -32,9 +32,25 @@ def test_license_status_closure_blocks_not_configured_status(tmp_path: Path) -> 
     assert payload["source_commit_sha"]
     assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
     assert payload["reused_evidence"] is False
+    assert payload["status"] == "blocked"
+    assert payload["template_path"] == "docs/templates/license_status.template.json"
     assert "license_status_not_active" in payload["blockers"]
     assert "license_tier_missing" in payload["blockers"]
     assert payload["summary"]["owner_action"].startswith("Populate license_status.json")
+    assert payload["summary_line"] == (
+        "License status: BLOCKED | status=not_configured | tier=missing | blockers=10"
+    )
+    assert payload["gate_unblock_plan_count"] == 6
+    assert payload["gate_unblock_plan"][0]["slot_id"] == "attach_license_status_record"
+    assert payload["gate_unblock_plan"][-1]["slot_id"] == "regenerate_release_gate_evidence"
+    assert payload["next_actions"] == [
+        "fill_license_status_record_from_template",
+        "attach_product_or_legal_approval_evidence",
+        "set_paid_pilot_or_limited_commercial_scope_boundary",
+        "prove_future_expiry_or_perpetual_approval",
+        "rerun_license_status_and_release_gates",
+    ]
+    assert any("build_license_status_intake_packet.py" in command for command in payload["validation_commands"])
 
 
 def test_license_status_closure_passes_populated_future_license(tmp_path: Path) -> None:
@@ -69,7 +85,11 @@ def test_license_status_closure_passes_populated_future_license(tmp_path: Path) 
     assert payload["source_commit_sha"]
     assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
     assert payload["reused_evidence"] is False
+    assert payload["status"] == "ready"
     assert payload["blockers"] == []
+    assert payload["gate_unblock_plan"] == []
+    assert payload["gate_unblock_plan_count"] == 0
+    assert payload["next_actions"] == []
     assert payload["summary"]["product_scope_count"] == 4
     assert payload["summary"]["evidence_ref_kind"] == "local_path"
     assert payload["checks"]["provenance_complete_pass"] is True

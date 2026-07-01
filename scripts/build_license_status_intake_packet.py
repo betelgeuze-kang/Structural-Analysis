@@ -147,6 +147,14 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
 def _first_value(payload: dict[str, Any], keys: list[str]) -> Any:
     for key in keys:
         if key in payload:
@@ -188,6 +196,63 @@ def _derived_current_value(field: str, closure_summary: dict[str, Any]) -> str:
     return ""
 
 
+def _next_actions(contract_pass: bool) -> list[str]:
+    if contract_pass:
+        return []
+    return [
+        "fill_license_status_record_from_template",
+        "attach_product_or_legal_approval_evidence",
+        "set_paid_pilot_or_limited_commercial_scope_boundary",
+        "prove_future_expiry_or_perpetual_approval",
+        "rerun_license_status_and_release_gates",
+    ]
+
+
+def _gate_unblock_plan(
+    *,
+    license_status_path: Path,
+    template_path: Path,
+    closure_report_path: Path,
+    closure: dict[str, Any],
+    field_rows: list[dict[str, Any]],
+    validation_commands: list[str],
+    contract_pass: bool,
+) -> list[dict[str, Any]]:
+    if contract_pass:
+        return []
+    closure_plan = closure.get("gate_unblock_plan")
+    if isinstance(closure_plan, list) and closure_plan:
+        return [row for row in closure_plan if isinstance(row, dict)]
+    failing_fields = [
+        str(row["field"])
+        for row in field_rows
+        if row.get("closure_check_pass") is not True
+    ]
+    return [
+        {
+            "slot_id": "attach_license_status_record",
+            "required_artifact": str(license_status_path),
+            "template_artifact": str(template_path),
+            "closure_report": str(closure_report_path),
+            "failing_fields": failing_fields,
+            "minimum_evidence": [
+                "license_status.json populated from an approved product/legal decision",
+                "all required fields populated without template placeholders",
+                "contract_pass=true only after closure report validation passes",
+            ],
+        },
+        {
+            "slot_id": "rerun_validation_chain",
+            "validation_commands": validation_commands,
+            "minimum_evidence": [
+                "license_status_closure_report.json contract_pass=true",
+                "license_status_intake_packet.json contract_pass=true",
+                "PM release security gate refreshed",
+            ],
+        },
+    ]
+
+
 def build_packet(
     *,
     license_status_path: Path = DEFAULT_LICENSE_STATUS,
@@ -197,9 +262,9 @@ def build_packet(
     license_status = _load_json(license_status_path)
     template = _load_json(template_path)
     closure = _load_json(closure_report_path)
-    closure_checks = closure.get("checks") if isinstance(closure.get("checks"), dict) else {}
-    closure_summary = closure.get("summary") if isinstance(closure.get("summary"), dict) else {}
-    closure_blockers = closure.get("blockers") if isinstance(closure.get("blockers"), list) else []
+    closure_checks = _as_dict(closure.get("checks"))
+    closure_summary = _as_dict(closure.get("summary"))
+    closure_blockers = _as_list(closure.get("blockers"))
 
     rows: list[dict[str, Any]] = []
     for spec in (*FIELD_SPECS, *DERIVED_CHECK_SPECS):
@@ -225,14 +290,39 @@ def build_packet(
 
     placeholder_absent = bool(closure_checks.get("placeholder_values_absent_pass", False))
     contract_pass = bool(closure.get("contract_pass", False))
+    validation_commands = [
+        f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_CLOSURE_REPORT}",
+        f"python3 scripts/build_license_status_intake_packet.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+        "python3 scripts/report_pm_release_gate.py "
+        " --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+        " --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py "
+        " --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
+        " --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+    ]
+    gate_unblock_plan = _gate_unblock_plan(
+        license_status_path=license_status_path,
+        template_path=template_path,
+        closure_report_path=closure_report_path,
+        closure=closure,
+        field_rows=rows,
+        validation_commands=validation_commands,
+        contract_pass=contract_pass,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED",
         "license_status_path": str(license_status_path),
         "template_path": str(template_path),
         "closure_report_path": str(closure_report_path),
+        "summary_line": (
+            f"License status intake: {'PASS' if contract_pass else 'BLOCKED'} | "
+            f"fields={sum(1 for row in rows if row['closure_check_pass'])}/{len(rows)} | "
+            f"blockers={len(closure_blockers)}"
+        ),
         "summary": {
             "owner_action": str(
                 closure_summary.get(
@@ -253,15 +343,10 @@ def build_packet(
         ),
         "field_rows": rows,
         "current_blockers": [str(blocker) for blocker in closure_blockers],
-        "validation_commands": [
-            f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_CLOSURE_REPORT}",
-            "python3 scripts/report_pm_release_gate.py "
-            " --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-            " --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py "
-            " --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
-            " --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-        ],
+        "gate_unblock_plan": gate_unblock_plan,
+        "gate_unblock_plan_count": len(gate_unblock_plan),
+        "next_actions": _next_actions(contract_pass),
+        "validation_commands": validation_commands,
     }
 
 
@@ -272,7 +357,10 @@ def _markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# License Status Intake Packet",
         "",
+        f"- `summary_line`: `{payload['summary_line']}`",
+        f"- `status`: `{payload['status']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
+        f"- `gate_unblock_plan_count`: `{payload['gate_unblock_plan_count']}`",
         f"- `reason_code`: `{payload['reason_code']}`",
         f"- `license_status_path`: `{payload['license_status_path']}`",
         f"- `template_path`: `{payload['template_path']}`",
@@ -286,6 +374,12 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"| `{cell(row['field'])}` | `{cell(row['current_value'])}` | {cell(row['required_value'])} | "
             f"`{cell(row['closure_check'])}` = `{row['closure_check_pass']}` |"
         )
+    if payload["gate_unblock_plan"]:
+        lines.extend(["", "## Gate Unblock Plan", ""])
+        for row in payload["gate_unblock_plan"]:
+            lines.append(f"- `{cell(row.get('slot_id', ''))}`")
+            for item in row.get("minimum_evidence", []):
+                lines.append(f"  - {cell(item)}")
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:
         lines.append(f"- `{command}`")

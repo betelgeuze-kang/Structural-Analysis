@@ -25,6 +25,14 @@ REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_LICENSE_STATUS = Path("implementation/phase1/release/support_bundle/license_status.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/license_status_closure_report.json")
 DEFAULT_TEMPLATE = Path("docs/templates/license_status.template.json")
+DEFAULT_INTAKE_PACKET = Path("implementation/phase1/release_evidence/productization/license_status_intake_packet.json")
+DEFAULT_INTAKE_PACKET_MD = DEFAULT_INTAKE_PACKET.with_suffix(".md")
+DEFAULT_PM_RELEASE_GATE_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
+DEFAULT_PM_RELEASE_GATE_REPORT_MD = DEFAULT_PM_RELEASE_GATE_REPORT.with_suffix(".md")
+DEFAULT_PM_BLOCKER_ACTION_REGISTER = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
+)
+DEFAULT_PM_BLOCKER_ACTION_REGISTER_MD = DEFAULT_PM_BLOCKER_ACTION_REGISTER.with_suffix(".md")
 PASS_STATUSES = {"active", "approved", "valid"}
 ALLOWED_TIERS = {"paid-pilot", "limited-commercial"}
 ALLOWED_APPROVER_ROLES = {"product_owner", "legal_counsel", "product_and_legal", "delegated_product_owner"}
@@ -176,6 +184,100 @@ def _is_template_like_path(path: Path, *, repo_root: Path) -> bool:
     return bool(".template." in name or name.endswith(".template"))
 
 
+def _validation_commands() -> list[str]:
+    return [
+        f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_OUT}",
+        f"python3 scripts/build_license_status_intake_packet.py --out {DEFAULT_INTAKE_PACKET} "
+        f"--out-md {DEFAULT_INTAKE_PACKET_MD}",
+        f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_RELEASE_GATE_REPORT} "
+        f"--out-md {DEFAULT_PM_RELEASE_GATE_REPORT_MD}",
+        f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_PM_BLOCKER_ACTION_REGISTER} "
+        f"--out-md {DEFAULT_PM_BLOCKER_ACTION_REGISTER_MD}",
+    ]
+
+
+def _next_actions(contract_pass: bool) -> list[str]:
+    if contract_pass:
+        return []
+    return [
+        "fill_license_status_record_from_template",
+        "attach_product_or_legal_approval_evidence",
+        "set_paid_pilot_or_limited_commercial_scope_boundary",
+        "prove_future_expiry_or_perpetual_approval",
+        "rerun_license_status_and_release_gates",
+    ]
+
+
+def _gate_unblock_plan(
+    *,
+    license_status_path: Path,
+    template_path: Path,
+    validation_commands: list[str],
+    contract_pass: bool,
+) -> list[dict[str, Any]]:
+    if contract_pass:
+        return []
+    return [
+        {
+            "slot_id": "attach_license_status_record",
+            "required_artifact": str(license_status_path),
+            "template_artifact": str(template_path),
+            "minimum_evidence": [
+                "status is active, approved, or valid",
+                "tier is paid-pilot or limited-commercial",
+                "license_id, issuer_or_approver, approver_role, approval_ref, and approved_at_utc are populated",
+                "template placeholders such as LICENSE-ID or OWNER_INPUT_REQUIRED are absent",
+            ],
+        },
+        {
+            "slot_id": "prove_product_legal_approval",
+            "allowed_approver_roles": sorted(ALLOWED_APPROVER_ROLES),
+            "minimum_evidence": [
+                "approver_role is product_owner, legal_counsel, product_and_legal, or delegated_product_owner",
+                "approved_at_utc is timezone-aware and not in the future",
+                "approval_ref names the product/legal decision record",
+                "approval_ref differs from license_id",
+            ],
+        },
+        {
+            "slot_id": "prove_scope_and_tier_boundary",
+            "allowed_tiers": sorted(ALLOWED_TIERS),
+            "required_product_scope": sorted(REQUIRED_PRODUCT_SCOPE),
+            "minimum_evidence": [
+                "product_scope includes review-assist",
+                "product_scope includes specified-structure-families",
+                "product_scope includes specified-workflows",
+                "product_scope includes engine-and-reviewer-evidence-package",
+            ],
+        },
+        {
+            "slot_id": "prove_validity_window_or_perpetual_approval",
+            "minimum_evidence": [
+                "expires_at_utc is timezone-aware and in the future",
+                "or perpetual=true is explicitly approved",
+                "approved_at_utc is not later than expires_at_utc when an expiry exists",
+            ],
+        },
+        {
+            "slot_id": "attach_distinct_retrievable_evidence_reference",
+            "minimum_evidence": [
+                "evidence_ref is a ticket/jira/legal/docusign reference, https URL, or existing local evidence path",
+                "evidence_ref is not license_status.json itself",
+                "evidence_ref is not docs/templates or a .template artifact",
+            ],
+        },
+        {
+            "slot_id": "regenerate_release_gate_evidence",
+            "validation_commands": validation_commands,
+            "minimum_evidence": [
+                "license_status_closure_report.json contract_pass=true",
+                "license_status_intake_packet.json contract_pass=true",
+                "PM release security area no longer blocks license_status_not_configured",
+            ],
+        },
+    ]
+
+
 def build_report(
     *,
     license_status_path: Path,
@@ -293,6 +395,8 @@ def build_report(
     checksum_inputs = [license_status_path, template_path]
     if resolved_evidence_path:
         checksum_inputs.append(Path(resolved_evidence_path))
+    contract_pass = not blockers
+    validation_commands = _validation_commands()
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -301,10 +405,16 @@ def build_report(
         "engine_version": ENGINE_VERSION,
         "input_checksums": input_checksums(checksum_inputs, repo_root=repo_root),
         "reused_evidence": False,
+        "status": "ready" if contract_pass else "blocked",
         "license_status_path": str(license_status_path),
-        "contract_pass": not blockers,
-        "reason_code": "PASS" if not blockers else "ERR_LICENSE_STATUS_NOT_CLOSED",
+        "template_path": str(template_path),
+        "contract_pass": contract_pass,
+        "reason_code": "PASS" if contract_pass else "ERR_LICENSE_STATUS_NOT_CLOSED",
         "blockers": blockers,
+        "summary_line": (
+            f"License status: {'PASS' if contract_pass else 'BLOCKED'} | "
+            f"status={status or 'missing'} | tier={tier or 'missing'} | blockers={len(blockers)}"
+        ),
         "checks": {
             "license_status_file_present": license_status_path.exists(),
             "status_active_pass": status in PASS_STATUSES,
@@ -378,6 +488,15 @@ def build_report(
             "This report verifies that license status evidence is populated and current; it does not "
             "create legal approval or substitute for counsel/product-owner signoff."
         ),
+        "gate_unblock_plan": _gate_unblock_plan(
+            license_status_path=license_status_path,
+            template_path=template_path,
+            validation_commands=validation_commands,
+            contract_pass=contract_pass,
+        ),
+        "gate_unblock_plan_count": 0 if contract_pass else 6,
+        "next_actions": _next_actions(contract_pass),
+        "validation_commands": validation_commands,
     }
 
 
