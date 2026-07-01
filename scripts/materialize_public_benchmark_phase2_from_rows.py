@@ -710,6 +710,73 @@ def _phase2_exit_gate_with_source_actuality(
     }
 
 
+def _comma_join(values: list[Any]) -> str:
+    rendered = [str(value) for value in values if str(value)]
+    return ", ".join(rendered) if rendered else "none"
+
+
+def _markdown(payload: dict[str, Any]) -> str:
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    missing_row_inputs = [
+        str(item) for item in payload.get("missing_row_inputs", []) if str(item)
+    ]
+    lines = [
+        "# Public Benchmark Phase 2 Row Audit",
+        "",
+        f"- `status`: `{payload.get('status', '')}`",
+        f"- `contract_pass`: `{payload.get('contract_pass', False)}`",
+        f"- `phase2_ready`: `{payload.get('phase2_ready', False)}`",
+        f"- `component_ready_count`: `{payload.get('component_ready_count', 0)}/{payload.get('component_count', 0)}`",
+        f"- `missing_row_inputs`: `{_comma_join(missing_row_inputs)}`",
+        "",
+        "| Row Input | Status | Feeds Components | Closes Criteria | Default Path |",
+        "|---|---|---|---|---|",
+    ]
+    for row in payload.get("phase2_row_closure_matrix", []):
+        if not isinstance(row, dict):
+            continue
+        default_paths = row.get("default_row_path_candidates")
+        default_path = ""
+        if isinstance(default_paths, list) and default_paths:
+            default_path = str(default_paths[0])
+        lines.append(
+            "| "
+            f"`{row.get('row_input_id', '')}` | "
+            f"`{row.get('status', '')}` | "
+            f"`{_comma_join(row.get('feeds_components', []))}` | "
+            f"`{_comma_join(row.get('closes_phase2_criteria', []))}` | "
+            f"`{default_path}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "| Component | Status | Failed Criteria | Blocker Count |",
+            "|---|---|---|---|",
+        ]
+    )
+    for component in payload.get("components", []):
+        if not isinstance(component, dict):
+            continue
+        requirement_summary = component.get("requirement_summary")
+        if not isinstance(requirement_summary, dict):
+            requirement_summary = {}
+        lines.append(
+            "| "
+            f"`{component.get('component_id', '')}` | "
+            f"`{component.get('status', '')}` | "
+            f"`{_comma_join(component.get('failed_criteria', []))}` | "
+            f"`{requirement_summary.get('blocker_count', len(component.get('blockers', [])))}` |"
+        )
+    lines.extend(["", str(payload.get("claim_boundary", "")), ""])
+    return "\n".join(lines)
+
+
+def _resolve_out_md(out: Path, out_md: Path | None) -> Path:
+    return out.with_suffix(".md") if out_md is None else out_md
+
+
 def build_public_benchmark_phase2_row_audit(
     *,
     repo_root: Path = ROOT,
@@ -1061,6 +1128,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--vina-gnina-rows", type=Path)
     parser.add_argument("--target-subset-case-count", type=int)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--out-md", type=Path)
     parser.add_argument("--operator-bundle-out", type=Path, default=DEFAULT_OPERATOR_BUNDLE_OUT)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--harness-report-out", type=Path, default=DEFAULT_HARNESS_REPORT_OUT)
@@ -1084,6 +1152,10 @@ def main(argv: list[str] | None = None) -> int:
         artifact_bundle_out=args.artifact_bundle_out,
     )
     _write_json(args.repo_root, args.out, payload)
+    out_md = _resolve_out_md(args.out, args.out_md)
+    resolved_out_md = _resolve(args.repo_root, out_md)
+    resolved_out_md.parent.mkdir(parents=True, exist_ok=True)
+    resolved_out_md.write_text(_markdown(payload), encoding="utf-8")
     print(
         "public-benchmark-phase2-row-audit: "
         f"{payload['status']} | ready={payload['component_ready_count']}/"

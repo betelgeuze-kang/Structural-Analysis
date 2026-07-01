@@ -665,6 +665,51 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     assert not (tmp_path / "artifact_bundle.json").exists()
 
 
+def test_public_benchmark_phase2_row_audit_cli_writes_markdown(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "public_benchmark_phase2_row_audit.json"
+    out_md = tmp_path / "public_benchmark_phase2_row_audit.md"
+
+    exit_code = module.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--out",
+            str(out),
+            "--out-md",
+            str(out_md),
+            "--operator-bundle-out",
+            str(tmp_path / "operator_bundle.json"),
+            "--out-dir",
+            str(tmp_path / "out"),
+            "--harness-report-out",
+            str(tmp_path / "harness_report.json"),
+            "--artifact-bundle-out",
+            str(tmp_path / "artifact_bundle.json"),
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    markdown = out_md.read_text(encoding="utf-8")
+    assert payload["status"] == "operator_evidence_required"
+    assert "# Public Benchmark Phase 2 Row Audit" in markdown
+    assert "| `subset_rows` | `missing` |" in markdown
+    assert "| `pose_rows` | `missing` |" in markdown
+    assert "| `enrichment_rows` | `missing` |" in markdown
+    assert "| `vina_gnina_rows` | `missing` |" in markdown
+    assert "casf_pdbbind_pose_success_harness_ready" in markdown
+    assert "symmetry_aware_ligand_rmsd_ready" in markdown
+    assert "posebusters_style_pose_validity_ready" in markdown
+    assert "vina_gnina_comparison_ready" in markdown
+    assert "dud_e_or_lit_pcba_enrichment_ready" in markdown
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_subset_rows.json"
+    ) in markdown
+
+
 def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     tmp_path: Path,
 ) -> None:
