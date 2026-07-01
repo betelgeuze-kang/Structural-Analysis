@@ -73,8 +73,13 @@ def test_rmsd_scorecard_materializer_scores_real_pose_input() -> None:
 
 
 def test_rmsd_scorecard_materializer_records_pose_failure_without_blocking() -> None:
+    failure_case = _pose_case()
+    predicted_atoms = failure_case["predicted_atoms"]
+    assert isinstance(predicted_atoms, list)
+    predicted_atoms[3]["z"] = 10.0
+
     scorecard = module.materialize_rmsd_scorecard(
-        {"pose_validity_ready": True, "cases": [_pose_case(threshold=0.0)]},
+        {"pose_validity_ready": True, "cases": [failure_case]},
         repo_root=REPO_ROOT,
     )
 
