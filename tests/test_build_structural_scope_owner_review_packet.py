@@ -143,6 +143,12 @@ def test_owner_review_packet_groups_quarantined_paths(tmp_path: Path) -> None:
         rows["implementation/phase1/md3bead_soa.py"]["recommended_owner_decision"]
         == "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
     )
+    assert rows["implementation/phase1/md3bead_soa.py"][
+        "recommended_owner_decision_primary"
+    ] == "extract_to_molecular_or_science_repository"
+    assert rows["implementation/phase1/md3bead_soa.py"][
+        "recommended_owner_decision_alternate"
+    ] == "delete_from_structural_repository"
     assert (
         rows[
             "implementation/phase1/release_evidence/productization/"
@@ -150,6 +156,16 @@ def test_owner_review_packet_groups_quarantined_paths(tmp_path: Path) -> None:
         ]["recommended_owner_decision"]
         == "delete_from_structural_repository_or_extract_only_if_owner_requires_history"
     )
+    assert rows[
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_product_report.json"
+    ]["recommended_owner_decision_primary"] == "delete_from_structural_repository"
+    assert rows[
+        "implementation/phase1/release_evidence/productization/"
+        "gpcr_hard_decoy_product_report.json"
+    ][
+        "recommended_owner_decision_alternate"
+    ] == "extract_to_molecular_or_science_repository"
 
 
 def test_owner_review_packet_closes_with_signed_quarantine_exception_decisions(
@@ -303,6 +319,10 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     rows = json.loads(template.read_text(encoding="utf-8"))["decision_rows"]
     assert rows[0]["owner_decision"] == ""
     assert rows[0]["owner_identity"] == ""
+    assert (
+        rows[0]["recommended_owner_decision_primary"]
+        == "extract_to_molecular_or_science_repository"
+    )
     assert rows[0]["allowed_owner_decisions"] == list(
         owner_review.ALLOWED_OWNER_DECISIONS
     )
@@ -314,6 +334,13 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     assert csv_rows[0]["owner_decision"] == ""
     assert csv_rows[0]["recommended_owner_decision"] == (
         "extract_to_molecular_or_science_repository_or_delete_if_obsolete"
+    )
+    assert (
+        csv_rows[0]["recommended_owner_decision_primary"]
+        == "extract_to_molecular_or_science_repository"
+    )
+    assert csv_rows[0]["recommended_owner_decision_alternate"] == (
+        "delete_from_structural_repository"
     )
 
 
@@ -331,6 +358,8 @@ def test_owner_review_packet_accepts_owner_decision_csv(tmp_path: Path) -> None:
                     "row-1,implementation/phase1/md3bead_soa.py,"
                     "implementation_phase1,molecular_dynamics,md3bead,"
                     "extract_to_molecular_or_science_repository_or_delete_if_obsolete,"
+                    "extract_to_molecular_or_science_repository,"
+                    "delete_from_structural_repository,"
                     "extract_to_molecular_or_science_repository,scope-owner,"
                     "product_owner,2026-07-02T00:00:00Z,"
                     "owner-review://scope-cleanup/001"
@@ -341,6 +370,8 @@ def test_owner_review_packet_accepts_owner_decision_csv(tmp_path: Path) -> None:
                     "gpcr_hard_decoy_product_report.json,productization_evidence,"
                     "molecular_docking,gpcr,"
                     "delete_from_structural_repository_or_extract_only_if_owner_requires_history,"
+                    "delete_from_structural_repository,"
+                    "extract_to_molecular_or_science_repository,"
                     "delete_from_structural_repository,scope-owner,product_owner,"
                     "2026-07-02T00:00:00Z,"
                     "owner-review://scope-cleanup/002"

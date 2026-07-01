@@ -51,6 +51,8 @@ OWNER_DECISION_COLUMNS = (
     "families",
     "matched_tokens",
     "recommended_owner_decision",
+    "recommended_owner_decision_primary",
+    "recommended_owner_decision_alternate",
     "owner_decision",
     "owner_identity",
     "owner_role",
@@ -148,6 +150,24 @@ def _recommended_decision(row: dict[str, Any]) -> str:
     return "owner_decision_required"
 
 
+def _recommended_owner_decision_primary(row: dict[str, Any]) -> str:
+    area = str(row.get("path_area", ""))
+    if area in {"release_surface", "productization_evidence"}:
+        return "delete_from_structural_repository"
+    if area in {"script", "test", "implementation_phase1"}:
+        return "extract_to_molecular_or_science_repository"
+    return ""
+
+
+def _recommended_owner_decision_alternate(row: dict[str, Any]) -> str:
+    area = str(row.get("path_area", ""))
+    if area in {"release_surface", "productization_evidence"}:
+        return "extract_to_molecular_or_science_repository"
+    if area in {"script", "test", "implementation_phase1"}:
+        return "delete_from_structural_repository"
+    return "retain_quarantined_with_signed_owner_exception"
+
+
 def _review_row(row: dict[str, Any], *, manifest_paths: set[str]) -> dict[str, Any]:
     path = str(row.get("path", ""))
     quarantined = str(row.get("quarantine_status", "")) == "quarantined"
@@ -171,6 +191,8 @@ def _review_row(row: dict[str, Any], *, manifest_paths: set[str]) -> dict[str, A
         "owner_decision_required": True,
         "allowed_owner_decisions": list(ALLOWED_OWNER_DECISIONS),
         "recommended_owner_decision": _recommended_decision(row),
+        "recommended_owner_decision_primary": _recommended_owner_decision_primary(row),
+        "recommended_owner_decision_alternate": _recommended_owner_decision_alternate(row),
         "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
         "closure_evidence_required": list(REQUIRED_CLOSURE_EVIDENCE),
     }
@@ -363,6 +385,12 @@ def build_owner_decision_template(
                 "current_release_action": _text(row.get("current_release_action")),
                 "recommended_owner_decision": _text(
                     row.get("recommended_owner_decision")
+                ),
+                "recommended_owner_decision_primary": _text(
+                    row.get("recommended_owner_decision_primary")
+                ),
+                "recommended_owner_decision_alternate": _text(
+                    row.get("recommended_owner_decision_alternate")
                 ),
                 "allowed_owner_decisions": list(ALLOWED_OWNER_DECISIONS),
                 "owner_decision": "",
