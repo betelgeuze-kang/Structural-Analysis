@@ -38,6 +38,10 @@ DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
 DEFAULT_GOAL_BOTTLENECK = PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json"
 DEFAULT_OUT = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_RAW_ROW_INPUT_CANDIDATES = [
+    str(PRODUCTIZATION / f"gpcr_hard_decoy_rows.{suffix}")
+    for suffix in ("json", "jsonl", "ndjson", "csv", "tsv")
+]
 
 SCHEMA_VERSION = "gpcr-hard-decoy-operator-intake-packet.v1"
 GPCR_PRODUCT_REPORT_ROUTE = "/product/gpcr-hard-decoy-suite-report"
@@ -403,6 +407,11 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
             "command": import_template_command,
             "produces": str(DEFAULT_OPERATOR_TEMPLATE),
             "accepted_formats": ["csv", "tsv", "json"],
+            "default_row_path_candidates": DEFAULT_RAW_ROW_INPUT_CANDIDATES,
+            "auto_detecting_actual_closure_command": (
+                "python3 scripts/materialize_science_actual_closure_from_rows.py "
+                "--fail-blocked"
+            ),
             "required_row_fields": list(RAW_HARD_DECOY_ROW_FIELDS),
             "required_flat_row_fields": [
                 "target_id",

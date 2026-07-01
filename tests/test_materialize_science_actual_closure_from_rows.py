@@ -193,6 +193,8 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert audit["summary"]["passing_requirement_count"] == 1
     assert audit["summary"]["actual_closure_ready"] is False
     assert audit["missing_row_inputs"] == ["gpcr_rows", "pocketmd_rows"]
+    assert audit["row_input_resolution"]["gpcr_rows"]["missing"] is True
+    assert audit["row_input_resolution"]["pocketmd_rows"]["missing"] is True
     requirement_summary = audit["actual_closure_requirement_summary"]
     assert requirement_summary["gpcr_phase3_requirement_count"] == 5
     assert requirement_summary["gpcr_phase3_passing_requirement_count"] == 0
@@ -306,6 +308,9 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     )
     gpcr_contract = audit["row_intake_contracts"]["gpcr_rows"]
     assert gpcr_contract["required_targets"] == ["DRD2", "HTR2A", "OPRM1"]
+    assert gpcr_contract["default_row_path_candidates"][0].endswith(
+        "gpcr_hard_decoy_rows.json"
+    )
     assert gpcr_contract["phase3_exit_criteria"] == {
         "decoys_above_positive_count_max": 0,
         "positive_out_anchored_by_top_decoys_allowed": False,
@@ -325,6 +330,9 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
         "is_decoy",
     ]
     pocketmd_contract = audit["row_intake_contracts"]["pocketmd_rows"]
+    assert pocketmd_contract["default_row_path_candidates"][0].endswith(
+        "pocketmd_lite_topk_rows.json"
+    )
     assert "h_bond_persistence_rate" in pocketmd_contract["required_case_fields"]
     assert "uncertainty_width_median" in (
         pocketmd_contract["required_component_metrics"]
@@ -452,3 +460,56 @@ def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     ]
     assert (tmp_path / "gpcr_surface.json").exists()
     assert (tmp_path / "pocketmd_surface.json").exists()
+
+
+def test_science_actual_closure_audit_autodetects_default_row_paths(
+    tmp_path: Path,
+) -> None:
+    default_dir = tmp_path / "implementation/phase1/release_evidence/productization"
+    default_dir.mkdir(parents=True)
+    gpcr_rows = default_dir / "gpcr_hard_decoy_rows.csv"
+    pocketmd_rows = default_dir / "pocketmd_lite_topk_rows.json"
+    pocketmd_contract = tmp_path / "pocketmd_contract.json"
+    _write_gpcr_rows(gpcr_rows)
+    _write_pocketmd_rows(pocketmd_rows)
+    pocketmd_contract.write_text(
+        json.dumps({"schema_version": "pocketmd-lite-contract.v1", "contract_pass": True}),
+        encoding="utf-8",
+    )
+
+    audit = module.build_science_actual_closure_audit(
+        repo_root=tmp_path,
+        gpcr_template_out=tmp_path / "gpcr_template.json",
+        gpcr_report_out=tmp_path / "gpcr_report.json",
+        gpcr_surface_out=tmp_path / "gpcr_surface.json",
+        pocketmd_intake_out=tmp_path / "pocketmd_intake.json",
+        pocketmd_report_out=tmp_path / "pocketmd_report.json",
+        pocketmd_surface_out=tmp_path / "pocketmd_surface.json",
+        pocketmd_contract_path=pocketmd_contract,
+        source_id="operator_attached_science_actual_closure_rows",
+        source_url="https://zenodo.org/records/2468135",
+        source_license="CC-BY-4.0",
+    )
+
+    assert audit["status"] == "ready"
+    assert audit["contract_pass"] is True
+    assert audit["missing_row_inputs"] == []
+    assert audit["row_input_resolution"]["gpcr_rows"] == {
+        "auto_detected": True,
+        "candidate_paths": [
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.ndjson",
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+            "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.tsv",
+        ],
+        "explicit_path": "",
+        "missing": False,
+        "resolved_path": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+        "row_input_id": "gpcr_rows",
+    }
+    assert audit["row_input_resolution"]["pocketmd_rows"]["auto_detected"] is True
+    assert audit["row_input_resolution"]["pocketmd_rows"]["resolved_path"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_topk_rows.json"
+    )

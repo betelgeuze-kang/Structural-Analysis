@@ -81,6 +81,17 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
             "script": "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
             "status": "ready_for_raw_operator_rows",
             "supported_source_formats": ["csv", "tsv", "json", "jsonl", "ndjson"],
+            "default_row_path_candidates": [
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+                "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv",
+            ],
+            "auto_detecting_actual_closure_command": (
+                "python3 scripts/materialize_science_actual_closure_from_rows.py "
+                "--fail-blocked"
+            ),
             "required_output_key": "cases",
             "output_intake": "<operator-pocketmd-lite-intake.json>",
             "emits_operator_input_source_receipt": True,

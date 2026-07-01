@@ -102,7 +102,15 @@
       ],
       "raw_row_import_command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
       "raw_row_importer": {
+        "auto_detecting_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
         "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
+        "default_row_path_candidates": [
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+        ],
         "emits_operator_input_source_receipt": true,
         "operator_input_source_receipt_policy": {
           "required_mode": "raw_top_k_refinement_rows",
@@ -152,9 +160,9 @@
     }
   ],
   "gate_unblock_plan_count": 1,
-  "generated_at": "2026-07-01T02:39:48.492599+00:00",
+  "generated_at": "2026-07-01T03:19:05.698982+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:8fabf32dc8bf3b7962d1e38b7057695335b8542d8a9d996a519777da052fe9bc",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:6696bc4d8fd6d50e941e9489c38c196bcf128f59f9325ed1fe08bf01d6624ebe",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:493daab9100f920c8f17ab7729ef31e8fee96e1d3b96dcf8840d218de7917817",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:7d72cc4d56752323369e605f144f839ce9c2265133b7472c241452117bd4b5e5"
   },
@@ -173,7 +181,15 @@
         "keep operator_input_source source_artifact/source_artifact_sha256/source_id/source_url/source_license populated"
       ],
       "raw_row_importer": {
+        "auto_detecting_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
         "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
+        "default_row_path_candidates": [
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+          "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+        ],
         "emits_operator_input_source_receipt": true,
         "operator_input_source_receipt_policy": {
           "required_mode": "raw_top_k_refinement_rows",
@@ -307,7 +323,15 @@
   "packet_id": "pocketmd_lite_operator_intake_packet",
   "product_surface_ready": false,
   "raw_row_importer": {
+    "auto_detecting_actual_closure_command": "python3 scripts/materialize_science_actual_closure_from_rows.py --fail-blocked",
     "command": "python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py --rows <operator-pocketmd-lite-refinement-rows.csv|tsv|json|jsonl|ndjson> --out <operator-pocketmd-lite-intake.json> --source-id <source-id> --source-url <source-url> --source-license <license>",
+    "default_row_path_candidates": [
+      "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.json",
+      "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.jsonl",
+      "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.ndjson",
+      "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.csv",
+      "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows.tsv"
+    ],
     "emits_operator_input_source_receipt": true,
     "operator_input_source_receipt_policy": {
       "required_mode": "raw_top_k_refinement_rows",
@@ -379,7 +403,7 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/operator-intake",
   "schema_version": "pocketmd-lite-operator-intake-packet.v1",
-  "source_commit_sha": "d9b66bf808cc4757f44691322aea1769ccce5be5",
+  "source_commit_sha": "a68f86b82839d20a84c593688b47c34d04410121",
   "status": "ready_for_operator_input",
   "summary": {
     "current_blocker_count": 6,

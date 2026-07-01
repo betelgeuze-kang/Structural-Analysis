@@ -65,6 +65,24 @@ ARTIFACT_BUNDLE_ROLES = (
     "vina_gnina_comparison_adapter",
     "external_receipts_validation",
 )
+DEFAULT_ROW_INPUT_CANDIDATES = {
+    "subset_rows": tuple(
+        PRODUCTIZATION / f"public_benchmark_subset_rows.{suffix}"
+        for suffix in ("json", "jsonl", "ndjson", "csv")
+    ),
+    "pose_rows": tuple(
+        PRODUCTIZATION / f"public_benchmark_pose_rows.{suffix}"
+        for suffix in ("json", "jsonl", "ndjson", "csv")
+    ),
+    "enrichment_rows": tuple(
+        PRODUCTIZATION / f"public_benchmark_enrichment_rows.{suffix}"
+        for suffix in ("json", "jsonl", "ndjson", "csv")
+    ),
+    "vina_gnina_rows": tuple(
+        PRODUCTIZATION / f"public_benchmark_vina_gnina_rows.{suffix}"
+        for suffix in ("json", "jsonl", "ndjson", "csv")
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -91,6 +109,47 @@ def _artifact_paths_for_out_dir(repo_root: Path, out_dir: Path) -> list[Path]:
         resolved_out_dir / harness_bundle.ARTIFACT_FILENAMES[role]
         for role in ARTIFACT_BUNDLE_ROLES
     ]
+
+
+def _candidate_path_strings(row_input_id: str) -> list[str]:
+    return [str(path) for path in DEFAULT_ROW_INPUT_CANDIDATES[row_input_id]]
+
+
+def _resolve_row_input(
+    *,
+    repo_root: Path,
+    row_input_id: str,
+    explicit_path: Path | None,
+) -> tuple[Path | None, dict[str, Any]]:
+    candidates = DEFAULT_ROW_INPUT_CANDIDATES[row_input_id]
+    if explicit_path is not None:
+        return explicit_path, {
+            "row_input_id": row_input_id,
+            "explicit_path": str(explicit_path),
+            "resolved_path": str(explicit_path),
+            "auto_detected": False,
+            "candidate_paths": _candidate_path_strings(row_input_id),
+            "missing": False,
+        }
+    for candidate in candidates:
+        resolved_candidate = _resolve(repo_root, candidate)
+        if resolved_candidate.exists():
+            return resolved_candidate, {
+                "row_input_id": row_input_id,
+                "explicit_path": "",
+                "resolved_path": str(candidate),
+                "auto_detected": True,
+                "candidate_paths": _candidate_path_strings(row_input_id),
+                "missing": False,
+            }
+    return None, {
+        "row_input_id": row_input_id,
+        "explicit_path": "",
+        "resolved_path": "",
+        "auto_detected": False,
+        "candidate_paths": _candidate_path_strings(row_input_id),
+        "missing": True,
+    }
 
 
 def _row_intake_contracts(
@@ -121,6 +180,12 @@ def _row_intake_contracts(
             "row_input_id": "subset_rows",
             "description": ROW_INPUTS["subset_rows"],
             "accepted_formats": list(ACCEPTED_ROW_FORMATS),
+            "default_row_path_candidates": _candidate_path_strings("subset_rows"),
+            "auto_detection_policy": (
+                "When --subset-rows is omitted, the runner uses the first "
+                "existing default row path candidate and records it in "
+                "row_input_resolution."
+            ),
             "required_case_fields": list(subset_manifest.REQUIRED_CASE_FIELDS),
             "required_local_source_file_fields": list(
                 subset_manifest.LOCAL_SOURCE_FILE_FIELDS
@@ -149,6 +214,12 @@ def _row_intake_contracts(
             "row_input_id": "pose_rows",
             "description": ROW_INPUTS["pose_rows"],
             "accepted_formats": list(ACCEPTED_ROW_FORMATS),
+            "default_row_path_candidates": _candidate_path_strings("pose_rows"),
+            "auto_detection_policy": (
+                "When --pose-rows is omitted, the runner uses the first "
+                "existing default row path candidate and records it in "
+                "row_input_resolution."
+            ),
             "required_pose_fields": list(pose_validity_input.REQUIRED_POSE_FIELDS),
             "paired_row_inputs_required": ["subset_rows"],
             "coordinate_payload_fields": ["reference_atoms", "predicted_atoms"],
@@ -188,6 +259,14 @@ def _row_intake_contracts(
             "row_input_id": "enrichment_rows",
             "description": ROW_INPUTS["enrichment_rows"],
             "accepted_formats": list(ACCEPTED_ROW_FORMATS),
+            "default_row_path_candidates": _candidate_path_strings(
+                "enrichment_rows"
+            ),
+            "auto_detection_policy": (
+                "When --enrichment-rows is omitted, the runner uses the first "
+                "existing default row path candidate and records it in "
+                "row_input_resolution."
+            ),
             "accepted_shapes": [
                 "targets_with_scored_molecules",
                 "flat_target_molecule_rows",
@@ -217,6 +296,14 @@ def _row_intake_contracts(
             "row_input_id": "vina_gnina_rows",
             "description": ROW_INPUTS["vina_gnina_rows"],
             "accepted_formats": list(ACCEPTED_ROW_FORMATS),
+            "default_row_path_candidates": _candidate_path_strings(
+                "vina_gnina_rows"
+            ),
+            "auto_detection_policy": (
+                "When --vina-gnina-rows is omitted, the runner uses the first "
+                "existing default row path candidate and records it in "
+                "row_input_resolution."
+            ),
             "accepted_shapes": [
                 "cases_with_engine_runs",
                 "flat_case_engine_run_rows",
@@ -477,6 +564,32 @@ def build_public_benchmark_phase2_row_audit(
     harness_report_out: Path = DEFAULT_HARNESS_REPORT_OUT,
     artifact_bundle_out: Path = DEFAULT_ARTIFACT_BUNDLE_OUT,
 ) -> dict[str, Any]:
+    subset_rows_path, subset_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="subset_rows",
+        explicit_path=subset_rows_path,
+    )
+    pose_rows_path, pose_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="pose_rows",
+        explicit_path=pose_rows_path,
+    )
+    enrichment_rows_path, enrichment_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="enrichment_rows",
+        explicit_path=enrichment_rows_path,
+    )
+    vina_gnina_rows_path, vina_gnina_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="vina_gnina_rows",
+        explicit_path=vina_gnina_rows_path,
+    )
+    row_input_resolution = {
+        "subset_rows": subset_resolution,
+        "pose_rows": pose_resolution,
+        "enrichment_rows": enrichment_resolution,
+        "vina_gnina_rows": vina_gnina_resolution,
+    }
     row_intake_contracts = _row_intake_contracts(
         operator_bundle_out=operator_bundle_out,
         out_dir=out_dir,
@@ -541,6 +654,7 @@ def build_public_benchmark_phase2_row_audit(
             "contract_pass": False,
             "phase2_ready": False,
             "missing_row_inputs": missing_input_ids,
+            "row_input_resolution": row_input_resolution,
             "summary": summary,
             "row_input_contract": ROW_INPUTS,
             "row_intake_contracts": row_intake_contracts,
@@ -632,6 +746,7 @@ def build_public_benchmark_phase2_row_audit(
             "contract_pass": False,
             "phase2_ready": False,
             "missing_row_inputs": [],
+            "row_input_resolution": row_input_resolution,
             "summary": summary,
             "row_input_contract": ROW_INPUTS,
             "row_intake_contracts": row_intake_contracts,
@@ -723,6 +838,7 @@ def build_public_benchmark_phase2_row_audit(
         "phase2_ready": phase2_ready,
         "tier_beta_ready": bool(materialization_report.get("tier_beta_ready")),
         "missing_row_inputs": [],
+        "row_input_resolution": row_input_resolution,
         "summary": summary,
         "row_input_contract": ROW_INPUTS,
         "row_intake_contracts": row_intake_contracts,

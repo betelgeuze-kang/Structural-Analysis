@@ -243,6 +243,10 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         "enrichment_rows",
         "vina_gnina_rows",
     ]
+    assert audit["row_input_resolution"]["subset_rows"]["missing"] is True
+    assert audit["row_input_resolution"]["pose_rows"]["missing"] is True
+    assert audit["row_input_resolution"]["enrichment_rows"]["missing"] is True
+    assert audit["row_input_resolution"]["vina_gnina_rows"]["missing"] is True
     assert {row["component_id"] for row in audit["phase2_requirements"]} == (
         PHASE2_COMPONENT_IDS
     )
@@ -377,6 +381,9 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
     contracts = audit["row_intake_contracts"]
     subset_contract = contracts["subset_rows"]
     assert subset_contract["supported_source_families"] == ["CASF/PDBBind"]
+    assert subset_contract["default_row_path_candidates"][0].endswith(
+        "public_benchmark_subset_rows.json"
+    )
     assert subset_contract["supported_benchmark_splits"] == [
         "CASF-core",
         "PDBBind-core",
@@ -401,6 +408,9 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         "file://",
     ]
     pose_contract = contracts["pose_rows"]
+    assert pose_contract["default_row_path_candidates"][0].endswith(
+        "public_benchmark_pose_rows.json"
+    )
     assert pose_contract["paired_row_inputs_required"] == ["subset_rows"]
     assert pose_contract["coordinate_payload_fields"] == [
         "reference_atoms",
@@ -436,12 +446,18 @@ def test_public_benchmark_phase2_row_audit_blocks_without_rows(
         )
     }
     enrichment_contract = contracts["enrichment_rows"]
+    assert enrichment_contract["default_row_path_candidates"][0].endswith(
+        "public_benchmark_enrichment_rows.json"
+    )
     assert enrichment_contract["supported_benchmark_families"] == [
         "DUD-E",
         "LIT-PCBA",
     ]
     assert "scored_molecules" in enrichment_contract["required_target_fields"]
     vina_contract = contracts["vina_gnina_rows"]
+    assert vina_contract["default_row_path_candidates"][0].endswith(
+        "public_benchmark_vina_gnina_rows.json"
+    )
     assert vina_contract["supported_engines"] == ["vina", "gnina"]
     assert "engine_runs" in vina_contract["required_case_fields"]
     assert "casf_pdbbind_pose_success_harness::subset_rows_not_provided" in audit["blockers"]
@@ -533,6 +549,56 @@ def test_public_benchmark_phase2_row_audit_materializes_ready_gate(
     artifact_bundle = json.loads((tmp_path / "artifact_bundle.json").read_text())
     assert artifact_bundle["phase2_ready"] is True
     assert artifact_bundle["phase2_exit_gate"]["status"] == "ready"
+
+
+def test_public_benchmark_phase2_row_audit_autodetects_default_row_paths(
+    tmp_path: Path,
+) -> None:
+    rows = _write_phase2_rows(tmp_path)
+    default_dir = tmp_path / "implementation/phase1/release_evidence/productization"
+    default_dir.mkdir(parents=True)
+    defaults = {
+        "subset": default_dir / "public_benchmark_subset_rows.json",
+        "pose": default_dir / "public_benchmark_pose_rows.json",
+        "enrichment": default_dir / "public_benchmark_enrichment_rows.json",
+        "vina_gnina": default_dir / "public_benchmark_vina_gnina_rows.json",
+    }
+    for key, path in defaults.items():
+        path.write_text(rows[key].read_text(encoding="utf-8"), encoding="utf-8")
+
+    audit = module.build_public_benchmark_phase2_row_audit(
+        repo_root=tmp_path,
+        target_subset_case_count=module.harness_bundle.TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        operator_bundle_out=tmp_path / "operator_bundle.json",
+        out_dir=tmp_path / "out",
+        harness_report_out=tmp_path / "harness_report.json",
+        artifact_bundle_out=tmp_path / "artifact_bundle.json",
+    )
+
+    assert audit["status"] == "ready"
+    assert audit["contract_pass"] is True
+    assert audit["phase2_ready"] is True
+    assert audit["missing_row_inputs"] == []
+    assert audit["row_input_resolution"]["subset_rows"] == {
+        "auto_detected": True,
+        "candidate_paths": [
+            "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+            "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
+            "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.ndjson",
+            "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv",
+        ],
+        "explicit_path": "",
+        "missing": False,
+        "resolved_path": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_subset_rows.json"
+        ),
+        "row_input_id": "subset_rows",
+    }
+    assert audit["row_input_resolution"]["pose_rows"]["auto_detected"] is True
+    assert audit["row_input_resolution"]["enrichment_rows"]["auto_detected"] is True
+    assert audit["row_input_resolution"]["vina_gnina_rows"]["auto_detected"] is True
+    assert audit["phase2_exit_gate"]["status"] == "ready"
 
 
 def test_public_benchmark_phase2_row_audit_blocks_one_case_smoke_rows(

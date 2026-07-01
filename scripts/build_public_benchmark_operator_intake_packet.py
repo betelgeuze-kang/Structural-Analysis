@@ -95,6 +95,24 @@ DEFAULT_ENRICHMENT_OPERATOR_TEMPLATE = (
 DEFAULT_VINA_GNINA_OPERATOR_TEMPLATE = (
     DEFAULT_OPERATOR_TEMPLATE_DIR / "public_benchmark_vina_gnina_operator_template.json"
 )
+DEFAULT_PHASE2_ROW_INPUT_CANDIDATES = {
+    "subset_rows": [
+        str(PRODUCTIZATION / f"public_benchmark_subset_rows.{suffix}")
+        for suffix in ("json", "jsonl", "ndjson", "csv")
+    ],
+    "pose_rows": [
+        str(PRODUCTIZATION / f"public_benchmark_pose_rows.{suffix}")
+        for suffix in ("json", "jsonl", "ndjson", "csv")
+    ],
+    "enrichment_rows": [
+        str(PRODUCTIZATION / f"public_benchmark_enrichment_rows.{suffix}")
+        for suffix in ("json", "jsonl", "ndjson", "csv")
+    ],
+    "vina_gnina_rows": [
+        str(PRODUCTIZATION / f"public_benchmark_vina_gnina_rows.{suffix}")
+        for suffix in ("json", "jsonl", "ndjson", "csv")
+    ],
+}
 
 SCHEMA_VERSION = "public-benchmark-operator-intake-packet.v1"
 OPERATOR_TEMPLATE_SCHEMA_VERSION = "public-benchmark-operator-template.v1"
@@ -786,6 +804,10 @@ def build_public_benchmark_operator_intake_packet(
         "--target-subset-case-count 12 "
         "--out <operator-public-benchmark-bundle.json>"
     )
+    phase2_row_audit_command = (
+        "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
+        "--fail-blocked"
+    )
     harness_bundle_index = (
         "python3 scripts/materialize_public_benchmark_harness_bundle.py "
         f"--out {DEFAULT_HARNESS_BUNDLE}"
@@ -1116,6 +1138,24 @@ def build_public_benchmark_operator_intake_packet(
         "operator_template_artifact_count": len(operator_template_artifacts),
         "operator_template_artifacts": operator_template_artifacts,
         "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        "phase2_row_dropzone": {
+            "status": "ready_for_operator_rows",
+            "auto_detection_policy": (
+                "Place real row files at these default paths, then run the "
+                "Phase 2 row audit command without explicit row flags."
+            ),
+            "default_row_path_candidates": DEFAULT_PHASE2_ROW_INPUT_CANDIDATES,
+            "materialization_command": phase2_row_audit_command,
+            "produces": str(
+                PRODUCTIZATION / "public_benchmark_phase2_row_audit.json"
+            ),
+            "required_row_inputs": [
+                "subset_rows",
+                "pose_rows",
+                "enrichment_rows",
+                "vina_gnina_rows",
+            ],
+        },
         "operator_bundle_materialization": {
             "schema_version": "public-benchmark-harness-bundle-materialization.v1",
             "row_bundle_import": {

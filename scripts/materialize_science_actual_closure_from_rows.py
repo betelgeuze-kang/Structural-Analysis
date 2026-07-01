@@ -36,6 +36,16 @@ DEFAULT_POCKETMD_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 SCHEMA_VERSION = "science-actual-closure-row-audit.v1"
 GPCR_COMPONENT_ID = "gpcr_hard_decoy_actual_closure"
 POCKETMD_COMPONENT_ID = "pocketmd_lite_topk_actual_closure"
+DEFAULT_ROW_INPUT_CANDIDATES = {
+    "gpcr_rows": tuple(
+        PRODUCTIZATION / f"gpcr_hard_decoy_rows.{suffix}"
+        for suffix in ("json", "jsonl", "ndjson", "csv", "tsv")
+    ),
+    "pocketmd_rows": tuple(
+        PRODUCTIZATION / f"pocketmd_lite_topk_rows.{suffix}"
+        for suffix in ("json", "jsonl", "ndjson", "csv", "tsv")
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -60,6 +70,47 @@ def _load_optional_json(repo_root: Path, path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _candidate_path_strings(row_input_id: str) -> list[str]:
+    return [str(path) for path in DEFAULT_ROW_INPUT_CANDIDATES[row_input_id]]
+
+
+def _resolve_row_input(
+    *,
+    repo_root: Path,
+    row_input_id: str,
+    explicit_path: Path | None,
+) -> tuple[Path | None, dict[str, Any]]:
+    candidates = DEFAULT_ROW_INPUT_CANDIDATES[row_input_id]
+    if explicit_path is not None:
+        return explicit_path, {
+            "row_input_id": row_input_id,
+            "explicit_path": str(explicit_path),
+            "resolved_path": str(explicit_path),
+            "auto_detected": False,
+            "candidate_paths": _candidate_path_strings(row_input_id),
+            "missing": False,
+        }
+    for candidate in candidates:
+        resolved_candidate = _resolve(repo_root, candidate)
+        if resolved_candidate.exists():
+            return resolved_candidate, {
+                "row_input_id": row_input_id,
+                "explicit_path": "",
+                "resolved_path": str(candidate),
+                "auto_detected": True,
+                "candidate_paths": _candidate_path_strings(row_input_id),
+                "missing": False,
+            }
+    return None, {
+        "row_input_id": row_input_id,
+        "explicit_path": "",
+        "resolved_path": "",
+        "auto_detected": False,
+        "candidate_paths": _candidate_path_strings(row_input_id),
+        "missing": True,
+    }
+
+
 def _gpcr_row_intake_contract(
     *,
     template_out: Path,
@@ -70,6 +121,11 @@ def _gpcr_row_intake_contract(
         "component_id": "gpcr_hard_decoy_actual_closure",
         "row_input_id": "gpcr_rows",
         "accepted_formats": list(gpcr_rows.SUPPORTED_ROW_FORMATS),
+        "default_row_path_candidates": _candidate_path_strings("gpcr_rows"),
+        "auto_detection_policy": (
+            "When --gpcr-rows is omitted, the runner uses the first existing "
+            "default row path candidate and records it in row_input_resolution."
+        ),
         "required_targets": list(gpcr_suite.REQUIRED_TARGETS),
         "required_flat_row_fields": [
             "target_id",
@@ -121,6 +177,11 @@ def _pocketmd_row_intake_contract(
         "component_id": "pocketmd_lite_topk_actual_closure",
         "row_input_id": "pocketmd_rows",
         "accepted_formats": list(pocketmd_rows.SUPPORTED_ROW_FORMATS),
+        "default_row_path_candidates": _candidate_path_strings("pocketmd_rows"),
+        "auto_detection_policy": (
+            "When --pocketmd-rows is omitted, the runner uses the first existing "
+            "default row path candidate and records it in row_input_resolution."
+        ),
         "max_top_k": max_top_k,
         "required_case_fields": list(pocketmd_survival.REQUIRED_CASE_FIELDS),
         "uncertainty_field_modes": [
@@ -648,6 +709,20 @@ def build_science_actual_closure_audit(
     source_version: str = "",
     pocketmd_max_top_k: int = pocketmd_rows.DEFAULT_MAX_TOP_K,
 ) -> dict[str, Any]:
+    gpcr_rows_path, gpcr_row_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="gpcr_rows",
+        explicit_path=gpcr_rows_path,
+    )
+    pocketmd_rows_path, pocketmd_row_resolution = _resolve_row_input(
+        repo_root=repo_root,
+        row_input_id="pocketmd_rows",
+        explicit_path=pocketmd_rows_path,
+    )
+    row_input_resolution = {
+        "gpcr_rows": gpcr_row_resolution,
+        "pocketmd_rows": pocketmd_row_resolution,
+    }
     row_intake_contracts = {
         "gpcr_rows": _gpcr_row_intake_contract(
             template_out=gpcr_template_out,
@@ -749,6 +824,7 @@ def build_science_actual_closure_audit(
         "component_ready_count": sum(1 for component in components if component.get("contract_pass")),
         "components": components,
         "missing_row_inputs": missing_row_inputs,
+        "row_input_resolution": row_input_resolution,
         "row_intake_contracts": row_intake_contracts,
         "component_requirement_summaries": component_requirement_summaries,
         "actual_closure_requirements": actual_closure_requirements,

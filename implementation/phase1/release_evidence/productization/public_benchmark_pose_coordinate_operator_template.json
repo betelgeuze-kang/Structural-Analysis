@@ -6,10 +6,10 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T02:55:56.965618+00:00",
+  "generated_at": "2026-07-01T03:19:27.108202+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:c57b5dbd221f5a24bb30871e0336f9b11a95a45daf985bb075a203b27c7237da",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:987c65882b572a415c1dcd4941fc8adfc055b2e673d114bbe90caa5b02f777d8",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:44ef9f84de69f4db4bc7c37e35a07a68aa34ce79f2e346a050256cccc9a7d6eb",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d4cd7091185ef46a3fef3d546d1a670b7911b0e4de2f60703391a2cc757912b0",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:edd2e1f2c560695f83e4f6dc30489379d16fe7a798541e82179cb5b933a6bf72",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:4bd5f69785cf7baa9ad2b567b1ba7c0d424ffd695f0f0440eec054ca2262b77d",
@@ -50,7 +50,7 @@
   "reused_evidence": true,
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "pose_coordinate_intake",
-  "source_commit_sha": "3cadfc43fc1782339f1af5640eb986b68e4c03ce",
+  "source_commit_sha": "a68f86b82839d20a84c593688b47c34d04410121",
   "status": "operator_template_seed",
   "template": {
     "cases": [

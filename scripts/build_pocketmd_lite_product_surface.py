@@ -34,6 +34,10 @@ DEFAULT_OPERATOR_INTAKE_MD_OUT = DEFAULT_OPERATOR_INTAKE_OUT.with_suffix(".md")
 DEFAULT_OPERATOR_TEMPLATE_OUT = PRODUCTIZATION / "pocketmd_lite_operator_template.json"
 DEFAULT_SURFACE_OUT = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 RAW_ROW_IMPORTER_SCRIPT = Path("scripts/materialize_pocketmd_lite_operator_intake_from_rows.py")
+DEFAULT_RAW_ROW_INPUT_CANDIDATES = [
+    str(PRODUCTIZATION / f"pocketmd_lite_topk_rows.{suffix}")
+    for suffix in ("json", "jsonl", "ndjson", "csv", "tsv")
+]
 
 CONTRACT_SCHEMA_VERSION = "pocketmd-lite-contract.v1"
 SURVIVAL_REPORT_SCHEMA_VERSION = "pocketmd-lite-topk-survival-report.v1"
@@ -174,6 +178,11 @@ def _raw_row_importer_contract() -> dict[str, Any]:
         "script": str(RAW_ROW_IMPORTER_SCRIPT),
         "status": "ready_for_raw_operator_rows",
         "supported_source_formats": ["csv", "tsv", "json", "jsonl", "ndjson"],
+        "default_row_path_candidates": DEFAULT_RAW_ROW_INPUT_CANDIDATES,
+        "auto_detecting_actual_closure_command": (
+            "python3 scripts/materialize_science_actual_closure_from_rows.py "
+            "--fail-blocked"
+        ),
         "required_output_key": "cases",
         "output_intake": "<operator-pocketmd-lite-intake.json>",
         "emits_operator_input_source_receipt": True,

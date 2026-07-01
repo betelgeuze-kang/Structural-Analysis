@@ -457,6 +457,53 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
     assert packet["operator_bundle_materialization"]["row_bundle_import"][
         "accepted_row_formats"
     ] == ["json", "jsonl", "ndjson", "csv"]
+    assert packet["phase2_row_dropzone"] == {
+        "auto_detection_policy": (
+            "Place real row files at these default paths, then run the "
+            "Phase 2 row audit command without explicit row flags."
+        ),
+        "default_row_path_candidates": {
+            "enrichment_rows": [
+                "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+                "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.csv",
+            ],
+            "pose_rows": [
+                "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+                "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.csv",
+            ],
+            "subset_rows": [
+                "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+                "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv",
+            ],
+            "vina_gnina_rows": [
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+                "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv",
+            ],
+        },
+        "materialization_command": (
+            "python3 scripts/materialize_public_benchmark_phase2_from_rows.py "
+            "--fail-blocked"
+        ),
+        "produces": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_phase2_row_audit.json"
+        ),
+        "required_row_inputs": [
+            "subset_rows",
+            "pose_rows",
+            "enrichment_rows",
+            "vina_gnina_rows",
+        ],
+        "status": "ready_for_operator_rows",
+    }
     assert "materialize_public_benchmark_harness_bundle.py" in packet[
         "operator_bundle_materialization"
     ]["command"]

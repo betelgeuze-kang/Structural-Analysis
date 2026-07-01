@@ -69,7 +69,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     assert packet["target_execution_preflight_count"] == 3
     assert packet["first_target_execution_preflight_blocker"]["target_id"] == "DRD2"
     assert packet["first_target_execution_preflight_blocker"]["first_blocker"] == (
-        "DRD2:hard_decoy_rows_required_for_actual_closure"
+        "DRD2:operator_metrics_required"
     )
     assert packet["minimum_target_count"] == 3
     assert packet["minimum_metric_field_count_per_target"] == 4
@@ -101,10 +101,7 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "no_positive_out_anchored_by_top_decoys",
         "raw_hard_decoy_rows_actual_closure",
     ]
-    assert preflight["DRD2"]["root_cause_tags"] == [
-        "hard_decoy_rows_required",
-        "operator_values_required",
-    ]
+    assert preflight["DRD2"]["root_cause_tags"] == ["operator_values_required"]
     assert (
         "materialize_gpcr_hard_decoy_suite_report.py"
         in preflight["DRD2"]["materialization_command"]
@@ -160,11 +157,11 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "materialization_command"
     ]
     assert packet["current_suite_status"]["first_blocked_target"] == "DRD2"
-    assert packet["current_suite_status"]["blocker_count"] == 15
+    assert packet["current_suite_status"]["blocker_count"] == 18
     assert packet["summary"]["target_execution_preflight_count"] == 3
     assert packet["summary"]["first_target_execution_preflight_target"] == "DRD2"
     assert packet["summary"]["first_target_execution_preflight_blocker"] == (
-        "DRD2:hard_decoy_rows_required_for_actual_closure"
+        "DRD2:operator_metrics_required"
     )
 
 
@@ -201,6 +198,17 @@ def test_gpcr_hard_decoy_operator_intake_packet_materialization_sequence() -> No
         "min_positive_count_per_target": 4,
         "min_total_row_count_per_target": 24,
     }
+    assert packet["raw_row_import"]["default_row_path_candidates"] == [
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.csv",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.tsv",
+    ]
+    assert packet["raw_row_import"]["auto_detecting_actual_closure_command"] == (
+        "python3 scripts/materialize_science_actual_closure_from_rows.py "
+        "--fail-blocked"
+    )
     assert packet["next_actions"][:3] == [
         "attach_gpcr_hard_decoy_raw_row_file",
         "materialize_gpcr_hard_decoy_operator_template_from_rows",

@@ -323,11 +323,11 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T02:56:09.040229+00:00",
+  "generated_at": "2026-07-01T03:19:12.291459+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:4bd5f69785cf7baa9ad2b567b1ba7c0d424ffd695f0f0440eec054ca2262b77d",
-    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:ca222a08d28e7f93e4a25f88a6ef7db1c874851a3e2ab5e649742f9d2b2f7b32"
+    "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:a57596ddd7b07cb8a52adf74749b22f5a9805a597481f0e614cdf99918e9a94a"
   },
   "missing_row_inputs": [
     "subset_rows",
@@ -672,6 +672,60 @@
     "subset_rows": "CASF/PDBBind subset rows",
     "vina_gnina_rows": "Vina/GNINA engine comparison rows"
   },
+  "row_input_resolution": {
+    "enrichment_rows": {
+      "auto_detected": false,
+      "candidate_paths": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.csv"
+      ],
+      "explicit_path": "",
+      "missing": true,
+      "resolved_path": "",
+      "row_input_id": "enrichment_rows"
+    },
+    "pose_rows": {
+      "auto_detected": false,
+      "candidate_paths": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.csv"
+      ],
+      "explicit_path": "",
+      "missing": true,
+      "resolved_path": "",
+      "row_input_id": "pose_rows"
+    },
+    "subset_rows": {
+      "auto_detected": false,
+      "candidate_paths": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv"
+      ],
+      "explicit_path": "",
+      "missing": true,
+      "resolved_path": "",
+      "row_input_id": "subset_rows"
+    },
+    "vina_gnina_rows": {
+      "auto_detected": false,
+      "candidate_paths": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+      ],
+      "explicit_path": "",
+      "missing": true,
+      "resolved_path": "",
+      "row_input_id": "vina_gnina_rows"
+    }
+  },
   "row_intake_contracts": {
     "claim_boundary": "These row contracts describe operator-attached Phase 2 benchmark inputs. They do not download public benchmark files, approve redistribution, run docking engines, infer chemistry, or convert fixture/proxy rows into external beta evidence.",
     "enrichment_rows": {
@@ -685,10 +739,17 @@
         "targets_with_scored_molecules",
         "flat_target_molecule_rows"
       ],
+      "auto_detection_policy": "When --enrichment-rows is omitted, the runner uses the first existing default row path candidate and records it in row_input_resolution.",
       "computed_metrics": [
         "roc_auc",
         "enrichment_factor_1pct",
         "enrichment_factor_5pct"
+      ],
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows.csv"
       ],
       "description": "DUD-E/LIT-PCBA enrichment rows",
       "feeds_components": [
@@ -824,11 +885,18 @@
         "ndjson",
         "csv"
       ],
+      "auto_detection_policy": "When --pose-rows is omitted, the runner uses the first existing default row path candidate and records it in row_input_resolution.",
       "coordinate_payload_fields": [
         "reference_atoms",
         "predicted_atoms"
       ],
       "default_rmsd_threshold_angstrom": 2.0,
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows.csv"
+      ],
       "description": "CASF/PDBBind pose-coordinate rows",
       "feeds_components": [
         "symmetry_aware_ligand_rmsd",
@@ -920,6 +988,13 @@
         "jsonl",
         "ndjson",
         "csv"
+      ],
+      "auto_detection_policy": "When --subset-rows is omitted, the runner uses the first existing default row path candidate and records it in row_input_resolution.",
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows.csv"
       ],
       "default_target_subset_case_count": 12,
       "description": "CASF/PDBBind subset rows",
@@ -1044,6 +1119,7 @@
         "cases_with_engine_runs",
         "flat_case_engine_run_rows"
       ],
+      "auto_detection_policy": "When --vina-gnina-rows is omitted, the runner uses the first existing default row path candidate and records it in row_input_resolution.",
       "computed_comparison_fields": [
         "case_count",
         "engine_case_counts",
@@ -1051,6 +1127,12 @@
         "symmetry_aware_rmsd_median_angstrom"
       ],
       "default_pose_success_rmsd_threshold_angstrom": 2.0,
+      "default_row_path_candidates": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.jsonl",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.ndjson",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows.csv"
+      ],
       "description": "Vina/GNINA engine comparison rows",
       "feeds_components": [
         "vina_gnina_comparison_adapter"
@@ -1160,7 +1242,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "3cadfc43fc1782339f1af5640eb986b68e4c03ce",
+  "source_commit_sha": "a68f86b82839d20a84c593688b47c34d04410121",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [
