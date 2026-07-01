@@ -17,7 +17,7 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 66.7,
-  "generated_at": "2026-07-01T06:07:10.062601+00:00",
+  "generated_at": "2026-07-01T06:08:20.064073+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:c93273708f4cd6f34af4a8d61f41c973bd3db8baac31e4629aa198fdb8eb02c2",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:c97656d4e83e9754aa91f709f757f2f3f87e9e884dd7ad5f120c12c598aa82dd",
@@ -26,9 +26,9 @@
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e0494ccf92848c1b43b3a27baea01d91564a2c85c72895d61c4fc8a50d96d44b",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:78bbbf5f72caaa390d9888537314c068e3eca0f83cad1ee0496b0dd6941075b2",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:84d915072a6171587626964f371cd50613e088a588ddc90ba26ea51f2409b56d",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:2dd6a6959ab6dd291797d1a8db367c3d4f4807a926b850812bc7cc04f984f524",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:5e2dfe3ec796a135c282d5d5d8b374435e542a6fde8b927d8e9d2e1b69c2404f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5f55727723767e2061492f6b925d2fac197e0aaadcc34bd1e24b7aaeed999d3c",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:33bd28fadfebffa0a2a444e5e6325bb0802d73ff194cad969e9d70705a3f6fbf",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:3ddc67ebf54f0f59822c8f464fe407018da637c06ab2c1c30daaccd681169917",
     "scripts/build_structural_product_development_roadmap.py": "sha256:7fefa7570e85ee2d5a4c130fcd9bd12577146739ced51a2da9a15b6d115a302a"
   },
   "passed_evidence_requirement_count": 32,
@@ -376,7 +376,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "cbff893e16ad3884019bbc60b36c5b5229273f3a",
+  "source_commit_sha": "8fdc0c147f777aa0eddba3e941a9bad6a3e04ca9",
   "stage_average_progress_percent": 56.1,
   "stage_count": 7,
   "status": "blocked",
