@@ -808,6 +808,82 @@ def _operator_next_actions(
     return attach_actions + follow_up_actions
 
 
+def _comma_join(values: list[Any]) -> str:
+    rendered = [str(value) for value in values if str(value)]
+    return ", ".join(rendered) if rendered else "none"
+
+
+def _markdown(payload: dict[str, Any]) -> str:
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    missing_row_inputs = [
+        str(item) for item in payload.get("missing_row_inputs", []) if str(item)
+    ]
+    lines = [
+        "# Science Actual Closure Row Audit",
+        "",
+        f"- `status`: `{payload.get('status', '')}`",
+        f"- `contract_pass`: `{payload.get('contract_pass', False)}`",
+        f"- `component_ready_count`: `{payload.get('component_ready_count', 0)}/{payload.get('component_count', 0)}`",
+        f"- `requirement_pass_count`: `{summary.get('passing_requirement_count', 0)}/{summary.get('requirement_count', 0)}`",
+        f"- `missing_row_inputs`: `{_comma_join(missing_row_inputs)}`",
+        "",
+        "| Row Input | Status | Component | Closes Criteria | Default Path |",
+        "|---|---|---|---|---|",
+    ]
+    for row in payload.get("row_closure_matrix", []):
+        if not isinstance(row, dict):
+            continue
+        default_paths = row.get("default_row_path_candidates")
+        default_path = ""
+        if isinstance(default_paths, list) and default_paths:
+            default_path = str(default_paths[0])
+        lines.append(
+            "| "
+            f"`{row.get('row_input_id', '')}` | "
+            f"`{row.get('status', '')}` | "
+            f"`{row.get('actual_closure_component_id', '')}` | "
+            f"`{_comma_join(row.get('closes_actual_closure_criteria', []))}` | "
+            f"`{default_path}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "| Component | Status | Failed Criteria | Blocker Count |",
+            "|---|---|---|---|",
+        ]
+    )
+    for component in payload.get("components", []):
+        if not isinstance(component, dict):
+            continue
+        requirement_summary = component.get("requirement_summary")
+        if not isinstance(requirement_summary, dict):
+            requirement_summary = {}
+        lines.append(
+            "| "
+            f"`{component.get('component_id', '')}` | "
+            f"`{component.get('status', '')}` | "
+            f"`{_comma_join(component.get('failed_criteria', []))}` | "
+            f"`{requirement_summary.get('blocker_count', len(component.get('blockers', [])))}` |"
+        )
+    next_actions = [str(item) for item in payload.get("operator_next_actions", [])]
+    lines.extend(
+        [
+            "",
+            f"- `operator_next_actions`: `{_comma_join(next_actions)}`",
+            "",
+            str(payload.get("claim_boundary", "")),
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _resolve_out_md(out: Path, out_md: Path | None) -> Path:
+    return out.with_suffix(".md") if out_md is None else out_md
+
+
 def _materialize_public_benchmark(
     *,
     subset_rows_path: Path | None,
@@ -1313,6 +1389,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--gpcr-rows", type=Path)
     parser.add_argument("--pocketmd-rows", type=Path)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--out-md", type=Path)
     parser.add_argument("--gpcr-template-out", type=Path, default=DEFAULT_GPCR_TEMPLATE)
     parser.add_argument("--gpcr-report-out", type=Path, default=DEFAULT_GPCR_REPORT)
     parser.add_argument("--gpcr-surface-out", type=Path, default=DEFAULT_GPCR_SURFACE)
@@ -1359,6 +1436,10 @@ def main(argv: list[str] | None = None) -> int:
         pocketmd_max_top_k=args.pocketmd_max_top_k,
     )
     _write_json(args.repo_root, args.out, payload)
+    out_md = _resolve_out_md(args.out, args.out_md)
+    resolved_out_md = _resolve(args.repo_root, out_md)
+    resolved_out_md.parent.mkdir(parents=True, exist_ok=True)
+    resolved_out_md.write_text(_markdown(payload), encoding="utf-8")
     print(
         "science-actual-closure-row-audit: "
         f"{payload['status']} | ready={payload['component_ready_count']}/"

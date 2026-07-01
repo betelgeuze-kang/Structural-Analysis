@@ -815,6 +815,59 @@ def test_science_actual_closure_audit_blocks_without_operator_rows(tmp_path: Pat
     assert not (tmp_path / "pocketmd_report.json").exists()
 
 
+def test_science_actual_closure_audit_cli_writes_markdown(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "science_actual_closure_row_audit.json"
+    out_md = tmp_path / "science_actual_closure_row_audit.md"
+
+    exit_code = module.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--out",
+            str(out),
+            "--out-md",
+            str(out_md),
+            "--public-phase2-audit-out",
+            str(tmp_path / "public_phase2_audit.json"),
+            "--public-operator-bundle-out",
+            str(tmp_path / "public_operator_bundle.json"),
+            "--public-out-dir",
+            str(tmp_path / "public_out"),
+            "--public-harness-report-out",
+            str(tmp_path / "public_harness_report.json"),
+            "--public-artifact-bundle-out",
+            str(tmp_path / "public_artifact_bundle.json"),
+            "--gpcr-template-out",
+            str(tmp_path / "gpcr_template.json"),
+            "--gpcr-report-out",
+            str(tmp_path / "gpcr_report.json"),
+            "--gpcr-surface-out",
+            str(tmp_path / "gpcr_surface.json"),
+            "--pocketmd-intake-out",
+            str(tmp_path / "pocketmd_intake.json"),
+            "--pocketmd-report-out",
+            str(tmp_path / "pocketmd_report.json"),
+            "--pocketmd-surface-out",
+            str(tmp_path / "pocketmd_surface.json"),
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    markdown = out_md.read_text(encoding="utf-8")
+    assert payload["status"] == "operator_evidence_required"
+    assert "# Science Actual Closure Row Audit" in markdown
+    assert "| `subset_rows` | `missing` |" in markdown
+    assert "| `gpcr_rows` | `missing` |" in markdown
+    assert "| `pocketmd_rows` | `missing` |" in markdown
+    assert "ranking_pr_auc_ci_low_min" in markdown
+    assert "uncertainty_summary_materialized" in markdown
+    assert "attach_subset_rows" in markdown
+    assert "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows.json" in markdown
+
+
 def test_science_actual_closure_audit_materializes_both_ready_surfaces(
     tmp_path: Path,
 ) -> None:
