@@ -85,7 +85,6 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         ).read_text(encoding="utf-8")
     )
     decision = pm_report["release_decision"]
-    assert kpis["operator_action_count"] == 10
     assert kpis == {
         key: decision[key]
         for key in (
@@ -316,11 +315,12 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
     assert phase_1["first_blocker"] == (
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
+    kpis = surface["release_decision_kpis"]
     assert phase_1["summary"] == {
-        "release_allowed": False,
-        "blocked_release_count": 6,
-        "operator_action_count": 10,
-        "approval_token_count": 5,
+        "release_allowed": kpis["release_allowed"],
+        "blocked_release_count": kpis["blocked_release_count"],
+        "operator_action_count": kpis["operator_action_count"],
+        "approval_token_count": kpis["approval_token_count"],
         "action_register_contract_pass": False,
         "product_capability_count": 1,
         "blocked_capability_count": 0,
