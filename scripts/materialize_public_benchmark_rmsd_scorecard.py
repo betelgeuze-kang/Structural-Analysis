@@ -27,6 +27,13 @@ from validate_public_benchmark_pose_validity import (  # noqa: E402
 
 SCHEMA_VERSION = "public-benchmark-rmsd-scorecard-materialization.v1"
 SCORECARD_SCHEMA_VERSION = "public-benchmark-symmetry-rmsd-scorecard.v1"
+ROW_INTEGRITY_POLICY = {
+    "required_unique_row_keys": {"pose_validity_input.cases": ["case_id"]},
+    "purpose": (
+        "Duplicate pose-validity input cases cannot be used to inflate real "
+        "public benchmark RMSD case counts."
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -56,6 +63,17 @@ def _score_case(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _duplicate_case_id_blockers(rows: list[dict[str, Any]]) -> list[str]:
+    seen_case_ids: set[str] = set()
+    blockers: list[str] = []
+    for index, row in enumerate(rows):
+        case_id = str(row.get("case_id") or f"case_{index + 1}").strip()
+        if case_id in seen_case_ids:
+            blockers.append(f"{case_id}:case_id_duplicate:row_{index}")
+        seen_case_ids.add(case_id)
+    return blockers
+
+
 def materialize_rmsd_scorecard(
     pose_validity_input: dict[str, Any],
     *,
@@ -70,6 +88,7 @@ def materialize_rmsd_scorecard(
         blockers.append("pose_validity_input_cases_missing")
     if pose_validity_input and not bool(pose_validity_input.get("pose_validity_ready")):
         blockers.append("pose_validity_input_not_ready")
+    blockers.extend(_duplicate_case_id_blockers(cases))
 
     rows: list[dict[str, Any]] = []
     for index, row in enumerate(cases):
@@ -84,6 +103,13 @@ def materialize_rmsd_scorecard(
 
     dry_run_case_count = sum(1 for row in cases if is_non_actual_pose_case(row))
     real_benchmark_case_count = max(len(cases) - dry_run_case_count, 0)
+    unique_real_benchmark_case_count = len(
+        {
+            str(row.get("case_id") or "").strip()
+            for row in cases
+            if not is_non_actual_pose_case(row) and str(row.get("case_id") or "").strip()
+        }
+    )
     if cases and real_benchmark_case_count == 0:
         blockers.append("real_benchmark_rmsd_cases_missing")
     pose_success_count = sum(1 for row in rows if row["score"]["pose_success"])
@@ -106,7 +132,9 @@ def materialize_rmsd_scorecard(
         "status": "ready" if scorecard_ready else "rmsd_materialization_required",
         "contract_pass": scorecard_ready,
         "scorecard_ready": scorecard_ready,
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "real_benchmark_case_count": real_benchmark_case_count,
+        "unique_real_benchmark_case_count": unique_real_benchmark_case_count,
         "dry_run_case_count": dry_run_case_count,
         "case_count": len(rows),
         "pose_success_count": pose_success_count,
@@ -119,6 +147,7 @@ def materialize_rmsd_scorecard(
             "pose_validity_input_case_count": len(cases),
             "scored_case_count": len(rows),
             "real_benchmark_case_count": real_benchmark_case_count,
+            "unique_real_benchmark_case_count": unique_real_benchmark_case_count,
             "pose_success_count": pose_success_count,
             "pose_failure_count": max(len(rows) - pose_success_count, 0),
             "blocker_count": len(blockers),

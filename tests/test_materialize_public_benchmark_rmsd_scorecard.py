@@ -131,6 +131,25 @@ def test_rmsd_scorecard_materializer_blocks_placeholder_source_family() -> None:
     assert "real_benchmark_rmsd_cases_missing" in scorecard["blockers"]
 
 
+def test_rmsd_scorecard_materializer_blocks_duplicate_case_ids() -> None:
+    scorecard = module.materialize_rmsd_scorecard(
+        {"pose_validity_ready": True, "cases": [_pose_case(), _pose_case()]},
+        repo_root=REPO_ROOT,
+    )
+
+    assert scorecard["scorecard_ready"] is False
+    assert scorecard["status"] == "rmsd_materialization_required"
+    assert scorecard["row_integrity_policy"]["required_unique_row_keys"] == {
+        "pose_validity_input.cases": ["case_id"],
+    }
+    assert scorecard["real_benchmark_case_count"] == 2
+    assert scorecard["unique_real_benchmark_case_count"] == 1
+    assert "case_a:case_id_duplicate:row_1" in scorecard["blockers"]
+    assert (
+        scorecard["materialization_report"]["unique_real_benchmark_case_count"] == 1
+    )
+
+
 def test_rmsd_scorecard_materializer_cli_writes_scorecard_and_report(
     tmp_path: Path,
 ) -> None:

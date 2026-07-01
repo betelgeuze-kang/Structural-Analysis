@@ -23,6 +23,16 @@ from validate_public_benchmark_pose_validity import (  # noqa: E402
 
 SCHEMA_VERSION = "public-benchmark-pose-success-harness-materialization.v1"
 HARNESS_SCHEMA_VERSION = "public-benchmark-pose-success-harness.v1"
+ROW_INTEGRITY_POLICY = {
+    "required_unique_row_keys": {
+        "pose_validity_packet.case_rows": ["case_id"],
+        "symmetry_rmsd_scorecard.rows": ["case_id"],
+    },
+    "purpose": (
+        "Duplicate pose-validity or RMSD rows cannot be silently overwritten "
+        "during pose-success harness joins."
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -43,6 +53,17 @@ def _rows_by_case_id(rows: list[Any]) -> dict[str, dict[str, Any]]:
         for row in rows
         if isinstance(row, dict) and row.get("case_id")
     }
+
+
+def _duplicate_case_id_blockers(rows: list[dict[str, Any]], *, group_id: str) -> list[str]:
+    seen_case_ids: set[str] = set()
+    blockers: list[str] = []
+    for index, row in enumerate(rows):
+        case_id = str(row.get("case_id") or f"case_{index + 1}").strip()
+        if case_id in seen_case_ids:
+            blockers.append(f"{group_id}:{case_id}:case_id_duplicate:row_{index}")
+        seen_case_ids.add(case_id)
+    return blockers
 
 
 def _harness_case_row(
@@ -149,6 +170,18 @@ def materialize_pose_success_harness(
         blockers.append("pose_validity_packet_not_ready")
     if rmsd_rows and not bool(rmsd_scorecard.get("scorecard_ready")):
         blockers.append("symmetry_rmsd_scorecard_not_ready")
+    blockers.extend(
+        _duplicate_case_id_blockers(
+            pose_rows,
+            group_id="pose_validity_packet",
+        )
+    )
+    blockers.extend(
+        _duplicate_case_id_blockers(
+            rmsd_rows,
+            group_id="symmetry_rmsd_scorecard",
+        )
+    )
 
     case_ids = sorted(set(pose_by_case_id) | set(rmsd_by_case_id))
     case_rows: list[dict[str, Any]] = []
@@ -189,6 +222,7 @@ def materialize_pose_success_harness(
         "status": "ready" if harness_ready else "pose_success_harness_materialization_required",
         "contract_pass": harness_ready,
         "pose_success_harness_ready": harness_ready,
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "real_benchmark_case_count": real_benchmark_case_count,
         "dry_run_case_count": dry_run_case_count,
         "case_count": len(case_rows),

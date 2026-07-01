@@ -178,6 +178,31 @@ def test_pose_success_harness_blocks_placeholder_source_family() -> None:
     assert harness["case_rows"][0]["status"] == "blocked"
 
 
+def test_pose_success_harness_blocks_duplicate_join_rows() -> None:
+    pose_packet = _pose_packet()
+    pose_packet["case_rows"].append(dict(pose_packet["case_rows"][0]))
+    rmsd_scorecard = _rmsd_scorecard()
+    rmsd_scorecard["rows"].append(dict(rmsd_scorecard["rows"][0]))
+
+    harness = module.materialize_pose_success_harness(
+        pose_packet,
+        rmsd_scorecard,
+        repo_root=REPO_ROOT,
+    )
+
+    assert harness["pose_success_harness_ready"] is False
+    assert harness["row_integrity_policy"]["required_unique_row_keys"] == {
+        "pose_validity_packet.case_rows": ["case_id"],
+        "symmetry_rmsd_scorecard.rows": ["case_id"],
+    }
+    assert "pose_validity_packet:case_a:case_id_duplicate:row_1" in harness[
+        "blockers"
+    ]
+    assert "symmetry_rmsd_scorecard:case_a:case_id_duplicate:row_1" in harness[
+        "blockers"
+    ]
+
+
 def test_pose_success_harness_cli_writes_harness_and_report(tmp_path: Path) -> None:
     pose_packet = tmp_path / "pose_packet.json"
     rmsd_scorecard = tmp_path / "rmsd_scorecard.json"
