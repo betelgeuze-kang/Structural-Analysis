@@ -1155,7 +1155,7 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-07-01T06:10:24.741299+00:00",
+  "generated_at": "2026-07-01T06:12:06.185133+00:00",
   "harness_bundle_index": {
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
     "artifact_index_command": "python3 scripts/materialize_public_benchmark_harness_bundle.py --out implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
@@ -3265,7 +3265,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "76032be5002e67824d24dc1bf368563becc8598a",
+  "source_commit_sha": "877c02371d65699a24a362f7e57d3dbe2a638baf",
   "source_families": [
     {
       "family_id": "casf_pdbbind",
