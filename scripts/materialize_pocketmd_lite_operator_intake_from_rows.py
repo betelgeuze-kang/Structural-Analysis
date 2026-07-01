@@ -56,7 +56,7 @@ SOURCE_RECEIPT_REQUIREMENTS = {
 }
 
 
-def _row_value_contract(*, max_top_k: int) -> dict[str, Any]:
+def row_value_contract(*, max_top_k: int) -> dict[str, Any]:
     return {
         "top_k_rank_policy": (
             "top_k_rank must parse to a positive integer not exceeding "
@@ -504,7 +504,7 @@ def build_pocketmd_lite_operator_intake_from_rows(
             ),
             "case_top_k_rank_prefixes": _topk_rank_prefixes(cases),
             "top_k_row_quality_minimums": dict(TOPK_ROW_QUALITY_CRITERIA),
-            "row_value_contract": _row_value_contract(max_top_k=max_top_k),
+            "row_value_contract": row_value_contract(max_top_k=max_top_k),
             "source_receipt_requirements": dict(SOURCE_RECEIPT_REQUIREMENTS),
         },
         "claim_boundary": (
