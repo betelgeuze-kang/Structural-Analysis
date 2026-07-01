@@ -77,6 +77,8 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
     assert payload["summary"] == {
         "required_medium_model_count": 5,
+        "local_candidate_case_count": 2,
+        "missing_candidate_case_count": 3,
         "current_medium_model_scorecard_count": 0,
         "normalization_receipt_count": 0,
         "pass_or_approved_review_count": 0,
@@ -87,6 +89,17 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "runner_command_ready": True,
         "source_url_verified": True,
         "license_review_status": "identified_gpl_3_0_product_legal_review_required",
+    }
+    assert payload["case_selection_summary"] == {
+        "claim_boundary": (
+            "Candidate selection counts parser/topology-ready local source rows only. "
+            "Scorecard credit remains zero until reference outputs, normalization "
+            "receipts, scorecard execution, and PASS/REVIEW decisions pass."
+        ),
+        "current_scorecard_credit_count": 0,
+        "local_candidate_case_count": 2,
+        "missing_candidate_case_count": 3,
+        "required_candidate_case_count": 5,
     }
     assert "source_url_verification_pending" not in payload["blockers"]
     assert "license_review_pending" in payload["blockers"]
@@ -125,6 +138,21 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "attach_medium_pass_or_approved_review_decisions",
     ]
     assert payload["recommended_next_actions"] == payload["operator_next_actions"]
+    assert payload["gate_unblock_plan_count"] == 7
+    gate_plan = {row["slot_id"]: row for row in payload["gate_unblock_plan"]}
+    assert "select_additional_medium_model_cases" in gate_plan
+    assert "rerun_medium_model_and_dp_rc_checks" in gate_plan
+    assert gate_plan["run_medium_scorecard_receipts"]["remaining_case_count"] == 5
+    assert any(
+        "convergence history" in item
+        for item in gate_plan["run_medium_scorecard_receipts"]["minimum_evidence"]
+    )
+    assert payload["validation_commands"] == [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check",
+    ]
     assert payload["next_actions"] == [
         "select_additional_medium_model_cases",
         "complete_product_legal_license_review",

@@ -593,6 +593,91 @@ def _operator_next_actions(
     return actions
 
 
+def _validation_commands() -> list[str]:
+    return [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check",
+    ]
+
+
+def _medium_gate_minimum_evidence(action_id: str) -> list[str]:
+    evidence_by_action = {
+        "select_additional_medium_model_cases": [
+            "five authoritative medium structural model cases selected",
+            "each selected case has stable source id and checksum",
+            "case selection remains parser-only until reference, normalization, scorecard, and review evidence pass",
+        ],
+        "complete_product_legal_license_review": [
+            "source license receipt records approved redistribution boundary",
+            "source license receipt records approved commercial-use boundary",
+            "license_review_pending is absent from the readiness receipt blockers",
+        ],
+        "attach_medium_reference_outputs": [
+            "reference displacement, reaction, member, or modal outputs attached per selected case",
+            "reference output SHA256 or approved REVIEW baseline recorded per selected case",
+            "reference_outputs_missing is absent from the readiness receipt blockers",
+        ],
+        "record_medium_canonical_normalization": [
+            f"one {NORMALIZATION_RECEIPT_SCHEMA_VERSION} receipt attached per selected case",
+            f"node and member mapping coverage are both >= {NORMALIZATION_MIN_MAPPING_COVERAGE}",
+            "normalization_receipts_missing is absent from the readiness receipt blockers",
+        ],
+        "run_medium_scorecard_receipts": [
+            "one scorecard receipt, result artifact, and validation report retained per selected case",
+            "receipt records no crash, no OOM, residual formula, and convergence history",
+            "opensees_medium_scorecard_execution_missing is absent from the readiness receipt blockers",
+        ],
+        "attach_medium_pass_or_approved_review_decisions": [
+            "each selected case has PASS or APPROVED_REVIEW decision",
+            "decision is referenced by the corresponding scorecard receipt",
+            "medium_model_pass_or_review_missing is absent from the readiness receipt blockers",
+        ],
+    }
+    return evidence_by_action.get(action_id, [])
+
+
+def _gate_unblock_plan(
+    *,
+    operator_next_actions: list[dict[str, Any]],
+    validation_commands: list[str],
+    contract_pass: bool,
+) -> list[dict[str, Any]]:
+    if contract_pass:
+        return []
+    plan: list[dict[str, Any]] = []
+    for row in operator_next_actions:
+        action_id = str(row.get("id") or "")
+        plan.append(
+            {
+                "slot_id": action_id,
+                "owner": str(row.get("owner") or ""),
+                "action": str(row.get("action") or ""),
+                "clears_blockers": _safe_list(row.get("clears_blockers")),
+                "evidence_artifacts": _safe_list(row.get("evidence_artifacts")),
+                "remaining_case_count": row.get("remaining_case_count"),
+                "minimum_evidence": _medium_gate_minimum_evidence(action_id),
+                "validation_commands": _safe_list(row.get("validation_commands")) or validation_commands,
+            }
+        )
+    plan.append(
+        {
+            "slot_id": "rerun_medium_model_and_dp_rc_checks",
+            "owner": "release_engineering",
+            "action": "Regenerate medium-model, benchmark-scale, Developer Preview RC, and product readiness receipts.",
+            "minimum_evidence": [
+                "phase3_medium_model_scorecard_readiness_receipt.json contract_pass=true",
+                "phase6_benchmark_scale_status.json no longer reports medium-model blockers",
+                "developer_preview_rc_status no longer blocks selected_medium_models_pass_or_approved_review",
+                "product_readiness_snapshot remains semantically consistent",
+            ],
+            "validation_commands": validation_commands,
+        }
+    )
+    return plan
+
+
 def _case_input_requirements(
     *,
     required_medium_model_count: int,
@@ -942,8 +1027,16 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         current_scorecard_count=current_scorecard_count,
         pass_or_approved_review_count=pass_or_approved_review_count,
     )
+    validation_commands = _validation_commands()
+    gate_unblock_plan = _gate_unblock_plan(
+        operator_next_actions=operator_next_actions,
+        validation_commands=validation_commands,
+        contract_pass=False,
+    )
     summary = {
         "required_medium_model_count": required_medium_model_count,
+        "local_candidate_case_count": len(canonical_rows),
+        "missing_candidate_case_count": max(required_medium_model_count - len(canonical_rows), 0),
         "current_medium_model_scorecard_count": current_scorecard_count,
         "pass_or_approved_review_count": pass_or_approved_review_count,
         "normalization_receipt_count": normalization_receipt_count,
@@ -980,6 +1073,17 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "pass_or_approved_review_count": pass_or_approved_review_count,
         "scorecard_receipt_inventory": receipt_inventory,
         "local_candidate_artifact_count": len(canonical_rows),
+        "case_selection_summary": {
+            "required_candidate_case_count": required_medium_model_count,
+            "local_candidate_case_count": len(canonical_rows),
+            "missing_candidate_case_count": max(required_medium_model_count - len(canonical_rows), 0),
+            "current_scorecard_credit_count": current_scorecard_count,
+            "claim_boundary": (
+                "Candidate selection counts parser/topology-ready local source rows only. "
+                "Scorecard credit remains zero until reference outputs, normalization "
+                "receipts, scorecard execution, and PASS/REVIEW decisions pass."
+            ),
+        },
         "local_topology_contract_pass": bool(topology_report.get("contract_pass")),
         "source_license_receipt_path": SOURCE_LICENSE_RECEIPT.as_posix(),
         "source_url_verified": bool(source_license_receipt.get("source_url_verified") is True),
@@ -1049,7 +1153,10 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "missing_evidence_breakdown": missing_evidence,
         "operator_next_actions": operator_next_actions,
         "recommended_next_actions": operator_next_actions,
+        "gate_unblock_plan": gate_unblock_plan,
+        "gate_unblock_plan_count": len(gate_unblock_plan),
         "next_actions": [str(row.get("id")) for row in operator_next_actions],
+        "validation_commands": validation_commands,
         "case_input_requirements": _case_input_requirements(
             required_medium_model_count=required_medium_model_count,
             current_scorecard_count=current_scorecard_count,
