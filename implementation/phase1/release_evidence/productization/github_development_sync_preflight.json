@@ -1,11 +1,13 @@
 {
-  "blockers": [],
+  "blockers": [
+    "remote_mutation_approval_required"
+  ],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
-    "feature_synced_to_head": true,
+    "feature_synced_to_head": false,
     "main_fast_forward_possible": true,
-    "main_synced_to_head": true,
+    "main_synced_to_head": false,
     "remote_fetch_ok": null,
     "remote_safety_ok": true,
     "worktree_clean": true,
@@ -17,37 +19,53 @@
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
-  "contract_pass": true,
-  "generated_at": "2026-07-01T11:05:30.110081+00:00",
-  "pending_remote_updates": [],
+  "contract_pass": false,
+  "generated_at": "2026-07-01T13:03:37.171754+00:00",
+  "pending_remote_updates": [
+    {
+      "action": "push current HEAD to feature",
+      "command": "git push origin codex/seed-pr-ci-source-evidence:codex/seed-pr-ci-source-evidence",
+      "rollback": "restore feature to previous remote SHA cbe06126a65f92a25dda68eabfdc2f294b337967 with an approved restore action",
+      "target": "origin/codex/seed-pr-ci-source-evidence"
+    },
+    {
+      "action": "fast-forward push current HEAD to main",
+      "command": "git push origin HEAD:main",
+      "rollback": "restore main to previous remote SHA cbe06126a65f92a25dda68eabfdc2f294b337967 with an approved revert/restore action",
+      "target": "origin/main"
+    }
+  ],
   "preflight_pass": true,
   "r4_disclosure": {
-    "action": "no remote mutation required",
-    "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
-    "risk": "No remote mutation remains.",
-    "rollback": "no rollback needed",
-    "target": [],
+    "action": "push current HEAD to feature; fast-forward push current HEAD to main",
+    "impact": "GitHub pending refs become externally visible at the local development state.",
+    "risk": "Main CI and external reviewers immediately see the current commits.",
+    "rollback": "restore feature to previous remote SHA cbe06126a65f92a25dda68eabfdc2f294b337967 with an approved restore action; restore main to previous remote SHA cbe06126a65f92a25dda68eabfdc2f294b337967 with an approved revert/restore action",
+    "target": [
+      "origin/codex/seed-pr-ci-source-evidence",
+      "origin/main"
+    ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
-  "reason_code": "PASS",
+  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
   "remote_fetch_attempted": false,
   "remote_fetch_ok": null,
   "remote_mutation_approved": false,
-  "remote_sync_needed": false,
+  "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
-    "feature_ahead_count": 0,
+    "feature_ahead_count": 10,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/ai_decision_review_artifacts.json\n M implementation/phase1/release_evidence/productization/ai_decision_trace_ledger.json\n M implementation/phase1/release_evidence/productization/ai_review_queue.json\n M implementation/phase1/release_evidence/productization/kds_clause_member_extraction_receipt.json\n M implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
-    "local_head_sha": "12eb3c0b0d02685f2c03fabce802a46c7e07e5ec",
-    "main_ahead_count": 0,
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json\n M implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md\n M implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+    "local_head_sha": "5c56f7cb9a50ac0e9fd8b7868113fcef258c7204",
+    "main_ahead_count": 10,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "12eb3c0b0d02685f2c03fabce802a46c7e07e5ec",
+    "remote_feature_sha": "cbe06126a65f92a25dda68eabfdc2f294b337967",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "12eb3c0b0d02685f2c03fabce802a46c7e07e5ec",
+    "remote_main_sha": "cbe06126a65f92a25dda68eabfdc2f294b337967",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -61,7 +79,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/ai_decision_review_artifacts.json\n M implementation/phase1/release_evidence/productization/ai_decision_trace_ledger.json\n M implementation/phase1/release_evidence/productization/ai_review_queue.json\n M implementation/phase1/release_evidence/productization/kds_clause_member_extraction_receipt.json\n M implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json"
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json\n M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md\n M implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json\n M implementation/phase1/release_evidence/productization/source_of_truth_gap_classification.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json\n M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md\n M implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
   },
-  "status": "synced"
+  "status": "approval_required"
 }
