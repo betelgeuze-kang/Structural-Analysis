@@ -304,7 +304,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "environment_spillover"
     ]["scope"] == "local_environment_blocker"
     assert ux_handoff["intake_field_pass_count"] == 0
-    assert ux_handoff["intake_field_count"] == 23
+    assert ux_handoff["intake_field_count"] == 24
     assert ux_handoff["report_blockers"] == [
         "observation_file_missing",
         "contract_signal_not_pass",
