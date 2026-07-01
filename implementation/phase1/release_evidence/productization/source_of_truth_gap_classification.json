@@ -3,7 +3,7 @@
   "claim_boundary": "This artifact classifies the five remaining source-of-truth gap candidates. It records freshness policy and live artifact checks, but does not promote aggregator rollups or replace the heavy validation receipts themselves.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T08:57:49.903516+00:00",
+  "generated_at": "2026-07-01T09:04:01.096144+00:00",
   "input_checksums": {
     "docs/source-of-truth-gap-classification.md": "sha256:d4cd1134e78f6acedaf39c09c5ff2fc0fcbf62451e60e6530686269b855a8c09",
     "implementation/phase1/real_accuracy_validation_report.json": "sha256:1e63a32c3d0d95e3e34f58aea661e989646088d66cf086da7340bb8dfc8ab46c",
@@ -175,7 +175,7 @@
     }
   ],
   "schema_version": "source-of-truth-gap-classification.v1",
-  "source_commit_sha": "07fc560f00b06b1730b189e5a042dffff053147a",
+  "source_commit_sha": "382dfd6b730a02ffbd6afa86af286e6d55baeb7b",
   "status": "ready",
   "summary": {
     "aggregator_review_count": 3,
