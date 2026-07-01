@@ -75,13 +75,13 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T05:10:05.582626+00:00",
+  "generated_at": "2026-07-01T11:39:18.218490+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:55d2922f91d04c9ed411d98e4d710442f1774749795f76eb103203ecd87e6ee1",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:60b59a12228241029f9ff1ad43d27baa1b379372aa69ba859948a3ebae29b3bd",
-    "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:0851e59368d7903a83c614984ec8aaa95203313064f1423223b8172635e79e21",
-    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:ccef3cde6827854b4812e58e7eda7c5741598c5285355b318d97bdb9a0b9ddae",
-    "scripts/build_phase6_benchmark_scale_status.py": "sha256:e61667c479d1830bbe9d44423258e7c8a968d8d7abaf3b4cc98061d111318f56"
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:9d5e64875534a41dac9148ce6936299190b48ab61c5857f86ec2252e4faba723",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:4a102063db8ed32743ea1e067c1e1d7cd5f8aa35a1232271ec037b7fadd26c69",
+    "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:1242fd7e68b3db201e904b18697f7ce607cfd904bb5c782dad357df30f81ba17",
+    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:536f2ac6721b629d2b73f0e5c5db01c412a0718152a86daf0eb8baa7ab79e816",
+    "scripts/build_phase6_benchmark_scale_status.py": "sha256:9cba29d197afca5baa2f7fa925a67b440637191b42eb21ba82853b8dd6bc2d2a"
   },
   "large_gate": {
     "blocker_grouping_metadata": {
@@ -150,7 +150,107 @@
     "crash_oom_free_execution_count": 2,
     "current_large_model_execution_receipt_count": 2,
     "current_large_source_model_count": 2,
+    "operator_next_actions": [
+      {
+        "action": "Attach product/legal approval for local large-model execution and claim boundaries.",
+        "clears_blockers": [
+          "license_review_pending"
+        ],
+        "id": "complete_large_model_license_review",
+        "lane": "opensees-large",
+        "owner": "product_legal",
+        "validation_commands": [
+          "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+          "python3 scripts/build_developer_preview_rc_status.py --check"
+        ]
+      },
+      {
+        "action": "Attach reference outputs or approved REVIEW baselines for the selected large models.",
+        "clears_blockers": [
+          "reference_outputs_missing"
+        ],
+        "id": "attach_large_reference_outputs",
+        "lane": "opensees-large",
+        "owner": "benchmark_operator",
+        "remaining_case_count": 2,
+        "validation_commands": [
+          "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check"
+        ]
+      },
+      {
+        "action": "Record canonical units, coordinates, and mapping coverage for each selected large model.",
+        "clears_blockers": [
+          "normalization_not_implemented"
+        ],
+        "id": "record_large_canonical_normalization",
+        "lane": "opensees-large",
+        "owner": "benchmark_operator",
+        "remaining_case_count": 2,
+        "validation_commands": [
+          "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check"
+        ]
+      },
+      {
+        "accepted_decisions": [
+          "PASS",
+          "APPROVED_REVIEW"
+        ],
+        "action": "Attach a scorecard PASS or explicit approved REVIEW record for each large model receipt.",
+        "clears_blockers": [
+          "large_model_scorecard_or_review_missing"
+        ],
+        "id": "attach_large_scorecard_or_approved_review",
+        "lane": "opensees-large",
+        "owner": "benchmark_reviewer",
+        "remaining_case_count": 2,
+        "validation_commands": [
+          "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+          "python3 scripts/build_developer_preview_rc_status.py --check"
+        ]
+      }
+    ],
+    "progress_partition": {
+      "claim_boundary": "Large execution and crash/OOM receipts are separated from scorecard/approved-review credit, so existing execution receipts cannot promote the RC large-model gate without the review evidence.",
+      "crash_oom_free": {
+        "contract_pass": true,
+        "current": 2,
+        "label": "crash/OOM-free large receipts",
+        "remaining": 0,
+        "required": 2
+      },
+      "evidence_contract": {
+        "contract_pass": false,
+        "current": 5,
+        "label": "large readiness evidence rows passed",
+        "remaining": 4,
+        "required": 9
+      },
+      "execution_receipts": {
+        "contract_pass": true,
+        "current": 2,
+        "label": "large execution receipts",
+        "remaining": 0,
+        "required": 2
+      },
+      "required_large_model_count": 2,
+      "schema_version": "phase6-large-benchmark-progress-partition.v1",
+      "scorecard_or_review": {
+        "contract_pass": false,
+        "current": 0,
+        "label": "large scorecard or approved review decisions",
+        "remaining": 2,
+        "required": 2
+      },
+      "source_identity": {
+        "contract_pass": true,
+        "current": 2,
+        "label": "large source models with verified URL identity",
+        "remaining": 0,
+        "required": 2
+      }
+    },
     "receipt": "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json",
+    "required_evidence_count": 9,
     "required_evidence_pass_count": 5,
     "required_large_model_count": 2,
     "scorecard_or_review_count": 0,
@@ -224,17 +324,343 @@
       "opensees_medium_scorecard_execution_missing",
       "reference_outputs_missing"
     ],
+    "case_ready_count": 0,
     "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command, but it does not prove product license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
     "contract_pass": false,
     "current_medium_model_scorecard_count": 0,
     "local_candidate_artifact_count": 2,
     "local_topology_contract_pass": true,
+    "operator_next_actions": [
+      {
+        "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+        "clears_blockers": [
+          "medium_structural_models_current_below_required:2/5"
+        ],
+        "current_candidate_case_count": 2,
+        "evidence_artifacts": [
+          "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+          "operator-attached source/license/reference/normalization rows for each added case"
+        ],
+        "id": "select_additional_medium_model_cases",
+        "lane": "opensees-medium",
+        "owner": "benchmark_operator",
+        "remaining_case_count": 3,
+        "required_candidate_case_count": 5,
+        "validation_commands": [
+          "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+          "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+          "python3 scripts/build_developer_preview_rc_status.py --check"
+        ]
+      },
+      {
+        "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
+        "clears_blockers": [
+          "license_review_pending"
+        ],
+        "evidence_artifacts": [
+          "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json"
+        ],
+        "id": "complete_product_legal_license_review",
+        "lane": "opensees-medium",
+        "owner": "product_legal",
+        "validation_commands": [
+          "python3 scripts/build_phase3_opensees_source_license_receipt.py --check",
+          "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+        ]
+      },
+      {
+        "action": "Attach reference outputs or approved REVIEW baselines for the five selected medium structural models.",
+        "clears_blockers": [
+          "reference_outputs_missing"
+        ],
+        "evidence_artifacts": [
+          "OPERATOR_ATTACHED_REFERENCE_OUTPUTS",
+          "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256_PER_CASE"
+        ],
+        "id": "attach_medium_reference_outputs",
+        "lane": "opensees-medium",
+        "owner": "benchmark_operator",
+        "remaining_case_count": 5,
+        "validation_commands": [
+          "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+        ]
+      },
+      {
+        "action": "Record units, coordinate transforms, node/member mapping coverage, and normalization receipt paths for all selected medium cases.",
+        "clears_blockers": [
+          "normalization_not_implemented"
+        ],
+        "evidence_artifacts": [
+          "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
+        ],
+        "id": "record_medium_canonical_normalization",
+        "lane": "opensees-medium",
+        "owner": "benchmark_operator",
+        "remaining_case_count": 5,
+        "validation_commands": [
+          "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+        ]
+      },
+      {
+        "action": "Run the medium scorecard receipt command for each selected case and retain receipt, result, and validation report artifacts.",
+        "clears_blockers": [
+          "opensees_medium_scorecard_execution_missing"
+        ],
+        "id": "run_medium_scorecard_receipts",
+        "lane": "opensees-medium",
+        "owner": "benchmark_operator",
+        "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
+        "remaining_case_count": 5,
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "validation_commands": [
+          "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+          "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+          "python3 scripts/build_developer_preview_rc_status.py --check"
+        ]
+      },
+      {
+        "accepted_decisions": [
+          "PASS",
+          "APPROVED_REVIEW"
+        ],
+        "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+        "clears_blockers": [
+          "medium_model_pass_or_review_missing"
+        ],
+        "id": "attach_medium_pass_or_approved_review_decisions",
+        "lane": "opensees-medium",
+        "owner": "benchmark_reviewer",
+        "remaining_case_count": 5,
+        "validation_commands": [
+          "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+          "python3 scripts/build_developer_preview_rc_status.py --check"
+        ]
+      }
+    ],
     "pass_or_approved_review_count": 0,
+    "progress_partition": {
+      "case_readiness_ledger_ref": "case_readiness_ledger",
+      "case_ready_for_credit": {
+        "contract_pass": false,
+        "current": 0,
+        "label": "case rows with every medium credit prerequisite",
+        "remaining": 5,
+        "required": 5
+      },
+      "claim_boundary": "Candidate parser/topology rows, scorecard execution receipts, and PASS/APPROVED_REVIEW decisions are tracked separately. Only the scorecard and review counts can close the RC medium-model gate.",
+      "evidence_contract": {
+        "contract_pass": false,
+        "current": 4,
+        "label": "medium readiness evidence rows passed",
+        "remaining": 5,
+        "required": 9
+      },
+      "local_candidate_selection": {
+        "contract_pass": false,
+        "current": 2,
+        "label": "parser/topology candidate cases selected",
+        "remaining": 3,
+        "required": 5
+      },
+      "pass_or_approved_review": {
+        "contract_pass": false,
+        "current": 0,
+        "label": "PASS or APPROVED_REVIEW decisions",
+        "remaining": 5,
+        "required": 5
+      },
+      "required_medium_model_count": 5,
+      "schema_version": "phase6-medium-benchmark-progress-partition.v1",
+      "scorecard_execution": {
+        "contract_pass": false,
+        "current": 0,
+        "label": "valid medium scorecard receipts",
+        "remaining": 5,
+        "required": 5
+      }
+    },
     "receipt": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+    "required_evidence_count": 9,
     "required_evidence_pass_count": 4,
     "required_medium_model_count": 5,
     "status": "blocked"
   },
+  "next_actions": [
+    "select_additional_medium_model_cases",
+    "complete_product_legal_license_review",
+    "attach_medium_reference_outputs",
+    "record_medium_canonical_normalization",
+    "run_medium_scorecard_receipts",
+    "attach_medium_pass_or_approved_review_decisions",
+    "complete_large_model_license_review",
+    "attach_large_reference_outputs",
+    "record_large_canonical_normalization",
+    "attach_large_scorecard_or_approved_review"
+  ],
+  "operator_next_actions": [
+    {
+      "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+      "clears_blockers": [
+        "medium_structural_models_current_below_required:2/5"
+      ],
+      "current_candidate_case_count": 2,
+      "evidence_artifacts": [
+        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        "operator-attached source/license/reference/normalization rows for each added case"
+      ],
+      "id": "select_additional_medium_model_cases",
+      "lane": "opensees-medium",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 3,
+      "required_candidate_case_count": 5,
+      "validation_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
+      "clears_blockers": [
+        "license_review_pending"
+      ],
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json"
+      ],
+      "id": "complete_product_legal_license_review",
+      "lane": "opensees-medium",
+      "owner": "product_legal",
+      "validation_commands": [
+        "python3 scripts/build_phase3_opensees_source_license_receipt.py --check",
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+      ]
+    },
+    {
+      "action": "Attach reference outputs or approved REVIEW baselines for the five selected medium structural models.",
+      "clears_blockers": [
+        "reference_outputs_missing"
+      ],
+      "evidence_artifacts": [
+        "OPERATOR_ATTACHED_REFERENCE_OUTPUTS",
+        "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256_PER_CASE"
+      ],
+      "id": "attach_medium_reference_outputs",
+      "lane": "opensees-medium",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 5,
+      "validation_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+      ]
+    },
+    {
+      "action": "Record units, coordinate transforms, node/member mapping coverage, and normalization receipt paths for all selected medium cases.",
+      "clears_blockers": [
+        "normalization_not_implemented"
+      ],
+      "evidence_artifacts": [
+        "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
+      ],
+      "id": "record_medium_canonical_normalization",
+      "lane": "opensees-medium",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 5,
+      "validation_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+      ]
+    },
+    {
+      "action": "Run the medium scorecard receipt command for each selected case and retain receipt, result, and validation report artifacts.",
+      "clears_blockers": [
+        "opensees_medium_scorecard_execution_missing"
+      ],
+      "id": "run_medium_scorecard_receipts",
+      "lane": "opensees-medium",
+      "owner": "benchmark_operator",
+      "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
+      "remaining_case_count": 5,
+      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "validation_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "accepted_decisions": [
+        "PASS",
+        "APPROVED_REVIEW"
+      ],
+      "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+      "clears_blockers": [
+        "medium_model_pass_or_review_missing"
+      ],
+      "id": "attach_medium_pass_or_approved_review_decisions",
+      "lane": "opensees-medium",
+      "owner": "benchmark_reviewer",
+      "remaining_case_count": 5,
+      "validation_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "action": "Attach product/legal approval for local large-model execution and claim boundaries.",
+      "clears_blockers": [
+        "license_review_pending"
+      ],
+      "id": "complete_large_model_license_review",
+      "lane": "opensees-large",
+      "owner": "product_legal",
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "action": "Attach reference outputs or approved REVIEW baselines for the selected large models.",
+      "clears_blockers": [
+        "reference_outputs_missing"
+      ],
+      "id": "attach_large_reference_outputs",
+      "lane": "opensees-large",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 2,
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check"
+      ]
+    },
+    {
+      "action": "Record canonical units, coordinates, and mapping coverage for each selected large model.",
+      "clears_blockers": [
+        "normalization_not_implemented"
+      ],
+      "id": "record_large_canonical_normalization",
+      "lane": "opensees-large",
+      "owner": "benchmark_operator",
+      "remaining_case_count": 2,
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check"
+      ]
+    },
+    {
+      "accepted_decisions": [
+        "PASS",
+        "APPROVED_REVIEW"
+      ],
+      "action": "Attach a scorecard PASS or explicit approved REVIEW record for each large model receipt.",
+      "clears_blockers": [
+        "large_model_scorecard_or_review_missing"
+      ],
+      "id": "attach_large_scorecard_or_approved_review",
+      "lane": "opensees-large",
+      "owner": "benchmark_reviewer",
+      "remaining_case_count": 2,
+      "validation_commands": [
+        "python3 scripts/build_phase3_large_model_runner_readiness_receipt.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    }
+  ],
   "owner_action": "Attach five medium-model scorecards with PASS or pre-approved REVIEW evidence, attach two licensed large-model crash/OOM-free execution receipts with scorecard or review evidence, then rerun this status before promoting RC benchmark scale.",
   "readiness_inputs": {
     "benchmark_acquisition_plan": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
@@ -246,7 +672,16 @@
   "reused_evidence": true,
   "schema_version": "phase6-benchmark-scale-status.v1",
   "seed_benchmark_status": "ready",
-  "source_commit_sha": "6f8dcef857484f46aa8ed80074f14b46368cea0d",
+  "source_commit_sha": "bb3faea75545777c494414f519cf3bcf62dca3a2",
   "status": "blocked",
+  "summary": {
+    "large_crash_oom_free": "2/2",
+    "large_execution_receipts": "2/2",
+    "large_scorecard_or_review": "0/2",
+    "medium_local_candidates": "2/5",
+    "medium_pass_or_review": "0/5",
+    "medium_scorecard_receipts": "0/5",
+    "operator_next_action_count": 10
+  },
   "summary_line": "Phase 6 benchmark scale: BLOCKED | medium=0/5 | large_exec=2/2"
 }
