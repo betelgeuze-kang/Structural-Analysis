@@ -323,10 +323,10 @@
   ],
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T07:17:18.982526+00:00",
+  "generated_at": "2026-07-01T08:05:28.943208+00:00",
   "input_checksums": {
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
-    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:3cc17f577e7d6f0dcc3b435c55d0059b904ec372f37f3880420ea52bc2bac5a5",
+    "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:8fcd3dd11225cc788bac2278acf53cb77be5d230dfe2d8202eda5df8e5d05a22",
     "scripts/materialize_public_benchmark_phase2_from_rows.py": "sha256:ee0bac5372567516451bfdf3fd9059f2ede3476658256e3879989206a17a9c37"
   },
   "missing_row_inputs": [
@@ -1245,7 +1245,7 @@
     }
   },
   "schema_version": "public-benchmark-phase2-row-audit.v1",
-  "source_commit_sha": "77addd71abde6ac4940b9e55eaf0b2543ba1d2ba",
+  "source_commit_sha": "8ba36c1c3ed027e8453c25a749f0bcdd13c6f2fc",
   "status": "operator_evidence_required",
   "summary": {
     "blocked_component_ids": [

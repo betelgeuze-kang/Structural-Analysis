@@ -425,7 +425,12 @@
     "evidence_role": "non_promoting_partial_frontier_context",
     "frontier_chain_count": 44,
     "frontier_residual_above_tolerance": true,
+    "latest_frontier_compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
     "latest_frontier_direct_residual_inf_n": 1.3092276661494922,
+    "latest_frontier_load_scale": null,
+    "latest_frontier_operator_stop_reason": "no_residual_descent",
+    "latest_frontier_operator_support_column_count": 8,
+    "latest_frontier_operator_target_row_count": 128,
     "latest_frontier_receipt": "mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8.json",
     "non_promoting_launch_receipt_count": 24,
     "non_promoting_launch_receipts": [
@@ -1511,6 +1516,7 @@
     "present": true,
     "promotes_g1_closure": false,
     "promotes_lane_status": false,
+    "same_operator_exhausted_at_latest_checkpoint": true,
     "schema_version": "g1-frontier-non-promoting-context.v1",
     "source_blockers": [
       "direct_residual_gate_not_closed",
@@ -1542,15 +1548,32 @@
       "pending_launch_only_receipts_do_not_claim_descent": true
     },
     "source_contract_pass": false,
+    "source_next_actions": [
+      "all configured largest-rows target128/support8 support/Jacobian strategies are exhausted at the latest checkpoint; do not spend another slice on largest-rows support/Jacobian retuning. Use a consistent residual/Jacobian Newton path, a production ROCm/HIP residual/JVP worker, or a different coupled operator/preconditioner.",
+      "port residual-row batch replay with state-dependent shell material tangent to the production ROCm/HIP lane",
+      "replace row-only correction with a consistent residual/Jacobian Newton path before claiming commercial closure"
+    ],
     "source_path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
     "source_status": "partial"
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-01T07:41:11.882059+00:00",
+  "generated_at": "2026-07-01T08:05:27.923329+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
+      "docs/source-of-truth-gap-classification.md",
+      "scripts/build_product_readiness_snapshot.py",
+      "scripts/build_source_of_truth_gap_classification.py",
+      "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+      "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
+      "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
       "scripts/run_g1_full_load_hip_newton_lane.py",
+      "tests/test_build_product_readiness_snapshot.py",
+      "tests/test_build_source_of_truth_gap_classification.py",
+      "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+      "tests/test_materialize_public_benchmark_operator_bundle_from_rows.py",
+      "tests/test_materialize_public_benchmark_phase2_from_rows.py",
+      "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
       "tests/test_run_g1_full_load_hip_newton_lane.py"
     ],
     "consistent_residual_jacobian_newton_gate_passed": false,
@@ -1630,7 +1653,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:5035b57d5f9193f0e56a97ac6d3753a81562c1a0a4142337bd46d701d56c286f",
-    "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:9adb5c4eeb3190c089dca7b56c7ef9fd976ba1238f61c83f8fa0c2482490198a",
+    "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:074b5f56420b954981caa83699470679842875fa0840266762530e5af305293f",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:0c7539798ab5ae1b91154edebdc718c7c7d13a3e067f63de179b3ae728e321a0",
     "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz": "sha256:e3a48e50edfb68648d1d7c5d720faec45f632de667061be71b30a57a042d1235",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:26231b6d8aea08199264cb3ee4e5f24417d58265664a18c88aa74c579a2ab5e3"
@@ -1638,12 +1661,22 @@
   "lane_next_actions": [
     {
       "acceptance_receipt": "a loadable mgt-direct-residual-newton-state.v1 checkpoint with load_scale >= required_load_scale and no load-path provenance contradiction",
+      "cause_narrowing_primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+      "claim_boundary": "This routes the next checkpoint-generation slice only. It does not promote a full-load checkpoint, close G1, or allow another exhausted row-only largest-rows retuning loop to count as progress.",
+      "frontier_operator_stop_reason": "no_residual_descent",
+      "frontier_operator_support_column_count": 8,
+      "frontier_operator_target_row_count": 128,
       "highest_observed_gap_to_required_load_scale": 0.344,
       "highest_observed_load_scale": 0.656,
-      "id": "generate_full_load_1p0_checkpoint_candidate",
-      "reason": "checkpoint_resolution_no_full_load_candidate",
+      "id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
+      "preferred_candidate_generator": "consistent_residual_jacobian_newton_rocm_full_load_candidate",
+      "reason": "row_only_largest_rows_operator_exhausted",
       "required_load_scale": 1.0,
       "rerun_command": "python3 scripts/run_g1_full_load_hip_newton_lane.py --checkpoint-npz <full-load-checkpoint.npz> --fail-blocked",
+      "row_only_largest_rows_exhausted_at_latest_checkpoint": true,
+      "suppressed_retry_action_ids": [
+        "repeat_largest_rows_target128_support8_row_only_retuning"
+      ],
       "workspace_candidate_count": 357,
       "workspace_full_load_candidate_count": 0,
       "workspace_highest_observed_gap_to_required_load_scale": 0.344,
@@ -1693,7 +1726,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "27c4c73df81bf273078ea8fc2f1d4496588959ba",
+  "source_commit_sha": "8ba36c1c3ed027e8453c25a749f0bcdd13c6f2fc",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",
@@ -1718,15 +1751,21 @@
         "id": "full_load_checkpoint_1p0",
         "label": "Full-load 1.0 checkpoint candidate",
         "next_action_ids": [
-          "generate_full_load_1p0_checkpoint_candidate"
+          "build_consistent_newton_full_load_checkpoint_candidate_runner"
         ],
         "observed": {
           "full_load_candidate_count": 0,
           "highest_observed_gap_to_required_load_scale": 0.344,
           "highest_observed_load_scale": 0.656,
           "load_path_provenance_passed": true,
+          "preferred_candidate_generator": "consistent_residual_jacobian_newton_rocm_full_load_candidate",
           "provenance_below_required_full_load": {},
-          "required_load_scale": 1.0
+          "required_load_scale": 1.0,
+          "routing_reason": "row_only_largest_rows_operator_exhausted",
+          "row_only_largest_rows_exhausted_at_latest_checkpoint": true,
+          "suppressed_retry_action_ids": [
+            "repeat_largest_rows_target128_support8_row_only_retuning"
+          ]
         },
         "ready": false,
         "rerun_command": "python3 scripts/run_g1_full_load_hip_newton_lane.py --checkpoint-npz <full-load-checkpoint.npz> --fail-blocked",
@@ -1766,7 +1805,7 @@
         "id": "production_rocm_hip_residual_jvp_worker",
         "label": "Production ROCm/HIP residual/JVP worker",
         "next_action_ids": [
-          "generate_full_load_1p0_checkpoint_candidate"
+          "build_consistent_newton_full_load_checkpoint_candidate_runner"
         ],
         "observed": {
           "g1_closure_gate_ready": false,
