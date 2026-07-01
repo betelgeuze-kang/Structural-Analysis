@@ -118,6 +118,27 @@ def _status_from_packet(packet: dict[str, Any]) -> str:
     return "pending_post_decision_scope_audit"
 
 
+def _owner_decision_validation_blockers(
+    *,
+    packet: dict[str, Any],
+    owner_decisions: dict[str, Any],
+) -> list[str]:
+    blockers: list[str] = []
+    if not packet.get("contract_pass"):
+        blockers.append("structural_scope_owner_review_contract_not_pass")
+    if not owner_decisions.get("present"):
+        blockers.append("owner_decisions_missing")
+    if packet.get("owner_decision_pending_count"):
+        blockers.append(
+            f"owner_decision_pending_count={packet.get('owner_decision_pending_count')}"
+        )
+    blockers.extend(
+        f"owner_decisions::{item}"
+        for item in _as_list(owner_decisions.get("blockers"))
+    )
+    return blockers
+
+
 def build_application_plan(
     *,
     repo_root: Path = ROOT,
@@ -143,6 +164,10 @@ def build_application_plan(
         if row["owner_decision"] == "retain_quarantined_with_signed_owner_exception"
     ]
     closure_blockers = [str(item) for item in _as_list(packet.get("closure_blockers"))]
+    owner_decision_validation_blockers = _owner_decision_validation_blockers(
+        packet=packet,
+        owner_decisions=owner_decisions,
+    )
     plan_blockers = [
         *([f"owner_decision_pending_count={packet.get('owner_decision_pending_count')}"] if packet.get("owner_decision_pending_count") else []),
         *([f"post_decision_cleanup_pending_count={packet.get('post_decision_cleanup_pending_count')}"] if packet.get("post_decision_cleanup_pending_count") else []),
@@ -167,6 +192,8 @@ def build_application_plan(
         "contract_pass": bool(packet.get("contract_pass") and not _as_list(owner_decisions.get("blockers"))),
         "application_ready": status == "ready_for_cleanup_application",
         "evidence_closure_pass": bool(packet.get("evidence_closure_pass")),
+        "owner_decision_validation_pass": not owner_decision_validation_blockers,
+        "owner_decision_validation_blockers": owner_decision_validation_blockers,
         "owner_decisions_path": owner_decisions_path.as_posix(),
         "owner_decisions_present": bool(owner_decisions.get("present")),
         "owner_decision_recorded_count": int(packet.get("owner_decision_recorded_count", 0) or 0),
@@ -220,15 +247,21 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `application_ready`: `{payload['application_ready']}`",
         f"- `evidence_closure_pass`: `{payload['evidence_closure_pass']}`",
+        f"- `owner_decision_validation_pass`: `{payload['owner_decision_validation_pass']}`",
         f"- `owner_decision_pending_count`: `{payload['owner_decision_pending_count']}`",
         f"- `post_decision_cleanup_pending_count`: `{payload['post_decision_cleanup_pending_count']}`",
         f"- `delete_decision_count`: `{payload['delete_decision_count']}`",
         f"- `extract_decision_count`: `{payload['extract_decision_count']}`",
         f"- `retain_quarantined_exception_count`: `{payload['retain_quarantined_exception_count']}`",
         "",
-        "## Plan Blockers",
-        "",
     ]
+    if payload["owner_decision_validation_blockers"]:
+        lines.extend(["## Owner Decision Validation Blockers", ""])
+        lines.extend(
+            f"- `{item}`" for item in payload["owner_decision_validation_blockers"]
+        )
+        lines.append("")
+    lines.extend(["## Plan Blockers", ""])
     if payload["plan_blockers"]:
         lines.extend(f"- `{item}`" for item in payload["plan_blockers"])
     else:
@@ -276,6 +309,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
+    parser.add_argument(
+        "--fail-invalid-owner-decisions",
+        action="store_true",
+        help=(
+            "Exit non-zero when owner decisions are missing, incomplete, "
+            "schema-invalid, duplicated, or reference paths outside quarantine. "
+            "A valid delete/extract decision file may still leave cleanup pending."
+        ),
+    )
     return parser
 
 
@@ -297,6 +339,10 @@ def main(argv: list[str] | None = None) -> int:
             f"{payload['status']} | pending={payload['owner_decision_pending_count']} | "
             f"cleanup_pending={payload['post_decision_cleanup_pending_count']}"
         )
+    if args.fail_invalid_owner_decisions and not payload[
+        "owner_decision_validation_pass"
+    ]:
+        return 1
     return 1 if args.fail_blocked and not payload["evidence_closure_pass"] else 0
 
 

@@ -122,6 +122,11 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
     assert payload["contract_pass"] is True
     assert payload["application_ready"] is False
     assert payload["evidence_closure_pass"] is False
+    assert payload["owner_decision_validation_pass"] is False
+    assert payload["owner_decision_validation_blockers"] == [
+        "owner_decisions_missing",
+        "owner_decision_pending_count=2",
+    ]
     assert payload["owner_decision_pending_count"] == 2
     assert payload["post_decision_cleanup_pending_count"] == 0
     assert payload["plan_blockers"] == ["owner_decision_pending_count=2"]
@@ -153,6 +158,8 @@ def test_application_plan_routes_delete_and_extract_decisions(tmp_path: Path) ->
     assert payload["status"] == "ready_for_cleanup_application"
     assert payload["application_ready"] is True
     assert payload["evidence_closure_pass"] is False
+    assert payload["owner_decision_validation_pass"] is True
+    assert payload["owner_decision_validation_blockers"] == []
     assert payload["owner_decision_pending_count"] == 0
     assert payload["post_decision_cleanup_pending_count"] == 2
     assert payload["delete_decision_count"] == 1
@@ -214,6 +221,8 @@ def test_application_plan_accepts_owner_decision_csv(tmp_path: Path) -> None:
 
     assert payload["status"] == "ready_for_cleanup_application"
     assert payload["application_ready"] is True
+    assert payload["owner_decision_validation_pass"] is True
+    assert payload["owner_decision_validation_blockers"] == []
     assert payload["owner_decision_pending_count"] == 0
     assert payload["post_decision_cleanup_pending_count"] == 2
 
@@ -246,6 +255,8 @@ def test_application_plan_closes_retain_exception_decisions(tmp_path: Path) -> N
     assert payload["status"] == "complete"
     assert payload["application_ready"] is False
     assert payload["evidence_closure_pass"] is True
+    assert payload["owner_decision_validation_pass"] is True
+    assert payload["owner_decision_validation_blockers"] == []
     assert payload["owner_decision_pending_count"] == 0
     assert payload["post_decision_cleanup_pending_count"] == 0
     assert payload["retain_quarantined_exception_count"] == 2
@@ -273,4 +284,63 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
     )
     markdown = out_md.read_text(encoding="utf-8")
     assert "# Structural Scope Owner Decision Application Plan" in markdown
+    assert "owner_decision_validation_pass" in markdown
     assert "owner_decision_pending_count=2" in markdown
+
+
+def test_application_plan_fail_invalid_owner_decisions_exit_code(
+    tmp_path: Path,
+) -> None:
+    audit, manifest = _write_inputs(tmp_path)
+    invalid_exit = application_plan.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--audit",
+            str(audit),
+            "--quarantine-manifest",
+            str(manifest),
+            "--owner-decisions",
+            str(tmp_path / "missing_decisions.json"),
+            "--out",
+            str(tmp_path / "invalid_plan.json"),
+            "--out-md",
+            str(tmp_path / "invalid_plan.md"),
+            "--fail-invalid-owner-decisions",
+        ]
+    )
+    assert invalid_exit == 1
+
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(
+        decisions,
+        _decision_payload(
+            ("implementation/phase1/md3bead_soa.py", "extract_to_molecular_or_science_repository"),
+            (
+                "implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_product_report.json",
+                "delete_from_structural_repository",
+            ),
+        ),
+    )
+    valid_exit = application_plan.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--audit",
+            str(audit),
+            "--quarantine-manifest",
+            str(manifest),
+            "--owner-decisions",
+            str(decisions),
+            "--out",
+            str(tmp_path / "valid_plan.json"),
+            "--out-md",
+            str(tmp_path / "valid_plan.md"),
+            "--fail-invalid-owner-decisions",
+        ]
+    )
+    assert valid_exit == 0
+    assert json.loads((tmp_path / "valid_plan.json").read_text(encoding="utf-8"))[
+        "owner_decision_validation_pass"
+    ] is True
