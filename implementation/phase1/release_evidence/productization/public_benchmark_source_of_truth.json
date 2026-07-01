@@ -155,6 +155,48 @@
           "is_active",
           "score"
         ],
+        "row_validation_policies": {
+          "active_decoy_policy": {
+            "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+          },
+          "boolean_label_policy": {
+            "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+            "required_unique_row_keys": {
+              "target_scored_molecules": [
+                "molecule_id"
+              ],
+              "targets": [
+                "target_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -225,6 +267,60 @@
           "vina",
           "gnina"
         ],
+        "row_validation_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "engine_pair_policy": {
+            "duplicate_docking_run_ids_rejected": true,
+            "duplicate_engine_ids_rejected": true,
+            "per_case_required_engines": [
+              "vina",
+              "gnina"
+            ]
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "pose_success_policy": {
+            "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+            "threshold_default_angstrom": 2.0
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -1155,7 +1251,7 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-07-01T09:23:49.990624+00:00",
+  "generated_at": "2026-07-01T09:31:31.123014+00:00",
   "harness_bundle_index": {
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
     "artifact_index_command": "python3 scripts/materialize_public_benchmark_harness_bundle.py --out implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
@@ -1165,7 +1261,7 @@
     "status": "ready_for_local_artifact_index"
   },
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d4cd7091185ef46a3fef3d546d1a670b7911b0e4de2f60703391a2cc757912b0",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:e74bc1318713a960757e9a876b4b876d0a1cfbc3207992ef3109f3c33a6bfce4",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:9c8063587ea2dbaa901f1d3a3f930be4b430978636b81e8d38f4ba89a1a6cfb2",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
@@ -1431,6 +1527,48 @@
           "is_active",
           "score"
         ],
+        "row_validation_policies": {
+          "active_decoy_policy": {
+            "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+          },
+          "boolean_label_policy": {
+            "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+            "required_unique_row_keys": {
+              "target_scored_molecules": [
+                "molecule_id"
+              ],
+              "targets": [
+                "target_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -1509,6 +1647,60 @@
           "vina",
           "gnina"
         ],
+        "row_validation_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "engine_pair_policy": {
+            "duplicate_docking_run_ids_rejected": true,
+            "duplicate_engine_ids_rejected": true,
+            "per_case_required_engines": [
+              "vina",
+              "gnina"
+            ]
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "pose_success_policy": {
+            "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+            "threshold_default_angstrom": 2.0
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -1844,6 +2036,48 @@
           "is_active",
           "score"
         ],
+        "row_validation_policies": {
+          "active_decoy_policy": {
+            "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+          },
+          "boolean_label_policy": {
+            "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+            "required_unique_row_keys": {
+              "target_scored_molecules": [
+                "molecule_id"
+              ],
+              "targets": [
+                "target_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -1925,6 +2159,60 @@
           "vina",
           "gnina"
         ],
+        "row_validation_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "engine_pair_policy": {
+            "duplicate_docking_run_ids_rejected": true,
+            "duplicate_engine_ids_rejected": true,
+            "per_case_required_engines": [
+              "vina",
+              "gnina"
+            ]
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "pose_success_policy": {
+            "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+            "threshold_default_angstrom": 2.0
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -1987,6 +2275,7 @@
           "permutations"
         ]
       },
+      "row_validation_policies": {},
       "slot_id": "casf_pdbbind_subset_intake",
       "status": "operator_input_required",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
@@ -2010,6 +2299,7 @@
         "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
         "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
       },
+      "row_validation_policies": {},
       "slot_id": "pose_coordinate_intake",
       "status": "operator_input_required",
       "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
@@ -2043,6 +2333,48 @@
           "is_active",
           "score"
         ],
+        "row_validation_policies": {
+          "active_decoy_policy": {
+            "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+          },
+          "boolean_label_policy": {
+            "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+            "required_unique_row_keys": {
+              "target_scored_molecules": [
+                "molecule_id"
+              ],
+              "targets": [
+                "target_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -2051,6 +2383,48 @@
           "DUD-E",
           "LIT-PCBA"
         ]
+      },
+      "row_validation_policies": {
+        "active_decoy_policy": {
+          "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+        },
+        "boolean_label_policy": {
+          "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+        },
+        "numeric_value_policy": {
+          "score": "must parse to a finite float; NaN and Infinity are rejected"
+        },
+        "row_integrity_policy": {
+          "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+          "required_unique_row_keys": {
+            "target_scored_molecules": [
+              "molecule_id"
+            ],
+            "targets": [
+              "target_id"
+            ]
+          }
+        },
+        "score_direction_policy": {
+          "accepted_aliases": {
+            "higher_is_better": [
+              "higher",
+              "higher_is_better",
+              "descending"
+            ],
+            "lower_is_better": [
+              "lower",
+              "lower_is_better",
+              "ascending"
+            ]
+          },
+          "accepted_values": [
+            "higher_is_better",
+            "lower_is_better"
+          ],
+          "blank_values": "rejected; no implicit default is applied",
+          "required": true
+        }
       },
       "slot_id": "dud_e_lit_pcba_enrichment_intake",
       "status": "operator_input_required",
@@ -2087,6 +2461,60 @@
           "vina",
           "gnina"
         ],
+        "row_validation_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "engine_pair_policy": {
+            "duplicate_docking_run_ids_rejected": true,
+            "duplicate_engine_ids_rejected": true,
+            "per_case_required_engines": [
+              "vina",
+              "gnina"
+            ]
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "pose_success_policy": {
+            "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+            "threshold_default_angstrom": 2.0
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -2097,6 +2525,60 @@
           "PDBBind-refined",
           "PDBBind-general"
         ]
+      },
+      "row_validation_policies": {
+        "boolean_value_policy": {
+          "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+        },
+        "engine_pair_policy": {
+          "duplicate_docking_run_ids_rejected": true,
+          "duplicate_engine_ids_rejected": true,
+          "per_case_required_engines": [
+            "vina",
+            "gnina"
+          ]
+        },
+        "numeric_value_policy": {
+          "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+          "score": "must parse to a finite float; NaN and Infinity are rejected",
+          "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+        },
+        "pose_success_policy": {
+          "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+          "threshold_default_angstrom": 2.0
+        },
+        "row_integrity_policy": {
+          "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+          "required_unique_row_keys": {
+            "case_engine_runs": [
+              "engine_id",
+              "docking_run_id"
+            ],
+            "cases": [
+              "case_id"
+            ]
+          }
+        },
+        "score_direction_policy": {
+          "accepted_aliases": {
+            "higher_is_better": [
+              "higher",
+              "higher_is_better",
+              "descending"
+            ],
+            "lower_is_better": [
+              "lower",
+              "lower_is_better",
+              "ascending"
+            ]
+          },
+          "accepted_values": [
+            "higher_is_better",
+            "lower_is_better"
+          ],
+          "blank_values": "rejected; no implicit default is applied",
+          "required": true
+        }
       },
       "slot_id": "vina_gnina_comparison_intake",
       "status": "operator_input_required",
@@ -2223,6 +2705,48 @@
           "is_active",
           "score"
         ],
+        "row_validation_policies": {
+          "active_decoy_policy": {
+            "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+          },
+          "boolean_label_policy": {
+            "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+            "required_unique_row_keys": {
+              "target_scored_molecules": [
+                "molecule_id"
+              ],
+              "targets": [
+                "target_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -2277,6 +2801,60 @@
           "vina",
           "gnina"
         ],
+        "row_validation_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "engine_pair_policy": {
+            "duplicate_docking_run_ids_rejected": true,
+            "duplicate_engine_ids_rejected": true,
+            "per_case_required_engines": [
+              "vina",
+              "gnina"
+            ]
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "pose_success_policy": {
+            "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+            "threshold_default_angstrom": 2.0
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
+        },
         "source_checksum_policy": {
           "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
           "required_receipt_field": "source_checksum"
@@ -2553,6 +3131,7 @@
             "permutations"
           ]
         },
+        "row_validation_policies": {},
         "slot_id": "casf_pdbbind_subset_intake",
         "status": "operator_input_required",
         "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
@@ -2576,6 +3155,7 @@
           "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
           "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
         },
+        "row_validation_policies": {},
         "slot_id": "pose_coordinate_intake",
         "status": "operator_input_required",
         "template_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
@@ -2609,6 +3189,48 @@
             "is_active",
             "score"
           ],
+          "row_validation_policies": {
+            "active_decoy_policy": {
+              "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+            },
+            "boolean_label_policy": {
+              "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+            },
+            "numeric_value_policy": {
+              "score": "must parse to a finite float; NaN and Infinity are rejected"
+            },
+            "row_integrity_policy": {
+              "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+              "required_unique_row_keys": {
+                "target_scored_molecules": [
+                  "molecule_id"
+                ],
+                "targets": [
+                  "target_id"
+                ]
+              }
+            },
+            "score_direction_policy": {
+              "accepted_aliases": {
+                "higher_is_better": [
+                  "higher",
+                  "higher_is_better",
+                  "descending"
+                ],
+                "lower_is_better": [
+                  "lower",
+                  "lower_is_better",
+                  "ascending"
+                ]
+              },
+              "accepted_values": [
+                "higher_is_better",
+                "lower_is_better"
+              ],
+              "blank_values": "rejected; no implicit default is applied",
+              "required": true
+            }
+          },
           "source_checksum_policy": {
             "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
             "required_receipt_field": "source_checksum"
@@ -2617,6 +3239,48 @@
             "DUD-E",
             "LIT-PCBA"
           ]
+        },
+        "row_validation_policies": {
+          "active_decoy_policy": {
+            "per_target_requirement": "each target must contain at least one active molecule and one decoy molecule"
+          },
+          "boolean_label_policy": {
+            "is_active": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "numeric_value_policy": {
+            "score": "must parse to a finite float; NaN and Infinity are rejected"
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate enrichment targets or scored molecules cannot be used to inflate Public Benchmark enrichment coverage or active/decoy counts.",
+            "required_unique_row_keys": {
+              "target_scored_molecules": [
+                "molecule_id"
+              ],
+              "targets": [
+                "target_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
         },
         "slot_id": "dud_e_lit_pcba_enrichment_intake",
         "status": "operator_input_required",
@@ -2653,6 +3317,60 @@
             "vina",
             "gnina"
           ],
+          "row_validation_policies": {
+            "boolean_value_policy": {
+              "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+            },
+            "engine_pair_policy": {
+              "duplicate_docking_run_ids_rejected": true,
+              "duplicate_engine_ids_rejected": true,
+              "per_case_required_engines": [
+                "vina",
+                "gnina"
+              ]
+            },
+            "numeric_value_policy": {
+              "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+              "score": "must parse to a finite float; NaN and Infinity are rejected",
+              "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+            },
+            "pose_success_policy": {
+              "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+              "threshold_default_angstrom": 2.0
+            },
+            "row_integrity_policy": {
+              "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+              "required_unique_row_keys": {
+                "case_engine_runs": [
+                  "engine_id",
+                  "docking_run_id"
+                ],
+                "cases": [
+                  "case_id"
+                ]
+              }
+            },
+            "score_direction_policy": {
+              "accepted_aliases": {
+                "higher_is_better": [
+                  "higher",
+                  "higher_is_better",
+                  "descending"
+                ],
+                "lower_is_better": [
+                  "lower",
+                  "lower_is_better",
+                  "ascending"
+                ]
+              },
+              "accepted_values": [
+                "higher_is_better",
+                "lower_is_better"
+              ],
+              "blank_values": "rejected; no implicit default is applied",
+              "required": true
+            }
+          },
           "source_checksum_policy": {
             "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
             "required_receipt_field": "source_checksum"
@@ -2663,6 +3381,60 @@
             "PDBBind-refined",
             "PDBBind-general"
           ]
+        },
+        "row_validation_policies": {
+          "boolean_value_policy": {
+            "pose_success": "must be a JSON boolean true/false; strings and numbers are rejected"
+          },
+          "engine_pair_policy": {
+            "duplicate_docking_run_ids_rejected": true,
+            "duplicate_engine_ids_rejected": true,
+            "per_case_required_engines": [
+              "vina",
+              "gnina"
+            ]
+          },
+          "numeric_value_policy": {
+            "pose_success_rmsd_threshold_angstrom": "must parse to a finite positive float; NaN, Infinity, zero, and negative thresholds are rejected",
+            "score": "must parse to a finite float; NaN and Infinity are rejected",
+            "symmetry_aware_rmsd_angstrom": "must parse to a finite non-negative float; NaN, Infinity, and negative RMSD values are rejected"
+          },
+          "pose_success_policy": {
+            "consistency_rule": "pose_success must equal symmetry_aware_rmsd_angstrom <= pose_success_rmsd_threshold_angstrom",
+            "threshold_default_angstrom": 2.0
+          },
+          "row_integrity_policy": {
+            "purpose": "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA case coverage, engine coverage, or pose-success summaries.",
+            "required_unique_row_keys": {
+              "case_engine_runs": [
+                "engine_id",
+                "docking_run_id"
+              ],
+              "cases": [
+                "case_id"
+              ]
+            }
+          },
+          "score_direction_policy": {
+            "accepted_aliases": {
+              "higher_is_better": [
+                "higher",
+                "higher_is_better",
+                "descending"
+              ],
+              "lower_is_better": [
+                "lower",
+                "lower_is_better",
+                "ascending"
+              ]
+            },
+            "accepted_values": [
+              "higher_is_better",
+              "lower_is_better"
+            ],
+            "blank_values": "rejected; no implicit default is applied",
+            "required": true
+          }
         },
         "slot_id": "vina_gnina_comparison_intake",
         "status": "operator_input_required",
@@ -3266,7 +4038,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "828b9e20f5d6aaca0ebc5830089fe531cf97b945",
+  "source_commit_sha": "bc98a98d9a1e46cb2e91177f1a99b0c4cca59915",
   "source_families": [
     {
       "family_id": "casf_pdbbind",
