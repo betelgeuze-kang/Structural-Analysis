@@ -130,6 +130,12 @@ DERIVED_CHECK_SPECS = (
         "closure_check": "evidence_ref_not_template_artifact_pass",
         "owner_note": "Any template-like file is rejected as product/legal approval evidence.",
     },
+    {
+        "field": "evidence_ref_not_generated_gate_artifact",
+        "required_value": "evidence_ref must not point to generated PM/license/readiness gate artifacts",
+        "closure_check": "evidence_ref_not_generated_gate_artifact_pass",
+        "owner_note": "Generated gate reports and intake packets verify approval evidence; they cannot be that evidence.",
+    },
 )
 
 
@@ -191,6 +197,7 @@ def _derived_current_value(field: str, closure_summary: dict[str, Any]) -> str:
         "evidence_ref_not_self_reference",
         "evidence_ref_not_template_reference",
         "evidence_ref_not_template_artifact",
+        "evidence_ref_not_generated_gate_artifact",
     }:
         return str(closure_summary.get("evidence_ref_resolved_path", ""))
     return ""

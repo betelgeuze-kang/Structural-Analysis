@@ -54,6 +54,7 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
                 "evidence_ref_not_self_reference_pass": False,
                 "evidence_ref_not_template_reference_pass": False,
                 "evidence_ref_not_template_artifact_pass": False,
+                "evidence_ref_not_generated_gate_artifact_pass": False,
                 "product_scope_boundary_pass": False,
                 "expiry_valid_pass": False,
                 "approval_timeline_pass": False,
@@ -85,7 +86,7 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
     assert payload["contract_pass"] is False
     assert payload["status"] == "blocked"
     assert payload["reason_code"] == "ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED"
-    assert payload["summary_line"] == "License status intake: BLOCKED | fields=0/16 | blockers=2"
+    assert payload["summary_line"] == "License status intake: BLOCKED | fields=0/17 | blockers=2"
     assert payload["summary"]["closure_blocker_count"] == 2
     assert payload["summary"]["placeholder_values_absent_pass"] is True
     assert payload["gate_unblock_plan_count"] == 2
@@ -114,6 +115,10 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
     assert rows["evidence_ref_not_self_reference"]["closure_check"] == "evidence_ref_not_self_reference_pass"
     assert rows["evidence_ref_not_template_reference"]["closure_check"] == "evidence_ref_not_template_reference_pass"
     assert rows["evidence_ref_not_template_artifact"]["closure_check"] == "evidence_ref_not_template_artifact_pass"
+    assert (
+        rows["evidence_ref_not_generated_gate_artifact"]["closure_check"]
+        == "evidence_ref_not_generated_gate_artifact_pass"
+    )
     assert any("build_license_status_closure_report.py" in command for command in payload["validation_commands"])
     assert any("build_license_status_intake_packet.py" in command for command in payload["validation_commands"])
 
@@ -158,6 +163,7 @@ def test_license_status_intake_packet_passes_through_closed_report(tmp_path: Pat
                 "evidence_ref_not_self_reference_pass": True,
                 "evidence_ref_not_template_reference_pass": True,
                 "evidence_ref_not_template_artifact_pass": True,
+                "evidence_ref_not_generated_gate_artifact_pass": True,
                 "product_scope_boundary_pass": True,
                 "expiry_valid_pass": True,
                 "approval_timeline_pass": True,
@@ -188,7 +194,7 @@ def test_license_status_intake_packet_passes_through_closed_report(tmp_path: Pat
     assert payload["contract_pass"] is True
     assert payload["status"] == "ready"
     assert payload["reason_code"] == "PASS"
-    assert payload["summary"]["field_pass_count"] == 16
+    assert payload["summary"]["field_pass_count"] == 17
     assert payload["summary"]["provenance_complete_pass"] is True
     assert payload["current_blockers"] == []
     assert payload["gate_unblock_plan"] == []
