@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-07-01T05:19:42.857702+00:00",
-  "source_commit_sha": "fca13ed5080a8ce606d7a6c15698dff3dd502e26",
+  "generated_at": "2026-07-01T07:33:01.496680+00:00",
+  "source_commit_sha": "a1ad46cb53bb63c0644d7ef6dc74b313ba7a17a7",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -13,7 +13,7 @@
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-07-01T05:19:42.859411+00:00",
+    "checked_at": "2026-07-01T07:33:01.498560+00:00",
     "hip_available": true,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -83,7 +83,7 @@
   "production_rocm_hip_residual_jvp_worker": {
     "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "source_commit_sha": "fca13ed5080a8ce606d7a6c15698dff3dd502e26",
+    "source_commit_sha": "a1ad46cb53bb63c0644d7ef6dc74b313ba7a17a7",
     "ready": false,
     "status": "blocked",
     "blockers": [
@@ -95,6 +95,41 @@
     "g1_closure_gate_blockers": [
       "consistent_residual_jacobian_newton_gate_not_passed"
     ],
+    "terminal_gate_partition": {
+      "schema_version": "production-rocm-hip-worker-terminal-gate-partition.v1",
+      "worker_path": {
+        "ready": true,
+        "blockers": []
+      },
+      "g1_closure_gate": {
+        "ready": false,
+        "blockers": [
+          "consistent_residual_jacobian_newton_gate_not_passed"
+        ],
+        "consistent_residual_jacobian_newton_gate_passed": false
+      },
+      "checkpoint_gate": {
+        "full_load_required": true,
+        "load_scale": 0.656,
+        "full_load_candidate": false,
+        "gap_to_full_load": 0.344,
+        "full_load_closure_passed": false
+      },
+      "direct_residual_gate": {
+        "passed": false,
+        "relative_increment_gate_passed": true,
+        "material_newton_breadth_passed": false,
+        "fallback_zero_passed": true
+      },
+      "next_action": {
+        "id": "generate_full_load_1p0_checkpoint_candidate",
+        "blockers": [
+          "full_load_checkpoint_candidate_missing",
+          "full_load_closure_gate_not_passed"
+        ]
+      },
+      "claim_boundary": "Partition only: this separates the HIP residual/JVP worker path from the remaining full-load and consistent Newton G1 closure gates. It does not promote G1 readiness."
+    },
     "required_for_g1_closure": true,
     "promotes_g1_closure": false,
     "cpu_fallback_allowed": false,
@@ -155,8 +190,8 @@
     "schema_version": "mgt-residual-jacobian-consistency-hip-direct-proof.v1",
     "executed": true,
     "execution_error": null,
-    "elapsed_seconds": 192.28463856098824,
-    "source_commit_sha": "fca13ed5080a8ce606d7a6c15698dff3dd502e26",
+    "elapsed_seconds": 192.31016370101133,
+    "source_commit_sha": "72360da1c2ea554c41d82bb2021c79d3bb816ddc",
     "status": "partial",
     "direct_residual_newton_ready": false,
     "production_hip_residual_jacobian_path": true,
@@ -254,7 +289,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 193.3556851229805
+    "total_seconds": 193.54735315599828
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
   "blockers": [
