@@ -7,9 +7,9 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json"
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T06:21:06.668859+00:00",
+  "generated_at": "2026-07-01T06:25:54.413084+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:a7642810fad133ed3baa65bdf411fea069b8f70e410b948513ba2b71f424fab4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:614eb09c312e6d435b6fb8b2c8c520a79c924976143f9be8d2855a57721924d8",
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:d4cd7091185ef46a3fef3d546d1a670b7911b0e4de2f60703391a2cc757912b0",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:754b0f3b0516078ed8336a5fb6838f6840ae93dc9aa8aaac1a76412a2266781f",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:8b129acaad57700518887c4a429ed9508c7405542bad31b357b009299d5944cb",
@@ -77,7 +77,7 @@
   "reused_evidence": true,
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "vina_gnina_comparison_intake",
-  "source_commit_sha": "b8f60e5ca75b7b371e1f4ae93d9ac843b9aeeca4",
+  "source_commit_sha": "43b318b7a1efdf9fab3f9dbea89226d8ea5de9bc",
   "status": "operator_template_seed",
   "template": {
     "cases": [
