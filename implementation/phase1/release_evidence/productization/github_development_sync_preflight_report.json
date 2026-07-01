@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-01T15:19:31.443322+00:00",
+  "generated_at": "2026-07-01T15:26:19.435026+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -41,13 +41,13 @@
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
     "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-    "local_head_sha": "7d3a5fb31eccd7adf41b392902c197092f8901b8",
+    "local_head_sha": "f147f3414f578e9142df0ad058c5a03ba2b5bf56",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "7d3a5fb31eccd7adf41b392902c197092f8901b8",
+    "remote_feature_sha": "f147f3414f578e9142df0ad058c5a03ba2b5bf56",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "7d3a5fb31eccd7adf41b392902c197092f8901b8",
+    "remote_main_sha": "f147f3414f578e9142df0ad058c5a03ba2b5bf56",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
