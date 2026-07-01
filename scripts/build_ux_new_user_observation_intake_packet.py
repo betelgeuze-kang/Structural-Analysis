@@ -151,6 +151,12 @@ DERIVED_CHECK_SPECS = (
         "check": "evidence_ref_not_template_reference_pass",
         "owner_note": "Templates are owner input aids, not human observation evidence.",
     },
+    {
+        "field": "evidence_ref_not_template_artifact",
+        "required_value": "evidence_ref must not point to docs/templates or a .template.* artifact",
+        "check": "evidence_ref_not_template_artifact_pass",
+        "owner_note": "Any template-like file is rejected as human observation evidence.",
+    },
 )
 
 
@@ -232,6 +238,8 @@ def _current_value(field: str, observation: dict[str, Any], summary: dict[str, A
     if field == "evidence_ref_not_self_reference":
         return summary.get("evidence_ref_resolved_path", "")
     if field == "evidence_ref_not_template_reference":
+        return summary.get("evidence_ref_resolved_path", "")
+    if field == "evidence_ref_not_template_artifact":
         return summary.get("evidence_ref_resolved_path", "")
     return observation.get(field)
 

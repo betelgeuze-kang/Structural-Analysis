@@ -291,6 +291,24 @@ def test_ux_new_user_observation_rejects_template_evidence_ref(tmp_path: Path) -
     assert payload["checks"]["evidence_ref_not_template_reference_pass"] is False
 
 
+def test_ux_new_user_observation_rejects_template_like_evidence_artifact(tmp_path: Path) -> None:
+    observation_template = _write_json(tmp_path / "docs" / "templates" / "ux-observation-note.json", {"template": True})
+    record = _passing_observation()
+    record["evidence_ref"] = str(observation_template)
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(
+        observation_path=observation,
+        repo_root=tmp_path,
+    )
+
+    assert payload["contract_pass"] is False
+    assert "evidence_ref_template_artifact" in payload["blockers"]
+    assert payload["checks"]["evidence_ref_resolvable_pass"] is True
+    assert payload["checks"]["evidence_ref_not_template_reference_pass"] is True
+    assert payload["checks"]["evidence_ref_not_template_artifact_pass"] is False
+
+
 def test_ux_new_user_observation_rejects_placeholder_and_slow_completion(tmp_path: Path) -> None:
     record = _passing_observation()
     record["observer"] = "TODO"

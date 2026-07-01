@@ -224,6 +224,21 @@ def _same_resolved_path(first: Path, second: Path) -> bool:
         return False
 
 
+def _is_template_like_path(path: Path, *, repo_root: Path) -> bool:
+    try:
+        resolved = path.resolve()
+    except Exception:
+        resolved = path
+    try:
+        templates_dir = (repo_root / "docs" / "templates").resolve()
+        if resolved.is_relative_to(templates_dir):
+            return True
+    except Exception:
+        pass
+    name = resolved.name.lower()
+    return bool(".template." in name or name.endswith(".template"))
+
+
 def build_report(
     *,
     observation_path: Path = DEFAULT_OBSERVATION,
@@ -263,6 +278,9 @@ def build_report(
     )
     evidence_ref_template_reference = bool(
         resolved_evidence_path and _same_resolved_path(Path(resolved_evidence_path), repo_root / template_path)
+    )
+    evidence_ref_template_artifact = bool(
+        resolved_evidence_path and _is_template_like_path(Path(resolved_evidence_path), repo_root=repo_root)
     )
     template_only = observation.get("template_only") is True
     template_note_present = _looks_placeholder(observation.get("note"))
@@ -320,6 +338,11 @@ def build_report(
             and evidence_ref_resolution["resolvable"]
             and not evidence_ref_template_reference
         ),
+        "evidence_ref_not_template_artifact_pass": bool(
+            _field_present(observation, "evidence_ref")
+            and evidence_ref_resolution["resolvable"]
+            and not evidence_ref_template_artifact
+        ),
         "approval_decision_pass": decision in ACCEPTED_DECISIONS,
     }
     blockers = [
@@ -358,6 +381,7 @@ def build_report(
         *(["evidence_ref_unresolvable"] if checks["evidence_ref_present_pass"] and not checks["evidence_ref_resolvable_pass"] else []),
         *(["evidence_ref_self_reference"] if evidence_ref_self_reference else []),
         *(["evidence_ref_template_reference"] if evidence_ref_template_reference else []),
+        *(["evidence_ref_template_artifact"] if evidence_ref_template_artifact and not evidence_ref_template_reference else []),
         *(["approval_decision_not_accepted"] if not checks["approval_decision_pass"] else []),
     ]
     contract_pass = not blockers

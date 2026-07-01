@@ -93,6 +93,7 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
                 "evidence_ref_resolvable_pass": False,
                 "evidence_ref_not_self_reference_pass": False,
                 "evidence_ref_not_template_reference_pass": False,
+                "evidence_ref_not_template_artifact_pass": False,
                 "blocker_count_zero_pass": False,
                 "approval_decision_pass": False,
             },
@@ -139,6 +140,7 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
     assert rows["workflow_step_placeholders"]["report_check_pass"] is False
     assert rows["evidence_ref_resolvable"]["report_check"] == "evidence_ref_resolvable_pass"
     assert rows["evidence_ref_resolvable"]["report_check_pass"] is False
+    assert rows["evidence_ref_not_template_artifact"]["report_check"] == "evidence_ref_not_template_artifact_pass"
     assert "observation_file_missing" in payload["current_blockers"]
     assert any("build_ux_new_user_observation_report.py" in command for command in payload["validation_commands"])
 
@@ -168,6 +170,7 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
                 "evidence_ref_resolvable_pass": True,
                 "evidence_ref_not_self_reference_pass": True,
                 "evidence_ref_not_template_reference_pass": True,
+                "evidence_ref_not_template_artifact_pass": True,
                 "blocker_count_zero_pass": True,
                 "approval_decision_pass": True,
             },
@@ -208,8 +211,8 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
 
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
-    assert payload["summary"]["field_pass_count"] == 21
-    assert payload["summary"]["field_count"] == 21
+    assert payload["summary"]["field_pass_count"] == 22
+    assert payload["summary"]["field_count"] == 22
     assert payload["summary"]["elapsed_minutes"] == 24.0
     assert payload["summary"]["evidence_ref_kind"] == "external_reference"
     assert payload["summary"]["workflow_step_pass_count"] == 5
