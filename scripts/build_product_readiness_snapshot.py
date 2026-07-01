@@ -2609,6 +2609,23 @@ def build_snapshot(
                     structural_scope.get("unquarantined_family_counts")
                 ),
                 "quarantine_manifest": _as_dict(structural_scope.get("quarantine_manifest")),
+                "release_surface_text_guard_paths": [
+                    str(row)
+                    for row in _as_list(
+                        structural_scope.get("release_surface_text_guard_paths")
+                    )
+                ],
+                "release_surface_text_leak_path_count": _as_int(
+                    structural_scope.get("release_surface_text_leak_path_count"),
+                    0,
+                ),
+                "release_surface_text_leak_rows": [
+                    _as_dict(row)
+                    for row in _as_list(
+                        structural_scope.get("release_surface_text_leak_rows")
+                    )
+                    if isinstance(row, dict)
+                ],
                 "blockers": _as_list(structural_scope.get("blockers")),
                 "ready": structural_scope_ready,
             },

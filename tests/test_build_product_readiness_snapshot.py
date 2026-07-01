@@ -4089,6 +4089,9 @@ def test_snapshot_blocks_structural_scope_contamination(tmp_path: Path) -> None:
         },
         "quarantine_manifest": {"present": False},
         "git_state_counts": {"tracked": 2},
+        "release_surface_text_guard_paths": [],
+        "release_surface_text_leak_path_count": 0,
+        "release_surface_text_leak_rows": [],
         "blockers": [
             "unquarantined_non_structural_path_count=2",
             "unquarantined_non_structural_release_evidence_path_count=1",
@@ -4130,6 +4133,9 @@ def test_snapshot_blocks_structural_scope_contamination(tmp_path: Path) -> None:
             "molecular_docking": 1,
         },
         "quarantine_manifest": {"present": False},
+        "release_surface_text_guard_paths": [],
+        "release_surface_text_leak_path_count": 0,
+        "release_surface_text_leak_rows": [],
         "blockers": [
             "unquarantined_non_structural_path_count=2",
             "unquarantined_non_structural_release_evidence_path_count=1",
@@ -4194,6 +4200,11 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
             "active": True,
             "quarantined_path_count": 2,
         },
+        "release_surface_text_guard_paths": [
+            "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        ],
+        "release_surface_text_leak_path_count": 0,
+        "release_surface_text_leak_rows": [],
         "blockers": [],
         "non_structural_rows": [
             {
@@ -4222,6 +4233,7 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     assert component["non_structural_path_count"] == 2
     assert component["quarantined_non_structural_path_count"] == 2
     assert component["unquarantined_non_structural_path_count"] == 0
+    assert component["release_surface_text_leak_path_count"] == 0
     assert not [
         blocker for blocker in payload["blockers"] if blocker.startswith("structural_scope::")
     ]
