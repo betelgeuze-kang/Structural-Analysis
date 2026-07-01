@@ -308,3 +308,20 @@ def test_medium_model_scorecard_readiness_check_detects_drift(tmp_path: Path) ->
 
     assert ok is False
     assert message == "phase3_medium_model_scorecard_readiness_mismatch"
+
+
+def test_medium_model_scorecard_readiness_check_ignores_wrapper_metadata(tmp_path: Path) -> None:
+    out = tmp_path / "medium-scorecard.json"
+    module.write_phase3_medium_model_scorecard_readiness_receipt(repo_root=REPO_ROOT, out_path=out)
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["generated_at"] = "2026-06-30T00:00:00+00:00"
+    payload["source_commit_sha"] = "receipt-only-refresh"
+    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    ok, message = module.check_phase3_medium_model_scorecard_readiness_receipt(
+        repo_root=REPO_ROOT,
+        out_path=out,
+    )
+
+    assert ok is True
+    assert message == "phase3_medium_model_scorecard_readiness_consistent"
