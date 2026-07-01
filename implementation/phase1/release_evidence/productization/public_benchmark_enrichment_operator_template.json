@@ -4,10 +4,10 @@
   "contract_pass": true,
   "depends_on": [],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T11:24:28.045951+00:00",
+  "generated_at": "2026-07-01T13:50:27.500973+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:c98c35473191595c87cc009f41b9a2846cf25ab82b9d5ba866e8fee6a53ed3cd",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:ea9fbd1ba888a881cbb06a8126d391dea2861df2d75b2501d66dfe355a8e3111",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:2ebbbfcc1ad7db1d75edf44db943506384a328a39868a874677371e04ecd1475",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:81c0cbc2298b1032f2c3d0868524d16f2563036a6a5962d3c101b13eed60abd6",
     "scripts/materialize_public_benchmark_harness_bundle.py": "sha256:29e71d040e64eca8770205a5b78386646e059ec964ff51d00d2cbe0a2d8bd269",
     "scripts/materialize_public_benchmark_operator_bundle_from_rows.py": "sha256:a0b2c4f79fa4bb40ae7de6f2953a3e8cb4fbdec4ba7e074f7dfb98871f9e6ea7",
@@ -150,7 +150,7 @@
   },
   "schema_version": "public-benchmark-operator-template.v1",
   "slot_id": "dud_e_lit_pcba_enrichment_intake",
-  "source_commit_sha": "e1aba2aa0164d862cd0be65126d1f2537094be93",
+  "source_commit_sha": "23b9f88d030b5d2ce5f2d29f90e3369c327f16b4",
   "status": "operator_template_seed",
   "template": {
     "targets": [
