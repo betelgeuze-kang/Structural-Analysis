@@ -64,6 +64,16 @@ PLACEHOLDER_PROVENANCE_PREFIXES = (
     "unit-test://",
     "file://",
 )
+ROW_INTEGRITY_POLICY = {
+    "required_unique_row_keys": {
+        "targets": ["target_id"],
+        "target_scored_molecules": ["molecule_id"],
+    },
+    "purpose": (
+        "Duplicate enrichment targets or scored molecules cannot be used to inflate "
+        "Public Benchmark enrichment coverage or active/decoy counts."
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -291,6 +301,7 @@ def _score_target(row: dict[str, Any], *, index: int) -> dict[str, Any]:
         root_cause_tags.append("operator_values_required")
 
     molecules: list[dict[str, Any]] = []
+    seen_molecule_ids: set[str] = set()
     for molecule_index, raw_molecule in enumerate(raw_molecules):
         if not isinstance(raw_molecule, dict):
             blockers.append(f"{target_key}:molecule_{molecule_index}:invalid_object")
@@ -305,6 +316,16 @@ def _score_target(row: dict[str, Any], *, index: int) -> dict[str, Any]:
         blockers.extend(molecule_blockers)
         if molecule_blockers:
             root_cause_tags.append("operator_values_required")
+        molecule_id = _string(molecule.get("molecule_id"))
+        if molecule_id:
+            if molecule_id in seen_molecule_ids:
+                blockers.append(
+                    f"{target_key}:molecule_{molecule_index}:"
+                    f"molecule_id_duplicate:{molecule_id}"
+                )
+                root_cause_tags.append("row_integrity_required")
+            else:
+                seen_molecule_ids.add(molecule_id)
 
     valid_molecules = [
         molecule
@@ -407,7 +428,24 @@ def materialize_enrichment_scorecard(
     intake_path: Path | None = None,
 ) -> dict[str, Any]:
     raw_targets = [row for row in _as_list(intake_payload.get("targets")) if isinstance(row, dict)]
-    rows = [_score_target(row, index=index) for index, row in enumerate(raw_targets)]
+    rows: list[dict[str, Any]] = []
+    seen_target_ids: set[str] = set()
+    for index, row in enumerate(raw_targets):
+        scored = _score_target(row, index=index)
+        target_id = _string(scored.get("target_id"))
+        if target_id:
+            if target_id in seen_target_ids:
+                scored["blockers"].append(f"{target_id}:target_id_duplicate")
+                scored["root_cause_tags"] = list(
+                    dict.fromkeys(
+                        [*scored["root_cause_tags"], "row_integrity_required"]
+                    )
+                )
+                scored["status"] = "blocked"
+                scored["contract_pass"] = False
+            else:
+                seen_target_ids.add(target_id)
+        rows.append(scored)
     blockers = [blocker for row in rows for blocker in row["blockers"]]
     root_cause_tags = list(dict.fromkeys(tag for row in rows for tag in row["root_cause_tags"]))
     if not rows:
@@ -445,6 +483,7 @@ def materialize_enrichment_scorecard(
         "summary": summary,
         "required_target_fields": list(REQUIRED_TARGET_FIELDS),
         "required_molecule_fields": list(REQUIRED_MOLECULE_FIELDS),
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "supported_benchmark_families": list(SUPPORTED_FAMILIES),
         "first_blocked_target": first_blocked_target,
         "root_cause_tags": root_cause_tags,

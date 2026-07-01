@@ -279,6 +279,45 @@ def test_vina_gnina_comparison_adapter_blocks_local_proxy_receipts() -> None:
     assert "operator_receipts_required" in adapter["root_cause_tags"]
 
 
+def test_vina_gnina_comparison_adapter_blocks_duplicate_row_identities() -> None:
+    intake = _valid_intake()
+    cases = intake["cases"]
+    assert isinstance(cases, list)
+    first_case = cases[0]
+    second_case = cases[1]
+    assert isinstance(first_case, dict)
+    assert isinstance(second_case, dict)
+    engine_runs = first_case["engine_runs"]
+    assert isinstance(engine_runs, list)
+    second_run = engine_runs[1]
+    first_run = engine_runs[0]
+    assert isinstance(first_run, dict)
+    assert isinstance(second_run, dict)
+    second_run["engine_id"] = first_run["engine_id"]
+    second_run["docking_run_id"] = first_run["docking_run_id"]
+    second_case["case_id"] = first_case["case_id"]
+
+    adapter = module.materialize_vina_gnina_comparison_adapter(
+        intake,
+        repo_root=REPO_ROOT,
+    )
+
+    assert adapter["status"] == "operator_evidence_required"
+    assert adapter["contract_pass"] is False
+    assert adapter["public_benchmark_engine_comparison_ready"] is False
+    assert adapter["row_integrity_policy"]["required_unique_row_keys"] == {
+        "cases": ["case_id"],
+        "case_engine_runs": ["engine_id", "docking_run_id"],
+    }
+    assert "case_a:engine_run_1:engine_id_duplicate:vina" in adapter["blockers"]
+    assert (
+        "case_a:engine_run_1:docking_run_id_duplicate:vina_run_001"
+        in adapter["blockers"]
+    )
+    assert "case_a:case_id_duplicate" in adapter["blockers"]
+    assert "row_integrity_required" in adapter["root_cause_tags"]
+
+
 def test_vina_gnina_comparison_adapter_cli_writes_adapter_and_report(
     tmp_path: Path,
 ) -> None:

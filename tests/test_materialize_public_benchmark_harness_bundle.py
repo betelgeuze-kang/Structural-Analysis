@@ -264,6 +264,54 @@ def test_public_benchmark_harness_bundle_materializes_tier_beta_ready_artifacts(
         assert (tmp_path / artifact).exists()
 
 
+def test_public_benchmark_harness_bundle_blocks_duplicate_manual_bundle_rows(
+    tmp_path: Path,
+) -> None:
+    bundle_path = tmp_path / "operator_bundle.json"
+    payload = _bundle(tmp_path)
+    enrichment_targets = payload["dud_e_lit_pcba_enrichment_intake"]["targets"]
+    assert isinstance(enrichment_targets, list)
+    first_target = enrichment_targets[0]
+    assert isinstance(first_target, dict)
+    scored_molecules = first_target["scored_molecules"]
+    assert isinstance(scored_molecules, list)
+    scored_molecules[1]["molecule_id"] = scored_molecules[0]["molecule_id"]
+    comparison_cases = payload["vina_gnina_comparison_intake"]["cases"]
+    assert isinstance(comparison_cases, list)
+    comparison_case = comparison_cases[0]
+    assert isinstance(comparison_case, dict)
+    engine_runs = comparison_case["engine_runs"]
+    assert isinstance(engine_runs, list)
+    engine_runs[1]["engine_id"] = engine_runs[0]["engine_id"]
+    engine_runs[1]["docking_run_id"] = engine_runs[0]["docking_run_id"]
+    bundle_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = module.materialize_public_benchmark_harness_bundle(
+        payload,
+        repo_root=tmp_path,
+        bundle_path=bundle_path,
+        out_dir=tmp_path / "out",
+    )
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["public_benchmark_ready"] is False
+    assert "enrichment_scorecard:AA2AR:molecule_1:molecule_id_duplicate:active_1" in report[
+        "blockers"
+    ]
+    assert (
+        "vina_gnina_comparison_adapter:case_01:engine_run_1:"
+        "engine_id_duplicate:vina"
+    ) in report["blockers"]
+    assert (
+        "vina_gnina_comparison_adapter:case_01:engine_run_1:"
+        "docking_run_id_duplicate:case_01_vina"
+    ) in report["blockers"]
+    components = {row["component_id"]: row for row in report["components"]}
+    assert components["dud_e_or_lit_pcba_enrichment"]["ready"] is False
+    assert components["vina_gnina_comparison_adapter"]["ready"] is False
+
+
 def test_public_benchmark_harness_bundle_blocks_one_case_smoke_as_phase2_ready(
     tmp_path: Path,
 ) -> None:

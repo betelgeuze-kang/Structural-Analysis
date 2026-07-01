@@ -80,6 +80,16 @@ PLACEHOLDER_PROVENANCE_PREFIXES = (
     "unit-test://",
     "file://",
 )
+ROW_INTEGRITY_POLICY = {
+    "required_unique_row_keys": {
+        "cases": ["case_id"],
+        "case_engine_runs": ["engine_id", "docking_run_id"],
+    },
+    "purpose": (
+        "Duplicate comparison cases or engine runs cannot be used to inflate Vina/GNINA "
+        "case coverage, engine coverage, or pose-success summaries."
+    ),
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -328,6 +338,8 @@ def _normalize_case(row: dict[str, Any], *, index: int) -> dict[str, Any]:
         root_cause_tags.append("operator_values_required")
 
     engine_runs: list[dict[str, Any]] = []
+    seen_engine_ids: set[str] = set()
+    seen_docking_run_ids: set[str] = set()
     for run_index, raw_run in enumerate(raw_runs):
         if not isinstance(raw_run, dict):
             blockers.append(f"{case_key}:engine_run_{run_index}:invalid_object")
@@ -341,6 +353,26 @@ def _normalize_case(row: dict[str, Any], *, index: int) -> dict[str, Any]:
         engine_runs.append(engine_run)
         blockers.extend(run_blockers)
         root_cause_tags.extend(run_root_cause_tags)
+        engine_id = _string(engine_run.get("engine_id"))
+        if engine_id:
+            if engine_id in seen_engine_ids:
+                blockers.append(
+                    f"{case_key}:engine_run_{run_index}:"
+                    f"engine_id_duplicate:{engine_id}"
+                )
+                root_cause_tags.append("row_integrity_required")
+            else:
+                seen_engine_ids.add(engine_id)
+        docking_run_id = _string(engine_run.get("docking_run_id"))
+        if docking_run_id:
+            if docking_run_id in seen_docking_run_ids:
+                blockers.append(
+                    f"{case_key}:engine_run_{run_index}:"
+                    f"docking_run_id_duplicate:{docking_run_id}"
+                )
+                root_cause_tags.append("row_integrity_required")
+            else:
+                seen_docking_run_ids.add(docking_run_id)
 
     present_engines = sorted(
         {
@@ -418,9 +450,24 @@ def materialize_vina_gnina_comparison_adapter(
     raw_cases = [
         row for row in _as_list(intake_payload.get("cases")) if isinstance(row, dict)
     ]
-    case_rows = [
-        _normalize_case(row, index=index) for index, row in enumerate(raw_cases)
-    ]
+    case_rows: list[dict[str, Any]] = []
+    seen_case_ids: set[str] = set()
+    for index, row in enumerate(raw_cases):
+        normalized = _normalize_case(row, index=index)
+        case_id = _string(normalized.get("case_id"))
+        if case_id:
+            if case_id in seen_case_ids:
+                normalized["blockers"].append(f"{case_id}:case_id_duplicate")
+                normalized["root_cause_tags"] = list(
+                    dict.fromkeys(
+                        [*normalized["root_cause_tags"], "row_integrity_required"]
+                    )
+                )
+                normalized["status"] = "blocked"
+                normalized["contract_pass"] = False
+            else:
+                seen_case_ids.add(case_id)
+        case_rows.append(normalized)
     blockers = [blocker for row in case_rows for blocker in row["blockers"]]
     root_cause_tags = list(
         dict.fromkeys(tag for row in case_rows for tag in row["root_cause_tags"])
@@ -476,6 +523,7 @@ def materialize_vina_gnina_comparison_adapter(
         },
         "required_case_fields": list(REQUIRED_CASE_FIELDS),
         "required_engine_run_fields": list(REQUIRED_ENGINE_RUN_FIELDS),
+        "row_integrity_policy": ROW_INTEGRITY_POLICY,
         "supported_engines": list(SUPPORTED_ENGINES),
         "supported_benchmark_splits": list(SUPPORTED_BENCHMARK_SPLITS),
         "first_blocked_target": first_blocked_target,

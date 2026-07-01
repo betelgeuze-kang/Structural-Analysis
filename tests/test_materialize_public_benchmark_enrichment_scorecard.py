@@ -120,6 +120,39 @@ def test_public_benchmark_enrichment_materializer_scores_targets() -> None:
     assert rows["ESR1"]["roc_auc"] == 1.0
 
 
+def test_public_benchmark_enrichment_materializer_blocks_duplicate_row_identities() -> None:
+    intake = json.loads(json.dumps(_valid_intake()))
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    first_target = targets[0]
+    assert isinstance(first_target, dict)
+    molecules = first_target["scored_molecules"]
+    assert isinstance(molecules, list)
+    molecules.append(_molecule("active_1", is_active=True, score=0.95))
+    targets.append(_target(
+        benchmark_family="DUD-E",
+        target_id="aa2ar",
+        score_direction="higher_is_better",
+        scored_molecules=[
+            _molecule("active_3", is_active=True, score=0.88),
+            _molecule("decoy_3", is_active=False, score=0.15),
+        ],
+    ))
+
+    scorecard = module.materialize_enrichment_scorecard(intake, repo_root=REPO_ROOT)
+
+    assert scorecard["status"] == "operator_evidence_required"
+    assert scorecard["contract_pass"] is False
+    assert scorecard["public_benchmark_enrichment_ready"] is False
+    assert "aa2ar:molecule_4:molecule_id_duplicate:active_1" in scorecard["blockers"]
+    assert "aa2ar:target_id_duplicate" in scorecard["blockers"]
+    assert "row_integrity_required" in scorecard["root_cause_tags"]
+    assert scorecard["row_integrity_policy"]["required_unique_row_keys"] == {
+        "targets": ["target_id"],
+        "target_scored_molecules": ["molecule_id"],
+    }
+
+
 def test_public_benchmark_enrichment_materializer_blocks_empty_intake() -> None:
     scorecard = module.materialize_enrichment_scorecard({"targets": []}, repo_root=REPO_ROOT)
 
@@ -215,6 +248,33 @@ def test_public_benchmark_enrichment_materializer_blocks_local_proxy_receipts() 
     assert scorecard["first_blocked_target"] == "aa2ar"
     assert "aa2ar:provenance_ref_placeholder" in scorecard["blockers"]
     assert "operator_receipts_required" in scorecard["root_cause_tags"]
+
+
+def test_public_benchmark_enrichment_materializer_blocks_duplicate_row_identities() -> None:
+    intake = _valid_intake()
+    targets = intake["targets"]
+    assert isinstance(targets, list)
+    first_target = targets[0]
+    second_target = targets[1]
+    assert isinstance(first_target, dict)
+    assert isinstance(second_target, dict)
+    molecules = first_target["scored_molecules"]
+    assert isinstance(molecules, list)
+    molecules[1]["molecule_id"] = molecules[0]["molecule_id"]
+    second_target["target_id"] = first_target["target_id"]
+
+    scorecard = module.materialize_enrichment_scorecard(intake, repo_root=REPO_ROOT)
+
+    assert scorecard["status"] == "operator_evidence_required"
+    assert scorecard["contract_pass"] is False
+    assert scorecard["public_benchmark_enrichment_ready"] is False
+    assert scorecard["row_integrity_policy"]["required_unique_row_keys"] == {
+        "targets": ["target_id"],
+        "target_scored_molecules": ["molecule_id"],
+    }
+    assert "aa2ar:molecule_1:molecule_id_duplicate:active_1" in scorecard["blockers"]
+    assert "aa2ar:target_id_duplicate" in scorecard["blockers"]
+    assert "row_integrity_required" in scorecard["root_cause_tags"]
 
 
 def test_public_benchmark_enrichment_materializer_cli_writes_scorecard_and_report(
