@@ -22,11 +22,11 @@
     "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
     "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
   },
-  "generated_at": "2026-07-01T06:36:54.429429+00:00",
+  "generated_at": "2026-07-01T07:03:11.903124+00:00",
   "input_checksums": {
     "scripts/build_pocketmd_lite_product_surface.py": "sha256:c95d3613bc538e66ed7c54c191e813019e40ddfd728272e11d3cb2ef1ac877f0",
     "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py": "sha256:901204e8a2c4f20693a6ec22d288f8333aee72c373fdce5fe07ca75d3a882048",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:b849c3ca45e7e840e8c778f251b0ed613400adb0982d507d50092583a93ac6a9"
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:29a76d1c6930531053027609fff40657e57183cd279ef5b0e9a9965c0bc674c2"
   },
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -217,6 +217,6 @@
   "reused_evidence": false,
   "route": "/product/pocketmd-lite/handoff",
   "schema_version": "pocketmd-lite-delivery-handoff.v1",
-  "source_commit_sha": "a42a913582607f8746c80b4b67033a6c72171738",
+  "source_commit_sha": "52cdef70b2503cd7511b9095a87b8faa3b7588bb",
   "status": "handoff_ready_operator_evidence_required"
 }
