@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-01T08:49:02.263072+00:00",
+  "generated_at": "2026-07-01T08:49:46.846928+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -944,7 +944,7 @@
         "github_sync_main_synced_to_head": true,
         "github_sync_preflight_artifact_present": true,
         "github_sync_preflight_clean": true,
-        "github_sync_preflight_head_matches_current": true,
+        "github_sync_preflight_head_matches_current": false,
         "github_sync_preflight_source_state_fresh": true,
         "github_sync_preflight_status": "synced",
         "github_sync_remote_mutation_approval_pending": false,
@@ -956,8 +956,14 @@
       "ok": true,
       "status": "pass",
       "summary": {
-        "changed_paths_since_preflight_head": [],
-        "current_head_sha": "dc0b3f630194481d0a6d92d1dcc545995a7f9b6b",
+        "changed_paths_since_preflight_head": [
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
+        ],
+        "current_head_sha": "0a17eb3867266029403e4a45a1de9c7796ff4cfa",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -966,7 +972,7 @@
         "pending_remote_update_count": 0,
         "pending_remote_update_targets": [],
         "preflight_local_head_sha": "dc0b3f630194481d0a6d92d1dcc545995a7f9b6b",
-        "preflight_source_state_kind": "exact",
+        "preflight_source_state_kind": "evidence_only_delta",
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
@@ -1586,6 +1592,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "dc0b3f630194481d0a6d92d1dcc545995a7f9b6b",
+  "source_commit_sha": "0a17eb3867266029403e4a45a1de9c7796ff4cfa",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }
