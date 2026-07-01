@@ -7,7 +7,9 @@
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
-    "security::license_status_not_configured"
+    "security::license_status_not_configured",
+    "github_sync::github_sync_remote_sync_pending",
+    "github_sync::github_sync_preflight_not_synced"
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
@@ -56,7 +58,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-01T05:50:48.961823+00:00",
+  "generated_at": "2026-07-01T05:53:06.533702+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -104,7 +106,7 @@
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:8213bc9f03f65d7e47c5590d5d82fc3072fe23904fa486efbb00ad66b91dce6f",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:8c06c5cfeb2ba4133768e506128ad442764c7278a87e4a1866751b144eb4ed01",
-    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:9e2d38080abfe7ea9187aefc9d6f528321f1cc1944cf11eff5f249d6cc38b522",
+    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:4a3e66f848c12d8a0a30aefd51d20371fd719bec5df8f97d2687052615ae1327",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:2a1093deb6e54e238ec35c73d9798e08d318f4b7b82a3ebf98d54af873afb30b",
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
@@ -115,8 +117,8 @@
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:6ae4de0cec2ca3fa9ee2eddd99536f7c2c6c71a36df218c1e197f0a5bc1b2371",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:e405b577ebf60759011d8003940c99809c9fa2a619ee78b74568e21814130c87",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:56ff6e436ca6fec2111d1a652a55becfb45fe953e664bcdd4d5f0611cb522ac4",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:14438407095772b52939fe1244014cb2ffa00fac73410e8f96c348a6065c55ec",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ad57670540dffb7f9a78cdd312e8ea020f78dd51fcb166e5f97778ef4748c59b",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -130,7 +132,7 @@
     "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:0d57c89df5c33d8fba0557d7f8cf421c301ed4bfe754a95b892df3abecaca0ed",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:70e879451df9869ae79bc775e375701cb44c405acf17efa91a417b2aa7aba376",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:556580c21013eeb70dc71c6d9adc60e57b2f4e296eeb2652e84c1d9028ca76b5",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:c318ce2ebe22830a57ea711ef42f850d5182e5d05964004c5287b4bdc6181801",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
@@ -401,7 +403,9 @@
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
-    "security::license_status_not_configured"
+    "security::license_status_not_configured",
+    "github_sync::github_sync_remote_sync_pending",
+    "github_sync::github_sync_preflight_not_synced"
   ],
   "release_area_gate_ready": false,
   "release_area_matrix": [
@@ -528,7 +532,7 @@
       "summary": {
         "artifact_count": 18,
         "blocker_count": 0,
-        "current_source_commit_sha": "87d53d5b7681a0e83a8554b94b831832eb60c404",
+        "current_source_commit_sha": "2836d6b365102c31096dc169710cd6dbe7c5f5ea",
         "max_age_days": 30.0,
         "pass_count": 18
       },
@@ -936,62 +940,61 @@
       "artifacts": {
         "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
       },
-      "blockers": [],
+      "blockers": [
+        "github_sync_remote_sync_pending",
+        "github_sync_preflight_not_synced"
+      ],
       "checks": {
         "github_sync_feature_fast_forward_possible": true,
-        "github_sync_feature_synced_to_head": true,
+        "github_sync_feature_synced_to_head": false,
         "github_sync_main_fast_forward_possible": true,
-        "github_sync_main_synced_to_head": true,
+        "github_sync_main_synced_to_head": false,
         "github_sync_preflight_artifact_present": true,
-        "github_sync_preflight_clean": true,
-        "github_sync_preflight_head_matches_current": false,
+        "github_sync_preflight_clean": false,
+        "github_sync_preflight_head_matches_current": true,
         "github_sync_preflight_source_state_fresh": true,
-        "github_sync_preflight_status": "synced",
+        "github_sync_preflight_status": "ready_to_push",
         "github_sync_remote_mutation_approval_pending": false,
         "github_sync_remote_safety_ok": true,
-        "github_sync_remote_sync_needed": false,
+        "github_sync_remote_sync_needed": true,
         "github_sync_worktree_clean": true
       },
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
-      "ok": true,
-      "status": "pass",
+      "ok": false,
+      "status": "blocked",
       "summary": {
-        "changed_paths_since_preflight_head": [
-          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-          "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-          "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md"
+        "changed_paths_since_preflight_head": [],
+        "current_head_sha": "2836d6b365102c31096dc169710cd6dbe7c5f5ea",
+        "feature_ahead_count": 1,
+        "feature_synced_to_head": false,
+        "main_ahead_count": 1,
+        "main_synced_to_head": false,
+        "pending_remote_update_actions": [
+          "push current HEAD to feature",
+          "fast-forward push current HEAD to main"
         ],
-        "current_head_sha": "87d53d5b7681a0e83a8554b94b831832eb60c404",
-        "feature_ahead_count": 0,
-        "feature_synced_to_head": true,
-        "main_ahead_count": 0,
-        "main_synced_to_head": true,
-        "pending_remote_update_actions": [],
-        "pending_remote_update_count": 0,
-        "pending_remote_update_targets": [],
-        "preflight_local_head_sha": "38182f3958c9aea4dc4a1602238111d1cc1563bb",
-        "preflight_source_state_kind": "evidence_only_delta",
-        "r4_risk": "No remote mutation remains.",
+        "pending_remote_update_count": 2,
+        "pending_remote_update_targets": [
+          "origin/codex/seed-pr-ci-source-evidence",
+          "origin/main"
+        ],
+        "preflight_local_head_sha": "2836d6b365102c31096dc169710cd6dbe7c5f5ea",
+        "preflight_source_state_kind": "exact",
+        "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "PASS",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
         "remote_main_ref": "origin/main",
         "remote_mutation_approval_pending": false,
-        "remote_mutation_approved": false,
-        "remote_sync_needed": false,
-        "status": "synced"
+        "remote_mutation_approved": true,
+        "remote_sync_needed": true,
+        "status": "ready_to_push"
       },
       "title": "GitHub Development Sync"
     }
   ],
   "release_decision": {
     "approval_token_count": 4,
-    "blocked_release_count": 5,
+    "blocked_release_count": 7,
     "broad_gpcr_family_claim_safe": false,
     "claim_boundary": "Evidence surface counts reflect local JSON files under evidence_surface_dir. Broad GPCR family claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked. PocketMD Lite is a bounded top-k science product surface; broad all-atom MD and FEP claims remain locked unless separately evidenced.",
     "evidence_surface_count": 12,
@@ -1574,7 +1577,9 @@
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
-      "security::license_status_not_configured"
+      "security::license_status_not_configured",
+      "github_sync::github_sync_remote_sync_pending",
+      "github_sync::github_sync_preflight_not_synced"
     ],
     "ga_enterprise_evidence_gate_pass": false,
     "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -1596,6 +1601,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "87d53d5b7681a0e83a8554b94b831832eb60c404",
-  "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
+  "source_commit_sha": "2836d6b365102c31096dc169710cd6dbe7c5f5ea",
+  "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
