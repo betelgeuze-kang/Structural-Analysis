@@ -28,13 +28,13 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T04:48:03.965465+00:00",
+  "generated_at": "2026-07-02T04:53:23.861443+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:f5f2e7f0086e77af946238f5fb00d0ad2bc32b89da2a2a6ce537c72d5f87af21",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:2b86a34a327cf23d297c33477721543a32832f0c9952a5c0bd270c82e7ae698f",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:dd30bf5f6738916e225f3c30360031c3e103fa37aa00b697fc38eec28fc94198",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a17cc3d0b4b592a1d8a7b64fd6adfd01d1d8fc0d127c99a9a8e30b283577fc7e",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9a75f30c000fe05713ab0ebfc8b56c1de5fcddde2857b8b768144c0da1503217",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:04a9192b6ec8162812cb7a7415761ab188710522404e75bc9730cf4aa0dbb26b",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:79fc6cc1cf0defc34f21e49285775ce8ce751276565992d96a11b3ea91718fc1",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:a916d9965090d7a7a6814a6c9bca8f6da9e4aadbbaaadd3f4415cd7f24037523",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:726c3fbfb58ed358f29d925854a32393ac725d17edcd6338a31ab0947eca8220"
   },
@@ -3458,7 +3458,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "cec44f6450874e561a2a41c4b62d8088a08f31fb",
+  "source_commit_sha": "aa1425e2593886ae9e2f74b6fe3cf4b2e896fdd0",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,

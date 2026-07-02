@@ -14,10 +14,10 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-02T04:48:04.745844+00:00",
+  "generated_at": "2026-07-02T04:53:24.641870+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:91a626e2a0f17af3d22690f480daeb2c27dc79c6338420c6b1ad75ce5789f34e",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:dd30bf5f6738916e225f3c30360031c3e103fa37aa00b697fc38eec28fc94198",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d980a3547a3d579adeb8bb50eb81f0f1bd73dd168815a7dc271a1aec8f74559e",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a17cc3d0b4b592a1d8a7b64fd6adfd01d1d8fc0d127c99a9a8e30b283577fc7e",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9a75f30c000fe05713ab0ebfc8b56c1de5fcddde2857b8b768144c0da1503217",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:a916d9965090d7a7a6814a6c9bca8f6da9e4aadbbaaadd3f4415cd7f24037523",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:e2cc217ff8f1023b893831611717bbcb4b83dc947017724bf6ada12d4c5998c8",
@@ -293,13 +293,13 @@
   "read_model_ready": true,
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
-    "approval_token_count": 4,
+    "approval_token_count": 5,
     "blocked_release_count": 5,
     "evidence_surface_count": 8,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 35,
+    "operator_action_count": 36,
     "public_benchmark_ready": false,
     "release_allowed": false,
     "stale_artifact_count": 0
@@ -422,10 +422,10 @@
       "state": "blocked",
       "summary": {
         "action_register_contract_pass": false,
-        "approval_token_count": 4,
+        "approval_token_count": 5,
         "blocked_capability_count": 0,
         "blocked_release_count": 5,
-        "operator_action_count": 35,
+        "operator_action_count": 36,
         "product_capability_count": 1,
         "release_allowed": false
       }
@@ -435,7 +435,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "cec44f6450874e561a2a41c4b62d8088a08f31fb",
+  "source_commit_sha": "aa1425e2593886ae9e2f74b6fe3cf4b2e896fdd0",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

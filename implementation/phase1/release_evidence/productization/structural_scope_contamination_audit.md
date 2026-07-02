@@ -39,6 +39,21 @@
 
 No guarded structural release surface text leaks detected.
 
+## Release Surface Quarantine Boundary
+
+- `status`: `quarantined_paths_excluded_pending_owner_cleanup`
+- `quarantined_release_surface_path_count`: `3`
+- `quarantined_paths_claim_eligible`: `False`
+
+| Quarantined Release-Surface Path | Owner Action |
+|---|---|
+| `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `delete_or_extract_after_owner_review` |
+| `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `delete_or_extract_after_owner_review` |
+| `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `delete_or_extract_after_owner_review` |
+
+Quarantined release-surface paths are explicitly excluded from the building structural-analysis release surface. They are skipped by the structural text guard only because the quarantine manifest keeps them outside release claims; they still require owner delete/extract decisions before scope cleanup can close.
+
+
 | Path | Git State | Area | Quarantine | Families | Tokens |
 |---|---|---|---|---|---|
 | `implementation/phase1/md3bead_scientific_validity_report.md` | `tracked` | `implementation_phase1` | `quarantined` | `molecular_dynamics` | `md3bead` |

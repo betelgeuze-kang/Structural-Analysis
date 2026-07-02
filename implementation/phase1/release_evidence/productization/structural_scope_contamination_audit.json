@@ -10,12 +10,12 @@
   },
   "first_non_structural_path": "implementation/phase1/md3bead_scientific_validity_report.md",
   "first_unquarantined_non_structural_path": "",
-  "generated_at": "2026-07-02T04:34:08.146845+00:00",
+  "generated_at": "2026-07-02T04:52:53.166056+00:00",
   "git_state_counts": {
     "tracked": 86
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:604ec4f093e465331e38ba252ea5d31f06ec1a3e40c79d1b8894d2804cff97b2",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:e2355aba893034292b904448bcc79c3f21ab5ffac42891c851ad4b13ad355cde",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:826c36a8adcd4325d2d4389800e65dddf2739a13c4273d69cf50233869f4e7aa",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
@@ -26,7 +26,7 @@
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
-    "scripts/check_structural_scope_contamination.py": "sha256:7395d8c6928fa86ebc82341386194cb586bca9ddaed83af93f00c054d3aac412"
+    "scripts/check_structural_scope_contamination.py": "sha256:cb0b9f7f26b730540d402b16e4d198db486289c3a13d86b224ff6e38ecc1f31f"
   },
   "next_actions": [
     "keep_quarantine_manifest_exact_until_non_structural_paths_are_deleted_or_extracted",
@@ -2862,6 +2862,22 @@
     "script": 19,
     "test": 19
   },
+  "release_surface_quarantine_boundary": {
+    "claim_boundary": "Quarantined release-surface paths are explicitly excluded from the building structural-analysis release surface. They are skipped by the structural text guard only because the quarantine manifest keeps them outside release claims; they still require owner delete/extract decisions before scope cleanup can close.",
+    "quarantined_paths_claim_eligible": false,
+    "quarantined_release_surface_owner_action": "delete_or_extract_after_owner_review",
+    "quarantined_release_surface_path_count": 3,
+    "quarantined_release_surface_paths": [
+      "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+    ],
+    "schema_version": "structural-scope-release-surface-quarantine-boundary.v1",
+    "status": "quarantined_paths_excluded_pending_owner_cleanup",
+    "structural_release_claim_eligible": true,
+    "structural_release_surface_text_guard_path_count": 10,
+    "structural_release_surface_text_leak_path_count": 0
+  },
   "release_surface_text_guard_path_count": 10,
   "release_surface_text_guard_paths": [
     "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
@@ -2886,7 +2902,7 @@
   "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths_with_release_surface_quarantine_manifest",
   "reused_evidence": false,
   "schema_version": "structural-scope-contamination-audit.v1",
-  "source_commit_sha": "2d3832426d45d8eddc498e5bbde037b072b39db5",
+  "source_commit_sha": "aa1425e2593886ae9e2f74b6fe3cf4b2e896fdd0",
   "status": "quarantined",
   "tracked_path_count": 5749,
   "unquarantined_family_counts": {},
