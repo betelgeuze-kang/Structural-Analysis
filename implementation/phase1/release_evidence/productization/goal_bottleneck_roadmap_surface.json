@@ -14,14 +14,14 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-01T20:56:49.529113+00:00",
+  "generated_at": "2026-07-02T03:37:01.047582+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:1f29bc76149986c99a57e1d655ed1203d6305a7b930763a2019d986962d63a8e",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:653f958559fde10c3fd755e63050e57ca5268395930053529ff523c1a54831c8",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6932084dfe505170186b91e5177b5ad44b8887e1e576cd1072f95ac6d5af9358",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:2d8b3ff07849e743f8a21ab11cf4f8de610f026ff9bd3a03061fb595bc50d242",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:bb47e5d1d69ed17a4d80cbff9924fee9264ea2d38e3e806e51d9bb5be102e8d7",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:af7f5171db08b818d01b7aa3c2ca68379e4f650c8801205c5d28539959f3e602",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:2eda5cfbb590964a3d14918a97137bd2274b1f8da8de3f2e45914644aa863ba8",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:b9518524ef625caba934654ac2cd62a3e9e4b2ef94de33b9ef30c0492d0466d7",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9a75f30c000fe05713ab0ebfc8b56c1de5fcddde2857b8b768144c0da1503217",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:a916d9965090d7a7a6814a6c9bca8f6da9e4aadbbaaadd3f4415cd7f24037523",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:76f44d8618dfba4d62dc00e039cf6e290d5f6cdb2cb91296d9ec3021c0cea509",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:8050868db685a7aab8c9ddd678c0b65933e6e91782d6f84d17bd4175d0d5da8c"
   },
   "mutation_allowed": false,
@@ -123,7 +123,10 @@
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+        "python3 scripts/build_phase6_ux_observation_status.py --out implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+        "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
       "workflow_step_pass_count": 0
     },
@@ -136,134 +139,112 @@
     "refresh_required_operator_action_count": 0,
     "refresh_required_operator_actions": [],
     "release_allowed": false,
-    "release_area_blocker_count": 5,
-    "release_area_owner_handoff_count": 5,
+    "release_area_blocker_count": 8,
+    "release_area_owner_handoff_count": 8,
     "release_area_owner_handoffs": [
       {
-        "acceptance_criteria": [
-          "`pr_pass_streak_count >= 30` in `pm_release_gate_report.json`",
-          "`ci_streak_intake_packet.json.contract_pass == true`",
-          "`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`",
-          "`github_actions_ci_streak_evidence.json` refreshed for the release signoff window"
-        ],
-        "acceptance_criteria_count": 4,
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
         "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-        "evidence_artifact_keys": [
-          "ci_streak_intake_packet",
-          "ci_streak_manifest",
-          "github_actions_ci_streak_evidence",
-          "nightly_ci",
-          "pm_release_gate_report",
-          "pr_ci"
-        ],
-        "evidence_state": "self_hosted_runner_offline",
-        "external_input_required": true,
-        "handoff_state": "external_owner_input_ready",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
         "namespace": "basic_ci",
-        "owner": "release_ci_owner",
-        "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
-        "title": "Basic CI"
+        "owner": "",
+        "owner_action": "",
+        "title": ""
       },
       {
-        "acceptance_criteria": [
-          "`nightly_pass_streak_count >= 30` in `pm_release_gate_report.json`",
-          "`ci_streak_intake_packet.json.contract_pass == true`",
-          "`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`",
-          "`github_actions_ci_streak_evidence.json` refreshed for the release signoff window"
-        ],
-        "acceptance_criteria_count": 4,
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
         "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-        "evidence_artifact_keys": [
-          "ci_streak_intake_packet",
-          "ci_streak_manifest",
-          "github_actions_ci_streak_evidence",
-          "nightly_ci",
-          "pm_release_gate_report",
-          "pr_ci"
-        ],
-        "evidence_state": "self_hosted_runner_offline",
-        "external_input_required": true,
-        "handoff_state": "external_owner_input_ready",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
         "namespace": "basic_ci",
-        "owner": "release_ci_owner",
-        "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
-        "title": "Basic CI"
+        "owner": "",
+        "owner_action": "",
+        "title": ""
       },
       {
-        "acceptance_criteria": [
-          "`ux_new_user_observation_report.json.contract_pass == true`",
-          "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
-          "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`"
-        ],
-        "acceptance_criteria_count": 3,
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
+        "blocker_id": "report::commercial_packaging_milestone_not_green",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
+        "namespace": "report",
+        "owner": "",
+        "owner_action": "",
+        "title": ""
+      },
+      {
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
         "blocker_id": "ux::human_new_user_observation_missing_or_failed",
-        "evidence_artifact_keys": [
-          "pm_release_gate_report",
-          "ux_new_user_observation",
-          "ux_new_user_observation_intake_packet",
-          "ux_new_user_observation_report",
-          "ux_release_readiness",
-          "viewer_performance_budget",
-          "viewer_quality"
-        ],
-        "evidence_state": "missing_human_new_user_observation",
-        "external_input_required": true,
-        "handoff_state": "external_owner_input_ready",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
         "namespace": "ux",
-        "owner": "ux_research_owner",
-        "owner_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
-        "title": "UX"
+        "owner": "",
+        "owner_action": "",
+        "title": ""
       },
       {
-        "acceptance_criteria": [
-          "`ux_new_user_observation_report.json.contract_pass == true`",
-          "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
-          "`ux::human_new_user_30min_sample_evidence_missing` absent from `release_area_blockers`"
-        ],
-        "acceptance_criteria_count": 3,
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
         "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
-        "evidence_artifact_keys": [
-          "pm_release_gate_report",
-          "ux_new_user_observation",
-          "ux_new_user_observation_intake_packet",
-          "ux_new_user_observation_report",
-          "ux_release_readiness",
-          "viewer_performance_budget",
-          "viewer_quality"
-        ],
-        "evidence_state": "missing_human_new_user_completion_evidence",
-        "external_input_required": true,
-        "handoff_state": "external_owner_input_ready",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
         "namespace": "ux",
-        "owner": "ux_research_owner",
-        "owner_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
-        "title": "UX"
+        "owner": "",
+        "owner_action": "",
+        "title": ""
       },
       {
-        "acceptance_criteria": [
-          "`license_status_closure_report.json.contract_pass == true`",
-          "`license_status` is active and populated from approved product/legal evidence",
-          "`security::license_status_not_configured` absent from `release_area_blockers`"
-        ],
-        "acceptance_criteria_count": 3,
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
+        "blocker_id": "support::pm_blocker_closure_board_count_mismatch",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
+        "namespace": "support",
+        "owner": "",
+        "owner_action": "",
+        "title": ""
+      },
+      {
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
         "blocker_id": "security::license_status_not_configured",
-        "evidence_artifact_keys": [
-          "frontend_dependency_audit",
-          "license_status",
-          "license_status_closure",
-          "license_status_intake_packet",
-          "pm_release_gate_report",
-          "reproducibility_lock",
-          "runtime_sbom",
-          "security_runbook"
-        ],
-        "evidence_state": "not_configured",
-        "external_input_required": true,
-        "handoff_state": "external_owner_input_ready",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
         "namespace": "security",
-        "owner": "product_legal_owner",
-        "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
-        "title": "Security"
+        "owner": "",
+        "owner_action": "",
+        "title": ""
+      },
+      {
+        "acceptance_criteria": [],
+        "acceptance_criteria_count": 0,
+        "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
+        "evidence_artifact_keys": [],
+        "evidence_state": "",
+        "external_input_required": false,
+        "handoff_state": "action_register_row_missing",
+        "namespace": "github_sync",
+        "owner": "",
+        "owner_action": "",
+        "title": ""
       }
     ]
   },
@@ -291,12 +272,12 @@
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
     "approval_token_count": 4,
-    "blocked_release_count": 5,
+    "blocked_release_count": 9,
     "evidence_surface_count": 8,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 9,
+    "operator_action_count": 29,
     "public_benchmark_ready": true,
     "release_allowed": false,
     "stale_artifact_count": 0
@@ -421,8 +402,8 @@
         "action_register_contract_pass": false,
         "approval_token_count": 4,
         "blocked_capability_count": 0,
-        "blocked_release_count": 5,
-        "operator_action_count": 9,
+        "blocked_release_count": 9,
+        "operator_action_count": 29,
         "product_capability_count": 1,
         "release_allowed": false
       }
@@ -432,7 +413,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "9ce427c37e9140220de0226659d1d16db8eedca3",
+  "source_commit_sha": "e149ae7bf61d3e03e697fb5c1dac1f3377994e86",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

@@ -3,21 +3,21 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "gates": [
     {
-      "blocks_p1_execution": false,
+      "blocks_p1_execution": true,
       "core_evidence_closed": true,
       "label": "P0 release publication",
-      "ok": true,
-      "release_publication_closed": true,
-      "status": "ready"
+      "ok": false,
+      "release_publication_closed": false,
+      "status": "blocked"
     },
     {
-      "already_restored": 8,
+      "already_restored": 0,
       "artifact_count": 8,
-      "blocked": 0,
+      "blocked": 8,
       "cache_ready": 0,
       "label": "Open-data artifact restore",
-      "ok": true,
-      "status": "ready",
+      "ok": false,
+      "status": "blocked",
       "total_bytes": 293146888
     },
     {
@@ -54,23 +54,23 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-06-30T02:46:45.349607+00:00",
+  "generated_at": "2026-07-02T03:34:04.395926+00:00",
   "input_checksums": {
     "implementation/phase1/open_data_external_artifacts_manifest.json": "sha256:b8144a8e22fb7d91cb846113ce56e834b2505853697795db24e3c9d9dc344d14",
     "implementation/phase1/peer_tbi_benchmark_metric_records.json": "sha256:1684f9871aea7651232875e3d5abbe8ef97308814846af36ef41a362c15905b6",
     "implementation/phase1/real_project_parser_coverage_matrix.json": "sha256:0c2945fbbaa09d53929f80477a4136f85a9570982118a74eecb0cc473b014b93",
     "implementation/phase1/real_project_row_provenance_report.json": "sha256:2b5db540ce49ac602a890af1fb0adc3b0ee432544f85f21240d60864d68f35f2",
-    "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json": "sha256:733fe07afff3d607e059aea4d77889a2b6da3572f583cd13694e6d7714859657"
+    "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json": "missing"
   },
-  "next_action": "start P1 quality/fallback/benchmark breadth",
+  "next_action": "fix blocked P1 input gates",
   "p0_core_evidence_closed": true,
-  "p0_release_blocker": false,
-  "p1_execution_unblocked": true,
-  "p1_inputs_ready": true,
-  "publication_evidence_index": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
+  "p0_release_blocker": true,
+  "p1_execution_unblocked": false,
+  "p1_inputs_ready": false,
+  "publication_evidence_index": "",
   "reuse_policy": "status_rebuilt_from_existing_p0_open_data_parser_peer_and_row_provenance_receipts",
   "reused_evidence": true,
   "schema_version": "p1-readiness-status.v1",
-  "source_commit_sha": "f03a1ebc7bf3a3802cc9f73b20c2c7b26d3d09ec",
-  "status": "ready"
+  "source_commit_sha": "e149ae7bf61d3e03e697fb5c1dac1f3377994e86",
+  "status": "blocked"
 }

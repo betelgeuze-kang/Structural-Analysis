@@ -1,5 +1,8 @@
 {
   "blockers": [
+    "launch_prerequisite_blocked:p0_closed",
+    "launch_prerequisite_blocked:p1_readiness_unblocked",
+    "launch_prerequisite_blocked:p1_benchmark_breadth_ready",
     "launch_prerequisite_blocked:customer_shadow_completed_project_cases_ready"
   ],
   "checks": {
@@ -137,34 +140,34 @@
       "present": true
     }
   ],
-  "generated_at": "2026-07-01T16:23:21.543561+00:00",
+  "generated_at": "2026-07-02T03:34:24.438198+00:00",
   "input_checksums": {
-    "README.md": "sha256:fcfaf937aa8ca5ac8912291e11d330059fd8c5f18677b238892b61b0440a16e1",
-    "docs/commercialization-gap-current-state.md": "sha256:566c65266db8112b7caab894eb51c45b068abbdabb20bb72b8a3260a17e9e363",
+    "README.md": "sha256:efa2a42057903a4e9a0755e10c838b594a41d2943799e5df05ceab39ebb95093",
+    "docs/commercialization-gap-current-state.md": "sha256:6f8e5d481f3117e2166a739859244e2835dfc54b63767bf1f6a94e792843d87d",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:a081bc019ff4d77f443963172f85044440e0d0cfbe5d9cdae9771bca98ceb181",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:6c08d327691796c5108262267e1f89f928f0addd36c6d4d3d9c4c66eb52fb6d8",
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
-    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:92b693d88117cf344c6f459ad91cf0cca661f49a59a56abbc502d406a5b92931",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:7c13470912298b5329ce20dc785ffb0afd4ea555631fb3a8c0165c64165a4fe5",
-    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:d66b811a097d2dc3b563a852acd1f8b5a1c4eee9f9f06d5ee70fda1d2022d9a7"
+    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:e866cd85d21d0b000e20a9bfc5bb80e8190384a6cb86a0354c1c23c962198e68",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:8ed13ce4a59c6190c77aa49e294eb79f25f1ab69dde213697c87bbd92ab8369a",
+    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:3bbbf86d2887e8978b14c474653d59593db6e91fa8a3ab63632d84ebf2b15bdd"
   },
   "launch_ready": false,
   "prerequisite_rows": [
     {
       "check": "p0_closed",
-      "pass": true,
+      "pass": false,
       "path": "implementation/phase1/release_evidence/productization/p0_closure_status.json",
       "summary": {}
     },
     {
       "check": "p1_readiness_unblocked",
-      "pass": true,
+      "pass": false,
       "path": "implementation/phase1/release_evidence/productization/p1_readiness_status.json",
       "summary": {}
     },
     {
       "check": "p1_benchmark_breadth_ready",
-      "pass": true,
+      "pass": false,
       "path": "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
       "summary": {}
     },
@@ -228,7 +231,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "dd09ee48341d2245cb0cb3557df5c48695726908",
+  "source_commit_sha": "e149ae7bf61d3e03e697fb5c1dac1f3377994e86",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [
@@ -242,9 +245,9 @@
     "evidence_console_feature_count": 7,
     "evidence_console_feature_pass_count": 7,
     "launch_prerequisite_count": 5,
-    "launch_prerequisite_pass_count": 4,
+    "launch_prerequisite_pass_count": 1,
     "next_action": "attach validated customer completed-project shadow evidence",
     "scope_source": "docs/structure-viewer-product-workspace.md"
   },
-  "summary_line": "Evidence Console scope: BLOCKED | features=7/7 | deferred_gui=5/5 | prerequisites=4/5"
+  "summary_line": "Evidence Console scope: BLOCKED | features=7/7 | deferred_gui=5/5 | prerequisites=1/5"
 }

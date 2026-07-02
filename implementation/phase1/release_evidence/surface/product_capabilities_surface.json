@@ -38,7 +38,7 @@
   "first_blocked_capability_id": "",
   "first_blocked_capability_next_action": "",
   "first_blocked_target": "",
-  "generated_at": "2026-07-01T21:52:27.753402+00:00",
+  "generated_at": "2026-07-02T03:36:35.810997+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
@@ -48,7 +48,7 @@
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
-    "scripts/build_product_capabilities_surface.py": "sha256:ee930be576d08b1a8ae02cbbabca84e04c5b8a111ec9457d315ffbd84e92c2e2"
+    "scripts/build_product_capabilities_surface.py": "sha256:f8b5f37ab943fe58dd2b697a639b354f07a36fce2d7868ee599a22ece9afc060"
   },
   "locked": false,
   "next_actions": [
@@ -68,7 +68,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "820f105aba97155d6e943ef91aee163bdd91bd0e",
+  "source_commit_sha": "e149ae7bf61d3e03e697fb5c1dac1f3377994e86",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=1 | ready=1 | blocked=0",
   "surface_id": "product_capabilities_surface",

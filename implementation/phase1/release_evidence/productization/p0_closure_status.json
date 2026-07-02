@@ -1,100 +1,15 @@
 {
   "core_evidence_closed": true,
-  "default_publication_evidence_index_missing": false,
+  "default_publication_evidence_index_missing": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "gates": [
     {
-      "artifact_root": "implementation/phase1/release/publication_evidence/current/hydrated_release_assets",
-      "details": {
-        "asset_listing": {
-          "assets_json": "implementation/phase1/release/publication_evidence/current/release-assets.json",
-          "checked": true,
-          "counts": {
-            "extra_assets": 0,
-            "listed_assets": 22,
-            "manifest_assets": 22,
-            "matched": 22,
-            "mismatched": 0,
-            "missing_optional": 0,
-            "missing_required": 0
-          },
-          "errors": [],
-          "ok": true,
-          "require_all": true,
-          "require_exact": true
-        },
-        "manifest": {
-          "errors": [],
-          "ok": true,
-          "path": "implementation/phase1/release_artifacts_manifest.json",
-          "release_tag": "structural-analysis-artifacts-2026-04-26"
-        },
-        "metadata_preflight": {
-          "checked": true,
-          "counts": {
-            "errors": 0,
-            "manifest_assets": 22,
-            "optional_missing": 0,
-            "present": 22,
-            "required_missing": 0
-          },
-          "errors": [],
-          "evidence_json": "implementation/phase1/release/publication_evidence/current/metadata-preflight.json",
-          "ok": true
-        },
-        "ok": true,
-        "p0_closed": true,
-        "post_publish_roundtrip": {
-          "checked": true,
-          "counts": {
-            "already_present": 1,
-            "downloaded": 21,
-            "errors": 0,
-            "manifest_assets": 22,
-            "selected_assets": 22
-          },
-          "errors": [],
-          "evidence_json": "implementation/phase1/release/publication_evidence/current/post-publish-roundtrip.json",
-          "ok": true
-        },
-        "publication_manifest": "implementation/phase1/release_artifacts_manifest.json",
-        "publication_manifest_source": "local",
-        "release_tag": "structural-analysis-artifacts-2026-04-26",
-        "source_manifest": "implementation/phase1/release_artifacts_manifest.json",
-        "status": "closed",
-        "tag_ref": {
-          "present": true,
-          "status": "present"
-        },
-        "upload_plan": {
-          "artifact_root": "implementation/phase1/release/publication_evidence/current/hydrated_release_assets",
-          "checked": true,
-          "counts": {
-            "errors": 0,
-            "extra_files": 0,
-            "manifest_assets": 22,
-            "selected_assets": 22,
-            "upload_assets": 22
-          },
-          "errors": [],
-          "evidence_counts": {
-            "errors": 0,
-            "extra_files": 0,
-            "manifest_assets": 22,
-            "upload_assets": 22
-          },
-          "evidence_json": "implementation/phase1/release/publication_evidence/current/release-upload-plan.json",
-          "evidence_ok": true,
-          "ok": true
-        }
-      },
+      "default_publication_evidence_index": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
       "label": "P0-1 release publication",
       "manifest": "implementation/phase1/release_artifacts_manifest.json",
-      "ok": true,
-      "post_publish_roundtrip_json": "implementation/phase1/release/publication_evidence/current/post-publish-roundtrip.json",
-      "promoted_manifest_json": "",
-      "release_assets_json": "implementation/phase1/release/publication_evidence/current/release-assets.json",
-      "status": "closed"
+      "ok": false,
+      "reason": "default publication evidence missing",
+      "status": "open"
     },
     {
       "exists": true,
@@ -110,7 +25,7 @@
       "exists": true,
       "label": "P0-3 KDS load combination",
       "ok": true,
-      "path": "implementation/phase1/load_combination_engine_gate_report.json",
+      "path": "implementation/phase1/release_evidence/midas/load_combination_engine_gate_report.json",
       "primary_path": "implementation/phase1/load_combination_engine_gate_report.json",
       "reason_code": "PASS",
       "status": "closed",
@@ -132,7 +47,7 @@
           "exists": true,
           "label": "Material constitutive",
           "ok": true,
-          "path": "implementation/phase1/material_constitutive_gate_report.json",
+          "path": "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json",
           "primary_path": "implementation/phase1/material_constitutive_gate_report.json",
           "reason_code": "PASS",
           "status": "closed",
@@ -142,7 +57,7 @@
           "exists": true,
           "label": "Steel/composite constitutive",
           "ok": true,
-          "path": "implementation/phase1/steel_composite_constitutive_gate_report.json",
+          "path": "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json",
           "primary_path": "implementation/phase1/steel_composite_constitutive_gate_report.json",
           "reason_code": "PASS",
           "status": "closed",
@@ -159,7 +74,7 @@
           "exists": true,
           "label": "Solver breadth",
           "ok": true,
-          "path": "implementation/phase1/solver_breadth_report.json",
+          "path": "implementation/phase1/release_evidence/surface/solver_breadth_report.json",
           "primary_path": "implementation/phase1/solver_breadth_report.json",
           "reason_code": "PASS",
           "status": "closed",
@@ -179,7 +94,7 @@
           "exists": true,
           "label": "Structural contact",
           "ok": true,
-          "path": "implementation/phase1/structural_contact_gate_report.json",
+          "path": "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
           "primary_path": "implementation/phase1/structural_contact_gate_report.json",
           "reason_code": "PASS",
           "status": "closed",
@@ -189,7 +104,7 @@
           "exists": true,
           "label": "General FE contact",
           "ok": true,
-          "path": "implementation/phase1/general_fe_contact_benchmark_gate_report.json",
+          "path": "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
           "primary_path": "implementation/phase1/general_fe_contact_benchmark_gate_report.json",
           "reason_code": "PASS",
           "status": "closed",
@@ -199,11 +114,11 @@
           "exists": true,
           "label": "Solver truthfulness",
           "ok": true,
-          "path": "implementation/phase1/solver_truthfulness_gate_report.json",
+          "path": "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json",
           "primary_path": "implementation/phase1/solver_truthfulness_gate_report.json",
           "reason_code": "PASS",
           "status": "closed",
-          "summary_line": "Solver truthfulness: PASS | reports=4/4 | explicit=4/4 | production_seeded=4/4 | surrogate_free=4/4 | cpu_fallback=0/4 | solver_hip_variants=20/20 | hazards=20 | topologies=17 | load_paths=15"
+          "summary_line": "Solver truthfulness: PASS | reports=4/4 | explicit=4/4 | production_seeded=2/4 | surrogate_free=4/4 | cpu_fallback=0/4 | solver_hip_variants=20/20 | hazards=20 | topologies=17 | load_paths=15"
         }
       ],
       "label": "P0-6 element / solver engine",
@@ -211,33 +126,34 @@
       "status": "closed"
     }
   ],
-  "generated_at": "2026-06-30T02:46:45.059660+00:00",
+  "generated_at": "2026-07-02T03:33:59.572852+00:00",
   "input_checksums": {
     "implementation/phase1/element_material_breadth_gate_report.json": "sha256:a92cecd8599d94ed8280ade651f861dd87b6f501b7cdad856f91c99afdbcc181",
-    "implementation/phase1/general_fe_contact_benchmark_gate_report.json": "sha256:23eeabfe177b3579444428b646e4835bc4c07cb62111ca0889516ae05965997e",
-    "implementation/phase1/load_combination_engine_gate_report.json": "sha256:f983fe084f3ed7f0d34b9da91493da1704af3339534072cbd908c6aa298d8af5",
-    "implementation/phase1/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
+    "implementation/phase1/general_fe_contact_benchmark_gate_report.json": "missing",
+    "implementation/phase1/load_combination_engine_gate_report.json": "missing",
+    "implementation/phase1/material_constitutive_gate_report.json": "missing",
     "implementation/phase1/midas_exact_roundtrip_closure_gate_report.json": "sha256:ffc11770277fdebb186c05b30439357b6628f38e3231742942d0f4aa063c67ae",
     "implementation/phase1/midas_kds_geometry_bridge_validation_report.json": "sha256:54edc11b80403ff703b62dcbfb09e75b07fd07bbd17e33db87460ef677ba9b8a",
-    "implementation/phase1/release/publication_evidence/current/hydrated_release_assets": "dir-sha256:a2c199e1a8b3fc18678542cb05018e978b54a06ad69acb7c48878389a28c2e4b",
-    "implementation/phase1/release/publication_evidence/current/metadata-preflight.json": "sha256:46d0ce26f9de83e855c897101f1d202254ab20d8dc6c75b8164b407b33ad6a57",
-    "implementation/phase1/release/publication_evidence/current/post-publish-roundtrip.json": "sha256:e65be2aaa460a7cee294c95d261c1473710b27f38785dc30743596ba1d3c531a",
-    "implementation/phase1/release/publication_evidence/current/release-assets.json": "sha256:df9e2b3b91aa4ca40ca8067a549cacd0c9c0f870f47aca644b6cf30af07b3669",
-    "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json": "sha256:733fe07afff3d607e059aea4d77889a2b6da3572f583cd13694e6d7714859657",
-    "implementation/phase1/release/publication_evidence/current/release-upload-plan.json": "sha256:3605ace37240b08489ce0cbf24f537ab76a6225bc9a1c3fe4c3ac82e28513806",
     "implementation/phase1/release_artifacts_manifest.json": "sha256:1b45e6dad8665d6d417c7e71e4f80555c585ba0651116cb429ba35511c015d06",
-    "implementation/phase1/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
-    "implementation/phase1/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
-    "implementation/phase1/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
-    "implementation/phase1/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199"
+    "implementation/phase1/release_evidence/midas/load_combination_engine_gate_report.json": "sha256:f983fe084f3ed7f0d34b9da91493da1704af3339534072cbd908c6aa298d8af5",
+    "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
+    "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
+    "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
+    "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:56d86b7b57ffd17def5bf314f9287599ed40a42868726f705150a9d80d8fa740",
+    "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
+    "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
+    "implementation/phase1/solver_breadth_report.json": "missing",
+    "implementation/phase1/solver_truthfulness_gate_report.json": "missing",
+    "implementation/phase1/steel_composite_constitutive_gate_report.json": "missing",
+    "implementation/phase1/structural_contact_gate_report.json": "missing"
   },
-  "next_action": "promote release manifest and proceed to P1/P2 breadth work",
-  "p0_closed": true,
-  "publication_evidence_index": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
-  "release_publication_closed": true,
+  "next_action": "run Publish Release Assets workflow or provide release asset listing",
+  "p0_closed": false,
+  "publication_evidence_index": "",
+  "release_publication_closed": false,
   "reuse_policy": "status_rebuilt_from_existing_release_and_p0_gate_receipts",
   "reused_evidence": true,
   "schema_version": "p0-closure-status.v1",
-  "source_commit_sha": "f03a1ebc7bf3a3802cc9f73b20c2c7b26d3d09ec",
-  "status": "closed"
+  "source_commit_sha": "e149ae7bf61d3e03e697fb5c1dac1f3377994e86",
+  "status": "open"
 }

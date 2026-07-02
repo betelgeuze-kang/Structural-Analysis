@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-real-accuracy-validation",
-  "generated_at": "2026-06-29T13:36:41.895546+00:00",
-  "source_commit_sha": "36a3e952ad3ffae3f2bd51b9cdbd39f60ada0273",
+  "generated_at": "2026-07-02T03:35:12.940387+00:00",
+  "source_commit_sha": "e149ae7bf61d3e03e697fb5c1dac1f3377994e86",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "implementation/phase1/run_real_accuracy_validation.py": "sha256:c15100493ea0ff1e07795fe5e37d6dee58f6a84f1e707b37e192c36174ed4e80",
@@ -10,7 +10,7 @@
     "implementation/phase1/benchmark_kpi_contract.py": "sha256:6821a685105f0207615d8957ba24c17e072b1020f03908864f93bf932f47d47f",
     "implementation/phase1/run_topk_precision_experiments.py": "sha256:dd92f044fb59dc92c0a79d14ac2dc441e7832798f9a68624c072789eb8d34cda",
     "implementation/phase1/runtime_contracts.py": "sha256:2c3edae1897f53d333605d3ff13705145a0541761f565d73aa5c808488773b7b",
-    "implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip": "sha256:ec982c1c9ef30f8f56e903327c65c76899d8d5c9a53c18602f3b08404ac57060"
+    "implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip": "missing"
   },
   "reused_evidence": false,
   "reuse_policy": "fresh_real_accuracy_validation_run",
@@ -96,32 +96,14 @@
   "steps": [
     {
       "step": "build_cases_rwth",
-      "seconds": 5.51667332649231,
+      "seconds": 0.028445720672607422,
       "command": "/usr/bin/python3 implementation/phase1/build_cases_from_rwth_zenodo.py --zip implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip --out implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --story-height-mm 3000.0 --effective-mass-kg 250000.0 --metric-source open_data_measurement --public-case-count 3 --min-source-families 1",
-      "ok": true,
-      "return_code": 0,
-      "stdout_tail": "Wrote RWTH-derived benchmark cases: implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "step": "benchmark_topk",
-      "seconds": 15.97828483581543,
-      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --out implementation/phase1/hf_benchmark_report.rwth_zenodo.json --comparison-out implementation/phase1/topk_comparison_experiment_report.rwth_zenodo.json --target-split test --epochs 220 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 23 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
-      "ok": true,
-      "return_code": 0,
-      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/hf_benchmark_report.rwth_zenodo.json\nWrote Top-k comparison report: implementation/phase1/topk_comparison_experiment_report.rwth_zenodo.json\n",
-      "stderr_tail": ""
-    },
-    {
-      "step": "suite_multiseed",
-      "seconds": 81.13394546508789,
-      "command": "/usr/bin/python3 implementation/phase1/run_topk_precision_experiments.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --out implementation/phase1/topk_precision_suite_report.rwth_zenodo.json --seeds 11,17,23,31,47 --epochs 220 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --target-split test --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
-      "ok": true,
-      "return_code": 0,
-      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/hf_benchmark_report.seed_11.json\nWrote Top-k comparison report: implementation/phase1/topk_comparison_experiment_report.seed_11.json\nWrote HF benchmark contract report: implementation/phase1/hf_benchmark_report.seed_17.json\nWrote Top-k comparison report: implementation/phase1/topk_comparison_experiment_report.seed_17.json\nWrote HF benchmark contract report: implementation/phase1/hf_benchmark_report.seed_23.json\nWrote Top-k comparison report: implementation/phase1/topk_comparison_experiment_report.seed_23.json\nWrote HF benchmark contract report: implementation/phase1/hf_benchmark_report.seed_31.json\nWrote Top-k comparison report: implementation/phase1/topk_comparison_experiment_report.seed_31.json\nWrote HF benchmark contract report: implementation/phase1/hf_benchmark_report.seed_47.json\nWrote Top-k comparison report: implementation/phase1/topk_comparison_experiment_report.seed_47.json\nWrote Top-k precision suite report: implementation/phase1/topk_precision_suite_report.rwth_zenodo.json\n",
-      "stderr_tail": ""
+      "ok": false,
+      "return_code": 1,
+      "stdout_tail": "",
+      "stderr_tail": "zip not found: implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip\n"
     }
   ],
-  "overall_pass": true,
-  "reason_code": "PASS"
+  "overall_pass": false,
+  "reason_code": "ERR_BUILD_CASES_FAIL"
 }

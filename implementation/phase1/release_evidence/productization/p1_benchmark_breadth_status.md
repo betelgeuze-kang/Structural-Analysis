@@ -1,14 +1,14 @@
 # P1 Benchmark Breadth Status
 
 - Benchmark inputs ready: `True`
-- P1 benchmark execution unblocked: `True`
-- P0 release blocker: `False`
+- P1 benchmark execution unblocked: `False`
+- P0 release blocker: `True`
 - P1 work slice: `quality/fallback/benchmark breadth`
-- Next action: `run P1 quality/fallback/benchmark breadth execution`
+- Next action: `close P0-1 release publication before running P1 benchmark breadth`
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
-| P1 execution prerequisite | `ready` |  |
+| P1 execution prerequisite | `blocked` |  |
 | Commercial readiness breadth | `ready` | commercial_readiness_report.json |
 | External benchmark submission queue | `ready` | external_benchmark_submission_readiness.json |
 | hf benchmark report | `ready` | hf_benchmark_report.json |

@@ -1,6 +1,6 @@
 # Evidence Console Scope Status
 
-- `summary_line`: `Evidence Console scope: BLOCKED | features=7/7 | deferred_gui=5/5 | prerequisites=4/5`
+- `summary_line`: `Evidence Console scope: BLOCKED | features=7/7 | deferred_gui=5/5 | prerequisites=1/5`
 - `scope_contract_pass`: `True`
 - `launch_ready`: `False`
 
@@ -24,12 +24,15 @@
 
 | Launch Prerequisite | Pass |
 |---|---|
-| `p0_closed` | `True` |
-| `p1_readiness_unblocked` | `True` |
-| `p1_benchmark_breadth_ready` | `True` |
+| `p0_closed` | `False` |
+| `p1_readiness_unblocked` | `False` |
+| `p1_benchmark_breadth_ready` | `False` |
 | `real_project_measured_status_pass` | `True` |
 | `customer_shadow_completed_project_cases_ready` | `False` |
 
 ## Blockers
 
+- `launch_prerequisite_blocked:p0_closed`
+- `launch_prerequisite_blocked:p1_readiness_unblocked`
+- `launch_prerequisite_blocked:p1_benchmark_breadth_ready`
 - `launch_prerequisite_blocked:customer_shadow_completed_project_cases_ready`
