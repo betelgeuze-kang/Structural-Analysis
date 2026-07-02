@@ -15,12 +15,12 @@
     },
     {
       "requirement": {
-        "crate": "rust_hip_md3bead_hook",
+        "crate": "mgt_hip_full_residual_rust_ffi",
         "edition": "2021",
         "version": "0.1.0"
       },
       "status": "declared",
-      "target": "rust_native_hook"
+      "target": "mgt_rust_hip_full_residual_ffi"
     },
     {
       "requirement": {
@@ -52,6 +52,6 @@
       "status": "manifest_ready"
     }
   ],
-  "generated_at": "2026-05-18T14:05:45.848623+00:00",
+  "generated_at": "2026-07-02T08:41:48.706998+00:00",
   "schema_version": "runtime-version-compatibility-matrix.v1"
 }

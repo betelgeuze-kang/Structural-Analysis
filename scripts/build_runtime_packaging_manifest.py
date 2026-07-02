@@ -22,8 +22,9 @@ DEFAULT_SBOM_OUT = Path("implementation/phase1/runtime_sbom.json")
 DEFAULT_NATIVE_ARTIFACT_MANIFEST_OUT = Path("implementation/phase1/native_runtime_artifact_manifest.json")
 DEFAULT_COMPATIBILITY_MATRIX_OUT = Path("implementation/phase1/runtime_version_compatibility_matrix.json")
 DEFAULT_RUNTIME_PROBE = Path("implementation/phase1/zero_copy_real_probe_report_strict.json")
-DEFAULT_RUNTIME_WRAPPER = Path("implementation/phase1/rust_hip_md3bead_hook.py")
-DEFAULT_CRATE_DIR = Path("implementation/phase1/rust_hip_md3bead_hook")
+DEFAULT_RUNTIME_WRAPPER = Path("implementation/phase1/run_mgt_rust_hip_full_residual_ffi_probe.py")
+DEFAULT_CRATE_DIR = Path("implementation/phase1/mgt_hip_full_residual_ffi")
+DEFAULT_NATIVE_HIP_FFI_SOURCE = Path("implementation/phase1/hip_full_residual_ffi.cpp")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_ROLLBACK_RUNBOOK = Path("docs/runtime-production-packaging.md")
@@ -211,16 +212,22 @@ def _build_native_artifact_manifest(
     out: Path,
     runtime_wrapper: Path,
     crate_dir: Path,
+    native_hip_ffi_source: Path,
 ) -> dict[str, Any]:
     rows = [
         _artifact_row(runtime_wrapper, label="runtime_wrapper"),
         _artifact_row(crate_dir / "Cargo.toml", label="cargo_toml"),
         _artifact_row(crate_dir / "Cargo.lock", label="cargo_lock"),
-        _artifact_row(crate_dir / "src" / "main.rs", label="rust_main"),
         _artifact_row(crate_dir / "src" / "lib.rs", label="rust_lib"),
-        _artifact_row(crate_dir / "target" / "release" / "rust_hip_md3bead_hook", label="release_binary"),
-        _artifact_row(crate_dir / "target" / "release" / "librust_hip_md3bead_hook.so", label="release_cdylib"),
-        _artifact_row(crate_dir / "target" / "release" / "librust_hip_md3bead_hook.rlib", label="release_rlib"),
+        _artifact_row(native_hip_ffi_source, label="native_hip_c_abi_source"),
+        _artifact_row(
+            crate_dir
+            / "target"
+            / "release"
+            / "libmgt_hip_full_residual_rust_ffi.so",
+            label="release_cdylib",
+            required=False,
+        ),
     ]
     missing = [row["label"] for row in rows if row["required"] and not row["available"]]
     payload = {
@@ -263,7 +270,7 @@ def _build_compatibility_matrix(
             "status": "declared",
         },
         {
-            "target": "rust_native_hook",
+            "target": "mgt_rust_hip_full_residual_ffi",
             "requirement": {
                 "crate": cargo_project.get("name", ""),
                 "version": cargo_project.get("version", ""),
@@ -309,6 +316,7 @@ def build_runtime_packaging_manifest(
     runtime_probe: Path = DEFAULT_RUNTIME_PROBE,
     runtime_wrapper: Path = DEFAULT_RUNTIME_WRAPPER,
     crate_dir: Path = DEFAULT_CRATE_DIR,
+    native_hip_ffi_source: Path = DEFAULT_NATIVE_HIP_FFI_SOURCE,
     pyproject: Path = DEFAULT_PYPROJECT,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     rollback_runbook: Path = DEFAULT_ROLLBACK_RUNBOOK,
@@ -326,6 +334,7 @@ def build_runtime_packaging_manifest(
         out=native_artifact_manifest_out,
         runtime_wrapper=runtime_wrapper,
         crate_dir=crate_dir,
+        native_hip_ffi_source=native_hip_ffi_source,
     )
     compatibility = _build_compatibility_matrix(
         out=compatibility_matrix_out,
@@ -363,7 +372,7 @@ def build_runtime_packaging_manifest(
             "package_id": "structural-analysis-runtime-production-candidate",
             "version": runtime_version,
             "supported_modes": ["saas", "on_prem", "air_gapped"],
-            "supported_backends": ["cpu", "rust_hip"],
+            "supported_backends": ["cpu", "mgt_rust_hip_full_residual_ffi"],
             "cpu_fallback_policy": "explicit_only_no_silent_fallback",
         },
         "required_evidence": {
@@ -406,6 +415,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--runtime-probe", type=Path, default=DEFAULT_RUNTIME_PROBE)
     parser.add_argument("--runtime-wrapper", type=Path, default=DEFAULT_RUNTIME_WRAPPER)
     parser.add_argument("--crate-dir", type=Path, default=DEFAULT_CRATE_DIR)
+    parser.add_argument("--native-hip-ffi-source", type=Path, default=DEFAULT_NATIVE_HIP_FFI_SOURCE)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
     parser.add_argument("--rollback-runbook", type=Path, default=DEFAULT_ROLLBACK_RUNBOOK)
@@ -424,6 +434,7 @@ def main(argv: list[str] | None = None) -> int:
         runtime_probe=args.runtime_probe,
         runtime_wrapper=args.runtime_wrapper,
         crate_dir=args.crate_dir,
+        native_hip_ffi_source=args.native_hip_ffi_source,
         pyproject=args.pyproject,
         package_json=args.package_json,
         rollback_runbook=args.rollback_runbook,

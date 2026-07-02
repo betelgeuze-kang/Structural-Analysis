@@ -38,9 +38,10 @@ def _runtime_fixture(tmp_path: Path) -> dict[str, Path]:
     )
     _write_text(crate_dir / "src" / "main.rs", "fn main() {}\n")
     _write_text(crate_dir / "src" / "lib.rs", "pub fn run() {}\n")
-    _write_text(crate_dir / "target" / "release" / "rust_hip_md3bead_hook", "binary\n")
-    _write_text(crate_dir / "target" / "release" / "librust_hip_md3bead_hook.so", "so\n")
-    _write_text(crate_dir / "target" / "release" / "librust_hip_md3bead_hook.rlib", "rlib\n")
+    _write_text(
+        crate_dir / "target" / "release" / "libmgt_hip_full_residual_rust_ffi.so",
+        "so\n",
+    )
 
     return {
         "runtime_probe": _write_json(
@@ -56,6 +57,7 @@ def _runtime_fixture(tmp_path: Path) -> dict[str, Path]:
         ),
         "runtime_wrapper": _write_text(tmp_path / "runtime-wrapper.py", "print('runtime')\n"),
         "crate_dir": crate_dir,
+        "native_hip_ffi_source": _write_text(tmp_path / "hip_full_residual_ffi.cpp", "// hip\n"),
         "pyproject": _write_text(
             tmp_path / "pyproject.toml",
             '[project]\nname = "runtime-product"\nversion = "0.1.0"\n'
@@ -98,7 +100,7 @@ def test_runtime_packaging_manifest_generates_sbom_native_and_compatibility(tmp_
 
 def test_runtime_packaging_manifest_blocks_missing_native_artifact(tmp_path: Path) -> None:
     fixture = _runtime_fixture(tmp_path)
-    (fixture["crate_dir"] / "target" / "release" / "rust_hip_md3bead_hook").unlink()
+    (fixture["crate_dir"] / "src" / "lib.rs").unlink()
 
     payload = build_runtime_packaging_manifest.build_runtime_packaging_manifest(
         manifest_out=tmp_path / "manifest.json",

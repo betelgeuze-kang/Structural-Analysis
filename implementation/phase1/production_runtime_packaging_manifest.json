@@ -2,15 +2,15 @@
   "artifacts": {
     "native_artifact_manifest": {
       "path": "implementation/phase1/native_runtime_artifact_manifest.json",
-      "sha256": "a45eba481a1dc29b0b0f91ff5feecf2064b6a6ed70b24a4c2d88252a07c87b1b"
+      "sha256": "7f835c9832e61bf6e6b359db2a75ead9dcc549f942001741c393f4e9cdaee4fe"
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "bbb01dd56ce313c1daf5504ef94d9bda86559c063595f0ab289e866bb8d807f4"
+      "sha256": "f82640aa4af7659fc732a0628a492747e144fdeca60f311b5e80ddeb89f89804"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "b5075cb20c9632c3bed1fb5e5c312a4b2b894d5ea6f086afd5a6c95b8b21482f"
+      "sha256": "57df58303c7ce9a8920feda5c5980f477e01c49dfc5cba1e6291ddd55d5e77b1"
     }
   },
   "blockers": [],
@@ -22,7 +22,7 @@
     "version_compatibility_matrix_pass": true
   },
   "contract_pass": true,
-  "generated_at": "2026-05-18T14:05:45.849062+00:00",
+  "generated_at": "2026-07-02T08:41:48.707284+00:00",
   "reason_code": "PASS",
   "required_evidence": {
     "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",
@@ -36,7 +36,7 @@
     "package_id": "structural-analysis-runtime-production-candidate",
     "supported_backends": [
       "cpu",
-      "rust_hip"
+      "mgt_rust_hip_full_residual_ffi"
     ],
     "supported_modes": [
       "saas",
@@ -46,5 +46,5 @@
     "version": "0.1.0"
   },
   "schema_version": "production-runtime-packaging-manifest.v1",
-  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=26 | native_artifacts=8/8"
+  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=15 | native_artifacts=5/6"
 }

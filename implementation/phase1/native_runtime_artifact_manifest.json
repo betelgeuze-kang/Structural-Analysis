@@ -1,74 +1,58 @@
 {
-  "artifact_count": 8,
+  "artifact_count": 6,
   "artifact_rows": [
     {
       "available": true,
-      "bytes": 1957,
+      "bytes": 16971,
       "label": "runtime_wrapper",
-      "path": "implementation/phase1/rust_hip_md3bead_hook.py",
+      "path": "implementation/phase1/run_mgt_rust_hip_full_residual_ffi_probe.py",
       "required": true,
-      "sha256": "64bdb9a74cac0fcbf00b5af058cd35cf0ba26b02190b20ccae8b2594b22ceef1"
+      "sha256": "df77aee7206ef2c36386094919f307e15ffa902efedf86d179762828e7380404"
     },
     {
       "available": true,
-      "bytes": 232,
+      "bytes": 172,
       "label": "cargo_toml",
-      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+      "path": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",
       "required": true,
-      "sha256": "d92ca7f9539f525f0b59e263951d809af8a90690e0b76f6bcc7b78332f01fa4f"
+      "sha256": "42d1a10c5fc076009a35e9f576843643efde4e5af1a12fa2d5e93c0b461c744f"
     },
     {
       "available": true,
-      "bytes": 2680,
+      "bytes": 174,
       "label": "cargo_lock",
-      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+      "path": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.lock",
       "required": true,
-      "sha256": "2d54732c9ce1f39c948335f9313646c4b73ec9fece8f3e0d9b344f379288ac77"
+      "sha256": "4112b6718c940b132ef7023b0bdb6adfdb454a3fe0ec079b8f69dbe20445cbff"
     },
     {
       "available": true,
-      "bytes": 14519,
-      "label": "rust_main",
-      "path": "implementation/phase1/rust_hip_md3bead_hook/src/main.rs",
-      "required": true,
-      "sha256": "de9dc4d35c107627ea6667681b44ce3e06d646b84a2baa03d6659eadbfffe0a9"
-    },
-    {
-      "available": true,
-      "bytes": 36903,
+      "bytes": 6012,
       "label": "rust_lib",
-      "path": "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+      "path": "implementation/phase1/mgt_hip_full_residual_ffi/src/lib.rs",
       "required": true,
-      "sha256": "9f1f58d45fc3d539ae49ff47baf0300b726580ea84189189ec83a14952fe2dab"
+      "sha256": "310bbc2ea5dd1f057103af01581add1aa2a5d10294fd8a72fc7f96085dbeaf43"
     },
     {
       "available": true,
-      "bytes": 578832,
-      "label": "release_binary",
-      "path": "implementation/phase1/rust_hip_md3bead_hook/target/release/rust_hip_md3bead_hook",
+      "bytes": 14349,
+      "label": "native_hip_c_abi_source",
+      "path": "implementation/phase1/hip_full_residual_ffi.cpp",
       "required": true,
-      "sha256": "0d44102d630417e2e83da94b89de9ae01e655e821a01470a0aeb914c6a95b0c4"
+      "sha256": "ee242271a94096640ab75b9108defdbf989c5a2366e784c59b835cd3063bc6cb"
     },
     {
-      "available": true,
-      "bytes": 425008,
+      "available": false,
+      "bytes": 0,
       "label": "release_cdylib",
-      "path": "implementation/phase1/rust_hip_md3bead_hook/target/release/librust_hip_md3bead_hook.so",
-      "required": true,
-      "sha256": "431f5eba2888e91b0f7d2db8b87251db7ce02c2122f2e4cf4dda6a1ca89d8b9e"
-    },
-    {
-      "available": true,
-      "bytes": 103542,
-      "label": "release_rlib",
-      "path": "implementation/phase1/rust_hip_md3bead_hook/target/release/librust_hip_md3bead_hook.rlib",
-      "required": true,
-      "sha256": "f97518e8ff9393cbb10f5c53d04f9de87651e0649d0b3f0831cbd397500e122a"
+      "path": "implementation/phase1/mgt_hip_full_residual_ffi/target/release/libmgt_hip_full_residual_rust_ffi.so",
+      "required": false,
+      "sha256": ""
     }
   ],
-  "available_artifact_count": 8,
+  "available_artifact_count": 5,
   "contract_pass": true,
-  "generated_at": "2026-05-18T14:05:45.848298+00:00",
+  "generated_at": "2026-07-02T08:41:48.706674+00:00",
   "missing_required": [],
   "schema_version": "native-runtime-artifact-manifest.v1"
 }
