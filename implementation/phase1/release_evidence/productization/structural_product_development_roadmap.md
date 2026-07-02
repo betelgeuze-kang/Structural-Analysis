@@ -29,7 +29,7 @@ Structural product roadmap: BLOCKED | evidence_progress=65.4% | stage_average=55
   - first blocker: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
   - next action: `collect_30_pr_ci_and_nightly_ci_streak_evidence`
 - `developer_preview_rc`: partial (6/9, 66.7%)
-  - first blocker: `selected_medium_models_pass_or_approved_review::medium_structural_models_current_below_required:2/5`
+  - first blocker: `selected_medium_models_pass_or_approved_review::medium_structural_models_current_below_required:3/5`
   - next action: `close_medium_model_pass_or_approved_review_gate`
 - `g1_solver_closure`: partial (1/2, 50.0%)
   - first blocker: `checkpoint_load_scale_below_required_full_load`

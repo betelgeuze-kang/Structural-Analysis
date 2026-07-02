@@ -34,7 +34,7 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert medium["required_medium_model_count"] == 5
     assert medium["current_medium_model_scorecard_count"] == 0
     assert medium["pass_or_approved_review_count"] == 0
-    assert medium["local_candidate_artifact_count"] == 2
+    assert medium["local_candidate_artifact_count"] == 3
     assert medium["local_topology_contract_pass"] is True
     assert medium["required_evidence_count"] == 9
     assert medium["required_evidence_pass_count"] == 4
@@ -45,9 +45,9 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     )
     assert medium_progress["local_candidate_selection"] == {
         "contract_pass": False,
-        "current": 2,
+        "current": 3,
         "label": "parser/topology candidate cases selected",
-        "remaining": 3,
+        "remaining": 2,
         "required": 5,
     }
     assert medium_progress["scorecard_execution"]["current"] == 0
@@ -69,7 +69,7 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert (
         medium_actions["run_medium_scorecard_receipts"]["remaining_case_count"] == 5
     )
-    assert "medium_structural_models_current_below_required:2/5" in medium["blockers"]
+    assert "medium_structural_models_current_below_required:3/5" in medium["blockers"]
     assert "medium_model_pass_or_review_below_required:0/5" in medium["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in medium["blockers"]
     medium_grouping = medium["blocker_grouping_metadata"]
@@ -79,7 +79,7 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert "opensees_medium_scorecard_execution_missing" in medium_grouping[
         "groups"
     ]["medium_scorecard_execution"]["blockers"]
-    assert "medium_structural_models_current_below_required:2/5" in medium_grouping[
+    assert "medium_structural_models_current_below_required:3/5" in medium_grouping[
         "groups"
     ]["medium_quantity_shortfall"]["blockers"]
     large = payload["large_gate"]
@@ -143,7 +143,7 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
         "large_crash_oom_free": "2/2",
         "large_execution_receipts": "2/2",
         "large_scorecard_or_review": "0/2",
-        "medium_local_candidates": "2/5",
+        "medium_local_candidates": "3/5",
         "medium_pass_or_review": "0/5",
         "medium_scorecard_receipts": "0/5",
         "operator_next_action_count": 10,
