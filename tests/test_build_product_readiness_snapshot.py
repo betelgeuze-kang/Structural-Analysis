@@ -408,9 +408,18 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "release_surface_first_batch_cleanup_application_preflight": {
             "status": "no_cleanup_required",
             "ready": False,
+            "extract_archive_reference_missing_count": 0,
+            "extract_archive_reference_missing_rows": [],
+            "repo_state_checked": False,
+            "cleanup_path_not_tracked_count": 0,
+            "cleanup_path_not_tracked_rows": [],
+            "cleanup_path_missing_count": 0,
+            "cleanup_path_missing_rows": [],
         },
         "release_surface_first_batch_template_paths": {},
+        "release_surface_first_decision_overrides_template_paths": {},
         "next_owner_review_batch_decision_template": {},
+        "next_batch_decision_overrides_template_paths": {},
         "owner_decision_template_paths": {},
         "application_blockers": [],
         "plan_blockers": [],
@@ -6018,8 +6027,16 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
         "release_surface_first_batch_cleanup_application_preflight": {
             "status": "no_cleanup_required",
             "ready": False,
+            "extract_archive_reference_missing_count": 0,
+            "extract_archive_reference_missing_rows": [],
+            "repo_state_checked": False,
+            "cleanup_path_not_tracked_count": 0,
+            "cleanup_path_not_tracked_rows": [],
+            "cleanup_path_missing_count": 0,
+            "cleanup_path_missing_rows": [],
         },
         "release_surface_first_batch_template_paths": {},
+        "release_surface_first_decision_overrides_template_paths": {},
         "next_owner_review_batch_decision_template": {
             "batch_id": "productization_evidence_second",
             "generated_template_paths": {
@@ -6034,6 +6051,16 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
                 "markdown": (
                     "implementation/phase1/release_evidence/productization/"
                     "structural_scope_owner_decisions.next_batch.template.md"
+                ),
+            },
+            "decision_overrides_template_paths": {
+                "csv": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "structural_scope_owner_decisions.next_batch.overrides.template.csv"
+                ),
+                "markdown": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "structural_scope_owner_decisions.next_batch.overrides.template.md"
                 ),
             },
         },
@@ -6121,10 +6148,21 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     assert cleanup["release_surface_first_batch_cleanup_application_preflight"] == {
         "status": "no_cleanup_required",
         "ready": False,
+        "extract_archive_reference_missing_count": 0,
+        "extract_archive_reference_missing_rows": [],
+        "repo_state_checked": False,
+        "cleanup_path_not_tracked_count": 0,
+        "cleanup_path_not_tracked_rows": [],
+        "cleanup_path_missing_count": 0,
+        "cleanup_path_missing_rows": [],
     }
     assert cleanup["release_surface_first_batch_template_paths"] == {}
+    assert cleanup["release_surface_first_decision_overrides_template_paths"] == {}
     assert cleanup["next_batch_template_paths"]["csv"].endswith(
         "structural_scope_owner_decisions.next_batch.template.csv"
+    )
+    assert cleanup["next_batch_decision_overrides_template_paths"]["csv"].endswith(
+        "structural_scope_owner_decisions.next_batch.overrides.template.csv"
     )
     assert cleanup["blockers"] == [
         "owner_decision_pending_count=2",

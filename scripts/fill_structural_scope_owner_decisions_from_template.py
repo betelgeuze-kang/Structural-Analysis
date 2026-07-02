@@ -97,6 +97,51 @@ def _load_template_rows(
     ]
 
 
+def _load_decision_override_rows(
+    repo_root: Path,
+    path: Path | None,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    if path is None:
+        return [], []
+    resolved = _resolve(repo_root, path)
+    if not resolved.exists():
+        return [], ["decision_overrides_missing"]
+    if resolved.suffix.lower() == ".json":
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
+        raw_rows = payload.get("decision_rows") if isinstance(payload, dict) else None
+        if raw_rows is None and isinstance(payload, dict):
+            raw_rows = payload.get("rows")
+        if raw_rows is None and isinstance(payload, dict):
+            raw_rows = payload.get("overrides")
+        if not isinstance(raw_rows, list):
+            return [], ["decision_overrides_json_rows_missing"]
+        rows = [dict(row) for row in raw_rows if isinstance(row, dict)]
+    else:
+        with resolved.open(newline="", encoding="utf-8") as handle:
+            rows = [dict(row) for row in csv.DictReader(handle)]
+    blockers: list[str] = []
+    seen_paths: set[str] = set()
+    duplicate_paths: set[str] = set()
+    for row in rows:
+        override_path = _text(row.get("path"))
+        if not override_path:
+            blockers.append("decision_override_empty_path")
+            continue
+        if override_path in seen_paths:
+            duplicate_paths.add(override_path)
+        seen_paths.add(override_path)
+        override_decision = _text(row.get("owner_decision"))
+        if override_decision and override_decision not in owner_review.ALLOWED_OWNER_DECISIONS:
+            blockers.append(
+                f"{override_path}::unsupported_override_decision:{override_decision}"
+            )
+    blockers.extend(
+        f"decision_override_duplicate_path:{override_path}"
+        for override_path in sorted(duplicate_paths)
+    )
+    return rows, blockers
+
+
 def _decision_for_row(row: dict[str, Any], requested_decision: str) -> str:
     if requested_decision == DECISION_RECOMMENDED_PRIMARY:
         return _text(row.get("recommended_owner_decision_primary"))
@@ -111,6 +156,7 @@ def _field_blockers(
     evidence_reference: str,
     decision: str,
     external_archive_reference: str,
+    signed_owner_exception_reference: str,
 ) -> list[str]:
     blockers: list[str] = []
     if not owner_identity:
@@ -134,6 +180,11 @@ def _field_blockers(
             blockers.append("external_archive_reference_missing_for_extract")
         elif owner_review._is_placeholder_text(external_archive_reference):
             blockers.append("external_archive_reference_placeholder")
+    if decision == "retain_quarantined_with_signed_owner_exception":
+        if not signed_owner_exception_reference:
+            blockers.append("signed_owner_exception_reference_missing_for_retain")
+        elif owner_review._is_placeholder_text(signed_owner_exception_reference):
+            blockers.append("signed_owner_exception_reference_placeholder")
     return blockers
 
 
@@ -169,9 +220,39 @@ def build_filled_decisions(
     evidence_reference: str,
     decision: str = DECISION_RECOMMENDED_PRIMARY,
     external_archive_reference: str = "",
+    decision_overrides_path: Path | None = None,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     template_rows, template_columns, blockers = _load_template_rows(repo_root, template_path)
+    override_rows, override_blockers = _load_decision_override_rows(
+        repo_root,
+        decision_overrides_path,
+    )
+    blockers.extend(override_blockers)
+    override_by_path = {
+        _text(row.get("path")): row for row in override_rows if _text(row.get("path"))
+    }
+    template_path_order = [
+        _text(row.get("path")) for row in template_rows if _text(row.get("path"))
+    ]
+    unknown_override_paths = sorted(set(override_by_path) - set(template_path_order))
+    blockers.extend(
+        f"decision_override_unknown_path:{override_path}"
+        for override_path in unknown_override_paths
+    )
+    missing_override_paths = (
+        [
+            template_path
+            for template_path in template_path_order
+            if template_path not in override_by_path
+        ]
+        if decision_overrides_path
+        else []
+    )
+    blockers.extend(
+        f"decision_override_missing_path:{template_path}"
+        for template_path in missing_override_paths
+    )
     if decision not in ALLOWED_FILL_DECISIONS:
         blockers.append(f"unsupported_fill_decision:{decision}")
 
@@ -179,19 +260,47 @@ def build_filled_decisions(
     row_summaries: list[dict[str, Any]] = []
     for row in template_rows:
         path = _text(row.get("path"))
-        row_decision = _decision_for_row(row, decision)
+        override = override_by_path.get(path, {})
+        row_requested_decision = (
+            _text(override.get("owner_decision"))
+            if decision_overrides_path
+            else decision
+        )
+        row_decision = _decision_for_row(row, row_requested_decision)
+        row_external_archive_reference = (
+            _text(override.get("external_archive_reference"))
+            or external_archive_reference
+        )
+        row_signed_owner_exception_reference = _text(
+            override.get("signed_owner_exception_reference")
+        )
+        row_evidence_reference = (
+            _text(override.get("evidence_reference"))
+            or evidence_reference
+        )
         allowed_decisions = _split_list_field(row.get("allowed_owner_decisions"))
         row_blockers: list[str] = []
-        if row_decision not in allowed_decisions:
+        if decision_overrides_path and path not in override_by_path:
+            row_blockers.append("decision_override_missing_for_path")
+        if decision_overrides_path and not row_requested_decision:
+            row_blockers.append("decision_override_owner_decision_missing")
+        if row_requested_decision and row_requested_decision not in ALLOWED_FILL_DECISIONS and row_requested_decision not in owner_review.ALLOWED_OWNER_DECISIONS:
+            row_blockers.append(
+                f"unsupported_override_decision:{row_requested_decision}"
+            )
+        if row_decision and row_decision not in allowed_decisions:
             row_blockers.append(f"owner_decision_not_allowed:{row_decision}")
         row_blockers.extend(
             _field_blockers(
                 owner_identity=owner_identity,
                 owner_role=owner_role,
                 decision_timestamp_utc=decision_timestamp_utc,
-                evidence_reference=evidence_reference,
+                evidence_reference=row_evidence_reference,
                 decision=row_decision,
-                external_archive_reference=external_archive_reference,
+                external_archive_reference=row_external_archive_reference,
+                signed_owner_exception_reference=(
+                    row_signed_owner_exception_reference
+                ),
             )
         )
         blockers.extend(f"{path or 'unknown_path'}::{item}" for item in row_blockers)
@@ -204,10 +313,14 @@ def build_filled_decisions(
             "owner_identity": owner_identity,
             "owner_role": owner_role,
             "decision_timestamp_utc": decision_timestamp_utc,
-            "evidence_reference": evidence_reference,
-            "signed_owner_exception_reference": "",
+            "evidence_reference": row_evidence_reference,
+            "signed_owner_exception_reference": (
+                row_signed_owner_exception_reference
+                if row_decision == "retain_quarantined_with_signed_owner_exception"
+                else ""
+            ),
             "external_archive_reference": (
-                external_archive_reference
+                row_external_archive_reference
                 if row_decision == "extract_to_molecular_or_science_repository"
                 else ""
             ),
@@ -222,6 +335,17 @@ def build_filled_decisions(
                 "matched_tokens": _split_list_field(row.get("matched_tokens")),
                 "owner_decision": row_decision,
                 "allowed_owner_decisions": allowed_decisions,
+                "override_applied": path in override_by_path,
+                "external_archive_reference": (
+                    row_external_archive_reference
+                    if row_decision == "extract_to_molecular_or_science_repository"
+                    else ""
+                ),
+                "signed_owner_exception_reference": (
+                    row_signed_owner_exception_reference
+                    if row_decision == "retain_quarantined_with_signed_owner_exception"
+                    else ""
+                ),
                 "row_blockers": row_blockers,
             }
         )
@@ -249,6 +373,7 @@ def build_filled_decisions(
                 Path("scripts/fill_structural_scope_owner_decisions_from_template.py"),
                 Path("scripts/build_structural_scope_owner_review_packet.py"),
                 template_path,
+                *([decision_overrides_path] if decision_overrides_path else []),
             ],
             reused_evidence=False,
             reuse_policy="structural_scope_owner_decision_fill_from_template",
@@ -258,6 +383,13 @@ def build_filled_decisions(
         "status": "filled" if not unique_blockers else "blocked",
         "contract_pass": not unique_blockers,
         "template_path": template_path.as_posix(),
+        "decision_overrides_path": (
+            decision_overrides_path.as_posix() if decision_overrides_path else ""
+        ),
+        "decision_override_count": len(override_rows),
+        "decision_override_paths": sorted(override_by_path),
+        "unknown_decision_override_paths": unknown_override_paths,
+        "missing_decision_override_paths": missing_override_paths,
         "template_column_count": len(template_columns),
         "decision_row_count": len(decision_rows),
         "delete_decision_count": delete_count,
@@ -332,6 +464,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `extract_decision_count`: `{payload['extract_decision_count']}`",
         f"- `retain_decision_count`: `{payload['retain_decision_count']}`",
         f"- `template_path`: `{payload['template_path']}`",
+        f"- `decision_overrides_path`: `{payload['decision_overrides_path']}`",
+        f"- `decision_override_count`: `{payload['decision_override_count']}`",
         f"- `requested_decision`: `{payload['requested_decision']}`",
         "",
         "## Counts",
@@ -342,14 +476,16 @@ def _markdown(payload: dict[str, Any]) -> str:
         "",
         "## Rows",
         "",
-        "| Row | Area | Path | Decision | Blockers |",
-        "|---|---|---|---|---|",
+        "| Row | Area | Path | Decision | Override | External Archive Reference | Signed Exception | Blockers |",
+        "|---|---|---|---|---:|---|---|---|",
     ]
     for row in payload["row_summaries"]:
         blockers = ", ".join(f"`{item}`" for item in row["row_blockers"]) or "none"
         lines.append(
             f"| `{row['row_id']}` | `{row['path_area']}` | `{row['path']}` | "
-            f"`{row['owner_decision']}` | {blockers} |"
+            f"`{row['owner_decision']}` | `{row['override_applied']}` | "
+            f"`{row['external_archive_reference']}` | "
+            f"`{row['signed_owner_exception_reference']}` | {blockers} |"
         )
     lines.extend(["", "## Blockers", ""])
     if payload["blockers"]:
@@ -373,6 +509,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--evidence-reference", required=True)
     parser.add_argument("--external-archive-reference", default="")
     parser.add_argument(
+        "--decision-overrides",
+        type=Path,
+        help=(
+            "Optional CSV or JSON rows keyed by path with owner_decision, "
+            "optional evidence_reference, external_archive_reference for extract, "
+            "and signed_owner_exception_reference for retain."
+        ),
+    )
+    parser.add_argument(
         "--decision",
         choices=ALLOWED_FILL_DECISIONS,
         default=DECISION_RECOMMENDED_PRIMARY,
@@ -393,6 +538,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_reference=args.evidence_reference,
         decision=args.decision,
         external_archive_reference=args.external_archive_reference,
+        decision_overrides_path=args.decision_overrides,
     )
     write_outputs(
         payload=payload,

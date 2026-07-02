@@ -4,6 +4,7 @@ import csv
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
 
 
@@ -51,6 +52,12 @@ def _write_csv(path: Path, rows: list[dict]) -> None:
                     for column in merge_tool.owner_review.OWNER_DECISION_COLUMNS
                 }
             )
+
+
+def _init_git_repo(path: Path) -> None:
+    subprocess.check_call(["git", "init"], cwd=path, stdout=subprocess.DEVNULL)
+    subprocess.check_call(["git", "config", "user.email", "test@example.invalid"], cwd=path)
+    subprocess.check_call(["git", "config", "user.name", "Test User"], cwd=path)
 
 
 def _audit_payload() -> dict:
@@ -158,6 +165,43 @@ def _release_surface_decision_row(decision: str) -> dict:
     }
 
 
+def _release_surface_batch_row(
+    *,
+    index: int,
+    path: str,
+    family: str,
+    token: str,
+    decision: str,
+    external_archive_reference: str = "",
+) -> dict:
+    return {
+        "row_id": f"release_surface_first-{index:03d}",
+        "path": path,
+        "path_area": "release_surface",
+        "families": [family],
+        "matched_tokens": [token],
+        "recommended_owner_decision": (
+            "delete_from_structural_repository_or_extract_only_if_owner_requires_history"
+        ),
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "recommended_owner_decision_alternate": (
+            "extract_to_molecular_or_science_repository"
+        ),
+        "owner_decision": decision,
+        "owner_identity": "scope-owner",
+        "owner_role": "product_owner",
+        "decision_timestamp_utc": "2026-07-02T00:00:00Z",
+        "evidence_reference": f"owner-review://scope-cleanup/release-surface-{index:03d}",
+        "signed_owner_exception_reference": (
+            f"signed-exception://scope-cleanup/release-surface-{index:03d}"
+        ),
+        "external_archive_reference": external_archive_reference,
+        "allowed_owner_decisions": list(
+            merge_tool.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+        ),
+    }
+
+
 def _write_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
     audit = tmp_path / "audit.json"
     manifest = tmp_path / "manifest.json"
@@ -221,6 +265,176 @@ def test_batch_merge_builds_candidate_and_validates_release_surface_first(
     assert summary["post_decision_cleanup_pending_count"] == 1
     assert summary["release_surface_first_batch_ready"] is True
     assert summary["release_surface_first_batch_application_ready"] is True
+    assert payload["safe_to_auto_apply"] is False
+    assert payload["destructive_commands_enabled"] is False
+    assert payload["manual_cleanup_application_required"] is True
+
+
+def test_batch_merge_accepts_mixed_release_surface_delete_extract_batch(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    release_rows = [
+        _release_surface_batch_row(
+            index=1,
+            path=(
+                "implementation/phase1/release_evidence/surface/"
+                "gpcr_hard_decoy_evidence_surface.json"
+            ),
+            family="molecular_docking",
+            token="gpcr",
+            decision="delete_from_structural_repository",
+        ),
+        _release_surface_batch_row(
+            index=2,
+            path=(
+                "implementation/phase1/release_evidence/surface/"
+                "h_bond_backmap_evidence_surface.json"
+            ),
+            family="molecular_science_evidence",
+            token="h_bond",
+            decision="extract_to_molecular_or_science_repository",
+            external_archive_reference="archive://molecular-scope/release-surface-002",
+        ),
+        _release_surface_batch_row(
+            index=3,
+            path=(
+                "implementation/phase1/release_evidence/surface/"
+                "pocketmd_lite_science_product_surface.json"
+            ),
+            family="molecular_dynamics",
+            token="pocketmd",
+            decision="extract_to_molecular_or_science_repository",
+            external_archive_reference="archive://molecular-scope/release-surface-003",
+        ),
+    ]
+    release_paths = [row["path"] for row in release_rows]
+    for release_path in release_paths:
+        target = tmp_path / release_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("{}\n", encoding="utf-8")
+    subprocess.check_call(
+        ["git", "add", "--", *release_paths],
+        cwd=tmp_path,
+        stdout=subprocess.DEVNULL,
+    )
+
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    base = tmp_path / "owner_decisions.json"
+    batch = tmp_path / "release_surface_first.csv"
+    candidate = tmp_path / "candidate_owner_decisions.json"
+    report = tmp_path / "candidate_owner_decisions.md"
+    _write_json(
+        audit,
+        {
+            "schema_version": "structural-scope-contamination-audit.v1",
+            "status": "quarantined",
+            "contract_pass": True,
+            "blockers": [],
+            "quarantined_non_structural_rows": [
+                {
+                    "path": "implementation/phase1/md3bead_soa.py",
+                    "git_state": "tracked",
+                    "path_area": "implementation_phase1",
+                    "families": ["molecular_dynamics"],
+                    "matched_tokens": ["md3bead"],
+                    "quarantine_status": "quarantined",
+                    "excluded_from_structural_release_surface": True,
+                },
+                *[
+                    {
+                        "path": row["path"],
+                        "git_state": "tracked",
+                        "path_area": "release_surface",
+                        "families": row["families"],
+                        "matched_tokens": row["matched_tokens"],
+                        "quarantine_status": "quarantined",
+                        "excluded_from_structural_release_surface": True,
+                    }
+                    for row in release_rows
+                ],
+            ],
+            "unquarantined_non_structural_rows": [],
+        },
+    )
+    _write_json(
+        manifest,
+        {
+            "schema_version": "structural-scope-quarantine-manifest.v1",
+            "status": "active",
+            "paths": [
+                {
+                    "path": "implementation/phase1/md3bead_soa.py",
+                    "excluded_from_structural_release_surface": True,
+                },
+                *[
+                    {
+                        "path": path,
+                        "excluded_from_structural_release_surface": True,
+                    }
+                    for path in release_paths
+                ],
+            ],
+        },
+    )
+    _write_json(base, _base_decisions_payload())
+    _write_csv(batch, release_rows)
+
+    payload = merge_tool.write_merge_candidate(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        base_owner_decisions_path=base,
+        batch_owner_decisions_path=batch,
+        out=candidate,
+        out_md=report,
+    )
+
+    assert candidate.exists()
+    assert report.exists()
+    candidate_payload = json.loads(candidate.read_text(encoding="utf-8"))
+    assert candidate_payload["blockers"] == []
+    assert [row["path"] for row in candidate_payload["decision_rows"]] == [
+        "implementation/phase1/md3bead_soa.py",
+        *release_paths,
+    ]
+    assert payload["merge_report"]["merge_contract_pass"] is True
+    assert payload["merge_report"]["base_decision_row_count"] == 1
+    assert payload["merge_report"]["batch_decision_row_count"] == 3
+    assert payload["merge_report"]["merged_decision_row_count"] == 4
+    assert payload["merge_report"]["appended_paths"] == release_paths
+    summary = payload["application_plan_summary"]
+    assert summary["owner_decision_validation_pass"] is True
+    assert summary["owner_decision_pending_count"] == 0
+    assert summary["post_decision_cleanup_pending_count"] == 3
+    assert summary["release_surface_first_batch_ready"] is True
+    assert summary["release_surface_first_batch_application_ready"] is True
+    assert summary["release_surface_first_batch_application_blockers"] == []
+    manifest_summary = summary["cleanup_command_manifest"]
+    assert manifest_summary["delete_from_structural_repository"]["paths"] == [
+        release_paths[0]
+    ]
+    extract_manifest = manifest_summary[
+        "extract_to_molecular_or_science_repository"
+    ]
+    assert extract_manifest["paths"] == release_paths[1:]
+    assert extract_manifest["external_archive_reference_count"] == 2
+    assert extract_manifest["missing_external_archive_reference_count"] == 0
+    assert extract_manifest["archive_reference_rows"] == [
+        {
+            "path": release_paths[1],
+            "external_archive_reference": (
+                "archive://molecular-scope/release-surface-002"
+            ),
+        },
+        {
+            "path": release_paths[2],
+            "external_archive_reference": (
+                "archive://molecular-scope/release-surface-003"
+            ),
+        },
+    ]
     assert payload["safe_to_auto_apply"] is False
     assert payload["destructive_commands_enabled"] is False
     assert payload["manual_cleanup_application_required"] is True

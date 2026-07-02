@@ -44,6 +44,7 @@
 - `allowed_owner_decisions`: `['delete_from_structural_repository', 'extract_to_molecular_or_science_repository']`
 - `disallowed_owner_decisions`: `['retain_quarantined_with_signed_owner_exception']`
 - `owner_decision_template.csv`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv`
+- `owner_decision_overrides_template.csv`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv`
 - `origin_context_source_report`: `implementation/phase1/release_evidence/productization/structural_scope_origin_report.json`
 - `origin_context_complete`: `True`
 
@@ -76,6 +77,7 @@
 - `batch_id`: `release_surface_first`
 - `decision_pending_count`: `3`
 - `primary_delete_path_count`: `3`
+- `owner_decision_overrides_template.csv`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.csv`
 
 | Row | Path | Primary Decision |
 |---|---|---|
@@ -103,6 +105,8 @@
 - `manual_application_required`: `False`
 - `delete_from_structural_repository.path_count`: `0`
 - `extract_to_molecular_or_science_repository.path_count`: `0`
+- `extract_to_molecular_or_science_repository.external_archive_reference_count`: `0`
+- `extract_to_molecular_or_science_repository.missing_external_archive_reference_count`: `0`
 
 ## Cleanup Application Preflight
 
@@ -110,6 +114,10 @@
 - `ready`: `False`
 - `destructive_commands_enabled`: `False`
 - `safe_to_auto_apply`: `False`
+- `extract_archive_reference_missing_count`: `0`
+- `repo_state_checked`: `True`
+- `cleanup_path_not_tracked_count`: `0`
+- `cleanup_path_missing_count`: `0`
 - blockers: none
 
 ## Claim Boundary

@@ -4,6 +4,7 @@ import importlib.util
 import csv
 import json
 from pathlib import Path
+import subprocess
 import sys
 
 
@@ -25,6 +26,12 @@ SPEC.loader.exec_module(application_plan)
 def _write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _init_git_repo(path: Path) -> None:
+    subprocess.check_call(["git", "init"], cwd=path, stdout=subprocess.DEVNULL)
+    subprocess.check_call(["git", "config", "user.email", "test@example.invalid"], cwd=path)
+    subprocess.check_call(["git", "config", "user.name", "Test User"], cwd=path)
 
 
 def _audit_payload() -> dict:
@@ -179,6 +186,24 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
             "implementation/phase1/release_evidence/productization/"
             "gpcr_hard_decoy_product_report.json"
         )
+    ]
+    next_template = payload["next_owner_review_batch_decision_template"]
+    assert next_template["decision_overrides_template_paths"] == {
+        "csv": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.overrides.template.csv"
+        ),
+        "markdown": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.overrides.template.md"
+        ),
+    }
+    assert next_template["decision_overrides_template_columns"] == [
+        "path",
+        "owner_decision",
+        "external_archive_reference",
+        "signed_owner_exception_reference",
+        "evidence_reference",
     ]
     assert [
         row["batch_id"] for row in payload["owner_review_priority_batches"]
@@ -347,6 +372,9 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
     assert payload["release_surface_first_batch_template_paths"] == (
         release_template["generated_template_paths"]
     )
+    assert payload["release_surface_first_decision_overrides_template_paths"] == (
+        release_template["mixed_decision_overrides_template_paths"]
+    )
     action_packet = payload["release_surface_first_owner_action_packet"]
     assert action_packet["schema_version"] == (
         "structural-scope-release-surface-first-owner-action-packet.v1"
@@ -408,6 +436,15 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
     assert action_packet["template_paths"] == release_template[
         "generated_template_paths"
     ]
+    assert action_packet["mixed_decision_overrides_template_paths"] == (
+        release_template["mixed_decision_overrides_template_paths"]
+    )
+    assert action_packet["mixed_decision_overrides_template_columns"] == [
+        "path",
+        "owner_decision",
+        "external_archive_reference",
+        "evidence_reference",
+    ]
     assert action_packet["owner_decision_submission_options"] == release_template[
         "owner_decision_submission_options"
     ]
@@ -446,6 +483,20 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
     assert sequence_steps["fill_release_surface_first_owner_decisions"][
         "status"
     ] == "waiting_for_owner_input"
+    assert (
+        release_template["mixed_decision_overrides_template_paths"]["csv"]
+        in sequence_steps["fill_release_surface_first_owner_decisions"][
+            "required_artifacts"
+        ]
+    )
+    assert (
+        "--decision-overrides <release-surface-decision-overrides.csv>"
+        in " ".join(
+            sequence_steps["fill_release_surface_first_owner_decisions"][
+                "materialization_commands"
+            ]
+        )
+    )
     assert sequence_steps["validate_filled_owner_decisions"][
         "runnable_now"
     ] is False
@@ -488,6 +539,22 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "structural_scope_owner_decisions.next_batch.template.md"
         ),
     }
+    assert batch_template["decision_overrides_template_paths"] == {
+        "csv": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.overrides.template.csv"
+        ),
+        "markdown": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.overrides.template.md"
+        ),
+    }
+    assert batch_template["decision_overrides_template_columns"] == [
+        "path",
+        "owner_decision",
+        "external_archive_reference",
+        "evidence_reference",
+    ]
     assert batch_template["owner_decision_submission_options"] == {
         "accepted_submission_formats": ["json", "csv"],
         "canonical_owner_decisions_path": (
@@ -515,6 +582,23 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "--owner-role <owner-role> "
             "--decision-timestamp-utc <decision-timestamp-utc> "
             "--evidence-reference <owner-evidence-reference> "
+            "--external-archive-reference <external-archive-reference-for-extract-decisions> "
+            "--fail-blocked"
+        ),
+        "fill_release_surface_owner_decisions_with_overrides_command": (
+            "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py "
+            "--template implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.template.csv "
+            "--decision-overrides <release-surface-decision-overrides.csv> "
+            "--out <filled-next-batch-owner-decisions.json> "
+            "--out-md <filled-next-batch-owner-decisions.md> "
+            "--out-csv <filled-next-batch-owner-decisions.csv> "
+            "--decision recommended_primary "
+            "--owner-identity <owner-identity> "
+            "--owner-role <owner-role> "
+            "--decision-timestamp-utc <decision-timestamp-utc> "
+            "--evidence-reference <owner-evidence-reference> "
+            "--external-archive-reference <fallback-external-archive-reference-for-extract-decisions> "
             "--fail-blocked"
         ),
         "fill_owner_decisions_from_template_command": (
@@ -530,6 +614,22 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "--decision-timestamp-utc <decision-timestamp-utc> "
             "--evidence-reference <owner-evidence-reference> "
             "--external-archive-reference <external-archive-reference-for-extract-decisions> "
+            "--fail-blocked"
+        ),
+        "fill_owner_decisions_from_template_with_overrides_command": (
+            "python3 scripts/fill_structural_scope_owner_decisions_from_template.py "
+            "--template implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.template.csv "
+            "--decision-overrides <owner-decision-overrides.csv> "
+            "--out <filled-next-batch-owner-decisions.json> "
+            "--out-md <filled-next-batch-owner-decisions.md> "
+            "--out-csv <filled-next-batch-owner-decisions.csv> "
+            "--decision recommended_primary "
+            "--owner-identity <owner-identity> "
+            "--owner-role <owner-role> "
+            "--decision-timestamp-utc <decision-timestamp-utc> "
+            "--evidence-reference <owner-evidence-reference> "
+            "--external-archive-reference <fallback-external-archive-reference-for-extract-decisions> "
             "--fail-blocked"
         ),
         "validate_canonical_owner_decisions_command": (
@@ -734,6 +834,16 @@ def test_application_plan_routes_delete_and_extract_decisions(tmp_path: Path) ->
     assert manifest["extract_to_molecular_or_science_repository"][
         "post_extract_batched_git_rm_args"
     ] == ["git", "rm", "--", "implementation/phase1/md3bead_soa.py"]
+    extract_manifest = manifest["extract_to_molecular_or_science_repository"]
+    assert extract_manifest["external_archive_reference_count"] == 1
+    assert extract_manifest["missing_external_archive_reference_count"] == 0
+    assert extract_manifest["missing_external_archive_reference_paths"] == []
+    assert extract_manifest["archive_reference_rows"] == [
+        {
+            "path": "implementation/phase1/md3bead_soa.py",
+            "external_archive_reference": "archive://molecular-scope/001",
+        }
+    ]
     rows = {row["path"]: row for row in payload["cleanup_rows"]}
     assert rows["implementation/phase1/md3bead_soa.py"]["required_action"] == (
         "extract_elsewhere_then_remove_from_structural_repository"
@@ -885,6 +995,7 @@ def test_cleanup_application_preflight_blocks_unsafe_paths() -> None:
                 "path": ".git/config",
                 "path_area": "script",
                 "owner_decision": "extract_to_molecular_or_science_repository",
+                "external_archive_reference": "archive://molecular-scope/git-config",
             },
         ]
     )
@@ -901,6 +1012,97 @@ def test_cleanup_application_preflight_blocks_unsafe_paths() -> None:
     }
     assert reasons["../outside.py"] == ("parent_traversal",)
     assert reasons[".git/config"] == ("git_metadata_path",)
+
+
+def test_cleanup_application_preflight_blocks_extract_without_archive_reference() -> None:
+    preflight = application_plan._cleanup_application_preflight(
+        [
+            {
+                "path": "implementation/phase1/md3bead_soa.py",
+                "path_area": "implementation_phase1",
+                "owner_decision": "extract_to_molecular_or_science_repository",
+                "external_archive_reference": "",
+            },
+        ]
+    )
+
+    assert preflight["status"] == "blocked_cleanup_application"
+    assert preflight["ready"] is False
+    assert preflight["extract_archive_reference_missing_count"] == 1
+    assert preflight["blockers"] == ["extract_archive_reference_missing_count=1"]
+    assert preflight["extract_archive_reference_missing_rows"] == [
+        {
+            "path": "implementation/phase1/md3bead_soa.py",
+            "path_area": "implementation_phase1",
+            "owner_decision": "extract_to_molecular_or_science_repository",
+            "external_archive_reference": "",
+            "safe_path": True,
+            "unsafe_reasons": [],
+        }
+    ]
+
+
+def test_cleanup_application_preflight_blocks_untracked_or_missing_targets(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    tracked_path = "implementation/phase1/tracked_md3bead_soa.py"
+    untracked_path = "implementation/phase1/untracked_md3bead_soa.py"
+    missing_path = "implementation/phase1/missing_md3bead_soa.py"
+    (tmp_path / tracked_path).parent.mkdir(parents=True, exist_ok=True)
+    (tmp_path / tracked_path).write_text("tracked cleanup target\n", encoding="utf-8")
+    (tmp_path / untracked_path).write_text("untracked cleanup target\n", encoding="utf-8")
+    subprocess.check_call(["git", "add", tracked_path], cwd=tmp_path)
+
+    preflight = application_plan._cleanup_application_preflight(
+        [
+            {
+                "path": tracked_path,
+                "path_area": "implementation_phase1",
+                "owner_decision": "delete_from_structural_repository",
+            },
+            {
+                "path": untracked_path,
+                "path_area": "implementation_phase1",
+                "owner_decision": "delete_from_structural_repository",
+            },
+            {
+                "path": missing_path,
+                "path_area": "implementation_phase1",
+                "owner_decision": "delete_from_structural_repository",
+            },
+        ],
+        repo_root=tmp_path,
+    )
+
+    assert preflight["status"] == "blocked_cleanup_application"
+    assert preflight["ready"] is False
+    assert preflight["repo_state_checked"] is True
+    assert preflight["cleanup_path_not_tracked_count"] == 2
+    assert preflight["cleanup_path_missing_count"] == 1
+    assert preflight["blockers"] == [
+        "cleanup_path_not_tracked_count=2",
+        "cleanup_path_missing_count=1",
+    ]
+    rows = {row["path"]: row for row in preflight["repo_state_rows"]}
+    assert rows[tracked_path] == {
+        "path": tracked_path,
+        "path_exists": True,
+        "git_tracked": True,
+        "cleanup_target_available": True,
+    }
+    assert rows[untracked_path] == {
+        "path": untracked_path,
+        "path_exists": True,
+        "git_tracked": False,
+        "cleanup_target_available": False,
+    }
+    assert rows[missing_path] == {
+        "path": missing_path,
+        "path_exists": False,
+        "git_tracked": False,
+        "cleanup_target_available": False,
+    }
 
 
 def test_application_plan_surfaces_partial_release_surface_cleanup_batch(
@@ -1086,6 +1288,158 @@ def test_application_plan_prioritizes_release_surface_cleanup_commands(
     ]["paths"]
 
 
+def test_application_plan_accepts_mixed_release_surface_delete_extract_batch(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    release_surface_rows = [
+        (
+            "implementation/phase1/release_evidence/surface/"
+            "gpcr_hard_decoy_evidence_surface.json",
+            "molecular_docking",
+            "gpcr",
+            "delete_from_structural_repository",
+        ),
+        (
+            "implementation/phase1/release_evidence/surface/"
+            "h_bond_backmap_evidence_surface.json",
+            "molecular_science_evidence",
+            "h_bond",
+            "extract_to_molecular_or_science_repository",
+        ),
+        (
+            "implementation/phase1/release_evidence/surface/"
+            "pocketmd_lite_science_product_surface.json",
+            "molecular_dynamics",
+            "pocketmd",
+            "extract_to_molecular_or_science_repository",
+        ),
+    ]
+    release_surface_paths = [row[0] for row in release_surface_rows]
+    for release_surface_path in release_surface_paths:
+        target = tmp_path / release_surface_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("{}\n", encoding="utf-8")
+    subprocess.check_call(
+        ["git", "add", "--", *release_surface_paths],
+        cwd=tmp_path,
+        stdout=subprocess.DEVNULL,
+    )
+
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    decisions_path = tmp_path / "owner_decisions.json"
+    _write_json(
+        audit_path,
+        {
+            "schema_version": "structural-scope-contamination-audit.v1",
+            "status": "quarantined",
+            "contract_pass": True,
+            "blockers": [],
+            "quarantined_non_structural_rows": [
+                {
+                    "path": path,
+                    "git_state": "tracked",
+                    "path_area": "release_surface",
+                    "families": [family],
+                    "matched_tokens": [token],
+                    "quarantine_status": "quarantined",
+                    "excluded_from_structural_release_surface": True,
+                }
+                for path, family, token, _decision in release_surface_rows
+            ],
+            "unquarantined_non_structural_rows": [],
+        },
+    )
+    _write_json(
+        manifest_path,
+        {
+            "schema_version": "structural-scope-quarantine-manifest.v1",
+            "status": "active",
+            "paths": [
+                {
+                    "path": path,
+                    "excluded_from_structural_release_surface": True,
+                }
+                for path in release_surface_paths
+            ],
+        },
+    )
+    _write_json(
+        decisions_path,
+        _decision_payload(
+            *[(path, decision) for path, _family, _token, decision in release_surface_rows]
+        ),
+    )
+
+    payload = application_plan.build_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit_path,
+        quarantine_manifest_path=manifest_path,
+        owner_decisions_path=decisions_path,
+    )
+
+    assert payload["status"] == "ready_for_cleanup_application"
+    assert payload["owner_decision_validation_pass"] is True
+    assert payload["owner_decision_pending_count"] == 0
+    assert payload["cleanup_required_count"] == 3
+    assert payload["release_surface_cleanup_required_count"] == 3
+    intake = payload["release_surface_first_batch_decision_intake"]
+    assert intake["ready_for_manual_cleanup_application"] is True
+    assert intake["expected_path_count"] == 3
+    assert intake["submitted_decision_count"] == 3
+    assert intake["delete_decision_count"] == 1
+    assert intake["extract_decision_count"] == 2
+    assert intake["blockers"] == []
+    assert payload["release_surface_first_batch_application_ready"] is True
+    assert payload["release_surface_first_batch_application_blockers"] == []
+
+    release_preflight = payload[
+        "release_surface_first_batch_cleanup_application_preflight"
+    ]
+    assert release_preflight["ready"] is True
+    assert release_preflight["repo_state_checked"] is True
+    assert release_preflight["cleanup_path_count"] == 3
+    assert release_preflight["delete_path_count"] == 1
+    assert release_preflight["extract_path_count"] == 2
+    assert release_preflight["cleanup_path_not_tracked_count"] == 0
+    assert release_preflight["cleanup_path_missing_count"] == 0
+    assert all(
+        row["cleanup_target_available"]
+        for row in release_preflight["repo_state_rows"]
+    )
+
+    manifest = payload["cleanup_command_manifest"]
+    assert manifest["release_surface_first_paths"] == release_surface_paths
+    assert manifest["delete_from_structural_repository"]["paths"] == [
+        release_surface_paths[0]
+    ]
+    extract_manifest = manifest["extract_to_molecular_or_science_repository"]
+    assert extract_manifest["paths"] == release_surface_paths[1:]
+    assert extract_manifest["external_archive_reference_count"] == 2
+    assert extract_manifest["missing_external_archive_reference_count"] == 0
+    assert extract_manifest["missing_external_archive_reference_paths"] == []
+    assert extract_manifest["archive_reference_rows"] == [
+        {
+            "path": release_surface_paths[1],
+            "external_archive_reference": "archive://molecular-scope/002",
+        },
+        {
+            "path": release_surface_paths[2],
+            "external_archive_reference": "archive://molecular-scope/003",
+        },
+    ]
+    assert payload["next_cleanup_application_batch"]["batch_id"] == (
+        "release_surface_cleanup"
+    )
+    assert payload["next_cleanup_application_batch"]["delete_paths"] == [
+        release_surface_paths[0]
+    ]
+    assert payload["next_cleanup_application_batch"]["extract_paths"] == (
+        release_surface_paths[1:]
+    )
+
+
 def test_application_plan_closes_retain_exception_decisions(tmp_path: Path) -> None:
     audit, manifest = _write_inputs(tmp_path)
     decisions = tmp_path / "owner_decisions.json"
@@ -1182,6 +1536,8 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
     next_template = tmp_path / "next_batch.template.json"
     next_template_md = tmp_path / "next_batch.template.md"
     next_template_csv = tmp_path / "next_batch.template.csv"
+    next_overrides_template_csv = tmp_path / "next_batch.overrides.csv"
+    next_overrides_template_md = tmp_path / "next_batch.overrides.md"
 
     payload = application_plan.write_application_plan(
         repo_root=tmp_path,
@@ -1193,6 +1549,8 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
         next_batch_template_out=next_template,
         next_batch_template_out_md=next_template_md,
         next_batch_template_out_csv=next_template_csv,
+        next_batch_decision_overrides_template_out_csv=next_overrides_template_csv,
+        next_batch_decision_overrides_template_out_md=next_overrides_template_md,
     )
 
     assert payload["status"] == "pending_owner_decisions"
@@ -1207,6 +1565,9 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "cleanup_required_count" in markdown
     assert "Release Surface First Batch Intake" in markdown
     assert "Cleanup Command Manifest" in markdown
+    assert "external_archive_reference_count" in markdown
+    assert "missing_external_archive_reference_count" in markdown
+    assert "extract_archive_reference_missing_count" in markdown
     assert "owner_decision_pending_count=2" in markdown
     next_payload = json.loads(next_template.read_text(encoding="utf-8"))
     assert next_payload["batch_id"] == "productization_evidence_second"
@@ -1219,6 +1580,34 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
         next_template_md.read_text(encoding="utf-8")
     )
     assert "owner_decision" in next_template_csv.read_text(encoding="utf-8")
+    override_rows = list(
+        csv.DictReader(
+            next_overrides_template_csv.read_text(encoding="utf-8").splitlines()
+        )
+    )
+    assert list(override_rows[0]) == [
+        "path",
+        "owner_decision",
+        "external_archive_reference",
+        "signed_owner_exception_reference",
+        "evidence_reference",
+    ]
+    assert override_rows == [
+        {
+            "path": (
+                "implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_product_report.json"
+            ),
+            "owner_decision": "",
+            "external_archive_reference": "",
+            "signed_owner_exception_reference": "",
+            "evidence_reference": "",
+        }
+    ]
+    next_overrides_markdown = next_overrides_template_md.read_text(encoding="utf-8")
+    assert "Next Batch Decision Overrides Template" in next_overrides_markdown
+    assert "Blank rows intentionally block validation" in next_overrides_markdown
+    assert "retain_quarantined_with_signed_owner_exception" in next_overrides_markdown
 
 
 def test_application_plan_writes_release_surface_first_template(
@@ -1274,9 +1663,13 @@ def test_application_plan_writes_release_surface_first_template(
     next_template = tmp_path / "next_batch.template.json"
     next_template_md = tmp_path / "next_batch.template.md"
     next_template_csv = tmp_path / "next_batch.template.csv"
+    next_overrides_template_csv = tmp_path / "next_batch.overrides.csv"
+    next_overrides_template_md = tmp_path / "next_batch.overrides.md"
     release_template = tmp_path / "release_surface_first.template.json"
     release_template_md = tmp_path / "release_surface_first.template.md"
     release_template_csv = tmp_path / "release_surface_first.template.csv"
+    release_overrides_template_csv = tmp_path / "release_surface_first.overrides.csv"
+    release_overrides_template_md = tmp_path / "release_surface_first.overrides.md"
 
     application_plan.write_application_plan(
         repo_root=tmp_path,
@@ -1289,9 +1682,17 @@ def test_application_plan_writes_release_surface_first_template(
         next_batch_template_out=next_template,
         next_batch_template_out_md=next_template_md,
         next_batch_template_out_csv=next_template_csv,
+        next_batch_decision_overrides_template_out_csv=next_overrides_template_csv,
+        next_batch_decision_overrides_template_out_md=next_overrides_template_md,
         release_surface_first_batch_template_out=release_template,
         release_surface_first_batch_template_out_md=release_template_md,
         release_surface_first_batch_template_out_csv=release_template_csv,
+        release_surface_first_decision_overrides_template_out_csv=(
+            release_overrides_template_csv
+        ),
+        release_surface_first_decision_overrides_template_out_md=(
+            release_overrides_template_md
+        ),
     )
 
     template_payload = json.loads(release_template.read_text(encoding="utf-8"))
@@ -1306,6 +1707,29 @@ def test_application_plan_writes_release_surface_first_template(
     assert template_payload["decision_rows"][0]["first_added_commit_short_sha"] == (
         "01e6fe1b"
     )
+    assert template_payload["mixed_decision_overrides_template_paths"] == {
+        "csv": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.release_surface_first.overrides.template.csv"
+        ),
+        "markdown": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.release_surface_first.overrides.template.md"
+        ),
+    }
+    assert template_payload["mixed_decision_overrides_template_rows"] == [
+        {
+            "row_id": "release_surface_first-001",
+            "path": release_surface_path,
+            "recommended_owner_decision_primary": "delete_from_structural_repository",
+            "recommended_owner_decision_alternate": (
+                "extract_to_molecular_or_science_repository"
+            ),
+            "owner_decision": "",
+            "external_archive_reference": "",
+            "evidence_reference": "",
+        }
+    ]
     assert template_payload["primary_cleanup_preview"]["preconditions"] == [
         (
             "owner fills all release_surface_first rows in "
@@ -1336,11 +1760,22 @@ def test_application_plan_writes_release_surface_first_template(
         "--fail-release-surface-first-blocked"
     )
     next_markdown = next_template_md.read_text(encoding="utf-8")
+    next_overrides_markdown = next_overrides_template_md.read_text(encoding="utf-8")
     release_markdown = release_template_md.read_text(encoding="utf-8")
+    release_overrides_markdown = release_overrides_template_md.read_text(
+        encoding="utf-8"
+    )
     assert "Release Surface First Batch" in release_markdown
     assert "pocketmd_productization_evidence_wave" in release_markdown
     assert "01e6fe1b 2026-06-30" in release_markdown
     assert "merge_and_validate_filled_csv_command" in release_markdown
+    assert "Mixed Decision Overrides Template" in release_markdown
+    assert "Release Surface Mixed Decision Overrides Template" in (
+        release_overrides_markdown
+    )
+    assert "Blank rows intentionally block validation" in release_overrides_markdown
+    assert "Blank rows intentionally block validation" in next_overrides_markdown
+    assert "Next Batch Decision Overrides Template" in next_overrides_markdown
     assert (
         "`external_archive_reference`: required when `owner_decision` is "
         "`extract_to_molecular_or_science_repository`"
@@ -1355,6 +1790,42 @@ def test_application_plan_writes_release_surface_first_template(
     assert "## Post Batch Verification" in release_markdown
     assert "## Owner Decision Submission" in next_markdown
     assert "## Owner Decision Submission" in release_markdown
+    assert "fill_release_surface_owner_decisions_command" in release_markdown
+    assert (
+        "fill_release_surface_owner_decisions_with_overrides_command"
+        in release_markdown
+    )
+    assert "fill_owner_decisions_from_template_command" in release_markdown
+    assert (
+        "fill_owner_decisions_from_template_with_overrides_command"
+        in release_markdown
+    )
+    assert "fill_release_surface_owner_decisions_command" in next_markdown
+    assert (
+        "fill_release_surface_owner_decisions_with_overrides_command"
+        in next_markdown
+    )
+    assert "fill_owner_decisions_from_template_command" in next_markdown
+    assert (
+        "fill_owner_decisions_from_template_with_overrides_command"
+        in next_markdown
+    )
+    assert "--decision-overrides <release-surface-decision-overrides.csv>" in (
+        release_markdown
+    )
+    assert "--decision-overrides <release-surface-decision-overrides.csv>" in (
+        next_markdown
+    )
+    assert "--decision-overrides <owner-decision-overrides.csv>" in release_markdown
+    assert "--decision-overrides <owner-decision-overrides.csv>" in next_markdown
+    assert (
+        "--external-archive-reference <external-archive-reference-for-extract-decisions>"
+        in release_markdown
+    )
+    assert (
+        "--external-archive-reference <external-archive-reference-for-extract-decisions>"
+        in next_markdown
+    )
     assert "--owner-decisions <filled-next-batch-owner-decisions.csv>" in next_markdown
     assert (
         "--owner-decisions <filled-release-surface-first-owner-decisions.csv>"
@@ -1362,6 +1833,17 @@ def test_application_plan_writes_release_surface_first_template(
     )
     assert "--fail-release-surface-first-blocked" in next_markdown
     assert "--fail-release-surface-first-blocked" in release_markdown
+    next_override_rows = list(
+        csv.DictReader(
+            next_overrides_template_csv.read_text(encoding="utf-8").splitlines()
+        )
+    )
+    assert list(next_override_rows[0]) == [
+        "path",
+        "owner_decision",
+        "external_archive_reference",
+        "evidence_reference",
+    ]
     csv_rows = list(
         csv.DictReader(release_template_csv.read_text(encoding="utf-8").splitlines())
     )
@@ -1371,6 +1853,25 @@ def test_application_plan_writes_release_surface_first_template(
     )
     assert csv_rows[0]["origin_wave"] == "pocketmd_productization_evidence_wave"
     assert csv_rows[0]["first_added_commit_short_sha"] == "01e6fe1b"
+    override_rows = list(
+        csv.DictReader(
+            release_overrides_template_csv.read_text(encoding="utf-8").splitlines()
+        )
+    )
+    assert list(override_rows[0]) == [
+        "path",
+        "owner_decision",
+        "external_archive_reference",
+        "evidence_reference",
+    ]
+    assert override_rows == [
+        {
+            "path": release_surface_path,
+            "owner_decision": "",
+            "external_archive_reference": "",
+            "evidence_reference": "",
+        }
+    ]
 
 
 def test_application_plan_fail_invalid_owner_decisions_exit_code(
@@ -1429,6 +1930,13 @@ def test_application_plan_fail_invalid_owner_decisions_exit_code(
     assert json.loads((tmp_path / "valid_plan.json").read_text(encoding="utf-8"))[
         "owner_decision_validation_pass"
     ] is True
+    valid_markdown = (tmp_path / "valid_plan.md").read_text(encoding="utf-8")
+    assert "archive://molecular-scope/001" in valid_markdown
+    assert (
+        "extract_to_molecular_or_science_repository.external_archive_reference_count"
+        in valid_markdown
+    )
+    assert "| Extract Path | External Archive Reference |" in valid_markdown
 
 
 def test_application_plan_fail_release_surface_first_blocked_exit_code(

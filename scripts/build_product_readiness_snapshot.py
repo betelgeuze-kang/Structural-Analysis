@@ -3203,12 +3203,24 @@ def build_snapshot(
                         "release_surface_first_batch_template_paths"
                     )
                 ),
+                "release_surface_first_decision_overrides_template_paths": _as_dict(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_first_decision_overrides_template_paths"
+                    )
+                ),
                 "next_batch_template_paths": _as_dict(
                     _as_dict(
                         structural_scope_cleanup_plan.get(
                             "next_owner_review_batch_decision_template"
                         )
                     ).get("generated_template_paths")
+                ),
+                "next_batch_decision_overrides_template_paths": _as_dict(
+                    _as_dict(
+                        structural_scope_cleanup_plan.get(
+                            "next_owner_review_batch_decision_template"
+                        )
+                    ).get("decision_overrides_template_paths")
                 ),
                 "owner_decision_template_paths": _as_dict(
                     structural_scope_cleanup_plan.get(

@@ -12,8 +12,14 @@
     "blockers": [],
     "claim_boundary": "This preflight is non-mutating. It only checks owner-approved cleanup rows before a human manually applies git rm or external extract-then-remove actions.",
     "cleanup_path_count": 0,
+    "cleanup_path_missing_count": 0,
+    "cleanup_path_missing_rows": [],
+    "cleanup_path_not_tracked_count": 0,
+    "cleanup_path_not_tracked_rows": [],
     "delete_path_count": 0,
     "destructive_commands_enabled": false,
+    "extract_archive_reference_missing_count": 0,
+    "extract_archive_reference_missing_rows": [],
     "extract_path_count": 0,
     "git_rm_command_preview_only": true,
     "manual_application_required": false,
@@ -21,6 +27,8 @@
     "ready": false,
     "release_surface_policy_violation_count": 0,
     "release_surface_policy_violation_rows": [],
+    "repo_state_checked": true,
+    "repo_state_rows": [],
     "requires_human_confirmation": false,
     "retain_exception_cleanup_row_count": 0,
     "safe_to_auto_apply": false,
@@ -48,6 +56,10 @@
       ]
     },
     "extract_to_molecular_or_science_repository": {
+      "archive_reference_rows": [],
+      "external_archive_reference_count": 0,
+      "missing_external_archive_reference_count": 0,
+      "missing_external_archive_reference_paths": [],
       "path_count": 0,
       "paths": [],
       "post_apply_verification": [
@@ -82,13 +94,13 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T22:02:06.843179+00:00",
+  "generated_at": "2026-07-02T23:09:07.578174+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:9a74f3781a36ab4cecda3d80cc5249026a609cd044565d0fb936c0ca1833b96a",
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:beea4a8604da8c2dba697f3eff88c163e0f43cd67ee910142911ba6caf659f5b",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:64c6d94f32cdf1b5076515fcb0497cf0be545e37046dfc6e9160c140c1794fa1",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:74d468933419c7f29e55517e82c873b09fbdaae54fbfd04cf51cc3020ef096f4",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:2e22342965b8172b0279a94033689244d63557884b4259d559dfdeccc78a786e",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:605ea030922af67534c69fd716a89c3ff4a21dd35a23161bd875628551766307"
   },
   "next_actions": [
@@ -127,6 +139,45 @@
     "claim_boundary": "This is a batch fill-in template and cleanup preview only. It is not an owner decision, does not delete files, and does not close scope cleanup without recorded owner evidence and refreshed audits.",
     "conditional_required_fields": [
       "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository"
+    ],
+    "decision_overrides_template_columns": [
+      "path",
+      "owner_decision",
+      "external_archive_reference",
+      "evidence_reference"
+    ],
+    "decision_overrides_template_paths": {
+      "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.csv",
+      "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.md"
+    },
+    "decision_overrides_template_rows": [
+      {
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "owner_decision": "",
+        "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-001"
+      },
+      {
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "owner_decision": "",
+        "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-002"
+      },
+      {
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "owner_decision": "",
+        "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-003"
+      }
     ],
     "decision_pending_count": 3,
     "decision_rows": [
@@ -242,7 +293,9 @@
       "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
       "claim_boundary": "A filled JSON/CSV can validate a scoped owner-review batch, but final closure still requires recorded owner evidence, manual cleanup where applicable, and refreshed structural scope receipts.",
       "fill_owner_decisions_from_template_command": "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv --out <filled-next-batch-owner-decisions.json> --out-md <filled-next-batch-owner-decisions.md> --out-csv <filled-next-batch-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
-      "fill_release_surface_owner_decisions_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv --out <filled-next-batch-owner-decisions.json> --out-md <filled-next-batch-owner-decisions.md> --out-csv <filled-next-batch-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked",
+      "fill_owner_decisions_from_template_with_overrides_command": "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv --decision-overrides <owner-decision-overrides.csv> --out <filled-next-batch-owner-decisions.json> --out-md <filled-next-batch-owner-decisions.md> --out-csv <filled-next-batch-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <fallback-external-archive-reference-for-extract-decisions> --fail-blocked",
+      "fill_release_surface_owner_decisions_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv --out <filled-next-batch-owner-decisions.json> --out-md <filled-next-batch-owner-decisions.md> --out-csv <filled-next-batch-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
+      "fill_release_surface_owner_decisions_with_overrides_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv --decision-overrides <release-surface-decision-overrides.csv> --out <filled-next-batch-owner-decisions.json> --out-md <filled-next-batch-owner-decisions.md> --out-csv <filled-next-batch-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <fallback-external-archive-reference-for-extract-decisions> --fail-blocked",
       "filled_csv_placeholder": "<filled-next-batch-owner-decisions.csv>",
       "filled_json_placeholder": "<filled-next-batch-owner-decisions.json>",
       "filled_markdown_placeholder": "<filled-next-batch-owner-decisions.md>",
@@ -3818,8 +3871,14 @@
     "blockers": [],
     "claim_boundary": "This preflight is non-mutating. It only checks owner-approved cleanup rows before a human manually applies git rm or external extract-then-remove actions.",
     "cleanup_path_count": 0,
+    "cleanup_path_missing_count": 0,
+    "cleanup_path_missing_rows": [],
+    "cleanup_path_not_tracked_count": 0,
+    "cleanup_path_not_tracked_rows": [],
     "delete_path_count": 0,
     "destructive_commands_enabled": false,
+    "extract_archive_reference_missing_count": 0,
+    "extract_archive_reference_missing_rows": [],
     "extract_path_count": 0,
     "git_rm_command_preview_only": true,
     "manual_application_required": false,
@@ -3827,6 +3886,8 @@
     "ready": false,
     "release_surface_policy_violation_count": 0,
     "release_surface_policy_violation_rows": [],
+    "repo_state_checked": true,
+    "repo_state_rows": [],
     "requires_human_confirmation": false,
     "retain_exception_cleanup_row_count": 0,
     "safe_to_auto_apply": false,
@@ -4045,6 +4106,45 @@
       "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
       "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
     },
+    "mixed_decision_overrides_template_columns": [
+      "path",
+      "owner_decision",
+      "external_archive_reference",
+      "evidence_reference"
+    ],
+    "mixed_decision_overrides_template_paths": {
+      "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv",
+      "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.md"
+    },
+    "mixed_decision_overrides_template_rows": [
+      {
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "owner_decision": "",
+        "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-001"
+      },
+      {
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "owner_decision": "",
+        "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-002"
+      },
+      {
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "owner_decision": "",
+        "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-003"
+      }
+    ],
     "origin_context_complete": true,
     "origin_context_fields": [
       "origin_wave",
@@ -4066,7 +4166,9 @@
       "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
       "claim_boundary": "A filled JSON/CSV can validate a scoped owner-review batch, but final closure still requires recorded owner evidence, manual cleanup where applicable, and refreshed structural scope receipts.",
       "fill_owner_decisions_from_template_command": "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
-      "fill_release_surface_owner_decisions_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked",
+      "fill_owner_decisions_from_template_with_overrides_command": "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --decision-overrides <owner-decision-overrides.csv> --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <fallback-external-archive-reference-for-extract-decisions> --fail-blocked",
+      "fill_release_surface_owner_decisions_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
+      "fill_release_surface_owner_decisions_with_overrides_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --decision-overrides <release-surface-decision-overrides.csv> --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <fallback-external-archive-reference-for-extract-decisions> --fail-blocked",
       "filled_csv_placeholder": "<filled-release-surface-first-owner-decisions.csv>",
       "filled_json_placeholder": "<filled-release-surface-first-owner-decisions.json>",
       "filled_markdown_placeholder": "<filled-release-surface-first-owner-decisions.md>",
@@ -4133,6 +4235,10 @@
     "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
   },
   "release_surface_first_current_step_id": "fill_release_surface_first_owner_decisions",
+  "release_surface_first_decision_overrides_template_paths": {
+    "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv",
+    "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.md"
+  },
   "release_surface_first_operator_sequence": {
     "batch_id": "release_surface_first",
     "blockers": [
@@ -4154,13 +4260,17 @@
           "retain_quarantined_with_signed_owner_exception is not used for release-surface paths"
         ],
         "materialization_commands": [
-          "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked",
-          "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked"
+          "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
+          "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --decision-overrides <release-surface-decision-overrides.csv> --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <fallback-external-archive-reference-for-extract-decisions> --fail-blocked",
+          "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
+          "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --decision-overrides <owner-decision-overrides.csv> --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <fallback-external-archive-reference-for-extract-decisions> --fail-blocked"
         ],
         "owner": "scope_owner",
         "required_artifacts": [
           "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv"
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.md"
         ],
         "runnable_now": true,
         "status": "waiting_for_owner_input",
@@ -4337,6 +4447,16 @@
     "disallowed_owner_decisions": [
       "retain_quarantined_with_signed_owner_exception"
     ],
+    "mixed_decision_overrides_template_columns": [
+      "path",
+      "owner_decision",
+      "external_archive_reference",
+      "evidence_reference"
+    ],
+    "mixed_decision_overrides_template_paths": {
+      "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv",
+      "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.md"
+    },
     "origin_context_complete": true,
     "origin_context_missing_path_count": 0,
     "origin_context_missing_paths": [],
@@ -4351,7 +4471,9 @@
       "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
       "claim_boundary": "A filled JSON/CSV can validate a scoped owner-review batch, but final closure still requires recorded owner evidence, manual cleanup where applicable, and refreshed structural scope receipts.",
       "fill_owner_decisions_from_template_command": "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
-      "fill_release_surface_owner_decisions_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked",
+      "fill_owner_decisions_from_template_with_overrides_command": "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --decision-overrides <owner-decision-overrides.csv> --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <fallback-external-archive-reference-for-extract-decisions> --fail-blocked",
+      "fill_release_surface_owner_decisions_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
+      "fill_release_surface_owner_decisions_with_overrides_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --decision-overrides <release-surface-decision-overrides.csv> --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <fallback-external-archive-reference-for-extract-decisions> --fail-blocked",
       "filled_csv_placeholder": "<filled-release-surface-first-owner-decisions.csv>",
       "filled_json_placeholder": "<filled-release-surface-first-owner-decisions.json>",
       "filled_markdown_placeholder": "<filled-release-surface-first-owner-decisions.md>",
@@ -4438,7 +4560,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet_and_origin_report",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+  "source_commit_sha": "7dd6bc6cf09267eb2dc88b545620d72b58d222e2",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",

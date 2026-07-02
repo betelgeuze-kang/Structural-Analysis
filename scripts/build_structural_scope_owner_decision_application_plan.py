@@ -8,6 +8,7 @@ import csv
 from io import StringIO
 import json
 from pathlib import Path
+import subprocess
 import sys
 from typing import Any
 
@@ -33,6 +34,12 @@ DEFAULT_NEXT_BATCH_TEMPLATE = (
 )
 DEFAULT_NEXT_BATCH_TEMPLATE_MD = DEFAULT_NEXT_BATCH_TEMPLATE.with_suffix(".md")
 DEFAULT_NEXT_BATCH_TEMPLATE_CSV = DEFAULT_NEXT_BATCH_TEMPLATE.with_suffix(".csv")
+DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_CSV = (
+    PRODUCTIZATION / "structural_scope_owner_decisions.next_batch.overrides.template.csv"
+)
+DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_MD = (
+    DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_CSV.with_suffix(".md")
+)
 DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE = (
     PRODUCTIZATION
     / "structural_scope_owner_decisions.release_surface_first.template.json"
@@ -42,6 +49,13 @@ DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_MD = (
 )
 DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV = (
     DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE.with_suffix(".csv")
+)
+DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_CSV = (
+    PRODUCTIZATION
+    / "structural_scope_owner_decisions.release_surface_first.overrides.template.csv"
+)
+DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_MD = (
+    DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_CSV.with_suffix(".md")
 )
 ORIGIN_CONTEXT_FIELDS = (
     "origin_wave",
@@ -126,6 +140,15 @@ def _csv_text(rows: list[dict[str, Any]]) -> str:
     return output.getvalue()
 
 
+def _custom_csv_text(rows: list[dict[str, Any]], fieldnames: list[str]) -> str:
+    output = StringIO()
+    writer = csv.DictWriter(output, fieldnames=fieldnames, lineterminator="\n")
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({field: str(row.get(field, "")) for field in fieldnames})
+    return output.getvalue()
+
+
 def _family_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
     counts: dict[str, int] = {}
     for row in rows:
@@ -138,6 +161,24 @@ def _family_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
 
 def _git_rm_args(paths: list[str]) -> list[str]:
     return ["git", "rm", "--", *paths] if paths else []
+
+
+def _git_tracked_paths(repo_root: Path, paths: list[str]) -> set[str]:
+    if not paths or not (repo_root / ".git").exists():
+        return set()
+    try:
+        output = subprocess.check_output(
+            ["git", "ls-files", "-z", "--", *paths],
+            cwd=repo_root,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return set()
+    return {
+        item.decode("utf-8", errors="replace")
+        for item in output.split(b"\0")
+        if item
+    }
 
 
 def _origin_rows_by_path(origin_report: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -382,6 +423,21 @@ def _cleanup_command_manifest(cleanup_rows: list[dict[str, Any]]) -> dict[str, A
         for row in cleanup_rows
         if row["owner_decision"] == "extract_to_molecular_or_science_repository"
     ]
+    extract_archive_reference_rows = [
+        {
+            "path": row["path"],
+            "external_archive_reference": _text(
+                row.get("external_archive_reference")
+            ),
+        }
+        for row in cleanup_rows
+        if row["owner_decision"] == "extract_to_molecular_or_science_repository"
+    ]
+    extract_missing_archive_reference_paths = [
+        row["path"]
+        for row in extract_archive_reference_rows
+        if not row["external_archive_reference"]
+    ]
     release_surface_first_paths = [
         row["path"] for row in cleanup_rows if row["path_area"] == "release_surface"
     ]
@@ -407,6 +463,17 @@ def _cleanup_command_manifest(cleanup_rows: list[dict[str, Any]]) -> dict[str, A
         "extract_to_molecular_or_science_repository": {
             "path_count": len(extract_paths),
             "paths": extract_paths,
+            "external_archive_reference_count": (
+                len(extract_archive_reference_rows)
+                - len(extract_missing_archive_reference_paths)
+            ),
+            "missing_external_archive_reference_count": len(
+                extract_missing_archive_reference_paths
+            ),
+            "missing_external_archive_reference_paths": (
+                extract_missing_archive_reference_paths
+            ),
+            "archive_reference_rows": extract_archive_reference_rows,
             "post_extract_batched_git_rm_args": _git_rm_args(extract_paths),
             "preconditions": [
                 "owner_decision_validation_pass=true",
@@ -437,11 +504,26 @@ def _unsafe_cleanup_path_reasons(path: str) -> list[str]:
     return reasons
 
 
-def _cleanup_application_preflight(cleanup_rows: list[dict[str, Any]]) -> dict[str, Any]:
+def _cleanup_application_preflight(
+    cleanup_rows: list[dict[str, Any]],
+    *,
+    repo_root: Path | None = None,
+) -> dict[str, Any]:
     path_safety_rows: list[dict[str, Any]] = []
     unsafe_rows: list[dict[str, Any]] = []
     release_surface_policy_violations: list[dict[str, Any]] = []
     retain_cleanup_rows: list[dict[str, Any]] = []
+    extract_missing_archive_reference_rows: list[dict[str, Any]] = []
+    cleanup_paths = [_text(row.get("path")) for row in cleanup_rows]
+    repo_state_checked = bool(repo_root and (repo_root / ".git").exists())
+    tracked_paths = (
+        _git_tracked_paths(repo_root, cleanup_paths)
+        if repo_root is not None and repo_state_checked
+        else set()
+    )
+    repo_state_rows: list[dict[str, Any]] = []
+    untracked_rows: list[dict[str, Any]] = []
+    missing_rows: list[dict[str, Any]] = []
     cleanup_decisions = {
         "delete_from_structural_repository",
         "extract_to_molecular_or_science_repository",
@@ -453,9 +535,26 @@ def _cleanup_application_preflight(cleanup_rows: list[dict[str, Any]]) -> dict[s
             "path": path,
             "path_area": _text(row.get("path_area")),
             "owner_decision": _text(row.get("owner_decision")),
+            "external_archive_reference": _text(
+                row.get("external_archive_reference")
+            ),
             "safe_path": not reasons,
             "unsafe_reasons": reasons,
         }
+        if repo_root is not None and repo_state_checked:
+            path_exists = bool(path and (repo_root / path).exists())
+            git_tracked = path in tracked_paths
+            repo_state_row = {
+                "path": path,
+                "path_exists": path_exists,
+                "git_tracked": git_tracked,
+                "cleanup_target_available": path_exists and git_tracked,
+            }
+            repo_state_rows.append(repo_state_row)
+            if not git_tracked:
+                untracked_rows.append(repo_state_row)
+            if not path_exists:
+                missing_rows.append(repo_state_row)
         path_safety_rows.append(safety_row)
         if reasons:
             unsafe_rows.append(safety_row)
@@ -466,6 +565,12 @@ def _cleanup_application_preflight(cleanup_rows: list[dict[str, Any]]) -> dict[s
             release_surface_policy_violations.append(safety_row)
         if _text(row.get("owner_decision")) == "retain_quarantined_with_signed_owner_exception":
             retain_cleanup_rows.append(safety_row)
+        if (
+            _text(row.get("owner_decision"))
+            == "extract_to_molecular_or_science_repository"
+            and not _text(row.get("external_archive_reference"))
+        ):
+            extract_missing_archive_reference_rows.append(safety_row)
     blockers = [
         *(
             [f"unsafe_cleanup_path_count={len(unsafe_rows)}"]
@@ -483,6 +588,24 @@ def _cleanup_application_preflight(cleanup_rows: list[dict[str, Any]]) -> dict[s
         *(
             [f"retain_exception_cleanup_row_count={len(retain_cleanup_rows)}"]
             if retain_cleanup_rows
+            else []
+        ),
+        *(
+            [
+                "extract_archive_reference_missing_count="
+                f"{len(extract_missing_archive_reference_rows)}"
+            ]
+            if extract_missing_archive_reference_rows
+            else []
+        ),
+        *(
+            [f"cleanup_path_not_tracked_count={len(untracked_rows)}"]
+            if untracked_rows
+            else []
+        ),
+        *(
+            [f"cleanup_path_missing_count={len(missing_rows)}"]
+            if missing_rows
             else []
         ),
     ]
@@ -515,11 +638,23 @@ def _cleanup_application_preflight(cleanup_rows: list[dict[str, Any]]) -> dict[s
             release_surface_policy_violations
         ),
         "retain_exception_cleanup_row_count": len(retain_cleanup_rows),
+        "extract_archive_reference_missing_count": len(
+            extract_missing_archive_reference_rows
+        ),
+        "repo_state_checked": repo_state_checked,
+        "cleanup_path_not_tracked_count": len(untracked_rows),
+        "cleanup_path_missing_count": len(missing_rows),
         "path_safety_rows": path_safety_rows,
         "unsafe_cleanup_path_rows": unsafe_rows,
         "release_surface_policy_violation_rows": (
             release_surface_policy_violations
         ),
+        "extract_archive_reference_missing_rows": (
+            extract_missing_archive_reference_rows
+        ),
+        "repo_state_rows": repo_state_rows,
+        "cleanup_path_not_tracked_rows": untracked_rows,
+        "cleanup_path_missing_rows": missing_rows,
         "destructive_commands_enabled": False,
         "safe_to_auto_apply": False,
         "manual_application_required": bool(cleanup_rows),
@@ -693,6 +828,44 @@ def _decision_template_row(row: dict[str, Any], *, index: int, batch_id: str) ->
     }
 
 
+def _decision_overrides_template_rows(
+    decision_rows: list[dict[str, Any]],
+    *,
+    include_signed_owner_exception: bool,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for row in decision_rows:
+        override_row = {
+            "row_id": row["row_id"],
+            "path": row["path"],
+            "recommended_owner_decision_primary": row[
+                "recommended_owner_decision_primary"
+            ],
+            "recommended_owner_decision_alternate": row[
+                "recommended_owner_decision_alternate"
+            ],
+            "owner_decision": "",
+            "external_archive_reference": "",
+            "evidence_reference": "",
+        }
+        if include_signed_owner_exception:
+            override_row["signed_owner_exception_reference"] = ""
+        rows.append(override_row)
+    return rows
+
+
+def _decision_overrides_template_columns(*, include_signed_owner_exception: bool) -> list[str]:
+    columns = [
+        "path",
+        "owner_decision",
+        "external_archive_reference",
+    ]
+    if include_signed_owner_exception:
+        columns.append("signed_owner_exception_reference")
+    columns.append("evidence_reference")
+    return columns
+
+
 def _next_batch_decision_template(
     *,
     pending_owner_decision_rows: list[dict[str, Any]],
@@ -729,6 +902,14 @@ def _next_batch_decision_template(
         if path_area == "release_surface"
         else "--fail-invalid-owner-decisions"
     )
+    include_signed_owner_exception = path_area != "release_surface"
+    override_template_rows = _decision_overrides_template_rows(
+        decision_rows,
+        include_signed_owner_exception=include_signed_owner_exception,
+    )
+    override_template_columns = _decision_overrides_template_columns(
+        include_signed_owner_exception=include_signed_owner_exception
+    )
     return {
         "schema_version": owner_review.DECISION_SCHEMA_VERSION,
         "batch_id": batch_id,
@@ -741,6 +922,12 @@ def _next_batch_decision_template(
             "csv": DEFAULT_NEXT_BATCH_TEMPLATE_CSV.as_posix(),
             "markdown": DEFAULT_NEXT_BATCH_TEMPLATE_MD.as_posix(),
         },
+        "decision_overrides_template_paths": {
+            "csv": DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_CSV.as_posix(),
+            "markdown": DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_MD.as_posix(),
+        },
+        "decision_overrides_template_columns": override_template_columns,
+        "decision_overrides_template_rows": override_template_rows,
         "owner_decision_submission_options": _owner_decision_submission_options(
             template_csv_path=DEFAULT_NEXT_BATCH_TEMPLATE_CSV.as_posix(),
             validation_flag=validation_flag,
@@ -846,6 +1033,22 @@ def _owner_decision_submission_options(
             "--owner-role <owner-role> "
             "--decision-timestamp-utc <decision-timestamp-utc> "
             "--evidence-reference <owner-evidence-reference> "
+            "--external-archive-reference <external-archive-reference-for-extract-decisions> "
+            "--fail-blocked"
+        ),
+        "fill_release_surface_owner_decisions_with_overrides_command": (
+            "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py "
+            f"--template {template_csv_path} "
+            "--decision-overrides <release-surface-decision-overrides.csv> "
+            f"--out {filled_json_placeholder} "
+            f"--out-md {filled_md_placeholder} "
+            f"--out-csv {filled_csv_placeholder} "
+            "--decision recommended_primary "
+            "--owner-identity <owner-identity> "
+            "--owner-role <owner-role> "
+            "--decision-timestamp-utc <decision-timestamp-utc> "
+            "--evidence-reference <owner-evidence-reference> "
+            "--external-archive-reference <fallback-external-archive-reference-for-extract-decisions> "
             "--fail-blocked"
         ),
         "fill_owner_decisions_from_template_command": (
@@ -860,6 +1063,21 @@ def _owner_decision_submission_options(
             "--decision-timestamp-utc <decision-timestamp-utc> "
             "--evidence-reference <owner-evidence-reference> "
             "--external-archive-reference <external-archive-reference-for-extract-decisions> "
+            "--fail-blocked"
+        ),
+        "fill_owner_decisions_from_template_with_overrides_command": (
+            "python3 scripts/fill_structural_scope_owner_decisions_from_template.py "
+            f"--template {template_csv_path} "
+            "--decision-overrides <owner-decision-overrides.csv> "
+            f"--out {filled_json_placeholder} "
+            f"--out-md {filled_md_placeholder} "
+            f"--out-csv {filled_csv_placeholder} "
+            "--decision recommended_primary "
+            "--owner-identity <owner-identity> "
+            "--owner-role <owner-role> "
+            "--decision-timestamp-utc <decision-timestamp-utc> "
+            "--evidence-reference <owner-evidence-reference> "
+            "--external-archive-reference <fallback-external-archive-reference-for-extract-decisions> "
             "--fail-blocked"
         ),
         "validate_canonical_owner_decisions_command": (
@@ -932,6 +1150,10 @@ def _release_surface_first_batch_decision_template(
     origin_context_missing_paths = [
         row["path"] for row in decision_rows if not row["first_added_commit_sha"]
     ]
+    override_template_rows = _decision_overrides_template_rows(
+        decision_rows,
+        include_signed_owner_exception=False,
+    )
     primary_delete_paths = [
         row["path"]
         for row in decision_rows
@@ -966,6 +1188,16 @@ def _release_surface_first_batch_decision_template(
             "csv": DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV.as_posix(),
             "markdown": DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_MD.as_posix(),
         },
+        "mixed_decision_overrides_template_paths": {
+            "csv": DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_CSV.as_posix(),
+            "markdown": DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_MD.as_posix(),
+        },
+        "mixed_decision_overrides_template_columns": (
+            _decision_overrides_template_columns(
+                include_signed_owner_exception=False
+            )
+        ),
+        "mixed_decision_overrides_template_rows": override_template_rows,
         "owner_decision_submission_options": _owner_decision_submission_options(
             template_csv_path=DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV.as_posix(),
             validation_flag="--fail-release-surface-first-blocked",
@@ -1096,6 +1328,15 @@ def _release_surface_first_owner_action_packet(
             for row in decision_rows
         ],
         "template_paths": _as_dict(template.get("generated_template_paths")),
+        "mixed_decision_overrides_template_paths": _as_dict(
+            template.get("mixed_decision_overrides_template_paths")
+        ),
+        "mixed_decision_overrides_template_columns": [
+            str(item)
+            for item in _as_list(
+                template.get("mixed_decision_overrides_template_columns")
+            )
+        ],
         "origin_context_source_report": _text(
             template.get("origin_context_source_report")
         ),
@@ -1132,6 +1373,9 @@ def _release_surface_first_operator_sequence(
         return {}
     submission = _as_dict(action_packet.get("owner_decision_submission_options"))
     template_paths = _as_dict(action_packet.get("template_paths"))
+    overrides_template_paths = _as_dict(
+        action_packet.get("mixed_decision_overrides_template_paths")
+    )
     pending_decision_count = int(action_packet.get("pending_decision_count", 0) or 0)
     intake_ready = bool(intake.get("ready_for_manual_cleanup_application"))
     preflight_ready = bool(cleanup_preflight.get("ready"))
@@ -1159,13 +1403,28 @@ def _release_surface_first_operator_sequence(
             "status": "waiting_for_owner_input" if owner_input_waiting else "complete",
             "runnable_now": True,
             "required_artifacts": [
-                value for value in [template_paths.get("json"), template_paths.get("csv")] if value
+                value
+                for value in [
+                    template_paths.get("json"),
+                    template_paths.get("csv"),
+                    overrides_template_paths.get("csv"),
+                    overrides_template_paths.get("markdown"),
+                ]
+                if value
             ],
             "materialization_commands": [
                 command
                 for command in [
                     submission.get("fill_release_surface_owner_decisions_command", ""),
+                    submission.get(
+                        "fill_release_surface_owner_decisions_with_overrides_command",
+                        "",
+                    ),
                     submission.get("fill_owner_decisions_from_template_command", ""),
+                    submission.get(
+                        "fill_owner_decisions_from_template_with_overrides_command",
+                        "",
+                    ),
                 ]
                 if command
             ],
@@ -1370,12 +1629,18 @@ def build_application_plan(
     cleanup_rows = [
         row for row in rows if row["post_decision_cleanup_pending"] is True
     ]
-    cleanup_application_preflight = _cleanup_application_preflight(cleanup_rows)
+    cleanup_application_preflight = _cleanup_application_preflight(
+        cleanup_rows,
+        repo_root=repo_root,
+    )
     release_surface_cleanup_rows = [
         row for row in cleanup_rows if row["path_area"] == "release_surface"
     ]
     release_surface_first_batch_cleanup_application_preflight = (
-        _cleanup_application_preflight(release_surface_cleanup_rows)
+        _cleanup_application_preflight(
+            release_surface_cleanup_rows,
+            repo_root=repo_root,
+        )
     )
     cleanup_priority_batches = _cleanup_priority_batches(cleanup_rows)
     next_cleanup_application_batch = (
@@ -1592,6 +1857,11 @@ def build_application_plan(
                 "generated_template_paths"
             )
         ),
+        "release_surface_first_decision_overrides_template_paths": _as_dict(
+            release_surface_first_batch_decision_template.get(
+                "mixed_decision_overrides_template_paths"
+            )
+        ),
         "cleanup_required_count": len(cleanup_rows),
         "cleanup_application_preflight": cleanup_application_preflight,
         "cleanup_application_preflight_ready": bool(
@@ -1752,6 +2022,17 @@ def _markdown(payload: dict[str, Any]) -> str:
                 "- `owner_decision_template.csv`: "
                 f"`{packet_template_paths.get('csv')}`"
             )
+        packet_override_paths = action_packet.get(
+            "mixed_decision_overrides_template_paths"
+        )
+        packet_override_paths = (
+            packet_override_paths if isinstance(packet_override_paths, dict) else {}
+        )
+        if packet_override_paths:
+            lines.append(
+                "- `owner_decision_overrides_template.csv`: "
+                f"`{packet_override_paths.get('csv')}`"
+            )
         lines.append(
             "- `origin_context_source_report`: "
             f"`{action_packet.get('origin_context_source_report')}`"
@@ -1829,6 +2110,14 @@ def _markdown(payload: dict[str, Any]) -> str:
             "- `primary_delete_path_count`: "
             f"`{preview.get('primary_delete_path_count', 0)}`"
         )
+        override_paths = _as_dict(
+            next_batch_template.get("decision_overrides_template_paths")
+        )
+        if override_paths:
+            lines.append(
+                "- `owner_decision_overrides_template.csv`: "
+                f"`{override_paths.get('csv')}`"
+            )
         lines.extend(["", "| Row | Path | Primary Decision |", "|---|---|---|"])
         for row in next_batch_template.get("decision_rows", []):
             lines.append(
@@ -1868,6 +2157,28 @@ def _markdown(payload: dict[str, Any]) -> str:
         "- `extract_to_molecular_or_science_repository.path_count`: "
         f"`{manifest['extract_to_molecular_or_science_repository']['path_count']}`"
     )
+    extract_manifest = manifest["extract_to_molecular_or_science_repository"]
+    lines.append(
+        "- `extract_to_molecular_or_science_repository.external_archive_reference_count`: "
+        f"`{extract_manifest.get('external_archive_reference_count', 0)}`"
+    )
+    lines.append(
+        "- `extract_to_molecular_or_science_repository.missing_external_archive_reference_count`: "
+        f"`{extract_manifest.get('missing_external_archive_reference_count', 0)}`"
+    )
+    archive_reference_rows = [
+        row
+        for row in _as_list(extract_manifest.get("archive_reference_rows"))
+        if isinstance(row, dict)
+    ]
+    if archive_reference_rows:
+        lines.extend(["", "| Extract Path | External Archive Reference |", "|---|---|"])
+        for row in archive_reference_rows:
+            lines.append(
+                "| "
+                f"`{_text(row.get('path'))}` | "
+                f"`{_text(row.get('external_archive_reference'))}` |"
+            )
     preflight = payload.get("cleanup_application_preflight")
     preflight = preflight if isinstance(preflight, dict) else {}
     lines.extend(["", "## Cleanup Application Preflight", ""])
@@ -1878,6 +2189,21 @@ def _markdown(payload: dict[str, Any]) -> str:
     )
     lines.append(
         f"- `safe_to_auto_apply`: `{preflight.get('safe_to_auto_apply')}`"
+    )
+    lines.append(
+        "- `extract_archive_reference_missing_count`: "
+        f"`{preflight.get('extract_archive_reference_missing_count', 0)}`"
+    )
+    lines.append(
+        f"- `repo_state_checked`: `{preflight.get('repo_state_checked', False)}`"
+    )
+    lines.append(
+        "- `cleanup_path_not_tracked_count`: "
+        f"`{preflight.get('cleanup_path_not_tracked_count', 0)}`"
+    )
+    lines.append(
+        "- `cleanup_path_missing_count`: "
+        f"`{preflight.get('cleanup_path_missing_count', 0)}`"
     )
     if preflight.get("blockers"):
         lines.extend(f"- `{item}`" for item in preflight["blockers"])
@@ -1945,6 +2271,34 @@ def _next_batch_template_markdown(payload: dict[str, Any]) -> str:
             f"`{row['path']}` | "
             f"`{row['recommended_owner_decision_primary']}` | "
             f"`{row['recommended_owner_decision_alternate']}` |"
+        )
+    override_paths = _as_dict(payload.get("decision_overrides_template_paths"))
+    override_rows = [
+        row
+        for row in _as_list(payload.get("decision_overrides_template_rows"))
+        if isinstance(row, dict)
+    ]
+    lines.extend(["", "## Decision Overrides Template", ""])
+    if override_paths:
+        lines.append(f"- `csv`: `{override_paths.get('csv', '')}`")
+        lines.append(f"- `markdown`: `{override_paths.get('markdown', '')}`")
+    else:
+        lines.append("- none")
+    lines.extend(
+        [
+            "",
+            "| Row | Path | Owner Decision | External Archive Reference | Signed Exception Reference |",
+            "|---|---|---|---|---|",
+        ]
+    )
+    for row in override_rows:
+        lines.append(
+            "| "
+            f"`{row.get('row_id', '')}` | "
+            f"`{row.get('path', '')}` | "
+            f"`{row.get('owner_decision', '')}` | "
+            f"`{row.get('external_archive_reference', '')}` | "
+            f"`{row.get('signed_owner_exception_reference', '')}` |"
         )
     preview = payload.get("primary_cleanup_preview")
     preview = preview if isinstance(preview, dict) else {}
@@ -2014,6 +2368,22 @@ def _owner_decision_submission_markdown_lines(payload: dict[str, Any]) -> list[s
         f"`{options.get('template_csv_path', '')}`"
     )
     lines.append(
+        "- `fill_release_surface_owner_decisions_command`: "
+        f"`{options.get('fill_release_surface_owner_decisions_command', '')}`"
+    )
+    lines.append(
+        "- `fill_release_surface_owner_decisions_with_overrides_command`: "
+        f"`{options.get('fill_release_surface_owner_decisions_with_overrides_command', '')}`"
+    )
+    lines.append(
+        "- `fill_owner_decisions_from_template_command`: "
+        f"`{options.get('fill_owner_decisions_from_template_command', '')}`"
+    )
+    lines.append(
+        "- `fill_owner_decisions_from_template_with_overrides_command`: "
+        f"`{options.get('fill_owner_decisions_from_template_with_overrides_command', '')}`"
+    )
+    lines.append(
         "- `validate_canonical_owner_decisions_command`: "
         f"`{options.get('validate_canonical_owner_decisions_command', '')}`"
     )
@@ -2034,6 +2404,90 @@ def _owner_decision_submission_markdown_lines(payload: dict[str, Any]) -> list[s
         f"`{options.get('validate_merged_candidate_command', '')}`"
     )
     return lines
+
+
+def _next_batch_overrides_template_markdown(payload: dict[str, Any]) -> str:
+    rows = [
+        row
+        for row in _as_list(payload.get("decision_overrides_template_rows"))
+        if isinstance(row, dict)
+    ]
+    paths = _as_dict(payload.get("decision_overrides_template_paths"))
+    columns = [
+        str(item)
+        for item in _as_list(payload.get("decision_overrides_template_columns"))
+    ]
+    signed_column_enabled = "signed_owner_exception_reference" in columns
+    fill_fields = [
+        "`owner_decision`",
+        "`external_archive_reference`",
+    ]
+    if signed_column_enabled:
+        fill_fields.append("`signed_owner_exception_reference`")
+    fill_fields.append("optionally `evidence_reference`")
+    lines = [
+        "# Structural Scope Next Batch Decision Overrides Template",
+        "",
+        f"- `batch_id`: `{payload.get('batch_id', '')}`",
+        f"- `path_area`: `{payload.get('path_area', '')}`",
+        f"- `csv`: `{paths.get('csv', '')}`",
+        "",
+        "Fill only " + ", ".join(fill_fields) + "; keep `path` unchanged.",
+        "",
+        "Every row requires an explicit `owner_decision`. Blank rows intentionally "
+        "block validation so this template cannot silently create all-delete "
+        "decisions.",
+        "",
+    ]
+    if signed_column_enabled:
+        lines.extend(
+            [
+                "`signed_owner_exception_reference` is required only when "
+                "`owner_decision` is "
+                "`retain_quarantined_with_signed_owner_exception`.",
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "| Path | Primary Decision | Alternate Decision | Owner Decision | External Archive Reference | Signed Exception Reference |",
+            "|---|---|---|---|---|---|",
+        ]
+    )
+    for row in rows:
+        lines.append(
+            "| "
+            f"`{row.get('path', '')}` | "
+            f"`{row.get('recommended_owner_decision_primary', '')}` | "
+            f"`{row.get('recommended_owner_decision_alternate', '')}` | "
+            f"`{row.get('owner_decision', '')}` | "
+            f"`{row.get('external_archive_reference', '')}` | "
+            f"`{row.get('signed_owner_exception_reference', '')}` |"
+        )
+    allowed_decisions = sorted(
+        {
+            str(decision)
+            for row in _as_list(payload.get("decision_rows"))
+            if isinstance(row, dict)
+            for decision in _as_list(row.get("allowed_owner_decisions"))
+            if str(decision)
+        }
+    )
+    lines.extend(["", "## Allowed Owner Decisions", ""])
+    if allowed_decisions:
+        lines.extend(f"- `{decision}`" for decision in allowed_decisions)
+    else:
+        lines.append("- none")
+    lines.extend(
+        [
+            "",
+            "## Validation",
+            "",
+            "- `python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv --decision-overrides implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.overrides.template.csv --out <filled-next-batch-owner-decisions.json> --out-md <filled-next-batch-owner-decisions.md> --out-csv <filled-next-batch-owner-decisions.csv> --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked`",
+            "",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> str:
@@ -2086,6 +2540,33 @@ def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> s
             f"`{row['recommended_owner_decision_primary']}` | "
             f"`{row['recommended_owner_decision_alternate']}` |"
         )
+    override_paths = _as_dict(payload.get("mixed_decision_overrides_template_paths"))
+    override_rows = [
+        row
+        for row in _as_list(payload.get("mixed_decision_overrides_template_rows"))
+        if isinstance(row, dict)
+    ]
+    lines.extend(["", "## Mixed Decision Overrides Template", ""])
+    if override_paths:
+        lines.append(f"- `csv`: `{override_paths.get('csv', '')}`")
+        lines.append(f"- `markdown`: `{override_paths.get('markdown', '')}`")
+    else:
+        lines.append("- none")
+    lines.extend(
+        [
+            "",
+            "| Row | Path | Owner Decision | External Archive Reference |",
+            "|---|---|---|---|",
+        ]
+    )
+    for row in override_rows:
+        lines.append(
+            "| "
+            f"`{row.get('row_id', '')}` | "
+            f"`{row.get('path', '')}` | "
+            f"`{row.get('owner_decision', '')}` | "
+            f"`{row.get('external_archive_reference', '')}` |"
+        )
     preview = payload.get("primary_cleanup_preview")
     preview = preview if isinstance(preview, dict) else {}
     lines.extend(
@@ -2119,6 +2600,55 @@ def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> s
     return "\n".join(lines)
 
 
+def _release_surface_overrides_template_markdown(payload: dict[str, Any]) -> str:
+    rows = [
+        row
+        for row in _as_list(payload.get("mixed_decision_overrides_template_rows"))
+        if isinstance(row, dict)
+    ]
+    paths = _as_dict(payload.get("mixed_decision_overrides_template_paths"))
+    lines = [
+        "# Structural Scope Release Surface Mixed Decision Overrides Template",
+        "",
+        f"- `batch_id`: `{payload.get('batch_id', '')}`",
+        f"- `csv`: `{paths.get('csv', '')}`",
+        "",
+        "Fill only `owner_decision`, `external_archive_reference`, and optionally "
+        "`evidence_reference`; keep `path` unchanged.",
+        "",
+        "Every row requires an explicit `owner_decision`. Blank rows intentionally "
+        "block validation so this template cannot silently create all-delete "
+        "decisions.",
+        "",
+        "| Path | Primary Decision | Alternate Decision | Owner Decision | External Archive Reference |",
+        "|---|---|---|---|---|",
+    ]
+    for row in rows:
+        lines.append(
+            "| "
+            f"`{row.get('path', '')}` | "
+            f"`{row.get('recommended_owner_decision_primary', '')}` | "
+            f"`{row.get('recommended_owner_decision_alternate', '')}` | "
+            f"`{row.get('owner_decision', '')}` | "
+            f"`{row.get('external_archive_reference', '')}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Allowed Owner Decisions",
+            "",
+            "- `delete_from_structural_repository`",
+            "- `extract_to_molecular_or_science_repository`",
+            "",
+            "## Validation",
+            "",
+            "- `python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --decision-overrides implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.overrides.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked`",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def write_application_plan(
     *,
     repo_root: Path = ROOT,
@@ -2131,6 +2661,12 @@ def write_application_plan(
     next_batch_template_out: Path = DEFAULT_NEXT_BATCH_TEMPLATE,
     next_batch_template_out_md: Path = DEFAULT_NEXT_BATCH_TEMPLATE_MD,
     next_batch_template_out_csv: Path = DEFAULT_NEXT_BATCH_TEMPLATE_CSV,
+    next_batch_decision_overrides_template_out_csv: Path = (
+        DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_CSV
+    ),
+    next_batch_decision_overrides_template_out_md: Path = (
+        DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_MD
+    ),
     release_surface_first_batch_template_out: Path = (
         DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE
     ),
@@ -2139,6 +2675,12 @@ def write_application_plan(
     ),
     release_surface_first_batch_template_out_csv: Path = (
         DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV
+    ),
+    release_surface_first_decision_overrides_template_out_csv: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_CSV
+    ),
+    release_surface_first_decision_overrides_template_out_md: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_MD
     ),
 ) -> dict[str, Any]:
     payload = build_application_plan(
@@ -2162,6 +2704,14 @@ def write_application_plan(
         resolved_next = _resolve(repo_root, next_batch_template_out)
         resolved_next_md = _resolve(repo_root, next_batch_template_out_md)
         resolved_next_csv = _resolve(repo_root, next_batch_template_out_csv)
+        resolved_next_overrides_csv = _resolve(
+            repo_root,
+            next_batch_decision_overrides_template_out_csv,
+        )
+        resolved_next_overrides_md = _resolve(
+            repo_root,
+            next_batch_decision_overrides_template_out_md,
+        )
         resolved_next.parent.mkdir(parents=True, exist_ok=True)
         resolved_next.write_text(_json_text(next_batch_template), encoding="utf-8")
         resolved_next_md.parent.mkdir(parents=True, exist_ok=True)
@@ -2172,6 +2722,29 @@ def write_application_plan(
         resolved_next_csv.parent.mkdir(parents=True, exist_ok=True)
         resolved_next_csv.write_text(
             _csv_text(next_batch_template["decision_rows"]),
+            encoding="utf-8",
+        )
+        next_override_rows = [
+            row
+            for row in _as_list(
+                next_batch_template.get("decision_overrides_template_rows")
+            )
+            if isinstance(row, dict)
+        ]
+        next_override_fields = [
+            str(item)
+            for item in _as_list(
+                next_batch_template.get("decision_overrides_template_columns")
+            )
+        ]
+        resolved_next_overrides_csv.parent.mkdir(parents=True, exist_ok=True)
+        resolved_next_overrides_csv.write_text(
+            _custom_csv_text(next_override_rows, next_override_fields),
+            encoding="utf-8",
+        )
+        resolved_next_overrides_md.parent.mkdir(parents=True, exist_ok=True)
+        resolved_next_overrides_md.write_text(
+            _next_batch_overrides_template_markdown(next_batch_template),
             encoding="utf-8",
         )
     release_surface_first_template = payload.get(
@@ -2195,6 +2768,14 @@ def write_application_plan(
             repo_root,
             release_surface_first_batch_template_out_csv,
         )
+        resolved_overrides_csv = _resolve(
+            repo_root,
+            release_surface_first_decision_overrides_template_out_csv,
+        )
+        resolved_overrides_md = _resolve(
+            repo_root,
+            release_surface_first_decision_overrides_template_out_md,
+        )
         resolved_release_surface.parent.mkdir(parents=True, exist_ok=True)
         resolved_release_surface.write_text(
             _json_text(release_surface_first_template),
@@ -2210,6 +2791,33 @@ def write_application_plan(
         resolved_release_surface_csv.parent.mkdir(parents=True, exist_ok=True)
         resolved_release_surface_csv.write_text(
             _csv_text(release_surface_first_template["decision_rows"]),
+            encoding="utf-8",
+        )
+        override_rows = [
+            row
+            for row in _as_list(
+                release_surface_first_template.get(
+                    "mixed_decision_overrides_template_rows"
+                )
+            )
+            if isinstance(row, dict)
+        ]
+        override_fields = [
+            "path",
+            "owner_decision",
+            "external_archive_reference",
+            "evidence_reference",
+        ]
+        resolved_overrides_csv.parent.mkdir(parents=True, exist_ok=True)
+        resolved_overrides_csv.write_text(
+            _custom_csv_text(override_rows, override_fields),
+            encoding="utf-8",
+        )
+        resolved_overrides_md.parent.mkdir(parents=True, exist_ok=True)
+        resolved_overrides_md.write_text(
+            _release_surface_overrides_template_markdown(
+                release_surface_first_template
+            ),
             encoding="utf-8",
         )
     return payload
@@ -2240,6 +2848,16 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_NEXT_BATCH_TEMPLATE_CSV,
     )
     parser.add_argument(
+        "--next-batch-decision-overrides-template-out-csv",
+        type=Path,
+        default=DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_CSV,
+    )
+    parser.add_argument(
+        "--next-batch-decision-overrides-template-out-md",
+        type=Path,
+        default=DEFAULT_NEXT_BATCH_DECISION_OVERRIDES_TEMPLATE_MD,
+    )
+    parser.add_argument(
         "--release-surface-first-batch-template-out",
         type=Path,
         default=DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE,
@@ -2253,6 +2871,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--release-surface-first-batch-template-out-csv",
         type=Path,
         default=DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV,
+    )
+    parser.add_argument(
+        "--release-surface-first-decision-overrides-template-out-csv",
+        type=Path,
+        default=DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_CSV,
+    )
+    parser.add_argument(
+        "--release-surface-first-decision-overrides-template-out-md",
+        type=Path,
+        default=DEFAULT_RELEASE_SURFACE_FIRST_DECISION_OVERRIDES_TEMPLATE_MD,
     )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -2290,6 +2918,12 @@ def main(argv: list[str] | None = None) -> int:
         next_batch_template_out=args.next_batch_template_out,
         next_batch_template_out_md=args.next_batch_template_out_md,
         next_batch_template_out_csv=args.next_batch_template_out_csv,
+        next_batch_decision_overrides_template_out_csv=(
+            args.next_batch_decision_overrides_template_out_csv
+        ),
+        next_batch_decision_overrides_template_out_md=(
+            args.next_batch_decision_overrides_template_out_md
+        ),
         release_surface_first_batch_template_out=(
             args.release_surface_first_batch_template_out
         ),
@@ -2298,6 +2932,12 @@ def main(argv: list[str] | None = None) -> int:
         ),
         release_surface_first_batch_template_out_csv=(
             args.release_surface_first_batch_template_out_csv
+        ),
+        release_surface_first_decision_overrides_template_out_csv=(
+            args.release_surface_first_decision_overrides_template_out_csv
+        ),
+        release_surface_first_decision_overrides_template_out_md=(
+            args.release_surface_first_decision_overrides_template_out_md
         ),
     )
     if args.json:

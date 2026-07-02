@@ -138,6 +138,24 @@ def _write_template(path: Path) -> None:
         writer.writerows(template_rows)
 
 
+def _write_decision_overrides(path: Path, rows: list[dict]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=[
+                "path",
+                "owner_decision",
+                "external_archive_reference",
+                "signed_owner_exception_reference",
+                "evidence_reference",
+            ],
+            lineterminator="\n",
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def _write_scope_inputs(tmp_path: Path) -> tuple[Path, Path]:
     rows = _scope_rows()
     audit = tmp_path / "audit.json"
@@ -252,3 +270,141 @@ def test_full_template_fill_validates_delete_and_extract_cleanup_plan(
         "extract_to_molecular_or_science_repository"
     ]["path_count"] == 1
     assert plan["cleanup_command_manifest"]["manual_application_required"] is True
+
+
+def test_full_template_fill_mixed_decision_overrides_validate_cleanup_plan(
+    tmp_path: Path,
+) -> None:
+    template = tmp_path / "structural_scope_owner_decisions.template.csv"
+    overrides = tmp_path / "structural_scope_owner_decisions.overrides.csv"
+    _write_template(template)
+    scope_rows = _scope_rows()
+    _write_decision_overrides(
+        overrides,
+        [
+            {
+                "path": scope_rows[0]["path"],
+                "owner_decision": "delete_from_structural_repository",
+                "external_archive_reference": "",
+                "signed_owner_exception_reference": "",
+                "evidence_reference": "",
+            },
+            {
+                "path": scope_rows[1]["path"],
+                "owner_decision": "extract_to_molecular_or_science_repository",
+                "external_archive_reference": "archive://molecular-scope/gpcr",
+                "signed_owner_exception_reference": "",
+                "evidence_reference": "owner-review://scope-cleanup/gpcr",
+            },
+            {
+                "path": scope_rows[2]["path"],
+                "owner_decision": "retain_quarantined_with_signed_owner_exception",
+                "external_archive_reference": "",
+                "signed_owner_exception_reference": (
+                    "signed-exception://scope-cleanup/md3bead"
+                ),
+                "evidence_reference": "owner-review://scope-cleanup/md3bead",
+            },
+        ],
+    )
+
+    payload = fill_decisions.build_filled_decisions(
+        repo_root=tmp_path,
+        template_path=template,
+        owner_identity="scope-owner",
+        owner_role="repository_owner",
+        decision_timestamp_utc="2026-07-03T00:00:00Z",
+        evidence_reference="owner-review://scope-cleanup/full-template",
+        decision_overrides_path=overrides,
+    )
+
+    assert payload["status"] == "filled"
+    assert payload["contract_pass"] is True
+    assert payload["decision_override_count"] == 3
+    assert payload["decision_override_paths"] == sorted(row["path"] for row in scope_rows)
+    assert payload["unknown_decision_override_paths"] == []
+    assert payload["missing_decision_override_paths"] == []
+    assert payload["owner_decision_counts"] == {
+        "delete_from_structural_repository": 1,
+        "extract_to_molecular_or_science_repository": 1,
+        "retain_quarantined_with_signed_owner_exception": 1,
+    }
+    assert all(row["override_applied"] for row in payload["row_summaries"])
+
+    owner_decisions_path = tmp_path / "filled-owner-decisions.json"
+    fill_decisions.write_outputs(
+        payload=payload,
+        repo_root=tmp_path,
+        out=owner_decisions_path,
+        out_md=tmp_path / "filled-owner-decisions.md",
+        out_csv=tmp_path / "filled-owner-decisions.csv",
+    )
+    audit, manifest = _write_scope_inputs(tmp_path)
+    plan = application_plan.build_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=owner_decisions_path,
+    )
+
+    assert plan["owner_decision_validation_pass"] is True
+    assert plan["owner_decision_pending_count"] == 0
+    assert plan["post_decision_cleanup_pending_count"] == 2
+    assert plan["retain_quarantined_exception_count"] == 1
+    assert plan["cleanup_command_manifest"]["delete_from_structural_repository"][
+        "paths"
+    ] == [scope_rows[0]["path"]]
+    assert plan["cleanup_command_manifest"][
+        "extract_to_molecular_or_science_repository"
+    ]["archive_reference_rows"] == [
+        {
+            "path": scope_rows[1]["path"],
+            "external_archive_reference": "archive://molecular-scope/gpcr",
+        }
+    ]
+
+
+def test_full_template_fill_decision_overrides_require_explicit_decisions(
+    tmp_path: Path,
+) -> None:
+    template = tmp_path / "structural_scope_owner_decisions.template.csv"
+    overrides = tmp_path / "structural_scope_owner_decisions.overrides.csv"
+    _write_template(template)
+    scope_rows = _scope_rows()
+    _write_decision_overrides(
+        overrides,
+        [
+            {
+                "path": row["path"],
+                "owner_decision": "",
+                "external_archive_reference": "",
+                "signed_owner_exception_reference": "",
+                "evidence_reference": "",
+            }
+            for row in scope_rows
+        ],
+    )
+
+    payload = fill_decisions.build_filled_decisions(
+        repo_root=tmp_path,
+        template_path=template,
+        owner_identity="scope-owner",
+        owner_role="repository_owner",
+        decision_timestamp_utc="2026-07-03T00:00:00Z",
+        evidence_reference="owner-review://scope-cleanup/full-template",
+        decision_overrides_path=overrides,
+    )
+
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["delete_decision_count"] == 0
+    assert payload["extract_decision_count"] == 0
+    assert payload["retain_decision_count"] == 0
+    assert payload["missing_decision_override_paths"] == []
+    assert all(
+        row["row_blockers"] == ["decision_override_owner_decision_missing"]
+        for row in payload["row_summaries"]
+    )
+    assert {
+        blocker.rsplit("::", 1)[-1] for blocker in payload["blockers"]
+    } == {"decision_override_owner_decision_missing"}
