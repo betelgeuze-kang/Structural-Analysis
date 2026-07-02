@@ -1067,6 +1067,12 @@ def _g1_lane_next_actions(
         hip_consistency_proof.get("consistent_residual_jacobian_newton_gate_passed")
         is not True
     ):
+        runtime_blockers = _string_list(
+            hip_consistency_proof.get("runtime_blockers")
+        )
+        worker_path_blockers = _string_list(
+            worker.get("residual_jvp_worker_path_blockers")
+        )
         action = {
             "id": "close_consistent_residual_jacobian_newton_gate",
             "reason": "hip_consistency_proof_gate_not_passed",
@@ -1074,12 +1080,32 @@ def _g1_lane_next_actions(
             "worker_residual_jvp_path_ready": worker.get(
                 "residual_jvp_worker_path_ready"
             ),
+            "worker_residual_jvp_path_blockers": worker_path_blockers,
             "worker_g1_closure_gate_ready": worker.get("g1_closure_gate_ready"),
             "receipt_blockers": _string_list(
                 hip_consistency_proof.get("receipt_blockers")
             ),
+            "runtime_blockers": runtime_blockers,
             "worker_g1_closure_gate_blockers": _string_list(
                 worker.get("g1_closure_gate_blockers")
+            ),
+            "runtime_preconditions": [
+                "run on a production ROCm/HIP worker host with /dev/kfd and /dev/dri available",
+                "keep CPU fallback disallowed for the required residual/JVP proof",
+                "retain global JVP rows and accepted-state tangent refresh on HIP",
+            ],
+            "proof_refresh_command": (
+                "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py "
+                "--component-only --require-hip-residual-engine "
+                "--output-json implementation/phase1/release_evidence/productization/"
+                "mgt_residual_jacobian_consistency_hip_required_probe.json"
+            ),
+            "lane_refresh_command": (
+                "python3 scripts/run_g1_full_load_hip_newton_lane.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "g1_full_load_hip_newton_lane_report.json "
+                "--child-output-json implementation/phase1/release_evidence/productization/"
+                "g1_full_load_hip_newton_direct_probe.json"
             ),
         }
         if cause_narrowing_context.get("present") is True:

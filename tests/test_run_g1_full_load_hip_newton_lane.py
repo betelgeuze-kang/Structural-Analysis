@@ -882,6 +882,13 @@ def test_hip_runtime_blockers_propagate_to_lane_blockers_and_summary(
     assert "hip_consistency_proof_runtime::dev_dri_missing" in payload["blockers"]
     assert "hip_consistency_proof_gate_not_passed" in payload["blockers"]
     assert "hip_consistency_proof_has_blockers" in payload["blockers"]
+    close_action = {
+        row["id"]: row for row in payload["lane_next_actions"]
+    }["close_consistent_residual_jacobian_newton_gate"]
+    assert close_action["runtime_blockers"] == ["dev_kfd_missing", "dev_dri_missing"]
+    assert "production ROCm/HIP worker host" in close_action["runtime_preconditions"][0]
+    assert "--require-hip-residual-engine" in close_action["proof_refresh_command"]
+    assert "g1_full_load_hip_newton_lane_report.json" in close_action["lane_refresh_command"]
     assert payload["child_exit_code"] is None
     assert not child.exists()
 
