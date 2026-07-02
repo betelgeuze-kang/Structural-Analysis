@@ -28,12 +28,12 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T15:40:52.860873+00:00",
+  "generated_at": "2026-07-02T16:08:50.215220+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:2d06b055d9ab5605562c585a1a6e8977fe7ff9726b29dc70261f26a9796d215b",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:5767b4546cdfe290af10c4c69e51b6bc14c050219c66d7051537cae7440b04a2",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d64e4b1d7c20e2a3acf89a69a098cee056908d18a637e40719971cd1580a5ced",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:b539d91c23265a7ea69ff223469e68c622f94b04d91e61e5def646728e35a399",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0095ed837271737891a6174921e7607c3ecd4c807dbb62a544d7a759ddb1600b",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d31c9ad7c684ba0c5d05f6a29a49b1d4792f79e6ceef7a947ed3161cef7f7a3e",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:203edb092b934482716332de735076061ef42cdd9b35d3b85705e8a6c84c711f",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:d8d18ae72a44048b3f4be961099095fa473aa500ca49dd7ef3859981c9d18346",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:3a8915215c417de65afe874a41551da5d0caebd02ca4308f89620a22a9a1f3a8"
@@ -1909,7 +1909,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "645217edfaf87afb8e5120723875d0555c0b3b08",
+  "source_commit_sha": "28d391369ab9648d0fdc4693fddfffc429e5947f",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,
