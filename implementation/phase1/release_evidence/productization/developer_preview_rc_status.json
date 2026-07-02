@@ -480,7 +480,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-02T16:09:40.419772+00:00",
+  "generated_at": "2026-07-02T16:18:05.249240+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -3239,6 +3239,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "28d391369ab9648d0fdc4693fddfffc429e5947f",
+  "source_commit_sha": "6a6fdda3181797589c4a75e967972c89e36196b3",
   "status": "blocked"
 }
