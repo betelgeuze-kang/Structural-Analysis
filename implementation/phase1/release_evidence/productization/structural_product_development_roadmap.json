@@ -1,5 +1,5 @@
 {
-  "blocked_stage_count": 6,
+  "blocked_stage_count": 7,
   "claim_boundary": "This surface summarizes current evidence-readiness progress for the structural solver product. It is not a product-complete, paid-pilot, limited-commercial, or GA/enterprise claim while any stage remains blocked.",
   "contract_pass": false,
   "current_position": {
@@ -11,39 +11,71 @@
     "pm_milestones": "5/5",
     "pm_release_areas": "13/16",
     "release_ready": false,
-    "snapshot_blocker_count": 69,
+    "snapshot_blocker_count": 42,
     "snapshot_status": "blocked",
+    "structural_scope_owner_decisions": "0/86",
+    "structural_scope_release_surface_cleanup_decisions": "0/3",
     "workstation_delivery_ready": true
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_requirement_progress_percent": 64.6,
-  "generated_at": "2026-07-02T04:53:24.599502+00:00",
+  "evidence_requirement_progress_percent": 65.4,
+  "generated_at": "2026-07-02T13:50:10.332661+00:00",
   "input_checksums": {
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:397769d8ccae25d3a832afe907cf62276dcfc4831f5dab14e4eb0bfca67650e5",
-    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:c966eed944c067a18cd2b997cca202b78d39b1af7d8d911526217bb0eba0811c",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:40c1106fe259c434e2026aed107c5fa20cb5e402bd0aa05d8728c6d9c6eccf19",
-    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:c5b29b3a465cdf659489c7cb037ce203a936ff2af621ff298c26a4b367cf9a44",
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:964ceb5f52163536bc028d1c10f40c3bcded60fe92e4634aa24ce224b19b1b32",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e85ee7e39c295d2b638dd1feea67dcf6a57318e22d80c30b73c241ca00095896",
-    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:1d4666f87685b3d8f4cbcd9deeaded31d62d138ce7b27199fdcbdd643ef60c4c",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:0fa577808f940eb817ba77dafb41aecb6d2302111b44960ab217035515f2edc4",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:cc8a0880bf087021e318027687a31faa483a109b1bbd5a7bbc1bfcc276a1c0d4",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:8f74b6d64b1721e2c23adf4bdd37363d7c0337a14297fb7b68c81f819c0b71dd",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:c0dac94d41b89f15f30cd6304676775cc4114198f7ce6474c8a31de028d83a49",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f6e17630732f1c2294562c6a03d29cf360ec2d07111100ffa4c3f81e7991fb95",
+    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:de7cf0fe1e6db6bcb609f4b1c73f0e2a539f77c497d0849987196bff94fb16ac",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:ca58151d432993bb1851ff196a45a55c3dd80b6fe38b306b863cdf9a2fbdc7c2",
-    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:0570379cb2c7b1ba2ad20ff8c69e59f7d19929227f29e83c7ee0643ae959d918",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a17cc3d0b4b592a1d8a7b64fd6adfd01d1d8fc0d127c99a9a8e30b283577fc7e",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:2ec24d0172c8a1742a343429e552586aa54238ab066406d325c4f467e52c8f32",
+    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:c7c073086ff7d2ebaff1ba727195892ec38b27978079a3b852208ae3947ccf59",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c0657c67f7a5ac6ded55577322bdc7e1f48c690d430f5e5f6ff42df54f4b1988",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:6ad13b208d80ff1eb44249149a5466391f68887115cb5e4cbfdff44012c42cc6",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9a75f30c000fe05713ab0ebfc8b56c1de5fcddde2857b8b768144c0da1503217",
-    "scripts/build_structural_product_development_roadmap.py": "sha256:2b7c4189a272f2112c3c05bd0a562df7c80f39b2a5d33f35b95eac5907fb4d8c"
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:3c4ae375b1fe44065e2a22d4bd2ab0ecb12776a8f4e5c0433ab231d717bbea80",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:73f1dda2ca80b4db9872cd7da3a4f247974181ecddabecb6190e269f95b61864",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:b4df0acb72e51794008937ca72be82274cab7548c40ab7272473c36b72f8aee6",
+    "scripts/build_structural_product_development_roadmap.py": "sha256:87e6498551b81cc2c1e37f66eb6c510343353040110873da6b1958aa3a0a5690"
   },
-  "passed_evidence_requirement_count": 31,
-  "primary_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+  "passed_evidence_requirement_count": 34,
+  "primary_blocker": "release_surface_owner_decision_pending_count=3",
   "product_completion_claim": false,
   "ready_stage_count": 1,
   "recommended_next_slice": [
+    "close_structural_scope_owner_review_and_release_surface_cleanup",
     "land_ci_license_ux_release_area_evidence",
     "close_developer_preview_medium_large_and_parity_gates",
     "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path",
     "collect_customer_shadow_and_external_benchmark_terminal_receipts"
   ],
   "recommended_next_slice_details": [
+    {
+      "current_position": {
+        "next_owner_review_batch": "release_surface_first",
+        "non_structural_paths_quarantined": "86/86",
+        "owner_decisions_recorded": "0/86",
+        "release_surface_cleanup_decisions": "0/3",
+        "release_surface_pending_decision_count": 3,
+        "unquarantined_non_structural_path_count": 0
+      },
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json"
+      ],
+      "exit_conditions": [
+        "release-surface GPCR/H-bond/PocketMD paths have owner delete/extract decisions",
+        "all 86 quarantined non-structural paths have owner decisions",
+        "owner-approved delete/extract cleanup is manually applied",
+        "structural scope audit and product snapshot pass after cleanup"
+      ],
+      "external_dependency": true,
+      "id": "close_structural_scope_owner_review_and_release_surface_cleanup",
+      "stage_ids": [
+        "structural_scope_cleanup"
+      ]
+    },
     {
       "current_position": {
         "ci_nightly_consecutive_pass_count": 0,
@@ -150,7 +182,7 @@
       ]
     }
   ],
-  "required_evidence_requirement_count": 48,
+  "required_evidence_requirement_count": 52,
   "reuse_policy": "roadmap_aggregates_existing_release_dp_g1_paid_pilot_evidence",
   "reused_evidence": true,
   "roadmap_stages": [
@@ -173,8 +205,71 @@
       "summary": {
         "fresh_artifact_count": 14,
         "fresh_artifact_pass_count": 14,
-        "snapshot_blocker_count": 69,
+        "snapshot_blocker_count": 42,
         "stale_or_inconsistent": false
+      }
+    },
+    {
+      "blockers": [
+        "release_surface_owner_decision_pending_count=3",
+        "owner_decision_pending_count=86",
+        "structural_scope_cleanup_evidence_closure_not_passed"
+      ],
+      "claim_boundary": "Quarantine removes non-structural paths from the structural release surface, but repository cleanup is not closed until owner decisions are recorded and delete/extract actions are manually applied and re-audited.",
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json"
+      ],
+      "label": "Structural scope cleanup",
+      "next_actions": [
+        "record_release_surface_first_owner_delete_or_extract_decisions",
+        "merge_filled_owner_decision_batch_to_candidate",
+        "manually_apply_owner_approved_delete_or_extract_cleanup",
+        "rerun_structural_scope_audit_and_product_snapshot_checks"
+      ],
+      "passed_count": 2,
+      "progress_percent": 50.0,
+      "required_count": 4,
+      "stage_id": "structural_scope_cleanup",
+      "status": "partial",
+      "summary": {
+        "application_ready": false,
+        "evidence_closure_pass": false,
+        "next_owner_review_batch": {
+          "batch_id": "release_surface_first",
+          "family_counts": {
+            "molecular_docking": 1,
+            "molecular_dynamics": 1,
+            "molecular_science_evidence": 1
+          },
+          "path_area": "release_surface",
+          "path_count": 3,
+          "paths": [
+            "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+            "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+            "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+          ],
+          "priority": 1,
+          "recommended_owner_decision_primary_counts": {
+            "delete_from_structural_repository": 3
+          },
+          "review_goal": "record owner delete/extract decisions only; retain exceptions are not allowed for release-surface paths"
+        },
+        "non_structural_path_count": 86,
+        "owner_decision_recorded_count": 0,
+        "owner_decision_total_count": 86,
+        "quarantined_non_structural_path_count": 86,
+        "release_surface_first_template_paths": {
+          "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
+          "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
+          "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
+        },
+        "release_surface_owner_decision_required_count": 3,
+        "release_surface_pending_decision_count": 3,
+        "release_surface_text_leak_path_count": 0,
+        "release_surface_valid_cleanup_decision_count": 0,
+        "unquarantined_non_structural_path_count": 0
       }
     },
     {
@@ -242,14 +337,18 @@
     },
     {
       "blockers": [
-        "auto_select_no_loadable_candidates",
         "checkpoint_load_scale_below_required_full_load",
         "checkpoint_resolution_no_full_load_candidate",
-        "hip_consistency_proof_source_commit_sha_mismatch",
+        "hip_consistency_proof_production_hip_path_not_proven",
         "hip_consistency_proof_gate_not_passed",
+        "hip_consistency_proof_residual_jvp_worker_path_not_ready",
         "hip_consistency_proof_worker_g1_closure_gate_not_ready",
         "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
-        "hip_consistency_proof_has_blockers"
+        "hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
+        "hip_consistency_proof_worker::direct_probe_not_executed",
+        "hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+        "hip_consistency_proof_worker::global_krylov_hip_solver_not_proven",
+        "hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained"
       ],
       "claim_boundary": "Direct residual closure is only one G1 axis; full-load HIP/Newton closure remains required.",
       "evidence_artifacts": [
@@ -266,7 +365,6 @@
         "close_consistent_residual_jacobian_newton_gate",
         "prove_production_rocm_hip_residual_jvp_worker",
         "build_consistent_newton_full_load_checkpoint_candidate_runner",
-        "refresh_hip_consistency_proof_for_current_head",
         "preserve_non_promoting_boundary_until_all_g1_receipts_pass",
         "continue_from_global_connectivity_and_consistent_newton_path",
         "stop_row_only_support_or_elastic_link_correction_loop",
@@ -332,7 +430,7 @@
         "completed_shadow_case_count": 0,
         "external_receipt_attached_count": 0,
         "external_receipt_queue_count": 4,
-        "external_submission_package_ready": false,
+        "external_submission_package_ready": true,
         "paid_pilot_ready": false,
         "required_shadow_case_count": 3
       }
@@ -358,8 +456,8 @@
         "close_customer_shadow_reviews",
         "promote_limited_commercial_claim_only_after_solver_product_ready"
       ],
-      "passed_count": 1,
-      "progress_percent": 20.0,
+      "passed_count": 2,
+      "progress_percent": 40.0,
       "required_count": 5,
       "stage_id": "commercial_solver_claim_upgrade",
       "status": "partial",
@@ -401,11 +499,11 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "aa1425e2593886ae9e2f74b6fe3cf4b2e896fdd0",
-  "stage_average_progress_percent": 53.2,
-  "stage_count": 7,
+  "source_commit_sha": "03c713687b0c115678ec8db754bde9eb26c4eb88",
+  "stage_average_progress_percent": 55.3,
+  "stage_count": 8,
   "status": "blocked",
-  "summary_line": "Structural product roadmap: BLOCKED | evidence_progress=64.6% | stage_average=53.2% | ready_stages=1/7 | primary_blocker=basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+  "summary_line": "Structural product roadmap: BLOCKED | evidence_progress=65.4% | stage_average=55.3% | ready_stages=1/8 | primary_blocker=release_surface_owner_decision_pending_count=3",
   "surface_id": "structural_product_development_roadmap",
   "surface_scope": "structural_solver_product_completion"
 }

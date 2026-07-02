@@ -104,6 +104,63 @@ def _write_minimal_inputs(repo_root: Path) -> None:
         },
     )
     _write_json(
+        productization / "structural_scope_contamination_audit.json",
+        {
+            "schema_version": "structural-scope-contamination-audit.v1",
+            "status": "quarantined",
+            "contract_pass": True,
+            "blockers": [],
+            "non_structural_path_count": 3,
+            "quarantined_non_structural_path_count": 3,
+            "unquarantined_non_structural_path_count": 0,
+            "release_surface_text_leak_path_count": 0,
+        },
+    )
+    _write_json(
+        productization / "structural_scope_owner_review_packet.json",
+        {
+            "schema_version": "structural-scope-owner-review-packet.v1",
+            "status": "ready_for_owner_review",
+            "contract_pass": True,
+            "evidence_closure_pass": False,
+            "owner_review_required": True,
+            "owner_decision_pending_count": 3,
+        },
+    )
+    _write_json(
+        productization / "structural_scope_owner_decision_application_plan.json",
+        {
+            "schema_version": "structural-scope-owner-decision-application-plan.v1",
+            "status": "pending_owner_decisions",
+            "contract_pass": True,
+            "application_ready": False,
+            "evidence_closure_pass": False,
+            "owner_decision_recorded_count": 0,
+            "owner_decision_pending_count": 3,
+            "release_surface_owner_decision_required_count": 1,
+            "release_surface_first_batch_template_paths": {
+                "csv": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "structural_scope_owner_decisions.release_surface_first.template.csv"
+                ),
+            },
+            "release_surface_first_batch_decision_intake": {
+                "schema_version": (
+                    "structural-scope-release-surface-first-batch-decision-intake.v1"
+                ),
+                "status": "pending_owner_decisions",
+                "expected_path_count": 1,
+                "valid_cleanup_decision_count": 0,
+                "pending_decision_count": 1,
+            },
+            "next_owner_review_batch": {
+                "batch_id": "release_surface_first",
+                "path_area": "release_surface",
+                "path_count": 1,
+            },
+        },
+    )
+    _write_json(
         productization / "release_evidence_freshness_report.json",
         {
             "contract_pass": True,
@@ -224,16 +281,26 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     assert payload["surface_id"] == "structural_product_development_roadmap"
     assert payload["status"] == "blocked"
     assert payload["product_completion_claim"] is False
-    assert payload["stage_count"] == 7
+    assert payload["stage_count"] == 8
     assert payload["ready_stage_count"] == 1
-    assert payload["primary_blocker"] == "ux::human_observation_missing"
+    assert payload["primary_blocker"] == "release_surface_owner_decision_pending_count=1"
     assert payload["recommended_next_slice"] == [
+        "close_structural_scope_owner_review_and_release_surface_cleanup",
         "land_ci_license_ux_release_area_evidence",
         "close_developer_preview_medium_large_and_parity_gates",
         "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path",
         "collect_customer_shadow_and_external_benchmark_terminal_receipts",
     ]
     details = {row["id"]: row for row in payload["recommended_next_slice_details"]}
+    assert details[
+        "close_structural_scope_owner_review_and_release_surface_cleanup"
+    ]["current_position"]["owner_decisions_recorded"] == "0/3"
+    assert details[
+        "close_structural_scope_owner_review_and_release_surface_cleanup"
+    ]["current_position"]["release_surface_cleanup_decisions"] == "0/1"
+    assert details[
+        "close_structural_scope_owner_review_and_release_surface_cleanup"
+    ]["current_position"]["next_owner_review_batch"] == "release_surface_first"
     assert details["land_ci_license_ux_release_area_evidence"]["current_position"][
         "pm_release_areas"
     ] == "1/2"
@@ -264,6 +331,15 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
 
     stages = {row["stage_id"]: row for row in payload["roadmap_stages"]}
     assert stages["evidence_freshness_and_snapshot_integrity"]["status"] == "ready"
+    assert stages["structural_scope_cleanup"]["status"] == "partial"
+    assert stages["structural_scope_cleanup"]["blockers"] == [
+        "release_surface_owner_decision_pending_count=1",
+        "owner_decision_pending_count=3",
+        "structural_scope_cleanup_evidence_closure_not_passed",
+    ]
+    assert stages["structural_scope_cleanup"]["summary"][
+        "unquarantined_non_structural_path_count"
+    ] == 0
     assert stages["pm_release_gate"]["blockers"] == ["ux::human_observation_missing"]
     assert stages["g1_solver_closure"]["blockers"] == [
         "full_load_hip_newton_not_closed"

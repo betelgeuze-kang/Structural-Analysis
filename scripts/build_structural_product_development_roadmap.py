@@ -36,6 +36,11 @@ G1_F2G_F2H_CAUSE_NARROWING = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status
 G1_LOAD_DEPENDENT_COMPARISON = (
     PRODUCTIZATION / "g1_load_dependent_near_null_geometric_stiffness_comparison.json"
 )
+STRUCTURAL_SCOPE_AUDIT = PRODUCTIZATION / "structural_scope_contamination_audit.json"
+STRUCTURAL_SCOPE_OWNER_REVIEW = PRODUCTIZATION / "structural_scope_owner_review_packet.json"
+STRUCTURAL_SCOPE_OWNER_DECISION_PLAN = (
+    PRODUCTIZATION / "structural_scope_owner_decision_application_plan.json"
+)
 CUSTOMER_SHADOW = Path("implementation/phase1/customer_shadow_evidence_status.json")
 EXTERNAL_BENCHMARK_SUBMISSION = Path(
     "implementation/phase1/release/external_benchmark_submission_readiness.json"
@@ -202,6 +207,9 @@ def _source_paths() -> list[Path]:
         G1_GLOBAL_CONNECTIVITY,
         G1_F2G_F2H_CAUSE_NARROWING,
         G1_LOAD_DEPENDENT_COMPARISON,
+        STRUCTURAL_SCOPE_AUDIT,
+        STRUCTURAL_SCOPE_OWNER_REVIEW,
+        STRUCTURAL_SCOPE_OWNER_DECISION_PLAN,
         CUSTOMER_SHADOW,
         EXTERNAL_BENCHMARK_SUBMISSION,
     ]
@@ -250,6 +258,9 @@ def build_structural_product_development_roadmap(
     g1_global_connectivity = _load_json(repo_root, G1_GLOBAL_CONNECTIVITY)
     g1_cause_narrowing = _load_json(repo_root, G1_F2G_F2H_CAUSE_NARROWING)
     g1_load_dependent_comparison = _load_json(repo_root, G1_LOAD_DEPENDENT_COMPARISON)
+    structural_scope = _load_json(repo_root, STRUCTURAL_SCOPE_AUDIT)
+    structural_owner_review = _load_json(repo_root, STRUCTURAL_SCOPE_OWNER_REVIEW)
+    structural_cleanup_plan = _load_json(repo_root, STRUCTURAL_SCOPE_OWNER_DECISION_PLAN)
     customer_shadow = _load_json(repo_root, CUSTOMER_SHADOW)
     external_submission = _load_json(repo_root, EXTERNAL_BENCHMARK_SUBMISSION)
 
@@ -276,6 +287,78 @@ def build_structural_product_development_roadmap(
 
     dp_pass = _as_int(dp_report.get("final_gate_pass_count"))
     dp_total = _as_int(dp_report.get("final_gate_count"))
+
+    structural_scope_blockers = [str(row) for row in _as_list(structural_scope.get("blockers"))]
+    structural_unquarantined = _as_int(
+        structural_scope.get("unquarantined_non_structural_path_count")
+    )
+    structural_quarantined = _as_int(
+        structural_scope.get("quarantined_non_structural_path_count")
+    )
+    structural_total_non_structural = _as_int(
+        structural_scope.get("non_structural_path_count")
+    )
+    structural_release_surface_leak_count = _as_int(
+        structural_scope.get("release_surface_text_leak_path_count")
+    )
+    structural_scope_quarantined = bool(
+        structural_scope.get("contract_pass") is True
+        and structural_unquarantined == 0
+        and not structural_scope_blockers
+    )
+    structural_release_surface_clean = bool(
+        structural_scope
+        and structural_release_surface_leak_count == 0
+    )
+    structural_owner_pending = _as_int(
+        structural_cleanup_plan.get("owner_decision_pending_count"),
+        _as_int(structural_owner_review.get("owner_decision_pending_count")),
+    )
+    structural_owner_recorded = _as_int(
+        structural_cleanup_plan.get("owner_decision_recorded_count")
+    )
+    structural_owner_total = structural_owner_recorded + structural_owner_pending
+    structural_release_intake = _as_dict(
+        structural_cleanup_plan.get("release_surface_first_batch_decision_intake")
+    )
+    structural_release_expected = _as_int(
+        structural_cleanup_plan.get("release_surface_owner_decision_required_count"),
+        _as_int(structural_release_intake.get("expected_path_count")),
+    )
+    structural_release_valid_cleanup = _as_int(
+        structural_release_intake.get("valid_cleanup_decision_count")
+    )
+    structural_release_pending = _as_int(
+        structural_release_intake.get("pending_decision_count")
+    )
+    structural_cleanup_closed = structural_cleanup_plan.get("evidence_closure_pass") is True
+    structural_scope_checks = [
+        structural_scope_quarantined,
+        structural_release_surface_clean,
+        structural_owner_total > 0 and structural_owner_pending == 0,
+        structural_cleanup_closed,
+    ]
+    structural_scope_stage_blockers: list[str] = []
+    if structural_release_pending > 0:
+        structural_scope_stage_blockers.append(
+            f"release_surface_owner_decision_pending_count={structural_release_pending}"
+        )
+    if structural_owner_pending > 0:
+        structural_scope_stage_blockers.append(
+            f"owner_decision_pending_count={structural_owner_pending}"
+        )
+    if not structural_scope_quarantined:
+        structural_scope_stage_blockers.extend(
+            structural_scope_blockers or ["structural_scope_contamination_not_quarantined"]
+        )
+    if structural_release_surface_leak_count > 0:
+        structural_scope_stage_blockers.append(
+            f"release_surface_text_leak_path_count={structural_release_surface_leak_count}"
+        )
+    if not structural_cleanup_closed:
+        structural_scope_stage_blockers.append(
+            "structural_scope_cleanup_evidence_closure_not_passed"
+        )
 
     g1_direct_ready = g1_direct.get("contract_pass") is True
     g1_full_ready = g1_full_load.get("contract_pass") is True
@@ -369,6 +452,53 @@ def build_structural_product_development_roadmap(
                 "fresh_artifact_count": freshness_total,
                 "snapshot_blocker_count": _as_int(snapshot.get("blocker_count")),
                 "stale_or_inconsistent": _as_bool(snapshot.get("stale_or_inconsistent")),
+            },
+        ),
+        _stage_row(
+            stage_id="structural_scope_cleanup",
+            label="Structural scope cleanup",
+            numerator=sum(1 for item in structural_scope_checks if item),
+            denominator=len(structural_scope_checks),
+            blockers=structural_scope_stage_blockers,
+            next_actions=[
+                "record_release_surface_first_owner_delete_or_extract_decisions",
+                "merge_filled_owner_decision_batch_to_candidate",
+                "manually_apply_owner_approved_delete_or_extract_cleanup",
+                "rerun_structural_scope_audit_and_product_snapshot_checks",
+            ],
+            evidence_artifacts=[
+                STRUCTURAL_SCOPE_AUDIT,
+                STRUCTURAL_SCOPE_OWNER_REVIEW,
+                STRUCTURAL_SCOPE_OWNER_DECISION_PLAN,
+            ],
+            claim_boundary=(
+                "Quarantine removes non-structural paths from the structural release "
+                "surface, but repository cleanup is not closed until owner decisions "
+                "are recorded and delete/extract actions are manually applied and "
+                "re-audited."
+            ),
+            summary={
+                "non_structural_path_count": structural_total_non_structural,
+                "quarantined_non_structural_path_count": structural_quarantined,
+                "unquarantined_non_structural_path_count": structural_unquarantined,
+                "release_surface_text_leak_path_count": structural_release_surface_leak_count,
+                "owner_decision_recorded_count": structural_owner_recorded,
+                "owner_decision_total_count": structural_owner_total,
+                "release_surface_valid_cleanup_decision_count": (
+                    structural_release_valid_cleanup
+                ),
+                "release_surface_owner_decision_required_count": structural_release_expected,
+                "release_surface_pending_decision_count": structural_release_pending,
+                "next_owner_review_batch": _as_dict(
+                    structural_cleanup_plan.get("next_owner_review_batch")
+                ),
+                "release_surface_first_template_paths": _as_dict(
+                    structural_cleanup_plan.get("release_surface_first_batch_template_paths")
+                ),
+                "application_ready": _as_bool(
+                    structural_cleanup_plan.get("application_ready")
+                ),
+                "evidence_closure_pass": structural_cleanup_closed,
             },
         ),
         _stage_row(
@@ -607,6 +737,41 @@ def build_structural_product_development_roadmap(
             break
     recommended_next_slice_details = [
         {
+            "id": "close_structural_scope_owner_review_and_release_surface_cleanup",
+            "stage_ids": ["structural_scope_cleanup"],
+            "current_position": {
+                "non_structural_paths_quarantined": (
+                    f"{structural_quarantined}/{structural_total_non_structural}"
+                ),
+                "unquarantined_non_structural_path_count": structural_unquarantined,
+                "owner_decisions_recorded": (
+                    f"{structural_owner_recorded}/{structural_owner_total}"
+                ),
+                "release_surface_cleanup_decisions": (
+                    f"{structural_release_valid_cleanup}/{structural_release_expected}"
+                ),
+                "release_surface_pending_decision_count": structural_release_pending,
+                "next_owner_review_batch": str(
+                    _as_dict(structural_cleanup_plan.get("next_owner_review_batch")).get(
+                        "batch_id"
+                    )
+                    or ""
+                ),
+            },
+            "exit_conditions": [
+                "release-surface GPCR/H-bond/PocketMD paths have owner delete/extract decisions",
+                "all 86 quarantined non-structural paths have owner decisions",
+                "owner-approved delete/extract cleanup is manually applied",
+                "structural scope audit and product snapshot pass after cleanup",
+            ],
+            "external_dependency": True,
+            "evidence_artifacts": [
+                str(STRUCTURAL_SCOPE_AUDIT),
+                str(STRUCTURAL_SCOPE_OWNER_REVIEW),
+                str(STRUCTURAL_SCOPE_OWNER_DECISION_PLAN),
+            ],
+        },
+        {
             "id": "land_ci_license_ux_release_area_evidence",
             "stage_ids": ["pm_release_gate"],
             "current_position": {
@@ -755,10 +920,17 @@ def build_structural_product_development_roadmap(
             "developer_preview_final_gates": f"{dp_pass}/{dp_total}",
             "pm_release_areas": f"{release_area_pass}/{release_area_total}",
             "pm_milestones": f"{milestone_pass}/{milestone_total}",
+            "structural_scope_owner_decisions": (
+                f"{structural_owner_recorded}/{structural_owner_total}"
+            ),
+            "structural_scope_release_surface_cleanup_decisions": (
+                f"{structural_release_valid_cleanup}/{structural_release_expected}"
+            ),
             "g1_direct_residual_terminal_gate_ready": g1_direct_ready,
             "g1_full_load_hip_newton_lane_ready": g1_full_ready,
         },
         "recommended_next_slice": [
+            "close_structural_scope_owner_review_and_release_surface_cleanup",
             "land_ci_license_ux_release_area_evidence",
             "close_developer_preview_medium_large_and_parity_gates",
             "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path",
