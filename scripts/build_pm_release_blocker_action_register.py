@@ -132,6 +132,17 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _deduped(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if not item or item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
+
+
 def _release_area_green_total(report: dict[str, Any]) -> tuple[int, int]:
     rows = [row for row in _as_list(report.get("release_area_matrix")) if isinstance(row, dict)]
     if rows:
@@ -639,6 +650,57 @@ def _expected_intake_artifact(*, namespace: str, code: str) -> str:
     return ""
 
 
+def _path_within_root(path: Path) -> bool:
+    try:
+        path.resolve().relative_to(ROOT.resolve())
+    except ValueError:
+        return False
+    except Exception:
+        return False
+    return True
+
+
+def _resolve_artifact_json_path(*, pm_report: Path, artifact_ref: str) -> Path | None:
+    if not artifact_ref:
+        return None
+    artifact = Path(artifact_ref)
+    candidates: list[Path] = []
+    if artifact.is_absolute():
+        candidates.append(artifact)
+    else:
+        candidates.extend(
+            [
+                pm_report.parent / artifact,
+                pm_report.parent / artifact.name,
+                artifact,
+            ]
+        )
+        if _path_within_root(pm_report):
+            candidates.append(ROOT / artifact)
+    for candidate in candidates:
+        try:
+            if candidate.exists() and candidate.is_file():
+                return candidate
+        except OSError:
+            continue
+    return None
+
+
+def _source_intake_packet(
+    *,
+    pm_report: Path,
+    expected_intake_artifact: str,
+    evidence_artifacts: dict[str, str],
+) -> tuple[dict[str, Any], str]:
+    if not expected_intake_artifact:
+        return {}, ""
+    artifact_ref = str(evidence_artifacts.get(expected_intake_artifact, "") or "")
+    resolved = _resolve_artifact_json_path(pm_report=pm_report, artifact_ref=artifact_ref)
+    if not resolved:
+        return {}, artifact_ref
+    return _load_json(resolved), _path_key(resolved)
+
+
 def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[str, Any]:
     summary = _as_dict(row.get("summary"))
     if namespace == "fresh_full_validation":
@@ -961,6 +1023,27 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             artifacts=_evidence_artifacts(source_row),
         )
         expected_intake_artifact = _expected_intake_artifact(namespace=namespace, code=code)
+        source_intake_packet, source_intake_path = _source_intake_packet(
+            pm_report=pm_report,
+            expected_intake_artifact=expected_intake_artifact,
+            evidence_artifacts=evidence_artifacts,
+        )
+        source_intake_blocker_ids = _deduped(
+            [str(item) for item in _as_list(source_intake_packet.get("blocker_ids"))]
+        )
+        source_intake_release_area_blocker_ids = _deduped(
+            [str(item) for item in _as_list(source_intake_packet.get("release_area_blocker_ids"))]
+        )
+        source_intake_evidence_artifacts = _deduped(
+            [str(item) for item in _as_list(source_intake_packet.get("evidence_intake_artifacts"))]
+        )
+        row_blocker_ids = _deduped(
+            [
+                blocker_id,
+                *source_intake_release_area_blocker_ids,
+                *source_intake_blocker_ids,
+            ]
+        )
         handoff = _handoff_payload(
             owner=owner,
             owner_action=owner_action,
@@ -982,6 +1065,16 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "owner_input_required": owner_input_required,
             "external_input_required": owner_input_required,
             "resolution_type": _resolution_type(namespace=namespace, code=code),
+            "blocker_ids": row_blocker_ids,
+            "source_intake_artifact": expected_intake_artifact,
+            "source_intake_path": source_intake_path,
+            "source_intake_status": str(source_intake_packet.get("status", "")),
+            "source_intake_contract_pass": bool(source_intake_packet.get("contract_pass") is True),
+            "source_intake_blocker_ids": source_intake_blocker_ids,
+            "source_intake_blocker_id_count": len(source_intake_blocker_ids),
+            "source_intake_release_area_blocker_ids": source_intake_release_area_blocker_ids,
+            "source_intake_evidence_intake_artifacts": source_intake_evidence_artifacts,
+            "source_intake_evidence_intake_artifact_count": len(source_intake_evidence_artifacts),
             "owner_action": owner_action,
             "next_action": owner_action,
             "claim_boundary": _claim_boundary(namespace=namespace, code=code, row=source_row),
@@ -1025,6 +1118,9 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
                 Path("scripts/build_pm_release_blocker_action_register.py"),
                 pm_report,
                 DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT,
+                DEFAULT_CI_STREAK_INTAKE_PACKET,
+                DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
+                DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET,
             ]
         ),
         "pm_release_gate_report": str(pm_report),
@@ -1091,6 +1187,22 @@ def _markdown(payload: dict[str, Any]) -> str:
         )
     if not payload["rows"]:
         lines.append("| none | release | `release_owner` | `closed` | No open PM release blockers. | PM release gate is ready. |")
+    intake_rows = [
+        row
+        for row in payload["rows"]
+        if row.get("source_intake_blocker_ids") or row.get("source_intake_evidence_intake_artifacts")
+    ]
+    if intake_rows:
+        lines.extend(["", "## Source Intake Links", ""])
+        for row in intake_rows:
+            lines.append(f"### `{row['blocker_id']}`")
+            if row.get("source_intake_path"):
+                lines.append(f"- `source_intake_path`: `{row['source_intake_path']}`")
+            for blocker_id in row.get("source_intake_blocker_ids", []):
+                lines.append(f"- `blocker_id`: `{blocker_id}`")
+            for artifact in row.get("source_intake_evidence_intake_artifacts", []):
+                lines.append(f"- `evidence_artifact`: `{artifact}`")
+            lines.append("")
     return "\n".join(lines) + "\n"
 
 

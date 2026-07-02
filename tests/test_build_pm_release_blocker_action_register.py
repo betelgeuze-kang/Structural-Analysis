@@ -79,8 +79,54 @@ def _pm_report(path: Path, *, blockers: list[str] | None = None) -> Path:
     )
 
 
+def _intake_packet(
+    *,
+    status: str = "blocked",
+    blocker_ids: list[str],
+    release_area_blocker_ids: list[str] | None = None,
+    evidence_intake_artifacts: list[str] | None = None,
+) -> dict[str, object]:
+    return {
+        "status": status,
+        "contract_pass": status == "ready",
+        "blocker_ids": blocker_ids,
+        "release_area_blocker_ids": release_area_blocker_ids or [],
+        "evidence_intake_artifacts": evidence_intake_artifacts or [],
+    }
+
+
 def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) -> None:
     report = _pm_report(tmp_path / "pm_release_gate_report.json")
+    _write_json(
+        tmp_path / "ci_streak_intake_packet.json",
+        _intake_packet(
+            blocker_ids=[
+                "ci_streak::runner_precondition_blocked",
+                "ci_streak::pr_30_run_streak_missing",
+            ],
+            release_area_blocker_ids=[
+                "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+            ],
+            evidence_intake_artifacts=[
+                "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+            ],
+        ),
+    )
+    _write_json(
+        tmp_path / "license_status_intake_packet.json",
+        _intake_packet(
+            blocker_ids=[
+                "license::license_status_not_active",
+                "license::license_approval_reference_missing",
+            ],
+            release_area_blocker_ids=[
+                "pm_release::security::license_status_not_configured",
+            ],
+            evidence_intake_artifacts=[
+                "docs/templates/license_status.template.json",
+            ],
+        ),
+    )
 
     payload = build_register_module.build_register(pm_report=report)
     rows = {row["blocker_id"]: row for row in payload["rows"]}
@@ -125,6 +171,14 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert any("pr_pass_streak_count >= 30" in item for item in ci_row["acceptance_criteria"])
     assert any("ci_streak_intake_packet.json.contract_pass" in item for item in ci_row["acceptance_criteria"])
     assert "ci_streak_intake_packet" in ci_row["evidence_artifacts"]
+    assert ci_row["source_intake_artifact"] == "ci_streak_intake_packet"
+    assert ci_row["source_intake_status"] == "blocked"
+    assert ci_row["source_intake_blocker_id_count"] == 2
+    assert "ci_streak::runner_precondition_blocked" in ci_row["source_intake_blocker_ids"]
+    assert "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing" in ci_row[
+        "blocker_ids"
+    ]
+    assert ci_row["source_intake_evidence_intake_artifact_count"] == 1
     assert ci_row["handoff_ready"] is True
     assert ci_row["handoff_state"] == "external_owner_input_ready"
     assert ci_row["handoff"]["expected_intake_artifact"] == "ci_streak_intake_packet"
@@ -145,6 +199,11 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert any("build_license_status_closure_report.py" in command for command in security_row["verification_commands"])
     assert any("license_status_closure_report.json.contract_pass" in item for item in security_row["acceptance_criteria"])
     assert "license_status_intake_packet" in security_row["evidence_artifacts"]
+    assert security_row["source_intake_artifact"] == "license_status_intake_packet"
+    assert security_row["source_intake_blocker_id_count"] == 2
+    assert "license::license_status_not_active" in security_row["source_intake_blocker_ids"]
+    assert "pm_release::security::license_status_not_configured" in security_row["blocker_ids"]
+    assert security_row["source_intake_evidence_intake_artifact_count"] == 1
     assert security_row["handoff_ready"] is True
     assert security_row["handoff_state"] == "external_owner_input_ready"
     assert security_row["handoff"]["expected_intake_artifact"] == "license_status_intake_packet"
@@ -636,6 +695,22 @@ def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None
             ],
         },
     )
+    _write_json(
+        tmp_path / "ux_new_user_observation_intake_packet.json",
+        _intake_packet(
+            blocker_ids=[
+                "human_ux::observation_file_missing",
+                "ux_new_user_observation::observation_file_missing",
+            ],
+            release_area_blocker_ids=[
+                "pm_release::ux::human_new_user_observation_missing_or_failed",
+                "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+            ],
+            evidence_intake_artifacts=[
+                "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            ],
+        ),
+    )
 
     payload = build_register_module.build_register(pm_report=report)
     row = payload["rows"][0]
@@ -653,6 +728,11 @@ def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None
     assert any("ux_new_user_observation_report.json.contract_pass" in item for item in row["acceptance_criteria"])
     assert "ux_new_user_observation_report" in row["evidence_artifacts"]
     assert "ux_new_user_observation_intake_packet" in row["evidence_artifacts"]
+    assert row["source_intake_artifact"] == "ux_new_user_observation_intake_packet"
+    assert row["source_intake_blocker_id_count"] == 2
+    assert "human_ux::observation_file_missing" in row["source_intake_blocker_ids"]
+    assert "pm_release::ux::human_new_user_observation_missing_or_failed" in row["blocker_ids"]
+    assert "pm_release::ux::human_new_user_30min_sample_evidence_missing" in row["blocker_ids"]
     assert row["handoff_ready"] is True
     assert row["handoff_state"] == "external_owner_input_ready"
     assert row["handoff"]["expected_intake_artifact"] == "ux_new_user_observation_intake_packet"
@@ -730,6 +810,13 @@ def test_build_register_distinguishes_ux_observation_and_30min_evidence_blockers
 
 def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     report = _pm_report(tmp_path / "pm_release_gate_report.json")
+    _write_json(
+        tmp_path / "ci_streak_intake_packet.json",
+        _intake_packet(
+            blocker_ids=["ci_streak::pr_30_run_streak_missing"],
+            evidence_intake_artifacts=["github_actions_ci_streak_evidence.json"],
+        ),
+    )
     out = tmp_path / "register.json"
     out_md = tmp_path / "register.md"
 
@@ -751,3 +838,5 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert "basic_ci::pr_ci_30_consecutive_pass_evidence_missing" in out_md.read_text(encoding="utf-8")
     assert "release_ci_owner" in out_md.read_text(encoding="utf-8")
     assert "external_owner_input_ready" in out_md.read_text(encoding="utf-8")
+    assert "## Source Intake Links" in out_md.read_text(encoding="utf-8")
+    assert "ci_streak::pr_30_run_streak_missing" in out_md.read_text(encoding="utf-8")
