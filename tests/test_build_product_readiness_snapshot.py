@@ -377,6 +377,31 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "pending_owner_decision_family_counts": {},
         "next_owner_review_batch": {},
         "next_cleanup_application_batch": {},
+        "release_surface_first_batch_decision_intake": {
+            "schema_version": (
+                "structural-scope-release-surface-first-batch-decision-intake.v1"
+            ),
+            "batch_id": "release_surface_first",
+            "status": "no_release_surface_paths",
+            "ready_for_manual_cleanup_application": False,
+            "expected_path_count": 0,
+            "expected_paths": [],
+            "submitted_decision_count": 0,
+            "valid_decision_count": 0,
+            "valid_cleanup_decision_count": 0,
+            "pending_decision_count": 0,
+            "pending_decision_paths": [],
+            "invalid_submitted_decision_count": 0,
+            "invalid_submitted_decision_paths": [],
+            "retain_exception_count": 0,
+            "delete_decision_count": 0,
+            "extract_decision_count": 0,
+            "blockers": [],
+            "decision_rows": [],
+            "claim_boundary": "Fixture has no release-surface cleanup rows.",
+        },
+        "release_surface_first_batch_ready": False,
+        "release_surface_first_batch_blockers": [],
         "next_owner_review_batch_decision_template": {},
         "owner_decision_template_paths": {},
         "application_blockers": [],
@@ -5027,6 +5052,31 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
             ],
         },
         "next_cleanup_application_batch": {},
+        "release_surface_first_batch_decision_intake": {
+            "schema_version": (
+                "structural-scope-release-surface-first-batch-decision-intake.v1"
+            ),
+            "batch_id": "release_surface_first",
+            "status": "no_release_surface_paths",
+            "ready_for_manual_cleanup_application": False,
+            "expected_path_count": 0,
+            "expected_paths": [],
+            "submitted_decision_count": 0,
+            "valid_decision_count": 0,
+            "valid_cleanup_decision_count": 0,
+            "pending_decision_count": 0,
+            "pending_decision_paths": [],
+            "invalid_submitted_decision_count": 0,
+            "invalid_submitted_decision_paths": [],
+            "retain_exception_count": 0,
+            "delete_decision_count": 0,
+            "extract_decision_count": 0,
+            "blockers": [],
+            "decision_rows": [],
+            "claim_boundary": "Fixture has no release-surface cleanup rows.",
+        },
+        "release_surface_first_batch_ready": False,
+        "release_surface_first_batch_blockers": [],
         "next_owner_review_batch_decision_template": {
             "batch_id": "productization_evidence_second",
             "generated_template_paths": {
@@ -5111,6 +5161,11 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     assert cleanup["next_owner_review_batch"]["batch_id"] == (
         "productization_evidence_second"
     )
+    assert cleanup["release_surface_first_batch_decision_intake"]["status"] == (
+        "no_release_surface_paths"
+    )
+    assert cleanup["release_surface_first_batch_ready"] is False
+    assert cleanup["release_surface_first_batch_blockers"] == []
     assert cleanup["next_batch_template_paths"]["csv"].endswith(
         "structural_scope_owner_decisions.next_batch.template.csv"
     )

@@ -2980,6 +2980,21 @@ def build_snapshot(
                         "next_cleanup_application_batch"
                     )
                 ),
+                "release_surface_first_batch_decision_intake": _as_dict(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_first_batch_decision_intake"
+                    )
+                ),
+                "release_surface_first_batch_ready": bool(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_first_batch_ready"
+                    )
+                ),
+                "release_surface_first_batch_blockers": _as_list(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_first_batch_blockers"
+                    )
+                ),
                 "next_batch_template_paths": _as_dict(
                     _as_dict(
                         structural_scope_cleanup_plan.get(

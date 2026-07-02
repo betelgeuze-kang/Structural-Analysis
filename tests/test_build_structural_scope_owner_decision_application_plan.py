@@ -187,6 +187,14 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
         "implementation_phase1_cleanup_fifth",
     ]
     assert payload["release_surface_owner_decision_required_count"] == 0
+    assert payload["release_surface_first_batch_decision_intake"]["status"] == (
+        "no_release_surface_paths"
+    )
+    assert payload["release_surface_first_batch_decision_intake"][
+        "expected_path_count"
+    ] == 0
+    assert payload["release_surface_first_batch_ready"] is False
+    assert payload["release_surface_first_batch_blockers"] == []
     assert payload["owner_decision_template_paths"] == {
         "json": (
             "implementation/phase1/release_evidence/productization/"
@@ -252,6 +260,30 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
 
     assert payload["status"] == "pending_owner_decisions"
     assert payload["release_surface_owner_decision_required_count"] == 1
+    intake = payload["release_surface_first_batch_decision_intake"]
+    assert intake["schema_version"] == (
+        "structural-scope-release-surface-first-batch-decision-intake.v1"
+    )
+    assert intake["batch_id"] == "release_surface_first"
+    assert intake["status"] == "pending_owner_decisions"
+    assert intake["ready_for_manual_cleanup_application"] is False
+    assert intake["expected_path_count"] == 1
+    assert intake["expected_paths"] == [release_surface_path]
+    assert intake["submitted_decision_count"] == 0
+    assert intake["valid_decision_count"] == 0
+    assert intake["valid_cleanup_decision_count"] == 0
+    assert intake["pending_decision_count"] == 1
+    assert intake["pending_decision_paths"] == [release_surface_path]
+    assert intake["invalid_submitted_decision_count"] == 0
+    assert intake["blockers"] == [
+        "pending_release_surface_owner_decision_count=1",
+        "release_surface_cleanup_decision_count_below_expected=0/1",
+    ]
+    assert intake["decision_rows"][0]["allowed_owner_decisions"] == list(
+        application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+    )
+    assert payload["release_surface_first_batch_ready"] is False
+    assert payload["release_surface_first_batch_blockers"] == intake["blockers"]
     assert payload["next_owner_review_batch"]["batch_id"] == "release_surface_first"
     assert payload["next_owner_review_batch"]["priority"] == 1
     assert payload["next_owner_review_batch"]["paths"] == [release_surface_path]
@@ -429,6 +461,78 @@ def test_application_plan_routes_delete_and_extract_decisions(tmp_path: Path) ->
     ]
 
 
+def test_application_plan_intake_rejects_release_surface_retain_exception(
+    tmp_path: Path,
+) -> None:
+    audit = _audit_payload()
+    manifest = _manifest_payload()
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "pocketmd_lite_science_product_surface.json"
+    )
+    audit["quarantined_non_structural_rows"].append(
+        {
+            "path": release_surface_path,
+            "git_state": "tracked",
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "quarantine_status": "quarantined",
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    manifest["paths"].append(
+        {
+            "path": release_surface_path,
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(audit_path, audit)
+    _write_json(manifest_path, manifest)
+    _write_json(
+        decisions,
+        _decision_payload(
+            (
+                release_surface_path,
+                "retain_quarantined_with_signed_owner_exception",
+            ),
+        ),
+    )
+
+    payload = application_plan.build_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit_path,
+        quarantine_manifest_path=manifest_path,
+        owner_decisions_path=decisions,
+    )
+
+    assert payload["status"] == "owner_decision_evidence_invalid"
+    intake = payload["release_surface_first_batch_decision_intake"]
+    assert intake["status"] == "invalid_owner_decisions"
+    assert intake["ready_for_manual_cleanup_application"] is False
+    assert intake["expected_path_count"] == 1
+    assert intake["submitted_decision_count"] == 1
+    assert intake["valid_decision_count"] == 0
+    assert intake["valid_cleanup_decision_count"] == 0
+    assert intake["pending_decision_count"] == 0
+    assert intake["invalid_submitted_decision_count"] == 1
+    assert intake["invalid_submitted_decision_paths"] == [release_surface_path]
+    assert intake["retain_exception_count"] == 1
+    assert intake["blockers"] == [
+        "invalid_release_surface_owner_decision_count=1",
+        "release_surface_retain_exception_count=1",
+        "release_surface_cleanup_decision_count_below_expected=0/1",
+    ]
+    assert "release_surface_retain_exception_not_allowed" in intake[
+        "decision_rows"
+    ][0]["owner_decision_missing_requirements"]
+    assert payload["release_surface_first_batch_ready"] is False
+    assert payload["release_surface_first_batch_blockers"] == intake["blockers"]
+
+
 def test_application_plan_accepts_owner_decision_csv(tmp_path: Path) -> None:
     audit, manifest = _write_inputs(tmp_path)
     decisions = tmp_path / "owner_decisions.csv"
@@ -559,6 +663,20 @@ def test_application_plan_surfaces_partial_release_surface_cleanup_batch(
     assert payload["application_ready"] is False
     assert payload["partial_cleanup_ready"] is True
     assert payload["release_surface_batch_cleanup_ready"] is True
+    intake = payload["release_surface_first_batch_decision_intake"]
+    assert intake["status"] == "ready_for_manual_cleanup_application"
+    assert intake["ready_for_manual_cleanup_application"] is True
+    assert intake["expected_path_count"] == 1
+    assert intake["submitted_decision_count"] == 1
+    assert intake["valid_decision_count"] == 1
+    assert intake["valid_cleanup_decision_count"] == 1
+    assert intake["pending_decision_count"] == 0
+    assert intake["invalid_submitted_decision_count"] == 0
+    assert intake["delete_decision_count"] == 1
+    assert intake["extract_decision_count"] == 0
+    assert intake["blockers"] == []
+    assert payload["release_surface_first_batch_ready"] is True
+    assert payload["release_surface_first_batch_blockers"] == []
     assert payload["cleanup_application_preflight"]["status"] == (
         "ready_for_manual_cleanup_application"
     )
@@ -770,6 +888,7 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "Pending Owner Decision Buckets" in markdown
     assert "owner_decision_validation_pass" in markdown
     assert "cleanup_required_count" in markdown
+    assert "Release Surface First Batch Intake" in markdown
     assert "Cleanup Command Manifest" in markdown
     assert "owner_decision_pending_count=2" in markdown
     next_payload = json.loads(next_template.read_text(encoding="utf-8"))

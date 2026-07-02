@@ -110,6 +110,13 @@ def _git_rm_args(paths: list[str]) -> list[str]:
     return ["git", "rm", "--", *paths] if paths else []
 
 
+def _cleanup_owner_decision(decision: str) -> bool:
+    return decision in {
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+    }
+
+
 def _action_for_decision(row: dict[str, Any]) -> dict[str, Any]:
     path = _text(row.get("path"))
     decision = _text(row.get("owner_decision"))
@@ -184,6 +191,128 @@ def _plan_row(row: dict[str, Any]) -> dict[str, Any]:
         ),
         "current_release_action": _text(row.get("current_release_action")),
         **action,
+    }
+
+
+def _release_surface_first_batch_decision_intake(
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    release_rows = sorted(
+        [row for row in rows if _text(row.get("path_area")) == "release_surface"],
+        key=lambda item: _text(item.get("path")),
+    )
+    submitted_rows = [
+        row for row in release_rows if _text(row.get("owner_decision"))
+    ]
+    valid_rows = [
+        row for row in release_rows if bool(row.get("owner_decision_valid"))
+    ]
+    valid_cleanup_rows = [
+        row
+        for row in valid_rows
+        if _cleanup_owner_decision(_text(row.get("owner_decision")))
+    ]
+    pending_rows = [
+        row for row in release_rows if not _text(row.get("owner_decision"))
+    ]
+    invalid_submitted_rows = [
+        row
+        for row in submitted_rows
+        if not bool(row.get("owner_decision_valid"))
+    ]
+    retain_rows = [
+        row
+        for row in release_rows
+        if _text(row.get("owner_decision"))
+        == "retain_quarantined_with_signed_owner_exception"
+    ]
+    blockers: list[str] = []
+    if pending_rows:
+        blockers.append(
+            f"pending_release_surface_owner_decision_count={len(pending_rows)}"
+        )
+    if invalid_submitted_rows:
+        blockers.append(
+            "invalid_release_surface_owner_decision_count="
+            f"{len(invalid_submitted_rows)}"
+        )
+    if retain_rows:
+        blockers.append(
+            f"release_surface_retain_exception_count={len(retain_rows)}"
+        )
+    if release_rows and len(valid_cleanup_rows) < len(release_rows):
+        blockers.append(
+            "release_surface_cleanup_decision_count_below_expected="
+            f"{len(valid_cleanup_rows)}/{len(release_rows)}"
+        )
+    ready = bool(release_rows and not blockers)
+    if not release_rows:
+        status = "no_release_surface_paths"
+    elif invalid_submitted_rows or retain_rows:
+        status = "invalid_owner_decisions"
+    elif pending_rows:
+        status = "pending_owner_decisions"
+    elif ready:
+        status = "ready_for_manual_cleanup_application"
+    else:
+        status = "blocked_release_surface_decision_intake"
+    return {
+        "schema_version": (
+            "structural-scope-release-surface-first-batch-decision-intake.v1"
+        ),
+        "batch_id": "release_surface_first",
+        "status": status,
+        "ready_for_manual_cleanup_application": ready,
+        "expected_path_count": len(release_rows),
+        "expected_paths": [row["path"] for row in release_rows],
+        "submitted_decision_count": len(submitted_rows),
+        "valid_decision_count": len(valid_rows),
+        "valid_cleanup_decision_count": len(valid_cleanup_rows),
+        "pending_decision_count": len(pending_rows),
+        "pending_decision_paths": [row["path"] for row in pending_rows],
+        "invalid_submitted_decision_count": len(invalid_submitted_rows),
+        "invalid_submitted_decision_paths": [
+            row["path"] for row in invalid_submitted_rows
+        ],
+        "retain_exception_count": len(retain_rows),
+        "delete_decision_count": sum(
+            1
+            for row in release_rows
+            if _text(row.get("owner_decision"))
+            == "delete_from_structural_repository"
+        ),
+        "extract_decision_count": sum(
+            1
+            for row in release_rows
+            if _text(row.get("owner_decision"))
+            == "extract_to_molecular_or_science_repository"
+        ),
+        "blockers": blockers,
+        "decision_rows": [
+            {
+                "path": _text(row.get("path")),
+                "owner_decision": _text(row.get("owner_decision")),
+                "owner_decision_valid": bool(row.get("owner_decision_valid")),
+                "owner_review_state": _text(row.get("owner_review_state")),
+                "owner_decision_missing_requirements": [
+                    str(item)
+                    for item in _as_list(
+                        row.get("owner_decision_missing_requirements")
+                    )
+                ],
+                "required_action": _action_for_decision(row)["required_action"],
+                "allowed_owner_decisions": [
+                    str(item)
+                    for item in _as_list(row.get("allowed_owner_decisions"))
+                ],
+            }
+            for row in release_rows
+        ],
+        "claim_boundary": (
+            "This release-surface-first intake is non-mutating. It only tracks "
+            "whether every non-structural release-surface path has a valid "
+            "owner delete/extract decision before a human applies cleanup."
+        ),
     }
 
 
@@ -642,9 +771,15 @@ def build_application_plan(
         quarantine_manifest_path=quarantine_manifest_path,
         owner_decisions_path=owner_decisions_path,
     )
-    rows = [_plan_row(row) for row in _as_list(packet.get("review_rows")) if isinstance(row, dict)]
+    review_rows = [
+        row for row in _as_list(packet.get("review_rows")) if isinstance(row, dict)
+    ]
+    rows = [_plan_row(row) for row in review_rows]
     status = _status_from_packet(packet)
     owner_decisions = packet.get("owner_decisions") if isinstance(packet.get("owner_decisions"), dict) else {}
+    release_surface_first_batch_decision_intake = (
+        _release_surface_first_batch_decision_intake(review_rows)
+    )
     delete_rows = [row for row in rows if row["owner_decision"] == "delete_from_structural_repository"]
     extract_rows = [row for row in rows if row["owner_decision"] == "extract_to_molecular_or_science_repository"]
     retain_rows = [
@@ -788,6 +923,20 @@ def build_application_plan(
             for row in pending_owner_decision_rows
             if row["path_area"] == "release_surface"
         ],
+        "release_surface_first_batch_decision_intake": (
+            release_surface_first_batch_decision_intake
+        ),
+        "release_surface_first_batch_ready": bool(
+            release_surface_first_batch_decision_intake.get(
+                "ready_for_manual_cleanup_application"
+            )
+        ),
+        "release_surface_first_batch_blockers": [
+            str(item)
+            for item in _as_list(
+                release_surface_first_batch_decision_intake.get("blockers")
+            )
+        ],
         "cleanup_required_count": len(cleanup_rows),
         "cleanup_application_preflight": cleanup_application_preflight,
         "cleanup_application_preflight_ready": bool(
@@ -885,6 +1034,32 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{len(payload['owner_review_priority_batches'])}`"
         )
     lines.append("")
+    intake = payload.get("release_surface_first_batch_decision_intake")
+    intake = intake if isinstance(intake, dict) else {}
+    if intake:
+        lines.extend(["## Release Surface First Batch Intake", ""])
+        lines.append(f"- `status`: `{intake.get('status')}`")
+        lines.append(
+            "- `ready_for_manual_cleanup_application`: "
+            f"`{intake.get('ready_for_manual_cleanup_application')}`"
+        )
+        lines.append(
+            "- `expected_path_count`: "
+            f"`{intake.get('expected_path_count', 0)}`"
+        )
+        lines.append(
+            "- `valid_cleanup_decision_count`: "
+            f"`{intake.get('valid_cleanup_decision_count', 0)}`"
+        )
+        lines.append(
+            "- `pending_decision_count`: "
+            f"`{intake.get('pending_decision_count', 0)}`"
+        )
+        if intake.get("blockers"):
+            lines.extend(f"- `{item}`" for item in intake["blockers"])
+        else:
+            lines.append("- blockers: none")
+        lines.append("")
     next_batch_template = payload.get("next_owner_review_batch_decision_template")
     next_batch_template = (
         next_batch_template if isinstance(next_batch_template, dict) else {}
