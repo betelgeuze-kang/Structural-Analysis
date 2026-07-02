@@ -146,6 +146,30 @@ def _is_utc_timestamp(value: Any) -> bool:
     return parsed.utcoffset() == timezone.utc.utcoffset(None)
 
 
+def _is_placeholder_text(value: Any) -> bool:
+    text = _text(value).lower()
+    if not text:
+        return False
+    normalized = text.replace("_", "-").strip()
+    placeholder_values = {
+        "todo",
+        "tbd",
+        "placeholder",
+        "replace-me",
+        "fill-me",
+        "n/a",
+        "na",
+        "none",
+        "null",
+        "unknown",
+    }
+    if "<" in text or ">" in text:
+        return True
+    if normalized in placeholder_values:
+        return True
+    return normalized.startswith(("todo:", "placeholder:", "replace-me:"))
+
+
 def _counts_by_key(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
     counts: dict[str, int] = {}
     for row in rows:
@@ -398,24 +422,40 @@ def _owner_decision_overlay(
         missing.append("release_surface_retain_exception_not_allowed")
     if not owner_identity:
         missing.append("owner_identity")
+    elif _is_placeholder_text(owner_identity):
+        missing.append("owner_identity_placeholder")
     if not owner_role:
         missing.append("owner_role")
+    elif _is_placeholder_text(owner_role):
+        missing.append("owner_role_placeholder")
     if not decision_timestamp_utc:
         missing.append("decision_timestamp_utc")
     elif not _is_utc_timestamp(decision_timestamp_utc):
         missing.append("decision_timestamp_utc_not_utc")
     if not evidence_reference:
         missing.append("evidence_reference")
+    elif _is_placeholder_text(evidence_reference):
+        missing.append("evidence_reference_placeholder")
     if (
         owner_decision == "extract_to_molecular_or_science_repository"
         and not external_archive_reference
     ):
         missing.append("external_archive_reference")
+    elif (
+        owner_decision == "extract_to_molecular_or_science_repository"
+        and _is_placeholder_text(external_archive_reference)
+    ):
+        missing.append("external_archive_reference_placeholder")
     if (
         owner_decision == "retain_quarantined_with_signed_owner_exception"
         and not signed_owner_exception_reference
     ):
         missing.append("signed_owner_exception_reference")
+    elif (
+        owner_decision == "retain_quarantined_with_signed_owner_exception"
+        and _is_placeholder_text(signed_owner_exception_reference)
+    ):
+        missing.append("signed_owner_exception_reference_placeholder")
     valid = not missing
     cleanup_required = owner_decision in {
         "delete_from_structural_repository",
