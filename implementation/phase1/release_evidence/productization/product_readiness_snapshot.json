@@ -2932,7 +2932,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T08:33:50.173665+00:00",
+  "generated_at": "2026-07-02T08:38:02.260071+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -3282,7 +3282,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "fa7daf9053c3ae62dc39e7bfec5aef206af72d68",
+  "source_commit_sha": "e9e67f9da981d0f73b1b4243cca86e6e95026f7c",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -4144,7 +4144,13 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4169,7 +4175,13 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json"
+        " M implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
+        " M implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        " M implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md",
+        " M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json",
+        " M implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ]
     }
   },
