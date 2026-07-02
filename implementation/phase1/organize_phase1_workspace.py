@@ -16,7 +16,7 @@ from pathlib import Path
 import shutil
 
 
-EXCLUDE_DIRS = {".git", "__pycache__", "workspace", "rust_hip_md3bead_hook/target"}
+EXCLUDE_DIR_NAMES = {".git", "__pycache__", "workspace", "target"}
 GENERATED_MARKERS = (
     "report",
     "summary",
@@ -34,7 +34,6 @@ GENERATED_MARKERS = (
     "bifurcation_detector",
     "buckling_contract",
     "winning_ticket_backprop",
-    "rust_md3bead_parity",
     "nonlinear_lj_mapping",
     "pipeline_",
     "three_bead_cache_budget",
@@ -60,8 +59,7 @@ def _sha256(path: Path) -> str:
 
 
 def _is_excluded(path: Path) -> bool:
-    s = path.as_posix()
-    return any(token in s for token in EXCLUDE_DIRS)
+    return bool(set(path.parts) & EXCLUDE_DIR_NAMES)
 
 
 def _group_script(name: str) -> str:
@@ -74,7 +72,7 @@ def _group_script(name: str) -> str:
         return "benchmark_data"
     if "hook" in n or "probe" in n or "bridge" in n:
         return "hooks_runtime"
-    if "md3bead" in n or "projection" in n or "gnn" in n:
+    if "projection" in n or "gnn" in n:
         return "core_models"
     return "misc"
 
