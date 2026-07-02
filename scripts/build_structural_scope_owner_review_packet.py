@@ -66,6 +66,7 @@ OWNER_DECISION_COLUMNS = (
     "evidence_reference",
     "signed_owner_exception_reference",
     "external_archive_reference",
+    "allowed_owner_decisions",
 )
 OWNER_DECISION_REQUIRED_COLUMNS = (
     "path",

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import csv
 import json
 from pathlib import Path
 import sys
@@ -326,6 +327,14 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "human confirms the batch cleanup scope",
         ],
     }
+    csv_rows = list(
+        csv.DictReader(
+            application_plan._csv_text(batch_template["decision_rows"]).splitlines()
+        )
+    )
+    assert csv_rows[0]["allowed_owner_decisions"] == ";".join(
+        application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+    )
     assert [
         row["batch_id"] for row in payload["owner_review_priority_batches"]
     ] == [

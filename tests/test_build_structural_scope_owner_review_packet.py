@@ -597,6 +597,9 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     assert csv_rows[0]["recommended_owner_decision_alternate"] == (
         "delete_from_structural_repository"
     )
+    assert csv_rows[0]["allowed_owner_decisions"] == ";".join(
+        owner_review.ALLOWED_OWNER_DECISIONS
+    )
 
 
 def test_owner_review_packet_accepts_owner_decision_csv(tmp_path: Path) -> None:
