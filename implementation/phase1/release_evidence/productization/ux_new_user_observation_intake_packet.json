@@ -44,6 +44,68 @@
     "evidence_ref_missing",
     "approval_decision_not_accepted"
   ],
+  "derived_checks": [
+    {
+      "field": "timestamp_order",
+      "owner_note": "Completion timestamp must not precede the observed start timestamp.",
+      "report_check": "timestamp_order_pass",
+      "required_value": "completed_at_utc >= started_at_utc"
+    },
+    {
+      "field": "elapsed_minutes",
+      "owner_note": "The PM 30-minute gate is enforced from parsed wall-clock timestamps.",
+      "report_check": "elapsed_30min_pass",
+      "required_value": "<= 30.0 from completed_at_utc - started_at_utc"
+    },
+    {
+      "field": "completion_minutes_elapsed_match",
+      "owner_note": "Declared completion_minutes must match computed elapsed minutes within the report tolerance.",
+      "report_check": "completion_minutes_elapsed_match_pass",
+      "required_value": "completion_minutes equals elapsed_minutes within tolerance"
+    },
+    {
+      "field": "workflow_step_coverage",
+      "owner_note": "The observed task must cover Import through Compare & Report without skipped steps.",
+      "report_check": "all_required_workflow_steps_observed",
+      "required_value": "required workflow observed count == 5/5"
+    },
+    {
+      "field": "workflow_step_placeholders",
+      "owner_note": "Template workflow step placeholders must be replaced with real observed outcomes.",
+      "report_check": "workflow_step_placeholders_absent",
+      "required_value": "no placeholder workflow step labels or outcomes"
+    },
+    {
+      "field": "evidence_ref_resolvable",
+      "owner_note": "The 30-minute sample must point to a retrievable note, ticket, recording, or signed bundle.",
+      "report_check": "evidence_ref_resolvable_pass",
+      "required_value": "https URL, ticket/jira/ux/user-study reference, or existing local evidence path"
+    },
+    {
+      "field": "evidence_ref_not_self_reference",
+      "owner_note": "Self-references do not prove that separate human-observation evidence exists.",
+      "report_check": "evidence_ref_not_self_reference_pass",
+      "required_value": "evidence_ref must not point back to the observation JSON itself"
+    },
+    {
+      "field": "evidence_ref_not_template_reference",
+      "owner_note": "Templates are owner input aids, not human observation evidence.",
+      "report_check": "evidence_ref_not_template_reference_pass",
+      "required_value": "evidence_ref must not point to the UX observation template"
+    },
+    {
+      "field": "evidence_ref_not_template_artifact",
+      "owner_note": "Any template-like file is rejected as human observation evidence.",
+      "report_check": "evidence_ref_not_template_artifact_pass",
+      "required_value": "evidence_ref must not point to docs/templates or a .template.* artifact"
+    },
+    {
+      "field": "evidence_ref_not_generated_gate_artifact",
+      "owner_note": "Generated gate reports and automated rehearsal receipts are validation outputs, not separate human-observation evidence.",
+      "report_check": "evidence_ref_not_generated_gate_artifact_pass",
+      "required_value": "evidence_ref must not point to generated UX/PM/DP/readiness gate or automated browser-rehearsal artifacts"
+    }
+  ],
   "developer_preview_blocker_ids": [
     "developer_preview_rc::new_user_core_workflow_observation_passed"
   ],
@@ -403,7 +465,7 @@
     }
   ],
   "gate_unblock_plan_count": 5,
-  "generated_at": "2026-07-02T13:20:07.392206+00:00",
+  "generated_at": "2026-07-02T19:50:59.423424+00:00",
   "human_observation_evidence_policy": {
     "accepted_evidence": [
       "human-observed 30-minute new-user workflow record with anonymized participant_ref",
@@ -428,6 +490,45 @@
   ],
   "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
   "observation_report_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+  "observation_template": {
+    "contract_pass_default": false,
+    "path": "docs/templates/ux_new_user_observation.template.json",
+    "present": true,
+    "required_owner_edits": [
+      "replace OWNER_INPUT_REQUIRED placeholders",
+      "set contract_pass=true only after the real observation completes",
+      "attach a non-template evidence_ref",
+      "keep blocker_count=0 for release acceptance"
+    ],
+    "template_only": true,
+    "workflow_steps": [
+      {
+        "id": "import",
+        "label": "Import",
+        "outcome": "OWNER_INPUT_REQUIRED: pass"
+      },
+      {
+        "id": "model_health",
+        "label": "Model Health",
+        "outcome": "OWNER_INPUT_REQUIRED: pass"
+      },
+      {
+        "id": "analysis_setup",
+        "label": "Analysis Setup",
+        "outcome": "OWNER_INPUT_REQUIRED: pass"
+      },
+      {
+        "id": "run_monitor",
+        "label": "Run & Monitor",
+        "outcome": "OWNER_INPUT_REQUIRED: pass"
+      },
+      {
+        "id": "compare_report",
+        "label": "Compare & Report",
+        "outcome": "OWNER_INPUT_REQUIRED: pass"
+      }
+    ]
+  },
   "product_readiness_blocker_ids": [
     "human_ux::observation_file_missing",
     "human_ux::contract_signal_not_pass",
@@ -448,6 +549,161 @@
     "pm_release::ux::human_new_user_observation_missing_or_failed",
     "pm_release::ux::human_new_user_30min_sample_evidence_missing"
   ],
+  "required_fields": [
+    {
+      "field": "contract_pass",
+      "owner_note": "Observation source must explicitly opt into release evidence, not remain draft or template-only.",
+      "report_check": "contract_signal_pass",
+      "required_value": "true"
+    },
+    {
+      "field": "participant_ref",
+      "owner_note": "Use an anonymized participant/session reference so reviewers can trace the observation without storing raw personal data.",
+      "report_check": "required_fields_present",
+      "required_value": "stable anonymized participant reference"
+    },
+    {
+      "field": "participant_role",
+      "owner_note": "Participant must be new to the product workflow being released.",
+      "report_check": "participant_role_new_user_pass",
+      "required_value": "new_user | first_time_user | pilot_user"
+    },
+    {
+      "field": "new_to_product",
+      "owner_note": "Do not use expert/operator rehearsals as PM UX release-area evidence.",
+      "report_check": "new_to_product_pass",
+      "required_value": "true"
+    },
+    {
+      "field": "sample_project_id",
+      "owner_note": "Must identify the exact sample project completed by the participant.",
+      "report_check": "required_fields_present",
+      "required_value": "sample project identifier used in the observed workflow"
+    },
+    {
+      "field": "workflow_scope",
+      "owner_note": "Scope should match the paid-pilot workflow promised to customers.",
+      "report_check": "required_fields_present",
+      "required_value": "observed workflow scope covering the full five-step workflow"
+    },
+    {
+      "field": "workflow_steps",
+      "owner_note": "Each required workflow step must have a human-observed pass/outcome signal.",
+      "report_check": "all_required_workflow_steps_passed",
+      "required_value": "all five steps observed and passed: Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report"
+    },
+    {
+      "field": "observer",
+      "owner_note": "Automated browser smoke tests do not satisfy this field.",
+      "report_check": "required_fields_present",
+      "required_value": "human observer or UX research owner"
+    },
+    {
+      "field": "started_at_utc",
+      "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+      "report_check": "started_at_utc_valid",
+      "required_value": "timezone-aware ISO-8601 observation start timestamp"
+    },
+    {
+      "field": "completed_at_utc",
+      "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+      "report_check": "completed_at_utc_valid",
+      "required_value": "timezone-aware ISO-8601 observation completion timestamp"
+    },
+    {
+      "field": "completion_minutes",
+      "owner_note": "Completion time must prove the PM 30-minute UX gate and match wall-clock timestamps.",
+      "report_check": "completion_30min_pass",
+      "required_value": "<= 30.0 and matches timestamp elapsed minutes"
+    },
+    {
+      "field": "blocker_count",
+      "owner_note": "Blocking usability issues keep the UX release area blocked.",
+      "report_check": "blocker_count_zero_pass",
+      "required_value": "0"
+    },
+    {
+      "field": "evidence_ref",
+      "owner_note": "Reference the observation note, ticket, recording, or signed evidence bundle.",
+      "report_check": "required_fields_present",
+      "required_value": "non-placeholder evidence reference"
+    },
+    {
+      "field": "approval_decision",
+      "owner_note": "Decision must explicitly accept the observation for release evidence.",
+      "report_check": "approval_decision_pass",
+      "required_value": "accepted | approved | pass | signed | approved_for_release"
+    }
+  ],
+  "sample_workflow": {
+    "accepted_step_outcomes": [
+      "pass",
+      "passed",
+      "complete",
+      "completed",
+      "accepted",
+      "ok",
+      "success",
+      "successful"
+    ],
+    "claim_boundary": "This sample workflow contract is a fill-in guide only. It does not replace a real human new-user observation record.",
+    "max_completion_minutes": 30.0,
+    "required_workflow_step_count": 5,
+    "steps": [
+      {
+        "id": "import",
+        "label": "Import",
+        "minimum_capture": [
+          "outcome/status",
+          "short observed-result note",
+          "step-level blocker count if any"
+        ],
+        "required_observation": "human-observed pass outcome"
+      },
+      {
+        "id": "model_health",
+        "label": "Model Health",
+        "minimum_capture": [
+          "outcome/status",
+          "short observed-result note",
+          "step-level blocker count if any"
+        ],
+        "required_observation": "human-observed pass outcome"
+      },
+      {
+        "id": "analysis_setup",
+        "label": "Analysis Setup",
+        "minimum_capture": [
+          "outcome/status",
+          "short observed-result note",
+          "step-level blocker count if any"
+        ],
+        "required_observation": "human-observed pass outcome"
+      },
+      {
+        "id": "run_monitor",
+        "label": "Run & Monitor",
+        "minimum_capture": [
+          "outcome/status",
+          "short observed-result note",
+          "step-level blocker count if any"
+        ],
+        "required_observation": "human-observed pass outcome"
+      },
+      {
+        "id": "compare_report",
+        "label": "Compare & Report",
+        "minimum_capture": [
+          "outcome/status",
+          "short observed-result note",
+          "step-level blocker count if any"
+        ],
+        "required_observation": "human-observed pass outcome"
+      }
+    ],
+    "timestamp_tolerance_minutes": 1.0,
+    "workflow_scope": "Import -> Model Health -> Analysis Setup -> Run & Monitor -> Compare & Report"
+  },
   "schema_version": "ux-new-user-observation-intake-packet.v1",
   "status": "blocked",
   "summary": {

@@ -151,6 +151,34 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
     assert "automated browser smoke" in payload["human_observation_evidence_policy"]["rejected_substitutes"][0]
     assert payload["summary"]["field_pass_count"] == 0
     assert payload["summary"]["observation_blocker_count"] == 2
+    assert payload["observation_template"]["path"] == str(template)
+    assert payload["observation_template"]["present"] is True
+    assert payload["observation_template"]["template_only"] is True
+    assert payload["observation_template"]["contract_pass_default"] is False
+    assert "attach a non-template evidence_ref" in payload["observation_template"][
+        "required_owner_edits"
+    ]
+    required_fields = {row["field"]: row for row in payload["required_fields"]}
+    assert required_fields["participant_ref"]["report_check"] == (
+        "required_fields_present"
+    )
+    assert required_fields["workflow_steps"]["required_value"].startswith(
+        "all five steps observed"
+    )
+    derived_checks = {row["field"]: row for row in payload["derived_checks"]}
+    assert derived_checks["elapsed_minutes"]["report_check"] == "elapsed_30min_pass"
+    assert payload["sample_workflow"]["required_workflow_step_count"] == 5
+    assert payload["sample_workflow"]["max_completion_minutes"] == 30.0
+    assert [step["id"] for step in payload["sample_workflow"]["steps"]] == [
+        "import",
+        "model_health",
+        "analysis_setup",
+        "run_monitor",
+        "compare_report",
+    ]
+    assert payload["sample_workflow"]["steps"][0]["required_observation"] == (
+        "human-observed pass outcome"
+    )
     assert payload["gate_unblock_plan_count"] == 2
     assert payload["gate_unblock_plan"][0]["slot_id"] == "attach_observation_record"
     assert "participant_role" in payload["gate_unblock_plan"][0]["failing_fields"]
@@ -253,6 +281,9 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
     assert payload["blocker_ids"] == []
     assert payload["summary"]["field_pass_count"] == 24
     assert payload["summary"]["field_count"] == 24
+    assert len(payload["required_fields"]) == 14
+    assert len(payload["derived_checks"]) == 10
+    assert payload["sample_workflow"]["required_workflow_step_count"] == 5
     assert payload["gate_unblock_plan"] == []
     assert payload["gate_unblock_plan_count"] == 0
     assert payload["next_actions"] == []

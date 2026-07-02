@@ -56,6 +56,27 @@
 - `accepted_evidence`: human-observed 30-minute new-user workflow record with anonymized participant_ref; observer-owned note, ticket, recording reference, or signed evidence bundle; timezone-aware started_at_utc/completed_at_utc plus matching completion_minutes <= 30; all five required workflow steps observed with passing outcomes; approval_decision explicitly accepted for release evidence
 - `rejected_substitutes`: automated browser smoke or task-based UX rehearsal without human observation; generated UX/PM/DP/readiness gate reports used as evidence_ref; docs/templates or *.template.* files; the observation JSON self-referencing itself as separate evidence; operator/expert rehearsal that is not a new-user observation
 
+## Observation Template
+
+- `path`: `docs/templates/ux_new_user_observation.template.json`
+- `present`: `True`
+- `template_only`: `True`
+- `contract_pass_default`: `False`
+
+## Sample Workflow
+
+- `workflow_scope`: `Import -> Model Health -> Analysis Setup -> Run & Monitor -> Compare & Report`
+- `max_completion_minutes`: `30.0`
+- `required_workflow_step_count`: `5`
+
+| Step | Required Observation | Minimum Capture |
+|---|---|---|
+| `import` Import | human-observed pass outcome | outcome/status; short observed-result note; step-level blocker count if any |
+| `model_health` Model Health | human-observed pass outcome | outcome/status; short observed-result note; step-level blocker count if any |
+| `analysis_setup` Analysis Setup | human-observed pass outcome | outcome/status; short observed-result note; step-level blocker count if any |
+| `run_monitor` Run & Monitor | human-observed pass outcome | outcome/status; short observed-result note; step-level blocker count if any |
+| `compare_report` Compare & Report | human-observed pass outcome | outcome/status; short observed-result note; step-level blocker count if any |
+
 | Field | Current | Template | Required | Report Check |
 |---|---|---|---|---|
 | `contract_pass` | `` | `false` | true | `contract_signal_pass` = `False` |

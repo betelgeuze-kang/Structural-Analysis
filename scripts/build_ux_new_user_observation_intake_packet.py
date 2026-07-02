@@ -394,6 +394,96 @@ def _next_actions(contract_pass: bool) -> list[str]:
     ]
 
 
+def _required_field_contract() -> list[dict[str, str]]:
+    return [
+        {
+            "field": str(spec["field"]),
+            "required_value": str(spec["required_value"]),
+            "report_check": str(spec["check"]),
+            "owner_note": str(spec["owner_note"]),
+        }
+        for spec in FIELD_SPECS
+    ]
+
+
+def _derived_check_contract() -> list[dict[str, str]]:
+    return [
+        {
+            "field": str(spec["field"]),
+            "required_value": str(spec["required_value"]),
+            "report_check": str(spec["check"]),
+            "owner_note": str(spec["owner_note"]),
+        }
+        for spec in DERIVED_CHECK_SPECS
+    ]
+
+
+def _sample_workflow_contract(summary: dict[str, Any]) -> dict[str, Any]:
+    required_steps = _as_list(summary.get("required_workflow_steps"))
+    if not required_steps:
+        required_steps = [
+            {"id": "import", "label": "Import"},
+            {"id": "model_health", "label": "Model Health"},
+            {"id": "analysis_setup", "label": "Analysis Setup"},
+            {"id": "run_monitor", "label": "Run & Monitor"},
+            {"id": "compare_report", "label": "Compare & Report"},
+        ]
+    return {
+        "workflow_scope": "Import -> Model Health -> Analysis Setup -> Run & Monitor -> Compare & Report",
+        "max_completion_minutes": summary.get("max_completion_minutes", 30.0),
+        "timestamp_tolerance_minutes": summary.get("timestamp_tolerance_minutes"),
+        "required_workflow_step_count": len(required_steps),
+        "accepted_step_outcomes": [
+            "pass",
+            "passed",
+            "complete",
+            "completed",
+            "accepted",
+            "ok",
+            "success",
+            "successful",
+        ],
+        "steps": [
+            {
+                "id": str(_as_dict(step).get("id") or ""),
+                "label": str(_as_dict(step).get("label") or ""),
+                "required_observation": "human-observed pass outcome",
+                "minimum_capture": [
+                    "outcome/status",
+                    "short observed-result note",
+                    "step-level blocker count if any",
+                ],
+            }
+            for step in required_steps
+            if isinstance(step, dict)
+        ],
+        "claim_boundary": (
+            "This sample workflow contract is a fill-in guide only. It does not "
+            "replace a real human new-user observation record."
+        ),
+    }
+
+
+def _observation_template_summary(
+    *,
+    template_path: Path,
+    template: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "path": str(template_path),
+        "present": bool(template),
+        "template_only": template.get("template_only"),
+        "contract_pass_default": template.get("contract_pass"),
+        "workflow_steps": _as_list(template.get("workflow_steps")),
+        "required_owner_edits": [
+            "replace OWNER_INPUT_REQUIRED placeholders",
+            "set contract_pass=true only after the real observation completes",
+            "attach a non-template evidence_ref",
+            "keep blocker_count=0 for release acceptance",
+        ],
+    }
+
+
 def build_packet(
     *,
     observation_path: Path = DEFAULT_OBSERVATION,
@@ -509,6 +599,13 @@ def build_packet(
             "evidence_ref_kind": summary.get("evidence_ref_kind", ""),
             "evidence_ref_resolved_path": summary.get("evidence_ref_resolved_path", ""),
         },
+        "observation_template": _observation_template_summary(
+            template_path=template_path,
+            template=template,
+        ),
+        "required_fields": _required_field_contract(),
+        "derived_checks": _derived_check_contract(),
+        "sample_workflow": _sample_workflow_contract(summary),
         "field_rows": field_rows,
         "current_blockers": blockers,
         "gate_unblock_plan": gate_unblock_plan,
@@ -563,6 +660,32 @@ def _markdown(payload: dict[str, Any]) -> str:
             + "; ".join(payload["human_observation_evidence_policy"]["accepted_evidence"]),
             "- `rejected_substitutes`: "
             + "; ".join(payload["human_observation_evidence_policy"]["rejected_substitutes"]),
+            "",
+            "## Observation Template",
+            "",
+            f"- `path`: `{payload['observation_template']['path']}`",
+            f"- `present`: `{payload['observation_template']['present']}`",
+            f"- `template_only`: `{payload['observation_template']['template_only']}`",
+            f"- `contract_pass_default`: `{payload['observation_template']['contract_pass_default']}`",
+            "",
+            "## Sample Workflow",
+            "",
+            f"- `workflow_scope`: `{payload['sample_workflow']['workflow_scope']}`",
+            f"- `max_completion_minutes`: `{payload['sample_workflow']['max_completion_minutes']}`",
+            f"- `required_workflow_step_count`: `{payload['sample_workflow']['required_workflow_step_count']}`",
+            "",
+            "| Step | Required Observation | Minimum Capture |",
+            "|---|---|---|",
+        ]
+    )
+    for step in payload["sample_workflow"]["steps"]:
+        lines.append(
+            f"| `{cell(step['id'])}` {cell(step['label'])} | "
+            f"{cell(step['required_observation'])} | "
+            f"{cell('; '.join(step['minimum_capture']))} |"
+        )
+    lines.extend(
+        [
             "",
             "| Field | Current | Template | Required | Report Check |",
             "|---|---|---|---|---|",
