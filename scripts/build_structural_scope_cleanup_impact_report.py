@@ -358,6 +358,61 @@ def _cleanup_reference_priority_batches(rows: list[dict[str, Any]]) -> list[dict
     return batches
 
 
+def _release_surface_cleanup_impact_rows(
+    *,
+    release_surface_paths: list[str],
+    reference_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for path in sorted(release_surface_paths):
+        matched_rows = [
+            row
+            for row in reference_rows
+            if path in _as_list(row.get("matched_quarantined_paths"))
+        ]
+        blocking_rows = [
+            row for row in matched_rows if row.get("blocking_cleanup_reference") is True
+        ]
+        governance_rows = [
+            row for row in matched_rows if row.get("blocking_cleanup_reference") is not True
+        ]
+        rows.append(
+            {
+                "path": path,
+                "owner_decision_required": True,
+                "allowed_owner_decisions": [
+                    "delete_from_structural_repository",
+                    "extract_to_molecular_or_science_repository",
+                ],
+                "reference_path_count": len(matched_rows),
+                "blocking_cleanup_reference_path_count": len(blocking_rows),
+                "governance_reference_path_count": len(governance_rows),
+                "blocking_reference_paths": sorted(row["path"] for row in blocking_rows),
+                "governance_reference_paths": sorted(row["path"] for row in governance_rows),
+                "blocking_reference_role_counts": _counts_by_key(
+                    blocking_rows,
+                    "reference_role",
+                ),
+                "blocking_cleanup_action_counts": _counts_by_key(
+                    blocking_rows,
+                    "recommended_cleanup_action",
+                ),
+                "owner_decision_dependency_counts": _counts_by_key(
+                    matched_rows,
+                    "owner_decision_dependency",
+                ),
+                "cleanup_ready_after_owner_decision": not blocking_rows,
+                "post_cleanup_verification": [
+                    "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
+                    "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                    "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
+                    "python3 scripts/build_product_readiness_snapshot.py --check",
+                ],
+            }
+        )
+    return rows
+
+
 def build_cleanup_impact_report(
     *,
     repo_root: Path = ROOT,
@@ -388,6 +443,15 @@ def build_cleanup_impact_report(
         row
         for row in release_surface_reference_rows
         if row["blocking_cleanup_reference"] is True
+    ]
+    release_surface_cleanup_impact_rows = _release_surface_cleanup_impact_rows(
+        release_surface_paths=release_surface_paths,
+        reference_rows=reference_rows,
+    )
+    release_surface_cleanup_blocked_paths = [
+        row["path"]
+        for row in release_surface_cleanup_impact_rows
+        if row["blocking_cleanup_reference_path_count"]
     ]
     cleanup_reference_priority_batches = _cleanup_reference_priority_batches(
         blocking_rows
@@ -469,6 +533,11 @@ def build_cleanup_impact_report(
         "release_surface_blocking_reference_path_count": len(
             release_surface_blocking_reference_rows
         ),
+        "release_surface_cleanup_impact_rows": release_surface_cleanup_impact_rows,
+        "release_surface_cleanup_blocked_path_count": len(
+            release_surface_cleanup_blocked_paths
+        ),
+        "release_surface_cleanup_blocked_paths": release_surface_cleanup_blocked_paths,
         "release_surface_reference_rows": release_surface_reference_rows[:50],
         "release_surface_blocking_reference_rows": (
             release_surface_blocking_reference_rows[:50]
@@ -511,6 +580,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `reference_path_count`: `{payload['reference_path_count']}`",
         f"- `blocking_cleanup_reference_path_count`: `{payload['blocking_cleanup_reference_path_count']}`",
         f"- `owner_decision_pending_count`: `{payload['owner_decision_pending_count']}`",
+        f"- `release_surface_cleanup_blocked_path_count`: `{payload['release_surface_cleanup_blocked_path_count']}`",
         f"- `blocking_reference_cleanup_batch_count`: `{payload['blocking_reference_cleanup_batch_count']}`",
         "",
         "## Reference Roles",
@@ -532,6 +602,24 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"`{batch['reference_role']}` | "
             f"{batch['path_count']} | "
             f"`{batch['recommended_cleanup_action']}` |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Release Surface First Impact",
+            "",
+            "| Path | References | Blocking | Governance | Cleanup Ready After Owner Decision |",
+            "|---|---:|---:|---:|---:|",
+        ]
+    )
+    for row in payload["release_surface_cleanup_impact_rows"]:
+        lines.append(
+            "| "
+            f"`{row['path']}` | "
+            f"{row['reference_path_count']} | "
+            f"{row['blocking_cleanup_reference_path_count']} | "
+            f"{row['governance_reference_path_count']} | "
+            f"`{row['cleanup_ready_after_owner_decision']}` |"
         )
     lines.extend(
         [

@@ -1,19 +1,20 @@
 # Structural Scope Cleanup Impact Report
 
-- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=133 | blocking=93 | owner_pending=86`
+- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=135 | blocking=94 | owner_pending=86`
 - `contract_pass`: `False`
 - `cleanup_impact_clear`: `False`
 - `quarantined_path_count`: `86`
-- `reference_path_count`: `133`
-- `blocking_cleanup_reference_path_count`: `93`
+- `reference_path_count`: `135`
+- `blocking_cleanup_reference_path_count`: `94`
 - `owner_decision_pending_count`: `86`
+- `release_surface_cleanup_blocked_path_count`: `3`
 - `blocking_reference_cleanup_batch_count`: `6`
 
 ## Reference Roles
 
-- `reference_role_counts`: `{'documentation_reference': 2, 'implementation_runtime_or_manifest_reference': 48, 'other_reference': 1, 'productization_evidence_reference': 10, 'release_governance_reference': 11, 'scope_governance_reference': 29, 'script_reference': 14, 'test_reference': 18}`
-- `blocking_reference_role_counts`: `{'documentation_reference': 2, 'implementation_runtime_or_manifest_reference': 48, 'other_reference': 1, 'productization_evidence_reference': 10, 'script_reference': 14, 'test_reference': 18}`
-- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 14, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 18, 'regenerate_release_evidence_without_molecular_scope_references': 10, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 48, 'remove_non_structural_scope_ignore_or_metadata_reference': 1, 'rewrite_structural_docs_to_scope_boundary_only': 2}`
+- `reference_role_counts`: `{'documentation_reference': 2, 'implementation_runtime_or_manifest_reference': 48, 'other_reference': 1, 'productization_evidence_reference': 10, 'release_governance_reference': 12, 'scope_governance_reference': 29, 'script_reference': 14, 'test_reference': 19}`
+- `blocking_reference_role_counts`: `{'documentation_reference': 2, 'implementation_runtime_or_manifest_reference': 48, 'other_reference': 1, 'productization_evidence_reference': 10, 'script_reference': 14, 'test_reference': 19}`
+- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 14, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 19, 'regenerate_release_evidence_without_molecular_scope_references': 10, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 48, 'remove_non_structural_scope_ignore_or_metadata_reference': 1, 'rewrite_structural_docs_to_scope_boundary_only': 2}`
 
 ## Cleanup Batches
 
@@ -22,9 +23,17 @@
 | `cleanup_refs_01_productization_evidence_reference` | 1 | `productization_evidence_reference` | 10 | `regenerate_release_evidence_without_molecular_scope_references` |
 | `cleanup_refs_02_implementation_runtime_or_manifest_reference` | 2 | `implementation_runtime_or_manifest_reference` | 48 | `remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts` |
 | `cleanup_refs_03_script_reference` | 3 | `script_reference` | 14 | `delete_or_extract_molecular_script_or_remove_quarantined_path_refs` |
-| `cleanup_refs_04_test_reference` | 4 | `test_reference` | 18 | `delete_or_extract_molecular_tests_or_update_scope_guard_tests` |
+| `cleanup_refs_04_test_reference` | 4 | `test_reference` | 19 | `delete_or_extract_molecular_tests_or_update_scope_guard_tests` |
 | `cleanup_refs_05_documentation_reference` | 5 | `documentation_reference` | 2 | `rewrite_structural_docs_to_scope_boundary_only` |
 | `cleanup_refs_06_other_reference` | 6 | `other_reference` | 1 | `remove_non_structural_scope_ignore_or_metadata_reference` |
+
+## Release Surface First Impact
+
+| Path | References | Blocking | Governance | Cleanup Ready After Owner Decision |
+|---|---:|---:|---:|---:|
+| `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | 37 | 4 | 33 | `False` |
+| `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | 33 | 3 | 30 | `False` |
+| `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | 37 | 4 | 33 | `False` |
 
 ## Blocking References
 
@@ -114,7 +123,7 @@
 ## Blockers
 
 - `owner_decision_pending_count=86`
-- `blocking_cleanup_reference_path_count=93`
+- `blocking_cleanup_reference_path_count=94`
 
 ## Next Actions
 

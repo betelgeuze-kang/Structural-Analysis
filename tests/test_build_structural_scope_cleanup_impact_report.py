@@ -134,6 +134,19 @@ def test_cleanup_impact_report_classifies_blocking_and_governance_refs(
         "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts": 1,
         "rewrite_structural_docs_to_scope_boundary_only": 1,
     }
+    release_surface_rows = {
+        row["path"]: row for row in payload["release_surface_cleanup_impact_rows"]
+    }
+    release_surface_row = release_surface_rows[
+        "implementation/phase1/release_evidence/surface/"
+        "gpcr_hard_decoy_evidence_surface.json"
+    ]
+    assert release_surface_row["reference_path_count"] == 2
+    assert release_surface_row["blocking_cleanup_reference_path_count"] == 1
+    assert release_surface_row["governance_reference_path_count"] == 1
+    assert release_surface_row["cleanup_ready_after_owner_decision"] is False
+    assert release_surface_row["blocking_reference_paths"] == ["docs/scope-note.md"]
+    assert payload["release_surface_cleanup_blocked_path_count"] == 1
     assert "blocking_cleanup_reference_path_count=2" in payload["blockers"]
 
 
@@ -205,6 +218,18 @@ def test_cleanup_impact_report_treats_pm_scope_tracking_as_release_governance(
     assert payload["blocking_reference_role_counts"] == {
         "productization_evidence_reference": 1,
     }
+    release_surface_rows = {
+        row["path"]: row for row in payload["release_surface_cleanup_impact_rows"]
+    }
+    release_surface_row = release_surface_rows[
+        "implementation/phase1/release_evidence/surface/"
+        "gpcr_hard_decoy_evidence_surface.json"
+    ]
+    assert release_surface_row["reference_path_count"] == 3
+    assert release_surface_row["blocking_cleanup_reference_path_count"] == 0
+    assert release_surface_row["governance_reference_path_count"] == 3
+    assert release_surface_row["cleanup_ready_after_owner_decision"] is True
+    assert payload["release_surface_cleanup_blocked_path_count"] == 0
     assert payload["next_reference_cleanup_batch"]["batch_id"] == (
         "cleanup_refs_01_productization_evidence_reference"
     )
@@ -281,5 +306,6 @@ def test_cleanup_impact_report_cli_writes_markdown(tmp_path: Path) -> None:
     markdown = out_md.read_text(encoding="utf-8")
     assert payload["summary_line"] in markdown
     assert "## Cleanup Batches" in markdown
+    assert "## Release Surface First Impact" in markdown
     assert "## Blocking References" in markdown
     assert "native_runtime_artifact_manifest.json" in markdown
