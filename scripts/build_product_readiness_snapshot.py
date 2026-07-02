@@ -479,6 +479,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         "scripts/build_license_status_intake_packet.py",
         "scripts/build_ux_new_user_observation_intake_packet.py",
         "scripts/build_structural_scope_owner_decision_application_plan.py",
+        "scripts/merge_structural_scope_owner_decision_batch.py",
         "scripts/build_structural_scope_owner_review_packet.py",
         "scripts/build_structural_scope_cleanup_impact_report.py",
         "scripts/build_structural_scope_origin_report.py",
