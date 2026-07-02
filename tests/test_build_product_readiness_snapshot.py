@@ -3397,6 +3397,13 @@ def test_snapshot_structural_scope_cleanup_impact_helper_does_not_stale_leaf_rec
     ]
 
 
+def test_snapshot_allows_branch64_microbatch_profile_as_generated_receipt() -> None:
+    assert build_product_readiness_snapshot._receipt_commit_allowed_path(
+        "implementation/phase1/branch64_microbatch_profile_report.json",
+        set(),
+    )
+
+
 def test_snapshot_developer_preview_owner_packet_helper_does_not_stale_leaf_receipts(
     tmp_path: Path,
 ) -> None:
