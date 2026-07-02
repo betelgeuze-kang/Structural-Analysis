@@ -50,7 +50,7 @@ Code_Generated_Image*.png
 # Repo-specific runtime/cache artifacts
 tests/__pycache__/
 implementation/phase1/__pycache__/
-implementation/phase1/rust_hip_md3bead_hook/target/
+implementation/phase1/*/target/
 
 # Generated experiment outputs
 implementation/phase1/experiments/
