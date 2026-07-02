@@ -36,8 +36,8 @@ def _rc_status_payload() -> dict:
         "schema_version": "developer-preview-rc-status.v1",
         "status": "blocked",
         "contract_pass": False,
-        "final_gate_count": 4,
-        "final_gate_pass_count": 1,
+        "final_gate_count": 5,
+        "final_gate_pass_count": 2,
         "final_gates": [
             {
                 "item": "benchmark_results_clean_checkout_regenerated",
@@ -45,6 +45,13 @@ def _rc_status_payload() -> dict:
                 "contract_pass": True,
                 "blockers": [],
                 "evidence": "clean.json",
+            },
+            {
+                "item": "silent_import_loss_zero",
+                "status": "ready",
+                "contract_pass": True,
+                "blockers": [],
+                "evidence": "ifc.json",
             },
             {
                 "item": "selected_medium_models_pass_or_approved_review",
@@ -218,6 +225,29 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
     assert payload["contract_pass"] is True
     assert payload["evidence_closure_pass"] is False
     assert payload["blocked_final_gate_count"] == 3
+    assert payload["nearest_abf_slice_summary"] == {
+        "slice_count": 3,
+        "ready_count": 2,
+        "blocked_count": 1,
+        "ready_slice_ids": ["A", "B"],
+        "blocked_slice_ids": ["F"],
+        "blocked_gates": ["new_user_core_workflow_observation_passed"],
+        "completion_ratio": 0.6667,
+        "claim_boundary": (
+            "A/B/F slice tracking only reports current DP final-gate state. "
+            "It does not create missing human observation, benchmark, or "
+            "platform replay evidence and does not promote Developer Preview."
+        ),
+    }
+    nearest = {
+        row["slice_id"]: row for row in payload["nearest_abf_slice"]
+    }
+    assert nearest["A"]["ready_for_dp_final_gate"] is True
+    assert nearest["B"]["ready_for_dp_final_gate"] is True
+    assert nearest["F"]["ready_for_dp_final_gate"] is False
+    assert nearest["F"]["owner_review_required"] is True
+    assert nearest["F"]["owner"] == "ux_research_owner"
+    assert nearest["F"]["owner_unblock_slot_ids"] == ["attach_observation_record"]
     assert payload["owner_packet_count"] == 3
     assert payload["owner_packet_gate_ids"] == [
         "selected_medium_models_pass_or_approved_review",
@@ -358,5 +388,7 @@ def test_owner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "## Blocker IDs" in markdown
     assert "## Release Surface Impacts" in markdown
     assert "## Evidence Refresh Commands" in markdown
+    assert "## Nearest A/B/F Slice" in markdown
+    assert "`nearest_abf_ready_count`: `2/3`" in markdown
     assert "## Gate Unblock Plan" in markdown
     assert "## Upstream Handoff Sources" in markdown

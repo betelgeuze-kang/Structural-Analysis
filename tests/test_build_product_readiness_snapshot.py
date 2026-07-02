@@ -5827,6 +5827,45 @@ def test_snapshot_surfaces_developer_preview_final_gate_owner_packet(
             "linux_windows_reproducibility_confirmed",
             "new_user_core_workflow_observation_passed",
         ],
+        "nearest_abf_slice_summary": {
+            "slice_count": 3,
+            "ready_count": 2,
+            "blocked_count": 1,
+            "ready_slice_ids": ["A", "B"],
+            "blocked_slice_ids": ["F"],
+            "blocked_gates": ["new_user_core_workflow_observation_passed"],
+            "completion_ratio": 0.6667,
+            "claim_boundary": "A/B/F handoff only.",
+        },
+        "nearest_abf_slice": [
+            {
+                "slice_id": "A",
+                "gate": "benchmark_results_clean_checkout_regenerated",
+                "status": "ready",
+                "contract_pass": True,
+                "ready_for_dp_final_gate": True,
+                "owner_review_required": False,
+                "current_blocker_count": 0,
+            },
+            {
+                "slice_id": "B",
+                "gate": "silent_import_loss_zero",
+                "status": "ready",
+                "contract_pass": True,
+                "ready_for_dp_final_gate": True,
+                "owner_review_required": False,
+                "current_blocker_count": 0,
+            },
+            {
+                "slice_id": "F",
+                "gate": "new_user_core_workflow_observation_passed",
+                "status": "blocked",
+                "contract_pass": False,
+                "ready_for_dp_final_gate": False,
+                "owner_review_required": True,
+                "current_blocker_count": 3,
+            },
+        ],
         "owner_packet_count": 3,
         "owner_packet_gate_ids": [
             "selected_medium_models_pass_or_approved_review",
@@ -5868,6 +5907,17 @@ def test_snapshot_surfaces_developer_preview_final_gate_owner_packet(
     )
     assert component["evidence_intake_artifact_count"] == 9
     assert "linux_windows_reproducibility_confirmed" in component["blocked_gate_items"]
+    assert component["nearest_abf_slice_summary"]["ready_count"] == 2
+    assert component["nearest_abf_slice_summary"]["blocked_slice_ids"] == ["F"]
+    assert component["nearest_abf_slice"][2] == {
+        "slice_id": "F",
+        "gate": "new_user_core_workflow_observation_passed",
+        "status": "blocked",
+        "contract_pass": False,
+        "ready_for_dp_final_gate": False,
+        "owner_review_required": True,
+        "current_blocker_count": 3,
+    }
 
 
 def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Path) -> None:

@@ -25,6 +25,36 @@ DEFAULT_OUT = PRODUCTIZATION / "developer_preview_final_gate_owner_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_UX_OBSERVATION_INTAKE = PRODUCTIZATION / "ux_new_user_observation_intake_packet.json"
 UX_OBSERVATION_GATE = "new_user_core_workflow_observation_passed"
+NEAREST_ABF_SLICE: tuple[dict[str, str], ...] = (
+    {
+        "slice_id": "A",
+        "gate": "benchmark_results_clean_checkout_regenerated",
+        "slice_goal": "keep_clean_checkout_and_git_clean_clone_receipts_fresh",
+        "owner_action_if_blocked": (
+            "Regenerate clean-checkout and git-clean-clone benchmark receipts "
+            "from the tracked source state."
+        ),
+    },
+    {
+        "slice_id": "B",
+        "gate": "silent_import_loss_zero",
+        "slice_goal": "keep_ifc_import_loss_technical_gate_green",
+        "owner_action_if_blocked": (
+            "Regenerate IFC import-health and silent-data-loss receipts without "
+            "counting product/license credit blockers as DP technical closure."
+        ),
+    },
+    {
+        "slice_id": "F",
+        "gate": UX_OBSERVATION_GATE,
+        "slice_goal": "attach_human_new_user_30_minute_observation",
+        "owner_action_if_blocked": (
+            "Attach a real human new-user observation record for the five-step "
+            "sample workflow, completed within 30 minutes with blocker_count=0 "
+            "and an accepted release decision."
+        ),
+    },
+)
 
 GATE_HANDOFFS: dict[str, dict[str, Any]] = {
     "selected_medium_models_pass_or_approved_review": {
@@ -505,6 +535,98 @@ def _owner_packet_for_gate(*, gate: dict[str, Any], repo_root: Path) -> dict[str
     }
 
 
+def _nearest_abf_slice_rows(
+    *,
+    final_gates: list[dict[str, Any]],
+    owner_packets: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    gates_by_item = {_gate_item(gate): gate for gate in final_gates}
+    packets_by_gate = {str(packet.get("gate", "")): packet for packet in owner_packets}
+    rows: list[dict[str, Any]] = []
+    for spec in NEAREST_ABF_SLICE:
+        gate_id = spec["gate"]
+        gate = gates_by_item.get(gate_id, {})
+        packet = packets_by_gate.get(gate_id, {})
+        present = bool(gate)
+        contract_pass = bool(gate.get("contract_pass") is True)
+        status = str(gate.get("status", "missing") or "missing")
+        blockers = [str(item) for item in _as_list(gate.get("blockers"))]
+        rows.append(
+            {
+                "slice_id": spec["slice_id"],
+                "gate": gate_id,
+                "slice_goal": spec["slice_goal"],
+                "present": present,
+                "status": status,
+                "contract_pass": contract_pass,
+                "ready_for_dp_final_gate": bool(
+                    present and status.lower() == "ready" and contract_pass
+                ),
+                "owner_review_required": bool(not contract_pass),
+                "owner": str(packet.get("owner", "")),
+                "owner_action_if_blocked": str(
+                    packet.get("owner_action") or spec["owner_action_if_blocked"]
+                ),
+                "closure_decision_required": str(
+                    packet.get("closure_decision_required", "")
+                ),
+                "current_evidence_gap_state": str(
+                    packet.get(
+                        "current_evidence_gap_state",
+                        "ready" if contract_pass else "owner_evidence_required",
+                    )
+                ),
+                "current_evidence_refs": _split_evidence_refs(gate.get("evidence")),
+                "current_blockers": blockers,
+                "current_blocker_count": len(blockers),
+                "owner_unblock_slot_ids": [
+                    str(item)
+                    for item in _as_list(packet.get("owner_unblock_slot_ids"))
+                ],
+                "verification_commands": [
+                    str(item)
+                    for item in _as_list(packet.get("verification_commands"))
+                ],
+                "evidence_refresh_commands": [
+                    str(item)
+                    for item in _as_list(packet.get("evidence_refresh_commands"))
+                ],
+            }
+        )
+    return rows
+
+
+def _nearest_abf_slice_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    ready_rows = [
+        row
+        for row in rows
+        if row["ready_for_dp_final_gate"] is True
+    ]
+    blocked_rows = [
+        row
+        for row in rows
+        if row["ready_for_dp_final_gate"] is not True
+    ]
+    return {
+        "slice_count": len(rows),
+        "ready_count": len(ready_rows),
+        "blocked_count": len(blocked_rows),
+        "ready_slice_ids": [str(row["slice_id"]) for row in ready_rows],
+        "blocked_slice_ids": [str(row["slice_id"]) for row in blocked_rows],
+        "blocked_gates": [str(row["gate"]) for row in blocked_rows],
+        "completion_ratio": (
+            round(len(ready_rows) / len(rows), 4)
+            if rows
+            else 1.0
+        ),
+        "claim_boundary": (
+            "A/B/F slice tracking only reports current DP final-gate state. "
+            "It does not create missing human observation, benchmark, or "
+            "platform replay evidence and does not promote Developer Preview."
+        ),
+    }
+
+
 def build_owner_packet(
     *,
     repo_root: Path = ROOT,
@@ -525,6 +647,13 @@ def build_owner_packet(
         _owner_packet_for_gate(gate=gate, repo_root=repo_root)
         for gate in blocked_gates
     ]
+    nearest_abf_slice_rows = _nearest_abf_slice_rows(
+        final_gates=final_gates,
+        owner_packets=owner_packets,
+    )
+    nearest_abf_slice_summary = _nearest_abf_slice_summary(
+        nearest_abf_slice_rows
+    )
     owner_packet_blocker_ids = _deduped(
         [
             str(item)
@@ -600,6 +729,8 @@ def build_owner_packet(
             for gate in final_gates
             if gate not in blocked_gates
         ],
+        "nearest_abf_slice_summary": nearest_abf_slice_summary,
+        "nearest_abf_slice": nearest_abf_slice_rows,
         "owner_packet_count": len(owner_packets),
         "owner_packet_gate_ids": [packet["gate_id"] for packet in owner_packets],
         "owner_packet_blocker_ids": owner_packet_blocker_ids,
@@ -647,11 +778,39 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `evidence_closure_pass`: `{payload['evidence_closure_pass']}`",
         f"- `blocked_final_gate_count`: `{payload['blocked_final_gate_count']}`",
         "",
+        "## Nearest A/B/F Slice",
+        "",
+        "| Slice | Gate | Status | Owner Review Required | Blockers |",
+        "|---|---|---|---:|---:|",
+    ]
+    for row in payload["nearest_abf_slice"]:
+        lines.append(
+            "| "
+            f"`{row['slice_id']}` | "
+            f"`{row['gate']}` | "
+            f"`{row['status']}` | "
+            f"`{row['owner_review_required']}` | "
+            f"{row['current_blocker_count']} |"
+        )
+    summary = payload["nearest_abf_slice_summary"]
+    lines.extend(
+        [
+            "",
+            "- `nearest_abf_ready_count`: "
+            f"`{summary['ready_count']}/{summary['slice_count']}`",
+            "- `nearest_abf_blocked_slice_ids`: "
+            f"`{summary['blocked_slice_ids']}`",
+            "",
+        ]
+    )
+    lines.extend(
+        [
         "## Owner Packets",
         "",
         "| Gate | Owner | Blockers | Closure Decision |",
         "|---|---|---:|---|",
-    ]
+        ]
+    )
     for packet in payload["owner_packets"]:
         lines.append(
             "| "

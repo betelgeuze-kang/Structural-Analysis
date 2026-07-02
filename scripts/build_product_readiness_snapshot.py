@@ -2803,6 +2803,34 @@ def build_snapshot(
                         )
                     )
                 ],
+                "nearest_abf_slice_summary": _as_dict(
+                    developer_preview_final_gate_owner_packet.get(
+                        "nearest_abf_slice_summary"
+                    )
+                ),
+                "nearest_abf_slice": [
+                    {
+                        "slice_id": str(row.get("slice_id", "")),
+                        "gate": str(row.get("gate", "")),
+                        "status": str(row.get("status", "")),
+                        "contract_pass": bool(row.get("contract_pass")),
+                        "ready_for_dp_final_gate": bool(
+                            row.get("ready_for_dp_final_gate")
+                        ),
+                        "owner_review_required": bool(
+                            row.get("owner_review_required")
+                        ),
+                        "current_blocker_count": _as_int(
+                            row.get("current_blocker_count"), 0
+                        ),
+                    }
+                    for row in _as_list(
+                        developer_preview_final_gate_owner_packet.get(
+                            "nearest_abf_slice"
+                        )
+                    )
+                    if isinstance(row, dict)
+                ],
                 "blockers": _as_list(
                     developer_preview_final_gate_owner_packet.get("blockers")
                 ),
