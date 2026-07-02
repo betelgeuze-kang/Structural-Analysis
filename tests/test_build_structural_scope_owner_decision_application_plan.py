@@ -349,6 +349,32 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "structural_scope_owner_decisions.next_batch.template.md"
         ),
     }
+    assert batch_template["owner_decision_submission_options"] == {
+        "accepted_submission_formats": ["json", "csv"],
+        "canonical_owner_decisions_path": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.json"
+        ),
+        "template_csv_path": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.template.csv"
+        ),
+        "filled_csv_placeholder": "<filled-next-batch-owner-decisions.csv>",
+        "validate_canonical_owner_decisions_command": (
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            "--fail-release-surface-first-blocked"
+        ),
+        "validate_filled_csv_command": (
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            "--owner-decisions <filled-next-batch-owner-decisions.csv> "
+            "--fail-release-surface-first-blocked"
+        ),
+        "claim_boundary": (
+            "A filled CSV can validate a scoped owner-review batch, but final "
+            "closure still requires recorded owner evidence, manual cleanup where "
+            "applicable, and refreshed structural scope receipts."
+        ),
+    }
     assert batch_template["conditional_required_fields"] == [
         "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository"
     ]
@@ -1038,6 +1064,13 @@ def test_application_plan_writes_release_surface_first_template(
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
         "--fail-release-surface-first-blocked"
     )
+    assert template_payload["owner_decision_submission_options"][
+        "validate_filled_csv_command"
+    ] == (
+        "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+        "--owner-decisions <filled-release-surface-first-owner-decisions.csv> "
+        "--fail-release-surface-first-blocked"
+    )
     next_markdown = next_template_md.read_text(encoding="utf-8")
     release_markdown = release_template_md.read_text(encoding="utf-8")
     assert "Release Surface First Batch" in release_markdown
@@ -1053,6 +1086,13 @@ def test_application_plan_writes_release_surface_first_template(
     )
     assert "## Post Batch Verification" in next_markdown
     assert "## Post Batch Verification" in release_markdown
+    assert "## Owner Decision Submission" in next_markdown
+    assert "## Owner Decision Submission" in release_markdown
+    assert "--owner-decisions <filled-next-batch-owner-decisions.csv>" in next_markdown
+    assert (
+        "--owner-decisions <filled-release-surface-first-owner-decisions.csv>"
+        in release_markdown
+    )
     assert "--fail-release-surface-first-blocked" in next_markdown
     assert "--fail-release-surface-first-blocked" in release_markdown
     csv_rows = list(

@@ -682,6 +682,11 @@ def _next_batch_decision_template(
         == "extract_to_molecular_or_science_repository"
     ]
     path_area = _text(next_batch.get("path_area"))
+    validation_flag = (
+        "--fail-release-surface-first-blocked"
+        if path_area == "release_surface"
+        else "--fail-invalid-owner-decisions"
+    )
     return {
         "schema_version": owner_review.DECISION_SCHEMA_VERSION,
         "batch_id": batch_id,
@@ -694,6 +699,11 @@ def _next_batch_decision_template(
             "csv": DEFAULT_NEXT_BATCH_TEMPLATE_CSV.as_posix(),
             "markdown": DEFAULT_NEXT_BATCH_TEMPLATE_MD.as_posix(),
         },
+        "owner_decision_submission_options": _owner_decision_submission_options(
+            template_csv_path=DEFAULT_NEXT_BATCH_TEMPLATE_CSV.as_posix(),
+            validation_flag=validation_flag,
+            filled_csv_placeholder="<filled-next-batch-owner-decisions.csv>",
+        ),
         "required_owner_fill_fields": [
             "owner_decision",
             "owner_identity",
@@ -759,6 +769,33 @@ def _conditional_required_fields(path_area: str) -> list[str]:
     return fields
 
 
+def _owner_decision_submission_options(
+    *,
+    template_csv_path: str,
+    validation_flag: str,
+    filled_csv_placeholder: str,
+) -> dict[str, Any]:
+    return {
+        "accepted_submission_formats": ["json", "csv"],
+        "canonical_owner_decisions_path": DEFAULT_OWNER_DECISIONS.as_posix(),
+        "template_csv_path": template_csv_path,
+        "filled_csv_placeholder": filled_csv_placeholder,
+        "validate_canonical_owner_decisions_command": (
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            f"{validation_flag}"
+        ),
+        "validate_filled_csv_command": (
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            f"--owner-decisions {filled_csv_placeholder} {validation_flag}"
+        ),
+        "claim_boundary": (
+            "A filled CSV can validate a scoped owner-review batch, but final "
+            "closure still requires recorded owner evidence, manual cleanup where "
+            "applicable, and refreshed structural scope receipts."
+        ),
+    }
+
+
 def _release_surface_first_batch_decision_template(
     *,
     rows: list[dict[str, Any]],
@@ -803,6 +840,13 @@ def _release_surface_first_batch_decision_template(
             "csv": DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV.as_posix(),
             "markdown": DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_MD.as_posix(),
         },
+        "owner_decision_submission_options": _owner_decision_submission_options(
+            template_csv_path=DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV.as_posix(),
+            validation_flag="--fail-release-surface-first-blocked",
+            filled_csv_placeholder=(
+                "<filled-release-surface-first-owner-decisions.csv>"
+            ),
+        ),
         "required_owner_fill_fields": [
             "owner_decision",
             "owner_identity",
@@ -1393,11 +1437,10 @@ def _next_batch_template_markdown(payload: dict[str, Any]) -> str:
             f"- `safe_to_auto_apply`: `{preview.get('safe_to_auto_apply')}`",
             f"- `primary_delete_path_count`: `{preview.get('primary_delete_path_count', 0)}`",
             f"- `primary_extract_path_count`: `{preview.get('primary_extract_path_count', 0)}`",
-            "",
-            "## Post Batch Verification",
-            "",
         ]
     )
+    lines.extend(_owner_decision_submission_markdown_lines(payload))
+    lines.extend(["", "## Post Batch Verification", ""])
     verification = [
         str(item) for item in _as_list(payload.get("post_batch_verification"))
     ]
@@ -1436,6 +1479,30 @@ def _conditional_required_markdown_line(item: str) -> str:
             f"`{owner_decision}`"
         )
     return f"- `{item}`"
+
+
+def _owner_decision_submission_markdown_lines(payload: dict[str, Any]) -> list[str]:
+    options = _as_dict(payload.get("owner_decision_submission_options"))
+    if not options:
+        return []
+    lines = ["", "## Owner Decision Submission", ""]
+    lines.append(
+        "- `canonical_owner_decisions_path`: "
+        f"`{options.get('canonical_owner_decisions_path', '')}`"
+    )
+    lines.append(
+        "- `template_csv_path`: "
+        f"`{options.get('template_csv_path', '')}`"
+    )
+    lines.append(
+        "- `validate_canonical_owner_decisions_command`: "
+        f"`{options.get('validate_canonical_owner_decisions_command', '')}`"
+    )
+    lines.append(
+        "- `validate_filled_csv_command`: "
+        f"`{options.get('validate_filled_csv_command', '')}`"
+    )
+    return lines
 
 
 def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> str:
@@ -1492,11 +1559,10 @@ def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> s
             f"- `safe_to_auto_apply`: `{preview.get('safe_to_auto_apply')}`",
             f"- `primary_delete_path_count`: `{preview.get('primary_delete_path_count', 0)}`",
             f"- `primary_extract_path_count`: `{preview.get('primary_extract_path_count', 0)}`",
-            "",
-            "## Post Batch Verification",
-            "",
         ]
     )
+    lines.extend(_owner_decision_submission_markdown_lines(payload))
+    lines.extend(["", "## Post Batch Verification", ""])
     verification = [
         str(item) for item in _as_list(payload.get("post_batch_verification"))
     ]
