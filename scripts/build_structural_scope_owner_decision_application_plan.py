@@ -817,26 +817,67 @@ def _owner_decision_submission_options(
     validation_flag: str,
     filled_csv_placeholder: str,
 ) -> dict[str, Any]:
+    if filled_csv_placeholder.endswith(".csv>"):
+        filled_json_placeholder = filled_csv_placeholder[:-5] + ".json>"
+        filled_md_placeholder = filled_csv_placeholder[:-5] + ".md>"
+    elif filled_csv_placeholder.endswith(".csv"):
+        filled_json_placeholder = filled_csv_placeholder[:-4] + ".json"
+        filled_md_placeholder = filled_csv_placeholder[:-4] + ".md"
+    else:
+        filled_json_placeholder = "<filled-owner-decisions.json>"
+        filled_md_placeholder = "<filled-owner-decisions.md>"
     return {
         "accepted_submission_formats": ["json", "csv"],
         "canonical_owner_decisions_path": DEFAULT_OWNER_DECISIONS.as_posix(),
         "template_csv_path": template_csv_path,
+        "filled_json_placeholder": filled_json_placeholder,
         "filled_csv_placeholder": filled_csv_placeholder,
+        "filled_markdown_placeholder": filled_md_placeholder,
         "candidate_owner_decisions_placeholder": "<candidate-owner-decisions.json>",
         "candidate_merge_report_placeholder": "<candidate-owner-decisions.md>",
+        "fill_release_surface_owner_decisions_command": (
+            "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py "
+            f"--template {template_csv_path} "
+            f"--out {filled_json_placeholder} "
+            f"--out-md {filled_md_placeholder} "
+            f"--out-csv {filled_csv_placeholder} "
+            "--decision recommended_primary "
+            "--owner-identity <owner-identity> "
+            "--owner-role <owner-role> "
+            "--decision-timestamp-utc <decision-timestamp-utc> "
+            "--evidence-reference <owner-evidence-reference> "
+            "--fail-blocked"
+        ),
         "validate_canonical_owner_decisions_command": (
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
             f"{validation_flag}"
         ),
+        "validate_filled_json_command": (
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            f"--owner-decisions {filled_json_placeholder} {validation_flag}"
+        ),
         "validate_filled_csv_command": (
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
             f"--owner-decisions {filled_csv_placeholder} {validation_flag}"
+        ),
+        "merge_filled_json_to_candidate_command": (
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            f"--batch-owner-decisions {filled_json_placeholder} "
+            "--out <candidate-owner-decisions.json> "
+            "--out-md <candidate-owner-decisions.md>"
         ),
         "merge_filled_csv_to_candidate_command": (
             "python3 scripts/merge_structural_scope_owner_decision_batch.py "
             f"--batch-owner-decisions {filled_csv_placeholder} "
             "--out <candidate-owner-decisions.json> "
             "--out-md <candidate-owner-decisions.md>"
+        ),
+        "merge_and_validate_filled_json_command": (
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            f"--batch-owner-decisions {filled_json_placeholder} "
+            "--out <candidate-owner-decisions.json> "
+            "--out-md <candidate-owner-decisions.md> "
+            f"{validation_flag}"
         ),
         "merge_and_validate_filled_csv_command": (
             "python3 scripts/merge_structural_scope_owner_decision_batch.py "
@@ -851,7 +892,7 @@ def _owner_decision_submission_options(
             f"{validation_flag}"
         ),
         "claim_boundary": (
-            "A filled CSV can validate a scoped owner-review batch, but final "
+            "A filled JSON/CSV can validate a scoped owner-review batch, but final "
             "closure still requires recorded owner evidence, manual cleanup where "
             "applicable, and refreshed structural scope receipts."
         ),
@@ -1105,6 +1146,13 @@ def _release_surface_first_operator_sequence(
             "runnable_now": True,
             "required_artifacts": [
                 value for value in [template_paths.get("json"), template_paths.get("csv")] if value
+            ],
+            "materialization_commands": [
+                command
+                for command in [
+                    submission.get("fill_release_surface_owner_decisions_command", "")
+                ]
+                if command
             ],
             "acceptance": [
                 "all release_surface_first rows have owner_decision",

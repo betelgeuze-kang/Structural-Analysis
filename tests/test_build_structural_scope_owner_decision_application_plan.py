@@ -498,11 +498,32 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "implementation/phase1/release_evidence/productization/"
             "structural_scope_owner_decisions.next_batch.template.csv"
         ),
+        "filled_json_placeholder": "<filled-next-batch-owner-decisions.json>",
         "filled_csv_placeholder": "<filled-next-batch-owner-decisions.csv>",
+        "filled_markdown_placeholder": "<filled-next-batch-owner-decisions.md>",
         "candidate_owner_decisions_placeholder": "<candidate-owner-decisions.json>",
         "candidate_merge_report_placeholder": "<candidate-owner-decisions.md>",
+        "fill_release_surface_owner_decisions_command": (
+            "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py "
+            "--template implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.template.csv "
+            "--out <filled-next-batch-owner-decisions.json> "
+            "--out-md <filled-next-batch-owner-decisions.md> "
+            "--out-csv <filled-next-batch-owner-decisions.csv> "
+            "--decision recommended_primary "
+            "--owner-identity <owner-identity> "
+            "--owner-role <owner-role> "
+            "--decision-timestamp-utc <decision-timestamp-utc> "
+            "--evidence-reference <owner-evidence-reference> "
+            "--fail-blocked"
+        ),
         "validate_canonical_owner_decisions_command": (
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            "--fail-release-surface-first-blocked"
+        ),
+        "validate_filled_json_command": (
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            "--owner-decisions <filled-next-batch-owner-decisions.json> "
             "--fail-release-surface-first-blocked"
         ),
         "validate_filled_csv_command": (
@@ -510,11 +531,24 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "--owner-decisions <filled-next-batch-owner-decisions.csv> "
             "--fail-release-surface-first-blocked"
         ),
+        "merge_filled_json_to_candidate_command": (
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            "--batch-owner-decisions <filled-next-batch-owner-decisions.json> "
+            "--out <candidate-owner-decisions.json> "
+            "--out-md <candidate-owner-decisions.md>"
+        ),
         "merge_filled_csv_to_candidate_command": (
             "python3 scripts/merge_structural_scope_owner_decision_batch.py "
             "--batch-owner-decisions <filled-next-batch-owner-decisions.csv> "
             "--out <candidate-owner-decisions.json> "
             "--out-md <candidate-owner-decisions.md>"
+        ),
+        "merge_and_validate_filled_json_command": (
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            "--batch-owner-decisions <filled-next-batch-owner-decisions.json> "
+            "--out <candidate-owner-decisions.json> "
+            "--out-md <candidate-owner-decisions.md> "
+            "--fail-release-surface-first-blocked"
         ),
         "merge_and_validate_filled_csv_command": (
             "python3 scripts/merge_structural_scope_owner_decision_batch.py "
@@ -529,7 +563,7 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "--fail-release-surface-first-blocked"
         ),
         "claim_boundary": (
-            "A filled CSV can validate a scoped owner-review batch, but final "
+            "A filled JSON/CSV can validate a scoped owner-review batch, but final "
             "closure still requires recorded owner evidence, manual cleanup where "
             "applicable, and refreshed structural scope receipts."
         ),
