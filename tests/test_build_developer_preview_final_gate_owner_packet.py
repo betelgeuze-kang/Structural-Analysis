@@ -74,11 +74,56 @@ def _rc_status_payload() -> dict:
     }
 
 
+def _ux_intake_payload() -> dict:
+    return {
+        "schema_version": "ux-new-user-observation-intake-packet.v1",
+        "status": "blocked",
+        "contract_pass": False,
+        "release_area_blocker_ids": [
+            "pm_release::ux::human_new_user_observation_missing_or_failed",
+            "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+        ],
+        "developer_preview_blocker_ids": [
+            "developer_preview_rc::new_user_core_workflow_observation_passed",
+        ],
+        "product_readiness_blocker_ids": [
+            "human_ux::observation_file_missing",
+        ],
+        "blocker_ids": [
+            "developer_preview_rc::new_user_core_workflow_observation_passed",
+            "pm_release::ux::human_new_user_observation_missing_or_failed",
+            "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+            "human_ux::observation_file_missing",
+            "ux_new_user_observation::observation_file_missing",
+        ],
+        "evidence_intake_artifacts": [
+            "docs/templates/ux_new_user_observation.template.json",
+            "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
+            "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+            "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+            "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+        ],
+        "human_observation_evidence_policy": {
+            "accepted_evidence": [
+                "human-observed 30-minute new-user workflow record",
+            ],
+            "rejected_substitutes": [
+                "automated browser smoke or task-based UX rehearsal without human observation",
+            ],
+            "closure_rule": "Close only from a real human 30-minute new-user sample.",
+        },
+    }
+
+
 def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> None:
     rc_status = tmp_path / "developer_preview_rc_status.json"
     action_register = tmp_path / "docs/developer_preview_final_gate_action_register.md"
     _write_json(rc_status, _rc_status_payload())
     _write_text(action_register, "# Developer Preview Final Gate Action Register\n")
+    _write_json(tmp_path / owner_packet.DEFAULT_UX_OBSERVATION_INTAKE, _ux_intake_payload())
 
     payload = owner_packet.build_owner_packet(
         repo_root=tmp_path,
@@ -96,12 +141,12 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
         "linux_windows_reproducibility_confirmed",
         "new_user_core_workflow_observation_passed",
     ]
-    assert payload["owner_packet_blocker_id_count"] == 8
+    assert payload["owner_packet_blocker_id_count"] == 10
     assert "developer_preview_rc::new_user_core_workflow_observation_passed" in (
         payload["owner_packet_blocker_ids"]
     )
     assert payload["release_surface_impact_count"] == 8
-    assert payload["evidence_intake_artifact_count"] == 9
+    assert payload["evidence_intake_artifact_count"] == 12
     packets = {packet["gate"]: packet for packet in payload["owner_packets"]}
     assert packets["selected_medium_models_pass_or_approved_review"]["gate_id"] == (
         "selected_medium_models_pass_or_approved_review"
@@ -145,9 +190,24 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
     assert "pm_release::ux::human_new_user_30min_sample_evidence_missing" in packets[
         "new_user_core_workflow_observation_passed"
     ]["blocker_ids"]
+    assert "human_ux::observation_file_missing" in packets[
+        "new_user_core_workflow_observation_passed"
+    ]["blocker_ids"]
+    assert "ux_new_user_observation::observation_file_missing" in packets[
+        "new_user_core_workflow_observation_passed"
+    ]["blocker_ids"]
     assert "docs/templates/ux_new_user_observation.template.json" in packets[
         "new_user_core_workflow_observation_passed"
     ]["evidence_intake_artifacts"]
+    assert (
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+        in packets["new_user_core_workflow_observation_passed"]["evidence_intake_artifacts"]
+    )
+    assert packets["new_user_core_workflow_observation_passed"]["upstream_intake_status"] == "blocked"
+    assert packets["new_user_core_workflow_observation_passed"]["upstream_intake_blocker_id_count"] == 5
+    assert packets["new_user_core_workflow_observation_passed"]["human_observation_evidence_policy"][
+        "closure_rule"
+    ] == "Close only from a real human 30-minute new-user sample."
 
 
 def test_owner_packet_blocks_missing_action_register(tmp_path: Path) -> None:
@@ -172,6 +232,7 @@ def test_owner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     out_md = tmp_path / "packet.md"
     _write_json(rc_status, _rc_status_payload())
     _write_text(action_register, "# Developer Preview Final Gate Action Register\n")
+    _write_json(tmp_path / owner_packet.DEFAULT_UX_OBSERVATION_INTAKE, _ux_intake_payload())
 
     payload = owner_packet.write_owner_packet(
         repo_root=tmp_path,
@@ -189,5 +250,6 @@ def test_owner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "# Developer Preview Final Gate Owner Packet" in markdown
     assert "selected_medium_models_pass_or_approved_review" in markdown
     assert "## Evidence Intake Artifacts" in markdown
+    assert "## Human Observation Evidence Policy" in markdown
     assert "## Blocker IDs" in markdown
     assert "## Release Surface Impacts" in markdown

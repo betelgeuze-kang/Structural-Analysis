@@ -23,6 +23,8 @@ DEFAULT_RC_STATUS = PRODUCTIZATION / "developer_preview_rc_status.json"
 DEFAULT_ACTION_REGISTER = Path("docs/developer_preview_final_gate_action_register.md")
 DEFAULT_OUT = PRODUCTIZATION / "developer_preview_final_gate_owner_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_UX_OBSERVATION_INTAKE = PRODUCTIZATION / "ux_new_user_observation_intake_packet.json"
+UX_OBSERVATION_GATE = "new_user_core_workflow_observation_passed"
 
 GATE_HANDOFFS: dict[str, dict[str, Any]] = {
     "selected_medium_models_pass_or_approved_review": {
@@ -167,6 +169,10 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 def _split_evidence_refs(value: Any) -> list[str]:
     refs = [item.strip() for item in str(value or "").split(";")]
     return [item for item in refs if item]
@@ -196,9 +202,24 @@ def _blocked_gates(final_gates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
-def _owner_packet_for_gate(gate: dict[str, Any]) -> dict[str, Any]:
+def _owner_packet_for_gate(*, gate: dict[str, Any], repo_root: Path) -> dict[str, Any]:
     item = _gate_item(gate)
     handoff = GATE_HANDOFFS.get(item, {})
+    ux_intake = (
+        _load_json(repo_root, DEFAULT_UX_OBSERVATION_INTAKE)
+        if item == UX_OBSERVATION_GATE
+        else {}
+    )
+    ux_intake_blocker_ids = [str(item) for item in _as_list(ux_intake.get("blocker_ids"))]
+    ux_release_area_blocker_ids = [
+        str(item) for item in _as_list(ux_intake.get("release_area_blocker_ids"))
+    ]
+    ux_developer_preview_blocker_ids = [
+        str(item) for item in _as_list(ux_intake.get("developer_preview_blocker_ids"))
+    ]
+    ux_product_readiness_blocker_ids = [
+        str(item) for item in _as_list(ux_intake.get("product_readiness_blocker_ids"))
+    ]
     release_surface_impacts = [
         str(item) for item in _as_list(handoff.get("release_surface_impacts"))
     ]
@@ -206,6 +227,10 @@ def _owner_packet_for_gate(gate: dict[str, Any]) -> dict[str, Any]:
         [
             f"developer_preview_rc::{item}" if item else "",
             *release_surface_impacts,
+            *ux_release_area_blocker_ids,
+            *ux_developer_preview_blocker_ids,
+            *ux_product_readiness_blocker_ids,
+            *ux_intake_blocker_ids,
         ]
     )
     required_owner_evidence = [
@@ -217,6 +242,20 @@ def _owner_packet_for_gate(gate: dict[str, Any]) -> dict[str, Any]:
     evidence_intake_artifacts = [
         str(item) for item in _as_list(handoff.get("evidence_intake_artifacts"))
     ]
+    evidence_intake_artifacts = _deduped(
+        evidence_intake_artifacts
+        + [str(item) for item in _as_list(ux_intake.get("evidence_intake_artifacts"))]
+    )
+    human_observation_evidence_policy = _as_dict(
+        ux_intake.get("human_observation_evidence_policy")
+    )
+    prohibited_substitutes = _deduped(
+        [str(item) for item in _as_list(handoff.get("prohibited_substitutes"))]
+        + [
+            str(item)
+            for item in _as_list(human_observation_evidence_policy.get("rejected_substitutes"))
+        ]
+    )
     current_blockers = [str(item) for item in _as_list(gate.get("blockers"))]
     return {
         "gate_id": item,
@@ -240,11 +279,19 @@ def _owner_packet_for_gate(gate: dict[str, Any]) -> dict[str, Any]:
         "verification_command_count": len(verification_commands),
         "evidence_intake_artifacts": evidence_intake_artifacts,
         "evidence_intake_artifact_count": len(evidence_intake_artifacts),
-        "prohibited_substitutes": [
-            str(item) for item in _as_list(handoff.get("prohibited_substitutes"))
-        ],
+        "prohibited_substitutes": prohibited_substitutes,
         "release_surface_impacts": release_surface_impacts,
         "release_surface_impact_count": len(release_surface_impacts),
+        "upstream_intake_artifact": (
+            DEFAULT_UX_OBSERVATION_INTAKE.as_posix()
+            if item == UX_OBSERVATION_GATE
+            else ""
+        ),
+        "upstream_intake_status": str(ux_intake.get("status", "")),
+        "upstream_intake_contract_pass": bool(ux_intake.get("contract_pass") is True),
+        "upstream_intake_blocker_ids": ux_intake_blocker_ids,
+        "upstream_intake_blocker_id_count": len(ux_intake_blocker_ids),
+        "human_observation_evidence_policy": human_observation_evidence_policy,
         "current_blockers": current_blockers,
         "current_blocker_count": len(current_blockers),
         "blocker_grouping_metadata": gate.get("blocker_grouping_metadata", {}),
@@ -269,7 +316,10 @@ def build_owner_packet(
         if isinstance(gate, dict)
     ]
     blocked_gates = _blocked_gates(final_gates)
-    owner_packets = [_owner_packet_for_gate(gate) for gate in blocked_gates]
+    owner_packets = [
+        _owner_packet_for_gate(gate=gate, repo_root=repo_root)
+        for gate in blocked_gates
+    ]
     owner_packet_blocker_ids = _deduped(
         [
             str(item)
@@ -319,6 +369,7 @@ def build_owner_packet(
                 Path("scripts/build_developer_preview_final_gate_owner_packet.py"),
                 rc_status_path,
                 action_register_path,
+                DEFAULT_UX_OBSERVATION_INTAKE,
             ],
             reused_evidence=False,
             reuse_policy=(
@@ -412,6 +463,22 @@ def _markdown(payload: dict[str, Any]) -> str:
         if not packet["evidence_intake_artifacts"]:
             lines.append("- none")
         lines.append("")
+    ux_policy_packets = [
+        packet
+        for packet in payload["owner_packets"]
+        if packet.get("human_observation_evidence_policy")
+    ]
+    if ux_policy_packets:
+        lines.extend(["## Human Observation Evidence Policy", ""])
+        for packet in ux_policy_packets:
+            policy = packet["human_observation_evidence_policy"]
+            lines.append(f"### `{packet['gate_id']}`")
+            lines.append(f"- `closure_rule`: {policy.get('closure_rule', '')}")
+            accepted = "; ".join(str(item) for item in _as_list(policy.get("accepted_evidence")))
+            rejected = "; ".join(str(item) for item in _as_list(policy.get("rejected_substitutes")))
+            lines.append(f"- `accepted_evidence`: {accepted}")
+            lines.append(f"- `rejected_substitutes`: {rejected}")
+            lines.append("")
     lines.extend(["## Blocker IDs", ""])
     if payload["owner_packet_blocker_ids"]:
         lines.extend(f"- `{item}`" for item in payload["owner_packet_blocker_ids"])
