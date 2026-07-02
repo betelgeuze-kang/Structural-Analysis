@@ -17,3 +17,143 @@
 | `family_validation_manual_signoff_missing` | ga_enterprise | `validation_manual_owner` | `missing_external_ga_enterprise_signoff_evidence` / `external_owner_input_ready` | Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence. | `ga_enterprise_readiness_report.json.contract_pass == true` or no `family_validation_manual_signoff_missing` blocker<br>`ga_enterprise_signoff_intake_packet.json` shows family validation manual signoff accepted<br>`family_validation_manual_signoff_missing` absent from `ga_enterprise_blockers` |
 | `customer_audit_failure_bundle_sla_missing` | ga_enterprise | `customer_success_ops_owner` | `missing_external_ga_enterprise_signoff_evidence` / `external_owner_input_ready` | Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release. | `ga_enterprise_readiness_report.json.contract_pass == true` or no `customer_audit_failure_bundle_sla_missing` blocker<br>`ga_enterprise_signoff_intake_packet.json` shows customer audit/failure-bundle/SLA evidence accepted<br>`customer_audit_failure_bundle_sla_missing` absent from `ga_enterprise_blockers` |
 | `customer_shadow::completed_shadow_case_count_below_minimum` | ga_enterprise | `customer_success_ops_owner` | `completed_shadow_case_count_below_minimum` / `external_owner_input_ready` | Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence. | `customer_shadow_evidence_status.json.contract_pass == true`<br>`customer_shadow_evidence_status.json.summary.completed_shadow_case_count >= 3`<br>Every attached customer shadow JSON passes `validate_customer_shadow_evidence.py --fail-blocked`<br>`customer_shadow::completed_shadow_case_count_below_minimum` absent from `ga_enterprise_blockers` |
+
+## Source Intake Links
+
+### `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
+- `source_intake_path`: `implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json`
+- `blocker_id`: `pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
+- `blocker_id`: `pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`
+- `blocker_id`: `ci_streak::pr:pr_github_actions_job_start_blocked`
+- `blocker_id`: `ci_streak::pr:pr_ci_30_consecutive_pass_evidence_missing`
+- `blocker_id`: `ci_streak::pr:github_actions_lane_threshold_not_pass`
+- `blocker_id`: `ci_streak::pr:github_actions_lane_streak_below_threshold`
+- `blocker_id`: `ci_streak::nightly:nightly_github_actions_job_start_blocked`
+- `blocker_id`: `ci_streak::nightly:nightly_ci_30_consecutive_pass_evidence_missing`
+- `blocker_id`: `ci_streak::nightly:github_actions_lane_threshold_not_pass`
+- `blocker_id`: `ci_streak::nightly:github_actions_lane_streak_below_threshold`
+- `blocker_id`: `ci_streak::nightly:github_actions_filtered_run_count_below_threshold`
+- `blocker_id`: `ci_streak::runner:self_hosted_runner_matching_labels_not_online`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+
+### `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`
+- `source_intake_path`: `implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json`
+- `blocker_id`: `pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
+- `blocker_id`: `pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`
+- `blocker_id`: `ci_streak::pr:pr_github_actions_job_start_blocked`
+- `blocker_id`: `ci_streak::pr:pr_ci_30_consecutive_pass_evidence_missing`
+- `blocker_id`: `ci_streak::pr:github_actions_lane_threshold_not_pass`
+- `blocker_id`: `ci_streak::pr:github_actions_lane_streak_below_threshold`
+- `blocker_id`: `ci_streak::nightly:nightly_github_actions_job_start_blocked`
+- `blocker_id`: `ci_streak::nightly:nightly_ci_30_consecutive_pass_evidence_missing`
+- `blocker_id`: `ci_streak::nightly:github_actions_lane_threshold_not_pass`
+- `blocker_id`: `ci_streak::nightly:github_actions_lane_streak_below_threshold`
+- `blocker_id`: `ci_streak::nightly:github_actions_filtered_run_count_below_threshold`
+- `blocker_id`: `ci_streak::runner:self_hosted_runner_matching_labels_not_online`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+
+### `ux::human_new_user_observation_missing_or_failed`
+- `source_intake_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `blocker_id`: `pm_release::ux::human_new_user_observation_missing_or_failed`
+- `blocker_id`: `pm_release::ux::human_new_user_30min_sample_evidence_missing`
+- `blocker_id`: `developer_preview_rc::new_user_core_workflow_observation_passed`
+- `blocker_id`: `human_ux::observation_file_missing`
+- `blocker_id`: `human_ux::contract_signal_not_pass`
+- `blocker_id`: `human_ux::required_fields_missing`
+- `blocker_id`: `human_ux::participant_not_new_user`
+- `blocker_id`: `human_ux::new_to_product_not_confirmed`
+- `blocker_id`: `human_ux::completion_minutes_missing`
+- `blocker_id`: `human_ux::workflow_steps_missing`
+- `blocker_id`: `human_ux::required_workflow_steps_missing`
+- `blocker_id`: `human_ux::required_workflow_step_not_passed`
+- `blocker_id`: `human_ux::blocking_usability_issue_present`
+- `blocker_id`: `human_ux::evidence_ref_missing`
+- `blocker_id`: `human_ux::approval_decision_not_accepted`
+- `blocker_id`: `ux_new_user_observation::observation_file_missing`
+- `blocker_id`: `ux_new_user_observation::contract_signal_not_pass`
+- `blocker_id`: `ux_new_user_observation::required_fields_missing`
+- `blocker_id`: `ux_new_user_observation::participant_not_new_user`
+- `blocker_id`: `ux_new_user_observation::new_to_product_not_confirmed`
+- `blocker_id`: `ux_new_user_observation::completion_minutes_missing`
+- `blocker_id`: `ux_new_user_observation::workflow_steps_missing`
+- `blocker_id`: `ux_new_user_observation::required_workflow_steps_missing`
+- `blocker_id`: `ux_new_user_observation::required_workflow_step_not_passed`
+- `blocker_id`: `ux_new_user_observation::blocking_usability_issue_present`
+- `blocker_id`: `ux_new_user_observation::evidence_ref_missing`
+- `blocker_id`: `ux_new_user_observation::approval_decision_not_accepted`
+- `evidence_artifact`: `docs/templates/ux_new_user_observation.template.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
+
+### `ux::human_new_user_30min_sample_evidence_missing`
+- `source_intake_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `blocker_id`: `pm_release::ux::human_new_user_observation_missing_or_failed`
+- `blocker_id`: `pm_release::ux::human_new_user_30min_sample_evidence_missing`
+- `blocker_id`: `developer_preview_rc::new_user_core_workflow_observation_passed`
+- `blocker_id`: `human_ux::observation_file_missing`
+- `blocker_id`: `human_ux::contract_signal_not_pass`
+- `blocker_id`: `human_ux::required_fields_missing`
+- `blocker_id`: `human_ux::participant_not_new_user`
+- `blocker_id`: `human_ux::new_to_product_not_confirmed`
+- `blocker_id`: `human_ux::completion_minutes_missing`
+- `blocker_id`: `human_ux::workflow_steps_missing`
+- `blocker_id`: `human_ux::required_workflow_steps_missing`
+- `blocker_id`: `human_ux::required_workflow_step_not_passed`
+- `blocker_id`: `human_ux::blocking_usability_issue_present`
+- `blocker_id`: `human_ux::evidence_ref_missing`
+- `blocker_id`: `human_ux::approval_decision_not_accepted`
+- `blocker_id`: `ux_new_user_observation::observation_file_missing`
+- `blocker_id`: `ux_new_user_observation::contract_signal_not_pass`
+- `blocker_id`: `ux_new_user_observation::required_fields_missing`
+- `blocker_id`: `ux_new_user_observation::participant_not_new_user`
+- `blocker_id`: `ux_new_user_observation::new_to_product_not_confirmed`
+- `blocker_id`: `ux_new_user_observation::completion_minutes_missing`
+- `blocker_id`: `ux_new_user_observation::workflow_steps_missing`
+- `blocker_id`: `ux_new_user_observation::required_workflow_steps_missing`
+- `blocker_id`: `ux_new_user_observation::required_workflow_step_not_passed`
+- `blocker_id`: `ux_new_user_observation::blocking_usability_issue_present`
+- `blocker_id`: `ux_new_user_observation::evidence_ref_missing`
+- `blocker_id`: `ux_new_user_observation::approval_decision_not_accepted`
+- `evidence_artifact`: `docs/templates/ux_new_user_observation.template.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
+
+### `security::license_status_not_configured`
+- `source_intake_path`: `implementation/phase1/release_evidence/productization/license_status_intake_packet.json`
+- `blocker_id`: `pm_release::security::license_status_not_configured`
+- `blocker_id`: `license::license_status_not_active`
+- `blocker_id`: `license::license_tier_missing`
+- `blocker_id`: `license::license_id_missing`
+- `blocker_id`: `license::license_issuer_or_approver_missing`
+- `blocker_id`: `license::license_approver_role_missing`
+- `blocker_id`: `license::license_approval_reference_missing`
+- `blocker_id`: `license::license_approved_at_missing`
+- `blocker_id`: `license::license_evidence_ref_missing`
+- `blocker_id`: `license::license_product_scope_missing`
+- `blocker_id`: `license::license_expiry_missing_or_invalid`
+- `evidence_artifact`: `implementation/phase1/release/support_bundle/license_status.json`
+- `evidence_artifact`: `docs/templates/license_status.template.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/license_status_closure_report.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/license_status_intake_packet.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `evidence_artifact`: `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
