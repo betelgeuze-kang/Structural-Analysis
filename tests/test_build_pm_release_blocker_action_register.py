@@ -505,6 +505,64 @@ def test_build_register_surfaces_ga_enterprise_blockers(tmp_path: Path) -> None:
     assert any("validate_fresh_validation_receipt.py" in item for item in fresh_row["acceptance_criteria"])
 
 
+def test_build_register_surfaces_fresh_receipt_builder_commands(tmp_path: Path) -> None:
+    fresh_status = _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "rows": [
+                {
+                    "lane_id": "external_benchmark_refresh",
+                    "runner": "benchmark_productization_validation",
+                    "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json",
+                    "fresh_validation_receipt_present": True,
+                    "fresh_validation_receipt_fresh": True,
+                    "fresh_validation_receipt_lane_matches": True,
+                    "fresh_validation_receipt_runner_matches": True,
+                    "fresh_validation_receipt_contract_pass": True,
+                    "fresh_validation_receipt_blockers": [],
+                }
+            ]
+        },
+    )
+    report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | ga=BLOCKED",
+            "full_release_blockers": [],
+            "release_area_blockers": [],
+            "blockers": [],
+            "milestones": [],
+            "release_area_matrix": [],
+            "release_tiers": {
+                "ga_enterprise_blockers": [
+                    "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
+                ],
+                "fresh_full_validation_lane_status": str(fresh_status),
+            },
+        },
+    )
+
+    payload = build_register_module.build_register(pm_report=report)
+    row = payload["rows"][0]
+
+    assert row["blocker_id"] == (
+        "fresh_full_validation::external_benchmark_refresh::"
+        "fresh_validation_receipt_artifact_integrity_failed"
+    )
+    assert any(
+        "scripts/build_fresh_validation_receipt.py" in command
+        and "--lane-id external_benchmark_refresh" in command
+        and "--runner benchmark_productization_validation" in command
+        and "--output-receipt implementation/phase1/release_evidence/full_validation/"
+        "external_benchmark_refresh.fresh_validation_receipt.json" in command
+        for command in row["reproduction_commands"]
+    )
+    assert any(
+        "run_external_benchmark_refresh_lane.py" in command
+        for command in row["reproduction_commands"]
+    )
+
+
 def test_build_register_prioritizes_ci_job_start_blocker_state(tmp_path: Path) -> None:
     report = _pm_report(tmp_path / "pm_release_gate_report.json")
     payload = json.loads(report.read_text(encoding="utf-8"))

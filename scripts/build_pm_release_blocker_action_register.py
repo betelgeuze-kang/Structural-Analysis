@@ -88,6 +88,41 @@ DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET = Path(
 DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS = Path(
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
 )
+DEFAULT_FRESH_VALIDATION_RECEIPT_ROOT = Path(
+    "implementation/phase1/release_evidence/full_validation"
+)
+DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_MANIFEST = Path(
+    "implementation/phase1/release/external_benchmark_kickoff/"
+    "external_benchmark_execution_manifest.json"
+)
+DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_UPDATES = Path(
+    "implementation/phase1/release/external_benchmark_kickoff/"
+    "external_benchmark_execution_updates.json"
+)
+DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_STATUS = Path(
+    "implementation/phase1/release/external_benchmark_kickoff/"
+    "external_benchmark_execution_status_manifest.json"
+)
+DEFAULT_EXTERNAL_BENCHMARK_KICKOFF_GATE_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "hardest_external_10case_kickoff_gate_report.json"
+)
+DEFAULT_EXTERNAL_BENCHMARK_REFRESH_LANE_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "external_benchmark_refresh_lane_report.json"
+)
+DEFAULT_DESIGN_OPTIMIZATION_DATASET = Path(
+    "implementation/phase1/release/design_optimization/design_optimization_dataset.npz"
+)
+DEFAULT_DESIGN_OPTIMIZATION_CALIBRATION = Path(
+    "implementation/phase1/release/design_optimization/design_objective_calibration_report.json"
+)
+DEFAULT_DESIGN_OPTIMIZATION_SOLVER_LOOP_LONG_REPORT = Path(
+    "implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json"
+)
+DEFAULT_DESIGN_OPTIMIZATION_SOLVER_LOOP_LONG_STATE = Path(
+    "implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz"
+)
 DEFAULT_GA_ENTERPRISE_READINESS_REPORT = Path(
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
 )
@@ -96,6 +131,14 @@ DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET = Path(
 )
 GITHUB_SYNC_APPROVAL_PHRASE = "feature push + main fast-forward 승인"
 STRUCTURAL_SCOPE_CLEANUP_BLOCKER_ID = "structural_scope_cleanup::owner_review_decisions_pending"
+
+
+def _receipt_path(lane_id: str) -> Path:
+    return DEFAULT_FRESH_VALIDATION_RECEIPT_ROOT / f"{lane_id}.fresh_validation_receipt.json"
+
+
+def _receipt_result_path(lane_id: str) -> Path:
+    return DEFAULT_FRESH_VALIDATION_RECEIPT_ROOT / f"{lane_id}.fresh_validation_receipt.result.json"
 
 
 def _is_ux_human_new_user_blocker(*, namespace: str, code: str) -> bool:
@@ -639,6 +682,57 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
     ]
 
 
+def _fresh_validation_lane_reproduction_commands(lane_id: str) -> list[str]:
+    if lane_id == "external_benchmark_refresh":
+        validation_command = (
+            "python3 implementation/phase1/run_external_benchmark_refresh_lane.py "
+            f"--execution-manifest {DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_MANIFEST} "
+            f"--updates-json {DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_UPDATES} "
+            f"--status-manifest-out {DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_STATUS} "
+            f"--report-out {DEFAULT_EXTERNAL_BENCHMARK_REFRESH_LANE_REPORT}"
+        )
+        return [
+            "python3 scripts/build_fresh_validation_receipt.py "
+            "--lane-id external_benchmark_refresh "
+            "--runner benchmark_productization_validation "
+            f"--validation-command \"{validation_command}\" "
+            "--input implementation/phase1/generate_external_benchmark_execution_status_manifest.py "
+            f"--input {DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_MANIFEST} "
+            f"--input {DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_UPDATES} "
+            f"--input {DEFAULT_EXTERNAL_BENCHMARK_KICKOFF_GATE_REPORT} "
+            "--input implementation/phase1/run_external_benchmark_refresh_lane.py "
+            f"--receipt-artifact {DEFAULT_EXTERNAL_BENCHMARK_KICKOFF_GATE_REPORT}:hardest_external_10case_kickoff_gate_report "
+            f"--receipt-artifact {DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_STATUS}:execution_status_manifest "
+            f"--receipt-artifact {DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_STATUS.with_suffix('.md')}:execution_status_manifest_md "
+            f"--receipt-artifact {DEFAULT_EXTERNAL_BENCHMARK_REFRESH_LANE_REPORT}:external_benchmark_refresh_lane_report "
+            f"--output-receipt {_receipt_path(lane_id)} "
+            f"--out-result {_receipt_result_path(lane_id)} "
+            "--case-count 10 --passed-case-count 10 --fail-blocked"
+        ]
+    if lane_id == "design_optimization_refresh":
+        validation_command = (
+            "python3 implementation/phase1/run_design_optimization_solver_loop_long.py"
+        )
+        return [
+            "python3 scripts/build_fresh_validation_receipt.py "
+            "--lane-id design_optimization_refresh "
+            "--runner design_optimization_validation "
+            f"--validation-command \"{validation_command}\" "
+            f"--input {DEFAULT_DESIGN_OPTIMIZATION_CALIBRATION} "
+            f"--input {DEFAULT_DESIGN_OPTIMIZATION_DATASET} "
+            f"--receipt-artifact {DEFAULT_DESIGN_OPTIMIZATION_SOLVER_LOOP_LONG_REPORT}:solver_loop_long_report "
+            f"--receipt-artifact {DEFAULT_DESIGN_OPTIMIZATION_SOLVER_LOOP_LONG_STATE}:solver_loop_long_state "
+            f"--output-receipt {_receipt_path(lane_id)} "
+            f"--out-result {_receipt_result_path(lane_id)} "
+            "--case-count 1 --passed-case-count 1 --fail-blocked"
+        ]
+    return []
+
+
+def _fresh_validation_lane_verification_commands(lane_id: str) -> list[str]:
+    return []
+
+
 def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
     pm_report_command = (
         "python3 scripts/report_pm_release_gate.py "
@@ -659,7 +753,9 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
     if namespace == "fresh_full_validation":
+        lane_id = code.split("::", 1)[0]
         return [
+            *_fresh_validation_lane_reproduction_commands(lane_id),
             f"python3 scripts/build_fresh_full_validation_lane_status.py --out {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS} --out-md {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS.with_suffix('.md')}",
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
@@ -749,7 +845,9 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
         ]
     if namespace == "fresh_full_validation":
+        lane_id = code.split("::", 1)[0]
         return [
+            *_fresh_validation_lane_verification_commands(lane_id),
             f"python3 scripts/build_fresh_full_validation_lane_status.py --out {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS} --out-md {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS.with_suffix('.md')} --fail-blocked",
             f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}",
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
