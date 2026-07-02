@@ -126,6 +126,14 @@ def test_cleanup_impact_report_classifies_blocking_and_governance_refs(
         "documentation_reference": 1,
         "implementation_runtime_or_manifest_reference": 1,
     }
+    assert payload["blocking_reference_cleanup_batch_count"] == 2
+    assert payload["next_reference_cleanup_batch"]["batch_id"] == (
+        "cleanup_refs_02_implementation_runtime_or_manifest_reference"
+    )
+    assert payload["blocking_reference_cleanup_action_counts"] == {
+        "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts": 1,
+        "rewrite_structural_docs_to_scope_boundary_only": 1,
+    }
     assert "blocking_cleanup_reference_path_count=2" in payload["blockers"]
 
 
@@ -162,6 +170,8 @@ def test_cleanup_impact_report_can_be_clear_except_owner_decisions(
     assert payload["cleanup_impact_clear"] is True
     assert payload["reference_path_count"] == 1
     assert payload["blocking_cleanup_reference_path_count"] == 0
+    assert payload["blocking_reference_cleanup_batch_count"] == 0
+    assert payload["next_reference_cleanup_batch"] == {}
     assert payload["blockers"] == ["owner_decision_pending_count=2"]
 
 
@@ -197,5 +207,6 @@ def test_cleanup_impact_report_cli_writes_markdown(tmp_path: Path) -> None:
 
     markdown = out_md.read_text(encoding="utf-8")
     assert payload["summary_line"] in markdown
+    assert "## Cleanup Batches" in markdown
     assert "## Blocking References" in markdown
     assert "native_runtime_artifact_manifest.json" in markdown
