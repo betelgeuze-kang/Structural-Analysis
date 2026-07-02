@@ -34,6 +34,7 @@
 - `pending_decision_count`: `3`
 - `pending_release_surface_owner_decision_count=3`
 - `release_surface_cleanup_decision_count_below_expected=0/3`
+- `release_surface_first_batch_template.csv`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv`
 
 ## Next Batch Decision Template
 

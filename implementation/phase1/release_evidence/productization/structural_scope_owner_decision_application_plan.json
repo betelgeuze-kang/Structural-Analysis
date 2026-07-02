@@ -82,12 +82,12 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T00:56:19.429705+00:00",
+  "generated_at": "2026-07-02T01:03:27.204373+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:74442161282fa31da789bd335158452591b4e32efda29ad2609de9d8446e7f05",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:80edad0f3f3c4f87f64c95e388bdbcfe945c7ac8fa77b3f001833b4eeb2e4e11",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:47c12ca0c9f4ef782b362d0b53988a459bc25a4728d587c06bdeb10f6487bf82",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:723ac9629db97aaf072c71fe7f6f357a29b224a4e705782f91a6395bfdb9573b",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:c51e3c4e6ed276fb6167124fb9a1d677fef8ebe93c52a8f5a3fb0fe1e18a0df5"
   },
   "next_actions": [
@@ -3428,7 +3428,159 @@
     "valid_cleanup_decision_count": 0,
     "valid_decision_count": 0
   },
+  "release_surface_first_batch_decision_template": {
+    "batch_id": "release_surface_first",
+    "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+    "claim_boundary": "This is a fixed release_surface_first fill-in template and cleanup preview only. It is not an owner decision, does not delete files, and cannot close scope cleanup without recorded owner evidence and a refreshed post-decision structural scope audit.",
+    "conditional_required_fields": [
+      "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository"
+    ],
+    "current_intake_blockers": [
+      "pending_release_surface_owner_decision_count=3",
+      "release_surface_cleanup_decision_count_below_expected=0/3"
+    ],
+    "current_intake_status": "pending_owner_decisions",
+    "decision_pending_count": 3,
+    "decision_rows": [
+      {
+        "allowed_owner_decisions": [
+          "delete_from_structural_repository",
+          "extract_to_molecular_or_science_repository"
+        ],
+        "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+        "decision_timestamp_utc": "",
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "families": [
+          "molecular_docking"
+        ],
+        "matched_tokens": [
+          "gpcr"
+        ],
+        "owner_decision": "",
+        "owner_identity": "",
+        "owner_role": "",
+        "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "path_area": "release_surface",
+        "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+        "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-001",
+        "signed_owner_exception_reference": ""
+      },
+      {
+        "allowed_owner_decisions": [
+          "delete_from_structural_repository",
+          "extract_to_molecular_or_science_repository"
+        ],
+        "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+        "decision_timestamp_utc": "",
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "families": [
+          "molecular_science_evidence"
+        ],
+        "matched_tokens": [
+          "h_bond"
+        ],
+        "owner_decision": "",
+        "owner_identity": "",
+        "owner_role": "",
+        "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "path_area": "release_surface",
+        "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+        "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-002",
+        "signed_owner_exception_reference": ""
+      },
+      {
+        "allowed_owner_decisions": [
+          "delete_from_structural_repository",
+          "extract_to_molecular_or_science_repository"
+        ],
+        "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+        "decision_timestamp_utc": "",
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "families": [
+          "molecular_dynamics"
+        ],
+        "matched_tokens": [
+          "pocketmd"
+        ],
+        "owner_decision": "",
+        "owner_identity": "",
+        "owner_role": "",
+        "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "path_area": "release_surface",
+        "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+        "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-003",
+        "signed_owner_exception_reference": ""
+      }
+    ],
+    "expected_path_count": 3,
+    "generated_template_paths": {
+      "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
+      "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
+      "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
+    },
+    "path_area": "release_surface",
+    "path_specific_restrictions": [
+      "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface"
+    ],
+    "post_batch_verification": [
+      "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+      "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+      "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+      "python3 scripts/build_product_readiness_snapshot.py --check"
+    ],
+    "primary_cleanup_preview": {
+      "owner_decision_required": true,
+      "preconditions": [
+        "owner fills all release_surface_first rows in structural_scope_owner_decisions.json or CSV",
+        "owner_decision_validation_pass=true for these release surface rows",
+        "human confirms release-surface cleanup scope before any git rm"
+      ],
+      "primary_delete_git_rm_args": [
+        "git",
+        "rm",
+        "--",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "primary_delete_path_count": 3,
+      "primary_delete_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "primary_extract_path_count": 0,
+      "primary_extract_paths": [],
+      "primary_extract_post_archive_git_rm_args": [],
+      "safe_to_auto_apply": false
+    },
+    "required_owner_fill_fields": [
+      "owner_decision",
+      "owner_identity",
+      "owner_role",
+      "decision_timestamp_utc",
+      "evidence_reference"
+    ],
+    "schema_version": "structural-scope-owner-decisions.v1"
+  },
   "release_surface_first_batch_ready": false,
+  "release_surface_first_batch_template_paths": {
+    "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
+    "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
+    "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
+  },
   "release_surface_owner_decision_required_count": 3,
   "release_surface_owner_decision_required_paths": [
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3441,7 +3593,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "1e464e6d7c443839b70457d79b1f2a3a47a4de94",
+  "source_commit_sha": "470d603c7e1671a567ea111c13a76fb57c1da320",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
