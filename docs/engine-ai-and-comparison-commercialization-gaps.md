@@ -75,8 +75,8 @@
 ### 2.1 현재 구현 (사실, 파일 인용)
 
 - **모델 종류**: 일반 3D FEA가 아니라 **층 단위 축약 전단건물 모델**(층당 1 DOF, bilinear 층 스프링 + P-Δ)
-  - Rust 코어: `implementation/phase1/rust_hip_md3bead_hook/src/lib.rs`
-  - Python 브리지: `rust_nonlinear_frame_bridge.py`
+  - Release-surface 브리지: `implementation/phase1/rust_nonlinear_frame_bridge.py`
+  - 구조해석 GPU/Newton claim은 bridge/gate receipt 기준으로만 인용한다.
 - **해석 종류**:
   - 비선형 정적(Newton–Raphson + line search) — `phase1_rust_nonlinear_frame_solve`
   - 비선형 시간이력 NDTHA(Newmark-β) — `phase1_rust_nonlinear_frame_ndtha_solve`
@@ -177,8 +177,8 @@
 
 ## 부록 A. 주요 파일 인덱스
 
-- 해석 코어: `implementation/phase1/rust_hip_md3bead_hook/src/lib.rs`
 - 해석 브리지: `implementation/phase1/rust_nonlinear_frame_bridge.py`
+- GPU/Newton 검증 gate: `implementation/phase1/run_gpu_production_newton_equivalence_gate.py`, `scripts/run_gpu_newton_terminal_certification.py`
 - 설계코드: `implementation/phase1/kds_rc_rule_engine.py`
 - 최적화 엔진: `implementation/phase1/design_optimization_env.py`, `candidate_generation.py`
 - 최적화 루프: `implementation/phase1/run_design_optimization_solver_loop.py`, `run_design_optimization_cost_reduction.py`
