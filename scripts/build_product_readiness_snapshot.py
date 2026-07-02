@@ -88,6 +88,7 @@ class SnapshotInputPaths:
     fresh_full_validation: Path = PRODUCTIZATION / "fresh_full_validation_lane_status.json"
     g1_terminal_gate: Path = PRODUCTIZATION / "mgt_g1_direct_residual_terminal_gate_report.json"
     g1_full_load_hip_newton_lane: Path = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
+    g1_cause_narrowing_status: Path = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
     customer_shadow: Path = Path("implementation/phase1/customer_shadow_evidence_status.json")
     workstation_delivery: Path = Path("implementation/phase1/workstation_delivery_readiness.json")
     independent_product: Path = Path("implementation/phase1/release/independent_product_readiness.json")
@@ -306,6 +307,7 @@ def _receipt_commit_allowed_paths(
         "fresh_full_validation",
         "g1_terminal_gate",
         "g1_full_load_hip_newton_lane",
+        "g1_cause_narrowing_status",
         "customer_shadow",
         "workstation_delivery",
         "independent_product",
@@ -541,6 +543,9 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         },
         "g1_full_load_hip_newton_lane_report": {
             "scripts/run_g1_full_load_hip_newton_lane.py",
+        },
+        "g1_f2g_f2h_cause_narrowing_status": {
+            "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
         },
         "gap_closure_status": {
             "scripts/report_gap_closure_status.py",
@@ -838,6 +843,7 @@ def _schema_version_blockers(artifacts: dict[str, dict[str, Any]]) -> list[str]:
 def _exact_schema_version_blockers(artifacts: dict[str, dict[str, Any]]) -> list[str]:
     expected = {
         "g1_full_load_hip_newton_lane_report": "g1-full-load-hip-newton-lane.v1",
+        "g1_f2g_f2h_cause_narrowing_status": "g1-f2g-f2h-cause-narrowing-status.v1",
     }
     blockers: list[str] = []
     for name, expected_schema in expected.items():
@@ -1797,6 +1803,7 @@ def build_snapshot(
     fresh = _load_json(repo_root, paths.fresh_full_validation, blockers)
     g1 = _load_json(repo_root, paths.g1_terminal_gate, blockers)
     g1_full_load_lane = _load_json(repo_root, paths.g1_full_load_hip_newton_lane, blockers)
+    g1_cause_narrowing = _load_json(repo_root, paths.g1_cause_narrowing_status, blockers)
     customer = _load_json(repo_root, paths.customer_shadow, blockers)
     workstation = _load_json(repo_root, paths.workstation_delivery, blockers)
     independent = _load_json(repo_root, paths.independent_product, blockers)
@@ -1911,6 +1918,7 @@ def build_snapshot(
         "fresh_full_validation_lane_status": fresh,
         "mgt_g1_direct_residual_terminal_gate_report": g1,
         "g1_full_load_hip_newton_lane_report": g1_full_load_lane,
+        "g1_f2g_f2h_cause_narrowing_status": g1_cause_narrowing,
         "customer_shadow_evidence_status": customer,
         "workstation_delivery_readiness": workstation,
         "independent_product_readiness": independent,
@@ -2331,6 +2339,33 @@ def build_snapshot(
     g1_suppressed_detail_blockers = sorted(dict.fromkeys(g1_suppressed_detail_blockers))
     if not g1_root_blockers and (not g1_full_mesh_ready or not g1_full_load_lane_ready):
         blockers.append("g1::full_load_gate_not_closed")
+    g1_cause_summary = _as_dict(g1_cause_narrowing.get("summary"))
+    g1_cause_signals = _as_dict(g1_cause_narrowing.get("signals"))
+    g1_cause_decision = _as_dict(g1_cause_narrowing.get("decision_record"))
+    g1_cause_root_classification = _as_dict(
+        g1_cause_narrowing.get("root_cause_classification")
+    )
+    g1_cause_row_policy = _as_dict(g1_cause_narrowing.get("row_only_correction_policy"))
+    g1_cause_primary_next_lane = str(
+        g1_cause_decision.get("primary_next_lane")
+        or g1_cause_summary.get("primary_next_lane")
+        or g1_cause_root_classification.get("primary_next_lane")
+        or ""
+    )
+    g1_cause_solver_runtime_blockers = _as_list(
+        g1_cause_signals.get("solver_hip_runtime_blockers")
+    )
+    g1_cause_recommended_next_actions = [
+        {
+            "action_id": str(row.get("action_id", "")),
+            "priority": row.get("priority"),
+            "status": str(row.get("status", "")),
+            "required_receipt_count": len(_as_list(row.get("required_receipts"))),
+            "current_runtime_blockers": _as_list(row.get("current_runtime_blockers")),
+        }
+        for row in _as_list(g1_cause_narrowing.get("recommended_next_actions"))
+        if isinstance(row, dict)
+    ]
 
     workstation_delivery_ready = bool(
         _contract_pass(workstation) and not _as_list(workstation.get("blockers"))
@@ -2618,6 +2653,7 @@ def build_snapshot(
             "developer_preview_readiness": str(developer_preview.get("claim_boundary", "")),
             "developer_preview_rc": str(developer_preview_rc.get("claim_boundary", "")),
             "g1": g1_claim_boundary,
+            "g1_cause_narrowing": str(g1_cause_narrowing.get("claim_boundary", "")),
             "fresh_full_validation": str(fresh.get("claim_boundary", "")),
             "customer_shadow": str(customer.get("claim_boundary", "")),
         },
@@ -3233,6 +3269,72 @@ def build_snapshot(
                 ),
                 "full_load_hip_newton_hip_consistency_proof": (
                     g1_lane_hip_consistency_proof
+                ),
+                "cause_narrowing_status": str(g1_cause_narrowing.get("status", "")),
+                "cause_narrowing_contract_pass": bool(
+                    g1_cause_narrowing.get("contract_pass")
+                ),
+                "cause_narrowing_summary_line": str(
+                    g1_cause_narrowing.get("summary_line", "")
+                ),
+                "cause_narrowing_promotes_g1_closure": bool(
+                    g1_cause_narrowing.get("promotes_g1_closure")
+                ),
+                "cause_narrowing_primary_next_lane": g1_cause_primary_next_lane,
+                "cause_narrowing_row_only_correction_decision": str(
+                    g1_cause_row_policy.get("decision")
+                    or g1_cause_root_classification.get(
+                        "row_only_support_or_elastic_link_correction_decision"
+                    )
+                    or ""
+                ),
+                "cause_narrowing_support_or_link_row_gap_disfavored": bool(
+                    g1_cause_summary.get("support_or_link_row_gap_disfavored")
+                    or g1_cause_signals.get("support_or_link_row_gap_disfavored")
+                ),
+                "cause_narrowing_f2h_lightweight_0p1_0p2_0p4_ready": bool(
+                    g1_cause_summary.get("f2h_lightweight_0p1_0p2_0p4_ready")
+                    or g1_cause_signals.get("f2h_lightweight_0p1_0p2_0p4_ready")
+                ),
+                "cause_narrowing_load_dependent_near_null_geometric_stiffness_comparison_status": str(
+                    g1_cause_summary.get(
+                        "load_dependent_near_null_geometric_stiffness_comparison_status"
+                    )
+                    or g1_cause_signals.get(
+                        "load_dependent_near_null_geometric_stiffness_comparison_status"
+                    )
+                    or ""
+                ),
+                "cause_narrowing_solver_hip_e2e_status": str(
+                    g1_cause_summary.get("solver_hip_e2e_status")
+                    or g1_cause_signals.get("solver_hip_e2e_status")
+                    or ""
+                ),
+                "cause_narrowing_solver_hip_e2e_reason_code": str(
+                    g1_cause_summary.get("solver_hip_e2e_reason_code")
+                    or g1_cause_signals.get("solver_hip_e2e_reason_code")
+                    or ""
+                ),
+                "cause_narrowing_solver_hip_runtime_device_interface_present": bool(
+                    g1_cause_summary.get("solver_hip_runtime_device_interface_present")
+                    or g1_cause_signals.get(
+                        "solver_hip_runtime_device_interface_present"
+                    )
+                ),
+                "cause_narrowing_solver_hip_runtime_blocker_count": len(
+                    g1_cause_solver_runtime_blockers
+                ),
+                "cause_narrowing_solver_hip_runtime_blockers": (
+                    g1_cause_solver_runtime_blockers
+                ),
+                "cause_narrowing_next_actions": _as_list(
+                    g1_cause_narrowing.get("next_actions")
+                ),
+                "cause_narrowing_recommended_next_actions": (
+                    g1_cause_recommended_next_actions
+                ),
+                "cause_narrowing_claim_boundary": str(
+                    g1_cause_narrowing.get("claim_boundary", "")
                 ),
             },
             "product_identity": identity,

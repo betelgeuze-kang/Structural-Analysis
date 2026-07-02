@@ -163,6 +163,7 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         fresh_full_validation=Path("fresh_full_validation_lane_status.json"),
         g1_terminal_gate=Path("mgt_g1_direct_residual_terminal_gate_report.json"),
         g1_full_load_hip_newton_lane=Path("g1_full_load_hip_newton_lane_report.json"),
+        g1_cause_narrowing_status=Path("g1_f2g_f2h_cause_narrowing_status.json"),
         customer_shadow=Path("customer_shadow_evidence_status.json"),
         workstation_delivery=Path("workstation_delivery_readiness.json"),
         independent_product=Path("independent_product_readiness.json"),
@@ -618,6 +619,65 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "child_gate_evidence": _g1_child_gate_evidence(),
         "blockers": [],
     })
+    _write_json(tmp_path / "g1_f2g_f2h_cause_narrowing_status.json", {
+        "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "input_checksums": {"g1_cause_inputs.json": "sha256:abc123"},
+        "reused_evidence": True,
+        "contract_pass": True,
+        "status": "ready",
+        "summary_line": (
+            "G1 F2g/F2h cause narrowing: READY | "
+            "next=consistent_residual_jacobian_newton_rocm_worker"
+        ),
+        "summary": {
+            "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+            "support_or_link_row_gap_disfavored": True,
+            "f2h_lightweight_0p1_0p2_0p4_ready": True,
+            "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
+            "solver_hip_e2e_status": "blocked",
+            "solver_hip_e2e_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+            "solver_hip_runtime_device_interface_present": False,
+        },
+        "signals": {
+            "solver_hip_runtime_blockers": ["dev_kfd_missing", "dev_dri_missing"],
+        },
+        "decision_record": {
+            "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+        },
+        "root_cause_classification": {
+            "row_only_support_or_elastic_link_correction_decision": "stop",
+        },
+        "row_only_correction_policy": {
+            "decision": "stop_support_or_elastic_link_row_only_loop",
+        },
+        "next_actions": [
+            "stop_row_only_support_or_elastic_link_correction_loop",
+            "execute_consistent_residual_jacobian_newton_rocm_worker_lane",
+        ],
+        "recommended_next_actions": [
+            {
+                "action_id": "stop_row_only_support_or_elastic_link_corrections",
+                "priority": 1,
+                "status": "ready",
+            },
+            {
+                "action_id": "execute_consistent_residual_jacobian_newton_rocm_worker_lane",
+                "priority": 2,
+                "status": "required_for_g1_closure",
+                "required_receipts": [
+                    "mgt_residual_jacobian_consistency_hip_required_probe.json",
+                    "g1_full_load_hip_newton_lane_report.json",
+                ],
+            },
+        ],
+        "promotes_g1_closure": False,
+        "claim_boundary": (
+            "This receipt narrows the next G1 diagnostic direction and does not close G1."
+        ),
+        "blockers": [],
+    })
     _write_json(tmp_path / "ux_new_user_observation_report.json", {
         "schema_version": "ux-new-user-observation-report.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
@@ -1051,6 +1111,29 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["release_decision"]["evidence_surface_count"] == 2
     assert payload["release_decision"]["broad_gpcr_family_claim_safe"] is False
     assert payload["components"]["pm_release"]["release_decision"] == payload["release_decision"]
+    g1_component = payload["components"]["g1"]
+    assert g1_component["cause_narrowing_status"] == "ready"
+    assert g1_component["cause_narrowing_contract_pass"] is True
+    assert g1_component["cause_narrowing_promotes_g1_closure"] is False
+    assert (
+        g1_component["cause_narrowing_primary_next_lane"]
+        == "consistent_residual_jacobian_newton_rocm_worker"
+    )
+    assert (
+        g1_component["cause_narrowing_row_only_correction_decision"]
+        == "stop_support_or_elastic_link_row_only_loop"
+    )
+    assert g1_component["cause_narrowing_support_or_link_row_gap_disfavored"] is True
+    assert g1_component["cause_narrowing_f2h_lightweight_0p1_0p2_0p4_ready"] is True
+    assert g1_component["cause_narrowing_solver_hip_e2e_status"] == "blocked"
+    assert g1_component["cause_narrowing_solver_hip_runtime_blocker_count"] == 2
+    assert g1_component["cause_narrowing_recommended_next_actions"][1] == {
+        "action_id": "execute_consistent_residual_jacobian_newton_rocm_worker_lane",
+        "priority": 2,
+        "status": "required_for_g1_closure",
+        "required_receipt_count": 2,
+        "current_runtime_blockers": [],
+    }
     metadata_by_artifact = {
         row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
@@ -2844,6 +2927,7 @@ def test_snapshot_pm_action_register_builder_change_does_not_stale_snapshot_leaf
         == "non_artifact_source_paths_changed"
     )
     assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is True
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -2884,6 +2968,7 @@ def test_snapshot_structural_roadmap_builder_change_does_not_stale_snapshot_leaf
         not in metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"]
     )
     assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is True
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3043,10 +3128,13 @@ def test_snapshot_g1_cause_narrowing_builder_change_does_not_stale_snapshot_leaf
         == "non_artifact_source_paths_changed"
     )
     assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
-    assert not [
+    assert metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is False
+    assert [
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ] == [
+        "stale_or_inconsistent:source_commit_mismatch:g1_f2g_f2h_cause_narrowing_status"
     ]
 
 
