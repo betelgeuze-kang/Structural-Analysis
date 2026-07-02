@@ -320,6 +320,10 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
     assert payload["next_owner_review_batch"]["batch_id"] == "release_surface_first"
     assert payload["next_owner_review_batch"]["priority"] == 1
     assert payload["next_owner_review_batch"]["paths"] == [release_surface_path]
+    assert payload["next_owner_review_batch"]["review_goal"] == (
+        "record owner delete/extract decisions only; retain exceptions are not "
+        "allowed for release-surface paths"
+    )
     batch_template = payload["next_owner_review_batch_decision_template"]
     assert batch_template["schema_version"] == (
         application_plan.owner_review.DECISION_SCHEMA_VERSION

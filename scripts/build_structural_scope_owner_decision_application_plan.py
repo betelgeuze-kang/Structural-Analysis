@@ -518,10 +518,7 @@ def _owner_review_priority_batches(rows: list[dict[str, Any]]) -> list[dict[str,
                     batch_rows,
                     "recommended_owner_decision_primary",
                 ),
-                "review_goal": (
-                    "record owner delete/extract/retain decisions without "
-                    "mutating the repository"
-                ),
+                "review_goal": _owner_review_goal(area),
             }
         )
     other_rows = [row for row in rows if row["path_area"] not in known_areas]
@@ -538,13 +535,19 @@ def _owner_review_priority_batches(rows: list[dict[str, Any]]) -> list[dict[str,
                     other_rows,
                     "recommended_owner_decision_primary",
                 ),
-                "review_goal": (
-                    "record owner delete/extract/retain decisions without "
-                    "mutating the repository"
-                ),
+                "review_goal": _owner_review_goal("other"),
             }
         )
     return batches
+
+
+def _owner_review_goal(path_area: str) -> str:
+    if path_area == "release_surface":
+        return (
+            "record owner delete/extract decisions only; retain exceptions are "
+            "not allowed for release-surface paths"
+        )
+    return "record owner delete/extract/retain decisions without mutating the repository"
 
 
 def _path_area_priority(path_area: str) -> tuple[int, str]:
