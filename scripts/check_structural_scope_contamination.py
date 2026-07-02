@@ -381,6 +381,35 @@ def _release_surface_quarantine_boundary(
     }
 
 
+def _owner_cleanup_closure_blockers(
+    *,
+    quarantined_rows: list[dict[str, Any]],
+    unquarantined_rows: list[dict[str, Any]],
+    skipped_quarantined_release_surface_paths: list[str],
+    release_surface_text_leak_rows: list[dict[str, Any]],
+) -> list[str]:
+    blockers: list[str] = []
+    if release_surface_text_leak_rows:
+        blockers.append(
+            "release_surface_text_non_structural_token_path_count="
+            f"{len(release_surface_text_leak_rows)}"
+        )
+    if unquarantined_rows:
+        blockers.append(
+            f"unquarantined_non_structural_owner_cleanup_pending_count={len(unquarantined_rows)}"
+        )
+    if skipped_quarantined_release_surface_paths:
+        blockers.append(
+            "release_surface_quarantined_owner_cleanup_pending_count="
+            f"{len(skipped_quarantined_release_surface_paths)}"
+        )
+    if quarantined_rows:
+        blockers.append(
+            f"quarantined_non_structural_owner_cleanup_pending_count={len(quarantined_rows)}"
+        )
+    return sorted(dict.fromkeys(blockers))
+
+
 def build_audit(
     *,
     repo_root: Path = ROOT,
@@ -428,6 +457,14 @@ def build_audit(
         skipped_quarantined_paths=release_surface_text_guard_skipped_quarantined_paths,
         leak_rows=release_surface_text_leak_rows,
     )
+    owner_cleanup_closure_blockers = _owner_cleanup_closure_blockers(
+        quarantined_rows=quarantined_rows,
+        unquarantined_rows=unquarantined_rows,
+        skipped_quarantined_release_surface_paths=(
+            release_surface_text_guard_skipped_quarantined_paths
+        ),
+        release_surface_text_leak_rows=release_surface_text_leak_rows,
+    )
 
     blockers = [f"quarantine_manifest::{item}" for item in manifest_blockers]
     tracked_non_structural_count = git_state_counts.get("tracked", 0)
@@ -440,6 +477,7 @@ def build_audit(
         )
 
     contract_pass = not blockers and not unquarantined_rows
+    owner_cleanup_closure_ready = contract_pass and not owner_cleanup_closure_blockers
     if blockers:
         status = "blocked"
     elif rows:
@@ -501,6 +539,14 @@ def build_audit(
         "release_surface_text_leak_path_count": len(release_surface_text_leak_rows),
         "release_surface_text_leak_rows": release_surface_text_leak_rows,
         "release_surface_quarantine_boundary": release_surface_quarantine_boundary,
+        "owner_cleanup_closure_ready": owner_cleanup_closure_ready,
+        "owner_cleanup_closure_blockers": owner_cleanup_closure_blockers,
+        "owner_cleanup_pending_path_count": len(rows),
+        "quarantined_owner_cleanup_pending_path_count": len(quarantined_rows),
+        "unquarantined_owner_cleanup_pending_path_count": len(unquarantined_rows),
+        "release_surface_owner_cleanup_pending_path_count": len(
+            release_surface_text_guard_skipped_quarantined_paths
+        ),
         "blockers": blockers,
         "first_non_structural_path": rows[0]["path"] if rows else "",
         "first_unquarantined_non_structural_path": (
@@ -609,6 +655,9 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `first_non_structural_path`: `{payload['first_non_structural_path'] or 'none'}`",
         f"- `first_unquarantined_non_structural_path`: `{payload['first_unquarantined_non_structural_path'] or 'none'}`",
         f"- `release_surface_text_leak_path_count`: `{payload['release_surface_text_leak_path_count']}`",
+        f"- `owner_cleanup_closure_ready`: `{payload['owner_cleanup_closure_ready']}`",
+        f"- `owner_cleanup_pending_path_count`: `{payload['owner_cleanup_pending_path_count']}`",
+        f"- `release_surface_owner_cleanup_pending_path_count`: `{payload['release_surface_owner_cleanup_pending_path_count']}`",
         "",
         "## Quarantine",
         "",
@@ -645,6 +694,14 @@ def _markdown(payload: dict[str, Any]) -> str:
             )
     else:
         lines.append("No guarded structural release surface text leaks detected.")
+    lines.extend(["", "## Owner Cleanup Closure", ""])
+    owner_cleanup_blockers = payload.get("owner_cleanup_closure_blockers", [])
+    if owner_cleanup_blockers:
+        lines.append("- blockers:")
+        for blocker in owner_cleanup_blockers:
+            lines.append(f"  - `{blocker}`")
+    else:
+        lines.append("No owner cleanup closure blockers.")
     boundary = payload.get("release_surface_quarantine_boundary", {})
     lines.extend(
         [
@@ -726,6 +783,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     parser.add_argument(
+        "--fail-owner-cleanup-pending",
+        action="store_true",
+        help=(
+            "Fail when any non-structural path still awaits owner delete/extract "
+            "cleanup, even if quarantine keeps structural release claims clean."
+        ),
+    )
+    parser.add_argument(
         "--tracked-only",
         action="store_true",
         help="Only scan tracked files; by default ignored-excluded untracked files are scanned too.",
@@ -756,7 +821,11 @@ def main(argv: list[str] | None = None) -> int:
             f"{payload['status']} | "
             f"non_structural_paths={payload['non_structural_path_count']}"
         )
-    return 1 if args.fail_blocked and not payload["contract_pass"] else 0
+    if args.fail_blocked and not payload["contract_pass"]:
+        return 1
+    if args.fail_owner_cleanup_pending and not payload["owner_cleanup_closure_ready"]:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

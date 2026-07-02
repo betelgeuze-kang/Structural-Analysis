@@ -204,6 +204,14 @@ def test_scope_audit_quarantines_exact_manifest_paths(tmp_path: Path) -> None:
     assert payload["non_structural_path_count"] == 2
     assert payload["quarantined_non_structural_path_count"] == 2
     assert payload["unquarantined_non_structural_path_count"] == 0
+    assert payload["owner_cleanup_closure_ready"] is False
+    assert payload["owner_cleanup_pending_path_count"] == 2
+    assert payload["quarantined_owner_cleanup_pending_path_count"] == 2
+    assert payload["unquarantined_owner_cleanup_pending_path_count"] == 0
+    assert payload["release_surface_owner_cleanup_pending_path_count"] == 0
+    assert payload["owner_cleanup_closure_blockers"] == [
+        "quarantined_non_structural_owner_cleanup_pending_count=2"
+    ]
     assert payload["blockers"] == []
     assert {row["quarantine_status"] for row in payload["non_structural_rows"]} == {
         "quarantined"
@@ -355,6 +363,13 @@ def test_scope_audit_skips_quarantined_release_surface_text_guard(tmp_path: Path
             "gpcr_hard_decoy_evidence_surface.json"
         )
     ]
+    assert payload["owner_cleanup_closure_ready"] is False
+    assert payload["owner_cleanup_pending_path_count"] == 1
+    assert payload["release_surface_owner_cleanup_pending_path_count"] == 1
+    assert payload["owner_cleanup_closure_blockers"] == [
+        "quarantined_non_structural_owner_cleanup_pending_count=1",
+        "release_surface_quarantined_owner_cleanup_pending_count=1",
+    ]
     assert payload["release_surface_quarantine_boundary"] == {
         "schema_version": (
             "structural-scope-release-surface-quarantine-boundary.v1"
@@ -398,5 +413,69 @@ def test_scope_audit_writes_json_and_markdown(tmp_path: Path) -> None:
     markdown = out_md.read_text(encoding="utf-8")
     assert "# Structural Scope Contamination Audit" in markdown
     assert "| Git State | Count |" in markdown
+    assert "## Owner Cleanup Closure" in markdown
     assert "## Release Surface Quarantine Boundary" in markdown
     assert "implementation/phase1/md3bead_soa.py" in markdown
+
+
+def test_scope_audit_cli_can_fail_on_owner_cleanup_pending(tmp_path: Path) -> None:
+    _git("init", cwd=tmp_path)
+    path = (
+        "implementation/phase1/release_evidence/surface/"
+        "gpcr_hard_decoy_evidence_surface.json"
+    )
+    _tracked(tmp_path / path, "{}\n")
+    _git("add", ".", cwd=tmp_path)
+    manifest = tmp_path / "scope_quarantine.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": scope_audit.QUARANTINE_SCHEMA_VERSION,
+                "status": "active",
+                "paths": [
+                    {
+                        "path": path,
+                        "excluded_from_structural_release_surface": True,
+                    },
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    assert (
+        scope_audit.main(
+            [
+                "--repo-root",
+                tmp_path.as_posix(),
+                "--out",
+                (tmp_path / "audit.json").as_posix(),
+                "--out-md",
+                (tmp_path / "audit.md").as_posix(),
+                "--quarantine-manifest",
+                manifest.as_posix(),
+                "--tracked-only",
+                "--fail-blocked",
+            ]
+        )
+        == 0
+    )
+    assert (
+        scope_audit.main(
+            [
+                "--repo-root",
+                tmp_path.as_posix(),
+                "--out",
+                (tmp_path / "audit.json").as_posix(),
+                "--out-md",
+                (tmp_path / "audit.md").as_posix(),
+                "--quarantine-manifest",
+                manifest.as_posix(),
+                "--tracked-only",
+                "--fail-owner-cleanup-pending",
+            ]
+        )
+        == 1
+    )
