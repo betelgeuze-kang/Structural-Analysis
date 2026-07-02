@@ -164,6 +164,9 @@ def _plan_row(row: dict[str, Any]) -> dict[str, Any]:
         "families": [str(item) for item in _as_list(row.get("families"))],
         "matched_tokens": [str(item) for item in _as_list(row.get("matched_tokens"))],
         "owner_decision": _text(row.get("owner_decision")),
+        "allowed_owner_decisions": [
+            str(item) for item in _as_list(row.get("allowed_owner_decisions"))
+        ],
         "owner_decision_valid": bool(row.get("owner_decision_valid")),
         "owner_review_state": _text(row.get("owner_review_state")),
         "post_decision_cleanup_pending": bool(row.get("post_decision_cleanup_pending")),
@@ -374,7 +377,13 @@ def _decision_template_row(row: dict[str, Any], *, index: int, batch_id: str) ->
         "recommended_owner_decision_alternate": _text(
             row.get("recommended_owner_decision_alternate")
         ),
-        "allowed_owner_decisions": list(owner_review.ALLOWED_OWNER_DECISIONS),
+        "allowed_owner_decisions": [
+            str(item)
+            for item in (
+                _as_list(row.get("allowed_owner_decisions"))
+                or list(owner_review.ALLOWED_OWNER_DECISIONS)
+            )
+        ],
         "owner_decision": "",
         "owner_identity": "",
         "owner_role": "",
@@ -439,6 +448,9 @@ def _next_batch_decision_template(
             "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
             "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception",
         ],
+        "path_specific_restrictions": [
+            "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface",
+        ],
         "primary_cleanup_preview": {
             "safe_to_auto_apply": False,
             "owner_decision_required": True,
@@ -475,11 +487,11 @@ def _status_from_packet(packet: dict[str, Any]) -> str:
         return "blocked_scope_cleanup"
     if packet.get("evidence_closure_pass"):
         return "complete"
-    if packet.get("owner_decision_pending_count"):
-        return "pending_owner_decisions"
     owner_decisions = packet.get("owner_decisions")
     if isinstance(owner_decisions, dict) and owner_decisions.get("blockers"):
         return "owner_decision_evidence_invalid"
+    if packet.get("owner_decision_pending_count"):
+        return "pending_owner_decisions"
     if packet.get("post_decision_cleanup_pending_count"):
         return "ready_for_cleanup_application"
     return "pending_post_decision_scope_audit"
@@ -852,9 +864,29 @@ def _next_batch_template_markdown(payload: dict[str, Any]) -> str:
             "is `retain_quarantined_with_signed_owner_exception`"
         ),
         "",
-        "| Row | Path | Primary Decision | Alternate Decision |",
-        "|---|---|---|---|",
+        "## Path-Specific Restrictions",
+        "",
     ]
+    restrictions = [
+        str(item) for item in _as_list(payload.get("path_specific_restrictions"))
+    ]
+    if restrictions:
+        lines.extend(f"- `{item}`" for item in restrictions)
+    else:
+        lines.append("- none")
+    lines.extend(
+        [
+            "",
+            "## Decision Rows",
+            "",
+        ]
+    )
+    lines.extend(
+        [
+            "| Row | Path | Primary Decision | Alternate Decision |",
+            "|---|---|---|---|",
+        ]
+    )
     for row in payload["decision_rows"]:
         lines.append(
             "| "

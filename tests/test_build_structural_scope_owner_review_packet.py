@@ -242,9 +242,10 @@ def test_owner_review_packet_requires_signed_reference_for_retain_exception(
         owner_decisions_path=decisions,
     )
 
-    assert result["status"] == "ready_for_owner_review"
+    assert result["status"] == "owner_decision_evidence_invalid"
     assert result["owner_decision_recorded_count"] == 0
     assert result["owner_decision_pending_count"] == 2
+    assert "owner_decisions_invalid_path_count=2" in result["closure_blockers"]
     assert {
         tuple(row["owner_decision_missing_requirements"])
         for row in result["review_rows"]
@@ -368,13 +369,88 @@ def test_owner_review_packet_requires_archive_reference_for_extract_decisions(
         owner_decisions_path=decisions,
     )
 
-    assert result["status"] == "ready_for_owner_review"
+    assert result["status"] == "owner_decision_evidence_invalid"
     assert result["owner_decision_recorded_count"] == 0
     assert result["owner_decision_pending_count"] == 2
+    assert "owner_decisions_invalid_path_count=2" in result["closure_blockers"]
     assert {
         tuple(row["owner_decision_missing_requirements"])
         for row in result["review_rows"]
     } == {("external_archive_reference",)}
+
+
+def test_owner_review_packet_rejects_release_surface_retain_exception(
+    tmp_path: Path,
+) -> None:
+    audit_payload = _audit_payload()
+    manifest_payload = _manifest_payload()
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "pocketmd_lite_science_product_surface.json"
+    )
+    audit_payload["quarantined_non_structural_rows"].append(
+        {
+            "path": release_surface_path,
+            "git_state": "tracked",
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "quarantine_status": "quarantined",
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    manifest_payload["paths"].append(
+        {
+            "path": release_surface_path,
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(audit, audit_payload)
+    _write_json(manifest, manifest_payload)
+    _write_json(
+        decisions,
+        {
+            "schema_version": owner_review.DECISION_SCHEMA_VERSION,
+            "decision_rows": [
+                {
+                    "path": release_surface_path,
+                    "owner_decision": "retain_quarantined_with_signed_owner_exception",
+                    "owner_identity": "scope-owner",
+                    "owner_role": "product_owner",
+                    "decision_timestamp_utc": "2026-07-02T00:00:00Z",
+                    "evidence_reference": "owner-review://scope-cleanup/retain",
+                    "signed_owner_exception_reference": (
+                        "signed-exception://scope-cleanup/retain"
+                    ),
+                    "external_archive_reference": "",
+                }
+            ],
+        },
+    )
+
+    result = owner_review.build_owner_review_packet(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=decisions,
+    )
+
+    rows = {row["path"]: row for row in result["review_rows"]}
+    assert result["status"] == "owner_decision_evidence_invalid"
+    assert (
+        "owner_decisions_release_surface_retain_exception_count=1"
+        in result["closure_blockers"]
+    )
+    assert rows[release_surface_path]["allowed_owner_decisions"] == list(
+        owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+    )
+    assert rows[release_surface_path]["owner_decision_valid"] is False
+    assert "release_surface_retain_exception_not_allowed" in rows[
+        release_surface_path
+    ]["owner_decision_missing_requirements"]
 
 
 def test_owner_review_packet_requires_decisions_for_absent_manifest_paths(

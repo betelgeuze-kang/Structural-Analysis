@@ -294,7 +294,7 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
                 "extract_to_molecular_or_science_repository"
             ),
             "allowed_owner_decisions": list(
-                application_plan.owner_review.ALLOWED_OWNER_DECISIONS
+                application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
             ),
             "owner_decision": "",
             "owner_identity": "",

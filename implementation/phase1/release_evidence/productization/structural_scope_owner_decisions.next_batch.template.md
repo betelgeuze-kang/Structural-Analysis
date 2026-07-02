@@ -6,6 +6,12 @@
 - `external_archive_reference`: required when `owner_decision` is `extract_to_molecular_or_science_repository`
 - `signed_owner_exception_reference`: required when `owner_decision` is `retain_quarantined_with_signed_owner_exception`
 
+## Path-Specific Restrictions
+
+- `retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface`
+
+## Decision Rows
+
 | Row | Path | Primary Decision | Alternate Decision |
 |---|---|---|---|
 | `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `delete_from_structural_repository` | `extract_to_molecular_or_science_repository` |

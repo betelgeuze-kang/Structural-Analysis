@@ -37,6 +37,10 @@ ALLOWED_OWNER_DECISIONS = (
     "extract_to_molecular_or_science_repository",
     "retain_quarantined_with_signed_owner_exception",
 )
+RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS = (
+    "delete_from_structural_repository",
+    "extract_to_molecular_or_science_repository",
+)
 REQUIRED_CLOSURE_EVIDENCE = (
     "owner_identity_and_role",
     "decision_timestamp_utc",
@@ -172,6 +176,12 @@ def _recommended_owner_decision_alternate(row: dict[str, Any]) -> str:
     return "retain_quarantined_with_signed_owner_exception"
 
 
+def _allowed_owner_decisions_for_row(row: dict[str, Any]) -> tuple[str, ...]:
+    if _text(row.get("path_area")) == "release_surface":
+        return RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+    return ALLOWED_OWNER_DECISIONS
+
+
 def _review_row(row: dict[str, Any], *, manifest_paths: set[str]) -> dict[str, Any]:
     path = str(row.get("path", ""))
     quarantined = str(row.get("quarantine_status", "")) == "quarantined"
@@ -193,7 +203,7 @@ def _review_row(row: dict[str, Any], *, manifest_paths: set[str]) -> dict[str, A
         "structural_release_claim_eligible": False,
         "owner_review_state": "pending_owner_decision",
         "owner_decision_required": True,
-        "allowed_owner_decisions": list(ALLOWED_OWNER_DECISIONS),
+        "allowed_owner_decisions": list(_allowed_owner_decisions_for_row(row)),
         "recommended_owner_decision": _recommended_decision(row),
         "recommended_owner_decision_primary": _recommended_owner_decision_primary(row),
         "recommended_owner_decision_alternate": _recommended_owner_decision_alternate(row),
@@ -315,9 +325,15 @@ def _owner_decision_overlay(
         decision_row.get("signed_owner_exception_reference")
     )
     external_archive_reference = _text(decision_row.get("external_archive_reference"))
+    allowed_owner_decisions = _allowed_owner_decisions_for_row(review_row)
     missing: list[str] = []
-    if owner_decision not in ALLOWED_OWNER_DECISIONS:
+    if owner_decision not in allowed_owner_decisions:
         missing.append("per_path_decision")
+    if (
+        owner_decision == "retain_quarantined_with_signed_owner_exception"
+        and _text(review_row.get("path_area")) == "release_surface"
+    ):
+        missing.append("release_surface_retain_exception_not_allowed")
     if not owner_identity:
         missing.append("owner_identity")
     if not owner_role:
@@ -419,7 +435,13 @@ def build_owner_decision_template(
                 "recommended_owner_decision_alternate": _text(
                     row.get("recommended_owner_decision_alternate")
                 ),
-                "allowed_owner_decisions": list(ALLOWED_OWNER_DECISIONS),
+                "allowed_owner_decisions": [
+                    str(item)
+                    for item in (
+                        _as_list(row.get("allowed_owner_decisions"))
+                        or list(ALLOWED_OWNER_DECISIONS)
+                    )
+                ],
                 "owner_decision": "",
                 "owner_identity": "",
                 "owner_role": "",
@@ -483,6 +505,17 @@ def build_owner_review_packet(
             )
         )
         review_rows.append(review_row)
+    current_invalid_owner_decision_rows = [
+        row
+        for row in review_rows
+        if row.get("owner_decision") and row.get("owner_decision_valid") is False
+    ]
+    current_release_surface_retain_exception_rows = [
+        row
+        for row in current_invalid_owner_decision_rows
+        if "release_surface_retain_exception_not_allowed"
+        in _as_list(row.get("owner_decision_missing_requirements"))
+    ]
     review_paths = {row["path"] for row in review_rows}
     unquarantined_rows = [
         row
@@ -562,6 +595,16 @@ def build_owner_review_packet(
     if duplicate_decision_paths:
         decision_blockers.append(
             f"owner_decisions_duplicate_path_count={len(duplicate_decision_paths)}"
+        )
+    if current_invalid_owner_decision_rows:
+        decision_blockers.append(
+            "owner_decisions_invalid_path_count="
+            f"{len(current_invalid_owner_decision_rows)}"
+        )
+    if current_release_surface_retain_exception_rows:
+        decision_blockers.append(
+            "owner_decisions_release_surface_retain_exception_count="
+            f"{len(current_release_surface_retain_exception_rows)}"
         )
     if post_decision_cleanup_missing_owner_decision_paths:
         decision_blockers.append(
@@ -652,6 +695,16 @@ def build_owner_review_packet(
             "decision_extra_paths": external_extra_decision_paths,
             "decision_duplicate_path_count": len(duplicate_decision_paths),
             "decision_duplicate_paths": duplicate_decision_paths,
+            "decision_invalid_path_count": len(current_invalid_owner_decision_rows),
+            "decision_invalid_paths": [
+                row["path"] for row in current_invalid_owner_decision_rows
+            ],
+            "release_surface_retain_exception_path_count": len(
+                current_release_surface_retain_exception_rows
+            ),
+            "release_surface_retain_exception_paths": [
+                row["path"] for row in current_release_surface_retain_exception_rows
+            ],
             "decision_recorded_count": owner_decision_recorded_count,
             "decision_pending_count": owner_decision_pending_count,
             "post_decision_cleanup_pending_count": post_decision_cleanup_pending_count,

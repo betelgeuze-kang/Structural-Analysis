@@ -11,8 +11,7 @@
     {
       "allowed_owner_decisions": [
         "delete_from_structural_repository",
-        "extract_to_molecular_or_science_repository",
-        "retain_quarantined_with_signed_owner_exception"
+        "extract_to_molecular_or_science_repository"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
@@ -39,8 +38,7 @@
     {
       "allowed_owner_decisions": [
         "delete_from_structural_repository",
-        "extract_to_molecular_or_science_repository",
-        "retain_quarantined_with_signed_owner_exception"
+        "extract_to_molecular_or_science_repository"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
@@ -67,8 +65,7 @@
     {
       "allowed_owner_decisions": [
         "delete_from_structural_repository",
-        "extract_to_molecular_or_science_repository",
-        "retain_quarantined_with_signed_owner_exception"
+        "extract_to_molecular_or_science_repository"
       ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_timestamp_utc": "",
@@ -99,6 +96,9 @@
     "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md"
   },
   "path_area": "release_surface",
+  "path_specific_restrictions": [
+    "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface"
+  ],
   "post_batch_verification": [
     "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
     "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",

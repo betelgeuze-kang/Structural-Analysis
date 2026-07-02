@@ -59,13 +59,13 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-01T23:22:44.638863+00:00",
+  "generated_at": "2026-07-02T00:25:20.856258+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:74442161282fa31da789bd335158452591b4e32efda29ad2609de9d8446e7f05",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:80edad0f3f3c4f87f64c95e388bdbcfe945c7ac8fa77b3f001833b4eeb2e4e11",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:79d9c4a6b673e85ea5e4b73f3a6a6ffba3690e2b434d39f22b42e169b356dd2c",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:b6d7e6bd9fa121f9321f3dae4cc03fbf44cdf3d27d51a61466bf1b2b3a4bfedb"
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:7b71e228d44465d71817b2cbb0ccf15d7992c80e6bfc9a502d3bb9674ed03568",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:fab0b64fb0080c924c876fc7a30354792c1b4b5d72919f1b0409426d03edf3d9"
   },
   "next_actions": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
@@ -110,8 +110,7 @@
       {
         "allowed_owner_decisions": [
           "delete_from_structural_repository",
-          "extract_to_molecular_or_science_repository",
-          "retain_quarantined_with_signed_owner_exception"
+          "extract_to_molecular_or_science_repository"
         ],
         "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
         "decision_timestamp_utc": "",
@@ -138,8 +137,7 @@
       {
         "allowed_owner_decisions": [
           "delete_from_structural_repository",
-          "extract_to_molecular_or_science_repository",
-          "retain_quarantined_with_signed_owner_exception"
+          "extract_to_molecular_or_science_repository"
         ],
         "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
         "decision_timestamp_utc": "",
@@ -166,8 +164,7 @@
       {
         "allowed_owner_decisions": [
           "delete_from_structural_repository",
-          "extract_to_molecular_or_science_repository",
-          "retain_quarantined_with_signed_owner_exception"
+          "extract_to_molecular_or_science_repository"
         ],
         "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
         "decision_timestamp_utc": "",
@@ -198,6 +195,9 @@
       "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md"
     },
     "path_area": "release_surface",
+    "path_specific_restrictions": [
+      "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface"
+    ],
     "post_batch_verification": [
       "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
       "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
@@ -447,6 +447,11 @@
   },
   "pending_owner_decision_rows": [
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -475,6 +480,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -503,6 +513,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -531,6 +546,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -559,6 +579,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -587,6 +612,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -615,6 +645,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -643,6 +678,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -671,6 +711,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -699,6 +744,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -727,6 +777,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -755,6 +810,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -783,6 +843,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -811,6 +876,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -839,6 +909,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -867,6 +942,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -895,6 +975,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -923,6 +1008,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -951,6 +1041,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -979,6 +1074,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1007,6 +1107,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1036,6 +1141,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1064,6 +1174,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1092,6 +1207,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1120,6 +1240,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1148,6 +1273,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1176,6 +1306,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1204,6 +1339,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1232,6 +1372,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1260,6 +1405,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1288,6 +1438,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1316,6 +1471,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1346,6 +1506,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1376,6 +1541,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1406,6 +1576,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1434,6 +1609,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1462,6 +1642,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1490,6 +1675,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1518,6 +1708,10 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1546,6 +1740,10 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1574,6 +1772,10 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1602,6 +1804,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1630,6 +1837,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1658,6 +1870,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1686,6 +1903,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1714,6 +1936,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1742,6 +1969,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1770,6 +2002,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1798,6 +2035,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1826,6 +2068,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1854,6 +2101,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1882,6 +2134,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1910,6 +2167,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1938,6 +2200,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1966,6 +2233,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -1994,6 +2266,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2022,6 +2299,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2050,6 +2332,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2078,6 +2365,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2106,6 +2398,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2134,6 +2431,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2163,6 +2465,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2191,6 +2498,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2221,6 +2533,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2249,6 +2566,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2278,6 +2600,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2306,6 +2633,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2334,6 +2666,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2362,6 +2699,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2390,6 +2732,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2418,6 +2765,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2446,6 +2798,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2474,6 +2831,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2502,6 +2864,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2530,6 +2897,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2558,6 +2930,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2586,6 +2963,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2614,6 +2996,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2642,6 +3029,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2670,6 +3062,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2699,6 +3096,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2727,6 +3129,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2757,6 +3164,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2785,6 +3197,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2814,6 +3231,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2842,6 +3264,11 @@
       "signed_owner_exception_reference": ""
     },
     {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
       "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
       "decision_evidence_reference": "",
       "external_archive_reference": "",
@@ -2893,7 +3320,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "ea3faac9e125d01905db0fbe7166fd21d83520bb",
+  "source_commit_sha": "2a780810f6a9e34e72f554ac48d7e7c0dd4f75e5",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
