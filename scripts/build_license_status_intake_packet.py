@@ -16,6 +16,8 @@ DEFAULT_TEMPLATE = Path("docs/templates/license_status.template.json")
 DEFAULT_CLOSURE_REPORT = Path("implementation/phase1/release_evidence/productization/license_status_closure_report.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/license_status_intake_packet.json")
 DEFAULT_OUT_MD = Path("implementation/phase1/release_evidence/productization/license_status_intake_packet.md")
+DEFAULT_PM_RELEASE_GATE_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
+DEFAULT_PRODUCT_READINESS_SNAPSHOT = Path("implementation/phase1/release_evidence/productization/product_readiness_snapshot.json")
 
 
 FIELD_SPECS = (
@@ -161,6 +163,17 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _deduped(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if not item or item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
+
+
 def _first_value(payload: dict[str, Any], keys: list[str]) -> Any:
     for key in keys:
         if key in payload:
@@ -297,6 +310,24 @@ def build_packet(
 
     placeholder_absent = bool(closure_checks.get("placeholder_values_absent_pass", False))
     contract_pass = bool(closure.get("contract_pass", False))
+    current_blockers = [str(blocker) for blocker in closure_blockers]
+    release_area_blocker_ids = [
+        "pm_release::security::license_status_not_configured"
+    ] if not contract_pass else []
+    blocker_ids = _deduped(
+        [
+            *release_area_blocker_ids,
+            *[f"license::{blocker}" for blocker in current_blockers],
+        ]
+    )
+    evidence_intake_artifacts = [
+        str(license_status_path),
+        str(template_path),
+        str(closure_report_path),
+        str(DEFAULT_OUT),
+        str(DEFAULT_PM_RELEASE_GATE_REPORT),
+        str(DEFAULT_PRODUCT_READINESS_SNAPSHOT),
+    ]
     validation_commands = [
         f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_CLOSURE_REPORT}",
         f"python3 scripts/build_license_status_intake_packet.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
@@ -322,9 +353,31 @@ def build_packet(
         "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED",
+        "release_area": "security",
+        "release_area_blocker_ids": release_area_blocker_ids,
+        "blocker_ids": blocker_ids,
+        "blocker_id_count": len(blocker_ids),
         "license_status_path": str(license_status_path),
         "template_path": str(template_path),
         "closure_report_path": str(closure_report_path),
+        "evidence_intake_artifacts": evidence_intake_artifacts,
+        "evidence_intake_artifact_count": len(evidence_intake_artifacts),
+        "approval_evidence_policy": {
+            "accepted_evidence_ref_kinds": [
+                "ticket:<id>",
+                "jira:<id>",
+                "legal:<id>",
+                "docusign:<id>",
+                "https URL",
+                "existing local evidence path",
+            ],
+            "rejected_evidence_refs": [
+                "license_status.json self-reference",
+                "docs/templates or .template artifacts",
+                "generated PM/license/readiness gate artifacts",
+                "placeholder values such as OWNER_INPUT_REQUIRED or EVIDENCE-REF",
+            ],
+        },
         "summary_line": (
             f"License status intake: {'PASS' if contract_pass else 'BLOCKED'} | "
             f"fields={sum(1 for row in rows if row['closure_check_pass'])}/{len(rows)} | "
@@ -343,13 +396,15 @@ def build_packet(
             "field_count": len(rows),
             "field_pass_count": sum(1 for row in rows if row["closure_check_pass"]),
             "provenance_complete_pass": bool(closure_checks.get("provenance_complete_pass", False)),
+            "blocker_id_count": len(blocker_ids),
+            "evidence_intake_artifact_count": len(evidence_intake_artifacts),
         },
         "claim_boundary": (
             "This intake packet is an owner handoff checklist. It does not create legal approval and "
             "does not make the PM security release area pass until the closure report passes."
         ),
         "field_rows": rows,
-        "current_blockers": [str(blocker) for blocker in closure_blockers],
+        "current_blockers": current_blockers,
         "gate_unblock_plan": gate_unblock_plan,
         "gate_unblock_plan_count": len(gate_unblock_plan),
         "next_actions": _next_actions(contract_pass),
@@ -369,6 +424,9 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `gate_unblock_plan_count`: `{payload['gate_unblock_plan_count']}`",
         f"- `reason_code`: `{payload['reason_code']}`",
+        f"- `release_area`: `{payload['release_area']}`",
+        f"- `blocker_id_count`: `{payload['blocker_id_count']}`",
+        f"- `evidence_intake_artifact_count`: `{payload['evidence_intake_artifact_count']}`",
         f"- `license_status_path`: `{payload['license_status_path']}`",
         f"- `template_path`: `{payload['template_path']}`",
         f"- `owner_action`: {payload['summary']['owner_action']}",
@@ -387,6 +445,24 @@ def _markdown(payload: dict[str, Any]) -> str:
             lines.append(f"- `{cell(row.get('slot_id', ''))}`")
             for item in row.get("minimum_evidence", []):
                 lines.append(f"  - {cell(item)}")
+    lines.extend(["", "## Blocker IDs", ""])
+    if payload["blocker_ids"]:
+        lines.extend(f"- `{cell(item)}`" for item in payload["blocker_ids"])
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Evidence Intake Artifacts", ""])
+    for artifact in payload["evidence_intake_artifacts"]:
+        lines.append(f"- `{cell(artifact)}`")
+    policy = payload.get("approval_evidence_policy")
+    policy = policy if isinstance(policy, dict) else {}
+    lines.extend(["", "## Approval Evidence Policy", ""])
+    lines.append("Accepted evidence references:")
+    for item in policy.get("accepted_evidence_ref_kinds", []):
+        lines.append(f"- {cell(item)}")
+    lines.append("")
+    lines.append("Rejected substitutes:")
+    for item in policy.get("rejected_evidence_refs", []):
+        lines.append(f"- {cell(item)}")
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:
         lines.append(f"- `{command}`")
