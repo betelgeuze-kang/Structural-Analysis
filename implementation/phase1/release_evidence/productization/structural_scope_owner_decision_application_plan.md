@@ -25,6 +25,16 @@
 - `next_owner_review_batch`: `release_surface_first` paths=`3` area=`release_surface`
 - `owner_review_priority_batches`: `5`
 
+## Release Surface First Batch Intake
+
+- `status`: `pending_owner_decisions`
+- `ready_for_manual_cleanup_application`: `False`
+- `expected_path_count`: `3`
+- `valid_cleanup_decision_count`: `0`
+- `pending_decision_count`: `3`
+- `pending_release_surface_owner_decision_count=3`
+- `release_surface_cleanup_decision_count_below_expected=0/3`
+
 ## Next Batch Decision Template
 
 - `batch_id`: `release_surface_first`

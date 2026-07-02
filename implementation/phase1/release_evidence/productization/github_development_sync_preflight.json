@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-02T00:46:21.732950+00:00",
+  "generated_at": "2026-07-02T00:56:19.500860+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -33,27 +33,27 @@
   "receipt_commit_boundary": {
     "claim_boundary": "This receipt records GitHub sync state at source_commit_sha. A later commit that only refreshes productization/surface evidence can remain fresh in the PM gate as an evidence-only delta; any source-code or non-evidence delta must regenerate this preflight before claiming GitHub sync release credit.",
     "post_receipt_commit_delta_policy": "productization_or_surface_receipts_only",
-    "source_commit_sha": "f18b7c67dc5357e49ba6a524b8afed02067f3655"
+    "source_commit_sha": "1e464e6d7c443839b70457d79b1f2a3a47a4de94"
   },
   "remote_fetch_attempted": false,
   "remote_fetch_ok": null,
   "remote_mutation_approved": false,
   "remote_sync_needed": false,
   "schema_version": "github-development-sync-preflight.v1",
-  "source_commit_sha": "f18b7c67dc5357e49ba6a524b8afed02067f3655",
+  "source_commit_sha": "1e464e6d7c443839b70457d79b1f2a3a47a4de94",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-    "local_head_sha": "f18b7c67dc5357e49ba6a524b8afed02067f3655",
+    "ignored_worktree_status_short": "M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
+    "local_head_sha": "1e464e6d7c443839b70457d79b1f2a3a47a4de94",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "f18b7c67dc5357e49ba6a524b8afed02067f3655",
+    "remote_feature_sha": "1e464e6d7c443839b70457d79b1f2a3a47a4de94",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "f18b7c67dc5357e49ba6a524b8afed02067f3655",
+    "remote_main_sha": "1e464e6d7c443839b70457d79b1f2a3a47a4de94",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -64,7 +64,7 @@
         ]
       }
     },
-    "worktree_status_short": "M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json\n M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md"
   },
   "status": "synced"
 }

@@ -82,12 +82,12 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T00:35:29.340371+00:00",
+  "generated_at": "2026-07-02T00:56:19.429705+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:74442161282fa31da789bd335158452591b4e32efda29ad2609de9d8446e7f05",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:80edad0f3f3c4f87f64c95e388bdbcfe945c7ac8fa77b3f001833b4eeb2e4e11",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:13df7be9bf79049b1c1c89e756d0b251d83812c6083f928fd535ac2c20b337cf",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:47c12ca0c9f4ef782b362d0b53988a459bc25a4728d587c06bdeb10f6487bf82",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:c51e3c4e6ed276fb6167124fb9a1d677fef8ebe93c52a8f5a3fb0fe1e18a0df5"
   },
   "next_actions": [
@@ -3331,6 +3331,104 @@
   "release_surface_cleanup_paths": [],
   "release_surface_cleanup_required_count": 0,
   "release_surface_excluded_path_count": 86,
+  "release_surface_first_batch_blockers": [
+    "pending_release_surface_owner_decision_count=3",
+    "release_surface_cleanup_decision_count_below_expected=0/3"
+  ],
+  "release_surface_first_batch_decision_intake": {
+    "batch_id": "release_surface_first",
+    "blockers": [
+      "pending_release_surface_owner_decision_count=3",
+      "release_surface_cleanup_decision_count_below_expected=0/3"
+    ],
+    "claim_boundary": "This release-surface-first intake is non-mutating. It only tracks whether every non-structural release-surface path has a valid owner delete/extract decision before a human applies cleanup.",
+    "decision_rows": [
+      {
+        "allowed_owner_decisions": [
+          "delete_from_structural_repository",
+          "extract_to_molecular_or_science_repository"
+        ],
+        "owner_decision": "",
+        "owner_decision_missing_requirements": [
+          "owner_identity_and_role",
+          "decision_timestamp_utc",
+          "per_path_decision",
+          "evidence_reference",
+          "external_archive_reference_for_extract_decisions",
+          "signed_owner_exception_reference_for_retain_decisions",
+          "post_decision_structural_scope_audit"
+        ],
+        "owner_decision_valid": false,
+        "owner_review_state": "pending_owner_decision",
+        "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "required_action": "owner_decision_required"
+      },
+      {
+        "allowed_owner_decisions": [
+          "delete_from_structural_repository",
+          "extract_to_molecular_or_science_repository"
+        ],
+        "owner_decision": "",
+        "owner_decision_missing_requirements": [
+          "owner_identity_and_role",
+          "decision_timestamp_utc",
+          "per_path_decision",
+          "evidence_reference",
+          "external_archive_reference_for_extract_decisions",
+          "signed_owner_exception_reference_for_retain_decisions",
+          "post_decision_structural_scope_audit"
+        ],
+        "owner_decision_valid": false,
+        "owner_review_state": "pending_owner_decision",
+        "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "required_action": "owner_decision_required"
+      },
+      {
+        "allowed_owner_decisions": [
+          "delete_from_structural_repository",
+          "extract_to_molecular_or_science_repository"
+        ],
+        "owner_decision": "",
+        "owner_decision_missing_requirements": [
+          "owner_identity_and_role",
+          "decision_timestamp_utc",
+          "per_path_decision",
+          "evidence_reference",
+          "external_archive_reference_for_extract_decisions",
+          "signed_owner_exception_reference_for_retain_decisions",
+          "post_decision_structural_scope_audit"
+        ],
+        "owner_decision_valid": false,
+        "owner_review_state": "pending_owner_decision",
+        "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "required_action": "owner_decision_required"
+      }
+    ],
+    "delete_decision_count": 0,
+    "expected_path_count": 3,
+    "expected_paths": [
+      "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+    ],
+    "extract_decision_count": 0,
+    "invalid_submitted_decision_count": 0,
+    "invalid_submitted_decision_paths": [],
+    "pending_decision_count": 3,
+    "pending_decision_paths": [
+      "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+    ],
+    "ready_for_manual_cleanup_application": false,
+    "retain_exception_count": 0,
+    "schema_version": "structural-scope-release-surface-first-batch-decision-intake.v1",
+    "status": "pending_owner_decisions",
+    "submitted_decision_count": 0,
+    "valid_cleanup_decision_count": 0,
+    "valid_decision_count": 0
+  },
+  "release_surface_first_batch_ready": false,
   "release_surface_owner_decision_required_count": 3,
   "release_surface_owner_decision_required_paths": [
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3343,7 +3441,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "ea3944e75de6a6f51a688e5500f395d7a804d039",
+  "source_commit_sha": "1e464e6d7c443839b70457d79b1f2a3a47a4de94",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
