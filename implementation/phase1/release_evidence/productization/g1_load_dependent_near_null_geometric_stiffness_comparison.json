@@ -1,25 +1,24 @@
 {
-  "blockers": [
-    "load_dependent_near_null_packet_missing:0.2",
-    "load_dependent_near_null_packet_missing:0.4"
-  ],
+  "blockers": [],
   "claim_boundary": "This receipt compares non-promoting F2h load-response trends and optional load-dependent near-null packets. It does not close G1, prove full-load 1.0, or replace the consistent residual/Jacobian Newton and production ROCm/HIP gates.",
-  "contract_pass": false,
+  "contract_pass": true,
   "disallowed_promotions": [
     "no_G1_closure_claim",
     "no_full_load_1p0_claim",
     "no_modal_claim_without_0p2_0p4_near_null_packets",
+    "no_modal_claim_without_validated_near_null_packet_schema",
     "no_geometric_softening_promotion_without_consistent_newton_gate"
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T18:21:25.747632+00:00",
+  "generated_at": "2026-07-02T18:42:33.693265+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
     "implementation/phase1/release_evidence/productization/f2h_lightweight_pdelta_0p1_0p2_0p4.local.json": "sha256:8b9516fe2c04a8b3a9256007d65e360a514897a625d6b8ee4fa2cbea50977030",
-    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_0p2.local.json": "missing",
-    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_0p4.local.json": "missing",
+    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_0p2.local.json": "sha256:78047c96db8fb4e1ae532e85592a279efd0b5ce5fb779c43897d4a168c222bd0",
+    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_0p4.local.json": "sha256:973f9a5b167797f3afca60ecec05c6f8955a83080b3c278a972bc86fed24f068",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:8b437a017f328f541ca1a99edc6ff3302ea02cefed1dced8c9d2f62f4111645c",
-    "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py": "sha256:c1c0143bfd399809b6e1c3225835fd266ec0660bc8781c32ed19991495e4eaa2"
+    "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py": "sha256:8f554e427526ab3a776900d9b59177cbba2dd8fcb9f335748a2250b2de888e6d",
+    "scripts/build_g1_load_dependent_near_null_packet.py": "sha256:b658137a470e7fa5b9965dc96b170607da910d7ed1e4b13f8db8112167738b06"
   },
   "load_response_rows": [
     {
@@ -95,19 +94,72 @@
     }
   ],
   "near_null_comparison": {
+    "0p2_to_0p4_node_overlap": {
+      "jaccard": 1.0,
+      "left_count": 8,
+      "right_count": 8,
+      "shared_count": 8
+    },
     "baseline_dominant_dof_row_count": 64,
     "baseline_dominant_node_count": 8,
     "baseline_load_scale": 0.1,
     "baseline_near_null_mode_count": 8,
-    "claim_boundary": "A load-response trend is not a load-dependent modal comparison. Near-null packet comparison remains blocked until 0.2 and 0.4 packets are attached.",
-    "comparison_ready": false,
+    "baseline_to_0p2_node_overlap": {
+      "jaccard": 1.0,
+      "left_count": 8,
+      "right_count": 8,
+      "shared_count": 8
+    },
+    "baseline_to_0p4_node_overlap": {
+      "jaccard": 1.0,
+      "left_count": 8,
+      "right_count": 8,
+      "shared_count": 8
+    },
+    "claim_boundary": "A load-response trend is not a load-dependent modal comparison. Near-null packet comparison remains blocked until validated 0.2 and 0.4 packets with the expected schema, load scale, mode count, and dominant rows are attached.",
+    "comparison_ready": true,
+    "expected_packet_schema_version": "g1-load-dependent-near-null-packet.v1",
     "packet_summaries": {
       "0.2": {
-        "status": "missing"
+        "contract_pass": true,
+        "dominant_dof_row_count": 64,
+        "dominant_node_ids": [
+          2274,
+          2276,
+          2285,
+          2286,
+          7783,
+          7785,
+          7793,
+          7795
+        ],
+        "load_scale": 0.2,
+        "near_null_mode_count": 8,
+        "schema_version": "g1-load-dependent-near-null-packet.v1",
+        "status": "ready"
       },
       "0.4": {
-        "status": "missing"
+        "contract_pass": true,
+        "dominant_dof_row_count": 64,
+        "dominant_node_ids": [
+          2274,
+          2276,
+          2285,
+          2286,
+          7783,
+          7785,
+          7793,
+          7795
+        ],
+        "load_scale": 0.4,
+        "near_null_mode_count": 8,
+        "schema_version": "g1-load-dependent-near-null-packet.v1",
+        "status": "ready"
       }
+    },
+    "packet_validation_blockers": {
+      "0.2": [],
+      "0.4": []
     },
     "requested_packet_loads": [
       0.2,
@@ -121,7 +173,7 @@
         "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_0p2.local.json",
         "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_0p4.local.json"
       ],
-      "status": "required"
+      "status": "complete"
     },
     {
       "acceptance": [
@@ -130,7 +182,7 @@
         "comparison remains non-promoting unless full-load G1 gates close separately"
       ],
       "id": "compare_geometric_stiffness_contributions_at_0p2_0p4",
-      "status": "blocked_until_near_null_packets_ready"
+      "status": "ready"
     },
     {
       "id": "continue_consistent_residual_jacobian_newton_rocm_worker_lane",
@@ -138,26 +190,27 @@
     }
   ],
   "promotes_g1_closure": false,
-  "reason_code": "ERR_LOAD_DEPENDENT_NEAR_NULL_COMPARISON_INCOMPLETE",
+  "reason_code": "PASS",
   "reuse_policy": "non_promoting_f2h_load_response_and_optional_near_null_packets",
   "reused_evidence": true,
   "root_cause_signal_update": {
-    "load_dependent_near_null_comparison": "blocked_missing_0p2_0p4_packets",
+    "load_dependent_near_null_comparison": "ready",
     "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
     "support_or_elastic_link_row_gap": "deprioritized_by_f2g_audit",
     "weak_restraint_or_geometric_softening": "active_secondary"
   },
   "schema_version": "g1-load-dependent-near-null-geometric-stiffness-comparison.v1",
-  "source_commit_sha": "0ce1036034a7a6cc9a68991ebf1f9693a7218c6a",
-  "status": "blocked",
+  "source_commit_sha": "4ccb9ac800c4f5cc60cc46328ec9bf3c1bd8cc40",
+  "status": "ready",
   "summary": {
-    "blocker_count": 2,
+    "blocker_count": 0,
     "geometric_softening_signal": "active_secondary",
+    "invalid_near_null_packet_count": 0,
     "load_response_ready": true,
     "missing_load_count": 0,
-    "missing_near_null_packet_count": 2,
-    "near_null_packet_comparison_ready": false,
+    "missing_near_null_packet_count": 0,
+    "near_null_packet_comparison_ready": true,
     "superlinear_segment_count": 3
   },
-  "summary_line": "G1 load-dependent near-null/geometric-softening comparison: BLOCKED | load_response_ready=True | near_null_packets_ready=False | geometric_softening_signal=active_secondary"
+  "summary_line": "G1 load-dependent near-null/geometric-softening comparison: READY | load_response_ready=True | near_null_packets_ready=True | geometric_softening_signal=active_secondary"
 }

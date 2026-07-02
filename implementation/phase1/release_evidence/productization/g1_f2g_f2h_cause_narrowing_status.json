@@ -30,7 +30,7 @@
         "near-null packet is distributed translation/rotation-like",
         "F2h 0.1->0.2->0.4 status=ready",
         "residual_trend=nondecreasing",
-        "load_dependent_comparison_status=blocked",
+        "load_dependent_comparison_status=ready",
         "load_dependent_geometric_softening_signal=active_secondary"
       ],
       "hypothesis": "weak_restraint_or_geometric_softening",
@@ -171,8 +171,8 @@
     ],
     "global_frame_shell_tangent_integration_ready": false,
     "load_dependent_geometric_softening_signal": "active_secondary",
-    "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
-    "load_dependent_near_null_packet_comparison_ready": false,
+    "load_dependent_near_null_geometric_stiffness_comparison_status": "ready",
+    "load_dependent_near_null_packet_comparison_ready": true,
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "solver_hip_e2e_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
     "solver_hip_e2e_status": "blocked",
@@ -213,7 +213,7 @@
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
   ],
-  "generated_at": "2026-07-02T18:25:13.674571+00:00",
+  "generated_at": "2026-07-02T18:42:56.547954+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -244,7 +244,7 @@
         "near-null packet is distributed translation/rotation-like",
         "F2h 0.1->0.2->0.4 status=ready",
         "residual_trend=nondecreasing",
-        "load_dependent_comparison_status=blocked",
+        "load_dependent_comparison_status=ready",
         "load_dependent_geometric_softening_signal=active_secondary"
       ],
       "hypothesis": "weak_restraint_or_geometric_softening",
@@ -298,7 +298,7 @@
     "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:2efc4e10b27a897504b74e38d6d426b1e085fe58dfe3a1bd0275916d6437a85b",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:11389f3ef0058f6a862e08b5b6277e46c12d5831c8e1e84ce6c6620d5720720d",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:0c518c7e3678c0a5526bb67dbc1ae348c402cfeb0160a063453cb336b7375d14",
-    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:ca58151d432993bb1851ff196a45a55c3dd80b6fe38b306b863cdf9a2fbdc7c2",
+    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:9d571a56792968bd7bc53c9ac2f5b42eb23adff6507473e75504e5cfdc4c1a61",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:8b437a017f328f541ca1a99edc6ff3302ea02cefed1dced8c9d2f62f4111645c",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:fff3f1e0393a6dde86c0ea737f7e51fc95fd41c82f8513656378323c964f3376",
     "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:d29d0d37a3f84ab027144a3998b9a3a451e2e350e1e8be4fc26397b7315b34b9"
@@ -386,7 +386,7 @@
       "action_id": "compare_load_dependent_near_null_and_geometric_stiffness",
       "priority": 3,
       "rationale": "Residuals are nondecreasing over 0.1->0.2->0.4, so weak-restraint/geometric softening remains an active secondary diagnostic instead of a closure claim.",
-      "status": "blocked_missing_load_dependent_near_null_packets"
+      "status": "ready"
     },
     {
       "acceptance_evidence": [
@@ -459,8 +459,8 @@
     ],
     "global_frame_shell_tangent_integration_ready": false,
     "load_dependent_geometric_softening_signal": "active_secondary",
-    "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
-    "load_dependent_near_null_packet_comparison_ready": false,
+    "load_dependent_near_null_geometric_stiffness_comparison_status": "ready",
+    "load_dependent_near_null_packet_comparison_ready": true,
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "solver_hip_e2e_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
     "solver_hip_e2e_status": "blocked",
@@ -476,7 +476,7 @@
     "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "089d775d5dacf4f6d8cad4dcf4d2785c13d0d632",
+  "source_commit_sha": "4ccb9ac800c4f5cc60cc46328ec9bf3c1bd8cc40",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
@@ -490,8 +490,8 @@
     "g1_closure_blocker_id_count": 22,
     "global_frame_shell_tangent_integration_ready": false,
     "load_dependent_geometric_softening_signal": "active_secondary",
-    "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
-    "load_dependent_near_null_packet_comparison_ready": false,
+    "load_dependent_near_null_geometric_stiffness_comparison_status": "ready",
+    "load_dependent_near_null_packet_comparison_ready": true,
     "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
     "promotes_g1_closure": false,
     "required_next_receipt_count": 2,
