@@ -26,6 +26,8 @@ REQUIRED_FIELDS = [
     "challenge_echo",
 ]
 
+DEFAULT_PRODUCER_CMD = f"{sys.executable} implementation/phase1/engine_hook_stub.py"
+
 
 def _run_json_cmd(command: str, payload: dict) -> dict:
     proc = subprocess.run(
@@ -121,7 +123,7 @@ def run(producer_cmd: str, require_rust_hip: bool, allow_cpu_required: bool, gpu
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--producer-cmd", default=f"{sys.executable} implementation/phase1/rust_hip_md3bead_hook.py")
+    p.add_argument("--producer-cmd", default=DEFAULT_PRODUCER_CMD)
     p.add_argument("--require-rust-hip", action="store_true")
     p.add_argument("--allow-cpu-required", action="store_true")
     p.add_argument("--gpu-strict", action="store_true")

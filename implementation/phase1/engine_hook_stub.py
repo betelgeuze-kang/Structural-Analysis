@@ -55,9 +55,10 @@ def handle_step5(payload: dict) -> dict:
     }
 
 
-def handle_dlpack_probe() -> dict:
+def handle_dlpack_probe(payload: dict) -> dict:
     return {
         "producer_kind": "stub",
+        "runtime_backend": "structural_engine_stub",
         "roundtrip_success": True,
         "shared_storage": True,
         "host_copy_bytes": 0,
@@ -66,6 +67,7 @@ def handle_dlpack_probe() -> dict:
         "dtype": "float32",
         "strides": [64, 1],
         "byte_offset": 0,
+        "challenge_echo": payload.get("challenge"),
     }
 
 
@@ -89,7 +91,7 @@ def main() -> None:
     elif action == "step5_profile":
         res = handle_step5(payload)
     elif action == "dlpack_bridge_probe":
-        res = handle_dlpack_probe()
+        res = handle_dlpack_probe(payload)
     elif action == "av_operator":
         res = handle_av_operator(payload)
     else:
