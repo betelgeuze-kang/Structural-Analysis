@@ -1,13 +1,13 @@
 {
   "blockers": [
     "owner_decision_pending_count=86",
-    "blocking_cleanup_reference_path_count=65"
+    "blocking_cleanup_reference_path_count=64"
   ],
-  "blocking_cleanup_reference_path_count": 65,
+  "blocking_cleanup_reference_path_count": 64,
   "blocking_reference_cleanup_action_counts": {
     "delete_or_extract_molecular_script_or_remove_quarantined_path_refs": 9,
     "delete_or_extract_molecular_tests_or_update_scope_guard_tests": 12,
-    "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts": 42,
+    "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts": 41,
     "remove_non_structural_scope_ignore_or_metadata_reference": 1,
     "rewrite_structural_docs_to_scope_boundary_only": 1
   },
@@ -15,15 +15,15 @@
   "blocking_reference_cleanup_batches": [
     {
       "batch_id": "cleanup_refs_02_implementation_runtime_or_manifest_reference",
-      "matched_quarantined_path_count": 127,
+      "matched_quarantined_path_count": 122,
       "matched_scope_tokens": [
         "md3bead"
       ],
       "owner_decision_dependency_counts": {
-        "owner_delete_extract_decision_then_reference_cleanup": 38,
+        "owner_delete_extract_decision_then_reference_cleanup": 37,
         "scope_token_review_before_cleanup": 4
       },
-      "path_count": 42,
+      "path_count": 41,
       "paths": [
         "implementation/phase1/README.md",
         "implementation/phase1/ci-gate-reason-codebook.md",
@@ -65,7 +65,6 @@
         "implementation/phase1/winning_ticket_backprop.py",
         "implementation/phase1/winning_ticket_backprop_report.json",
         "implementation/phase1/zero_copy_real_probe.py",
-        "implementation/phase1/zero_copy_real_probe_report.forbidden.json",
         "implementation/phase1/zero_copy_real_probe_report_strict.json"
       ],
       "post_cleanup_verification": [
@@ -217,7 +216,7 @@
   ],
   "blocking_reference_role_counts": {
     "documentation_reference": 1,
-    "implementation_runtime_or_manifest_reference": 42,
+    "implementation_runtime_or_manifest_reference": 41,
     "other_reference": 1,
     "script_reference": 9,
     "test_reference": 12
@@ -1268,33 +1267,6 @@
         "rust_hip_md3bead_hook.py"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/zero_copy_real_probe_report.forbidden.json",
-      "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
-      "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2,
-      "release_freshness_source_boundary": false
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "cleanup_requires_release_receipt_refresh": false,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 3,
-      "matched_terms": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "rust_hip_md3bead_hook",
-        "rust_hip_md3bead_hook.py"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/zero_copy_real_probe_report_strict.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
@@ -2093,7 +2065,7 @@
   "cleanup_impact_clear": false,
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T09:22:44.359239+00:00",
+  "generated_at": "2026-07-02T09:25:44.755399+00:00",
   "governance_reference_path_count": 49,
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:e22085fff573457d46d0d9fa78facb24a84c3c18dbbd3e27df491a60c7863568",
@@ -2107,15 +2079,15 @@
   ],
   "next_reference_cleanup_batch": {
     "batch_id": "cleanup_refs_02_implementation_runtime_or_manifest_reference",
-    "matched_quarantined_path_count": 127,
+    "matched_quarantined_path_count": 122,
     "matched_scope_tokens": [
       "md3bead"
     ],
     "owner_decision_dependency_counts": {
-      "owner_delete_extract_decision_then_reference_cleanup": 38,
+      "owner_delete_extract_decision_then_reference_cleanup": 37,
       "scope_token_review_before_cleanup": 4
     },
-    "path_count": 42,
+    "path_count": 41,
     "paths": [
       "implementation/phase1/README.md",
       "implementation/phase1/ci-gate-reason-codebook.md",
@@ -2157,7 +2129,6 @@
       "implementation/phase1/winning_ticket_backprop.py",
       "implementation/phase1/winning_ticket_backprop_report.json",
       "implementation/phase1/zero_copy_real_probe.py",
-      "implementation/phase1/zero_copy_real_probe_report.forbidden.json",
       "implementation/phase1/zero_copy_real_probe_report_strict.json"
     ],
     "post_cleanup_verification": [
@@ -2177,10 +2148,10 @@
   "owner_decision_pending_count": 86,
   "owner_review_packet": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
   "quarantined_path_count": 86,
-  "reference_path_count": 114,
+  "reference_path_count": 113,
   "reference_role_counts": {
     "documentation_reference": 1,
-    "implementation_runtime_or_manifest_reference": 42,
+    "implementation_runtime_or_manifest_reference": 41,
     "other_reference": 1,
     "release_governance_reference": 19,
     "scope_governance_reference": 30,
@@ -5301,33 +5272,6 @@
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/zero_copy_real_probe.py",
-      "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
-      "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2,
-      "release_freshness_source_boundary": false
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "cleanup_requires_release_receipt_refresh": false,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 3,
-      "matched_terms": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "rust_hip_md3bead_hook",
-        "rust_hip_md3bead_hook.py"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/zero_copy_real_probe_report.forbidden.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
       "reference_role_priority": 2,
@@ -9415,7 +9359,7 @@
   "reuse_policy": "structural_scope_cleanup_impact_report_from_owner_review_and_tracked_references",
   "reused_evidence": false,
   "schema_version": "structural-scope-cleanup-impact-report.v1",
-  "source_commit_sha": "6d7da7697ee093074398cc311f4e9e0ad24c981b",
+  "source_commit_sha": "9022a385b698ab089ec65b6eb5ccc2b769b26be5",
   "status": "blocked_cleanup_impact",
-  "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=114 | blocking=65 | owner_pending=86"
+  "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=113 | blocking=64 | owner_pending=86"
 }
