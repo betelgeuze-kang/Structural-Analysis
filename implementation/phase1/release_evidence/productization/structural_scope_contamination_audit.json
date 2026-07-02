@@ -10,12 +10,12 @@
   },
   "first_non_structural_path": "implementation/phase1/md3bead_scientific_validity_report.md",
   "first_unquarantined_non_structural_path": "",
-  "generated_at": "2026-07-02T04:18:03.017254+00:00",
+  "generated_at": "2026-07-02T04:23:47.462548+00:00",
   "git_state_counts": {
     "tracked": 86
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:1b7d9fbd50133caf89431683199bbca27628edcd48016c214c7c8f79976e4b75",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:50a79c0d9c4d6d30f0793310c638b7d67ef23c3db34b2c8ab30a3a2a1c339b2b",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:826c36a8adcd4325d2d4389800e65dddf2739a13c4273d69cf50233869f4e7aa",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
@@ -2886,7 +2886,7 @@
   "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths_with_release_surface_quarantine_manifest",
   "reused_evidence": false,
   "schema_version": "structural-scope-contamination-audit.v1",
-  "source_commit_sha": "37d607686367766e414a93511ff1a7ad11d3e52f",
+  "source_commit_sha": "f5cb904005cd0619321a2f6537f9ddabbf73556f",
   "status": "quarantined",
   "tracked_path_count": 5749,
   "unquarantined_family_counts": {},
