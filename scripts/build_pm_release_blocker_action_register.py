@@ -1219,6 +1219,9 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
         runner_matches = bool(row.get("fresh_validation_receipt_runner_matches", False))
         contract_pass = bool(row.get("fresh_validation_receipt_contract_pass", False))
         validator_blockers = list(row.get("fresh_validation_receipt_blockers", []))
+        result_present = bool(row.get("fresh_validation_result_present", False))
+        result_contract_pass = row.get("fresh_validation_result_contract_pass")
+        result_failed = bool(result_present and result_contract_pass is False)
         if not present:
             state = "fresh_validation_receipt_missing"
         elif not fresh:
@@ -1229,6 +1232,8 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             state = "fresh_validation_receipt_runner_mismatch"
         elif not contract_pass:
             state = "fresh_validation_receipt_invalid"
+        elif result_failed:
+            state = "fresh_validation_result_failed"
         else:
             state = "ready_for_pm_regeneration"
         return {
@@ -1242,6 +1247,24 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "fresh_validation_receipt_runner_matches": runner_matches,
             "fresh_validation_receipt_contract_pass": contract_pass,
             "fresh_validation_receipt_blockers": validator_blockers,
+            "fresh_validation_result": str(row.get("fresh_validation_result", "") or ""),
+            "fresh_validation_result_present": result_present,
+            "fresh_validation_result_contract_pass": result_contract_pass,
+            "fresh_validation_result_reason_code": str(
+                row.get("fresh_validation_result_reason_code", "") or ""
+            ),
+            "fresh_validation_result_blockers": list(
+                row.get("fresh_validation_result_blockers", [])
+            ),
+            "fresh_validation_result_command_returncode": row.get(
+                "fresh_validation_result_command_returncode"
+            ),
+            "fresh_validation_result_tail_reason_codes": list(
+                row.get("fresh_validation_result_tail_reason_codes", [])
+            ),
+            "fresh_validation_result_latest_tail_reason_code": str(
+                row.get("fresh_validation_result_latest_tail_reason_code", "") or ""
+            ),
             "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
             "source_policy": "fresh_lane_execution_required",
         }

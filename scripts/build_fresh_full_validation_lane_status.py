@@ -128,6 +128,14 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
 def _read_docs(paths: tuple[Path, ...]) -> str:
     chunks = []
     for path in paths:
@@ -281,6 +289,56 @@ def _receipt_artifact_integrity_blockers(
     return list(_receipt_artifact_integrity_check(receipt_payload, receipt_path=receipt_path)["blockers"])
 
 
+def _json_line_reason_codes(text: str) -> list[str]:
+    reason_codes: list[str] = []
+    seen: set[str] = set()
+    for raw_line in str(text or "").splitlines():
+        line = raw_line.strip()
+        if not (line.startswith("{") and line.endswith("}")):
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(payload, dict):
+            continue
+        reason_code = str(payload.get("reason_code", "") or "").strip()
+        if reason_code and reason_code not in seen:
+            seen.add(reason_code)
+            reason_codes.append(reason_code)
+    return reason_codes
+
+
+def _fresh_validation_result_summary(receipt_root: Path, lane_id: str) -> dict[str, Any]:
+    result_path = receipt_root / f"{lane_id}.fresh_validation_receipt.result.json"
+    payload = _load_json(result_path)
+    present = result_path.exists()
+    command_result = _as_dict(payload.get("command_result"))
+    tail_reason_codes = [
+        *_json_line_reason_codes(str(command_result.get("stdout_tail", "") or "")),
+        *_json_line_reason_codes(str(command_result.get("stderr_tail", "") or "")),
+    ]
+    deduped_tail_reason_codes: list[str] = []
+    seen: set[str] = set()
+    for reason_code in tail_reason_codes:
+        if reason_code in seen:
+            continue
+        seen.add(reason_code)
+        deduped_tail_reason_codes.append(reason_code)
+    return {
+        "path": str(result_path),
+        "present": present,
+        "contract_pass": payload.get("contract_pass") if present else None,
+        "reason_code": str(payload.get("reason_code", "") or "") if present else "",
+        "blockers": [str(item) for item in _as_list(payload.get("blockers"))],
+        "command_returncode": command_result.get("returncode") if command_result else None,
+        "tail_reason_codes": deduped_tail_reason_codes,
+        "latest_tail_reason_code": (
+            deduped_tail_reason_codes[-1] if deduped_tail_reason_codes else ""
+        ),
+    }
+
+
 def _fresh_validation_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
     group_specs = [
         (
@@ -333,6 +391,17 @@ def _fresh_validation_blocker_grouping_metadata(blockers: list[str]) -> dict[str
                 "matches": (
                     "fresh_validation_receipt_invalid",
                     "fresh_validation_receipt_invalid:",
+                ),
+            },
+        ),
+        (
+            "fresh_receipt_execution_result",
+            {
+                "scope": "fresh_validation_receipt_required",
+                "description": "Latest fresh-validation builder result failed.",
+                "matches": (
+                    "fresh_validation_result_failed",
+                    "fresh_validation_result_failed:",
                 ),
             },
         ),
@@ -437,6 +506,11 @@ def _lane_row(
     receipt_self_asserted = _truthy_contract(receipt_payload)
     receipt_lane_matches = receipt_present and receipt_payload.get("lane_id") == lane_id
     receipt_runner_matches = receipt_present and receipt_payload.get("runner") == str(lane.get("runner", ""))
+    result_summary = _fresh_validation_result_summary(receipt_root, lane_id)
+    result_present = bool(result_summary["present"])
+    result_contract_pass = result_summary["contract_pass"]
+    result_failed = bool(result_present and result_contract_pass is False)
+    result_blockers = list(result_summary["blockers"])
     validation = _validate_receipt(receipt_path, receipt_schema) if receipt_present else {
         "contract_pass": False,
         "reason_code": "ERR_FRESH_VALIDATION_RECEIPT_INVALID",
@@ -463,6 +537,7 @@ def _lane_row(
         and receipt_artifact_integrity_pass
         and receipt_lane_matches
         and receipt_runner_matches
+        and not result_failed
     )
     blockers = [
         *(["materialized_publication_evidence_missing"] if not materialized_present else []),
@@ -492,6 +567,12 @@ def _lane_row(
             f"fresh_validation_receipt_artifact_integrity_failed:{blocker}"
             for blocker in artifact_integrity_blockers
         ],
+        *(["fresh_validation_result_failed"] if result_failed else []),
+        *[
+            f"fresh_validation_result_failed:{blocker}"
+            for blocker in result_blockers
+            if result_failed
+        ],
     ]
     return {
         "lane_id": lane_id,
@@ -515,6 +596,18 @@ def _lane_row(
         "fresh_validation_receipt_path_aliases": artifact_path_aliases,
         "fresh_validation_receipt_reason_code": validation.get("reason_code"),
         "fresh_validation_receipt_blockers": receipt_validator_blockers,
+        "fresh_validation_result": str(result_summary["path"]),
+        "fresh_validation_result_present": result_present,
+        "fresh_validation_result_contract_pass": result_contract_pass,
+        "fresh_validation_result_reason_code": str(result_summary["reason_code"]),
+        "fresh_validation_result_blockers": result_blockers,
+        "fresh_validation_result_command_returncode": result_summary["command_returncode"],
+        "fresh_validation_result_tail_reason_codes": list(
+            result_summary["tail_reason_codes"]
+        ),
+        "fresh_validation_result_latest_tail_reason_code": str(
+            result_summary["latest_tail_reason_code"]
+        ),
         "pass": lane_pass,
         "blockers": blockers,
     }
@@ -577,6 +670,15 @@ def build_status(
             ),
             "fresh_validation_receipt_path_alias_count": sum(
                 int(row["fresh_validation_receipt_path_alias_count"]) for row in rows
+            ),
+            "fresh_validation_result_present_count": sum(
+                1 for row in rows if row["fresh_validation_result_present"]
+            ),
+            "fresh_validation_result_pass_count": sum(
+                1 for row in rows if row["fresh_validation_result_contract_pass"] is True
+            ),
+            "fresh_validation_result_failed_count": sum(
+                1 for row in rows if row["fresh_validation_result_contract_pass"] is False
             ),
             "blocker_count": len(blockers),
         },

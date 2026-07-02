@@ -580,6 +580,16 @@ def test_build_register_surfaces_gpu_and_performance_fresh_receipt_commands(
                     "fresh_validation_receipt_runner_matches": True,
                     "fresh_validation_receipt_contract_pass": True,
                     "fresh_validation_receipt_blockers": [],
+                    "fresh_validation_result": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.result.json",
+                    "fresh_validation_result_present": True,
+                    "fresh_validation_result_contract_pass": False,
+                    "fresh_validation_result_reason_code": "ERR_FRESH_VALIDATION_COMMAND_FAILED",
+                    "fresh_validation_result_blockers": ["validation_command_exit_1"],
+                    "fresh_validation_result_command_returncode": 1,
+                    "fresh_validation_result_tail_reason_codes": [
+                        "ERR_ROCM_RUNTIME_UNAVAILABLE"
+                    ],
+                    "fresh_validation_result_latest_tail_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
                 },
                 {
                     "lane_id": "performance_profile",
@@ -634,6 +644,13 @@ def test_build_register_surfaces_gpu_and_performance_fresh_receipt_commands(
     assert any(
         "validate_fresh_validation_receipt.py --receipt implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json" in command
         for command in gpu_row["verification_commands"]
+    )
+    assert gpu_row["evidence_status"]["state"] == "fresh_validation_result_failed"
+    assert gpu_row["evidence_status"]["fresh_validation_result_present"] is True
+    assert gpu_row["evidence_status"]["fresh_validation_result_contract_pass"] is False
+    assert gpu_row["evidence_status"]["fresh_validation_result_command_returncode"] == 1
+    assert gpu_row["evidence_status"]["fresh_validation_result_latest_tail_reason_code"] == (
+        "ERR_ROCM_RUNTIME_UNAVAILABLE"
     )
     assert any(
         "scripts/build_fresh_validation_receipt.py" in command

@@ -93,6 +93,25 @@ def _legacy_fresh_receipt(
     }
 
 
+def _failed_result_payload() -> dict[str, object]:
+    return {
+        "schema_version": "fresh-validation-receipt-builder.v1",
+        "contract_pass": False,
+        "reason_code": "ERR_FRESH_VALIDATION_COMMAND_FAILED",
+        "blockers": ["validation_command_exit_1"],
+        "receipt_path": "",
+        "command_result": {
+            "returncode": 1,
+            "stdout_tail": "Wrote solver hip e2e contract report\n",
+            "stderr_tail": (
+                "{\"event\":\"solver_hip_e2e.completed\","
+                "\"contract_pass\":false,"
+                "\"reason_code\":\"ERR_ROCM_RUNTIME_UNAVAILABLE\"}\n"
+            ),
+        },
+    }
+
+
 def test_fresh_full_validation_lane_status_blocks_missing_fresh_receipt(tmp_path: Path) -> None:
     docs = (_write_text(tmp_path / "runbook.md", "GPU-capable validation task\n"),)
     materialized = _write_json(tmp_path / "gpu" / "solver_hip_e2e_contract_report.json", {"contract_pass": True})
@@ -145,7 +164,57 @@ def test_fresh_full_validation_lane_status_passes_with_valid_fresh_receipt(tmp_p
     assert payload["contract_pass"] is True
     assert payload["fresh_full_validation_ready"] is True
     assert payload["summary"]["fresh_validation_receipt_pass_count"] == 1
+    assert payload["summary"]["fresh_validation_result_present_count"] == 0
     assert payload["blockers"] == []
+
+
+def test_fresh_full_validation_lane_status_blocks_failed_latest_result(
+    tmp_path: Path,
+) -> None:
+    docs = (_write_text(tmp_path / "runbook.md", "GPU-capable validation task\n"),)
+    materialized = _write_json(
+        tmp_path / "gpu" / "solver_hip_e2e_contract_report.json",
+        {"contract_pass": False, "reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE"},
+    )
+    receipt_root = tmp_path / "receipts"
+    _write_json(
+        receipt_root / "gpu_hip_solver.fresh_validation_receipt.json",
+        _valid_receipt_payload(
+            artifact_path=materialized,
+            artifact_sha256=_sha256_ref(materialized),
+        ),
+    )
+    _write_json(
+        receipt_root / "gpu_hip_solver.fresh_validation_receipt.result.json",
+        _failed_result_payload(),
+    )
+
+    payload = lane_status.build_status(
+        docs=docs,
+        receipt_root=receipt_root,
+        lanes=(_lane(materialized),),
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["fresh_full_validation_ready"] is False
+    assert payload["summary"]["fresh_validation_result_present_count"] == 1
+    assert payload["summary"]["fresh_validation_result_failed_count"] == 1
+    assert "gpu_hip_solver::fresh_validation_result_failed" in payload["blockers"]
+    assert (
+        "gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1"
+        in payload["blockers"]
+    )
+    grouping = payload["blocker_grouping_metadata"]
+    assert "gpu_hip_solver::fresh_validation_result_failed" in grouping["groups"][
+        "fresh_receipt_execution_result"
+    ]["blockers"]
+    row = payload["rows"][0]
+    assert row["fresh_validation_result_present"] is True
+    assert row["fresh_validation_result_contract_pass"] is False
+    assert row["fresh_validation_result_command_returncode"] == 1
+    assert row["fresh_validation_result_latest_tail_reason_code"] == (
+        "ERR_ROCM_RUNTIME_UNAVAILABLE"
+    )
 
 
 def test_fresh_full_validation_lane_status_resolves_checksum_verified_path_alias(
