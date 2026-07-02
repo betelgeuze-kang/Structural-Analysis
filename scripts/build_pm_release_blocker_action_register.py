@@ -60,6 +60,9 @@ DEFAULT_STRUCTURAL_SCOPE_QUARANTINE_MANIFEST = Path(
 DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISIONS = Path(
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json"
 )
+DEFAULT_STRUCTURAL_SCOPE_ORIGIN_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json"
+)
 DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT = Path(
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
 )
@@ -630,6 +633,7 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         return [
             f"python3 scripts/check_structural_scope_contamination.py --out {DEFAULT_STRUCTURAL_SCOPE_CONTAMINATION_AUDIT} --out-md {DEFAULT_STRUCTURAL_SCOPE_CONTAMINATION_AUDIT.with_suffix('.md')}",
             f"python3 scripts/build_structural_scope_owner_review_packet.py --out {DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET} --out-md {DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET.with_suffix('.md')} --write-decision-template",
+            f"python3 scripts/build_structural_scope_origin_report.py --out {DEFAULT_STRUCTURAL_SCOPE_ORIGIN_REPORT} --out-md {DEFAULT_STRUCTURAL_SCOPE_ORIGIN_REPORT.with_suffix('.md')}",
             f"python3 scripts/build_structural_scope_owner_decision_application_plan.py --out {DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN} --out-md {DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN.with_suffix('.md')}",
             "python3 scripts/build_product_readiness_snapshot.py",
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
@@ -708,6 +712,7 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
 def _verification_commands(*, namespace: str, code: str) -> list[str]:
     if namespace == "structural_scope_cleanup":
         return [
+            "python3 scripts/build_structural_scope_origin_report.py --fail-blocked",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
             "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
@@ -820,6 +825,9 @@ def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[st
         )
         augmented["structural_scope_owner_decisions"] = str(
             DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISIONS
+        )
+        augmented["structural_scope_origin_report"] = str(
+            DEFAULT_STRUCTURAL_SCOPE_ORIGIN_REPORT
         )
     if namespace == "fresh_full_validation":
         augmented["fresh_full_validation_lane_status"] = str(DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS)

@@ -480,6 +480,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         "scripts/build_ux_new_user_observation_intake_packet.py",
         "scripts/build_structural_scope_owner_decision_application_plan.py",
         "scripts/build_structural_scope_owner_review_packet.py",
+        "scripts/build_structural_scope_origin_report.py",
     }
     if path in snapshot_only_paths:
         return False

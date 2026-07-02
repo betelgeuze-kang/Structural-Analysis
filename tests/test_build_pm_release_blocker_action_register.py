@@ -323,7 +323,15 @@ def test_build_register_prioritizes_structural_scope_cleanup_plan(tmp_path: Path
         for command in row["reproduction_commands"]
     )
     assert any(
+        "build_structural_scope_origin_report.py" in command
+        for command in row["reproduction_commands"]
+    )
+    assert any(
         "check_structural_scope_contamination.py --fail-blocked" in command
+        for command in row["verification_commands"]
+    )
+    assert any(
+        "build_structural_scope_origin_report.py --fail-blocked" in command
         for command in row["verification_commands"]
     )
     assert any(
@@ -331,6 +339,7 @@ def test_build_register_prioritizes_structural_scope_cleanup_plan(tmp_path: Path
         for command in row["verification_commands"]
     )
     assert "structural_scope_owner_review_packet" in row["evidence_artifacts"]
+    assert "structural_scope_origin_report" in row["evidence_artifacts"]
     assert payload["next_actions"] == [row["next_action"]]
 
 
