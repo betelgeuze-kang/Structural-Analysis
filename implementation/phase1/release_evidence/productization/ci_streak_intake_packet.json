@@ -1,5 +1,34 @@
 {
+  "blocker_id_count": 12,
+  "blocker_ids": [
+    "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+    "ci_streak::pr:pr_github_actions_job_start_blocked",
+    "ci_streak::pr:pr_ci_30_consecutive_pass_evidence_missing",
+    "ci_streak::pr:github_actions_lane_threshold_not_pass",
+    "ci_streak::pr:github_actions_lane_streak_below_threshold",
+    "ci_streak::nightly:nightly_github_actions_job_start_blocked",
+    "ci_streak::nightly:nightly_ci_30_consecutive_pass_evidence_missing",
+    "ci_streak::nightly:github_actions_lane_threshold_not_pass",
+    "ci_streak::nightly:github_actions_lane_streak_below_threshold",
+    "ci_streak::nightly:github_actions_filtered_run_count_below_threshold",
+    "ci_streak::runner:self_hosted_runner_matching_labels_not_online"
+  ],
   "ci_consecutive_pass_manifest": "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+  "ci_release_credit_policy": {
+    "accepted_source": "tracked GitHub Actions PR and nightly consecutive-pass evidence",
+    "rejected_substitutes": [
+      "local PR or nightly gate artifacts counted as release streak credit",
+      "manifest-only consecutive-pass claims without source evidence",
+      "queued/job-start-blocked workflow runs",
+      "github-hosted runner defaults when self-hosted labels are required"
+    ],
+    "required_consecutive_pass_count": 30,
+    "required_lanes": [
+      "pr",
+      "nightly"
+    ]
+  },
   "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
   "contract_pass": false,
   "current_blocker_count": 10,
@@ -14,6 +43,15 @@
     "nightly:github_actions_lane_streak_below_threshold",
     "nightly:github_actions_filtered_run_count_below_threshold",
     "runner:self_hosted_runner_matching_labels_not_online"
+  ],
+  "evidence_intake_artifact_count": 6,
+  "evidence_intake_artifacts": [
+    "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+    "implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json",
+    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   ],
   "first_job_start_blocker": {
     "first_head_branch": "codex/seed-pr-ci-source-evidence",
@@ -88,7 +126,7 @@
     "status": "external_runner_recovery_required"
   },
   "first_workflow_queue_backlog": {},
-  "generated_at": "2026-07-01T23:53:54.683605+00:00",
+  "generated_at": "2026-07-02T01:17:45.740766+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "job_start_blocker_queue": [
     {
@@ -360,6 +398,11 @@
     }
   ],
   "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
+  "release_area": "basic_ci",
+  "release_area_blocker_ids": [
+    "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing"
+  ],
   "runner_precondition": {
     "blockers": [
       "self_hosted_runner_matching_labels_not_online"
@@ -383,7 +426,7 @@
   },
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 13.577,
+    "age_hours": 14.974,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -550,6 +593,8 @@
   },
   "status": "blocked",
   "summary": {
+    "blocker_id_count": 12,
+    "evidence_intake_artifact_count": 6,
     "job_start_blocker_count": 6,
     "job_start_blocker_lane_count": 2,
     "lane_count": 2,
@@ -567,6 +612,7 @@
     "pr_missing_consecutive_pass_count": 30,
     "pr_pull_request_run_source_present": true,
     "pr_source_threshold_pass": false,
+    "release_area_blocker_count": 2,
     "runner_matching_runner_count": 1,
     "runner_online_matching_runner_count": 0,
     "runner_owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak.",
@@ -579,7 +625,7 @@
       "x64"
     ],
     "runner_status": "blocked",
-    "source_evidence_age_hours": 13.577,
+    "source_evidence_age_hours": 14.974,
     "source_evidence_freshness_pass": true,
     "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
     "source_evidence_pass": false,
