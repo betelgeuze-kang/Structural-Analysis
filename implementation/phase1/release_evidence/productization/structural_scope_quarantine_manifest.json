@@ -1,6 +1,6 @@
 {
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T14:55:22.172147+00:00",
+  "generated_at": "2026-07-02T17:37:26.236125+00:00",
   "input_checksums": {
     "scripts/check_structural_scope_contamination.py": "sha256:29e0bac1df2cc166be8e5ef2d80e3bc570a7a6dc32ed91c3537f66bde38688b5"
   },
@@ -1231,6 +1231,6 @@
   "reuse_policy": "structural_scope_quarantine_manifest_from_owner_requested_scope_cleanup",
   "reused_evidence": false,
   "schema_version": "structural-scope-quarantine-manifest.v1",
-  "source_commit_sha": "81859a9954a86d2e151b183fadde01d8dbf3b376",
+  "source_commit_sha": "7cab0311a6cf1ec65541c66b848d75396af69a6e",
   "status": "active"
 }

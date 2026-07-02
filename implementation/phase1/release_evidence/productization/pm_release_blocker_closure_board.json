@@ -10,30 +10,32 @@
   },
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 5,
+    "release_area_blocker_count": 7,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
-      "security::license_status_not_configured"
+      "security::license_status_not_configured",
+      "github_sync::github_sync_preflight::worktree_not_clean",
+      "github_sync::github_sync_preflight_not_synced"
     ],
-    "release_area_green_count": 13,
-    "release_area_summary": "13/16",
+    "release_area_green_count": 12,
+    "release_area_summary": "12/16",
     "release_area_total_count": 16
   },
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T17:26:35.572565+00:00",
+  "generated_at": "2026-07-02T17:38:06.447405+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:85cdd323ee8da5acad0e767b9e619efe09c73d08b5b52483dd94c69074af775f",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:430f4b370c1b7e4477d591eb2222933da6315f0c9bb50e36f3b8f71871f54189",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:f133501b9d841bf731c7f92fab9b686653c973272f4b2b2cce73a72286734d3b",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a810812b06105be0016a9986ec38ee1cbe8dd622fd9d81307db0d968e073d6d0",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:390c963b64828e63b71920b554bb49dfb6763c3051f78b8b8ec2e5db73ae5947"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
   "reuse_policy": "pm_release_blocker_closure_board_aggregates_action_register_and_pm_report",
   "reused_evidence": true,
@@ -284,6 +286,74 @@
       "scope": "release_area",
       "verification_commands": [
         "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+        "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+        "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
+      ],
+      "blocker_id": "github_sync::github_sync_preflight::worktree_not_clean",
+      "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+      "closure_state": "external_owner_input_ready",
+      "evidence_state": "blocked",
+      "external_input_required": true,
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner": "release_owner",
+      "owner_input_required": true,
+      "primary_evidence_artifacts": {
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "reproduction_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "r4_remote_mutation_approval_required",
+      "scope": "release_area",
+      "verification_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+        "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+        "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
+      ],
+      "blocker_id": "github_sync::github_sync_preflight_not_synced",
+      "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+      "closure_state": "external_owner_input_ready",
+      "evidence_state": "blocked",
+      "external_input_required": true,
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner": "release_owner",
+      "owner_input_required": true,
+      "primary_evidence_artifacts": {
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "reproduction_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "r4_remote_mutation_approval_required",
+      "scope": "release_area",
+      "verification_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
     },
@@ -658,88 +728,10 @@
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
-    },
-    {
-      "acceptance_criteria": [
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`",
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`",
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`",
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`",
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`",
-        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-        "`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`"
-      ],
-      "blocker_id": "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
-      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
-      "closure_state": "local_remediation_ready",
-      "evidence_state": "ready_for_pm_regeneration",
-      "external_input_required": false,
-      "handoff_ready": true,
-      "handoff_state": "local_remediation_ready",
-      "next_action": "Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
-      "owner": "validation_lane_owner",
-      "owner_input_required": false,
-      "primary_evidence_artifacts": {
-        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-      },
-      "reproduction_commands": [
-        "python3 scripts/build_fresh_validation_receipt.py --lane-id performance_profile --runner performance_validation --validation-command \"python3 implementation/phase1/run_performance_profiling_gate.py --p0-engine-perf-report implementation/phase1/p0_engine_perf_report.json --gpu-bottleneck-audit-report implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json --ndtha-long-profile-report implementation/phase1/ndtha_long_profile_report.json --track-lf-solver-report implementation/phase1/track_lf_solver_report.json --moving-load-integrator-report implementation/phase1/moving_load_integrator_report.json --moving-load-integrator-large-report implementation/phase1/release_evidence/performance/moving_load_integrator_large_report.json --moving-load-integrator-xlarge-report implementation/phase1/release_evidence/performance/moving_load_integrator_xlarge_report.json --vti-coupled-solver-report implementation/phase1/vti_coupled_solver_report.json --vti-contact-window-variant-sweep-report implementation/phase1/release_evidence/performance/vti_contact_window_variant_sweep_report.json --ssi-boundary-report implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json --contact-readiness-report implementation/phase1/release_evidence/performance/contact_readiness_report.json --foundation-soil-link-report implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json --solver-hip-e2e-report implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json --out implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json --bottleneck-map-md implementation/phase1/release_evidence/performance/performance_bottleneck_map.md --sprint-targets-json implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json --sprint-targets-md implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md\" --input implementation/phase1/moving_load_integrator_report.json --input implementation/phase1/ndtha_long_profile_report.json --input implementation/phase1/p0_engine_perf_report.json --input implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json --input implementation/phase1/release_evidence/performance/contact_readiness_report.json --input implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json --input implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json --input implementation/phase1/release_evidence/performance/moving_load_integrator_large_report.json --input implementation/phase1/release_evidence/performance/moving_load_integrator_xlarge_report.json --input implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json --input implementation/phase1/release_evidence/performance/vti_contact_window_variant_sweep_report.json --input implementation/phase1/run_performance_profiling_gate.py --input implementation/phase1/track_lf_solver_report.json --input implementation/phase1/vti_coupled_solver_report.json --receipt-artifact implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json:gate_report --receipt-artifact implementation/phase1/release_evidence/performance/performance_bottleneck_map.md:bottleneck_map --receipt-artifact implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json:sprint_targets --receipt-artifact implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md:sprint_targets_markdown --output-receipt implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.result.json --case-count 14 --passed-case-count 14 --fail-blocked",
-        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "resolution_type": "fresh_validation_receipt_required",
-      "scope": "ga_enterprise",
-      "verification_commands": [
-        "python3 implementation/phase1/validate_fresh_validation_receipt.py --receipt implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json --fail-blocked",
-        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
-    {
-      "acceptance_criteria": [
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`",
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`",
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`",
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`",
-        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`",
-        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-        "`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json` absent from `ga_enterprise_blockers`"
-      ],
-      "blocker_id": "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
-      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
-      "closure_state": "local_remediation_ready",
-      "evidence_state": "ready_for_pm_regeneration",
-      "external_input_required": false,
-      "handoff_ready": true,
-      "handoff_state": "local_remediation_ready",
-      "next_action": "Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
-      "owner": "validation_lane_owner",
-      "owner_input_required": false,
-      "primary_evidence_artifacts": {
-        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-      },
-      "reproduction_commands": [
-        "python3 scripts/build_fresh_validation_receipt.py --lane-id performance_profile --runner performance_validation --validation-command \"python3 implementation/phase1/run_performance_profiling_gate.py --p0-engine-perf-report implementation/phase1/p0_engine_perf_report.json --gpu-bottleneck-audit-report implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json --ndtha-long-profile-report implementation/phase1/ndtha_long_profile_report.json --track-lf-solver-report implementation/phase1/track_lf_solver_report.json --moving-load-integrator-report implementation/phase1/moving_load_integrator_report.json --moving-load-integrator-large-report implementation/phase1/release_evidence/performance/moving_load_integrator_large_report.json --moving-load-integrator-xlarge-report implementation/phase1/release_evidence/performance/moving_load_integrator_xlarge_report.json --vti-coupled-solver-report implementation/phase1/vti_coupled_solver_report.json --vti-contact-window-variant-sweep-report implementation/phase1/release_evidence/performance/vti_contact_window_variant_sweep_report.json --ssi-boundary-report implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json --contact-readiness-report implementation/phase1/release_evidence/performance/contact_readiness_report.json --foundation-soil-link-report implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json --solver-hip-e2e-report implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json --out implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json --bottleneck-map-md implementation/phase1/release_evidence/performance/performance_bottleneck_map.md --sprint-targets-json implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json --sprint-targets-md implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md\" --input implementation/phase1/moving_load_integrator_report.json --input implementation/phase1/ndtha_long_profile_report.json --input implementation/phase1/p0_engine_perf_report.json --input implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json --input implementation/phase1/release_evidence/performance/contact_readiness_report.json --input implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json --input implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json --input implementation/phase1/release_evidence/performance/moving_load_integrator_large_report.json --input implementation/phase1/release_evidence/performance/moving_load_integrator_xlarge_report.json --input implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json --input implementation/phase1/release_evidence/performance/vti_contact_window_variant_sweep_report.json --input implementation/phase1/run_performance_profiling_gate.py --input implementation/phase1/track_lf_solver_report.json --input implementation/phase1/vti_coupled_solver_report.json --receipt-artifact implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json:gate_report --receipt-artifact implementation/phase1/release_evidence/performance/performance_bottleneck_map.md:bottleneck_map --receipt-artifact implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json:sprint_targets --receipt-artifact implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md:sprint_targets_markdown --output-receipt implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.result.json --case-count 14 --passed-case-count 14 --fail-blocked",
-        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "resolution_type": "fresh_validation_receipt_required",
-      "scope": "ga_enterprise",
-      "verification_commands": [
-        "python3 implementation/phase1/validate_fresh_validation_receipt.py --receipt implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json --fail-blocked",
-        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "159f435dcae55c953b0a8931a78ec4efa9905fd9",
+  "source_commit_sha": "7cab0311a6cf1ec65541c66b848d75396af69a6e",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
@@ -749,33 +741,33 @@
       "structural_scope_cleanup::owner_review_decisions_pending"
     ],
     "closure_state_counts": {
-      "external_owner_input_ready": 10,
-      "local_remediation_ready": 8
+      "external_owner_input_ready": 12,
+      "local_remediation_ready": 6
     },
-    "external_input_required_count": 10,
-    "external_owner_input_ready_count": 10,
+    "external_input_required_count": 12,
+    "external_owner_input_ready_count": 12,
     "full_release_gate_ready": false,
     "handoff_not_ready_count": 0,
     "handoff_ready_count": 18,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "local_remediation_ready_count": 8,
+    "local_remediation_ready_count": 6,
     "missing_from_action_register": [],
     "missing_from_action_register_count": 0,
     "open_blocker_count": 18,
-    "owner_input_required_count": 10,
+    "owner_input_required_count": 12,
     "paid_pilot_candidate": true,
     "pm_report_blocker_count": 17,
     "pm_report_loaded": true,
     "register_blocker_count": 18,
     "register_open_blocker_count": 18,
-    "release_area_blocker_count": 5,
+    "release_area_blocker_count": 7,
     "release_area_gate_ready": false,
-    "release_area_green_count": 13,
+    "release_area_green_count": 12,
     "release_area_total_count": 16,
     "stale_action_register_blocker_count": 0,
     "stale_action_register_blockers": []
   },
-  "summary_line": "PM release blocker closure board: BLOCKED | open=18 | external_owner_ready=10 | handoff_not_ready=0"
+  "summary_line": "PM release blocker closure board: BLOCKED | open=18 | external_owner_ready=12 | handoff_not_ready=0"
 }
