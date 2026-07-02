@@ -53,6 +53,10 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
             "developer_preview_rc::selected_medium_models_pass_or_approved_review",
             "product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review",
         ],
+        "evidence_intake_artifacts": [
+            "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+            "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json",
+        ],
         "closure_decision_required": "five_PASS_or_explicit_APPROVED_REVIEW_rows",
     },
     "linux_windows_reproducibility_confirmed": {
@@ -81,6 +85,10 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
         "release_surface_impacts": [
             "developer_preview_rc::linux_windows_reproducibility_confirmed",
             "product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed",
+        ],
+        "evidence_intake_artifacts": [
+            "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+            "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
         ],
         "closure_decision_required": "direct_windows_replay_receipt_passes",
     },
@@ -127,6 +135,13 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
             "pm_release::ux::human_new_user_30min_sample_evidence_missing",
             "product_readiness_snapshot::human_ux::*",
         ],
+        "evidence_intake_artifacts": [
+            "docs/templates/ux_new_user_observation.template.json",
+            "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
+            "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+        ],
         "closure_decision_required": "accepted_human_new_user_observation",
     },
 }
@@ -157,6 +172,17 @@ def _split_evidence_refs(value: Any) -> list[str]:
     return [item for item in refs if item]
 
 
+def _deduped(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if not item or item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
+
+
 def _gate_item(gate: dict[str, Any]) -> str:
     return str(gate.get("item", "") or "")
 
@@ -173,28 +199,54 @@ def _blocked_gates(final_gates: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def _owner_packet_for_gate(gate: dict[str, Any]) -> dict[str, Any]:
     item = _gate_item(gate)
     handoff = GATE_HANDOFFS.get(item, {})
+    release_surface_impacts = [
+        str(item) for item in _as_list(handoff.get("release_surface_impacts"))
+    ]
+    blocker_ids = _deduped(
+        [
+            f"developer_preview_rc::{item}" if item else "",
+            *release_surface_impacts,
+        ]
+    )
+    required_owner_evidence = [
+        str(item) for item in _as_list(handoff.get("required_owner_evidence"))
+    ]
+    verification_commands = [
+        str(item) for item in _as_list(handoff.get("verification_commands"))
+    ]
+    evidence_intake_artifacts = [
+        str(item) for item in _as_list(handoff.get("evidence_intake_artifacts"))
+    ]
+    current_blockers = [str(item) for item in _as_list(gate.get("blockers"))]
     return {
+        "gate_id": item,
         "gate": item,
         "status": str(gate.get("status", "")),
         "contract_pass": bool(gate.get("contract_pass")),
+        "current_evidence_gap_state": (
+            "owner_evidence_required"
+            if current_blockers or gate.get("contract_pass") is not True
+            else "ready"
+        ),
         "owner": str(handoff.get("owner", "owner_assignment_required")),
         "owner_action": str(handoff.get("owner_action", "Owner action mapping required.")),
         "closure_decision_required": str(
             handoff.get("closure_decision_required", "owner_decision_required")
         ),
-        "required_owner_evidence": [
-            str(item) for item in _as_list(handoff.get("required_owner_evidence"))
-        ],
-        "verification_commands": [
-            str(item) for item in _as_list(handoff.get("verification_commands"))
-        ],
+        "blocker_ids": blocker_ids,
+        "required_owner_evidence": required_owner_evidence,
+        "required_owner_evidence_count": len(required_owner_evidence),
+        "verification_commands": verification_commands,
+        "verification_command_count": len(verification_commands),
+        "evidence_intake_artifacts": evidence_intake_artifacts,
+        "evidence_intake_artifact_count": len(evidence_intake_artifacts),
         "prohibited_substitutes": [
             str(item) for item in _as_list(handoff.get("prohibited_substitutes"))
         ],
-        "release_surface_impacts": [
-            str(item) for item in _as_list(handoff.get("release_surface_impacts"))
-        ],
-        "current_blockers": [str(item) for item in _as_list(gate.get("blockers"))],
+        "release_surface_impacts": release_surface_impacts,
+        "release_surface_impact_count": len(release_surface_impacts),
+        "current_blockers": current_blockers,
+        "current_blocker_count": len(current_blockers),
         "blocker_grouping_metadata": gate.get("blocker_grouping_metadata", {}),
         "current_evidence_refs": _split_evidence_refs(gate.get("evidence")),
         "notes": [str(item) for item in _as_list(gate.get("notes"))],
@@ -218,6 +270,13 @@ def build_owner_packet(
     ]
     blocked_gates = _blocked_gates(final_gates)
     owner_packets = [_owner_packet_for_gate(gate) for gate in blocked_gates]
+    owner_packet_blocker_ids = _deduped(
+        [
+            str(item)
+            for packet in owner_packets
+            for item in _as_list(packet.get("blocker_ids"))
+        ]
+    )
     unmapped = [
         packet["gate"]
         for packet in owner_packets
@@ -286,6 +345,12 @@ def build_owner_packet(
             if gate not in blocked_gates
         ],
         "owner_packet_count": len(owner_packets),
+        "owner_packet_gate_ids": [packet["gate_id"] for packet in owner_packets],
+        "owner_packet_blocker_ids": owner_packet_blocker_ids,
+        "owner_packet_blocker_id_count": len(owner_packet_blocker_ids),
+        "evidence_intake_artifact_count": sum(
+            len(packet["evidence_intake_artifacts"]) for packet in owner_packets
+        ),
         "release_surface_impact_count": sum(
             len(packet["release_surface_impacts"]) for packet in owner_packets
         ),
@@ -339,6 +404,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         for command in packet["verification_commands"]:
             lines.append(f"- `{command}`")
         lines.append("")
+    lines.extend(["## Evidence Intake Artifacts", ""])
+    for packet in payload["owner_packets"]:
+        lines.append(f"### `{packet['gate_id']}`")
+        for artifact in packet["evidence_intake_artifacts"]:
+            lines.append(f"- `{artifact}`")
+        if not packet["evidence_intake_artifacts"]:
+            lines.append("- none")
+        lines.append("")
+    lines.extend(["## Blocker IDs", ""])
+    if payload["owner_packet_blocker_ids"]:
+        lines.extend(f"- `{item}`" for item in payload["owner_packet_blocker_ids"])
+    else:
+        lines.append("- none")
+    lines.append("")
     lines.extend(["## Release Surface Impacts", ""])
     for packet in payload["owner_packets"]:
         lines.append(f"### `{packet['gate']}`")

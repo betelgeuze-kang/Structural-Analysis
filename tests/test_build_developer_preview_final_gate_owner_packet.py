@@ -91,8 +91,27 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
     assert payload["evidence_closure_pass"] is False
     assert payload["blocked_final_gate_count"] == 3
     assert payload["owner_packet_count"] == 3
+    assert payload["owner_packet_gate_ids"] == [
+        "selected_medium_models_pass_or_approved_review",
+        "linux_windows_reproducibility_confirmed",
+        "new_user_core_workflow_observation_passed",
+    ]
+    assert payload["owner_packet_blocker_id_count"] == 8
+    assert "developer_preview_rc::new_user_core_workflow_observation_passed" in (
+        payload["owner_packet_blocker_ids"]
+    )
     assert payload["release_surface_impact_count"] == 8
+    assert payload["evidence_intake_artifact_count"] == 9
     packets = {packet["gate"]: packet for packet in payload["owner_packets"]}
+    assert packets["selected_medium_models_pass_or_approved_review"]["gate_id"] == (
+        "selected_medium_models_pass_or_approved_review"
+    )
+    assert packets["selected_medium_models_pass_or_approved_review"][
+        "current_evidence_gap_state"
+    ] == "owner_evidence_required"
+    assert packets["selected_medium_models_pass_or_approved_review"][
+        "current_blocker_count"
+    ] == 2
     assert packets["selected_medium_models_pass_or_approved_review"]["owner"] == (
         "benchmark_validation_owner"
     )
@@ -105,6 +124,12 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
     assert "python3 scripts/build_phase6_linux_windows_parity_status.py --check" in (
         packets["linux_windows_reproducibility_confirmed"]["verification_commands"]
     )
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "phase6_windows_platform_replay_receipt.json"
+    ) in packets["linux_windows_reproducibility_confirmed"][
+        "evidence_intake_artifacts"
+    ]
     assert packets["new_user_core_workflow_observation_passed"]["owner"] == (
         "ux_research_owner"
     )
@@ -117,6 +142,12 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
     assert "pm_release::ux::human_new_user_30min_sample_evidence_missing" in packets[
         "new_user_core_workflow_observation_passed"
     ]["release_surface_impacts"]
+    assert "pm_release::ux::human_new_user_30min_sample_evidence_missing" in packets[
+        "new_user_core_workflow_observation_passed"
+    ]["blocker_ids"]
+    assert "docs/templates/ux_new_user_observation.template.json" in packets[
+        "new_user_core_workflow_observation_passed"
+    ]["evidence_intake_artifacts"]
 
 
 def test_owner_packet_blocks_missing_action_register(tmp_path: Path) -> None:
@@ -157,4 +188,6 @@ def test_owner_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     markdown = out_md.read_text(encoding="utf-8")
     assert "# Developer Preview Final Gate Owner Packet" in markdown
     assert "selected_medium_models_pass_or_approved_review" in markdown
+    assert "## Evidence Intake Artifacts" in markdown
+    assert "## Blocker IDs" in markdown
     assert "## Release Surface Impacts" in markdown

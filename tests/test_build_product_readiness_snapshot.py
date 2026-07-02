@@ -5211,6 +5211,18 @@ def test_snapshot_surfaces_developer_preview_final_gate_owner_packet(
             "new_user_core_workflow_observation_passed",
         ],
         "owner_packet_count": 3,
+        "owner_packet_gate_ids": [
+            "selected_medium_models_pass_or_approved_review",
+            "linux_windows_reproducibility_confirmed",
+            "new_user_core_workflow_observation_passed",
+        ],
+        "owner_packet_blocker_id_count": 3,
+        "owner_packet_blocker_ids": [
+            "developer_preview_rc::selected_medium_models_pass_or_approved_review",
+            "developer_preview_rc::linux_windows_reproducibility_confirmed",
+            "developer_preview_rc::new_user_core_workflow_observation_passed",
+        ],
+        "evidence_intake_artifact_count": 9,
         "blockers": [],
         "claim_boundary": "Owner handoff only.",
     })
@@ -5228,6 +5240,16 @@ def test_snapshot_surfaces_developer_preview_final_gate_owner_packet(
     assert component["final_gate_pass_count"] == 6
     assert component["blocked_final_gate_count"] == 3
     assert component["owner_packet_count"] == 3
+    assert component["owner_packet_gate_ids"] == [
+        "selected_medium_models_pass_or_approved_review",
+        "linux_windows_reproducibility_confirmed",
+        "new_user_core_workflow_observation_passed",
+    ]
+    assert component["owner_packet_blocker_id_count"] == 3
+    assert "developer_preview_rc::new_user_core_workflow_observation_passed" in (
+        component["owner_packet_blocker_ids"]
+    )
+    assert component["evidence_intake_artifact_count"] == 9
     assert "linux_windows_reproducibility_confirmed" in component["blocked_gate_items"]
 
 

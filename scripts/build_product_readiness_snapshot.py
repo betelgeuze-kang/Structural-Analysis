@@ -2690,6 +2690,34 @@ def build_snapshot(
                     ),
                     0,
                 ),
+                "owner_packet_gate_ids": [
+                    str(item)
+                    for item in _as_list(
+                        developer_preview_final_gate_owner_packet.get(
+                            "owner_packet_gate_ids"
+                        )
+                    )
+                ],
+                "owner_packet_blocker_id_count": _as_int(
+                    developer_preview_final_gate_owner_packet.get(
+                        "owner_packet_blocker_id_count"
+                    ),
+                    0,
+                ),
+                "owner_packet_blocker_ids": [
+                    str(item)
+                    for item in _as_list(
+                        developer_preview_final_gate_owner_packet.get(
+                            "owner_packet_blocker_ids"
+                        )
+                    )
+                ],
+                "evidence_intake_artifact_count": _as_int(
+                    developer_preview_final_gate_owner_packet.get(
+                        "evidence_intake_artifact_count"
+                    ),
+                    0,
+                ),
                 "blocked_gate_items": [
                     str(item)
                     for item in _as_list(
