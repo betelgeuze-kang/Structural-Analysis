@@ -3,7 +3,7 @@
 - `contract_pass`: `False`
 - `lane_contract_pass`: `True`
 - `fresh_full_validation_ready`: `False`
-- `blockers`: `6`
+- `blockers`: `8`
 
 | Lane | Materialized Evidence | Fresh Receipt | Status |
 |---|---|---|---|

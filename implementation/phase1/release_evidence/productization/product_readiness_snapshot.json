@@ -75,13 +75,15 @@
   "blocker_categories": {
     "benchmark": {
       "blocked": true,
-      "blocker_count": 11,
+      "blocker_count": 13,
       "blockers": [
         "external_benchmark::submission_receipts_pending=4",
         "external_benchmark::submission_update_receipts_below_queue_count",
         "external_benchmark::submission_updates_reused_evidence_not_fresh",
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed",
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
         "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
         "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:hardest_external_10case",
         "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:korean_public_structures",
@@ -164,7 +166,7 @@
       ]
     }
   },
-  "blocker_count": 45,
+  "blocker_count": 47,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -181,6 +183,8 @@
     "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/run_solver_hip_e2e_contract.py",
     "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/zero_copy_real_probe_report_strict.json",
     "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+    "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed",
+    "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
     "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
     "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
     "g1::full_load_gate_not_closed",
@@ -503,7 +507,7 @@
     },
     "fresh_full_validation": {
       "blocker_grouping_metadata": {
-        "blocker_count": 6,
+        "blocker_count": 8,
         "grouping_policy": "Preserve every lane blocker while separating publication boundary, fresh receipt presence, receipt metadata/freshness, receipt identity, schema validation, and artifact integrity failures.",
         "groups": {
           "fresh_receipt_artifact_integrity": {
@@ -517,6 +521,15 @@
               "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
             ],
             "description": "Receipt artifact checksum or path integrity failures.",
+            "scope": "fresh_validation_receipt_required"
+          },
+          "fresh_receipt_execution_result": {
+            "blocker_count": 2,
+            "blockers": [
+              "gpu_hip_solver::fresh_validation_result_failed",
+              "gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1"
+            ],
+            "description": "Latest fresh-validation builder result failed.",
             "scope": "fresh_validation_receipt_required"
           },
           "fresh_receipt_identity": {
@@ -586,7 +599,9 @@
               "fresh_validation_receipt_artifact_integrity_failed",
               "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
               "fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/run_solver_hip_e2e_contract.py",
-              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/zero_copy_real_probe_report_strict.json"
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/zero_copy_real_probe_report_strict.json",
+              "fresh_validation_result_failed",
+              "fresh_validation_result_failed:validation_command_exit_1"
             ],
             "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json",
             "pass": false,
@@ -2638,7 +2653,7 @@
         "locked_evidence_surface_count": 0,
         "missing_evidence_surface_count": 0,
         "non_structural_evidence_surface_excluded_count": 3,
-        "operator_action_count": 16,
+        "operator_action_count": 18,
         "operator_actions": [],
         "public_benchmark_ready": true,
         "release_allowed": false,
@@ -3016,12 +3031,12 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T17:06:07.969621+00:00",
+  "generated_at": "2026-07-02T17:19:34.168774+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
-    "README.md": "sha256:5df54f8eca7eab943e18a1c63b5ff444dfe6ffa2c68646f72228cb04e9616071",
-    "docs/commercialization-gap-current-state.md": "sha256:df5c2262dcb46b9b550ceaa5589b9ff095a073569500207479506930628d9917",
+    "README.md": "sha256:39963e2cbbe62aa6b852a920d9d9c0c495e34cfcc8bcfb5d5d7ce3d4cc39f8be",
+    "docs/commercialization-gap-current-state.md": "sha256:49d50ff76e11613755c2fe27ca824013c831018a6cf637dcb698114d960847b1",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:0c85df1de3520e7831dd57c1e7b0c910af0e3daac986ca41a0582b8b46f2d9de",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:3d022ddd47c81a9b2f5d15beae77bb88b1b56dce6475f7ca92c22d262e5d2292",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:3fad3a934acb2ca943bbcab8cff245152b0bbbc9d5ba427e90ef23d78c581115",
@@ -3030,7 +3045,7 @@
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:1df7cf1ef4cef845ddf05b55fe96979c7ab5759c5c416e86adf090c1fa995a02",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:0434837107367b553478f45c48ec8dded88ebfad89847d6c3affcace6e3ffdca",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:b85c948fb870c71d7b81d930c2a284aa5979ff251ccef213fc8edce973c496a2",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:9011694bc290bb661334e0426c633766e1306f32020b83601caa74a790b4df62",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:dce892002144b92bf3cd56ac757c5c1a4cef04469dba11a31bf8dbd49da16a11",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e2a6958f91c458977e7653abe1dedf0a926e23a26892356a0fbfc6d18ba6bc30",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:b0a4a34ae045cd9d7e8f455105ab0108fb6e88c553d621d57362036120ae7910",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:c52e217123d78edad8a4b799b46f85ce89a57fc45191d8022e53606d1cf0b704",
@@ -3041,8 +3056,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:704e44a74d8ba8728e51f23d596fbee0be1afa8e04dd3dfa74abde6358fb5002",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:5f2b7ae6e2a04e0b34eec851aa525ac845aeea72b3dfe59d2f28f7a103b9f10b",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:f459fab6d2f24d8c65cedc4eec3b91b2701302d653c3799472de28ad3523ed43",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1aa395f991ae9dab01130e002d3412aa46426249d4f448bab0b105896f09fbbc",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:dc73c009f3bdbe532c1dee7538b7ca2df90fc16f3f0de6113084340c497d1ace",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:430f4b370c1b7e4477d591eb2222933da6315f0c9bb50e36f3b8f71871f54189",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:b72eaca2998a769c64f411f86b8f9a73fbfc294b5a4a3f4ac442927625d7d4c3",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:862b21d27e4ad5e88980ec3eae431c500fc1304a85764b9eb619758d5393d272",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:92bcb7b0eabc7b8069da9e2891fa23c66ac93db3007bcfcebd5fca25a3d4c196",
@@ -3230,7 +3245,7 @@
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
     "non_structural_evidence_surface_excluded_count": 3,
-    "operator_action_count": 16,
+    "operator_action_count": 18,
     "operator_actions": [],
     "public_benchmark_ready": true,
     "release_allowed": false,
@@ -3301,10 +3316,12 @@
     },
     "fresh validation": {
       "blocked": true,
-      "blocker_count": 3,
+      "blocker_count": 5,
       "blockers": [
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed",
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
         "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed"
       ]
     },
@@ -3357,7 +3374,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "8458ad6bb48d4f4567fce3e64c6907290f2109da",
+  "source_commit_sha": "f0f079546445cb9d70e5c40d34a75c9f91e7aa17",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3455,23 +3472,25 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T17:06:07.646139+00:00",
+        "generated_at": "2026-07-02T17:14:17.921637+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "8458ad6bb48d4f4567fce3e64c6907290f2109da",
+        "source_commit_sha": "f0f079546445cb9d70e5c40d34a75c9f91e7aa17",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3490,11 +3509,13 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3513,11 +3534,13 @@
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3536,11 +3559,13 @@
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3559,11 +3584,13 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3582,10 +3609,12 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
@@ -3602,29 +3631,26 @@
       },
       {
         "artifact": "fresh_full_validation_lane_status",
-        "changed_paths_since_source_commit": [
-          "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
-          "tests/test_build_product_readiness_snapshot.py"
-        ],
-        "generated_at": "2026-07-02T16:56:48.680035+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-02T17:14:17.554400+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "c36be6d03138235d212151b73e0063ec7fd3254a",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "f0f079546445cb9d70e5c40d34a75c9f91e7aa17",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "exact"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3643,11 +3669,13 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3666,11 +3694,13 @@
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3689,11 +3719,13 @@
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3712,11 +3744,13 @@
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3735,11 +3769,13 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3758,11 +3794,13 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3781,11 +3819,13 @@
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3804,10 +3844,12 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
@@ -3825,11 +3867,13 @@
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3848,11 +3892,13 @@
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_paid_pilot_scope_guard_report.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
           "tests/test_build_pm_release_blocker_action_register.py",
@@ -3871,9 +3917,11 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py"
@@ -3890,9 +3938,11 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py"
@@ -3909,9 +3959,11 @@
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py"
@@ -3928,10 +3980,12 @@
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
+          "scripts/build_fresh_full_validation_lane_status.py",
           "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_fresh_full_validation_lane_status.py",
           "tests/test_build_g1_f2g_f2h_cause_narrowing_status.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
@@ -3948,9 +4002,9 @@
       }
     ],
     "open_blocker_counts": {
-      "README.md": 16,
-      "docs/commercialization-gap-current-state.md": 16,
-      "pm_release_blocker_action_register": 16
+      "README.md": 18,
+      "docs/commercialization-gap-current-state.md": 18,
+      "pm_release_blocker_action_register": 18
     },
     "release_area_counts": {
       "README.md": [
@@ -3969,13 +4023,24 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
+        "README.md",
+        "docs/commercialization-gap-current-state.md",
+        "docs/pm-release-gate-milestones.md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
+        "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
         "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
       "non_receipt_dirty_paths": [],
@@ -4001,13 +4066,24 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
+        " M README.md",
+        " M docs/commercialization-gap-current-state.md",
+        " M docs/pm-release-gate-milestones.md",
+        " M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        " M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         " M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
+        " M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
