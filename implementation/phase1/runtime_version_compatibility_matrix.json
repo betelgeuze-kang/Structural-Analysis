@@ -25,10 +25,12 @@
     {
       "requirement": {
         "cpu_fallback_used": false,
-        "device": "cuda:0",
-        "host_copy_share": 0.0,
-        "runtime_backend": "rocm_torch",
-        "runtime_kind": "rust_hip"
+        "device": "AMD Radeon RX 6900 XT",
+        "native_hip_c_abi": true,
+        "operator_buffers_device_resident": true,
+        "runtime_backend": "native_hip_c_abi",
+        "runtime_kind": "mgt_rust_hip_full_residual_ffi",
+        "rust_ffi_residual_gate_ready": true
       },
       "status": "verified",
       "target": "strict_rust_hip_probe"
@@ -52,6 +54,6 @@
       "status": "manifest_ready"
     }
   ],
-  "generated_at": "2026-07-02T08:41:48.706998+00:00",
+  "generated_at": "2026-07-02T08:48:30.180059+00:00",
   "schema_version": "runtime-version-compatibility-matrix.v1"
 }

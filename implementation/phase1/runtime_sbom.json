@@ -102,7 +102,7 @@
       "version": "0.1.0"
     }
   ],
-  "generated_at": "2026-07-02T08:41:48.706144+00:00",
+  "generated_at": "2026-07-02T08:48:30.179107+00:00",
   "schema_version": "runtime-sbom.v1",
   "source_files": {
     "cargo_lock": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.lock",

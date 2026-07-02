@@ -47,12 +47,11 @@ def _runtime_fixture(tmp_path: Path) -> dict[str, Path]:
         "runtime_probe": _write_json(
             tmp_path / "probe.json",
             {
-                "strict_rust_hip_pass": True,
-                "runtime_kind": "rust_hip",
-                "runtime_backend": "rocm_torch",
-                "cpu_fallback_used": False,
-                "host_copy_share": 0.0,
-                "probe": {"device": "cuda:0"},
+                "status": "pass",
+                "rust_ffi_residual_gate_ready": True,
+                "native_hip_c_abi": True,
+                "operator_buffers_device_resident": True,
+                "device_name": "AMD Radeon RX 6900 XT",
             },
         ),
         "runtime_wrapper": _write_text(tmp_path / "runtime-wrapper.py", "print('runtime')\n"),
