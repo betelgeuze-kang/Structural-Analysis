@@ -2433,12 +2433,33 @@
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-02T03:17:32.869555+00:00",
+  "generated_at": "2026-07-02T03:22:18.168110+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:e6dd42b94578cdfb06baf6752a56c52e1998b424156b7cd65e8bcb7d4007e4ff",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:4e87ae50c4850edd04dd7be8c2740eff518a81c7630db18ee35e15094e7bc497"
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:b08ddc36c1e2eb70e36eabbd5454707b4e2cd0bc0b79e3a93ffbdab3543acc5d",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:3968df9311831ce70d865fd29332cff649946dc673df17a63cd299cf8f9211ca"
   },
   "owner_decision_required_count": 86,
+  "placeholder_rejection_policy": {
+    "rejected_fields": [
+      "owner_identity",
+      "owner_role",
+      "evidence_reference",
+      "external_archive_reference",
+      "signed_owner_exception_reference"
+    ],
+    "rejected_values": [
+      "<...>",
+      "TODO",
+      "TBD",
+      "placeholder",
+      "replace-me",
+      "fill-me",
+      "N/A",
+      "none",
+      "null",
+      "unknown"
+    ]
+  },
   "required_closure_evidence": [
     "owner_identity_and_role",
     "decision_timestamp_utc",
@@ -2451,6 +2472,6 @@
   "reuse_policy": "structural_scope_owner_decision_template_from_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decisions.v1",
-  "source_commit_sha": "e52363594acb2ae91781b66e910b66eb61c6cb4c",
+  "source_commit_sha": "0cf383acbba03eac57894bdbe545285a87937fc1",
   "status": "pending_owner_decisions"
 }

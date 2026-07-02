@@ -6,6 +6,11 @@
 - `external_archive_reference`: required when `owner_decision` is `extract_to_molecular_or_science_repository`
 - `signed_owner_exception_reference`: required when `owner_decision` is `retain_quarantined_with_signed_owner_exception`
 
+## Placeholder Rejection Policy
+
+- `rejected_fields`: `owner_identity, owner_role, evidence_reference, external_archive_reference, signed_owner_exception_reference`
+- `rejected_values`: `<...>, TODO, TBD, placeholder, replace-me, fill-me, N/A, none, null, unknown`
+
 | Row | Path | Recommended Decision |
 |---|---|---|
 | `structural-scope-owner-001` | `implementation/phase1/md3bead_scientific_validity_report.md` | `extract_to_molecular_or_science_repository_or_delete_if_obsolete` |
