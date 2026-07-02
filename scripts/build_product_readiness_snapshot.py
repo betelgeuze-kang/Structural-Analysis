@@ -588,6 +588,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/build_pm_release_blocker_action_register.py",
             "scripts/build_g1_f2g_f2h_cause_narrowing_status.py",
             "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
+            "scripts/build_g1_load_dependent_near_null_packet.py",
             "scripts/build_goal_bottleneck_roadmap_surface.py",
             "scripts/build_phase3_large_model_runner_readiness_receipt.py",
             "scripts/build_phase6_benchmark_scale_status.py",
