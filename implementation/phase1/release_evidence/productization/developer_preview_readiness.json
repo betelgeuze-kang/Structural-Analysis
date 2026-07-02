@@ -229,7 +229,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-02T10:44:07.984271+00:00",
+  "generated_at": "2026-07-02T11:01:45.507091+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -248,11 +248,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:dc28189df23dca6ad23481adc721613face50988c4b89e1436b19efb0b8ddcdc",
+      "input_checksum": "sha256:45095637bd6b640a7c87328fb4994d432b3ff4ba0ab4818863ec4cee1aa935d3",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "aec2ab534e549de28b6987419112b1e6c1bd9514",
+      "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
       "status": "blocked"
     }
   },
@@ -260,7 +260,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d8cdf2989191bbff716779c472be3600e326f5f86a6bccb9093aca4b012ac778",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:dc28189df23dca6ad23481adc721613face50988c4b89e1436b19efb0b8ddcdc"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:45095637bd6b640a7c87328fb4994d432b3ff4ba0ab4818863ec4cee1aa935d3"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -427,8 +427,20 @@
           "g1_full_load_lane::full_load_input_not_pass": "g1::full_load_gate_not_closed",
           "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::production_rocm_hip_residency_not_closed",
-          "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::material_newton_breadth_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_worker::direct_probe_not_executed": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_hip_solver_not_proven": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_worker::rocm_hip_runtime_unavailable": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_worker::runtime::dev_dri_missing": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_worker::runtime::dev_kfd_missing": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready": "g1::material_newton_breadth_not_closed",
           "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::full_load_gate_not_closed",
@@ -460,11 +472,11 @@
           {
             "active": true,
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
-            "represented_detail_blocker_count": 6,
+            "represented_detail_blocker_count": 18,
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 23,
+        "suppressed_detail_blocker_count": 35,
         "unmatched_detail_blockers": [
           "g1_full_load_lane::auto_select_no_loadable_candidates",
           "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate"
@@ -486,7 +498,7 @@
           "full_load_hip_newton_lane_ready": false,
           "full_mesh_full_load_ready": false,
           "hip_consistency_proof_ready": false,
-          "hip_residual_jvp_worker_path_ready": true,
+          "hip_residual_jvp_worker_path_ready": false,
           "hip_worker_g1_closure_gate_ready": false
         },
         "gpu_hip_followup_scope": [
@@ -517,8 +529,20 @@
         "g1_full_load_lane::full_load_input_not_pass": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_has_blockers": "g1::*",
-        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_worker::direct_probe_not_executed": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_hip_solver_not_proven": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_worker::rocm_hip_runtime_unavailable": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_worker::runtime::dev_dri_missing": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_worker::runtime::dev_kfd_missing": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready": "g1::*",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::*",
         "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::*",
@@ -1735,23 +1759,41 @@
         "blockers": [
           "hip_consistency_proof_gate_not_passed",
           "hip_consistency_proof_has_blockers",
-          "hip_consistency_proof_source_commit_sha_mismatch",
+          "hip_consistency_proof_production_hip_path_not_proven",
+          "hip_consistency_proof_residual_jvp_worker_path_not_ready",
+          "hip_consistency_proof_runtime::dev_dri_missing",
+          "hip_consistency_proof_runtime::dev_kfd_missing",
           "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
+          "hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
+          "hip_consistency_proof_worker::direct_probe_not_executed",
+          "hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+          "hip_consistency_proof_worker::global_krylov_hip_solver_not_proven",
+          "hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained",
+          "hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven",
+          "hip_consistency_proof_worker::rocm_hip_runtime_unavailable",
+          "hip_consistency_proof_worker::runtime::dev_dri_missing",
+          "hip_consistency_proof_worker::runtime::dev_kfd_missing",
           "hip_consistency_proof_worker_g1_closure_gate_not_ready"
         ],
-        "changed_paths_since_source_commit": [
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py"
-        ],
+        "changed_paths_since_source_commit": [],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
-        "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
+        "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback",
         "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         "present": true,
-        "production_hip_residual_jacobian_path": true,
+        "production_hip_residual_jacobian_path": false,
         "production_rocm_hip_residual_jvp_worker": {
           "blockers": [
-            "consistent_residual_jacobian_newton_gate_not_passed"
+            "consistent_residual_jacobian_newton_gate_not_passed",
+            "current_tangent_residual_row_hip_replay_not_proven",
+            "direct_probe_not_executed",
+            "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+            "global_krylov_hip_solver_not_proven",
+            "global_krylov_jvp_rows_not_retained",
+            "production_hip_residual_jacobian_path_not_proven",
+            "rocm_hip_runtime_unavailable",
+            "runtime::dev_dri_missing",
+            "runtime::dev_kfd_missing"
           ],
           "g1_closure_gate_blockers": [
             "consistent_residual_jacobian_newton_gate_not_passed"
@@ -1759,28 +1801,37 @@
           "g1_closure_gate_ready": false,
           "present": true,
           "ready": false,
-          "residual_jvp_worker_path_blockers": [],
-          "residual_jvp_worker_path_ready": true,
+          "residual_jvp_worker_path_blockers": [
+            "current_tangent_residual_row_hip_replay_not_proven",
+            "direct_probe_not_executed",
+            "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+            "global_krylov_hip_solver_not_proven",
+            "global_krylov_jvp_rows_not_retained",
+            "production_hip_residual_jacobian_path_not_proven",
+            "rocm_hip_runtime_unavailable",
+            "runtime::dev_dri_missing",
+            "runtime::dev_kfd_missing"
+          ],
+          "residual_jvp_worker_path_ready": false,
           "status": "blocked",
           "worker_id": "consistent_residual_jacobian_newton_rocm_worker"
         },
         "ready": false,
         "receipt_blockers": [
-          "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
-          "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
-          "hip_direct_probe::consistent_jacobian_or_globalization_required",
-          "hip_direct_probe::direct_residual_gate_not_closed",
-          "hip_direct_probe::full_load_gate_not_closed",
-          "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
-          "hip_direct_probe_consistent_residual_jacobian_not_closed",
-          "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed"
+          "rocm_hip_runtime_unavailable",
+          "hip_runtime::dev_kfd_missing",
+          "hip_runtime::dev_dri_missing",
+          "hip_residual_jacobian_consistency_not_executed"
         ],
         "reused_evidence": false,
         "rocm_hip_required": true,
-        "runtime_blockers": [],
-        "source_commit_sha": "a1ad46cb53bb63c0644d7ef6dc74b313ba7a17a7",
-        "source_state_fresh": false,
-        "source_state_kind": "g1_hip_paths_changed",
+        "runtime_blockers": [
+          "dev_kfd_missing",
+          "dev_dri_missing"
+        ],
+        "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
+        "source_state_fresh": true,
+        "source_state_kind": "exact",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -1792,7 +1843,7 @@
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 23,
+      "suppressed_detail_blocker_count": 35,
       "suppressed_detail_blockers": [
         "g1_full_load_lane::auto_select_no_loadable_candidates",
         "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
@@ -1811,8 +1862,20 @@
         "g1_full_load_lane::full_load_input_not_pass",
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
         "g1_full_load_lane::hip_consistency_proof_has_blockers",
-        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
+        "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven",
+        "g1_full_load_lane::hip_consistency_proof_residual_jvp_worker_path_not_ready",
+        "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing",
+        "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
         "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
+        "g1_full_load_lane::hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
+        "g1_full_load_lane::hip_consistency_proof_worker::direct_probe_not_executed",
+        "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+        "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_hip_solver_not_proven",
+        "g1_full_load_lane::hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained",
+        "g1_full_load_lane::hip_consistency_proof_worker::production_hip_residual_jacobian_path_not_proven",
+        "g1_full_load_lane::hip_consistency_proof_worker::rocm_hip_runtime_unavailable",
+        "g1_full_load_lane::hip_consistency_proof_worker::runtime::dev_dri_missing",
+        "g1_full_load_lane::hip_consistency_proof_worker::runtime::dev_kfd_missing",
         "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
         "g1_full_load_lane::observed_load_scale_below_required_full_load",
@@ -2149,6 +2212,6 @@
       }
     }
   },
-  "source_commit_sha": "e6b967bd9556dff9129034ce75b51689347707b9",
+  "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
   "status": "blocked"
 }
