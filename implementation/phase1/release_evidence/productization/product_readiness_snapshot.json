@@ -2932,7 +2932,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T09:41:30.728938+00:00",
+  "generated_at": "2026-07-02T09:49:46.434154+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2966,7 +2966,7 @@
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:e0d5c3f8830e73b6e83fa98ddc817850e760efefe9f5cc6090beb9e0ac4a930c",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:6e2b4d54ab7715bf04569feb6eb0d39729674da058630700729ae9ed4c446a5e"
+    "scripts/build_product_readiness_snapshot.py": "sha256:e83e85977f9d80f1fa4ded2dfd12f930744bd878ae14d33d3707c14c128354a7"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -3282,7 +3282,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "b49a7cb487bb8088f466a1202f2b5593a0df052d",
+  "source_commit_sha": "39046781af9d5876f7062aa1dc086228dca7e48c",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -4177,8 +4177,7 @@
       "dirty_paths": [
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
-        "implementation/phase1/scaleout_io_profile_report.json"
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4205,8 +4204,7 @@
       "status_rows": [
         " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
-        " M implementation/phase1/scaleout_io_profile_report.json"
+        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ]
     }
   },

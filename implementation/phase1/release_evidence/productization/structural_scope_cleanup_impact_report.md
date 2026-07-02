@@ -1,21 +1,21 @@
 # Structural Scope Cleanup Impact Report
 
-- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=111 | blocking=62 | owner_pending=86`
+- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=109 | blocking=60 | owner_pending=86`
 - `contract_pass`: `False`
 - `cleanup_impact_clear`: `False`
 - `quarantined_path_count`: `86`
-- `reference_path_count`: `111`
-- `blocking_cleanup_reference_path_count`: `62`
+- `reference_path_count`: `109`
+- `blocking_cleanup_reference_path_count`: `60`
 - `owner_decision_pending_count`: `86`
 - `release_surface_cleanup_blocked_path_count`: `0`
-- `blocking_reference_cleanup_batch_count`: `5`
-- `release_freshness_source_boundary_reference_count`: `3`
+- `blocking_reference_cleanup_batch_count`: `3`
+- `release_freshness_source_boundary_reference_count`: `1`
 
 ## Reference Roles
 
-- `reference_role_counts`: `{'documentation_reference': 1, 'implementation_runtime_or_manifest_reference': 39, 'other_reference': 1, 'release_governance_reference': 19, 'scope_governance_reference': 30, 'script_reference': 9, 'test_reference': 12}`
-- `blocking_reference_role_counts`: `{'documentation_reference': 1, 'implementation_runtime_or_manifest_reference': 39, 'other_reference': 1, 'script_reference': 9, 'test_reference': 12}`
-- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 9, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 12, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 39, 'remove_non_structural_scope_ignore_or_metadata_reference': 1, 'rewrite_structural_docs_to_scope_boundary_only': 1}`
+- `reference_role_counts`: `{'implementation_runtime_or_manifest_reference': 39, 'release_governance_reference': 19, 'scope_governance_reference': 30, 'script_reference': 9, 'test_reference': 12}`
+- `blocking_reference_role_counts`: `{'implementation_runtime_or_manifest_reference': 39, 'script_reference': 9, 'test_reference': 12}`
+- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 9, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 12, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 39}`
 
 ## Cleanup Batches
 
@@ -24,8 +24,6 @@
 | `cleanup_refs_02_implementation_runtime_or_manifest_reference` | 2 | `implementation_runtime_or_manifest_reference` | 39 | 1 | `remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts` |
 | `cleanup_refs_03_script_reference` | 3 | `script_reference` | 9 | 0 | `delete_or_extract_molecular_script_or_remove_quarantined_path_refs` |
 | `cleanup_refs_04_test_reference` | 4 | `test_reference` | 12 | 0 | `delete_or_extract_molecular_tests_or_update_scope_guard_tests` |
-| `cleanup_refs_05_documentation_reference` | 5 | `documentation_reference` | 1 | 1 | `rewrite_structural_docs_to_scope_boundary_only` |
-| `cleanup_refs_06_other_reference` | 6 | `other_reference` | 1 | 1 | `remove_non_structural_scope_ignore_or_metadata_reference` |
 
 ## Release Surface First Impact
 
@@ -39,8 +37,6 @@
 
 | Path | Role | Source Boundary | Terms | Scope Tokens | Quarantined Paths |
 |---|---|---:|---:|---|---:|
-| `.gitignore` | `other_reference` | `True` | 1 | `md3bead` | 5 |
-| `docs/engine-ai-and-comparison-commercialization-gaps.md` | `documentation_reference` | `True` | 2 | `md3bead` | 5 |
 | `implementation/phase1/README.md` | `implementation_runtime_or_manifest_reference` | `True` | 11 | `md3bead` | 8 |
 | `implementation/phase1/ci-gate-reason-codebook.md` | `implementation_runtime_or_manifest_reference` | `False` | 0 | `md3bead` | 0 |
 | `implementation/phase1/ci_artifact_manifest.json` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 1 |
@@ -105,7 +101,7 @@
 ## Blockers
 
 - `owner_decision_pending_count=86`
-- `blocking_cleanup_reference_path_count=62`
+- `blocking_cleanup_reference_path_count=60`
 
 ## Next Actions
 
