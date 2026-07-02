@@ -563,6 +563,93 @@ def test_build_register_surfaces_fresh_receipt_builder_commands(tmp_path: Path) 
     )
 
 
+def test_build_register_surfaces_gpu_and_performance_fresh_receipt_commands(
+    tmp_path: Path,
+) -> None:
+    fresh_status = _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "rows": [
+                {
+                    "lane_id": "gpu_hip_solver",
+                    "runner": "gpu_capable_rocm_hip_validation",
+                    "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json",
+                    "fresh_validation_receipt_present": True,
+                    "fresh_validation_receipt_fresh": True,
+                    "fresh_validation_receipt_lane_matches": True,
+                    "fresh_validation_receipt_runner_matches": True,
+                    "fresh_validation_receipt_contract_pass": True,
+                    "fresh_validation_receipt_blockers": [],
+                },
+                {
+                    "lane_id": "performance_profile",
+                    "runner": "performance_validation",
+                    "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json",
+                    "fresh_validation_receipt_present": True,
+                    "fresh_validation_receipt_fresh": True,
+                    "fresh_validation_receipt_lane_matches": True,
+                    "fresh_validation_receipt_runner_matches": True,
+                    "fresh_validation_receipt_contract_pass": True,
+                    "fresh_validation_receipt_blockers": [],
+                },
+            ]
+        },
+    )
+    report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | ga=BLOCKED",
+            "full_release_blockers": [],
+            "release_area_blockers": [],
+            "blockers": [],
+            "milestones": [],
+            "release_area_matrix": [],
+            "release_tiers": {
+                "ga_enterprise_blockers": [
+                    "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed",
+                    "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
+                ],
+                "fresh_full_validation_lane_status": str(fresh_status),
+            },
+        },
+    )
+
+    payload = build_register_module.build_register(pm_report=report)
+    rows = {row["blocker_id"]: row for row in payload["rows"]}
+    gpu_row = rows[
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed"
+    ]
+    performance_row = rows[
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed"
+    ]
+
+    assert any(
+        "scripts/build_fresh_validation_receipt.py" in command
+        and "--lane-id gpu_hip_solver" in command
+        and "--runner gpu_capable_rocm_hip_validation" in command
+        and "run_solver_hip_e2e_contract.py" in command
+        and "--receipt-artifact implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json:solver_hip_e2e_contract_report" in command
+        for command in gpu_row["reproduction_commands"]
+    )
+    assert any(
+        "validate_fresh_validation_receipt.py --receipt implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json" in command
+        for command in gpu_row["verification_commands"]
+    )
+    assert any(
+        "scripts/build_fresh_validation_receipt.py" in command
+        and "--lane-id performance_profile" in command
+        and "--runner performance_validation" in command
+        and "run_performance_profiling_gate.py" in command
+        and "--receipt-artifact implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json:gate_report" in command
+        and "--receipt-artifact implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md:sprint_targets_markdown" in command
+        for command in performance_row["reproduction_commands"]
+    )
+    assert any(
+        "validate_fresh_validation_receipt.py --receipt implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json" in command
+        for command in performance_row["verification_commands"]
+    )
+
+
 def test_build_register_prioritizes_ci_job_start_blocker_state(tmp_path: Path) -> None:
     report = _pm_report(tmp_path / "pm_release_gate_report.json")
     payload = json.loads(report.read_text(encoding="utf-8"))

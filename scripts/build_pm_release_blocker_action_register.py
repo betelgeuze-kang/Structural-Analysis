@@ -91,6 +91,24 @@ DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS = Path(
 DEFAULT_FRESH_VALIDATION_RECEIPT_ROOT = Path(
     "implementation/phase1/release_evidence/full_validation"
 )
+DEFAULT_GPU_HIP_E2E_CONTRACT_REPORT = Path(
+    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
+)
+DEFAULT_ZERO_COPY_REAL_PROBE_STRICT_REPORT = Path(
+    "implementation/phase1/zero_copy_real_probe_report_strict.json"
+)
+DEFAULT_PERFORMANCE_PROFILING_GATE_REPORT = Path(
+    "implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json"
+)
+DEFAULT_PERFORMANCE_BOTTLENECK_MAP = Path(
+    "implementation/phase1/release_evidence/performance/performance_bottleneck_map.md"
+)
+DEFAULT_PERFORMANCE_OPTIMIZATION_SPRINT_TARGETS = Path(
+    "implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json"
+)
+DEFAULT_PERFORMANCE_OPTIMIZATION_SPRINT_TARGETS_MD = Path(
+    "implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md"
+)
 DEFAULT_EXTERNAL_BENCHMARK_EXECUTION_MANIFEST = Path(
     "implementation/phase1/release/external_benchmark_kickoff/"
     "external_benchmark_execution_manifest.json"
@@ -683,6 +701,77 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
 
 
 def _fresh_validation_lane_reproduction_commands(lane_id: str) -> list[str]:
+    if lane_id == "gpu_hip_solver":
+        validation_command = (
+            "python3 implementation/phase1/run_solver_hip_e2e_contract.py "
+            f"--out {DEFAULT_GPU_HIP_E2E_CONTRACT_REPORT}"
+        )
+        return [
+            "python3 scripts/build_fresh_validation_receipt.py "
+            "--lane-id gpu_hip_solver "
+            "--runner gpu_capable_rocm_hip_validation "
+            f"--validation-command \"{validation_command}\" "
+            "--input implementation/phase1/run_solver_hip_e2e_contract.py "
+            f"--input {DEFAULT_ZERO_COPY_REAL_PROBE_STRICT_REPORT} "
+            f"--receipt-artifact {DEFAULT_GPU_HIP_E2E_CONTRACT_REPORT}:solver_hip_e2e_contract_report "
+            f"--output-receipt {_receipt_path(lane_id)} "
+            f"--out-result {_receipt_result_path(lane_id)} "
+            "--case-count 20 --passed-case-count 20 --fail-blocked"
+        ]
+    if lane_id == "performance_profile":
+        validation_command = (
+            "python3 implementation/phase1/run_performance_profiling_gate.py "
+            "--p0-engine-perf-report implementation/phase1/p0_engine_perf_report.json "
+            "--gpu-bottleneck-audit-report "
+            "implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json "
+            "--ndtha-long-profile-report implementation/phase1/ndtha_long_profile_report.json "
+            "--track-lf-solver-report implementation/phase1/track_lf_solver_report.json "
+            "--moving-load-integrator-report implementation/phase1/moving_load_integrator_report.json "
+            "--moving-load-integrator-large-report "
+            "implementation/phase1/release_evidence/performance/moving_load_integrator_large_report.json "
+            "--moving-load-integrator-xlarge-report "
+            "implementation/phase1/release_evidence/performance/moving_load_integrator_xlarge_report.json "
+            "--vti-coupled-solver-report implementation/phase1/vti_coupled_solver_report.json "
+            "--vti-contact-window-variant-sweep-report "
+            "implementation/phase1/release_evidence/performance/vti_contact_window_variant_sweep_report.json "
+            "--ssi-boundary-report implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json "
+            "--contact-readiness-report "
+            "implementation/phase1/release_evidence/performance/contact_readiness_report.json "
+            "--foundation-soil-link-report "
+            "implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json "
+            f"--solver-hip-e2e-report {DEFAULT_GPU_HIP_E2E_CONTRACT_REPORT} "
+            f"--out {DEFAULT_PERFORMANCE_PROFILING_GATE_REPORT} "
+            f"--bottleneck-map-md {DEFAULT_PERFORMANCE_BOTTLENECK_MAP} "
+            f"--sprint-targets-json {DEFAULT_PERFORMANCE_OPTIMIZATION_SPRINT_TARGETS} "
+            f"--sprint-targets-md {DEFAULT_PERFORMANCE_OPTIMIZATION_SPRINT_TARGETS_MD}"
+        )
+        return [
+            "python3 scripts/build_fresh_validation_receipt.py "
+            "--lane-id performance_profile "
+            "--runner performance_validation "
+            f"--validation-command \"{validation_command}\" "
+            "--input implementation/phase1/moving_load_integrator_report.json "
+            "--input implementation/phase1/ndtha_long_profile_report.json "
+            "--input implementation/phase1/p0_engine_perf_report.json "
+            f"--input {DEFAULT_GPU_HIP_E2E_CONTRACT_REPORT} "
+            "--input implementation/phase1/release_evidence/performance/contact_readiness_report.json "
+            "--input implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json "
+            "--input implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json "
+            "--input implementation/phase1/release_evidence/performance/moving_load_integrator_large_report.json "
+            "--input implementation/phase1/release_evidence/performance/moving_load_integrator_xlarge_report.json "
+            "--input implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json "
+            "--input implementation/phase1/release_evidence/performance/vti_contact_window_variant_sweep_report.json "
+            "--input implementation/phase1/run_performance_profiling_gate.py "
+            "--input implementation/phase1/track_lf_solver_report.json "
+            "--input implementation/phase1/vti_coupled_solver_report.json "
+            f"--receipt-artifact {DEFAULT_PERFORMANCE_PROFILING_GATE_REPORT}:gate_report "
+            f"--receipt-artifact {DEFAULT_PERFORMANCE_BOTTLENECK_MAP}:bottleneck_map "
+            f"--receipt-artifact {DEFAULT_PERFORMANCE_OPTIMIZATION_SPRINT_TARGETS}:sprint_targets "
+            f"--receipt-artifact {DEFAULT_PERFORMANCE_OPTIMIZATION_SPRINT_TARGETS_MD}:sprint_targets_markdown "
+            f"--output-receipt {_receipt_path(lane_id)} "
+            f"--out-result {_receipt_result_path(lane_id)} "
+            "--case-count 14 --passed-case-count 14 --fail-blocked"
+        ]
     if lane_id == "external_benchmark_refresh":
         validation_command = (
             "python3 implementation/phase1/run_external_benchmark_refresh_lane.py "
@@ -730,7 +819,10 @@ def _fresh_validation_lane_reproduction_commands(lane_id: str) -> list[str]:
 
 
 def _fresh_validation_lane_verification_commands(lane_id: str) -> list[str]:
-    return []
+    return [
+        "python3 implementation/phase1/validate_fresh_validation_receipt.py "
+        f"--receipt {_receipt_path(lane_id)} --fail-blocked"
+    ]
 
 
 def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
