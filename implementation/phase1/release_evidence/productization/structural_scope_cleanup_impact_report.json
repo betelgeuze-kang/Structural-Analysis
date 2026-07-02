@@ -1337,11 +1337,11 @@
   "cleanup_impact_clear": false,
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T18:29:19.631438+00:00",
+  "generated_at": "2026-07-02T18:31:51.753259+00:00",
   "governance_reference_path_count": 63,
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:a7aa1a09cffcd955e5350ff4a6dcd057fba519353875f1bfa26a9d336e2dc5ba",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:35f54a2139cb5f348658bbb5132ae0c298faa138698dbae53ed1ed1e0434c0f2",
+    "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:76ff0e3ff7b6a42459e0bc5c0018448f861b50030f9a89264f4046f723d78c47",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:7951bd08d24cf38c9b3b7cc19ea40b32ee0fed8a81fb16018de545449df2d9ca",
     "scripts/build_structural_scope_cleanup_impact_report.py": "sha256:54c59e0c3dfcaba8785de17c08e136f7091d7bcfba394d9a22e3dab169653eb3"
   },
   "next_actions": [
@@ -8271,7 +8271,7 @@
   "reuse_policy": "structural_scope_cleanup_impact_report_from_owner_review_and_tracked_references",
   "reused_evidence": false,
   "schema_version": "structural-scope-cleanup-impact-report.v1",
-  "source_commit_sha": "a60eaa2c143d9a08af333fe15382dbaa8d94ff73",
+  "source_commit_sha": "3d4a6fe793d7bbc68b65498957e7da70e4ee80e6",
   "status": "blocked_cleanup_impact",
   "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=98 | blocking=35 | owner_pending=86"
 }
