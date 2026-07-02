@@ -1,11 +1,11 @@
 # Structural Scope Cleanup Impact Report
 
-- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=105 | blocking=45 | owner_pending=86`
+- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=104 | blocking=44 | owner_pending=86`
 - `contract_pass`: `False`
 - `cleanup_impact_clear`: `False`
 - `quarantined_path_count`: `86`
-- `reference_path_count`: `105`
-- `blocking_cleanup_reference_path_count`: `45`
+- `reference_path_count`: `104`
+- `blocking_cleanup_reference_path_count`: `44`
 - `owner_decision_pending_count`: `86`
 - `release_surface_cleanup_blocked_path_count`: `0`
 - `blocking_reference_cleanup_batch_count`: `3`
@@ -13,15 +13,15 @@
 
 ## Reference Roles
 
-- `reference_role_counts`: `{'implementation_runtime_or_manifest_reference': 39, 'release_governance_reference': 19, 'scope_governance_reference': 30, 'script_reference': 7, 'test_reference': 10}`
-- `blocking_reference_role_counts`: `{'implementation_runtime_or_manifest_reference': 35, 'script_reference': 6, 'test_reference': 4}`
-- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 6, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 4, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 35}`
+- `reference_role_counts`: `{'implementation_runtime_or_manifest_reference': 38, 'release_governance_reference': 19, 'scope_governance_reference': 30, 'script_reference': 7, 'test_reference': 10}`
+- `blocking_reference_role_counts`: `{'implementation_runtime_or_manifest_reference': 34, 'script_reference': 6, 'test_reference': 4}`
+- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 6, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 4, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 34}`
 
 ## Cleanup Batches
 
 | Batch | Priority | Role | Paths | Source-Boundary Paths | Action |
 |---|---:|---|---:|---:|---|
-| `cleanup_refs_02_implementation_runtime_or_manifest_reference` | 2 | `implementation_runtime_or_manifest_reference` | 35 | 1 | `remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts` |
+| `cleanup_refs_02_implementation_runtime_or_manifest_reference` | 2 | `implementation_runtime_or_manifest_reference` | 34 | 1 | `remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts` |
 | `cleanup_refs_03_script_reference` | 3 | `script_reference` | 6 | 0 | `delete_or_extract_molecular_script_or_remove_quarantined_path_refs` |
 | `cleanup_refs_04_test_reference` | 4 | `test_reference` | 4 | 0 | `delete_or_extract_molecular_tests_or_update_scope_guard_tests` |
 
@@ -48,7 +48,6 @@
 | `implementation/phase1/commercial_readiness_report.json` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 5 |
 | `implementation/phase1/commercialization-gap-redteam-playbook.md` | `implementation_runtime_or_manifest_reference` | `False` | 5 | `md3bead` | 5 |
 | `implementation/phase1/nightly_release_gate_report.json` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 5 |
-| `implementation/phase1/organize_phase1_workspace.py` | `implementation_runtime_or_manifest_reference` | `False` | 1 | `md3bead` | 5 |
 | `implementation/phase1/p0_core_gap_report.json` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 5 |
 | `implementation/phase1/p0_engine_perf_report.json` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 5 |
 | `implementation/phase1/phase1_ci_gate.py` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 1 |
@@ -86,7 +85,7 @@
 ## Blockers
 
 - `owner_decision_pending_count=86`
-- `blocking_cleanup_reference_path_count=45`
+- `blocking_cleanup_reference_path_count=44`
 
 ## Next Actions
 
