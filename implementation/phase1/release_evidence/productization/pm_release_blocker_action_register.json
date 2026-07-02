@@ -28,14 +28,14 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T13:12:26.948351+00:00",
+  "generated_at": "2026-07-02T13:20:32.532488+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:ff4a13158b40581704ed179f79dac5454ee322c79c5e80e28d89149ce85d2ae5",
+    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:2d06b055d9ab5605562c585a1a6e8977fe7ff9726b29dc70261f26a9796d215b",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:5767b4546cdfe290af10c4c69e51b6bc14c050219c66d7051537cae7440b04a2",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:85a9ca918eb17113aef127c521b2369e7e9b6cfdaf7ecb103fc72522f7a6fff4",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c0657c67f7a5ac6ded55577322bdc7e1f48c690d430f5e5f6ff42df54f4b1988",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9a75f30c000fe05713ab0ebfc8b56c1de5fcddde2857b8b768144c0da1503217",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:22a0eeb5b1cb58a9aecd2b5e56cabf1cfac78d319566ea8b80675a596728c36e",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:fb2c18eb3e65c5374c7a4ded129767a8eda6c7ee74cafd052745aafbe7bec161",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:73f1dda2ca80b4db9872cd7da3a4f247974181ecddabecb6190e269f95b61864",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:d8d18ae72a44048b3f4be961099095fa473aa500ca49dd7ef3859981c9d18346",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:3a8915215c417de65afe874a41551da5d0caebd02ca4308f89620a22a9a1f3a8"
   },
   "next_actions": [
@@ -373,7 +373,7 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 19.206,
+        "ci_streak_source_evidence_age_hours": 26.966,
         "ci_streak_source_evidence_freshness_pass": true,
         "ci_streak_source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
@@ -550,7 +550,7 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 19.206,
+        "ci_streak_source_evidence_age_hours": 26.966,
         "ci_streak_source_evidence_freshness_pass": true,
         "ci_streak_source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
@@ -1663,7 +1663,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "672658d16b19e91fa35acead82a077df83360a67",
+  "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,

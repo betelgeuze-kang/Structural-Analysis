@@ -480,13 +480,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-02T13:12:13.783915+00:00",
+  "generated_at": "2026-07-02T13:21:41.804559+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:cad6ee1593f6ef45f7774e455ad9bde8b7a961aaa5572457eb85b11ffc31a4d4",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f1bf2e5a404d7dce22a175576cb7f020ce7c4f6bf8dcf9417fc5cd157e8b26b9",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:a6c5a9be649567ed72c58f37ce93bcc32ca27a95b9e2b2ef61923e90fa8ea634",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:eb066839eebfe34906264d307764876b2119eb2c7c816c4961261d28b6b1d301",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:a96960eeab83df1f8a60d272043cef33cf30a61b9c47acb26cc2d6c21f561c71",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:479a7496bd48a32504203b058bf797f23e010023a885bb795f5ca3e000f2ffbc",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:7d316838d808a6d391b457d879b10f93ba71360f605222a882e4ffb2f64ab96d",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:2d3fd50ad43bed838d61a6527750819eb5474283cb3c5143562958a6feca9712",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -504,9 +504,9 @@
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:9e61ef1db0ab2e01a3917d1e410a9677e8e5170aa5b9fb7ccc344bc98ee30cdd",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:042ed67e1d625082c5fac4439121442e0ca0505e96bb09f2788b6da04e537c03",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:1da775e8d0cc6b97d1b7454f5b983a9d26660121753f8dfb0cc3b8d925f28291",
-    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:2b88dceb9e18dca0fc4e51469f64097642e9c307cf781c8ea1d7c8743b1d6038",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:fb2c18eb3e65c5374c7a4ded129767a8eda6c7ee74cafd052745aafbe7bec161",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f490d66c9f5c605a99b0fa8013467382f4a4f66e46ed32a9697e3d1666144536",
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:5cd0049e6dacf551e8eab911489964ee1a7630d0af56ee955cf423b72b2f8f9f",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:d8d18ae72a44048b3f4be961099095fa473aa500ca49dd7ef3859981c9d18346",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:9975d27aef1695d830cd1ffca54a17f45ca65e779f1dc6fc5f8bde8cb6774301",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
   },
@@ -3234,6 +3234,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "672658d16b19e91fa35acead82a077df83360a67",
+  "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
   "status": "blocked"
 }

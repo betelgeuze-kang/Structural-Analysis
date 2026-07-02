@@ -1,7 +1,7 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-02T12:59:33.659956+00:00",
-  "source_commit_sha": "8f040cb9673cc10e81c7f7b04761e748de473f34",
+  "generated_at": "2026-07-02T13:19:25.787042+00:00",
+  "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
@@ -110,8 +110,8 @@
             "id": "strict_full_load_hip_newton_checkpoint_available",
             "observed": {
               "full_load_candidate_count": 0,
-              "highest_observed_load_scale": null,
-              "loadable_count": 0,
+              "highest_observed_load_scale": 0.656,
+              "loadable_count": 42,
               "candidate_count": 50
             },
             "target": {
@@ -196,7 +196,7 @@
             "observed": {
               "load_scale_reached": 0.5,
               "full_load_candidate_count": 0,
-              "highest_observed_load_scale": null,
+              "highest_observed_load_scale": 0.656,
               "child_full_load_closure_passed": false,
               "child_relative_increment_gate_passed": false
             },
@@ -329,7 +329,6 @@
           "material_newton_direct_residual_gate_passed": false,
           "full_load_hip_newton_lane_status": "blocked",
           "full_load_hip_newton_lane_blockers": [
-            "auto_select_no_loadable_candidates",
             "checkpoint_load_scale_below_required_full_load",
             "checkpoint_resolution_no_full_load_candidate",
             "hip_consistency_proof_production_hip_path_not_proven",
@@ -358,16 +357,16 @@
             "claim_boundary": "This gate proves only whether the scanned checkpoint evidence contains a loadable checkpoint at the required full-load scale. It does not prove residual, increment, material Newton, or production ROCm/HIP closure.",
             "full_load_candidate_count": 0,
             "full_load_tolerance": 1e-12,
-            "highest_observed_gap_to_required_load_scale": null,
-            "highest_observed_load_scale": null,
-            "loadable_count": 0,
+            "highest_observed_gap_to_required_load_scale": 0.344,
+            "highest_observed_load_scale": 0.656,
+            "loadable_count": 42,
             "mode": "auto_select",
             "passed": false,
             "required_load_scale": 1.0,
             "schema_version": "g1-checkpoint-resolution-gate.v1",
-            "selected_checkpoint_load_scale": null,
+            "selected_checkpoint_load_scale": 0.656,
             "selected_checkpoint_meets_full_load": false,
-            "unloadable_count": 50
+            "unloadable_count": 8
           },
           "full_load_gate_closed": false,
           "material_newton_breadth_closed": false,
