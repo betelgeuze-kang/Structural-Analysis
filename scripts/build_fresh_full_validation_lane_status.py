@@ -347,6 +347,109 @@ def _fresh_validation_result_summary(receipt_root: Path, lane_id: str) -> dict[s
     }
 
 
+def _fresh_validation_result_remediation(
+    *,
+    lane_id: str,
+    runner: str,
+    result_summary: dict[str, Any],
+) -> dict[str, Any]:
+    if result_summary.get("contract_pass") is not False:
+        return {
+            "schema_version": "fresh-validation-result-remediation.v1",
+            "status": "not_applicable",
+            "failure_class": "",
+            "reason_code": "",
+            "current_blockers": [],
+            "operator_action": "",
+            "validation_commands": [],
+            "claim_boundary": "No failed fresh-validation result is active for this lane.",
+        }
+
+    latest_reason = str(result_summary.get("latest_tail_reason_code", "") or "")
+    blockers = [str(item) for item in _as_list(result_summary.get("blockers"))]
+    if latest_reason == "ERR_ROCM_RUNTIME_UNAVAILABLE":
+        failure_class = "rocm_runtime_unavailable"
+        status = "blocked_runtime_environment"
+        operator_action = (
+            "Restore a ROCm/HIP runtime that exposes the required GPU device "
+            "interfaces, then rerun the gpu_hip_solver fresh validation receipt "
+            "builder and regenerate the fresh full-validation lane status."
+        )
+        preflight_checks = [
+            "/dev/kfd is present and accessible to the validation user",
+            "/dev/dri render node is present and accessible to the validation user",
+            "ROCm/HIP runtime libraries are discoverable by the validation command",
+            "implementation/phase1/run_solver_hip_e2e_contract.py returns PASS",
+        ]
+    else:
+        failure_class = "validation_command_failed"
+        status = "blocked_validation_command"
+        operator_action = (
+            "Inspect the fresh validation result command tails, repair the failing "
+            "lane command, then rerun the receipt builder and lane status."
+        )
+        preflight_checks = [
+            "fresh validation command exits with return code 0",
+            "fresh validation receipt result has contract_pass=true",
+        ]
+
+    result_path = str(result_summary.get("path", "") or "")
+    receipt_path = result_path.replace(".result.json", ".json")
+    receipt_command = (
+        "python3 scripts/build_fresh_validation_receipt.py "
+        f"--lane-id {lane_id} "
+        f"--runner {runner} "
+        "--validation-command \"python3 implementation/phase1/"
+        "run_solver_hip_e2e_contract.py --out implementation/phase1/"
+        "release_evidence/gpu/solver_hip_e2e_contract_report.json\" "
+        "--input implementation/phase1/run_solver_hip_e2e_contract.py "
+        "--input implementation/phase1/zero_copy_real_probe_report_strict.json "
+        "--receipt-artifact implementation/phase1/release_evidence/gpu/"
+        "solver_hip_e2e_contract_report.json:solver_hip_e2e_contract_report "
+        f"--output-receipt {receipt_path} "
+        f"--out-result {result_path} "
+        "--case-count 20 --passed-case-count 20 --fail-blocked"
+    )
+    return {
+        "schema_version": "fresh-validation-result-remediation.v1",
+        "status": status,
+        "lane_id": lane_id,
+        "runner": runner,
+        "failure_class": failure_class,
+        "reason_code": latest_reason,
+        "result_path": result_path,
+        "command_returncode": result_summary.get("command_returncode"),
+        "current_blockers": blockers,
+        "operator_action": operator_action,
+        "preflight_checks": preflight_checks,
+        "validation_commands": [
+            receipt_command,
+            (
+                "python3 implementation/phase1/validate_fresh_validation_receipt.py "
+                f"--receipt {receipt_path} --fail-blocked"
+            ),
+            (
+                "python3 scripts/build_fresh_full_validation_lane_status.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "fresh_full_validation_lane_status.json "
+                "--out-md implementation/phase1/release_evidence/productization/"
+                "fresh_full_validation_lane_status.md --fail-blocked"
+            ),
+        ],
+        "closure_requirements": [
+            "fresh_validation_result_contract_pass == true",
+            "fresh_validation_receipt_contract_pass == true",
+            "fresh_validation_receipt_artifact_integrity_pass == true",
+            "lane blocker fresh_validation_result_failed is absent",
+        ],
+        "claim_boundary": (
+            "This remediation plan classifies the failed fresh-validation result. "
+            "It does not make GPU/HIP validation pass, create a fresh receipt, "
+            "or promote release readiness."
+        ),
+    }
+
+
 def _fresh_validation_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
     group_specs = [
         (
@@ -519,6 +622,11 @@ def _lane_row(
     receipt_lane_matches = receipt_present and receipt_payload.get("lane_id") == lane_id
     receipt_runner_matches = receipt_present and receipt_payload.get("runner") == str(lane.get("runner", ""))
     result_summary = _fresh_validation_result_summary(receipt_root, lane_id)
+    result_remediation = _fresh_validation_result_remediation(
+        lane_id=lane_id,
+        runner=str(lane.get("runner", "")),
+        result_summary=result_summary,
+    )
     result_present = bool(result_summary["present"])
     result_contract_pass = result_summary["contract_pass"]
     result_failed = bool(result_present and result_contract_pass is False)
@@ -646,6 +754,10 @@ def _lane_row(
         "fresh_validation_result_latest_tail_reason_code": str(
             result_summary["latest_tail_reason_code"]
         ),
+        "fresh_validation_result_failure_class": str(
+            result_remediation.get("failure_class", "")
+        ),
+        "fresh_validation_result_remediation": result_remediation,
         "pass": lane_pass,
         "blockers": blockers,
     }
@@ -663,6 +775,12 @@ def build_status(
     rows = [
         _lane_row(lane, docs_text=docs_text, receipt_root=receipt_root, receipt_schema=schema)
         for lane in lanes
+    ]
+    failed_result_remediation_rows = [
+        _as_dict(row.get("fresh_validation_result_remediation"))
+        for row in rows
+        if _as_dict(row.get("fresh_validation_result_remediation")).get("status")
+        not in {"", "not_applicable"}
     ]
     blockers = [f"{row['lane_id']}::{blocker}" for row in rows for blocker in row["blockers"]]
     lane_contract_blockers = [
@@ -721,9 +839,17 @@ def build_status(
             "fresh_validation_result_failed_count": sum(
                 1 for row in rows if row["fresh_validation_result_contract_pass"] is False
             ),
+            "fresh_validation_result_runtime_unavailable_count": sum(
+                1
+                for row in rows
+                if row.get("fresh_validation_result_failure_class")
+                == "rocm_runtime_unavailable"
+            ),
             "blocker_count": len(blockers),
         },
         "rows": rows,
+        "failed_result_remediation_rows": failed_result_remediation_rows,
+        "failed_result_remediation_count": len(failed_result_remediation_rows),
         "blockers": blockers,
         "blocker_grouping_metadata": _fresh_validation_blocker_grouping_metadata(blockers),
         "lane_boundary_metadata": _lane_boundary_metadata(rows),
@@ -758,6 +884,27 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"| `{row['lane_id']}` | `{row['materialized_publication_evidence_present']}` | "
             f"`{row['fresh_validation_receipt_present']}` | `{'pass' if row['pass'] else 'blocked'}` |"
         )
+    remediation_rows = [
+        row
+        for row in _as_list(payload.get("failed_result_remediation_rows"))
+        if isinstance(row, dict)
+    ]
+    if remediation_rows:
+        lines.extend(["", "## Failed Result Remediation", ""])
+        lines.extend(
+            [
+                "| Lane | Status | Failure Class | Reason |",
+                "|---|---|---|---|",
+            ]
+        )
+        for row in remediation_rows:
+            lines.append(
+                "| "
+                f"`{row.get('lane_id')}` | "
+                f"`{row.get('status')}` | "
+                f"`{row.get('failure_class')}` | "
+                f"`{row.get('reason_code')}` |"
+            )
     lines.append("")
     return "\n".join(lines)
 

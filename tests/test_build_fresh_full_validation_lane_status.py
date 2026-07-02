@@ -216,6 +216,29 @@ def test_fresh_full_validation_lane_status_blocks_failed_latest_result(
     assert row["fresh_validation_result_latest_tail_reason_code"] == (
         "ERR_ROCM_RUNTIME_UNAVAILABLE"
     )
+    assert row["fresh_validation_result_failure_class"] == (
+        "rocm_runtime_unavailable"
+    )
+    remediation = row["fresh_validation_result_remediation"]
+    assert remediation["schema_version"] == (
+        "fresh-validation-result-remediation.v1"
+    )
+    assert remediation["status"] == "blocked_runtime_environment"
+    assert remediation["failure_class"] == "rocm_runtime_unavailable"
+    assert remediation["reason_code"] == "ERR_ROCM_RUNTIME_UNAVAILABLE"
+    assert remediation["command_returncode"] == 1
+    assert "/dev/kfd is present" in remediation["preflight_checks"][0]
+    assert any(
+        "build_fresh_validation_receipt.py" in command
+        for command in remediation["validation_commands"]
+    )
+    assert payload["summary"][
+        "fresh_validation_result_runtime_unavailable_count"
+    ] == 1
+    assert payload["failed_result_remediation_count"] == 1
+    assert payload["failed_result_remediation_rows"][0]["lane_id"] == (
+        "gpu_hip_solver"
+    )
 
 
 def test_fresh_full_validation_lane_status_suppresses_stale_receipt_mismatch_when_failed_result_is_newer(
