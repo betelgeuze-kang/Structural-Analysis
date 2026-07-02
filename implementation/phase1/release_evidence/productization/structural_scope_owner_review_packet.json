@@ -22,12 +22,12 @@
     "molecular_dynamics": 25,
     "molecular_science_evidence": 13
   },
-  "generated_at": "2026-07-02T00:30:51.893820+00:00",
+  "generated_at": "2026-07-02T02:05:36.094133+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:74442161282fa31da789bd335158452591b4e32efda29ad2609de9d8446e7f05",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:bfb10fddbcf50595d8c7a7a7f0d87def836f904c203aa9a159e6a0b177603142",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:80edad0f3f3c4f87f64c95e388bdbcfe945c7ac8fa77b3f001833b4eeb2e4e11",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:c51e3c4e6ed276fb6167124fb9a1d677fef8ebe93c52a8f5a3fb0fe1e18a0df5"
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:48477af9dacab22b53171ab6ce7bc7242bbae480dce326c3a9a5d503047f23e1"
   },
   "manifest_absent_path_count": 0,
   "owner_decision_pending_count": 86,
@@ -71,7 +71,53 @@
   "post_decision_cleanup_retained_absent_path_count": 0,
   "post_decision_cleanup_retained_absent_paths": [],
   "quarantined_path_count": 86,
+  "release_surface_allowed_owner_decisions": [
+    "delete_from_structural_repository",
+    "extract_to_molecular_or_science_repository"
+  ],
   "release_surface_excluded_path_count": 86,
+  "release_surface_owner_decision_required_count": 3,
+  "release_surface_owner_decision_required_paths": [
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+    "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+  ],
+  "release_surface_owner_review": {
+    "allowed_owner_decisions": [
+      "delete_from_structural_repository",
+      "extract_to_molecular_or_science_repository"
+    ],
+    "owner_decision_recorded_count": 0,
+    "owner_decision_recorded_paths": [],
+    "owner_decision_required_count": 3,
+    "owner_decision_required_paths": [
+      "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+    ],
+    "path_count": 3,
+    "paths": [
+      "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+    ],
+    "post_decision_cleanup_pending_count": 0,
+    "post_decision_cleanup_pending_paths": [],
+    "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+    "recommended_owner_decision_primary": "delete_from_structural_repository",
+    "retain_exception_count": 0,
+    "retain_exception_paths": [],
+    "retain_quarantined_exception_allowed": false,
+    "review_goal": "record owner delete/extract decisions for release-surface non-structural artifacts before any manual cleanup"
+  },
+  "release_surface_path_count": 3,
+  "release_surface_paths": [
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+    "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+  ],
+  "release_surface_post_decision_cleanup_pending_count": 0,
+  "release_surface_retain_quarantined_exception_allowed": false,
   "required_closure_evidence": [
     "owner_identity_and_role",
     "decision_timestamp_utc",
@@ -4591,7 +4637,7 @@
     }
   ],
   "schema_version": "structural-scope-owner-review-packet.v1",
-  "source_commit_sha": "f9d8e633263689b3f1012bbd04659ea049ce174c",
+  "source_commit_sha": "887fcb960bd2f4d5b094ed7c2dbc80984bb7b95f",
   "status": "ready_for_owner_review",
   "summary_line": "Structural scope owner review: READY_FOR_OWNER_REVIEW | pending=86 | cleanup_pending=0 | excluded=86/86 | unquarantined=0",
   "unquarantined_non_structural_path_count": 0,

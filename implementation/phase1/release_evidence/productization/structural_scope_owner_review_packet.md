@@ -9,8 +9,22 @@
 - `post_decision_cleanup_applied_count`: `0`
 - `post_decision_cleanup_missing_owner_decision_count`: `0`
 - `release_surface_excluded_path_count`: `86`
+- `release_surface_path_count`: `3`
+- `release_surface_owner_decision_required_count`: `3`
+- `release_surface_post_decision_cleanup_pending_count`: `0`
 - `unquarantined_non_structural_path_count`: `0`
 - `owner_decisions_path`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json`
+
+## Release Surface First
+
+- `allowed_owner_decisions`: `delete_from_structural_repository, extract_to_molecular_or_science_repository`
+- `retain_quarantined_with_signed_owner_exception_allowed`: `False`
+
+| Path | State | Owner Decision | Required Action |
+|---|---|---|---|
+| `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `pending_owner_decision` | `` | `delete_or_extract_before_release_surface_cleanup` |
+| `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `pending_owner_decision` | `` | `delete_or_extract_before_release_surface_cleanup` |
+| `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `pending_owner_decision` | `` | `delete_or_extract_before_release_surface_cleanup` |
 
 ## Review Groups
 
