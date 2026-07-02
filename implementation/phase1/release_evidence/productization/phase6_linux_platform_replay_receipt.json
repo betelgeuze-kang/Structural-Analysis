@@ -195,7 +195,7 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-07-01T20:47:41.525909+00:00",
+  "generated_at": "2026-07-02T05:31:39.271164+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:fd123502c0ba1dbe040509aed3e042a11fe7bf91bac52c52152e8fa18801db28",

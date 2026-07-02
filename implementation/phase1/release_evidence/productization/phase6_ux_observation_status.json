@@ -200,7 +200,7 @@
       "python3 scripts/build_developer_preview_rc_status.py --check"
     ]
   },
-  "generated_at": "2026-07-02T01:28:06.226528+00:00",
+  "generated_at": "2026-07-02T05:31:39.226642+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -233,8 +233,8 @@
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:a916d9965090d7a7a6814a6c9bca8f6da9e4aadbbaaadd3f4415cd7f24037523",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:76f44d8618dfba4d62dc00e039cf6e290d5f6cdb2cb91296d9ec3021c0cea509",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:7ec48747941e6affe89b3446ab2617bfc17df50fc659ce5f76fef9d41cb08b33",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:3ea9c4b54e36a220375087aedb9fa7fa8b1314b29290c117239c2e960e83bb14",
     "scripts/build_phase6_ux_observation_status.py": "sha256:871c654074772cfa0153dcff929d2bb7b1ad5ce9e1cac1a52228c8d1616edb89"
   },
   "intake_packet_gate": {
@@ -405,7 +405,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "ac7b5c5fc21e129b50e15348c68bf70d6cb9d300",
+  "source_commit_sha": "fb3778ef26814b0d22c5790bc6c4acaae79b9e8e",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=5/5 | browser=True"
 }

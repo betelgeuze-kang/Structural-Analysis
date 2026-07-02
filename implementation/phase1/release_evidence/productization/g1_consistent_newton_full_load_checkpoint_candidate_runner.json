@@ -40,7 +40,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-01T22:48:11.621504+00:00",
+  "generated_at": "2026-07-02T05:31:23.246189+00:00",
   "hip_worker_contract": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -88,8 +88,8 @@
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker"
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:64c8ae7e0041b0980d265b817c8af380b8019767c8e8f0e7ec737d77d1a1af67",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:358b7610b8fd3d0a7b5aa869b5de3f210be0aa8da69d93b5d8ba0774b49e98ec",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:964ceb5f52163536bc028d1c10f40c3bcded60fe92e4634aa24ce224b19b1b32",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:f125900dc01e8d45c747f923ac68d170bc729f9d0e9362e04b0b50041ce3b781",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:0c7539798ab5ae1b91154edebdc718c7c7d13a3e067f63de179b3ae728e321a0",
     "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:0efde34dd1a294c6e2a7f18d236ea934e2f9c4654427228e4275e6734b82fd84"
@@ -191,7 +191,7 @@
     "runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner"
   },
   "schema_version": "g1-consistent-newton-full-load-checkpoint-candidate-runner.v1",
-  "source_commit_sha": "4a55f6205b6f788a44ff66534c2c92bdf6efa73f",
+  "source_commit_sha": "fb3778ef26814b0d22c5790bc6c4acaae79b9e8e",
   "status": "ready_for_runner_implementation",
   "summary": {
     "closure_blocker_count": 19,

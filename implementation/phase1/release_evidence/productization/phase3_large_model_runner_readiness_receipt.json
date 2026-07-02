@@ -99,7 +99,7 @@
     "source_checksum_count": 2,
     "valid_execution_case_count": 0
   },
-  "generated_at": "2026-07-01T21:35:01.313360+00:00",
+  "generated_at": "2026-07-02T05:31:49.911036+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json": "sha256:efe4af8459fc34480a3e5bb6e62dc4022f1bf5bed51c49d428e8847e5c1556d8",
     "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
@@ -345,7 +345,7 @@
   "schema_version": "phase3-large-model-runner-readiness-receipt.v1",
   "scorecard_or_review_count": 0,
   "source_checksum_count": 2,
-  "source_commit_sha": "cc4feb72030ca991990d5c76985e0dd8dbf9d2cb",
+  "source_commit_sha": "fb3778ef26814b0d22c5790bc6c4acaae79b9e8e",
   "source_id": "opensees_megatall_model_2_large",
   "source_identity_inventory": {
     "claim_boundary": "This inventory records already-collected local large-model source files, their SHA256 values, and source URL metadata. It does not approve licenses, create reference outputs, normalize models, execute analyses, or count as large-model PASS/REVIEW evidence.",

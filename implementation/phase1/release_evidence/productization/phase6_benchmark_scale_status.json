@@ -77,7 +77,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T23:03:14.760581+00:00",
+  "generated_at": "2026-07-02T05:31:39.236426+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:2d3fd50ad43bed838d61a6527750819eb5474283cb3c5143562958a6feca9712",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:4a102063db8ed32743ea1e067c1e1d7cd5f8aa35a1232271ec037b7fadd26c69",
@@ -678,7 +678,7 @@
   "reused_evidence": true,
   "schema_version": "phase6-benchmark-scale-status.v1",
   "seed_benchmark_status": "ready",
-  "source_commit_sha": "9e906cb7861d92283965968ee81715658b2e541e",
+  "source_commit_sha": "fb3778ef26814b0d22c5790bc6c4acaae79b9e8e",
   "status": "blocked",
   "summary": {
     "large_crash_oom_free": "2/2",
