@@ -1612,6 +1612,8 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                 PHASE3_GIT_CLEAN_CLONE,
                 PHASE3_RELEASE_CONTROL_CLEANUP_PLAN,
                 PHASE6_LINUX_WINDOWS_PARITY_STATUS,
+                Path("scripts/build_phase6_platform_replay_receipt.py"),
+                Path(".github/workflows/dp-windows-parity.yml"),
                 PHASE6_SILENT_IMPORT_LOSS_STATUS,
                 PHASE6_BENCHMARK_SCALE_STATUS,
                 PHASE6_UX_OBSERVATION_STATUS,

@@ -2936,6 +2936,84 @@ def test_snapshot_phase6_parity_builder_change_only_stales_developer_preview_rc(
     ]
 
 
+def test_snapshot_phase6_platform_replay_builder_change_only_stales_developer_preview_rc(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/build_phase6_platform_replay_receipt.py",
+        "print('phase6 platform replay builder changed')\n",
+    )
+    _commit_all(tmp_path, "phase6 platform replay builder change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "non_artifact_source_paths_changed"
+    )
+    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
+    assert (
+        metadata_rows["developer_preview_rc_status"]["source_state_kind"]
+        == "non_receipt_paths_changed"
+    )
+    assert [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ] == [
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
+    ]
+
+
+def test_snapshot_dp_windows_parity_workflow_change_only_stales_developer_preview_rc(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / ".github/workflows/dp-windows-parity.yml",
+        "name: DP Windows Parity Receipt\n",
+    )
+    _commit_all(tmp_path, "dp windows parity workflow change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
+    assert [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ] == [
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
+    ]
+
+
 def test_snapshot_g1_cause_narrowing_builder_change_does_not_stale_snapshot_leaf_receipts(
     tmp_path: Path,
 ) -> None:

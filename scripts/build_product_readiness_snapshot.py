@@ -519,8 +519,10 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/run_phase3_large_model_execution_receipt.py",
             "scripts/run_phase3_medium_model_scorecard_receipt.py",
             "scripts/build_phase6_linux_windows_parity_status.py",
+            "scripts/build_phase6_platform_replay_receipt.py",
             "scripts/build_phase6_silent_import_loss_status.py",
             "scripts/build_phase6_ux_observation_status.py",
+            ".github/workflows/dp-windows-parity.yml",
         },
         "developer_preview_readiness": {
             "scripts/build_developer_preview_readiness.py",
