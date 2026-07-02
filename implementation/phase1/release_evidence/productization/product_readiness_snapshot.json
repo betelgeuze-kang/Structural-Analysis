@@ -3665,7 +3665,7 @@
         "source_commit_matches_head": true,
         "source_commit_sha": "e6b967bd9556dff9129034ce75b51689347707b9",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_rc_status",

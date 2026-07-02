@@ -9,7 +9,7 @@
     "remote_fetch_ok": null,
     "remote_safety_ok": true,
     "worktree_clean": true,
-    "worktree_only_ignored_evidence_dirty": true
+    "worktree_only_ignored_evidence_dirty": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
