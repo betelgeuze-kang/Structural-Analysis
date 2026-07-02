@@ -132,7 +132,7 @@
             "blocker_count": 2,
             "blockers": [
               "medium_model_pass_or_review_below_required:0/5",
-              "medium_structural_models_current_below_required:2/5"
+              "medium_structural_models_current_below_required:3/5"
             ],
             "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
             "scope": "medium_model_quantity_gate"
@@ -169,7 +169,7 @@
         "unassigned_blockers": []
       },
       "blockers": [
-        "medium_structural_models_current_below_required:2/5",
+        "medium_structural_models_current_below_required:3/5",
         "license_review_pending",
         "medium_model_pass_or_review_missing",
         "normalization_receipts_missing",
@@ -480,11 +480,11 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-02T18:05:10.841702+00:00",
+  "generated_at": "2026-07-02T18:52:52.439312+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:6b0e8298218bfaca8e711cc5e4787cc736bba1b157534ef5b8afd2b443850ddf",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f35626eb0b28ebb3317ab49e2d65c327e78afdfc7fe2cdd7c520d006fe84253b",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:e3b9333d00044eaeec5d93537bc953e9cbc48360963f7dbc8a0d359d665e6985",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:afd01a5accc205e06ac687cfecdb85bd9e843d0e1ad66201d718af9c3fec22f9",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:2296595bd8e040f49c68a95b657458e8a953099ccca8a370653ffef03302fc5b",
@@ -501,7 +501,7 @@
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:dfab62a2935d4de859f6b63085ee33d16a1b1a61043ad5509bd4acf6201cafa1",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:5bc106b5824d41c84c6e8f16549b48589ea92029e8592bd012128d08a2b8b7ba",
-    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:42e29dd33f91b3fdaba4c24abd9e6fa37e40e6725788c8c08d0bdc2aa97bbb95",
+    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:cba5aa5f8392dfecabf2af461e814e79859bb8a5b606e73d8a45beb5a501ed1e",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:9e61ef1db0ab2e01a3917d1e410a9677e8e5170aa5b9fb7ccc344bc98ee30cdd",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:042ed67e1d625082c5fac4439121442e0ca0505e96bb09f2788b6da04e537c03",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:1da775e8d0cc6b97d1b7454f5b983a9d26660121753f8dfb0cc3b8d925f28291",
@@ -539,7 +539,7 @@
             "blocker_count": 2,
             "blockers": [
               "medium_model_pass_or_review_below_required:0/5",
-              "medium_structural_models_current_below_required:2/5"
+              "medium_structural_models_current_below_required:3/5"
             ],
             "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
             "scope": "medium_model_quantity_gate"
@@ -818,7 +818,7 @@
                   "blocker_count": 2,
                   "blockers": [
                     "medium_model_pass_or_review_below_required:0/5",
-                    "medium_structural_models_current_below_required:2/5"
+                    "medium_structural_models_current_below_required:3/5"
                   ],
                   "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
                   "scope": "medium_model_quantity_gate"
@@ -858,7 +858,7 @@
               "license_review_pending",
               "medium_model_pass_or_review_below_required:0/5",
               "medium_model_pass_or_review_missing",
-              "medium_structural_models_current_below_required:2/5",
+              "medium_structural_models_current_below_required:3/5",
               "normalization_receipts_missing",
               "opensees_medium_scorecard_execution_missing",
               "reference_outputs_missing"
@@ -867,15 +867,15 @@
             "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
             "contract_pass": false,
             "current_medium_model_scorecard_count": 0,
-            "local_candidate_artifact_count": 2,
+            "local_candidate_artifact_count": 3,
             "local_topology_contract_pass": true,
             "operator_next_actions": [
               {
                 "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
                 "clears_blockers": [
-                  "medium_structural_models_current_below_required:2/5"
+                  "medium_structural_models_current_below_required:3/5"
                 ],
-                "current_candidate_case_count": 2,
+                "current_candidate_case_count": 3,
                 "evidence_artifacts": [
                   "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
                   "operator-attached source/license/reference/normalization rows for each added case"
@@ -883,7 +883,7 @@
                 "id": "select_additional_medium_model_cases",
                 "lane": "opensees-medium",
                 "owner": "benchmark_operator",
-                "remaining_case_count": 3,
+                "remaining_case_count": 2,
                 "required_candidate_case_count": 5,
                 "validation_commands": [
                   "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
@@ -998,9 +998,9 @@
               },
               "local_candidate_selection": {
                 "contract_pass": false,
-                "current": 2,
+                "current": 3,
                 "label": "parser/topology candidate cases selected",
-                "remaining": 3,
+                "remaining": 2,
                 "required": 5
               },
               "pass_or_approved_review": {
@@ -1027,8 +1027,8 @@
             "status": "blocked"
           },
           "contract_pass": false,
-          "current": 2,
-          "remaining": 3,
+          "current": 3,
+          "remaining": 2,
           "required": 5,
           "scorecard_blockers": [
             "license_review_pending",
@@ -2256,7 +2256,7 @@
             "blocker_count": 2,
             "blockers": [
               "medium_model_pass_or_review_below_required:0/5",
-              "medium_structural_models_current_below_required:2/5"
+              "medium_structural_models_current_below_required:3/5"
             ],
             "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
             "scope": "medium_model_quantity_gate"
@@ -2314,7 +2314,7 @@
               "blocker_count": 2,
               "blockers": [
                 "medium_model_pass_or_review_below_required:0/5",
-                "medium_structural_models_current_below_required:2/5"
+                "medium_structural_models_current_below_required:3/5"
               ],
               "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
               "scope": "medium_model_quantity_gate"
@@ -2354,7 +2354,7 @@
           "license_review_pending",
           "medium_model_pass_or_review_below_required:0/5",
           "medium_model_pass_or_review_missing",
-          "medium_structural_models_current_below_required:2/5",
+          "medium_structural_models_current_below_required:3/5",
           "normalization_receipts_missing",
           "opensees_medium_scorecard_execution_missing",
           "reference_outputs_missing"
@@ -2363,15 +2363,15 @@
         "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
         "contract_pass": false,
         "current_medium_model_scorecard_count": 0,
-        "local_candidate_artifact_count": 2,
+        "local_candidate_artifact_count": 3,
         "local_topology_contract_pass": true,
         "operator_next_actions": [
           {
             "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
             "clears_blockers": [
-              "medium_structural_models_current_below_required:2/5"
+              "medium_structural_models_current_below_required:3/5"
             ],
-            "current_candidate_case_count": 2,
+            "current_candidate_case_count": 3,
             "evidence_artifacts": [
               "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
               "operator-attached source/license/reference/normalization rows for each added case"
@@ -2379,7 +2379,7 @@
             "id": "select_additional_medium_model_cases",
             "lane": "opensees-medium",
             "owner": "benchmark_operator",
-            "remaining_case_count": 3,
+            "remaining_case_count": 2,
             "required_candidate_case_count": 5,
             "validation_commands": [
               "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
@@ -2494,9 +2494,9 @@
           },
           "local_candidate_selection": {
             "contract_pass": false,
-            "current": 2,
+            "current": 3,
             "label": "parser/topology candidate cases selected",
-            "remaining": 3,
+            "remaining": 2,
             "required": 5
           },
           "pass_or_approved_review": {
@@ -2587,12 +2587,13 @@
       },
       "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
       "current_medium_model_scorecard_count": 0,
-      "local_candidate_artifact_count": 2,
+      "local_candidate_artifact_count": 3,
       "local_parser_boundary": {
         "beam_element_count": 166,
         "canonical_candidate_case_ids": [
           "SCBF16B",
-          "SCBF16B_shell_beam_mix"
+          "SCBF16B_shell_beam_mix",
+          "luxinzheng_megatall_model1"
         ],
         "claim_boundary": "Local checksum and topology/parser evidence is retained only as parser input evidence. It is not reference-output ingest, normalization, medium scorecard execution, or PASS/REVIEW benchmark evidence.",
         "node_count": 426,
@@ -2677,16 +2678,16 @@
         {
           "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
           "clears_blockers": [
-            "medium_structural_models_current_below_required:2/5"
+            "medium_structural_models_current_below_required:3/5"
           ],
-          "current_candidate_case_count": 2,
+          "current_candidate_case_count": 3,
           "evidence_artifacts": [
             "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
             "operator-attached source/license/reference/normalization rows for each added case"
           ],
           "id": "select_additional_medium_model_cases",
           "owner": "benchmark_operator",
-          "remaining_case_count": 3,
+          "remaining_case_count": 2,
           "required_candidate_case_count": 5,
           "validation_commands": [
             "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
@@ -3239,6 +3240,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "77fa7a308c05b387bfab2479eaf1c6d72ef98411",
+  "source_commit_sha": "b30bb8ccd06170766dc6ed200550106973443824",
   "status": "blocked"
 }
