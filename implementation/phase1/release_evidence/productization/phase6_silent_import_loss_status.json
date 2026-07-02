@@ -120,7 +120,7 @@
     },
     "technical_silent_import_loss_zero": true
   },
-  "generated_at": "2026-07-01T21:12:10.159495+00:00",
+  "generated_at": "2026-07-02T23:20:42.351073+00:00",
   "import_health_contract_pass_count": 10,
   "import_health_execution_count": 10,
   "input_checksums": {
@@ -155,7 +155,7 @@
   "silent_import_loss_gate_pass_count": 10,
   "silent_import_loss_zero": true,
   "source_checksum_attached_count": 10,
-  "source_commit_sha": "d5920ed70fa4b9b8d419144f4d38ea96f22b5ee2",
+  "source_commit_sha": "15bb455f43b0a0b15ced20980df5239897575832",
   "source_file_acquired_count": 10,
   "source_license_quantity_credit_ready_count": 0,
   "source_license_receipt_contract_pass": false,

@@ -55,7 +55,7 @@
   "contract_pass": true,
   "developer_preview_release_candidate_claim": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T10:44:10.287427+00:00",
+  "generated_at": "2026-07-02T23:20:42.289260+00:00",
   "git_clean_clone_gate": {
     "blocker_count": 0,
     "blocker_counts": {},
@@ -110,7 +110,7 @@
   "reuse_policy": "phase6_clean_checkout_status_aggregates_phase3_replay_and_release_control_cleanup_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-clean-checkout-status.v1",
-  "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+  "source_commit_sha": "15bb455f43b0a0b15ced20980df5239897575832",
   "status": "ready",
   "summary_line": "Phase 6 clean checkout: READY | local=True | git_clone=True | cleanup_pending=0"
 }
