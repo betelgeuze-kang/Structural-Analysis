@@ -2932,7 +2932,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T08:29:06.805206+00:00",
+  "generated_at": "2026-07-02T08:33:08.548690+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -3282,7 +3282,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "cebb8c7757ca83dafda9c1552c531d4c9f89f32f",
+  "source_commit_sha": "097d5358b4eed22d3deefded31b649faa514c14b",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -4144,8 +4144,10 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4170,8 +4172,10 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json"
+        " M implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
+        " M implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md",
+        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ]
     }
   },
