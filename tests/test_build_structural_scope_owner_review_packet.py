@@ -686,6 +686,15 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     assert payload["status"] == "pending_owner_decisions"
     assert payload["contract_pass"] is True
     assert payload["decision_pending_count"] == 2
+    assert payload["placeholder_rejection_policy"]["rejected_fields"] == [
+        "owner_identity",
+        "owner_role",
+        "evidence_reference",
+        "external_archive_reference",
+        "signed_owner_exception_reference",
+    ]
+    assert "TODO" in payload["placeholder_rejection_policy"]["rejected_values"]
+    assert "<...>" in payload["placeholder_rejection_policy"]["rejected_values"]
     rows = json.loads(template.read_text(encoding="utf-8"))["decision_rows"]
     assert rows[0]["owner_decision"] == ""
     assert rows[0]["owner_identity"] == ""
@@ -702,6 +711,9 @@ def test_owner_decision_template_writes_fillable_rows(tmp_path: Path) -> None:
     assert "# Structural Scope Owner Decision Template" in markdown
     assert "signed_owner_exception_reference" in markdown
     assert "external_archive_reference" in markdown
+    assert "Placeholder Rejection Policy" in markdown
+    assert "owner_identity" in markdown
+    assert "TODO" in markdown
     assert "extract_to_molecular_or_science_repository" in markdown
     assert "implementation/phase1/md3bead_soa.py" in markdown
     csv_rows = list(csv.DictReader(template_csv.read_text(encoding="utf-8").splitlines()))

@@ -51,6 +51,27 @@ REQUIRED_CLOSURE_EVIDENCE = (
     "signed_owner_exception_reference_for_retain_decisions",
     "post_decision_structural_scope_audit",
 )
+PLACEHOLDER_REJECTION_POLICY = {
+    "rejected_fields": [
+        "owner_identity",
+        "owner_role",
+        "evidence_reference",
+        "external_archive_reference",
+        "signed_owner_exception_reference",
+    ],
+    "rejected_values": [
+        "<...>",
+        "TODO",
+        "TBD",
+        "placeholder",
+        "replace-me",
+        "fill-me",
+        "N/A",
+        "none",
+        "null",
+        "unknown",
+    ],
+}
 OWNER_DECISION_COLUMNS = (
     "row_id",
     "path",
@@ -519,6 +540,7 @@ def build_owner_decision_template(
         "decision_pending_count": len(review_rows),
         "allowed_owner_decisions": list(ALLOWED_OWNER_DECISIONS),
         "required_closure_evidence": list(REQUIRED_CLOSURE_EVIDENCE),
+        "placeholder_rejection_policy": PLACEHOLDER_REJECTION_POLICY,
         "blockers": blockers,
         "decision_rows": [
             {
@@ -1006,6 +1028,13 @@ def _decision_template_markdown(payload: dict[str, Any]) -> str:
             "- `signed_owner_exception_reference`: required when `owner_decision` "
             "is `retain_quarantined_with_signed_owner_exception`"
         ),
+        "",
+        "## Placeholder Rejection Policy",
+        "",
+        "- `rejected_fields`: "
+        f"`{', '.join(payload['placeholder_rejection_policy']['rejected_fields'])}`",
+        "- `rejected_values`: "
+        f"`{', '.join(payload['placeholder_rejection_policy']['rejected_values'])}`",
         "",
         "| Row | Path | Recommended Decision |",
         "|---|---|---|",
