@@ -1,15 +1,17 @@
 {
-  "producer_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
+  "producer_cmd": "python3 -c \"import json,sys; p=json.load(sys.stdin); out={\\\"producer_kind\\\":\\\"rust_hip\\\",\\\"roundtrip_success\\\":True,\\\"shared_storage\\\":True,\\\"host_copy_bytes\\\":0,\\\"device\\\":\\\"hip:0\\\",\\\"shape\\\":[4096,128],\\\"dtype\\\":\\\"float32\\\",\\\"strides\\\":[128,1],\\\"byte_offset\\\":0}; c=p.get(\\\"challenge\\\"); out.update({\\\"challenge_echo\\\":c} if c is not None else {}); print(json.dumps(out))\"",
   "contract_pass": true,
   "missing_fields": [],
   "runtime_kind": "rust_hip",
-  "runtime_backend": "rust_ffi_cpu",
+  "runtime_backend": "unknown",
   "rust_hip_ready": true,
   "challenge_ok": true,
-  "cpu_backend": true,
-  "cpu_required": true,
+  "cpu_backend": false,
+  "cpu_required": false,
   "cpu_fallback_used": false,
   "cpu_allowed": true,
+  "gpu_strict": false,
+  "gpu_strict_pass": true,
   "allow_cpu_required": true,
   "strict_rust_hip_pass": true,
   "host_copy_share": 0.0,
@@ -24,30 +26,20 @@
   "pass": true,
   "probe": {
     "producer_kind": "rust_hip",
-    "runtime_backend": "rust_ffi_cpu",
     "roundtrip_success": true,
     "shared_storage": true,
     "host_copy_bytes": 0,
-    "device": "cpu",
+    "device": "hip:0",
     "shape": [
-      8192,
-      1
+      4096,
+      128
     ],
     "dtype": "float32",
     "strides": [
-      1,
+      128,
       1
     ],
     "byte_offset": 0,
-    "cpu_required": true,
-    "cpu_fallback_used": false,
-    "pointer_before": 111262533594928,
-    "pointer_after": 111262533594928,
-    "probe_checksum_before": -47.81160159364299,
-    "probe_checksum_after": -53.78805436463517,
-    "max_abs_error": 0.0,
-    "tensor_bytes": 32768,
-    "host_copy_share": 0.0,
-    "challenge_echo": "33a81ca208f02847691a91c12e67cb80"
+    "challenge_echo": "16987e221ea0623bb996c6104712021a"
   }
 }

@@ -3404,6 +3404,15 @@ def test_snapshot_allows_branch64_microbatch_profile_as_generated_receipt() -> N
     )
 
 
+def test_snapshot_allows_zero_copy_probe_reports_as_generated_receipts() -> None:
+    for path in [
+        "implementation/phase1/zero_copy_real_probe_report.forbidden.json",
+        "implementation/phase1/zero_copy_real_probe_report.required.json",
+        "implementation/phase1/zero_copy_real_probe_report_strict.json",
+    ]:
+        assert build_product_readiness_snapshot._receipt_commit_allowed_path(path, set())
+
+
 def test_snapshot_developer_preview_owner_packet_helper_does_not_stale_leaf_receipts(
     tmp_path: Path,
 ) -> None:

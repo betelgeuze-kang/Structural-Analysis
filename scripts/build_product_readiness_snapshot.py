@@ -371,6 +371,9 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         "implementation/phase1/runtime_version_compatibility_matrix.json",
         "implementation/phase1/support_bundle_manifest.json",
         "implementation/phase1/workstation_delivery_readiness.json",
+        "implementation/phase1/zero_copy_real_probe_report.forbidden.json",
+        "implementation/phase1/zero_copy_real_probe_report.required.json",
+        "implementation/phase1/zero_copy_real_probe_report_strict.json",
         "implementation/phase1/release/independent_product_readiness.json",
         "implementation/phase1/release/external_benchmark_submission_readiness.json",
     }:
