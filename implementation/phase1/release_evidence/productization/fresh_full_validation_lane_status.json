@@ -1,33 +1,24 @@
 {
   "blocker_grouping_metadata": {
-    "blocker_count": 25,
+    "blocker_count": 16,
     "grouping_policy": "Preserve every lane blocker while separating publication boundary, fresh receipt presence, receipt metadata/freshness, receipt identity, schema validation, and artifact integrity failures.",
     "groups": {
       "fresh_receipt_artifact_integrity": {
-        "blocker_count": 25,
+        "blocker_count": 16,
         "blockers": [
           "performance_profile::fresh_validation_receipt_artifact_integrity_failed",
-          "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
-          "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-          "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
           "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
           "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
-          "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
           "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json",
           "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed",
-          "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-          "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
-          "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
           "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json",
-          "midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed",
-          "midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
           "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
           "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
           "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
           "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
           "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
           "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
-          "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+          "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
           "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
           "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
           "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz"
@@ -72,36 +63,27 @@
   },
   "blockers": [
     "performance_profile::fresh_validation_receipt_artifact_integrity_failed",
-    "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
-    "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-    "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
     "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
     "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
-    "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
     "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json",
     "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed",
-    "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-    "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
-    "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
     "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json",
-    "midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed",
-    "midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
     "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
     "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
     "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
     "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
     "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
     "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
-    "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+    "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
     "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
     "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
     "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz"
   ],
-  "claim_boundary": "This status separates release publication materialization from fresh full-validation. A release evidence freshness PASS only proves metadata/source recency. Level 3 promotion still requires fresh validation receipts for each named lane, with reused_evidence=false, validated by implementation/phase1/validate_fresh_validation_receipt.py. Missing or invalid receipts must stay blocked and must not be replaced by CPU-required hydrated reports.",
+  "claim_boundary": "This status separates release publication materialization from fresh full-validation. A release evidence freshness PASS only proves metadata/source recency. Level 3 promotion still requires fresh validation receipts for each named lane, with reused_evidence=false, validated by implementation/phase1/validate_fresh_validation_receipt.py. Missing or invalid receipts must stay blocked and must not be replaced by CPU-required hydrated reports. Legacy path aliases resolve only tracked release-evidence migrations and pass only when the resolved file sha256 matches the receipt expectation.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "fresh_full_validation_ready": false,
-  "generated_at": "2026-07-02T04:43:56.759441+00:00",
+  "generated_at": "2026-07-02T05:04:01.207485+00:00",
   "input_checksums": {
     "/tmp/structural-scope-fix-0702/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
     "docs/commercialization-gap-current-state.md": "sha256:0daf4e8cbf5d8c4fe1fb6e24a0671e4857ee3a8d5ce295fa64e7739305224c0f",
@@ -129,7 +111,7 @@
       "design_optimization_refresh": {
         "blockers": [
           "fresh_validation_receipt_artifact_integrity_failed",
-          "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+          "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
           "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
           "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
           "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz"
@@ -160,24 +142,17 @@
         "scope": "performance_track_after_cpu_reference_parity"
       },
       "midas_exact_refresh": {
-        "blockers": [
-          "fresh_validation_receipt_artifact_integrity_failed",
-          "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json"
-        ],
+        "blockers": [],
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json",
-        "pass": false,
+        "pass": true,
         "runner": "midas_validation",
         "scope": "fresh_full_validation_refresh"
       },
       "performance_profile": {
         "blockers": [
           "fresh_validation_receipt_artifact_integrity_failed",
-          "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
-          "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-          "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
           "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
           "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
-          "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
           "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json"
         ],
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json",
@@ -195,9 +170,6 @@
       "surface_material_contact": {
         "blockers": [
           "fresh_validation_receipt_artifact_integrity_failed",
-          "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-          "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
-          "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
           "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json"
         ],
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json",
@@ -228,6 +200,8 @@
       "fresh_validation_receipt_fresh": true,
       "fresh_validation_receipt_lane_matches": true,
       "fresh_validation_receipt_metadata_present": true,
+      "fresh_validation_receipt_path_alias_count": 0,
+      "fresh_validation_receipt_path_aliases": [],
       "fresh_validation_receipt_present": true,
       "fresh_validation_receipt_reason_code": "PASS",
       "fresh_validation_receipt_reused_evidence": false,
@@ -255,6 +229,8 @@
       "fresh_validation_receipt_fresh": true,
       "fresh_validation_receipt_lane_matches": true,
       "fresh_validation_receipt_metadata_present": true,
+      "fresh_validation_receipt_path_alias_count": 0,
+      "fresh_validation_receipt_path_aliases": [],
       "fresh_validation_receipt_present": true,
       "fresh_validation_receipt_reason_code": "PASS",
       "fresh_validation_receipt_reused_evidence": false,
@@ -272,12 +248,8 @@
     {
       "blockers": [
         "fresh_validation_receipt_artifact_integrity_failed",
-        "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
-        "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-        "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
         "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
         "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
-        "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
         "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json"
       ],
       "doc_terms": [
@@ -285,12 +257,8 @@
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json",
       "fresh_validation_receipt_artifact_integrity_blockers": [
-        "input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
-        "input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-        "input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
         "input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
         "input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
-        "input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
         "input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json"
       ],
       "fresh_validation_receipt_artifact_integrity_pass": false,
@@ -299,6 +267,49 @@
       "fresh_validation_receipt_fresh": true,
       "fresh_validation_receipt_lane_matches": true,
       "fresh_validation_receipt_metadata_present": true,
+      "fresh_validation_receipt_path_alias_count": 4,
+      "fresh_validation_receipt_path_aliases": [
+        {
+          "actual_sha256": "sha256:d7ea68437ef267d48a0a7fa988e38175a6758b92c26af6df05060a63f4ab742f",
+          "claim_boundary": "Alias resolves a tracked path migration only. Artifact integrity still requires the resolved file sha256 to match the receipt expectation.",
+          "expected_sha256": "sha256:d7ea68437ef267d48a0a7fa988e38175a6758b92c26af6df05060a63f4ab742f",
+          "original_path": "implementation/phase1/contact_readiness_report.json",
+          "receipt_field": "input_checksums",
+          "resolution": "legacy_release_evidence_path_alias",
+          "resolved_path": "implementation/phase1/release_evidence/performance/contact_readiness_report.json",
+          "sha256_match": true
+        },
+        {
+          "actual_sha256": "sha256:bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
+          "claim_boundary": "Alias resolves a tracked path migration only. Artifact integrity still requires the resolved file sha256 to match the receipt expectation.",
+          "expected_sha256": "sha256:bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
+          "original_path": "implementation/phase1/foundation_soil_link_gate_report.json",
+          "receipt_field": "input_checksums",
+          "resolution": "legacy_release_evidence_path_alias",
+          "resolved_path": "implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json",
+          "sha256_match": true
+        },
+        {
+          "actual_sha256": "sha256:d3474ec03a8a04df8dd207a702179d7016958f70158313f47c80c0e2871a5ab1",
+          "claim_boundary": "Alias resolves a tracked path migration only. Artifact integrity still requires the resolved file sha256 to match the receipt expectation.",
+          "expected_sha256": "sha256:d3474ec03a8a04df8dd207a702179d7016958f70158313f47c80c0e2871a5ab1",
+          "original_path": "implementation/phase1/gpu_bottleneck_audit_report.json",
+          "receipt_field": "input_checksums",
+          "resolution": "legacy_release_evidence_path_alias",
+          "resolved_path": "implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json",
+          "sha256_match": true
+        },
+        {
+          "actual_sha256": "sha256:b2fa4163270480a6dc52dde3829fa07a03da21b690246075af217d3011b0efb6",
+          "claim_boundary": "Alias resolves a tracked path migration only. Artifact integrity still requires the resolved file sha256 to match the receipt expectation.",
+          "expected_sha256": "sha256:b2fa4163270480a6dc52dde3829fa07a03da21b690246075af217d3011b0efb6",
+          "original_path": "implementation/phase1/ssi_boundary_gate_report.json",
+          "receipt_field": "input_checksums",
+          "resolution": "legacy_release_evidence_path_alias",
+          "resolved_path": "implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json",
+          "sha256_match": true
+        }
+      ],
       "fresh_validation_receipt_present": true,
       "fresh_validation_receipt_reason_code": "PASS",
       "fresh_validation_receipt_reused_evidence": false,
@@ -316,9 +327,6 @@
     {
       "blockers": [
         "fresh_validation_receipt_artifact_integrity_failed",
-        "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-        "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
-        "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
         "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json"
       ],
       "doc_terms": [
@@ -327,9 +335,6 @@
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json",
       "fresh_validation_receipt_artifact_integrity_blockers": [
-        "input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
-        "input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
-        "input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
         "input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json"
       ],
       "fresh_validation_receipt_artifact_integrity_pass": false,
@@ -338,6 +343,39 @@
       "fresh_validation_receipt_fresh": true,
       "fresh_validation_receipt_lane_matches": true,
       "fresh_validation_receipt_metadata_present": true,
+      "fresh_validation_receipt_path_alias_count": 3,
+      "fresh_validation_receipt_path_aliases": [
+        {
+          "actual_sha256": "sha256:bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
+          "claim_boundary": "Alias resolves a tracked path migration only. Artifact integrity still requires the resolved file sha256 to match the receipt expectation.",
+          "expected_sha256": "sha256:bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
+          "original_path": "implementation/phase1/foundation_soil_link_gate_report.json",
+          "receipt_field": "input_checksums",
+          "resolution": "legacy_release_evidence_path_alias",
+          "resolved_path": "implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json",
+          "sha256_match": true
+        },
+        {
+          "actual_sha256": "sha256:b2fa4163270480a6dc52dde3829fa07a03da21b690246075af217d3011b0efb6",
+          "claim_boundary": "Alias resolves a tracked path migration only. Artifact integrity still requires the resolved file sha256 to match the receipt expectation.",
+          "expected_sha256": "sha256:b2fa4163270480a6dc52dde3829fa07a03da21b690246075af217d3011b0efb6",
+          "original_path": "implementation/phase1/ssi_boundary_gate_report.json",
+          "receipt_field": "input_checksums",
+          "resolution": "legacy_release_evidence_path_alias",
+          "resolved_path": "implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json",
+          "sha256_match": true
+        },
+        {
+          "actual_sha256": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
+          "claim_boundary": "Alias resolves a tracked path migration only. Artifact integrity still requires the resolved file sha256 to match the receipt expectation.",
+          "expected_sha256": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
+          "original_path": "implementation/phase1/structural_contact_gate_report.json",
+          "receipt_field": "input_checksums",
+          "resolution": "legacy_release_evidence_path_alias",
+          "resolved_path": "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
+          "sha256_match": true
+        }
+      ],
       "fresh_validation_receipt_present": true,
       "fresh_validation_receipt_reason_code": "PASS",
       "fresh_validation_receipt_reused_evidence": false,
@@ -353,23 +391,31 @@
       "validation_lane_boundary_present": true
     },
     {
-      "blockers": [
-        "fresh_validation_receipt_artifact_integrity_failed",
-        "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json"
-      ],
+      "blockers": [],
       "doc_terms": [
         "MIDAS validation lane"
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json",
-      "fresh_validation_receipt_artifact_integrity_blockers": [
-        "input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json"
-      ],
-      "fresh_validation_receipt_artifact_integrity_pass": false,
+      "fresh_validation_receipt_artifact_integrity_blockers": [],
+      "fresh_validation_receipt_artifact_integrity_pass": true,
       "fresh_validation_receipt_blockers": [],
       "fresh_validation_receipt_contract_pass": true,
       "fresh_validation_receipt_fresh": true,
       "fresh_validation_receipt_lane_matches": true,
       "fresh_validation_receipt_metadata_present": true,
+      "fresh_validation_receipt_path_alias_count": 1,
+      "fresh_validation_receipt_path_aliases": [
+        {
+          "actual_sha256": "sha256:e8bae96dbc05c57ff72ae46c73ab2fe2c05b1c013edfab6419a225d825e5319f",
+          "claim_boundary": "Alias resolves a tracked path migration only. Artifact integrity still requires the resolved file sha256 to match the receipt expectation.",
+          "expected_sha256": "sha256:e8bae96dbc05c57ff72ae46c73ab2fe2c05b1c013edfab6419a225d825e5319f",
+          "original_path": "implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
+          "receipt_field": "input_checksums",
+          "resolution": "legacy_release_evidence_path_alias",
+          "resolved_path": "implementation/phase1/release_evidence/midas/midas_native_writeback_diff_receipts_report.json",
+          "sha256_match": true
+        }
+      ],
       "fresh_validation_receipt_present": true,
       "fresh_validation_receipt_reason_code": "PASS",
       "fresh_validation_receipt_reused_evidence": false,
@@ -380,7 +426,7 @@
         "implementation/phase1/release_evidence/midas"
       ],
       "materialized_publication_evidence_present": true,
-      "pass": false,
+      "pass": true,
       "runner": "midas_validation",
       "validation_lane_boundary_present": true
     },
@@ -398,6 +444,8 @@
       "fresh_validation_receipt_fresh": true,
       "fresh_validation_receipt_lane_matches": true,
       "fresh_validation_receipt_metadata_present": true,
+      "fresh_validation_receipt_path_alias_count": 0,
+      "fresh_validation_receipt_path_aliases": [],
       "fresh_validation_receipt_present": true,
       "fresh_validation_receipt_reason_code": "PASS",
       "fresh_validation_receipt_reused_evidence": false,
@@ -437,6 +485,8 @@
       "fresh_validation_receipt_fresh": true,
       "fresh_validation_receipt_lane_matches": true,
       "fresh_validation_receipt_metadata_present": true,
+      "fresh_validation_receipt_path_alias_count": 0,
+      "fresh_validation_receipt_path_aliases": [],
       "fresh_validation_receipt_present": true,
       "fresh_validation_receipt_reason_code": "PASS",
       "fresh_validation_receipt_reused_evidence": false,
@@ -454,7 +504,7 @@
     {
       "blockers": [
         "fresh_validation_receipt_artifact_integrity_failed",
-        "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+        "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
         "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
         "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
         "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz"
@@ -465,7 +515,7 @@
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
       "fresh_validation_receipt_artifact_integrity_blockers": [
-        "receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+        "receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
         "receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
         "input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
         "input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz"
@@ -476,6 +526,19 @@
       "fresh_validation_receipt_fresh": true,
       "fresh_validation_receipt_lane_matches": true,
       "fresh_validation_receipt_metadata_present": true,
+      "fresh_validation_receipt_path_alias_count": 1,
+      "fresh_validation_receipt_path_aliases": [
+        {
+          "actual_sha256": "sha256:4fb27f450dfce73f083493500bfff4051efbd2ee9dfed3bd10169964916f06e0",
+          "claim_boundary": "Alias resolves a tracked path migration only. Artifact integrity still requires the resolved file sha256 to match the receipt expectation.",
+          "expected_sha256": "sha256:cdccb594ad13d25d867d2d6efa4f259063bf9308f1cd956dc45bde6541e4cbdb",
+          "original_path": "implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+          "receipt_field": "receipt_artifacts[0].path",
+          "resolution": "legacy_release_evidence_path_alias",
+          "resolved_path": "implementation/phase1/release_evidence/kds/design_optimization_solver_loop_long_report.json",
+          "sha256_match": false
+        }
+      ],
       "fresh_validation_receipt_present": true,
       "fresh_validation_receipt_reason_code": "PASS",
       "fresh_validation_receipt_reused_evidence": false,
@@ -492,14 +555,15 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "5f5276bc17e8f7f2a93215183d04ea46b14581c3",
+  "source_commit_sha": "cf89d4c07f012933884ebd01d55711d7569f87bc",
   "status": "blocked",
   "summary": {
-    "blocker_count": 25,
-    "fresh_validation_receipt_pass_count": 3,
+    "blocker_count": 16,
+    "fresh_validation_receipt_pass_count": 4,
+    "fresh_validation_receipt_path_alias_count": 9,
     "fresh_validation_receipt_present_count": 8,
     "lane_contract_pass_count": 8,
     "lane_count": 8,
-    "lane_pass_count": 3
+    "lane_pass_count": 4
   }
 }

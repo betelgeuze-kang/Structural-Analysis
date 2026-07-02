@@ -3,7 +3,7 @@
 - `contract_pass`: `False`
 - `lane_contract_pass`: `True`
 - `fresh_full_validation_ready`: `False`
-- `blockers`: `25`
+- `blockers`: `16`
 
 | Lane | Materialized Evidence | Fresh Receipt | Status |
 |---|---|---|---|
@@ -11,7 +11,7 @@
 | `gpu_hip_solver` | `True` | `True` | `pass` |
 | `performance_profile` | `True` | `True` | `blocked` |
 | `surface_material_contact` | `True` | `True` | `blocked` |
-| `midas_exact_refresh` | `True` | `True` | `blocked` |
+| `midas_exact_refresh` | `True` | `True` | `pass` |
 | `productization_heavy_profile` | `True` | `True` | `pass` |
 | `external_benchmark_refresh` | `True` | `True` | `blocked` |
 | `design_optimization_refresh` | `True` | `True` | `blocked` |
