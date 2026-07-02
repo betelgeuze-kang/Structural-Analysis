@@ -5,6 +5,17 @@
 - `evidence_closure_pass`: `False`
 - `blocked_final_gate_count`: `3`
 
+## Nearest A/B/F Slice
+
+| Slice | Gate | Status | Owner Review Required | Blockers |
+|---|---|---|---:|---:|
+| `A` | `benchmark_results_clean_checkout_regenerated` | `ready` | `False` | 0 |
+| `B` | `silent_import_loss_zero` | `ready` | `False` | 0 |
+| `F` | `new_user_core_workflow_observation_passed` | `blocked` | `True` | 17 |
+
+- `nearest_abf_ready_count`: `2/3`
+- `nearest_abf_blocked_slice_ids`: `['F']`
+
 ## Owner Packets
 
 | Gate | Owner | Blockers | Closure Decision |
