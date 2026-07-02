@@ -7,7 +7,9 @@
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
-    "security::license_status_not_configured"
+    "security::license_status_not_configured",
+    "github_sync::github_sync_remote_sync_pending",
+    "github_sync::github_sync_preflight_not_synced"
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
@@ -56,7 +58,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-02T14:07:18.081087+00:00",
+  "generated_at": "2026-07-02T14:11:19.823741+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -104,14 +106,14 @@
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:82bdbf787799cd7bf874c16a97be07e2bdab81db91b77bbcfc2552112d5c30eb",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:1d2640e3114d87472c647bfd0ac3c4f14db27576f156009b22382d72c682000a",
-    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:06cc32135b9e0a0db7ce08f0371c57c2af0d63ce18c08bfb70481cbdccfaac3c",
+    "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:76883296d7e6e9f1a75341b1b3ad8740eb3ac666da9005c9655d54941b1347c3",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:44f860b08e85c159867d1450c7b8dbb78ccef8ab6df56a14028cbf859aedff57",
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:5d4338ca42539ecf9c33fa32ce2b2958a2c42e87c6613697b9e7138d5c30b9fd",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:6d97580e24951d0fa2ad356e1511602b82021b104e821f33eede24cd76aab181",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:c8e342674df942390aa9f0de73907cd70c5d38b8465f5e0f4b477ad3026c11c9",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:6ebbc95ff1b1955b95b272d40696cb6aed48b121d9ad1600b8fc1f897862af16",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:ebdf2f75eeaa4568ae964598cfb34143b962e2af7d41d279e8086eca24ad3b3f",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:2dbd6ee0459d22e9b9a8b9247aeae9654aad1121f7a6834eaf7c62b10e0819ac",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
@@ -396,7 +398,9 @@
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
-    "security::license_status_not_configured"
+    "security::license_status_not_configured",
+    "github_sync::github_sync_remote_sync_pending",
+    "github_sync::github_sync_preflight_not_synced"
   ],
   "release_area_gate_ready": false,
   "release_area_matrix": [
@@ -931,53 +935,62 @@
       "artifacts": {
         "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
       },
-      "blockers": [],
+      "blockers": [
+        "github_sync_remote_sync_pending",
+        "github_sync_preflight_not_synced"
+      ],
       "checks": {
         "github_sync_feature_fast_forward_possible": true,
-        "github_sync_feature_synced_to_head": true,
+        "github_sync_feature_synced_to_head": false,
         "github_sync_main_fast_forward_possible": true,
-        "github_sync_main_synced_to_head": true,
+        "github_sync_main_synced_to_head": false,
         "github_sync_preflight_artifact_present": true,
-        "github_sync_preflight_clean": true,
+        "github_sync_preflight_clean": false,
         "github_sync_preflight_head_matches_current": true,
         "github_sync_preflight_source_state_fresh": true,
-        "github_sync_preflight_status": "synced",
+        "github_sync_preflight_status": "ready_to_push",
         "github_sync_remote_mutation_approval_pending": false,
         "github_sync_remote_safety_ok": true,
-        "github_sync_remote_sync_needed": false,
+        "github_sync_remote_sync_needed": true,
         "github_sync_worktree_clean": true
       },
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
-      "ok": true,
-      "status": "pass",
+      "ok": false,
+      "status": "blocked",
       "summary": {
         "changed_paths_since_preflight_head": [],
-        "current_head_sha": "2824598423bc018e9314b6b16bbd05fa2ce34489",
-        "feature_ahead_count": 0,
-        "feature_synced_to_head": true,
-        "main_ahead_count": 0,
-        "main_synced_to_head": true,
-        "pending_remote_update_actions": [],
-        "pending_remote_update_count": 0,
-        "pending_remote_update_targets": [],
-        "preflight_local_head_sha": "2824598423bc018e9314b6b16bbd05fa2ce34489",
-        "preflight_source_commit_sha": "2824598423bc018e9314b6b16bbd05fa2ce34489",
+        "current_head_sha": "c9b7c64cb088862720c5a6102b0874e970cfcdf7",
+        "feature_ahead_count": 1,
+        "feature_synced_to_head": false,
+        "main_ahead_count": 1,
+        "main_synced_to_head": false,
+        "pending_remote_update_actions": [
+          "push current HEAD to feature",
+          "fast-forward push current HEAD to main"
+        ],
+        "pending_remote_update_count": 2,
+        "pending_remote_update_targets": [
+          "origin/codex/seed-pr-ci-source-evidence",
+          "origin/main"
+        ],
+        "preflight_local_head_sha": "c9b7c64cb088862720c5a6102b0874e970cfcdf7",
+        "preflight_source_commit_sha": "c9b7c64cb088862720c5a6102b0874e970cfcdf7",
         "preflight_source_state_kind": "exact",
-        "r4_risk": "No remote mutation remains.",
+        "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "PASS",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
         "remote_main_ref": "origin/main",
         "remote_mutation_approval_pending": false,
-        "remote_mutation_approved": false,
-        "remote_sync_needed": false,
-        "status": "synced"
+        "remote_mutation_approved": true,
+        "remote_sync_needed": true,
+        "status": "ready_to_push"
       },
       "title": "GitHub Development Sync"
     }
   ],
   "release_decision": {
     "approval_token_count": 4,
-    "blocked_release_count": 5,
+    "blocked_release_count": 7,
     "claim_boundary": "Evidence surface counts include only structural-analysis evidence surfaces. Non-structural product domains are outside this structural solver release gate and must not influence release readiness.",
     "evidence_surface_count": 8,
     "evidence_surface_dir": "implementation/phase1/release_evidence/surface",
@@ -1202,7 +1215,9 @@
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
-      "security::license_status_not_configured"
+      "security::license_status_not_configured",
+      "github_sync::github_sync_remote_sync_pending",
+      "github_sync::github_sync_preflight_not_synced"
     ],
     "ga_enterprise_evidence_gate_pass": false,
     "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -1224,6 +1239,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "2824598423bc018e9314b6b16bbd05fa2ce34489",
-  "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
+  "source_commit_sha": "c9b7c64cb088862720c5a6102b0874e970cfcdf7",
+  "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
