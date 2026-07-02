@@ -134,8 +134,6 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     required_release_area_handoffs = {
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-        "report::commercial_packaging_milestone_not_green",
-        "support::pm_blocker_closure_board_count_mismatch",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",

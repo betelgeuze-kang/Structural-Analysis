@@ -1,24 +1,21 @@
 # PM Release Blocker Closure Board
 
-- `summary_line`: `PM release blocker closure board: BLOCKED | open=38 | external_owner_ready=10 | handoff_not_ready=0`
-- `pm_summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=4/5 | release_areas_green=11/16 | measured_cases=304`
+- `summary_line`: `PM release blocker closure board: BLOCKED | open=35 | external_owner_ready=10 | handoff_not_ready=0`
+- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
 - `contract_pass`: `False`
-- `open_blocker_count`: `38`
-- `release_area_summary`: `11/16`
-- `release_area_blocker_count`: `7`
+- `open_blocker_count`: `35`
+- `release_area_summary`: `13/16`
+- `release_area_blocker_count`: `5`
 - `all_open_blockers_have_handoff`: `True`
 - `action_register_matches_pm_report`: `True`
 
 | Blocker | Owner | Closure State | Evidence State | Next Action |
 |---|---|---|---|---|
 | `structural_scope_cleanup::owner_review_decisions_pending` | `release_scope_owner` | `external_owner_input_ready` | `release_surface_owner_decisions_pending` | Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json. |
-| `M5::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `pm_blocker_closure_board_count_mismatch` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence. |
 | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `self_hosted_runner_offline` | Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff. |
 | `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `self_hosted_runner_offline` | Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff. |
-| `report::commercial_packaging_milestone_not_green` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `commercial_packaging_milestone_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence. |
 | `ux::human_new_user_observation_missing_or_failed` | `ux_research_owner` | `external_owner_input_ready` | `missing_human_new_user_observation` | Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `missing_human_new_user_completion_evidence` | Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
-| `support::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence. |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `not_configured` | Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass. |
 | `independent_vv_missing` | `independent_vv_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence. |
 | `family_validation_manual_signoff_missing` | `validation_manual_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence. |

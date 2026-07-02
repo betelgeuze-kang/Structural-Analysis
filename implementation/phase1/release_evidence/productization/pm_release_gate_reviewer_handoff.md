@@ -1,35 +1,57 @@
 # PM Release Gate Reviewer Handoff
 
-- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=13 | incomplete=0 | release_tiers=1/4`
-- `pm_summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=4/5 | release_areas_green=11/16 | measured_cases=304`
+- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=35 | incomplete=0 | release_tiers=2/4`
+- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
 - `contract_pass`: `True`
-- `release_area_summary`: `11/16`
-- `release_area_blocker_count`: `7`
+- `release_area_summary`: `13/16`
+- `release_area_blocker_count`: `5`
 
 | Blocker | Owner | Closure | Verdict Change Conditions |
 |---|---|---|---|
 | `structural_scope_cleanup::owner_review_decisions_pending` | `release_scope_owner` | `external_owner_input_ready` | An owning PM completion-audit requirement row must be identified.<br>The owning release-area row has no blocker-specific false check in the PM report. |
-| `M5::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | An owning PM completion-audit requirement row must be identified.<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`<br>`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.basic_ci::pr_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass` |
 | `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`<br>`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.basic_ci::nightly_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass` |
-| `report::commercial_packaging_milestone_not_green` | `release_owner` | `local_remediation_ready` | `release_area.report` status is `pass` in `pm_release_gate_completion_audit.json`<br>`report::commercial_packaging_milestone_not_green` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `commercial_packaging_milestone_pass` |
 | `ux::human_new_user_observation_missing_or_failed` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_observation_missing_or_failed` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_observation_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_30min_sample_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_sample_30min_evidence_present` is `true` in `pm_release_gate_report.json`<br>`release_area.ux::human_new_user_sample_30min_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
-| `support::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | `release_area.support` status is `pass` in `pm_release_gate_completion_audit.json`<br>`support::pm_blocker_closure_board_count_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `pm_blocker_closure_board_register_count_match` |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `release_area.security` status is `pass` in `pm_release_gate_completion_audit.json`<br>`security::license_status_not_configured` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.security::license_status_configured_pass` is `true` in `pm_release_gate_report.json`<br>`release_area.security::license_status_closure_report_present` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `license_status_configured_pass` |
 | `independent_vv_missing` | `independent_vv_owner` | `external_owner_input_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`independent_vv_missing` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
 | `family_validation_manual_signoff_missing` | `validation_manual_owner` | `external_owner_input_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`family_validation_manual_signoff_missing` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
 | `customer_audit_failure_bundle_sla_missing` | `customer_success_ops_owner` | `external_owner_input_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`customer_audit_failure_bundle_sla_missing` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
 | `customer_shadow::completed_shadow_case_count_below_minimum` | `customer_success_ops_owner` | `external_owner_input_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`customer_shadow::completed_shadow_case_count_below_minimum` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
+| `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz` | `validation_lane_owner` | `local_remediation_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
 
 ## Release Tier Boundaries
 
 | Release Tier | Status | Blockers | Next Action | Claim Boundary |
 |---|---|---|---|---|
-| `release_tier.technical_paid_pilot_candidate` Technical Paid Pilot Candidate | `blocked` | `technical_paid_pilot_candidate_false` | Regenerate the PM release gate after milestone or scope-guard evidence changes. | Technical paid pilot candidate status depends on local milestone evidence and still requires the paid-pilot scope guard before customer use. |
+| `release_tier.technical_paid_pilot_candidate` Technical Paid Pilot Candidate | `pass` | none | none | Technical paid pilot candidate status depends on local milestone evidence and still requires the paid-pilot scope guard before customer use. |
 | `release_tier.paid_pilot_scope_guard_pass` Paid Pilot Scope Guard | `pass` | none | none | Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness. |
-| `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `report::commercial_packaging_milestone_not_green`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `support::pm_blocker_closure_board_count_mismatch`, `security::license_status_not_configured` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
-| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `customer_shadow::completed_shadow_case_count_below_minimum`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `report::commercial_packaging_milestone_not_green`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `support::pm_blocker_closure_board_count_mismatch`, `security::license_status_not_configured` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
+| `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
+| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `customer_shadow::completed_shadow_case_count_below_minimum`, `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed`, `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json`, `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json`, `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json`, `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json`, `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json`, `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json`, `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json`, `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed`, `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json`, `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json`, `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json`, `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json`, `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed`, `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json`, `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed`, `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json`, `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md`, `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json`, `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json`, `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed`, `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json`, `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz`, `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json`, `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
 
 ## Blocker Details
 
@@ -46,6 +68,7 @@
 - Next action: Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.
 
 Acceptance criteria:
+- `structural_scope_owner_decision_application_plan.json.release_surface_first_batch_application_ready == true` before applying the first release-surface cleanup batch
 - `structural_scope_owner_decision_application_plan.json.owner_decision_pending_count == 0`
 - `structural_scope_owner_decision_application_plan.json.release_surface_owner_decision_required_count == 0`
 - `structural_scope_owner_decision_application_plan.json.retain_quarantined_exception_count == 0`
@@ -69,49 +92,10 @@ Reproduction commands:
 - `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
 
 Verification commands:
+- `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked`
 - `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions`
 - `python3 scripts/check_structural_scope_contamination.py --fail-blocked`
 - `python3 scripts/build_product_readiness_snapshot.py --check`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
-
-Verdict change conditions:
-- An owning PM completion-audit requirement row must be identified.
-- The owning release-area row has no blocker-specific false check in the PM report.
-
-### `M5::pm_blocker_closure_board_count_mismatch`
-
-- Owner: `release_owner`
-- Verdict requirement: `unmapped`
-- Verdict requirement group: `unmapped`
-- Verdict requirement status: `unmapped`
-- Closure state: `local_remediation_ready`
-- Evidence state: `open_release_evidence_blocker`
-- External input required: `False`
-- Owner input required: `False`
-- Next action: Resolve `pm_blocker_closure_board_count_mismatch` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.
-
-Acceptance criteria:
-- `M5::pm_blocker_closure_board_count_mismatch` absent from `full_release_blockers`
-- `full_release_gate_ready == true` after PM report regeneration
-
-Evidence artifact paths:
-- `limitation_manual`: `docs/release-limitation-manual.md`
-- `pm_release_blocker_action_register`: `implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json`
-- `pm_release_blocker_closure_board`: `implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json`
-- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
-- `pm_release_reproduction_command_audit`: `implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json`
-- `release_evidence_freshness`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
-- `release_registry`: `implementation/phase1/release/release_registry.json`
-- `support_bundle`: `implementation/phase1/support_bundle_manifest.json`
-- `template_evidence_safety`: `implementation/phase1/release_evidence/productization/template_evidence_safety_report.json`
-- `validation_manual`: `docs/release-validation-manual.md`
-- `workflow_productization`: `implementation/phase1/workflow_productization_gate_report.json`
-
-Reproduction commands:
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
-
-Verification commands:
 - `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
 
 Verdict change conditions:
@@ -204,41 +188,6 @@ Verdict change conditions:
 - `release_area.basic_ci::nightly_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`
 - Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`
 
-### `report::commercial_packaging_milestone_not_green`
-
-- Owner: `release_owner`
-- Verdict requirement: `release_area.report`
-- Verdict requirement group: `release_area`
-- Verdict requirement status: `blocked_local_remediation_ready`
-- Closure state: `local_remediation_ready`
-- Evidence state: `open_release_evidence_blocker`
-- External input required: `False`
-- Owner input required: `False`
-- Next action: Resolve `commercial_packaging_milestone_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.
-
-Acceptance criteria:
-- `report::commercial_packaging_milestone_not_green` absent from `full_release_blockers`
-- `full_release_gate_ready == true` after PM report regeneration
-
-Evidence artifact paths:
-- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
-- `release_registry`: `implementation/phase1/release/release_registry.json`
-- `reproducibility_lock`: `implementation/phase1/reproducibility_version_lock_report.json`
-- `workflow_productization`: `implementation/phase1/workflow_productization_gate_report.json`
-
-Reproduction commands:
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
-
-Verification commands:
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
-
-Verdict change conditions:
-- `release_area.report` status is `pass` in `pm_release_gate_completion_audit.json`
-- `report::commercial_packaging_milestone_not_green` is absent from `pm_release_gate_report.json.release_area_blockers`
-- The owning release-area row has no blocker-specific false check in the PM report.
-- Current false audit check(s): `commercial_packaging_milestone_pass`
-
 ### `ux::human_new_user_observation_missing_or_failed`
 
 - Owner: `ux_research_owner`
@@ -325,45 +274,6 @@ Verdict change conditions:
 - `release_area.ux::human_new_user_sample_30min_evidence_present` is `true` in `pm_release_gate_report.json`
 - `release_area.ux::human_new_user_sample_30min_pass` is `true` in `pm_release_gate_report.json`
 - Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass`
-
-### `support::pm_blocker_closure_board_count_mismatch`
-
-- Owner: `release_owner`
-- Verdict requirement: `release_area.support`
-- Verdict requirement group: `release_area`
-- Verdict requirement status: `blocked_local_remediation_ready`
-- Closure state: `local_remediation_ready`
-- Evidence state: `open_release_evidence_blocker`
-- External input required: `False`
-- Owner input required: `False`
-- Next action: Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence.
-
-Acceptance criteria:
-- `support::pm_blocker_closure_board_count_mismatch` absent from `full_release_blockers`
-- `full_release_gate_ready == true` after PM report regeneration
-
-Evidence artifact paths:
-- `limitation_manual`: `docs/release-limitation-manual.md`
-- `pm_release_blocker_action_register`: `implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json`
-- `pm_release_blocker_closure_board`: `implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json`
-- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
-- `pm_release_reproduction_command_audit`: `implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json`
-- `runtime_packaging`: `implementation/phase1/production_runtime_packaging_manifest.json`
-- `support_bundle`: `implementation/phase1/support_bundle_manifest.json`
-- `template_evidence_safety`: `implementation/phase1/release_evidence/productization/template_evidence_safety_report.json`
-
-Reproduction commands:
-- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
-
-Verification commands:
-- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
-
-Verdict change conditions:
-- `release_area.support` status is `pass` in `pm_release_gate_completion_audit.json`
-- `support::pm_blocker_closure_board_count_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
-- The owning release-area row has no blocker-specific false check in the PM report.
-- Current false audit check(s): `pm_blocker_closure_board_register_count_match`
 
 ### `security::license_status_not_configured`
 
@@ -557,6 +467,1006 @@ Verification commands:
 Verdict change conditions:
 - `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
 - `customer_shadow::completed_shadow_case_count_below_minimum` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `heavy_surface_material_contact_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `heavy_surface_material_contact_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `heavy_surface_material_contact_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `heavy_surface_material_contact_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `heavy_surface_material_contact_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `midas_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `midas_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `ga_enterprise_evidence_gate_pass`
+
+### `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz`
+
+- Owner: `validation_lane_owner`
+- Verdict requirement: `release_tier.ga_enterprise_evidence_gate_pass`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `ready_for_pm_regeneration`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+
+Acceptance criteria:
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `fresh_full_validation_lane_status`: `implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`
+- `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`
 - Current false audit check(s): `ga_enterprise_evidence_gate_pass`
 
 This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.

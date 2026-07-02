@@ -10,7 +10,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_handoff": {},
-  "generated_at": "2026-07-02T03:56:56.155591+00:00",
+  "generated_at": "2026-07-02T04:20:06.093709+00:00",
   "human_ux_summary": {
     "evidence_artifacts": {
       "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -39,10 +39,10 @@
     "workflow_step_pass_count": 0
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:82b40e25c715aa6e2b99632d2a31c5f27981fe94c2214179f5ec78855158179e",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:50a79c0d9c4d6d30f0793310c638b7d67ef23c3db34b2c8ab30a3a2a1c339b2b",
     "scripts/build_non_expert_release_briefing_report.py": "sha256:c8425a9b99789f4be43384a640a6386d8df9510916dba96075572ff99811eeb7"
   },
-  "next_owner_action_count": 7,
+  "next_owner_action_count": 5,
   "next_owner_actions": [
     {
       "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -59,13 +59,6 @@
       "source": "release_area"
     },
     {
-      "blocker_id": "report::commercial_packaging_milestone_not_green",
-      "external_input_required": false,
-      "owner": "release_owner",
-      "owner_action": "Resolve `commercial_packaging_milestone_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.",
-      "source": "release_area"
-    },
-    {
       "blocker_id": "ux::human_new_user_observation_missing_or_failed",
       "external_input_required": true,
       "owner": "ux_research_owner",
@@ -77,13 +70,6 @@
       "external_input_required": true,
       "owner": "ux_research_owner",
       "owner_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
-      "source": "release_area"
-    },
-    {
-      "blocker_id": "support::pm_blocker_closure_board_count_mismatch",
-      "external_input_required": false,
-      "owner": "release_owner",
-      "owner_action": "Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
       "source": "release_area"
     },
     {
@@ -111,8 +97,8 @@
   "read_model_ready": true,
   "reason_code": "PASS",
   "release_allowed": false,
-  "release_area_blocker_count": 7,
-  "release_area_owner_handoff_count": 7,
+  "release_area_blocker_count": 5,
+  "release_area_owner_handoff_count": 5,
   "reuse_policy": "non_expert_release_briefing_report_from_goal_bottleneck_surface",
   "reused_evidence": true,
   "route": "/goal/non-expert-release-briefing",
@@ -120,6 +106,6 @@
   "source_artifacts": {
     "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
   },
-  "source_commit_sha": "0764018634df67b0a5c6f145e6585ed9e0ca8a57",
+  "source_commit_sha": "37d607686367766e414a93511ff1a7ad11d3e52f",
   "status": "ready_release_blocked"
 }
