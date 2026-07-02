@@ -73,7 +73,7 @@ def _estimate_working_set_mb(
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--runtime-hook-cmd", default="python3 implementation/phase1/rust_hip_md3bead_hook.py")
+    p.add_argument("--runtime-hook-cmd", default="python3 implementation/phase1/structural_runtime_hook.py")
     p.add_argument("--branches", type=int, default=64)
     p.add_argument("--chunk-candidates", default="64,32,16,8,4")
     p.add_argument("--node-count", type=int, default=100_000)

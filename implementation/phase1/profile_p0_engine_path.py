@@ -77,7 +77,7 @@ def main() -> None:
     logger = get_logger("phase1.profile_p0_engine_path")
 
     p = argparse.ArgumentParser()
-    p.add_argument("--producer-cmd", default=f"{sys.executable} implementation/phase1/rust_hip_md3bead_hook.py")
+    p.add_argument("--producer-cmd", default=f"{sys.executable} implementation/phase1/structural_runtime_hook.py")
     p.add_argument("--allow-cpu-required", action="store_true")
     p.add_argument("--require-rust-hip", action="store_true")
     p.add_argument("--require-rust-faster", action="store_true")
@@ -302,4 +302,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

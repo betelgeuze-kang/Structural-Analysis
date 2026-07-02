@@ -121,7 +121,7 @@ def run(producer_cmd: str, require_rust_hip: bool, allow_cpu_required: bool, gpu
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--producer-cmd", default=f"{sys.executable} implementation/phase1/rust_hip_md3bead_hook.py")
+    p.add_argument("--producer-cmd", default=f"{sys.executable} implementation/phase1/structural_runtime_hook.py")
     p.add_argument("--require-rust-hip", action="store_true")
     p.add_argument("--allow-cpu-required", action="store_true")
     p.add_argument("--gpu-strict", action="store_true")

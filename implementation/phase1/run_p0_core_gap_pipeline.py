@@ -74,7 +74,7 @@ def main() -> None:
     p.add_argument("--track-out", default="implementation/phase1/track_lf_solver_report.json")
     p.add_argument("--perf-out", default="implementation/phase1/p0_engine_perf_report.json")
     p.add_argument("--accuracy-out", default="implementation/phase1/real_accuracy_validation_report.json")
-    p.add_argument("--producer-cmd", default=f"{sys.executable} implementation/phase1/rust_hip_md3bead_hook.py")
+    p.add_argument("--producer-cmd", default=f"{sys.executable} implementation/phase1/structural_runtime_hook.py")
     p.add_argument("--require-rust-hip", action="store_true")
     p.add_argument("--allow-cpu-required", action="store_true")
     p.add_argument("--profile-require-rust-faster", action="store_true")

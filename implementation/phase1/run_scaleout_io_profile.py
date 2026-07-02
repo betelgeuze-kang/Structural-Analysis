@@ -110,14 +110,19 @@ def _archive_outputs(test_name: str, paths: list[str]) -> str:
 
 def _cmd_looks_rust_hip(cmd: str) -> bool:
     c = str(cmd).lower()
-    return ("rust_hip" in c) or ("run_hip_kernel" in c)
+    return (
+        ("rust_hip" in c)
+        or ("run_hip_kernel" in c)
+        or ("structural_runtime_hook" in c)
+        or ("structural_runtime_ffi" in c)
+    )
 
 
 def main() -> None:
     logger = get_logger("phase1.run_scaleout_io_profile")
     p = argparse.ArgumentParser()
-    p.add_argument("--runtime-hook-cmd", default="python3 implementation/phase1/rust_hip_md3bead_hook.py")
-    p.add_argument("--producer-cmd", default=f"{sys.executable} implementation/phase1/rust_hip_md3bead_hook.py")
+    p.add_argument("--runtime-hook-cmd", default="python3 implementation/phase1/structural_runtime_hook.py")
+    p.add_argument("--producer-cmd", default=f"{sys.executable} implementation/phase1/structural_runtime_hook.py")
     p.add_argument("--dof-levels", default="100000,300000,1000000,3000000")
     p.add_argument("--branches", type=int, default=64)
     p.add_argument("--chunk-candidates", default="64,32,16,8,4,2,1")
