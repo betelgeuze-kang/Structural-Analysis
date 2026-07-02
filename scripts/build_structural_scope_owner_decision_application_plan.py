@@ -681,10 +681,11 @@ def _next_batch_decision_template(
         if row["recommended_owner_decision_primary"]
         == "extract_to_molecular_or_science_repository"
     ]
+    path_area = _text(next_batch.get("path_area"))
     return {
         "schema_version": owner_review.DECISION_SCHEMA_VERSION,
         "batch_id": batch_id,
-        "path_area": _text(next_batch.get("path_area")),
+        "path_area": path_area,
         "decision_pending_count": len(decision_rows),
         "decision_rows": decision_rows,
         "canonical_owner_decisions_path": DEFAULT_OWNER_DECISIONS.as_posix(),
@@ -700,10 +701,7 @@ def _next_batch_decision_template(
             "decision_timestamp_utc",
             "evidence_reference",
         ],
-        "conditional_required_fields": [
-            "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
-            "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception",
-        ],
+        "conditional_required_fields": _conditional_required_fields(path_area),
         "path_specific_restrictions": [
             "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface",
         ],
@@ -736,6 +734,17 @@ def _next_batch_decision_template(
             "cleanup without recorded owner evidence and refreshed audits."
         ),
     }
+
+
+def _conditional_required_fields(path_area: str) -> list[str]:
+    fields = [
+        "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
+    ]
+    if path_area != "release_surface":
+        fields.append(
+            "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception"
+        )
+    return fields
 
 
 def _release_surface_first_batch_decision_template(

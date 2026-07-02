@@ -349,6 +349,13 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "structural_scope_owner_decisions.next_batch.template.md"
         ),
     }
+    assert batch_template["conditional_required_fields"] == [
+        "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository"
+    ]
+    assert (
+        "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception"
+        not in batch_template["conditional_required_fields"]
+    )
     assert batch_template["decision_rows"] == [
         {
             "row_id": "release_surface_first-001",
