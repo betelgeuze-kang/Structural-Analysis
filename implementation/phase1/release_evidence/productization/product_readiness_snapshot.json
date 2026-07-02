@@ -3016,7 +3016,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T16:36:26.071767+00:00",
+  "generated_at": "2026-07-02T16:43:56.737205+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3041,7 +3041,7 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:704e44a74d8ba8728e51f23d596fbee0be1afa8e04dd3dfa74abde6358fb5002",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:5f2b7ae6e2a04e0b34eec851aa525ac845aeea72b3dfe59d2f28f7a103b9f10b",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7110880ce1fbcd3a51919336bf44e20c101509930b860f1cd319fc9c17e8610b",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:ca5ba63f0f43c3c46eb3fd4561445911f25fcb07c3e6b5ad976e9d8f83d17b88",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8ddfd17510e7b64eb5466f8ed3d48730fa3ae513c97273472f0d155fa6e4c98e",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:b72eaca2998a769c64f411f86b8f9a73fbfc294b5a4a3f4ac442927625d7d4c3",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:862b21d27e4ad5e88980ec3eae431c500fc1304a85764b9eb619758d5393d272",
@@ -3357,7 +3357,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "c2c2af36d7e9615c3c3a54637df8b269b41f0a28",
+  "source_commit_sha": "ff8b7cc5965a8fe45d7dc0815482a7a3877dba58",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3454,22 +3454,27 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_pm_release_blocker_action_register.py",
+          "tests/test_build_pm_release_blocker_action_register.py"
+        ],
         "generated_at": "2026-07-02T16:35:59.850015+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "c2c2af36d7e9615c3c3a54637df8b269b41f0a28",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:36:09.494867+00:00",
@@ -3485,8 +3490,10 @@
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:36:09.163414+00:00",
@@ -3502,8 +3509,10 @@
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:36:09.597447+00:00",
@@ -3519,8 +3528,10 @@
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:33:48.894207+00:00",
@@ -3536,8 +3547,10 @@
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:57:48.463834+00:00",
@@ -3552,7 +3565,9 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T16:18:05.249240+00:00",
@@ -3567,7 +3582,9 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T16:09:29.025143+00:00",
@@ -3583,8 +3600,10 @@
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:34:11.703028+00:00",
@@ -3600,8 +3619,10 @@
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:48:56.811325+00:00",
@@ -3617,8 +3638,10 @@
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:33:49.046672+00:00",
@@ -3634,8 +3657,10 @@
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:33:49.009126+00:00",
@@ -3651,8 +3676,10 @@
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:36:08.905261+00:00",
@@ -3668,8 +3695,10 @@
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-01T10:19:19.231347+00:00",
@@ -3685,8 +3714,10 @@
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:33:49.085575+00:00",
@@ -3702,8 +3733,10 @@
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:33:49.122698+00:00",
@@ -3718,7 +3751,9 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T16:08:49.986936+00:00",
@@ -3734,8 +3769,10 @@
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:36:08.946329+00:00",
@@ -3751,8 +3788,10 @@
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
           "scripts/build_paid_pilot_scope_guard_report.py",
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_paid_pilot_scope_guard_report.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T15:34:10.591766+00:00",
@@ -3767,23 +3806,8 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
-          "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
+          "scripts/build_pm_release_blocker_action_register.py",
+          "tests/test_build_pm_release_blocker_action_register.py"
         ],
         "generated_at": "2026-07-02T16:32:38.527894+00:00",
         "input_checksum_present": true,
@@ -3792,28 +3816,13 @@
         "source_commit_matches_head": false,
         "source_commit_sha": "eeef6b83a6056ae0516deeb9164e71038da135e7",
         "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
-          "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
+          "scripts/build_pm_release_blocker_action_register.py",
+          "tests/test_build_pm_release_blocker_action_register.py"
         ],
         "generated_at": "2026-07-02T16:32:43.529840+00:00",
         "input_checksum_present": true,
@@ -3822,28 +3831,13 @@
         "source_commit_matches_head": false,
         "source_commit_sha": "eeef6b83a6056ae0516deeb9164e71038da135e7",
         "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
-          "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-          "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
-          "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
+          "scripts/build_pm_release_blocker_action_register.py",
+          "tests/test_build_pm_release_blocker_action_register.py"
         ],
         "generated_at": "2026-07-02T16:32:52.583809+00:00",
         "input_checksum_present": true,
@@ -3852,12 +3846,14 @@
         "source_commit_matches_head": false,
         "source_commit_sha": "eeef6b83a6056ae0516deeb9164e71038da135e7",
         "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
+          "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T16:09:40.461956+00:00",
@@ -3892,22 +3888,13 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
         "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
         "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
+        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -3932,22 +3919,13 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         " M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
         " M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        " M implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md"
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
       ]
     }
   },
