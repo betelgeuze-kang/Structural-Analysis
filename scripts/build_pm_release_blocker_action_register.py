@@ -421,6 +421,33 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
         lane_id = code.split("::", 1)[0]
         runner = str(row.get("runner", "") or summary.get("runner", "") or lane_id)
         receipt = str(row.get("fresh_validation_receipt", "") or "")
+        remediation = _as_dict(row.get("fresh_validation_result_remediation"))
+        failure_class = str(
+            row.get("fresh_validation_result_failure_class", "")
+            or remediation.get("failure_class", "")
+            or ""
+        )
+        operator_action = str(remediation.get("operator_action", "") or "")
+        if failure_class == "rocm_runtime_unavailable" and operator_action:
+            checks = [
+                str(item)
+                for item in _as_list(remediation.get("preflight_checks"))
+                if str(item)
+            ]
+            check_clause = (
+                " Required preflight: " + "; ".join(checks[:4]) + "."
+                if checks
+                else ""
+            )
+            return (
+                f"{operator_action}{check_clause} Then rerun `{runner}` and "
+                "regenerate fresh full-validation and PM release evidence."
+            )
+        if operator_action:
+            return (
+                f"{operator_action} Then rerun `{runner}` and regenerate fresh "
+                "full-validation and PM release evidence."
+            )
         return (
             f"Run the `{runner}` fresh validation lane, attach `{receipt}` with "
             "`reused_evidence=false`, required provenance metadata, and a green contract result, "
@@ -1265,6 +1292,39 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "fresh_validation_result_latest_tail_reason_code": str(
                 row.get("fresh_validation_result_latest_tail_reason_code", "") or ""
             ),
+            "fresh_validation_result_failure_class": str(
+                row.get("fresh_validation_result_failure_class", "") or ""
+            ),
+            "fresh_validation_result_remediation_status": str(
+                _as_dict(row.get("fresh_validation_result_remediation")).get(
+                    "status", ""
+                )
+                or ""
+            ),
+            "fresh_validation_result_remediation_operator_action": str(
+                _as_dict(row.get("fresh_validation_result_remediation")).get(
+                    "operator_action", ""
+                )
+                or ""
+            ),
+            "fresh_validation_result_remediation_preflight_checks": [
+                str(item)
+                for item in _as_list(
+                    _as_dict(row.get("fresh_validation_result_remediation")).get(
+                        "preflight_checks"
+                    )
+                )
+                if str(item)
+            ],
+            "fresh_validation_result_remediation_validation_commands": [
+                str(item)
+                for item in _as_list(
+                    _as_dict(row.get("fresh_validation_result_remediation")).get(
+                        "validation_commands"
+                    )
+                )
+                if str(item)
+            ],
             "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
             "source_policy": "fresh_lane_execution_required",
         }

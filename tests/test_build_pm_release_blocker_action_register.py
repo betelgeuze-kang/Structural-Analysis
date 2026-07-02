@@ -590,6 +590,23 @@ def test_build_register_surfaces_gpu_and_performance_fresh_receipt_commands(
                         "ERR_ROCM_RUNTIME_UNAVAILABLE"
                     ],
                     "fresh_validation_result_latest_tail_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+                    "fresh_validation_result_failure_class": "rocm_runtime_unavailable",
+                    "fresh_validation_result_remediation": {
+                        "status": "blocked_runtime_environment",
+                        "failure_class": "rocm_runtime_unavailable",
+                        "operator_action": (
+                            "Restore a ROCm/HIP runtime that exposes the required "
+                            "GPU device interfaces."
+                        ),
+                        "preflight_checks": [
+                            "/dev/kfd is present and accessible to the validation user",
+                            "/dev/dri render node is present and accessible to the validation user",
+                            "ROCm/HIP runtime libraries are discoverable by the validation command",
+                        ],
+                        "validation_commands": [
+                            "python3 scripts/build_fresh_validation_receipt.py --lane-id gpu_hip_solver",
+                        ],
+                    },
                 },
                 {
                     "lane_id": "performance_profile",
@@ -651,6 +668,18 @@ def test_build_register_surfaces_gpu_and_performance_fresh_receipt_commands(
     assert gpu_row["evidence_status"]["fresh_validation_result_command_returncode"] == 1
     assert gpu_row["evidence_status"]["fresh_validation_result_latest_tail_reason_code"] == (
         "ERR_ROCM_RUNTIME_UNAVAILABLE"
+    )
+    assert gpu_row["evidence_status"]["fresh_validation_result_failure_class"] == (
+        "rocm_runtime_unavailable"
+    )
+    assert gpu_row["evidence_status"]["fresh_validation_result_remediation_status"] == (
+        "blocked_runtime_environment"
+    )
+    assert "/dev/kfd is present" in gpu_row["evidence_status"][
+        "fresh_validation_result_remediation_preflight_checks"
+    ][0]
+    assert gpu_row["next_action"].startswith(
+        "Restore a ROCm/HIP runtime that exposes the required GPU device interfaces."
     )
     assert any(
         "scripts/build_fresh_validation_receipt.py" in command
