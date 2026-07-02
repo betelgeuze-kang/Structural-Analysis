@@ -1051,6 +1051,10 @@ def test_application_plan_writes_release_surface_first_template(
     assert "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception" not in (
         release_markdown
     )
+    assert "## Post Batch Verification" in next_markdown
+    assert "## Post Batch Verification" in release_markdown
+    assert "--fail-release-surface-first-blocked" in next_markdown
+    assert "--fail-release-surface-first-blocked" in release_markdown
     csv_rows = list(
         csv.DictReader(release_template_csv.read_text(encoding="utf-8").splitlines())
     )

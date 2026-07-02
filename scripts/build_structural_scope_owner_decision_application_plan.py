@@ -1394,6 +1394,20 @@ def _next_batch_template_markdown(payload: dict[str, Any]) -> str:
             f"- `primary_delete_path_count`: `{preview.get('primary_delete_path_count', 0)}`",
             f"- `primary_extract_path_count`: `{preview.get('primary_extract_path_count', 0)}`",
             "",
+            "## Post Batch Verification",
+            "",
+        ]
+    )
+    verification = [
+        str(item) for item in _as_list(payload.get("post_batch_verification"))
+    ]
+    if verification:
+        lines.extend(f"- `{item}`" for item in verification)
+    else:
+        lines.append("- none")
+    lines.extend(
+        [
+            "",
             "## Claim Boundary",
             "",
             str(payload["claim_boundary"]),
@@ -1478,6 +1492,20 @@ def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> s
             f"- `safe_to_auto_apply`: `{preview.get('safe_to_auto_apply')}`",
             f"- `primary_delete_path_count`: `{preview.get('primary_delete_path_count', 0)}`",
             f"- `primary_extract_path_count`: `{preview.get('primary_extract_path_count', 0)}`",
+            "",
+            "## Post Batch Verification",
+            "",
+        ]
+    )
+    verification = [
+        str(item) for item in _as_list(payload.get("post_batch_verification"))
+    ]
+    if verification:
+        lines.extend(f"- `{item}`" for item in verification)
+    else:
+        lines.append("- none")
+    lines.extend(
+        [
             "",
             "## Claim Boundary",
             "",
