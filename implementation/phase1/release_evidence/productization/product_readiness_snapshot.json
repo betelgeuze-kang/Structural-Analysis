@@ -3087,12 +3087,12 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T23:15:45.815297+00:00",
+  "generated_at": "2026-07-02T23:17:11.833166+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
-    "README.md": "sha256:3c2ace54c61a5ff06348c28d41faf10159e41bc366780e8371c845b0f04db403",
-    "docs/commercialization-gap-current-state.md": "sha256:bf54805ee45a334c355478d74567fe14e67e88ecf641c80895dd57313b94ae84",
+    "README.md": "sha256:1228496a346f203db8d5292d1068c73ba13b1f5c88947ec31104af2c57b86866",
+    "docs/commercialization-gap-current-state.md": "sha256:0a8bc8df83236796cd658a6f2d6015b6b547120db5ebbea7a6af9a9105debc6b",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:9b1aad51e021dbc4dfb333618dd87a69d3475cc8c550c4b40de2951d90c41b2c",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:9014e8908dfb6df4b52a6c042aa611fa066ed85f86e4c5c283b7fe17e738693d",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:b9eb89043bd3c76c88b3f06c9d5777f40d4713bcd08b8f2b9b1c9ae8f25e69ba",
@@ -3424,7 +3424,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "6323217e552897287f6103bf282c11f0cfc54f9d",
+  "source_commit_sha": "46d3bb2936d6043d9f3bcf6251609def5f0784d1",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3962,6 +3962,9 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
           "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
           "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
@@ -3981,6 +3984,9 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
           "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
           "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
@@ -4000,6 +4006,9 @@
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
           "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
           "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
           "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
