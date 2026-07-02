@@ -178,7 +178,9 @@ def _git_ls_files(repo_root: Path) -> list[str]:
 def _candidate_tokens_for_row(row: dict[str, Any]) -> set[str]:
     path = _text(row.get("path"))
     path_obj = Path(path)
-    values = {path, path_obj.name}
+    values = {path}
+    if any(token in path_obj.name.lower() for token in SIGNAL_TOKENS):
+        values.add(path_obj.name)
     parts = [part for part in path_obj.parts if part not in {".", ""}]
     values.update(
         part

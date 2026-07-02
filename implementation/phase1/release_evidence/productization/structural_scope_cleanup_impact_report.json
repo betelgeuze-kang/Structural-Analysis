@@ -1,14 +1,14 @@
 {
   "blockers": [
     "owner_decision_pending_count=86",
-    "blocking_cleanup_reference_path_count=84"
+    "blocking_cleanup_reference_path_count=80"
   ],
-  "blocking_cleanup_reference_path_count": 84,
+  "blocking_cleanup_reference_path_count": 80,
   "blocking_reference_cleanup_action_counts": {
     "delete_or_extract_molecular_script_or_remove_quarantined_path_refs": 10,
     "delete_or_extract_molecular_tests_or_update_scope_guard_tests": 13,
-    "regenerate_release_evidence_without_molecular_scope_references": 10,
-    "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts": 48,
+    "regenerate_release_evidence_without_molecular_scope_references": 7,
+    "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts": 47,
     "remove_non_structural_scope_ignore_or_metadata_reference": 1,
     "rewrite_structural_docs_to_scope_boundary_only": 2
   },
@@ -16,24 +16,20 @@
   "blocking_reference_cleanup_batches": [
     {
       "batch_id": "cleanup_refs_01_productization_evidence_reference",
-      "matched_quarantined_path_count": 92,
+      "matched_quarantined_path_count": 81,
       "matched_scope_tokens": [
         "casf_pdbbind",
         "gnina",
-        "md3bead",
         "pdbbind",
         "posebusters",
         "symmetry_aware_ligand"
       ],
       "owner_decision_dependency_counts": {
-        "owner_delete_extract_decision_then_reference_cleanup": 8,
+        "owner_delete_extract_decision_then_reference_cleanup": 5,
         "scope_token_review_before_cleanup": 2
       },
-      "path_count": 10,
+      "path_count": 7,
       "paths": [
-        "implementation/phase1/release_evidence/productization/g1_current_frontier_engine_acceleration_assessment.json",
-        "implementation/phase1/release_evidence/productization/g1_rocm_rust_hip_acceleration_assessment.json",
-        "implementation/phase1/release_evidence/productization/mgt_rust_hip_full_residual_ffi_followup376_probe.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
         "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
@@ -53,15 +49,15 @@
     },
     {
       "batch_id": "cleanup_refs_02_implementation_runtime_or_manifest_reference",
-      "matched_quarantined_path_count": 154,
+      "matched_quarantined_path_count": 152,
       "matched_scope_tokens": [
         "md3bead"
       ],
       "owner_decision_dependency_counts": {
-        "owner_delete_extract_decision_then_reference_cleanup": 44,
+        "owner_delete_extract_decision_then_reference_cleanup": 43,
         "scope_token_review_before_cleanup": 4
       },
-      "path_count": 48,
+      "path_count": 47,
       "paths": [
         "implementation/phase1/README.md",
         "implementation/phase1/branch64_microbatch_profile_report.json",
@@ -78,7 +74,6 @@
         "implementation/phase1/ci_gate_report.pr.require_hip.json",
         "implementation/phase1/commercial_readiness_report.json",
         "implementation/phase1/commercialization-gap-redteam-playbook.md",
-        "implementation/phase1/mgt_hip_full_residual_backend.py",
         "implementation/phase1/native_runtime_artifact_manifest.json",
         "implementation/phase1/nightly_release_gate_report.json",
         "implementation/phase1/organize_phase1_workspace.py",
@@ -253,9 +248,9 @@
   ],
   "blocking_reference_role_counts": {
     "documentation_reference": 2,
-    "implementation_runtime_or_manifest_reference": 48,
+    "implementation_runtime_or_manifest_reference": 47,
     "other_reference": 1,
-    "productization_evidence_reference": 10,
+    "productization_evidence_reference": 7,
     "script_reference": 10,
     "test_reference": 13
   },
@@ -315,10 +310,9 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 3,
+      "matched_term_count": 2,
       "matched_terms": [
         "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "lib.rs",
         "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
@@ -629,37 +623,16 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 7,
+      "matched_term_count": 5,
       "matched_terms": [
-        "Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook.py",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "lib.rs",
         "rust_hip_md3bead_hook",
         "rust_hip_md3bead_hook.py"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/commercialization-gap-redteam-playbook.md",
-      "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
-      "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "matched_quarantined_path_count": 2,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs"
-      ],
-      "matched_scope_tokens": [],
-      "matched_term_count": 2,
-      "matched_terms": [
-        "Cargo.toml",
-        "lib.rs"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/mgt_hip_full_residual_backend.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
       "reference_role_priority": 2
@@ -677,17 +650,13 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 11,
+      "matched_term_count": 7,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook.py",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
         "implementation/phase1/rust_hip_md3bead_hook/src/main.rs",
-        "lib.rs",
-        "main.rs",
         "rust_hip_md3bead_hook",
         "rust_hip_md3bead_hook.py"
       ],
@@ -928,73 +897,6 @@
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
       "reference_role_priority": 2
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 3,
-      "matched_terms": [
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "lib.rs",
-        "rust_hip_md3bead_hook"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/release_evidence/productization/g1_current_frontier_engine_acceleration_assessment.json",
-      "recommended_cleanup_action": "regenerate_release_evidence_without_molecular_scope_references",
-      "reference_role": "productization_evidence_reference",
-      "reference_role_priority": 1
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 3,
-      "matched_terms": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "rust_hip_md3bead_hook",
-        "rust_hip_md3bead_hook.py"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/release_evidence/productization/g1_rocm_rust_hip_acceleration_assessment.json",
-      "recommended_cleanup_action": "regenerate_release_evidence_without_molecular_scope_references",
-      "reference_role": "productization_evidence_reference",
-      "reference_role_priority": 1
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "matched_quarantined_path_count": 1,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml"
-      ],
-      "matched_scope_tokens": [],
-      "matched_term_count": 1,
-      "matched_terms": [
-        "Cargo.toml"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/release_evidence/productization/mgt_rust_hip_full_residual_ffi_followup376_probe.json",
-      "recommended_cleanup_action": "regenerate_release_evidence_without_molecular_scope_references",
-      "reference_role": "productization_evidence_reference",
-      "reference_role_priority": 1
     },
     {
       "blocking_cleanup_reference": true,
@@ -1563,10 +1465,8 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 5,
+      "matched_term_count": 3,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
         "rust_hip_md3bead_hook"
@@ -1613,10 +1513,8 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 3,
+      "matched_term_count": 1,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
@@ -1638,10 +1536,8 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 3,
+      "matched_term_count": 1,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
@@ -2078,13 +1974,9 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 7,
+      "matched_term_count": 3,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook.py",
-        "lib.rs",
-        "main.rs",
         "rust_hip_md3bead_hook",
         "rust_hip_md3bead_hook.py"
       ],
@@ -2523,12 +2415,8 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 5,
+      "matched_term_count": 1,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
-        "lib.rs",
-        "main.rs",
         "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
@@ -2703,12 +2591,12 @@
   "cleanup_impact_clear": false,
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T08:21:50.512750+00:00",
+  "generated_at": "2026-07-02T08:28:19.900104+00:00",
   "governance_reference_path_count": 49,
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:e22085fff573457d46d0d9fa78facb24a84c3c18dbbd3e27df491a60c7863568",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:8c28b99117af00ab4a6f02d0ed7660320a5c375c8bfe27da4235516a99845679",
-    "scripts/build_structural_scope_cleanup_impact_report.py": "sha256:d64c0144cf965958cccdad9eefc5c9b54f82d607ba2fa9f01571dbb771bef38c"
+    "scripts/build_structural_scope_cleanup_impact_report.py": "sha256:7fb910372a06e8f0ed681c769a7675cc1dc1248a5045806764e23859ef018391"
   },
   "next_actions": [
     "record owner delete/extract decisions for quarantined non-structural paths",
@@ -2717,24 +2605,20 @@
   ],
   "next_reference_cleanup_batch": {
     "batch_id": "cleanup_refs_01_productization_evidence_reference",
-    "matched_quarantined_path_count": 92,
+    "matched_quarantined_path_count": 81,
     "matched_scope_tokens": [
       "casf_pdbbind",
       "gnina",
-      "md3bead",
       "pdbbind",
       "posebusters",
       "symmetry_aware_ligand"
     ],
     "owner_decision_dependency_counts": {
-      "owner_delete_extract_decision_then_reference_cleanup": 8,
+      "owner_delete_extract_decision_then_reference_cleanup": 5,
       "scope_token_review_before_cleanup": 2
     },
-    "path_count": 10,
+    "path_count": 7,
     "paths": [
-      "implementation/phase1/release_evidence/productization/g1_current_frontier_engine_acceleration_assessment.json",
-      "implementation/phase1/release_evidence/productization/g1_rocm_rust_hip_acceleration_assessment.json",
-      "implementation/phase1/release_evidence/productization/mgt_rust_hip_full_residual_ffi_followup376_probe.json",
       "implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json",
       "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json",
       "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
@@ -2756,12 +2640,12 @@
   "owner_decision_pending_count": 86,
   "owner_review_packet": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
   "quarantined_path_count": 86,
-  "reference_path_count": 133,
+  "reference_path_count": 129,
   "reference_role_counts": {
     "documentation_reference": 2,
-    "implementation_runtime_or_manifest_reference": 48,
+    "implementation_runtime_or_manifest_reference": 47,
     "other_reference": 1,
-    "productization_evidence_reference": 10,
+    "productization_evidence_reference": 7,
     "release_governance_reference": 19,
     "scope_governance_reference": 30,
     "script_reference": 10,
@@ -2843,10 +2727,9 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 3,
+      "matched_term_count": 2,
       "matched_terms": [
         "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "lib.rs",
         "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
@@ -3174,37 +3057,16 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 7,
+      "matched_term_count": 5,
       "matched_terms": [
-        "Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook.py",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "lib.rs",
         "rust_hip_md3bead_hook",
         "rust_hip_md3bead_hook.py"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/commercialization-gap-redteam-playbook.md",
-      "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
-      "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "matched_quarantined_path_count": 2,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs"
-      ],
-      "matched_scope_tokens": [],
-      "matched_term_count": 2,
-      "matched_terms": [
-        "Cargo.toml",
-        "lib.rs"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/mgt_hip_full_residual_backend.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
       "reference_role_priority": 2
@@ -3222,17 +3084,13 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 11,
+      "matched_term_count": 7,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook.py",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
         "implementation/phase1/rust_hip_md3bead_hook/src/main.rs",
-        "lib.rs",
-        "main.rs",
         "rust_hip_md3bead_hook",
         "rust_hip_md3bead_hook.py"
       ],
@@ -3473,73 +3331,6 @@
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
       "reference_role_priority": 2
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 3,
-      "matched_terms": [
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "lib.rs",
-        "rust_hip_md3bead_hook"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/release_evidence/productization/g1_current_frontier_engine_acceleration_assessment.json",
-      "recommended_cleanup_action": "regenerate_release_evidence_without_molecular_scope_references",
-      "reference_role": "productization_evidence_reference",
-      "reference_role_priority": 1
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 3,
-      "matched_terms": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "rust_hip_md3bead_hook",
-        "rust_hip_md3bead_hook.py"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/release_evidence/productization/g1_rocm_rust_hip_acceleration_assessment.json",
-      "recommended_cleanup_action": "regenerate_release_evidence_without_molecular_scope_references",
-      "reference_role": "productization_evidence_reference",
-      "reference_role_priority": 1
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "matched_quarantined_path_count": 1,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml"
-      ],
-      "matched_scope_tokens": [],
-      "matched_term_count": 1,
-      "matched_terms": [
-        "Cargo.toml"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "implementation/phase1/release_evidence/productization/mgt_rust_hip_full_residual_ffi_followup376_probe.json",
-      "recommended_cleanup_action": "regenerate_release_evidence_without_molecular_scope_references",
-      "reference_role": "productization_evidence_reference",
-      "reference_role_priority": 1
     },
     {
       "blocking_cleanup_reference": false,
@@ -4328,10 +4119,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 188,
+      "matched_term_count": 184,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -4379,7 +4168,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
@@ -4491,10 +4282,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -4542,7 +4331,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
@@ -4617,10 +4408,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -4668,7 +4457,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
@@ -4743,10 +4534,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -4794,7 +4583,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
@@ -4904,10 +4695,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -4955,7 +4744,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
@@ -5247,10 +5038,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -5298,7 +5087,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
@@ -5373,10 +5164,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -5424,7 +5213,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
@@ -5499,10 +5290,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -5550,7 +5339,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.md",
@@ -5625,10 +5416,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -5676,7 +5465,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
@@ -5751,10 +5542,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -5802,7 +5591,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md",
@@ -5877,10 +5668,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -5928,7 +5717,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json",
@@ -6101,10 +5892,8 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 5,
+      "matched_term_count": 3,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
         "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
         "rust_hip_md3bead_hook"
@@ -6151,10 +5940,8 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 3,
+      "matched_term_count": 1,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
@@ -6176,10 +5963,8 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 3,
+      "matched_term_count": 1,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
@@ -6687,13 +6472,9 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 7,
+      "matched_term_count": 3,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "implementation/phase1/rust_hip_md3bead_hook.py",
-        "lib.rs",
-        "main.rs",
         "rust_hip_md3bead_hook",
         "rust_hip_md3bead_hook.py"
       ],
@@ -7371,12 +7152,8 @@
       "matched_scope_tokens": [
         "md3bead"
       ],
-      "matched_term_count": 5,
+      "matched_term_count": 1,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
-        "lib.rs",
-        "main.rs",
         "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
@@ -7387,22 +7164,29 @@
     },
     {
       "blocking_cleanup_reference": false,
-      "matched_quarantined_path_count": 2,
+      "matched_quarantined_path_count": 7,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
-        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json"
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/rust_hip_md3bead_hook.py",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
       ],
       "matched_scope_tokens": [
         "gpcr",
         "md3bead"
       ],
-      "matched_term_count": 5,
+      "matched_term_count": 7,
       "matched_terms": [
         "gpcr_hard_decoy_evidence_surface",
         "gpcr_hard_decoy_evidence_surface.json",
         "implementation/phase1/md3bead_soa.py",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
         "md3bead_soa",
-        "md3bead_soa.py"
+        "md3bead_soa.py",
+        "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -8408,10 +8192,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 188,
+      "matched_term_count": 184,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -8459,7 +8241,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
@@ -8571,10 +8355,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -8622,7 +8404,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
@@ -8697,10 +8481,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -8748,7 +8530,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
@@ -8823,10 +8607,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -8874,7 +8656,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
@@ -8984,10 +8768,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -9035,7 +8817,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
@@ -9327,10 +9111,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -9378,7 +9160,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
@@ -9453,10 +9237,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -9504,7 +9286,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
@@ -9579,10 +9363,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -9630,7 +9412,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.md",
@@ -9705,10 +9489,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -9756,7 +9538,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
@@ -9831,10 +9615,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -9882,7 +9664,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md",
@@ -9957,10 +9741,8 @@
         "science_actual",
         "symmetry_aware_ligand"
       ],
-      "matched_term_count": 247,
+      "matched_term_count": 243,
       "matched_terms": [
-        "Cargo.lock",
-        "Cargo.toml",
         "build_gpcr_hard_decoy_operator_intake_packet",
         "build_gpcr_hard_decoy_operator_intake_packet.py",
         "build_gpcr_hard_decoy_product_report",
@@ -10008,7 +9790,9 @@
         "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
         "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
-        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json",
@@ -10087,22 +9871,29 @@
     },
     {
       "blocking_cleanup_reference": false,
-      "matched_quarantined_path_count": 2,
+      "matched_quarantined_path_count": 7,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
-        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json"
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/rust_hip_md3bead_hook.py",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
       ],
       "matched_scope_tokens": [
         "gpcr",
         "md3bead"
       ],
-      "matched_term_count": 5,
+      "matched_term_count": 7,
       "matched_terms": [
         "gpcr_hard_decoy_evidence_surface",
         "gpcr_hard_decoy_evidence_surface.json",
         "implementation/phase1/md3bead_soa.py",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
         "md3bead_soa",
-        "md3bead_soa.py"
+        "md3bead_soa.py",
+        "rust_hip_md3bead_hook"
       ],
       "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
       "path": "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -10370,7 +10161,7 @@
   "reuse_policy": "structural_scope_cleanup_impact_report_from_owner_review_and_tracked_references",
   "reused_evidence": false,
   "schema_version": "structural-scope-cleanup-impact-report.v1",
-  "source_commit_sha": "37c964c1b1f0cd1f8cc5b8d7d1bfec6b30049cd7",
+  "source_commit_sha": "7d981c50e905ac5adb9f30b692e36d82acdcd733",
   "status": "blocked_cleanup_impact",
-  "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=133 | blocking=84 | owner_pending=86"
+  "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=129 | blocking=80 | owner_pending=86"
 }

@@ -262,6 +262,59 @@ def test_cleanup_impact_report_treats_pm_scope_tracking_as_release_governance(
     )
 
 
+def test_cleanup_impact_report_ignores_generic_quarantined_basenames(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    owner_review = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_owner_review_packet.json"
+    )
+    origin = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_origin_report.json"
+    )
+    packet = _owner_review_packet()
+    packet["review_rows"] = [
+        {
+            "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+            "path_area": "implementation_phase1",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["md3bead"],
+            "owner_review_state": "pending_owner_decision",
+        }
+    ]
+    packet["owner_decision_pending_count"] = 1
+    _write_json(owner_review, packet)
+    _write_json(origin, _origin_report())
+    _write_text(
+        tmp_path / "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+        "self reference should be ignored\n",
+    )
+    _write_text(
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "mgt_rust_hip_full_residual_ffi_followup376_probe.json",
+        "/repo/implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml\n",
+    )
+    _git_add(tmp_path)
+
+    payload = impact_report.build_cleanup_impact_report(
+        repo_root=tmp_path,
+        owner_review_packet_path=owner_review,
+        origin_report_path=origin,
+    )
+
+    paths = {row["path"] for row in payload["reference_rows"]}
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "mgt_rust_hip_full_residual_ffi_followup376_probe.json"
+    ) not in paths
+    assert payload["blocking_cleanup_reference_path_count"] == 0
+
+
 def test_cleanup_impact_report_can_be_clear_except_owner_decisions(
     tmp_path: Path,
 ) -> None:

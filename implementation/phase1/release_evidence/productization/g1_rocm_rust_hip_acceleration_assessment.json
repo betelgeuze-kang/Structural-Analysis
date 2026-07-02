@@ -818,10 +818,11 @@
       "assessment": "ROCm/HIP runtime is present and fast for raw kernels and favorable coupled sparse solves. The shell probe still converges but consumes the full 4000-iteration GMRES budget, so the current shell/frame cancellation frontier is conditioning- and correction-model-limited rather than raw HIP throughput-limited."
     },
     "rust_path_current_status": {
-      "runtime_wrapper": "implementation/phase1/rust_hip_md3bead_hook.py",
-      "crate": "implementation/phase1/rust_hip_md3bead_hook",
+      "runtime_wrapper": "implementation/phase1/run_mgt_rust_hip_full_residual_ffi_probe.py",
+      "crate": null,
+      "native_hip_c_abi_source": "implementation/phase1/hip_full_residual_ffi.cpp",
       "connected_to_current_mgt_full_3d_frame_shell_residual": false,
-      "assessment": "The Rust/HIP contracts cover story-frame, NDTHA, and track/load-path kernels; they are not yet wired into the MGT full 3D frame+shell residual/Jacobian assembly that controls the current G1 frontier."
+      "assessment": "The structural acceleration evidence is scoped to the MGT full 3D frame+shell residual/Jacobian lane and native HIP C ABI probe. Legacy non-structural runtime hooks are excluded from the structural release-scope evidence surface."
     },
     "decision": {
       "short_answer": "Use ROCm/HIP for batched residual/JVP acceleration, but do not expect a simple sparse-solver or Rust backend swap to close G1.",
@@ -1025,10 +1026,11 @@
     }
   },
   "rust_path": {
-    "runtime_wrapper": "implementation/phase1/rust_hip_md3bead_hook.py",
-    "crate": "implementation/phase1/rust_hip_md3bead_hook",
+    "runtime_wrapper": "implementation/phase1/run_mgt_rust_hip_full_residual_ffi_probe.py",
+    "crate": null,
+    "native_hip_c_abi_source": "implementation/phase1/hip_full_residual_ffi.cpp",
     "connected_to_current_mgt_g1_full_3d_residual": false,
-    "assessment": "Rust backend is useful for existing runtime/NDTHA/nonlinear-frame contracts, but it is not wired into the current MGT full 3D frame+shell residual/Jacobian assembly."
+    "assessment": "The structural release-scope acceleration path is the MGT full 3D frame+shell residual/Jacobian lane and native HIP C ABI probe. Legacy non-structural runtime hooks are excluded from this evidence surface."
   },
   "latest_hotspot_direction_counter_evidence": {
     "shell_bending_tangent_followup": {

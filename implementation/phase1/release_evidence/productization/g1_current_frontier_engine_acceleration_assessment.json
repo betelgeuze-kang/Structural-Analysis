@@ -277,12 +277,13 @@
     },
     "rust_engine_scope": {
       "existing_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+        "implementation/phase1/run_mgt_rust_hip_full_residual_ffi_probe.py",
+        "implementation/phase1/hip_full_residual_ffi.cpp",
         "implementation/phase1/gpu_newton_core.py"
       ],
-      "current_scope": "story-level nonlinear frame / hook and GPU Newton contract support",
+      "current_scope": "building-structural MGT frame/shell residual, native HIP FFI, and GPU Newton contract support",
       "g1_full_residual_engine_ready": false,
-      "assessment": "Rust is useful as the stable FFI/orchestration layer, but the existing Rust path is not yet the full MGT frame-shell residual replay engine."
+      "assessment": "The active acceleration lane is the structural MGT frame/shell residual and native HIP FFI path. Legacy non-structural runtime hooks are excluded from the structural release-scope evidence surface."
     }
   },
   "code_bottleneck": {
