@@ -1,0 +1,51 @@
+name: DP Windows Parity Receipt
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+concurrency:
+  group: dp-windows-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-parity-receipt:
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_WINDOWS_RUNNER_LABELS || '["self-hosted","windows","x64"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Install Python package
+        run: python -m pip install -e .[dev]
+
+      - name: Build Windows platform replay receipt
+        run: >
+          python scripts/build_phase6_platform_replay_receipt.py
+          --platform windows
+          --out implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json
+          --json
+          --fail-blocked
+
+      - name: Check Linux/Windows parity status
+        run: python scripts/build_phase6_linux_windows_parity_status.py --check
+
+      - name: Upload Windows parity receipt
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: phase6-windows-platform-replay-receipt-${{ github.run_id }}
+          path: implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json
+          if-no-files-found: warn
+          retention-days: 30
