@@ -20,7 +20,7 @@ def test_classifies_cleanup_candidates_with_deterministic_counts(tmp_path: Path,
     monkeypatch.chdir(tmp_path)
     files = [
         "implementation/phase1/output/report.json",
-        "implementation/phase1/rust_hip_md3bead_hook/target/debug/build.log",
+        "implementation/phase1/structural_rust_solver/target/debug/build.log",
         "node_modules/pkg/index.js",
         "dist/app.js",
         "pkg/__pycache__/module.cpython-311.pyc",
@@ -31,7 +31,7 @@ def test_classifies_cleanup_candidates_with_deterministic_counts(tmp_path: Path,
     ]
     for path, size in {
         "implementation/phase1/output/report.json": 10,
-        "implementation/phase1/rust_hip_md3bead_hook/target/debug/build.log": 20,
+        "implementation/phase1/structural_rust_solver/target/debug/build.log": 20,
         "node_modules/pkg/index.js": 30,
         "dist/app.js": 40,
         "pkg/__pycache__/module.cpython-311.pyc": 50,
@@ -76,7 +76,7 @@ def test_classifies_cleanup_candidates_with_deterministic_counts(tmp_path: Path,
         {
             "buckets": ["build_output"],
             "bytes": 20,
-            "path": "implementation/phase1/rust_hip_md3bead_hook/target/debug/build.log",
+            "path": "implementation/phase1/structural_rust_solver/target/debug/build.log",
             "recommended_action": "remove_from_git",
         },
         {

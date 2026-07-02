@@ -3158,6 +3158,49 @@ def test_snapshot_license_builder_change_only_stales_license_receipt(
     )
 
 
+def test_snapshot_source_boundary_planner_change_only_stales_independent_product(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/plan_source_boundary_cleanup.py",
+        "print('source boundary planner changed')\n",
+    )
+    _commit_all(tmp_path, "source boundary planner change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["independent_product_readiness"]["source_state_fresh"]
+        is False
+    )
+    assert (
+        metadata_rows["independent_product_readiness"]["source_state_kind"]
+        == "non_receipt_paths_changed"
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
+        not in payload["blockers"]
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness"
+        in payload["blockers"]
+    )
+
+
 def test_snapshot_builder_change_does_not_stale_source_artifacts(
     tmp_path: Path,
 ) -> None:

@@ -15,12 +15,12 @@ GENERATED_BOUNDARY_PREFIXES = (
     "implementation/phase1/output/",
 )
 BUILD_OUTPUT_PREFIXES = (
-    "implementation/phase1/rust_hip_md3bead_hook/target/",
     "node_modules/",
     "dist/",
 )
 BUILD_OUTPUT_PARTS = {
     "__pycache__",
+    "target",
 }
 BUILD_OUTPUT_SUFFIXES = (
     ".pyc",

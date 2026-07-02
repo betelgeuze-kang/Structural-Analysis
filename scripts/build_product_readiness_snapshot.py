@@ -543,6 +543,9 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         "github_actions_ci_streak_evidence": {
             "scripts/build_github_actions_ci_streak_evidence.py",
         },
+        "independent_product_readiness": {
+            "scripts/plan_source_boundary_cleanup.py",
+        },
         "license_status_closure_report": {
             "scripts/build_license_status_closure_report.py",
         },
