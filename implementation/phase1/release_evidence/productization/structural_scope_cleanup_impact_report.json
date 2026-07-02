@@ -1,12 +1,12 @@
 {
   "blockers": [
     "owner_decision_pending_count=86",
-    "blocking_cleanup_reference_path_count=49"
+    "blocking_cleanup_reference_path_count=47"
   ],
-  "blocking_cleanup_reference_path_count": 49,
+  "blocking_cleanup_reference_path_count": 47,
   "blocking_reference_cleanup_action_counts": {
-    "delete_or_extract_molecular_script_or_remove_quarantined_path_refs": 8,
-    "delete_or_extract_molecular_tests_or_update_scope_guard_tests": 6,
+    "delete_or_extract_molecular_script_or_remove_quarantined_path_refs": 7,
+    "delete_or_extract_molecular_tests_or_update_scope_guard_tests": 5,
     "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts": 35
   },
   "blocking_reference_cleanup_batch_count": 3,
@@ -73,7 +73,7 @@
     },
     {
       "batch_id": "cleanup_refs_03_script_reference",
-      "matched_quarantined_path_count": 76,
+      "matched_quarantined_path_count": 71,
       "matched_scope_tokens": [
         "casf_pdbbind",
         "gnina",
@@ -83,13 +83,12 @@
         "symmetry_aware_ligand"
       ],
       "owner_decision_dependency_counts": {
-        "owner_delete_extract_decision_then_reference_cleanup": 8
+        "owner_delete_extract_decision_then_reference_cleanup": 7
       },
-      "path_count": 8,
+      "path_count": 7,
       "paths": [
         "scripts/build_public_benchmark_operator_intake_packet.py",
         "scripts/build_public_benchmark_source_of_truth.py",
-        "scripts/check_repo_hygiene.py",
         "scripts/materialize_public_benchmark_harness_bundle.py",
         "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
         "scripts/materialize_public_benchmark_phase2_from_rows.py",
@@ -109,7 +108,7 @@
     },
     {
       "batch_id": "cleanup_refs_04_test_reference",
-      "matched_quarantined_path_count": 53,
+      "matched_quarantined_path_count": 48,
       "matched_scope_tokens": [
         "casf_pdbbind",
         "gnina",
@@ -119,13 +118,12 @@
         "symmetry_aware_ligand"
       ],
       "owner_decision_dependency_counts": {
-        "owner_delete_extract_decision_then_reference_cleanup": 6
+        "owner_delete_extract_decision_then_reference_cleanup": 5
       },
-      "path_count": 6,
+      "path_count": 5,
       "paths": [
         "tests/test_build_public_benchmark_operator_intake_packet.py",
         "tests/test_build_public_benchmark_source_of_truth.py",
-        "tests/test_check_repo_hygiene.py",
         "tests/test_materialize_public_benchmark_harness_bundle.py",
         "tests/test_materialize_public_benchmark_operator_bundle_from_rows.py",
         "tests/test_plan_source_boundary_cleanup.py"
@@ -144,8 +142,8 @@
   ],
   "blocking_reference_role_counts": {
     "implementation_runtime_or_manifest_reference": 35,
-    "script_reference": 8,
-    "test_reference": 6
+    "script_reference": 7,
+    "test_reference": 5
   },
   "blocking_reference_rows": [
     {
@@ -1201,31 +1199,6 @@
     {
       "blocking_cleanup_reference": true,
       "cleanup_requires_release_receipt_refresh": false,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 1,
-      "matched_terms": [
-        "rust_hip_md3bead_hook"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "scripts/check_repo_hygiene.py",
-      "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
-      "reference_role": "script_reference",
-      "reference_role_priority": 3,
-      "release_freshness_source_boundary": false
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 12,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -1564,31 +1537,6 @@
     {
       "blocking_cleanup_reference": true,
       "cleanup_requires_release_receipt_refresh": false,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 1,
-      "matched_terms": [
-        "rust_hip_md3bead_hook"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "tests/test_check_repo_hygiene.py",
-      "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
-      "reference_role": "test_reference",
-      "reference_role_priority": 4,
-      "release_freshness_source_boundary": false
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 6,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -1684,7 +1632,7 @@
   "cleanup_impact_clear": false,
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T09:54:50.234780+00:00",
+  "generated_at": "2026-07-02T10:01:48.228575+00:00",
   "governance_reference_path_count": 60,
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:e22085fff573457d46d0d9fa78facb24a84c3c18dbbd3e27df491a60c7863568",
@@ -1760,13 +1708,13 @@
   "owner_decision_pending_count": 86,
   "owner_review_packet": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
   "quarantined_path_count": 86,
-  "reference_path_count": 109,
+  "reference_path_count": 107,
   "reference_role_counts": {
     "implementation_runtime_or_manifest_reference": 39,
     "release_governance_reference": 19,
     "scope_governance_reference": 30,
-    "script_reference": 9,
-    "test_reference": 12
+    "script_reference": 8,
+    "test_reference": 11
   },
   "reference_rows": [
     {
@@ -5127,31 +5075,6 @@
       "release_freshness_source_boundary": false
     },
     {
-      "blocking_cleanup_reference": true,
-      "cleanup_requires_release_receipt_refresh": false,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 1,
-      "matched_terms": [
-        "rust_hip_md3bead_hook"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "scripts/check_repo_hygiene.py",
-      "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
-      "reference_role": "script_reference",
-      "reference_role_priority": 3,
-      "release_freshness_source_boundary": false
-    },
-    {
       "blocking_cleanup_reference": false,
       "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
@@ -5882,31 +5805,6 @@
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
       "reference_role_priority": 99,
-      "release_freshness_source_boundary": false
-    },
-    {
-      "blocking_cleanup_reference": true,
-      "cleanup_requires_release_receipt_refresh": false,
-      "matched_quarantined_path_count": 5,
-      "matched_quarantined_paths": [
-        "implementation/phase1/rust_hip_md3bead_hook.py",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
-        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
-        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
-        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs"
-      ],
-      "matched_scope_tokens": [
-        "md3bead"
-      ],
-      "matched_term_count": 1,
-      "matched_terms": [
-        "rust_hip_md3bead_hook"
-      ],
-      "owner_decision_dependency": "owner_delete_extract_decision_then_reference_cleanup",
-      "path": "tests/test_check_repo_hygiene.py",
-      "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
-      "reference_role": "test_reference",
-      "reference_role_priority": 4,
       "release_freshness_source_boundary": false
     },
     {
@@ -8864,7 +8762,7 @@
   "reuse_policy": "structural_scope_cleanup_impact_report_from_owner_review_and_tracked_references",
   "reused_evidence": false,
   "schema_version": "structural-scope-cleanup-impact-report.v1",
-  "source_commit_sha": "36dc79203a71b6354f42eca245e943a8c29bac3c",
+  "source_commit_sha": "3ed94fcc1cab7ca00e0f4ec8d03ec878dc9986e2",
   "status": "blocked_cleanup_impact",
-  "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=109 | blocking=49 | owner_pending=86"
+  "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=107 | blocking=47 | owner_pending=86"
 }
