@@ -60,8 +60,43 @@
   "claim_boundary": "This status separates release publication materialization from fresh full-validation. A release evidence freshness PASS only proves metadata/source recency. Level 3 promotion still requires fresh validation receipts for each named lane, with reused_evidence=false, validated by implementation/phase1/validate_fresh_validation_receipt.py. Missing or invalid receipts must stay blocked and must not be replaced by CPU-required hydrated reports. Legacy path aliases resolve only tracked release-evidence migrations and pass only when the resolved file sha256 matches the receipt expectation. A newer failed execution-result artifact may supersede an older PASS receipt for blocker attribution only; this keeps stale checksum drift visible as raw diagnostics while preserving the failed execution result as the active blocker.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
+  "failed_result_remediation_count": 1,
+  "failed_result_remediation_rows": [
+    {
+      "claim_boundary": "This remediation plan classifies the failed fresh-validation result. It does not make GPU/HIP validation pass, create a fresh receipt, or promote release readiness.",
+      "closure_requirements": [
+        "fresh_validation_result_contract_pass == true",
+        "fresh_validation_receipt_contract_pass == true",
+        "fresh_validation_receipt_artifact_integrity_pass == true",
+        "lane blocker fresh_validation_result_failed is absent"
+      ],
+      "command_returncode": 1,
+      "current_blockers": [
+        "validation_command_exit_1"
+      ],
+      "failure_class": "rocm_runtime_unavailable",
+      "lane_id": "gpu_hip_solver",
+      "operator_action": "Restore a ROCm/HIP runtime that exposes the required GPU device interfaces, then rerun the gpu_hip_solver fresh validation receipt builder and regenerate the fresh full-validation lane status.",
+      "preflight_checks": [
+        "/dev/kfd is present and accessible to the validation user",
+        "/dev/dri render node is present and accessible to the validation user",
+        "ROCm/HIP runtime libraries are discoverable by the validation command",
+        "implementation/phase1/run_solver_hip_e2e_contract.py returns PASS"
+      ],
+      "reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+      "result_path": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.result.json",
+      "runner": "gpu_capable_rocm_hip_validation",
+      "schema_version": "fresh-validation-result-remediation.v1",
+      "status": "blocked_runtime_environment",
+      "validation_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id gpu_hip_solver --runner gpu_capable_rocm_hip_validation --validation-command \"python3 implementation/phase1/run_solver_hip_e2e_contract.py --out implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json\" --input implementation/phase1/run_solver_hip_e2e_contract.py --input implementation/phase1/zero_copy_real_probe_report_strict.json --receipt-artifact implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json:solver_hip_e2e_contract_report --output-receipt implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.result.json --case-count 20 --passed-case-count 20 --fail-blocked",
+        "python3 implementation/phase1/validate_fresh_validation_receipt.py --receipt implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json --fail-blocked",
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked"
+      ]
+    }
+  ],
   "fresh_full_validation_ready": false,
-  "generated_at": "2026-07-02T19:34:05.466756+00:00",
+  "generated_at": "2026-07-02T20:28:00.965537+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
     "docs/commercialization-gap-current-state.md": "sha256:0786c4db1191ecc9f9f0b75c171e5a20388d1b4410c673a5a7d5cec0d1777dc1",
@@ -176,10 +211,21 @@
       "fresh_validation_result_blockers": [],
       "fresh_validation_result_command_returncode": 0,
       "fresh_validation_result_contract_pass": true,
+      "fresh_validation_result_failure_class": "",
       "fresh_validation_result_latest_tail_reason_code": "",
       "fresh_validation_result_mtime_ns": 1782232328732325365,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "PASS",
+      "fresh_validation_result_remediation": {
+        "claim_boundary": "No failed fresh-validation result is active for this lane.",
+        "current_blockers": [],
+        "failure_class": "",
+        "operator_action": "",
+        "reason_code": "",
+        "schema_version": "fresh-validation-result-remediation.v1",
+        "status": "not_applicable",
+        "validation_commands": []
+      },
       "fresh_validation_result_tail_reason_codes": [],
       "lane_id": "commercial_benchmark_torch",
       "materialized_paths": [
@@ -227,10 +273,43 @@
       ],
       "fresh_validation_result_command_returncode": 1,
       "fresh_validation_result_contract_pass": false,
+      "fresh_validation_result_failure_class": "rocm_runtime_unavailable",
       "fresh_validation_result_latest_tail_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
       "fresh_validation_result_mtime_ns": 1783011126426640725,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "ERR_FRESH_VALIDATION_COMMAND_FAILED",
+      "fresh_validation_result_remediation": {
+        "claim_boundary": "This remediation plan classifies the failed fresh-validation result. It does not make GPU/HIP validation pass, create a fresh receipt, or promote release readiness.",
+        "closure_requirements": [
+          "fresh_validation_result_contract_pass == true",
+          "fresh_validation_receipt_contract_pass == true",
+          "fresh_validation_receipt_artifact_integrity_pass == true",
+          "lane blocker fresh_validation_result_failed is absent"
+        ],
+        "command_returncode": 1,
+        "current_blockers": [
+          "validation_command_exit_1"
+        ],
+        "failure_class": "rocm_runtime_unavailable",
+        "lane_id": "gpu_hip_solver",
+        "operator_action": "Restore a ROCm/HIP runtime that exposes the required GPU device interfaces, then rerun the gpu_hip_solver fresh validation receipt builder and regenerate the fresh full-validation lane status.",
+        "preflight_checks": [
+          "/dev/kfd is present and accessible to the validation user",
+          "/dev/dri render node is present and accessible to the validation user",
+          "ROCm/HIP runtime libraries are discoverable by the validation command",
+          "implementation/phase1/run_solver_hip_e2e_contract.py returns PASS"
+        ],
+        "reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+        "result_path": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.result.json",
+        "runner": "gpu_capable_rocm_hip_validation",
+        "schema_version": "fresh-validation-result-remediation.v1",
+        "status": "blocked_runtime_environment",
+        "validation_commands": [
+          "python3 scripts/build_fresh_validation_receipt.py --lane-id gpu_hip_solver --runner gpu_capable_rocm_hip_validation --validation-command \"python3 implementation/phase1/run_solver_hip_e2e_contract.py --out implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json\" --input implementation/phase1/run_solver_hip_e2e_contract.py --input implementation/phase1/zero_copy_real_probe_report_strict.json --receipt-artifact implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json:solver_hip_e2e_contract_report --output-receipt implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.result.json --case-count 20 --passed-case-count 20 --fail-blocked",
+          "python3 implementation/phase1/validate_fresh_validation_receipt.py --receipt implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json --fail-blocked",
+          "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked"
+        ]
+      },
       "fresh_validation_result_tail_reason_codes": [
         "ERR_ROCM_RUNTIME_UNAVAILABLE"
       ],
@@ -271,10 +350,21 @@
       "fresh_validation_result_blockers": [],
       "fresh_validation_result_command_returncode": 0,
       "fresh_validation_result_contract_pass": true,
+      "fresh_validation_result_failure_class": "",
       "fresh_validation_result_latest_tail_reason_code": "",
       "fresh_validation_result_mtime_ns": 1783013473876214482,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "PASS",
+      "fresh_validation_result_remediation": {
+        "claim_boundary": "No failed fresh-validation result is active for this lane.",
+        "current_blockers": [],
+        "failure_class": "",
+        "operator_action": "",
+        "reason_code": "",
+        "schema_version": "fresh-validation-result-remediation.v1",
+        "status": "not_applicable",
+        "validation_commands": []
+      },
       "fresh_validation_result_tail_reason_codes": [],
       "lane_id": "performance_profile",
       "materialized_paths": [
@@ -314,10 +404,21 @@
       "fresh_validation_result_blockers": [],
       "fresh_validation_result_command_returncode": 0,
       "fresh_validation_result_contract_pass": true,
+      "fresh_validation_result_failure_class": "",
       "fresh_validation_result_latest_tail_reason_code": "",
       "fresh_validation_result_mtime_ns": 1782232786001973558,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "PASS",
+      "fresh_validation_result_remediation": {
+        "claim_boundary": "No failed fresh-validation result is active for this lane.",
+        "current_blockers": [],
+        "failure_class": "",
+        "operator_action": "",
+        "reason_code": "",
+        "schema_version": "fresh-validation-result-remediation.v1",
+        "status": "not_applicable",
+        "validation_commands": []
+      },
       "fresh_validation_result_tail_reason_codes": [],
       "lane_id": "surface_material_contact",
       "materialized_paths": [
@@ -356,10 +457,21 @@
       "fresh_validation_result_blockers": [],
       "fresh_validation_result_command_returncode": 0,
       "fresh_validation_result_contract_pass": true,
+      "fresh_validation_result_failure_class": "",
       "fresh_validation_result_latest_tail_reason_code": "",
       "fresh_validation_result_mtime_ns": 1782231629491800066,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "PASS",
+      "fresh_validation_result_remediation": {
+        "claim_boundary": "No failed fresh-validation result is active for this lane.",
+        "current_blockers": [],
+        "failure_class": "",
+        "operator_action": "",
+        "reason_code": "",
+        "schema_version": "fresh-validation-result-remediation.v1",
+        "status": "not_applicable",
+        "validation_commands": []
+      },
       "fresh_validation_result_tail_reason_codes": [],
       "lane_id": "midas_exact_refresh",
       "materialized_paths": [
@@ -399,10 +511,21 @@
       "fresh_validation_result_blockers": [],
       "fresh_validation_result_command_returncode": 0,
       "fresh_validation_result_contract_pass": true,
+      "fresh_validation_result_failure_class": "",
       "fresh_validation_result_latest_tail_reason_code": "",
       "fresh_validation_result_mtime_ns": 1782231820601337381,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "PASS",
+      "fresh_validation_result_remediation": {
+        "claim_boundary": "No failed fresh-validation result is active for this lane.",
+        "current_blockers": [],
+        "failure_class": "",
+        "operator_action": "",
+        "reason_code": "",
+        "schema_version": "fresh-validation-result-remediation.v1",
+        "status": "not_applicable",
+        "validation_commands": []
+      },
       "fresh_validation_result_tail_reason_codes": [],
       "lane_id": "productization_heavy_profile",
       "materialized_paths": [
@@ -442,10 +565,21 @@
       "fresh_validation_result_blockers": [],
       "fresh_validation_result_command_returncode": 0,
       "fresh_validation_result_contract_pass": true,
+      "fresh_validation_result_failure_class": "",
       "fresh_validation_result_latest_tail_reason_code": "",
       "fresh_validation_result_mtime_ns": 1782995153814945215,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "PASS",
+      "fresh_validation_result_remediation": {
+        "claim_boundary": "No failed fresh-validation result is active for this lane.",
+        "current_blockers": [],
+        "failure_class": "",
+        "operator_action": "",
+        "reason_code": "",
+        "schema_version": "fresh-validation-result-remediation.v1",
+        "status": "not_applicable",
+        "validation_commands": []
+      },
       "fresh_validation_result_tail_reason_codes": [],
       "lane_id": "external_benchmark_refresh",
       "materialized_paths": [
@@ -485,10 +619,21 @@
       "fresh_validation_result_blockers": [],
       "fresh_validation_result_command_returncode": 0,
       "fresh_validation_result_contract_pass": true,
+      "fresh_validation_result_failure_class": "",
       "fresh_validation_result_latest_tail_reason_code": "",
       "fresh_validation_result_mtime_ns": 1782995168719288449,
       "fresh_validation_result_present": true,
       "fresh_validation_result_reason_code": "PASS",
+      "fresh_validation_result_remediation": {
+        "claim_boundary": "No failed fresh-validation result is active for this lane.",
+        "current_blockers": [],
+        "failure_class": "",
+        "operator_action": "",
+        "reason_code": "",
+        "schema_version": "fresh-validation-result-remediation.v1",
+        "status": "not_applicable",
+        "validation_commands": []
+      },
       "fresh_validation_result_tail_reason_codes": [],
       "lane_id": "design_optimization_refresh",
       "materialized_paths": [
@@ -501,7 +646,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "58271baed3d677dadc09d932ba14c1c4fb06227b",
+  "source_commit_sha": "30f38febb0a0bc05624f25729fcb2238e94d8b28",
   "status": "blocked",
   "summary": {
     "blocker_count": 2,
@@ -512,6 +657,7 @@
     "fresh_validation_result_failed_count": 1,
     "fresh_validation_result_pass_count": 7,
     "fresh_validation_result_present_count": 8,
+    "fresh_validation_result_runtime_unavailable_count": 1,
     "lane_contract_pass_count": 8,
     "lane_count": 8,
     "lane_pass_count": 7

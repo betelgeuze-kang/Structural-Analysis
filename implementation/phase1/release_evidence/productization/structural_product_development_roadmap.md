@@ -1,6 +1,6 @@
 # Structural Product Development Roadmap
 
-Structural product roadmap: BLOCKED | evidence_progress=65.4% | stage_average=55.3% | ready_stages=1/8 | primary_blocker=release_surface_owner_decision_pending_count=3
+Structural product roadmap: BLOCKED | evidence_progress=59.6% | stage_average=46.4% | ready_stages=0/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed
 
 ## Current Position
 
@@ -10,22 +10,23 @@ Structural product roadmap: BLOCKED | evidence_progress=65.4% | stage_average=55
 - `limited_commercial_ready`: `False`
 - `paid_pilot_ready`: `False`
 - `pm_milestones`: `5/5`
-- `pm_release_areas`: `13/16`
+- `pm_release_areas`: `12/16`
 - `release_ready`: `False`
-- `snapshot_blocker_count`: `41`
-- `snapshot_status`: `blocked`
+- `snapshot_blocker_count`: `44`
+- `snapshot_status`: `stale_or_inconsistent`
 - `structural_scope_owner_decisions`: `0/86`
 - `structural_scope_release_surface_cleanup_decisions`: `0/3`
 - `workstation_delivery_ready`: `True`
 
 ## Roadmap Stages
 
-- `evidence_freshness_and_snapshot_integrity`: ready (3/3, 100.0%)
+- `evidence_freshness_and_snapshot_integrity`: partial (1/3, 33.3%)
+  - first blocker: `freshness_or_snapshot_integrity_not_closed`
   - next action: `keep_release_evidence_freshness_report_green`
 - `structural_scope_cleanup`: partial (2/4, 50.0%)
   - first blocker: `release_surface_owner_decision_pending_count=3`
   - next action: `record_release_surface_first_owner_delete_or_extract_decisions`
-- `pm_release_gate`: partial (18/21, 85.7%)
+- `pm_release_gate`: partial (17/21, 81.0%)
   - first blocker: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
   - next action: `collect_30_pr_ci_and_nightly_ci_streak_evidence`
 - `developer_preview_rc`: partial (6/9, 66.7%)
@@ -38,7 +39,7 @@ Structural product roadmap: BLOCKED | evidence_progress=65.4% | stage_average=55
   - first blocker: `customer_shadow_below_required:0/3`
   - next action: `complete_3_customer_shadow_cases`
 - `commercial_solver_claim_upgrade`: partial (2/5, 40.0%)
-  - first blocker: `independent_product_not_ready`
+  - first blocker: `snapshot_source_state_not_consistent`
   - next action: `close_external_benchmark_receipts`
 - `enterprise_productization`: partial (1/4, 25.0%)
   - first blocker: `independent_product_ready_false`

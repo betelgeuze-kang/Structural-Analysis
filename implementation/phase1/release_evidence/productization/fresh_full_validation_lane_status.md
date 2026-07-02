@@ -15,3 +15,9 @@
 | `productization_heavy_profile` | `True` | `True` | `pass` |
 | `external_benchmark_refresh` | `True` | `True` | `pass` |
 | `design_optimization_refresh` | `True` | `True` | `pass` |
+
+## Failed Result Remediation
+
+| Lane | Status | Failure Class | Reason |
+|---|---|---|---|
+| `gpu_hip_solver` | `blocked_runtime_environment` | `rocm_runtime_unavailable` | `ERR_ROCM_RUNTIME_UNAVAILABLE` |
