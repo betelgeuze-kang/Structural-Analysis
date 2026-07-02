@@ -987,6 +987,9 @@ def test_application_plan_writes_release_surface_first_template(
     _write_json(manifest_path, manifest)
     out = tmp_path / "plan.json"
     out_md = tmp_path / "plan.md"
+    next_template = tmp_path / "next_batch.template.json"
+    next_template_md = tmp_path / "next_batch.template.md"
+    next_template_csv = tmp_path / "next_batch.template.csv"
     release_template = tmp_path / "release_surface_first.template.json"
     release_template_md = tmp_path / "release_surface_first.template.md"
     release_template_csv = tmp_path / "release_surface_first.template.csv"
@@ -998,6 +1001,9 @@ def test_application_plan_writes_release_surface_first_template(
         owner_decisions_path=tmp_path / "missing_decisions.json",
         out=out,
         out_md=out_md,
+        next_batch_template_out=next_template,
+        next_batch_template_out_md=next_template_md,
+        next_batch_template_out_csv=next_template_csv,
         release_surface_first_batch_template_out=release_template,
         release_surface_first_batch_template_out_md=release_template_md,
         release_surface_first_batch_template_out_csv=release_template_csv,
@@ -1008,8 +1014,17 @@ def test_application_plan_writes_release_surface_first_template(
     assert template_payload["expected_path_count"] == 1
     assert template_payload["decision_pending_count"] == 1
     assert template_payload["decision_rows"][0]["path"] == release_surface_path
-    assert "Release Surface First Batch" in release_template_md.read_text(
-        encoding="utf-8"
+    next_markdown = next_template_md.read_text(encoding="utf-8")
+    release_markdown = release_template_md.read_text(encoding="utf-8")
+    assert "Release Surface First Batch" in release_markdown
+    assert "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository" in (
+        next_markdown
+    )
+    assert "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception" not in (
+        next_markdown
+    )
+    assert "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception" not in (
+        release_markdown
     )
     csv_rows = list(
         csv.DictReader(release_template_csv.read_text(encoding="utf-8").splitlines())

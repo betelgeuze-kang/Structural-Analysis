@@ -1300,14 +1300,7 @@ def _next_batch_template_markdown(payload: dict[str, Any]) -> str:
         f"- `batch_id`: `{payload['batch_id']}`",
         f"- `path_area`: `{payload['path_area']}`",
         f"- `decision_pending_count`: `{payload['decision_pending_count']}`",
-        (
-            "- `external_archive_reference`: required when `owner_decision` is "
-            "`extract_to_molecular_or_science_repository`"
-        ),
-        (
-            "- `signed_owner_exception_reference`: required when `owner_decision` "
-            "is `retain_quarantined_with_signed_owner_exception`"
-        ),
+        *_conditional_required_markdown_lines(payload),
         "",
         "## Path-Specific Restrictions",
         "",
@@ -1360,6 +1353,17 @@ def _next_batch_template_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _conditional_required_markdown_lines(payload: dict[str, Any]) -> list[str]:
+    rows = [
+        str(item)
+        for item in _as_list(payload.get("conditional_required_fields"))
+        if str(item)
+    ]
+    if not rows:
+        return ["- conditional required fields: none"]
+    return [f"- `{item}`" for item in rows]
+
+
 def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> str:
     if not payload:
         return ""
@@ -1371,10 +1375,7 @@ def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> s
         f"- `expected_path_count`: `{payload['expected_path_count']}`",
         f"- `decision_pending_count`: `{payload['decision_pending_count']}`",
         f"- `current_intake_status`: `{payload['current_intake_status']}`",
-        (
-            "- `external_archive_reference`: required when `owner_decision` is "
-            "`extract_to_molecular_or_science_repository`"
-        ),
+        *_conditional_required_markdown_lines(payload),
         "",
         "## Path-Specific Restrictions",
         "",
