@@ -517,6 +517,21 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "--evidence-reference <owner-evidence-reference> "
             "--fail-blocked"
         ),
+        "fill_owner_decisions_from_template_command": (
+            "python3 scripts/fill_structural_scope_owner_decisions_from_template.py "
+            "--template implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.next_batch.template.csv "
+            "--out <filled-next-batch-owner-decisions.json> "
+            "--out-md <filled-next-batch-owner-decisions.md> "
+            "--out-csv <filled-next-batch-owner-decisions.csv> "
+            "--decision recommended_primary "
+            "--owner-identity <owner-identity> "
+            "--owner-role <owner-role> "
+            "--decision-timestamp-utc <decision-timestamp-utc> "
+            "--evidence-reference <owner-evidence-reference> "
+            "--external-archive-reference <external-archive-reference-for-extract-decisions> "
+            "--fail-blocked"
+        ),
         "validate_canonical_owner_decisions_command": (
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
             "--fail-release-surface-first-blocked"

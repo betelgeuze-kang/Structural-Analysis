@@ -579,6 +579,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         },
         "structural_scope_owner_decision_application_plan": {
             "scripts/build_structural_scope_owner_decision_application_plan.py",
+            "scripts/fill_structural_scope_owner_decisions_from_template.py",
             "scripts/fill_structural_scope_release_surface_owner_decisions.py",
         },
         "pm_release_gate_report": {

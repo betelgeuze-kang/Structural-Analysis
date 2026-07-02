@@ -848,6 +848,20 @@ def _owner_decision_submission_options(
             "--evidence-reference <owner-evidence-reference> "
             "--fail-blocked"
         ),
+        "fill_owner_decisions_from_template_command": (
+            "python3 scripts/fill_structural_scope_owner_decisions_from_template.py "
+            f"--template {template_csv_path} "
+            f"--out {filled_json_placeholder} "
+            f"--out-md {filled_md_placeholder} "
+            f"--out-csv {filled_csv_placeholder} "
+            "--decision recommended_primary "
+            "--owner-identity <owner-identity> "
+            "--owner-role <owner-role> "
+            "--decision-timestamp-utc <decision-timestamp-utc> "
+            "--evidence-reference <owner-evidence-reference> "
+            "--external-archive-reference <external-archive-reference-for-extract-decisions> "
+            "--fail-blocked"
+        ),
         "validate_canonical_owner_decisions_command": (
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
             f"{validation_flag}"
@@ -1150,7 +1164,8 @@ def _release_surface_first_operator_sequence(
             "materialization_commands": [
                 command
                 for command in [
-                    submission.get("fill_release_surface_owner_decisions_command", "")
+                    submission.get("fill_release_surface_owner_decisions_command", ""),
+                    submission.get("fill_owner_decisions_from_template_command", ""),
                 ]
                 if command
             ],
