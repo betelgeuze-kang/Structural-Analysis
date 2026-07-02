@@ -239,6 +239,116 @@ def _cleanup_command_manifest(cleanup_rows: list[dict[str, Any]]) -> dict[str, A
     }
 
 
+def _unsafe_cleanup_path_reasons(path: str) -> list[str]:
+    normalized = Path(path)
+    reasons: list[str] = []
+    if not path:
+        reasons.append("empty_path")
+    if normalized.is_absolute():
+        reasons.append("absolute_path")
+    if ".." in normalized.parts:
+        reasons.append("parent_traversal")
+    if normalized.parts and normalized.parts[0] == ".git":
+        reasons.append("git_metadata_path")
+    return reasons
+
+
+def _cleanup_application_preflight(cleanup_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    path_safety_rows: list[dict[str, Any]] = []
+    unsafe_rows: list[dict[str, Any]] = []
+    release_surface_policy_violations: list[dict[str, Any]] = []
+    retain_cleanup_rows: list[dict[str, Any]] = []
+    cleanup_decisions = {
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+    }
+    for row in cleanup_rows:
+        path = _text(row.get("path"))
+        reasons = _unsafe_cleanup_path_reasons(path)
+        safety_row = {
+            "path": path,
+            "path_area": _text(row.get("path_area")),
+            "owner_decision": _text(row.get("owner_decision")),
+            "safe_path": not reasons,
+            "unsafe_reasons": reasons,
+        }
+        path_safety_rows.append(safety_row)
+        if reasons:
+            unsafe_rows.append(safety_row)
+        if (
+            _text(row.get("path_area")) == "release_surface"
+            and _text(row.get("owner_decision")) not in cleanup_decisions
+        ):
+            release_surface_policy_violations.append(safety_row)
+        if _text(row.get("owner_decision")) == "retain_quarantined_with_signed_owner_exception":
+            retain_cleanup_rows.append(safety_row)
+    blockers = [
+        *(
+            [f"unsafe_cleanup_path_count={len(unsafe_rows)}"]
+            if unsafe_rows
+            else []
+        ),
+        *(
+            [
+                "release_surface_cleanup_policy_violation_count="
+                f"{len(release_surface_policy_violations)}"
+            ]
+            if release_surface_policy_violations
+            else []
+        ),
+        *(
+            [f"retain_exception_cleanup_row_count={len(retain_cleanup_rows)}"]
+            if retain_cleanup_rows
+            else []
+        ),
+    ]
+    delete_paths = [
+        row["path"]
+        for row in cleanup_rows
+        if row["owner_decision"] == "delete_from_structural_repository"
+    ]
+    extract_paths = [
+        row["path"]
+        for row in cleanup_rows
+        if row["owner_decision"] == "extract_to_molecular_or_science_repository"
+    ]
+    return {
+        "schema_version": "structural-scope-cleanup-application-preflight.v1",
+        "status": (
+            "ready_for_manual_cleanup_application"
+            if cleanup_rows and not blockers
+            else "blocked_cleanup_application"
+            if cleanup_rows
+            else "no_cleanup_required"
+        ),
+        "ready": bool(cleanup_rows and not blockers),
+        "blockers": blockers,
+        "cleanup_path_count": len(cleanup_rows),
+        "delete_path_count": len(delete_paths),
+        "extract_path_count": len(extract_paths),
+        "unsafe_cleanup_path_count": len(unsafe_rows),
+        "release_surface_policy_violation_count": len(
+            release_surface_policy_violations
+        ),
+        "retain_exception_cleanup_row_count": len(retain_cleanup_rows),
+        "path_safety_rows": path_safety_rows,
+        "unsafe_cleanup_path_rows": unsafe_rows,
+        "release_surface_policy_violation_rows": (
+            release_surface_policy_violations
+        ),
+        "destructive_commands_enabled": False,
+        "safe_to_auto_apply": False,
+        "manual_application_required": bool(cleanup_rows),
+        "requires_human_confirmation": bool(cleanup_rows),
+        "git_rm_command_preview_only": True,
+        "claim_boundary": (
+            "This preflight is non-mutating. It only checks owner-approved "
+            "cleanup rows before a human manually applies git rm or external "
+            "extract-then-remove actions."
+        ),
+    }
+
+
 def _owner_review_priority_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     priority_order = [
         ("release_surface", "release_surface_first"),
@@ -556,6 +666,7 @@ def build_application_plan(
     cleanup_rows = [
         row for row in rows if row["post_decision_cleanup_pending"] is True
     ]
+    cleanup_application_preflight = _cleanup_application_preflight(cleanup_rows)
     cleanup_priority_batches = _cleanup_priority_batches(cleanup_rows)
     next_cleanup_application_batch = (
         cleanup_priority_batches[0] if cleanup_priority_batches else {}
@@ -678,6 +789,14 @@ def build_application_plan(
             if row["path_area"] == "release_surface"
         ],
         "cleanup_required_count": len(cleanup_rows),
+        "cleanup_application_preflight": cleanup_application_preflight,
+        "cleanup_application_preflight_ready": bool(
+            cleanup_application_preflight.get("ready")
+        ),
+        "cleanup_application_preflight_blockers": [
+            str(item)
+            for item in _as_list(cleanup_application_preflight.get("blockers"))
+        ],
         "cleanup_path_area_counts": _counts_by_key(cleanup_rows, "path_area"),
         "cleanup_family_counts": _family_counts(cleanup_rows),
         "release_surface_cleanup_required_count": sum(
@@ -825,6 +944,21 @@ def _markdown(payload: dict[str, Any]) -> str:
         "- `extract_to_molecular_or_science_repository.path_count`: "
         f"`{manifest['extract_to_molecular_or_science_repository']['path_count']}`"
     )
+    preflight = payload.get("cleanup_application_preflight")
+    preflight = preflight if isinstance(preflight, dict) else {}
+    lines.extend(["", "## Cleanup Application Preflight", ""])
+    lines.append(f"- `status`: `{preflight.get('status')}`")
+    lines.append(f"- `ready`: `{preflight.get('ready')}`")
+    lines.append(
+        f"- `destructive_commands_enabled`: `{preflight.get('destructive_commands_enabled')}`"
+    )
+    lines.append(
+        f"- `safe_to_auto_apply`: `{preflight.get('safe_to_auto_apply')}`"
+    )
+    if preflight.get("blockers"):
+        lines.extend(f"- `{item}`" for item in preflight["blockers"])
+    else:
+        lines.append("- blockers: none")
     if payload.get("cleanup_priority_batches"):
         lines.extend(["", "## Cleanup Priority Batches", ""])
         lines.extend(

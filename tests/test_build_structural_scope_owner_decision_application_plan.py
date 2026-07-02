@@ -202,6 +202,9 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
         ),
     }
     assert payload["cleanup_required_count"] == 0
+    assert payload["cleanup_application_preflight"]["status"] == "no_cleanup_required"
+    assert payload["cleanup_application_preflight_ready"] is False
+    assert payload["cleanup_application_preflight_blockers"] == []
     assert payload["cleanup_command_manifest"]["manual_application_required"] is False
     assert payload["next_actions"][0].startswith(
         "fill structural_scope_owner_decisions"
@@ -374,6 +377,14 @@ def test_application_plan_routes_delete_and_extract_decisions(tmp_path: Path) ->
     assert payload["owner_decision_pending_count"] == 0
     assert payload["post_decision_cleanup_pending_count"] == 2
     assert payload["cleanup_required_count"] == 2
+    assert payload["cleanup_application_preflight"]["status"] == (
+        "ready_for_manual_cleanup_application"
+    )
+    assert payload["cleanup_application_preflight_ready"] is True
+    assert payload["cleanup_application_preflight"]["destructive_commands_enabled"] is False
+    assert payload["cleanup_application_preflight"]["safe_to_auto_apply"] is False
+    assert payload["cleanup_application_preflight"]["cleanup_path_count"] == 2
+    assert payload["cleanup_application_preflight"]["blockers"] == []
     assert payload["cleanup_path_area_counts"] == {
         "implementation_phase1": 1,
         "productization_evidence": 1,
@@ -469,6 +480,36 @@ def test_application_plan_accepts_owner_decision_csv(tmp_path: Path) -> None:
     assert payload["post_decision_cleanup_pending_count"] == 2
 
 
+def test_cleanup_application_preflight_blocks_unsafe_paths() -> None:
+    preflight = application_plan._cleanup_application_preflight(
+        [
+            {
+                "path": "../outside.py",
+                "path_area": "release_surface",
+                "owner_decision": "delete_from_structural_repository",
+            },
+            {
+                "path": ".git/config",
+                "path_area": "script",
+                "owner_decision": "extract_to_molecular_or_science_repository",
+            },
+        ]
+    )
+
+    assert preflight["status"] == "blocked_cleanup_application"
+    assert preflight["ready"] is False
+    assert preflight["destructive_commands_enabled"] is False
+    assert preflight["safe_to_auto_apply"] is False
+    assert preflight["unsafe_cleanup_path_count"] == 2
+    assert preflight["blockers"] == ["unsafe_cleanup_path_count=2"]
+    reasons = {
+        row["path"]: tuple(row["unsafe_reasons"])
+        for row in preflight["unsafe_cleanup_path_rows"]
+    }
+    assert reasons["../outside.py"] == ("parent_traversal",)
+    assert reasons[".git/config"] == ("git_metadata_path",)
+
+
 def test_application_plan_surfaces_partial_release_surface_cleanup_batch(
     tmp_path: Path,
 ) -> None:
@@ -518,6 +559,10 @@ def test_application_plan_surfaces_partial_release_surface_cleanup_batch(
     assert payload["application_ready"] is False
     assert payload["partial_cleanup_ready"] is True
     assert payload["release_surface_batch_cleanup_ready"] is True
+    assert payload["cleanup_application_preflight"]["status"] == (
+        "ready_for_manual_cleanup_application"
+    )
+    assert payload["cleanup_application_preflight"]["release_surface_policy_violation_count"] == 0
     assert payload["owner_decision_pending_count"] == 2
     assert payload["post_decision_cleanup_pending_count"] == 1
     assert payload["cleanup_required_count"] == 1

@@ -58,6 +58,14 @@
 - `delete_from_structural_repository.path_count`: `0`
 - `extract_to_molecular_or_science_repository.path_count`: `0`
 
+## Cleanup Application Preflight
+
+- `status`: `no_cleanup_required`
+- `ready`: `False`
+- `destructive_commands_enabled`: `False`
+- `safe_to_auto_apply`: `False`
+- blockers: none
+
 ## Claim Boundary
 
 This application plan is non-mutating. It never deletes or extracts files. It only classifies owner decisions into manual follow-up actions and keeps quarantined non-structural artifacts outside the building structural-analysis release surface until owner evidence and post-decision scope audit closure are present.
