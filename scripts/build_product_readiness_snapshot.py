@@ -630,6 +630,13 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _completion_ratio(*, numerator: int, denominator: int) -> float:
+    if denominator <= 0:
+        return 1.0 if numerator <= 0 else 0.0
+    clamped = max(0, min(numerator, denominator))
+    return round(clamped / denominator, 6)
+
+
 def _contract_pass(payload: dict[str, Any]) -> bool:
     return bool(
         payload.get("contract_pass")
@@ -2176,6 +2183,34 @@ def build_snapshot(
             f"structural_scope::{item}"
             for item in structural_scope_cleanup_blockers
         )
+    structural_scope_owner_recorded = _as_int(
+        structural_scope_cleanup_plan.get("owner_decision_recorded_count"),
+        0,
+    )
+    structural_scope_owner_pending = _as_int(
+        structural_scope_cleanup_plan.get("owner_decision_pending_count"),
+        0,
+    )
+    structural_scope_owner_total = (
+        structural_scope_owner_recorded + structural_scope_owner_pending
+    )
+    structural_scope_release_surface_intake = _as_dict(
+        structural_scope_cleanup_plan.get(
+            "release_surface_first_batch_decision_intake"
+        )
+    )
+    structural_scope_release_surface_expected = _as_int(
+        structural_scope_release_surface_intake.get("expected_path_count"),
+        0,
+    )
+    structural_scope_release_surface_valid_cleanup = _as_int(
+        structural_scope_release_surface_intake.get("valid_cleanup_decision_count"),
+        0,
+    )
+    structural_scope_release_surface_pending = _as_int(
+        structural_scope_release_surface_intake.get("pending_decision_count"),
+        0,
+    )
 
     g1_claim_boundary = str(g1.get("claim_boundary", ""))
     if "full_g1_closure_ready" in g1:
@@ -2948,11 +2983,11 @@ def build_snapshot(
                     ),
                     0,
                 ),
-                "owner_decision_recorded_count": _as_int(
-                    structural_scope_cleanup_plan.get(
-                        "owner_decision_recorded_count"
-                    ),
-                    0,
+                "owner_decision_recorded_count": structural_scope_owner_recorded,
+                "owner_decision_total_count": structural_scope_owner_total,
+                "owner_decision_completion_ratio": _completion_ratio(
+                    numerator=structural_scope_owner_recorded,
+                    denominator=structural_scope_owner_total,
                 ),
                 "post_decision_cleanup_pending_count": _as_int(
                     structural_scope_cleanup_plan.get(
@@ -3012,6 +3047,19 @@ def build_snapshot(
                     structural_scope_cleanup_plan.get(
                         "release_surface_first_batch_decision_intake"
                     )
+                ),
+                "release_surface_first_batch_expected_path_count": (
+                    structural_scope_release_surface_expected
+                ),
+                "release_surface_first_batch_valid_cleanup_decision_count": (
+                    structural_scope_release_surface_valid_cleanup
+                ),
+                "release_surface_first_batch_pending_decision_count": (
+                    structural_scope_release_surface_pending
+                ),
+                "release_surface_first_batch_completion_ratio": _completion_ratio(
+                    numerator=structural_scope_release_surface_valid_cleanup,
+                    denominator=structural_scope_release_surface_expected,
                 ),
                 "release_surface_first_batch_ready": bool(
                     structural_scope_cleanup_plan.get(

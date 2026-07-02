@@ -5155,6 +5155,9 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     assert cleanup["contract_pass"] is True
     assert cleanup["status"] == "pending_owner_decisions"
     assert cleanup["owner_decision_pending_count"] == 2
+    assert cleanup["owner_decision_recorded_count"] == 0
+    assert cleanup["owner_decision_total_count"] == 2
+    assert cleanup["owner_decision_completion_ratio"] == 0.0
     assert cleanup["post_decision_cleanup_pending_count"] == 0
     assert cleanup["pending_owner_decision_path_area_counts"] == {
         "productization_evidence": 1,
@@ -5166,6 +5169,10 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     assert cleanup["release_surface_first_batch_decision_intake"]["status"] == (
         "no_release_surface_paths"
     )
+    assert cleanup["release_surface_first_batch_expected_path_count"] == 0
+    assert cleanup["release_surface_first_batch_valid_cleanup_decision_count"] == 0
+    assert cleanup["release_surface_first_batch_pending_decision_count"] == 0
+    assert cleanup["release_surface_first_batch_completion_ratio"] == 1.0
     assert cleanup["release_surface_first_batch_ready"] is False
     assert cleanup["release_surface_first_batch_blockers"] == []
     assert cleanup["release_surface_first_batch_template_paths"] == {}
