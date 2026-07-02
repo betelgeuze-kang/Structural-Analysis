@@ -56,7 +56,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-02T00:41:36.650533+00:00",
+  "generated_at": "2026-07-02T00:45:07.317478+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -939,7 +939,7 @@
         "github_sync_main_synced_to_head": true,
         "github_sync_preflight_artifact_present": true,
         "github_sync_preflight_clean": true,
-        "github_sync_preflight_head_matches_current": true,
+        "github_sync_preflight_head_matches_current": false,
         "github_sync_preflight_source_state_fresh": true,
         "github_sync_preflight_status": "synced",
         "github_sync_remote_mutation_approval_pending": false,
@@ -951,8 +951,12 @@
       "ok": true,
       "status": "pass",
       "summary": {
-        "changed_paths_since_preflight_head": [],
-        "current_head_sha": "4737aa3b9d54c98f8a12f397d6f6c3aae3b818a3",
+        "changed_paths_since_preflight_head": [
+          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+          "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+        ],
+        "current_head_sha": "d2c668d006f3219eb71fa98b463c68f9388446d9",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -962,7 +966,7 @@
         "pending_remote_update_targets": [],
         "preflight_local_head_sha": "4737aa3b9d54c98f8a12f397d6f6c3aae3b818a3",
         "preflight_source_commit_sha": "4737aa3b9d54c98f8a12f397d6f6c3aae3b818a3",
-        "preflight_source_state_kind": "exact",
+        "preflight_source_state_kind": "evidence_only_delta",
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
@@ -1157,7 +1161,9 @@
       "steel_composite_constitutive_gate_report",
       "structural_contact_gate_report",
       "surface_interaction_benchmark_gate_report"
-    ]
+    ],
+    "structural_evidence_surface_allowlist_policy_blockers": [],
+    "structural_evidence_surface_allowlist_policy_pass": true
   },
   "release_tiers": {
     "customer_shadow_completed_project_ready": false,
@@ -1211,6 +1217,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "4737aa3b9d54c98f8a12f397d6f6c3aae3b818a3",
+  "source_commit_sha": "d2c668d006f3219eb71fa98b463c68f9388446d9",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304"
 }

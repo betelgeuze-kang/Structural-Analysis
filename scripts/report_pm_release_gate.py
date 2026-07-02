@@ -245,6 +245,14 @@ def _non_structural_product_path(path: str) -> bool:
     return any(token in lowered for token in NON_STRUCTURAL_PRODUCT_PATH_SUBSTRINGS)
 
 
+def _structural_surface_allowlist_policy_blockers() -> list[str]:
+    return [
+        f"non_structural_surface_allowlisted:{surface_id}"
+        for surface_id in sorted(STRUCTURAL_EVIDENCE_SURFACE_IDS)
+        if _non_structural_product_path(surface_id)
+    ]
+
+
 def _github_sync_preflight_source_state(
     preflight_head: str, current_head: str
 ) -> tuple[bool, str, list[str]]:
@@ -844,7 +852,13 @@ def _release_decision(
     pm_blocker_register: dict[str, Any],
     evidence_surface_dir: Path,
 ) -> dict[str, Any]:
-    full_release_blockers = [*blockers, *release_area_blockers]
+    allowlist_policy_blockers = _structural_surface_allowlist_policy_blockers()
+    full_release_blockers = [
+        *blockers,
+        *release_area_blockers,
+        *allowlist_policy_blockers,
+    ]
+    effective_release_allowed = bool(release_allowed and not allowlist_policy_blockers)
     first_blocker = (
         release_area_blockers[0]
         if release_area_blockers
@@ -881,7 +895,7 @@ def _release_decision(
         len(full_release_blockers),
     ) + len(operator_actions)
     return {
-        "release_allowed": bool(release_allowed),
+        "release_allowed": effective_release_allowed,
         "blocked_release_count": len(full_release_blockers),
         "first_blocker": first_blocker,
         "operator_action_count": operator_action_count,
@@ -898,6 +912,12 @@ def _release_decision(
             1
             for row in excluded_evidence_surfaces
             if row["non_structural_product_path"]
+        ),
+        "structural_evidence_surface_allowlist_policy_pass": (
+            not allowlist_policy_blockers
+        ),
+        "structural_evidence_surface_allowlist_policy_blockers": (
+            allowlist_policy_blockers
         ),
         "structural_evidence_surface_allowlist_ids": sorted(
             STRUCTURAL_EVIDENCE_SURFACE_IDS

@@ -813,6 +813,53 @@ def test_release_decision_prioritizes_release_area_first_blocker(
         decision["first_blocker"]
         == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
+    assert decision["structural_evidence_surface_allowlist_policy_pass"] is True
+    assert decision["structural_evidence_surface_allowlist_policy_blockers"] == []
+
+
+def test_release_decision_blocks_non_structural_allowlisted_surface(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        report_pm_release_gate,
+        "STRUCTURAL_EVIDENCE_SURFACE_IDS",
+        {
+            "structural_contact_gate_report",
+            "gpcr_hard_decoy_evidence_surface",
+        },
+    )
+
+    decision = report_pm_release_gate._release_decision(
+        release_allowed=True,
+        blockers=[],
+        release_area_blockers=[],
+        measured_benchmark_breadth_payload={"contract_pass": True},
+        external_benchmark_submission_readiness_payload={
+            "contract_pass": True,
+            "summary": {"ready_to_start_full_submission_now": True},
+        },
+        public_benchmark_source_of_truth_payload={
+            "contract_pass": True,
+            "public_benchmark_ready": True,
+        },
+        release_evidence_freshness_payload={
+            "contract_pass": True,
+            "summary": {"blocker_count": 0},
+        },
+        pm_blocker_register={"summary": {"open_blocker_count": 0}},
+        evidence_surface_dir=tmp_path / "evidence-surfaces",
+    )
+
+    assert decision["release_allowed"] is False
+    assert decision["blocked_release_count"] == 1
+    assert decision["first_blocker"] == (
+        "non_structural_surface_allowlisted:gpcr_hard_decoy_evidence_surface"
+    )
+    assert decision["structural_evidence_surface_allowlist_policy_pass"] is False
+    assert decision["structural_evidence_surface_allowlist_policy_blockers"] == [
+        "non_structural_surface_allowlisted:gpcr_hard_decoy_evidence_surface"
+    ]
 
 
 def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> None:
@@ -1213,6 +1260,8 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert decision["evidence_surface_count"] == 1
     assert decision["excluded_evidence_surface_count"] == 1
     assert decision["non_structural_evidence_surface_excluded_count"] == 1
+    assert decision["structural_evidence_surface_allowlist_policy_pass"] is True
+    assert decision["structural_evidence_surface_allowlist_policy_blockers"] == []
     assert decision["missing_evidence_surface_count"] == 0
     assert decision["locked_evidence_surface_count"] == 0
     assert decision["public_benchmark_ready"] is True
