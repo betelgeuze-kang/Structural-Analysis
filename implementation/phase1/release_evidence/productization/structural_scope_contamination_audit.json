@@ -10,21 +10,22 @@
   },
   "first_non_structural_path": "implementation/phase1/md3bead_scientific_validity_report.md",
   "first_unquarantined_non_structural_path": "",
-  "generated_at": "2026-07-02T04:52:53.166056+00:00",
+  "generated_at": "2026-07-02T05:22:43.628390+00:00",
   "git_state_counts": {
     "tracked": 86
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:e2355aba893034292b904448bcc79c3f21ab5ffac42891c851ad4b13ad355cde",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:a3a3da8bfda68f3bc8de800f15beaa887091db745ebc0db9729efc675b6c1c61",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:826c36a8adcd4325d2d4389800e65dddf2739a13c4273d69cf50233869f4e7aa",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
-    "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
+    "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:56d86b7b57ffd17def5bf314f9287599ed40a42868726f705150a9d80d8fa740",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
+    "implementation/phase1/release_evidence/surface/structural_contact_validation_report.json": "sha256:16b6eeb31aa563062128a7b670497925b83a3e51dc30e51c81bf0d5aaeca8fe9",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
     "scripts/check_structural_scope_contamination.py": "sha256:cb0b9f7f26b730540d402b16e4d198db486289c3a13d86b224ff6e38ecc1f31f"
   },
@@ -2875,10 +2876,10 @@
     "schema_version": "structural-scope-release-surface-quarantine-boundary.v1",
     "status": "quarantined_paths_excluded_pending_owner_cleanup",
     "structural_release_claim_eligible": true,
-    "structural_release_surface_text_guard_path_count": 10,
+    "structural_release_surface_text_guard_path_count": 11,
     "structural_release_surface_text_leak_path_count": 0
   },
-  "release_surface_text_guard_path_count": 10,
+  "release_surface_text_guard_path_count": 11,
   "release_surface_text_guard_paths": [
     "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json",
@@ -2889,6 +2890,7 @@
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
+    "implementation/phase1/release_evidence/surface/structural_contact_validation_report.json",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json"
   ],
   "release_surface_text_guard_skipped_quarantined_path_count": 3,
@@ -2902,9 +2904,9 @@
   "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths_with_release_surface_quarantine_manifest",
   "reused_evidence": false,
   "schema_version": "structural-scope-contamination-audit.v1",
-  "source_commit_sha": "aa1425e2593886ae9e2f74b6fe3cf4b2e896fdd0",
+  "source_commit_sha": "cd4bd256aff7fc1d647dd75ffc6a6cf1f9129eb7",
   "status": "quarantined",
-  "tracked_path_count": 5749,
+  "tracked_path_count": 5753,
   "unquarantined_family_counts": {},
   "unquarantined_git_state_counts": {},
   "unquarantined_non_structural_path_count": 0,
