@@ -2932,7 +2932,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T07:47:31.965323+00:00",
+  "generated_at": "2026-07-02T07:56:41.850119+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2942,7 +2942,7 @@
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d003816417d1b7c130271920ca2f960ef90ae285b996bcf2dd4dccf0f3586f5f",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:b075e75cb5088da3c161c59cbf390f8e3a4f56b55b388e869db3d422b02c238a",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:d08f3d99bf43d401ff0fa3da35a6448197c6dc5986e3c5682ae891c30ad70e94",
-    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:2350aa87dacb6ea96002ea8d385175488611d78c4601021e6048ad3f6dda07dc",
+    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:436ece2aa693e8190ef7db9cea32f400683139fbbf221da57eed708be8a5120b",
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:cd7cf25e96c78cce52ad23b413cbb55f03019e00213a57e974213c9b9f678578",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:b8edb41cdeee6af03bd88d98e06d737629e5d6fe8f1305404aa6f0b8c01619a7",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:f071d2394be667a073f460a907c8c71bb627beb7f245ffbcf745ac704bae3c04",
@@ -3282,7 +3282,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "dbe914f9c877d432c81eb46b4f244452082ca46b",
+  "source_commit_sha": "afb4292fbc6ed337fc78bd624fb445692a32bb1a",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3372,10 +3372,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
@@ -3393,6 +3395,7 @@
       {
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3400,6 +3403,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3420,6 +3424,7 @@
       {
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3427,6 +3432,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3447,6 +3453,7 @@
       {
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3454,6 +3461,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3474,6 +3482,7 @@
       {
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3481,6 +3490,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3501,6 +3511,7 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3508,6 +3519,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3528,6 +3540,7 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3535,6 +3548,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3555,6 +3569,7 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3562,6 +3577,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3582,6 +3598,7 @@
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3589,6 +3606,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3609,6 +3627,7 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3616,6 +3635,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3636,6 +3656,7 @@
       {
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3643,6 +3664,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3663,6 +3685,7 @@
       {
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3670,6 +3693,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3690,6 +3714,7 @@
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3697,6 +3722,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3717,6 +3743,7 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3724,6 +3751,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3744,6 +3772,7 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3751,6 +3780,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3771,6 +3801,7 @@
       {
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3778,6 +3809,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3798,6 +3830,7 @@
       {
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3805,6 +3838,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3825,6 +3859,7 @@
       {
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3832,6 +3867,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3852,6 +3888,7 @@
       {
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
@@ -3859,6 +3896,7 @@
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/check_structural_scope_contamination.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_cleanup_impact_report.py",
@@ -3879,10 +3917,12 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
@@ -3900,10 +3940,12 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/merge_structural_scope_owner_decision_batch.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
@@ -3921,8 +3963,10 @@
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_pm_release_blocker_action_register.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
@@ -3937,30 +3981,15 @@
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
-        "changed_paths_since_source_commit": [
-          "scripts/build_pm_release_blocker_action_register.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_cleanup_impact_report.py",
-          "scripts/build_structural_scope_origin_report.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/check_structural_scope_contamination.py",
-          "scripts/merge_structural_scope_owner_decision_batch.py",
-          "tests/test_build_pm_release_blocker_action_register.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_cleanup_impact_report.py",
-          "tests/test_build_structural_scope_origin_report.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_check_structural_scope_contamination.py",
-          "tests/test_merge_structural_scope_owner_decision_batch.py"
-        ],
-        "generated_at": "2026-07-02T05:31:56.007611+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-02T07:56:41.651717+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "fb3778ef26814b0d22c5790bc6c4acaae79b9e8e",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "afb4292fbc6ed337fc78bd624fb445692a32bb1a",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "exact"
       }
     ],
     "open_blocker_counts": {
@@ -3985,7 +4014,7 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+        "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4010,7 +4039,7 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+        " M implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json"
       ]
     }
   },

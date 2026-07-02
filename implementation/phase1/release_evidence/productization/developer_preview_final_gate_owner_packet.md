@@ -19,16 +19,82 @@
 - `python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check`
 - `python3 scripts/build_phase6_benchmark_scale_status.py --check`
 - `python3 scripts/build_developer_preview_rc_status.py --check`
+- `python3 scripts/build_product_readiness_snapshot.py --check`
 
 ### `linux_windows_reproducibility_confirmed`
 - `python3 scripts/build_phase6_linux_windows_parity_status.py --check`
 - `python3 scripts/build_developer_preview_rc_status.py --check`
+- `python3 scripts/build_product_readiness_snapshot.py --check`
 
 ### `new_user_core_workflow_observation_passed`
 - `python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
 - `python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
 - `python3 scripts/build_phase6_ux_observation_status.py --check`
 - `python3 scripts/build_developer_preview_rc_status.py --check`
+- `python3 scripts/build_phase6_ux_observation_status.py --out implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json`
+- `python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+- `python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+
+## Evidence Refresh Commands
+
+### `selected_medium_models_pass_or_approved_review`
+- `python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --out implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+- `python3 scripts/build_phase6_benchmark_scale_status.py --out implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json`
+- `python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
+- `python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+
+### `linux_windows_reproducibility_confirmed`
+- `python3 scripts/build_phase6_linux_windows_parity_status.py --out implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json`
+- `python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
+- `python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+
+### `new_user_core_workflow_observation_passed`
+- `python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
+- `python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `python3 scripts/build_phase6_ux_observation_status.py --out implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json`
+- `python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
+- `python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+
+## Gate Unblock Plan
+
+### `selected_medium_models_pass_or_approved_review`
+- `select_additional_medium_model_cases` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+- `complete_product_legal_license_review` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+- `attach_medium_reference_outputs` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+- `record_medium_canonical_normalization` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+- `run_medium_scorecard_receipts` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+- `attach_medium_pass_or_approved_review_decisions` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+- `rerun_medium_model_and_dp_rc_checks` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+
+### `linux_windows_reproducibility_confirmed`
+- `attach_windows_platform_replay_receipt` from `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json`
+- `rerun_linux_windows_parity_and_dp_rc_checks` from `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json`
+
+### `new_user_core_workflow_observation_passed`
+- `attach_observation_record` from `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `observe_required_workflow_steps` from `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `prove_30_minute_timing` from `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `attach_separate_evidence_reference` from `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `regenerate_release_gate_evidence` from `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+
+## Upstream Handoff Sources
+
+### `selected_medium_models_pass_or_approved_review`
+| Artifact | Status | Pass | Plan Rows | Blockers |
+|---|---|---:|---:|---:|
+| `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json` | `blocked` | `False` | 7 | 5 |
+
+### `linux_windows_reproducibility_confirmed`
+| Artifact | Status | Pass | Plan Rows | Blockers |
+|---|---|---:|---:|---:|
+| `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json` | `blocked` | `False` | 2 | 1 |
+
+### `new_user_core_workflow_observation_passed`
+| Artifact | Status | Pass | Plan Rows | Blockers |
+|---|---|---:|---:|---:|
+| `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json` | `blocked` | `False` | 5 | 0 |
 
 ## Evidence Intake Artifacts
 

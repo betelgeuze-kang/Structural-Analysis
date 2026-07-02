@@ -46,6 +46,28 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
             "python3 scripts/build_phase6_benchmark_scale_status.py --check",
             "python3 scripts/build_developer_preview_rc_status.py --check",
         ],
+        "evidence_refresh_commands": [
+            (
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "phase3_medium_model_scorecard_readiness_receipt.json"
+            ),
+            (
+                "python3 scripts/build_phase6_benchmark_scale_status.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "phase6_benchmark_scale_status.json"
+            ),
+            (
+                "python3 scripts/build_developer_preview_rc_status.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "developer_preview_rc_status.json"
+            ),
+            (
+                "python3 scripts/build_product_readiness_snapshot.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "product_readiness_snapshot.json"
+            ),
+        ],
         "prohibited_substitutes": [
             "parser_only_medium_topology_evidence",
             "candidate_case_count_without_scorecard_receipts",
@@ -58,6 +80,9 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
         "evidence_intake_artifacts": [
             "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
             "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json",
+        ],
+        "upstream_handoff_artifacts": [
+            "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
         ],
         "closure_decision_required": "five_PASS_or_explicit_APPROVED_REVIEW_rows",
     },
@@ -79,6 +104,23 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
             "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
             "python3 scripts/build_developer_preview_rc_status.py --check",
         ],
+        "evidence_refresh_commands": [
+            (
+                "python3 scripts/build_phase6_linux_windows_parity_status.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "phase6_linux_windows_parity_status.json"
+            ),
+            (
+                "python3 scripts/build_developer_preview_rc_status.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "developer_preview_rc_status.json"
+            ),
+            (
+                "python3 scripts/build_product_readiness_snapshot.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "product_readiness_snapshot.json"
+            ),
+        ],
         "prohibited_substitutes": [
             "linux_only_replay_copied_as_windows_parity",
             "git_clean_clone_receipt_counted_twice",
@@ -90,6 +132,9 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
         ],
         "evidence_intake_artifacts": [
             "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+            "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
+        ],
+        "upstream_handoff_artifacts": [
             "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
         ],
         "closure_decision_required": "direct_windows_replay_receipt_passes",
@@ -125,6 +170,33 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
             "python3 scripts/build_phase6_ux_observation_status.py --check",
             "python3 scripts/build_developer_preview_rc_status.py --check",
         ],
+        "evidence_refresh_commands": [
+            (
+                "python3 scripts/build_ux_new_user_observation_report.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "ux_new_user_observation_report.json"
+            ),
+            (
+                "python3 scripts/build_ux_new_user_observation_intake_packet.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "ux_new_user_observation_intake_packet.json"
+            ),
+            (
+                "python3 scripts/build_phase6_ux_observation_status.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "phase6_ux_observation_status.json"
+            ),
+            (
+                "python3 scripts/build_developer_preview_rc_status.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "developer_preview_rc_status.json"
+            ),
+            (
+                "python3 scripts/build_product_readiness_snapshot.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "product_readiness_snapshot.json"
+            ),
+        ],
         "prohibited_substitutes": [
             "automated_browser_smoke_without_human_observation",
             "template_ux_observation_json",
@@ -143,6 +215,9 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
             "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
             "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
             "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+        ],
+        "upstream_handoff_artifacts": [
+            "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         ],
         "closure_decision_required": "accepted_human_new_user_observation",
     },
@@ -187,6 +262,110 @@ def _deduped(items: list[str]) -> list[str]:
         seen.add(item)
         out.append(item)
     return out
+
+
+def _compact_upstream_handoff_source(repo_root: Path, artifact: str) -> dict[str, Any]:
+    path = Path(artifact)
+    payload = _load_json(repo_root, path)
+    if not payload:
+        return {
+            "artifact": artifact,
+            "present": False,
+            "status": "missing",
+            "contract_pass": False,
+            "summary_line": "",
+            "blockers": [f"upstream_handoff_artifact_missing:{artifact}"],
+            "blocker_count": 1,
+            "gate_unblock_plan": [],
+            "gate_unblock_plan_count": 0,
+            "operator_next_actions": [],
+            "operator_next_action_count": 0,
+            "recommended_next_actions": [],
+            "recommended_next_action_count": 0,
+            "validation_commands": [],
+            "validation_command_count": 0,
+            "missing_evidence_breakdown": [],
+            "missing_evidence_count": 0,
+        }
+    blockers = [str(item) for item in _as_list(payload.get("blockers"))]
+    gate_unblock_plan = _as_list(payload.get("gate_unblock_plan"))
+    operator_next_actions = _as_list(payload.get("operator_next_actions"))
+    recommended_next_actions = _as_list(payload.get("recommended_next_actions"))
+    validation_commands = [
+        str(item) for item in _as_list(payload.get("validation_commands"))
+    ]
+    missing_evidence_breakdown = _as_list(payload.get("missing_evidence_breakdown"))
+    source = {
+        "artifact": artifact,
+        "present": True,
+        "status": str(payload.get("status", "")),
+        "contract_pass": bool(payload.get("contract_pass") is True),
+        "summary_line": str(payload.get("summary_line", "")),
+        "blockers": blockers,
+        "blocker_count": len(blockers),
+        "gate_unblock_plan": gate_unblock_plan,
+        "gate_unblock_plan_count": len(gate_unblock_plan),
+        "operator_next_actions": operator_next_actions,
+        "operator_next_action_count": len(operator_next_actions),
+        "recommended_next_actions": recommended_next_actions,
+        "recommended_next_action_count": len(recommended_next_actions),
+        "validation_commands": validation_commands,
+        "validation_command_count": len(validation_commands),
+        "missing_evidence_breakdown": missing_evidence_breakdown,
+        "missing_evidence_count": len(missing_evidence_breakdown),
+    }
+    runner_command_template = payload.get("runner_command_template")
+    if isinstance(runner_command_template, str) and runner_command_template:
+        source["runner_command_template"] = runner_command_template
+    case_input_requirements = payload.get("case_input_requirements")
+    if isinstance(case_input_requirements, dict):
+        source["case_input_requirements"] = case_input_requirements
+    return source
+
+
+def _upstream_handoff_sources(
+    *, repo_root: Path, artifacts: list[str]
+) -> list[dict[str, Any]]:
+    return [
+        _compact_upstream_handoff_source(repo_root, artifact)
+        for artifact in artifacts
+    ]
+
+
+def _source_plan_rows(source: dict[str, Any]) -> list[Any]:
+    plan = _as_list(source.get("gate_unblock_plan"))
+    if plan:
+        return plan
+    plan = _as_list(source.get("operator_next_actions"))
+    if plan:
+        return plan
+    return _as_list(source.get("recommended_next_actions"))
+
+
+def _owner_unblock_plan(sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    plan: list[dict[str, Any]] = []
+    for source in sources:
+        artifact = str(source.get("artifact", ""))
+        for index, row in enumerate(_source_plan_rows(source), start=1):
+            if isinstance(row, dict):
+                item = dict(row)
+            else:
+                item = {"action": str(row)}
+            slot_id = str(item.get("slot_id") or item.get("id") or f"step_{index}")
+            item["slot_id"] = slot_id
+            item["source_artifact"] = artifact
+            plan.append(item)
+    return plan
+
+
+def _upstream_validation_commands(sources: list[dict[str, Any]]) -> list[str]:
+    return _deduped(
+        [
+            str(command)
+            for source in sources
+            for command in _as_list(source.get("validation_commands"))
+        ]
+    )
 
 
 def _gate_item(gate: dict[str, Any]) -> str:
@@ -239,6 +418,9 @@ def _owner_packet_for_gate(*, gate: dict[str, Any], repo_root: Path) -> dict[str
     verification_commands = [
         str(item) for item in _as_list(handoff.get("verification_commands"))
     ]
+    evidence_refresh_commands = [
+        str(item) for item in _as_list(handoff.get("evidence_refresh_commands"))
+    ]
     evidence_intake_artifacts = [
         str(item) for item in _as_list(handoff.get("evidence_intake_artifacts"))
     ]
@@ -249,6 +431,16 @@ def _owner_packet_for_gate(*, gate: dict[str, Any], repo_root: Path) -> dict[str
     human_observation_evidence_policy = _as_dict(
         ux_intake.get("human_observation_evidence_policy")
     )
+    upstream_handoff_artifacts = [
+        str(item) for item in _as_list(handoff.get("upstream_handoff_artifacts"))
+    ]
+    upstream_handoff_sources = _upstream_handoff_sources(
+        repo_root=repo_root,
+        artifacts=upstream_handoff_artifacts,
+    )
+    upstream_validation_commands = _upstream_validation_commands(upstream_handoff_sources)
+    verification_commands = _deduped(verification_commands + upstream_validation_commands)
+    owner_unblock_plan = _owner_unblock_plan(upstream_handoff_sources)
     prohibited_substitutes = _deduped(
         [str(item) for item in _as_list(handoff.get("prohibited_substitutes"))]
         + [
@@ -277,8 +469,21 @@ def _owner_packet_for_gate(*, gate: dict[str, Any], repo_root: Path) -> dict[str
         "required_owner_evidence_count": len(required_owner_evidence),
         "verification_commands": verification_commands,
         "verification_command_count": len(verification_commands),
+        "evidence_refresh_commands": evidence_refresh_commands,
+        "evidence_refresh_command_count": len(evidence_refresh_commands),
         "evidence_intake_artifacts": evidence_intake_artifacts,
         "evidence_intake_artifact_count": len(evidence_intake_artifacts),
+        "upstream_handoff_artifacts": upstream_handoff_artifacts,
+        "upstream_handoff_artifact_count": len(upstream_handoff_artifacts),
+        "upstream_handoff_sources": upstream_handoff_sources,
+        "upstream_handoff_source_count": len(upstream_handoff_sources),
+        "upstream_validation_commands": upstream_validation_commands,
+        "upstream_validation_command_count": len(upstream_validation_commands),
+        "owner_unblock_plan": owner_unblock_plan,
+        "owner_unblock_plan_count": len(owner_unblock_plan),
+        "owner_unblock_slot_ids": [
+            str(row.get("slot_id", "")) for row in owner_unblock_plan
+        ],
         "prohibited_substitutes": prohibited_substitutes,
         "release_surface_impacts": release_surface_impacts,
         "release_surface_impact_count": len(release_surface_impacts),
@@ -402,6 +607,12 @@ def build_owner_packet(
         "evidence_intake_artifact_count": sum(
             len(packet["evidence_intake_artifacts"]) for packet in owner_packets
         ),
+        "evidence_refresh_command_count": sum(
+            len(packet["evidence_refresh_commands"]) for packet in owner_packets
+        ),
+        "owner_unblock_plan_count": sum(
+            len(packet["owner_unblock_plan"]) for packet in owner_packets
+        ),
         "release_surface_impact_count": sum(
             len(packet["release_surface_impacts"]) for packet in owner_packets
         ),
@@ -454,6 +665,41 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(f"### `{packet['gate']}`")
         for command in packet["verification_commands"]:
             lines.append(f"- `{command}`")
+        lines.append("")
+    lines.extend(["## Evidence Refresh Commands", ""])
+    for packet in payload["owner_packets"]:
+        lines.append(f"### `{packet['gate']}`")
+        for command in packet["evidence_refresh_commands"]:
+            lines.append(f"- `{command}`")
+        if not packet["evidence_refresh_commands"]:
+            lines.append("- none")
+        lines.append("")
+    lines.extend(["## Gate Unblock Plan", ""])
+    for packet in payload["owner_packets"]:
+        lines.append(f"### `{packet['gate']}`")
+        if packet["owner_unblock_plan"]:
+            for row in packet["owner_unblock_plan"]:
+                source = str(row.get("source_artifact", ""))
+                lines.append(f"- `{row.get('slot_id', '')}` from `{source}`")
+        else:
+            lines.append("- none")
+        lines.append("")
+    lines.extend(["## Upstream Handoff Sources", ""])
+    for packet in payload["owner_packets"]:
+        lines.append(f"### `{packet['gate']}`")
+        lines.append("| Artifact | Status | Pass | Plan Rows | Blockers |")
+        lines.append("|---|---|---:|---:|---:|")
+        for source in packet["upstream_handoff_sources"]:
+            lines.append(
+                "| "
+                f"`{source['artifact']}` | "
+                f"`{source['status']}` | "
+                f"`{source['contract_pass']}` | "
+                f"{source['gate_unblock_plan_count']} | "
+                f"{source['blocker_count']} |"
+            )
+        if not packet["upstream_handoff_sources"]:
+            lines.append("| none |  |  |  |  |")
         lines.append("")
     lines.extend(["## Evidence Intake Artifacts", ""])
     for packet in payload["owner_packets"]:

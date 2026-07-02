@@ -15,14 +15,15 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
   "evidence_intake_artifact_count": 12,
+  "evidence_refresh_command_count": 12,
   "final_gate_count": 9,
   "final_gate_pass_count": 6,
-  "generated_at": "2026-07-02T05:31:56.007611+00:00",
+  "generated_at": "2026-07-02T07:56:41.651717+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:cd7cf25e96c78cce52ad23b413cbb55f03019e00213a57e974213c9b9f678578",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:7ec48747941e6affe89b3446ab2617bfc17df50fc659ce5f76fef9d41cb08b33",
-    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:393c1882b10486c35dc552ff64734c67994ccbb75b7e0f82f5fc6edbb72f7b10"
+    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:58950567275ac1464e1f50505f52b28d05d0e174105e41f154980c11e54abe62"
   },
   "owner_packet_blocker_id_count": 32,
   "owner_packet_blocker_ids": [
@@ -151,6 +152,13 @@
         "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
         "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json"
       ],
+      "evidence_refresh_command_count": 4,
+      "evidence_refresh_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --out implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+        "python3 scripts/build_phase6_benchmark_scale_status.py --out implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json",
+        "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+        "python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+      ],
       "gate": "selected_medium_models_pass_or_approved_review",
       "gate_id": "selected_medium_models_pass_or_approved_review",
       "human_observation_evidence_policy": {},
@@ -159,6 +167,166 @@
       ],
       "owner": "benchmark_validation_owner",
       "owner_action": "Attach product/legal source approval, five selected medium structural model cases, reference outputs or approved REVIEW baselines, normalization receipts, and per-case scorecard receipts.",
+      "owner_unblock_plan": [
+        {
+          "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+          "clears_blockers": [
+            "medium_structural_models_current_below_required:2/5"
+          ],
+          "evidence_artifacts": [
+            "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+            "operator-attached source/license/reference/normalization rows for each added case"
+          ],
+          "minimum_evidence": [
+            "five authoritative medium structural model cases selected",
+            "each selected case has stable source id and checksum",
+            "case selection remains parser-only until reference, normalization, scorecard, and review evidence pass"
+          ],
+          "owner": "benchmark_operator",
+          "remaining_case_count": 3,
+          "slot_id": "select_additional_medium_model_cases",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+            "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check"
+          ]
+        },
+        {
+          "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
+          "clears_blockers": [
+            "license_review_pending"
+          ],
+          "evidence_artifacts": [
+            "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json"
+          ],
+          "minimum_evidence": [
+            "source license receipt records approved redistribution boundary",
+            "source license receipt records approved commercial-use boundary",
+            "license_review_pending is absent from the readiness receipt blockers"
+          ],
+          "owner": "product_legal",
+          "remaining_case_count": null,
+          "slot_id": "complete_product_legal_license_review",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "validation_commands": [
+            "python3 scripts/build_phase3_opensees_source_license_receipt.py --check",
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+          ]
+        },
+        {
+          "action": "Attach reference outputs or approved REVIEW baselines for the five selected medium structural models.",
+          "clears_blockers": [
+            "reference_outputs_missing"
+          ],
+          "evidence_artifacts": [
+            "OPERATOR_ATTACHED_REFERENCE_OUTPUTS",
+            "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256_PER_CASE"
+          ],
+          "minimum_evidence": [
+            "reference displacement, reaction, member, or modal outputs attached per selected case",
+            "reference output SHA256 or approved REVIEW baseline recorded per selected case",
+            "reference_outputs_missing is absent from the readiness receipt blockers"
+          ],
+          "owner": "benchmark_operator",
+          "remaining_case_count": 5,
+          "slot_id": "attach_medium_reference_outputs",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+          ]
+        },
+        {
+          "action": "Attach one validated medium normalization receipt per selected case, including canonical units, coordinate transforms, and node/member mapping coverage.",
+          "clears_blockers": [
+            "normalization_receipts_missing"
+          ],
+          "evidence_artifacts": [
+            "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
+          ],
+          "minimum_evidence": [
+            "one phase3-medium-normalization-receipt.v1 receipt attached per selected case",
+            "node and member mapping coverage are both >= 0.99",
+            "normalization_receipts_missing is absent from the readiness receipt blockers"
+          ],
+          "owner": "benchmark_operator",
+          "remaining_case_count": 5,
+          "slot_id": "record_medium_canonical_normalization",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+          ]
+        },
+        {
+          "action": "Run the medium scorecard receipt command for each selected case and retain receipt, result, and validation report artifacts.",
+          "clears_blockers": [
+            "opensees_medium_scorecard_execution_missing"
+          ],
+          "evidence_artifacts": [],
+          "minimum_evidence": [
+            "one scorecard receipt, result artifact, and validation report retained per selected case",
+            "receipt records no crash, no OOM, residual formula, and convergence history",
+            "opensees_medium_scorecard_execution_missing is absent from the readiness receipt blockers"
+          ],
+          "owner": "benchmark_operator",
+          "remaining_case_count": 5,
+          "slot_id": "run_medium_scorecard_receipts",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+            "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check"
+          ]
+        },
+        {
+          "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+          "clears_blockers": [
+            "medium_model_pass_or_review_missing"
+          ],
+          "evidence_artifacts": [],
+          "minimum_evidence": [
+            "each selected case has PASS or APPROVED_REVIEW decision",
+            "decision is referenced by the corresponding scorecard receipt",
+            "medium_model_pass_or_review_missing is absent from the readiness receipt blockers"
+          ],
+          "owner": "benchmark_reviewer",
+          "remaining_case_count": 5,
+          "slot_id": "attach_medium_pass_or_approved_review_decisions",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check"
+          ]
+        },
+        {
+          "action": "Regenerate medium-model, benchmark-scale, Developer Preview RC, and product readiness receipts.",
+          "minimum_evidence": [
+            "phase3_medium_model_scorecard_readiness_receipt.json contract_pass=true",
+            "phase6_benchmark_scale_status.json no longer reports medium-model blockers",
+            "developer_preview_rc_status no longer blocks selected_medium_models_pass_or_approved_review",
+            "product_readiness_snapshot remains semantically consistent"
+          ],
+          "owner": "release_engineering",
+          "slot_id": "rerun_medium_model_and_dp_rc_checks",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+            "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check",
+            "python3 scripts/build_product_readiness_snapshot.py --check"
+          ]
+        }
+      ],
+      "owner_unblock_plan_count": 7,
+      "owner_unblock_slot_ids": [
+        "select_additional_medium_model_cases",
+        "complete_product_legal_license_review",
+        "attach_medium_reference_outputs",
+        "record_medium_canonical_normalization",
+        "run_medium_scorecard_receipts",
+        "attach_medium_pass_or_approved_review_decisions",
+        "rerun_medium_model_and_dp_rc_checks"
+      ],
       "prohibited_substitutes": [
         "parser_only_medium_topology_evidence",
         "candidate_case_count_without_scorecard_receipts",
@@ -178,16 +346,531 @@
       ],
       "required_owner_evidence_count": 5,
       "status": "blocked",
+      "upstream_handoff_artifact_count": 1,
+      "upstream_handoff_artifacts": [
+        "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json"
+      ],
+      "upstream_handoff_source_count": 1,
+      "upstream_handoff_sources": [
+        {
+          "artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "blocker_count": 5,
+          "blockers": [
+            "license_review_pending",
+            "medium_model_pass_or_review_missing",
+            "normalization_receipts_missing",
+            "opensees_medium_scorecard_execution_missing",
+            "reference_outputs_missing"
+          ],
+          "case_input_requirements": {
+            "case_fields": [
+              {
+                "field": "model",
+                "required_artifact": "operator-attached normalized structural model JSON",
+                "runner_argument": "--model"
+              },
+              {
+                "field": "source_id",
+                "required_artifact": "stable source identifier tied to the source/license receipt",
+                "runner_argument": "--source-id"
+              },
+              {
+                "field": "case_id",
+                "required_artifact": "unique selected medium case id",
+                "runner_argument": "--case-id"
+              },
+              {
+                "field": "source_sha256",
+                "required_artifact": "checksum of the attached source/model input",
+                "runner_argument": "--source-sha256"
+              },
+              {
+                "field": "scorecard_or_review_path",
+                "required_artifact": "PASS scorecard or pre-approved REVIEW record",
+                "runner_argument": "--scorecard-or-review"
+              },
+              {
+                "field": "reference_output_sha256",
+                "required_artifact": "reference output checksum or approved REVIEW baseline",
+                "runner_argument": "receipt_field"
+              },
+              {
+                "field": "normalization_receipt",
+                "required_artifact": "units/coordinates/mapping normalization receipt passing phase3-medium-normalization-receipt.v1",
+                "runner_argument": "receipt_field"
+              }
+            ],
+            "claim_boundary": "These inputs describe the operator handoff contract only. They do not create model evidence, approve licenses, or close medium benchmark gates.",
+            "current_valid_scorecard_case_count": 0,
+            "per_case_outputs": [
+              "medium_model_scorecard_receipts/CASE_ID.scorecard_receipt.json",
+              "medium_model_scorecard_receipts/CASE_ID.result.json",
+              "medium_model_scorecard_receipts/CASE_ID.validation_report.json"
+            ],
+            "remaining_case_count": 5,
+            "required_case_count": 5,
+            "schema_version": "phase3-medium-model-scorecard-case-inputs.v1",
+            "validation_commands": [
+              "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+              "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+              "python3 scripts/build_developer_preview_rc_status.py --check"
+            ]
+          },
+          "contract_pass": false,
+          "gate_unblock_plan": [
+            {
+              "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+              "clears_blockers": [
+                "medium_structural_models_current_below_required:2/5"
+              ],
+              "evidence_artifacts": [
+                "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+                "operator-attached source/license/reference/normalization rows for each added case"
+              ],
+              "minimum_evidence": [
+                "five authoritative medium structural model cases selected",
+                "each selected case has stable source id and checksum",
+                "case selection remains parser-only until reference, normalization, scorecard, and review evidence pass"
+              ],
+              "owner": "benchmark_operator",
+              "remaining_case_count": 3,
+              "slot_id": "select_additional_medium_model_cases",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
+              "clears_blockers": [
+                "license_review_pending"
+              ],
+              "evidence_artifacts": [
+                "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json"
+              ],
+              "minimum_evidence": [
+                "source license receipt records approved redistribution boundary",
+                "source license receipt records approved commercial-use boundary",
+                "license_review_pending is absent from the readiness receipt blockers"
+              ],
+              "owner": "product_legal",
+              "remaining_case_count": null,
+              "slot_id": "complete_product_legal_license_review",
+              "validation_commands": [
+                "python3 scripts/build_phase3_opensees_source_license_receipt.py --check",
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
+              "action": "Attach reference outputs or approved REVIEW baselines for the five selected medium structural models.",
+              "clears_blockers": [
+                "reference_outputs_missing"
+              ],
+              "evidence_artifacts": [
+                "OPERATOR_ATTACHED_REFERENCE_OUTPUTS",
+                "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256_PER_CASE"
+              ],
+              "minimum_evidence": [
+                "reference displacement, reaction, member, or modal outputs attached per selected case",
+                "reference output SHA256 or approved REVIEW baseline recorded per selected case",
+                "reference_outputs_missing is absent from the readiness receipt blockers"
+              ],
+              "owner": "benchmark_operator",
+              "remaining_case_count": 5,
+              "slot_id": "attach_medium_reference_outputs",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
+              "action": "Attach one validated medium normalization receipt per selected case, including canonical units, coordinate transforms, and node/member mapping coverage.",
+              "clears_blockers": [
+                "normalization_receipts_missing"
+              ],
+              "evidence_artifacts": [
+                "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
+              ],
+              "minimum_evidence": [
+                "one phase3-medium-normalization-receipt.v1 receipt attached per selected case",
+                "node and member mapping coverage are both >= 0.99",
+                "normalization_receipts_missing is absent from the readiness receipt blockers"
+              ],
+              "owner": "benchmark_operator",
+              "remaining_case_count": 5,
+              "slot_id": "record_medium_canonical_normalization",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
+              "action": "Run the medium scorecard receipt command for each selected case and retain receipt, result, and validation report artifacts.",
+              "clears_blockers": [
+                "opensees_medium_scorecard_execution_missing"
+              ],
+              "evidence_artifacts": [],
+              "minimum_evidence": [
+                "one scorecard receipt, result artifact, and validation report retained per selected case",
+                "receipt records no crash, no OOM, residual formula, and convergence history",
+                "opensees_medium_scorecard_execution_missing is absent from the readiness receipt blockers"
+              ],
+              "owner": "benchmark_operator",
+              "remaining_case_count": 5,
+              "slot_id": "run_medium_scorecard_receipts",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+              "clears_blockers": [
+                "medium_model_pass_or_review_missing"
+              ],
+              "evidence_artifacts": [],
+              "minimum_evidence": [
+                "each selected case has PASS or APPROVED_REVIEW decision",
+                "decision is referenced by the corresponding scorecard receipt",
+                "medium_model_pass_or_review_missing is absent from the readiness receipt blockers"
+              ],
+              "owner": "benchmark_reviewer",
+              "remaining_case_count": 5,
+              "slot_id": "attach_medium_pass_or_approved_review_decisions",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "action": "Regenerate medium-model, benchmark-scale, Developer Preview RC, and product readiness receipts.",
+              "minimum_evidence": [
+                "phase3_medium_model_scorecard_readiness_receipt.json contract_pass=true",
+                "phase6_benchmark_scale_status.json no longer reports medium-model blockers",
+                "developer_preview_rc_status no longer blocks selected_medium_models_pass_or_approved_review",
+                "product_readiness_snapshot remains semantically consistent"
+              ],
+              "owner": "release_engineering",
+              "slot_id": "rerun_medium_model_and_dp_rc_checks",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check",
+                "python3 scripts/build_product_readiness_snapshot.py --check"
+              ]
+            }
+          ],
+          "gate_unblock_plan_count": 7,
+          "missing_evidence_breakdown": [
+            {
+              "blocker": "license_review_pending",
+              "evidence_type": "product_legal_review",
+              "id": "license_approval",
+              "license_review_status": "identified_gpl_3_0_product_legal_review_required",
+              "required": "License review for local execution, redistribution boundary, and commercial-use boundary.",
+              "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+              "spdx": "GPL-3.0",
+              "status": "identified_review_required"
+            },
+            {
+              "blocker": "reference_outputs_missing",
+              "current_case_count": 0,
+              "evidence_type": "operator_attached",
+              "id": "reference_outputs",
+              "remaining_case_count": 5,
+              "required": "Reference displacement/reaction/member/modal outputs or approved REVIEW baseline.",
+              "required_artifacts": [
+                "reference displacement/reaction/member/modal outputs",
+                "reference output checksum per selected case",
+                "approved REVIEW baseline when exact reference output is unavailable"
+              ],
+              "required_case_count": 5,
+              "status": "missing"
+            },
+            {
+              "blocker": "normalization_receipts_missing",
+              "current_case_count": 0,
+              "evidence_type": "operator_attached",
+              "id": "canonical_normalization",
+              "minimum_mapping_coverage": 0.99,
+              "remaining_case_count": 5,
+              "required": "Canonical model normalization with units, coordinates, and mapping coverage.",
+              "required_artifacts": [
+                "canonical units and coordinate mapping",
+                "node/member mapping coverage",
+                "normalization receipt per selected case"
+              ],
+              "required_case_count": 5,
+              "schema_version_required": "phase3-medium-normalization-receipt.v1",
+              "status": "missing"
+            },
+            {
+              "blocker": "opensees_medium_scorecard_execution_missing",
+              "current_case_count": 0,
+              "evidence_type": "operator_attached",
+              "id": "scorecard_execution",
+              "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
+              "remaining_case_count": 5,
+              "required": "OpenSees medium scorecard execution retaining residual, increment, and convergence history.",
+              "required_case_count": 5,
+              "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+              "status": "missing"
+            },
+            {
+              "accepted_decisions": [
+                "PASS",
+                "APPROVED_REVIEW"
+              ],
+              "blocker": "medium_model_pass_or_review_missing",
+              "current_case_count": 0,
+              "evidence_type": "operator_attached",
+              "id": "pass_or_approved_review",
+              "remaining_case_count": 5,
+              "required": "Per-case PASS or explicit pre-approved REVIEW decision for selected medium models.",
+              "required_case_count": 5,
+              "status": "missing"
+            }
+          ],
+          "missing_evidence_count": 5,
+          "operator_next_action_count": 6,
+          "operator_next_actions": [
+            {
+              "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+              "clears_blockers": [
+                "medium_structural_models_current_below_required:2/5"
+              ],
+              "current_candidate_case_count": 2,
+              "evidence_artifacts": [
+                "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+                "operator-attached source/license/reference/normalization rows for each added case"
+              ],
+              "id": "select_additional_medium_model_cases",
+              "owner": "benchmark_operator",
+              "remaining_case_count": 3,
+              "required_candidate_case_count": 5,
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
+              "clears_blockers": [
+                "license_review_pending"
+              ],
+              "evidence_artifacts": [
+                "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json"
+              ],
+              "id": "complete_product_legal_license_review",
+              "owner": "product_legal",
+              "validation_commands": [
+                "python3 scripts/build_phase3_opensees_source_license_receipt.py --check",
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
+              "action": "Attach reference outputs or approved REVIEW baselines for the five selected medium structural models.",
+              "clears_blockers": [
+                "reference_outputs_missing"
+              ],
+              "evidence_artifacts": [
+                "OPERATOR_ATTACHED_REFERENCE_OUTPUTS",
+                "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256_PER_CASE"
+              ],
+              "id": "attach_medium_reference_outputs",
+              "owner": "benchmark_operator",
+              "remaining_case_count": 5,
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
+              "action": "Attach one validated medium normalization receipt per selected case, including canonical units, coordinate transforms, and node/member mapping coverage.",
+              "clears_blockers": [
+                "normalization_receipts_missing"
+              ],
+              "evidence_artifacts": [
+                "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
+              ],
+              "id": "record_medium_canonical_normalization",
+              "minimum_mapping_coverage": 0.99,
+              "owner": "benchmark_operator",
+              "remaining_case_count": 5,
+              "schema_version_required": "phase3-medium-normalization-receipt.v1",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
+              "action": "Run the medium scorecard receipt command for each selected case and retain receipt, result, and validation report artifacts.",
+              "clears_blockers": [
+                "opensees_medium_scorecard_execution_missing"
+              ],
+              "id": "run_medium_scorecard_receipts",
+              "owner": "benchmark_operator",
+              "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
+              "remaining_case_count": 5,
+              "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "accepted_decisions": [
+                "PASS",
+                "APPROVED_REVIEW"
+              ],
+              "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+              "clears_blockers": [
+                "medium_model_pass_or_review_missing"
+              ],
+              "id": "attach_medium_pass_or_approved_review_decisions",
+              "owner": "benchmark_reviewer",
+              "remaining_case_count": 5,
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            }
+          ],
+          "present": true,
+          "recommended_next_action_count": 6,
+          "recommended_next_actions": [
+            {
+              "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+              "clears_blockers": [
+                "medium_structural_models_current_below_required:2/5"
+              ],
+              "current_candidate_case_count": 2,
+              "evidence_artifacts": [
+                "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+                "operator-attached source/license/reference/normalization rows for each added case"
+              ],
+              "id": "select_additional_medium_model_cases",
+              "owner": "benchmark_operator",
+              "remaining_case_count": 3,
+              "required_candidate_case_count": 5,
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
+              "clears_blockers": [
+                "license_review_pending"
+              ],
+              "evidence_artifacts": [
+                "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json"
+              ],
+              "id": "complete_product_legal_license_review",
+              "owner": "product_legal",
+              "validation_commands": [
+                "python3 scripts/build_phase3_opensees_source_license_receipt.py --check",
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
+              "action": "Attach reference outputs or approved REVIEW baselines for the five selected medium structural models.",
+              "clears_blockers": [
+                "reference_outputs_missing"
+              ],
+              "evidence_artifacts": [
+                "OPERATOR_ATTACHED_REFERENCE_OUTPUTS",
+                "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256_PER_CASE"
+              ],
+              "id": "attach_medium_reference_outputs",
+              "owner": "benchmark_operator",
+              "remaining_case_count": 5,
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
+              "action": "Attach one validated medium normalization receipt per selected case, including canonical units, coordinate transforms, and node/member mapping coverage.",
+              "clears_blockers": [
+                "normalization_receipts_missing"
+              ],
+              "evidence_artifacts": [
+                "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
+              ],
+              "id": "record_medium_canonical_normalization",
+              "minimum_mapping_coverage": 0.99,
+              "owner": "benchmark_operator",
+              "remaining_case_count": 5,
+              "schema_version_required": "phase3-medium-normalization-receipt.v1",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
+              "action": "Run the medium scorecard receipt command for each selected case and retain receipt, result, and validation report artifacts.",
+              "clears_blockers": [
+                "opensees_medium_scorecard_execution_missing"
+              ],
+              "id": "run_medium_scorecard_receipts",
+              "owner": "benchmark_operator",
+              "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
+              "remaining_case_count": 5,
+              "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "accepted_decisions": [
+                "PASS",
+                "APPROVED_REVIEW"
+              ],
+              "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+              "clears_blockers": [
+                "medium_model_pass_or_review_missing"
+              ],
+              "id": "attach_medium_pass_or_approved_review_decisions",
+              "owner": "benchmark_reviewer",
+              "remaining_case_count": 5,
+              "validation_commands": [
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            }
+          ],
+          "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+          "status": "blocked",
+          "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=4/9",
+          "validation_command_count": 4,
+          "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+            "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check",
+            "python3 scripts/build_product_readiness_snapshot.py --check"
+          ]
+        }
+      ],
       "upstream_intake_artifact": "",
       "upstream_intake_blocker_id_count": 0,
       "upstream_intake_blocker_ids": [],
       "upstream_intake_contract_pass": false,
       "upstream_intake_status": "",
-      "verification_command_count": 3,
+      "upstream_validation_command_count": 4,
+      "upstream_validation_commands": [
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+        "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check"
+      ],
+      "verification_command_count": 4,
       "verification_commands": [
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
-        "python3 scripts/build_developer_preview_rc_status.py --check"
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check"
       ]
     },
     {
@@ -241,6 +924,12 @@
         "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
         "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json"
       ],
+      "evidence_refresh_command_count": 3,
+      "evidence_refresh_commands": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --out implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
+        "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+        "python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+      ],
       "gate": "linux_windows_reproducibility_confirmed",
       "gate_id": "linux_windows_reproducibility_confirmed",
       "human_observation_evidence_policy": {},
@@ -249,6 +938,63 @@
       ],
       "owner": "release_reproducibility_owner",
       "owner_action": "Attach a Windows platform replay receipt from the same tracked source state, with platform metadata, commands, return codes, and stable output checksums matching the Linux replay contract.",
+      "owner_unblock_plan": [
+        {
+          "forbidden_shortcuts": [
+            "do_not_copy_linux_receipt_as_windows_receipt",
+            "do_not_set_contract_pass_true_without_command_return_code_zero",
+            "do_not_omit_stable_artifact_checksums",
+            "do_not_attach_dirty_worktree_receipt"
+          ],
+          "minimum_evidence": [
+            "receipt exists at the required artifact path",
+            "receipt platform matches the required platform",
+            "platform_identity records platform, OS, Python, replay environment, receipt origin, and source commit",
+            "contract_pass=true only after replay commands return zero",
+            "working_tree_clean=true and local_dirty_inputs=[]",
+            "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
+          ],
+          "platform": "windows",
+          "required_artifact": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+          "required_replay_commands": [
+            {
+              "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+              "return_code": 0
+            },
+            {
+              "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+              "return_code": 0
+            }
+          ],
+          "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+          "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+          "slot_id": "attach_windows_platform_replay_receipt",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
+          "validation_commands_after_attachment": [
+            "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check"
+          ]
+        },
+        {
+          "minimum_evidence": [
+            "phase6_linux_windows_parity_status.json contract_pass=true",
+            "developer_preview_rc_status no longer blocks linux_windows_reproducibility_confirmed",
+            "product_readiness_snapshot remains semantically consistent"
+          ],
+          "slot_id": "rerun_linux_windows_parity_and_dp_rc_checks",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
+          "validation_commands": [
+            "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check",
+            "python3 scripts/build_product_readiness_snapshot.py --check"
+          ]
+        }
+      ],
+      "owner_unblock_plan_count": 2,
+      "owner_unblock_slot_ids": [
+        "attach_windows_platform_replay_receipt",
+        "rerun_linux_windows_parity_and_dp_rc_checks"
+      ],
       "prohibited_substitutes": [
         "linux_only_replay_copied_as_windows_parity",
         "git_clean_clone_receipt_counted_twice",
@@ -268,15 +1014,201 @@
       ],
       "required_owner_evidence_count": 5,
       "status": "blocked",
+      "upstream_handoff_artifact_count": 1,
+      "upstream_handoff_artifacts": [
+        "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json"
+      ],
+      "upstream_handoff_source_count": 1,
+      "upstream_handoff_sources": [
+        {
+          "artifact": "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
+          "blocker_count": 1,
+          "blockers": [
+            "platform_replay_receipt_missing:windows"
+          ],
+          "contract_pass": false,
+          "gate_unblock_plan": [
+            {
+              "forbidden_shortcuts": [
+                "do_not_copy_linux_receipt_as_windows_receipt",
+                "do_not_set_contract_pass_true_without_command_return_code_zero",
+                "do_not_omit_stable_artifact_checksums",
+                "do_not_attach_dirty_worktree_receipt"
+              ],
+              "minimum_evidence": [
+                "receipt exists at the required artifact path",
+                "receipt platform matches the required platform",
+                "platform_identity records platform, OS, Python, replay environment, receipt origin, and source commit",
+                "contract_pass=true only after replay commands return zero",
+                "working_tree_clean=true and local_dirty_inputs=[]",
+                "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
+              ],
+              "platform": "windows",
+              "required_artifact": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+              "required_replay_commands": [
+                {
+                  "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+                  "return_code": 0
+                },
+                {
+                  "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+                  "return_code": 0
+                }
+              ],
+              "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+              "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+              "slot_id": "attach_windows_platform_replay_receipt",
+              "validation_commands_after_attachment": [
+                "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "minimum_evidence": [
+                "phase6_linux_windows_parity_status.json contract_pass=true",
+                "developer_preview_rc_status no longer blocks linux_windows_reproducibility_confirmed",
+                "product_readiness_snapshot remains semantically consistent"
+              ],
+              "slot_id": "rerun_linux_windows_parity_and_dp_rc_checks",
+              "validation_commands": [
+                "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check",
+                "python3 scripts/build_product_readiness_snapshot.py --check"
+              ]
+            }
+          ],
+          "gate_unblock_plan_count": 2,
+          "missing_evidence_breakdown": [],
+          "missing_evidence_count": 0,
+          "operator_next_action_count": 2,
+          "operator_next_actions": [
+            {
+              "forbidden_shortcuts": [
+                "do_not_copy_linux_receipt_as_windows_receipt",
+                "do_not_set_contract_pass_true_without_command_return_code_zero",
+                "do_not_omit_stable_artifact_checksums",
+                "do_not_attach_dirty_worktree_receipt"
+              ],
+              "minimum_evidence": [
+                "receipt exists at the required artifact path",
+                "receipt platform matches the required platform",
+                "platform_identity records platform, OS, Python, replay environment, receipt origin, and source commit",
+                "contract_pass=true only after replay commands return zero",
+                "working_tree_clean=true and local_dirty_inputs=[]",
+                "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
+              ],
+              "platform": "windows",
+              "required_artifact": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+              "required_replay_commands": [
+                {
+                  "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+                  "return_code": 0
+                },
+                {
+                  "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+                  "return_code": 0
+                }
+              ],
+              "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+              "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+              "slot_id": "attach_windows_platform_replay_receipt",
+              "validation_commands_after_attachment": [
+                "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "minimum_evidence": [
+                "phase6_linux_windows_parity_status.json contract_pass=true",
+                "developer_preview_rc_status no longer blocks linux_windows_reproducibility_confirmed",
+                "product_readiness_snapshot remains semantically consistent"
+              ],
+              "slot_id": "rerun_linux_windows_parity_and_dp_rc_checks",
+              "validation_commands": [
+                "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check",
+                "python3 scripts/build_product_readiness_snapshot.py --check"
+              ]
+            }
+          ],
+          "present": true,
+          "recommended_next_action_count": 2,
+          "recommended_next_actions": [
+            {
+              "forbidden_shortcuts": [
+                "do_not_copy_linux_receipt_as_windows_receipt",
+                "do_not_set_contract_pass_true_without_command_return_code_zero",
+                "do_not_omit_stable_artifact_checksums",
+                "do_not_attach_dirty_worktree_receipt"
+              ],
+              "minimum_evidence": [
+                "receipt exists at the required artifact path",
+                "receipt platform matches the required platform",
+                "platform_identity records platform, OS, Python, replay environment, receipt origin, and source commit",
+                "contract_pass=true only after replay commands return zero",
+                "working_tree_clean=true and local_dirty_inputs=[]",
+                "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle"
+              ],
+              "platform": "windows",
+              "required_artifact": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+              "required_replay_commands": [
+                {
+                  "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+                  "return_code": 0
+                },
+                {
+                  "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+                  "return_code": 0
+                }
+              ],
+              "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+              "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+              "slot_id": "attach_windows_platform_replay_receipt",
+              "validation_commands_after_attachment": [
+                "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "minimum_evidence": [
+                "phase6_linux_windows_parity_status.json contract_pass=true",
+                "developer_preview_rc_status no longer blocks linux_windows_reproducibility_confirmed",
+                "product_readiness_snapshot remains semantically consistent"
+              ],
+              "slot_id": "rerun_linux_windows_parity_and_dp_rc_checks",
+              "validation_commands": [
+                "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check",
+                "python3 scripts/build_product_readiness_snapshot.py --check"
+              ]
+            }
+          ],
+          "status": "blocked",
+          "summary_line": "Phase 6 Linux/Windows parity: BLOCKED | receipts=1/2 | missing=windows",
+          "validation_command_count": 3,
+          "validation_commands": [
+            "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check",
+            "python3 scripts/build_product_readiness_snapshot.py --check"
+          ]
+        }
+      ],
       "upstream_intake_artifact": "",
       "upstream_intake_blocker_id_count": 0,
       "upstream_intake_blocker_ids": [],
       "upstream_intake_contract_pass": false,
       "upstream_intake_status": "",
-      "verification_command_count": 2,
+      "upstream_validation_command_count": 3,
+      "upstream_validation_commands": [
+        "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check"
+      ],
+      "verification_command_count": 3,
       "verification_commands": [
         "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
-        "python3 scripts/build_developer_preview_rc_status.py --check"
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_product_readiness_snapshot.py --check"
       ]
     },
     {
@@ -421,6 +1353,14 @@
         "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
       ],
+      "evidence_refresh_command_count": 5,
+      "evidence_refresh_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+        "python3 scripts/build_phase6_ux_observation_status.py --out implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+        "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+        "python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+      ],
       "gate": "new_user_core_workflow_observation_passed",
       "gate_id": "new_user_core_workflow_observation_passed",
       "human_observation_evidence_policy": {
@@ -445,6 +1385,97 @@
       ],
       "owner": "ux_research_owner",
       "owner_action": "Attach a real human new-user observation record for the five-step sample workflow with timezone-aware timestamps, completion minutes <= 30, blocker_count=0, evidence reference, and accepted decision.",
+      "owner_unblock_plan": [
+        {
+          "minimum_evidence": [
+            "participant_ref is a stable anonymized participant reference",
+            "participant_role is new_user, first_time_user, or pilot_user",
+            "new_to_product=true",
+            "observer is a human observer or UX research owner",
+            "contract_pass=true in the observation record"
+          ],
+          "required_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
+          "slot_id": "attach_observation_record",
+          "source_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+          "template_artifact": "docs/templates/ux_new_user_observation.template.json"
+        },
+        {
+          "minimum_evidence": [
+            "Import pass",
+            "Model Health pass",
+            "Analysis Setup pass",
+            "Run & Monitor pass",
+            "Compare & Report pass"
+          ],
+          "required_workflow_steps": [
+            {
+              "id": "import",
+              "label": "Import"
+            },
+            {
+              "id": "model_health",
+              "label": "Model Health"
+            },
+            {
+              "id": "analysis_setup",
+              "label": "Analysis Setup"
+            },
+            {
+              "id": "run_monitor",
+              "label": "Run & Monitor"
+            },
+            {
+              "id": "compare_report",
+              "label": "Compare & Report"
+            }
+          ],
+          "slot_id": "observe_required_workflow_steps",
+          "source_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
+        },
+        {
+          "minimum_evidence": [
+            "started_at_utc is timezone-aware",
+            "completed_at_utc is timezone-aware and not before start",
+            "completion_minutes <= 30.0",
+            "declared completion minutes matches elapsed minutes within tolerance"
+          ],
+          "slot_id": "prove_30_minute_timing",
+          "source_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
+        },
+        {
+          "minimum_evidence": [
+            "evidence_ref is a ticket/jira/ux/user-study reference, https URL, or existing local evidence path",
+            "evidence_ref is not the observation JSON itself",
+            "evidence_ref is not docs/templates or a .template artifact",
+            "evidence_ref is not a generated UX/PM/DP/readiness gate or automated browser-rehearsal artifact",
+            "approval_decision is accepted, approved, pass, signed, or approved_for_release"
+          ],
+          "slot_id": "attach_separate_evidence_reference",
+          "source_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
+        },
+        {
+          "minimum_evidence": [
+            "ux_new_user_observation_report.json contract_pass=true",
+            "ux_new_user_observation_intake_packet.json contract_pass=true",
+            "developer_preview_rc_status no longer blocks new_user_core_workflow_observation_passed"
+          ],
+          "slot_id": "regenerate_release_gate_evidence",
+          "source_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+          "validation_commands": [
+            "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+          ]
+        }
+      ],
+      "owner_unblock_plan_count": 5,
+      "owner_unblock_slot_ids": [
+        "attach_observation_record",
+        "observe_required_workflow_steps",
+        "prove_30_minute_timing",
+        "attach_separate_evidence_reference",
+        "regenerate_release_gate_evidence"
+      ],
       "prohibited_substitutes": [
         "automated_browser_smoke_without_human_observation",
         "template_ux_observation_json",
@@ -475,6 +1506,117 @@
       ],
       "required_owner_evidence_count": 8,
       "status": "blocked",
+      "upstream_handoff_artifact_count": 1,
+      "upstream_handoff_artifacts": [
+        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
+      ],
+      "upstream_handoff_source_count": 1,
+      "upstream_handoff_sources": [
+        {
+          "artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+          "blocker_count": 0,
+          "blockers": [],
+          "contract_pass": false,
+          "gate_unblock_plan": [
+            {
+              "minimum_evidence": [
+                "participant_ref is a stable anonymized participant reference",
+                "participant_role is new_user, first_time_user, or pilot_user",
+                "new_to_product=true",
+                "observer is a human observer or UX research owner",
+                "contract_pass=true in the observation record"
+              ],
+              "required_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
+              "slot_id": "attach_observation_record",
+              "template_artifact": "docs/templates/ux_new_user_observation.template.json"
+            },
+            {
+              "minimum_evidence": [
+                "Import pass",
+                "Model Health pass",
+                "Analysis Setup pass",
+                "Run & Monitor pass",
+                "Compare & Report pass"
+              ],
+              "required_workflow_steps": [
+                {
+                  "id": "import",
+                  "label": "Import"
+                },
+                {
+                  "id": "model_health",
+                  "label": "Model Health"
+                },
+                {
+                  "id": "analysis_setup",
+                  "label": "Analysis Setup"
+                },
+                {
+                  "id": "run_monitor",
+                  "label": "Run & Monitor"
+                },
+                {
+                  "id": "compare_report",
+                  "label": "Compare & Report"
+                }
+              ],
+              "slot_id": "observe_required_workflow_steps"
+            },
+            {
+              "minimum_evidence": [
+                "started_at_utc is timezone-aware",
+                "completed_at_utc is timezone-aware and not before start",
+                "completion_minutes <= 30.0",
+                "declared completion minutes matches elapsed minutes within tolerance"
+              ],
+              "slot_id": "prove_30_minute_timing"
+            },
+            {
+              "minimum_evidence": [
+                "evidence_ref is a ticket/jira/ux/user-study reference, https URL, or existing local evidence path",
+                "evidence_ref is not the observation JSON itself",
+                "evidence_ref is not docs/templates or a .template artifact",
+                "evidence_ref is not a generated UX/PM/DP/readiness gate or automated browser-rehearsal artifact",
+                "approval_decision is accepted, approved, pass, signed, or approved_for_release"
+              ],
+              "slot_id": "attach_separate_evidence_reference"
+            },
+            {
+              "minimum_evidence": [
+                "ux_new_user_observation_report.json contract_pass=true",
+                "ux_new_user_observation_intake_packet.json contract_pass=true",
+                "developer_preview_rc_status no longer blocks new_user_core_workflow_observation_passed"
+              ],
+              "slot_id": "regenerate_release_gate_evidence",
+              "validation_commands": [
+                "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+                "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+                "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+              ]
+            }
+          ],
+          "gate_unblock_plan_count": 5,
+          "missing_evidence_breakdown": [],
+          "missing_evidence_count": 0,
+          "operator_next_action_count": 0,
+          "operator_next_actions": [],
+          "present": true,
+          "recommended_next_action_count": 0,
+          "recommended_next_actions": [],
+          "status": "blocked",
+          "summary_line": "UX new-user observation intake: BLOCKED | fields=0/24 | blockers=12",
+          "validation_command_count": 7,
+          "validation_commands": [
+            "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "python3 scripts/build_phase6_ux_observation_status.py --out implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+            "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+            "python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+          ]
+        }
+      ],
       "upstream_intake_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
       "upstream_intake_blocker_id_count": 27,
       "upstream_intake_blocker_ids": [
@@ -508,16 +1650,32 @@
       ],
       "upstream_intake_contract_pass": false,
       "upstream_intake_status": "blocked",
-      "verification_command_count": 4,
+      "upstream_validation_command_count": 7,
+      "upstream_validation_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+        "python3 scripts/build_phase6_ux_observation_status.py --out implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+        "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+      ],
+      "verification_command_count": 9,
       "verification_commands": [
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "python3 scripts/build_phase6_ux_observation_status.py --check",
-        "python3 scripts/build_developer_preview_rc_status.py --check"
+        "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_phase6_ux_observation_status.py --out implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+        "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
   ],
   "owner_review_required": true,
+  "owner_unblock_plan_count": 14,
   "ready_gate_items": [
     "analytic_component_benchmark_all_pass",
     "large_models_crash_oom_free",
@@ -531,7 +1689,7 @@
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "fb3778ef26814b0d22c5790bc6c4acaae79b9e8e",
+  "source_commit_sha": "afb4292fbc6ed337fc78bd624fb445692a32bb1a",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
 }
