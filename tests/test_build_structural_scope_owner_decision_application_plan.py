@@ -1017,9 +1017,10 @@ def test_application_plan_writes_release_surface_first_template(
     next_markdown = next_template_md.read_text(encoding="utf-8")
     release_markdown = release_template_md.read_text(encoding="utf-8")
     assert "Release Surface First Batch" in release_markdown
-    assert "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository" in (
-        next_markdown
-    )
+    assert (
+        "`external_archive_reference`: required when `owner_decision` is "
+        "`extract_to_molecular_or_science_repository`"
+    ) in next_markdown
     assert "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception" not in (
         next_markdown
     )

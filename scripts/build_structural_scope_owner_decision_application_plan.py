@@ -1361,7 +1361,17 @@ def _conditional_required_markdown_lines(payload: dict[str, Any]) -> list[str]:
     ]
     if not rows:
         return ["- conditional required fields: none"]
-    return [f"- `{item}`" for item in rows]
+    return [_conditional_required_markdown_line(item) for item in rows]
+
+
+def _conditional_required_markdown_line(item: str) -> str:
+    field, marker, owner_decision = item.partition(" when owner_decision=")
+    if marker and field and owner_decision:
+        return (
+            f"- `{field}`: required when `owner_decision` is "
+            f"`{owner_decision}`"
+        )
+    return f"- `{item}`"
 
 
 def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> str:
