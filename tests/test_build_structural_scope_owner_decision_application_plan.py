@@ -419,6 +419,43 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
     ]
     assert "not an owner decision" in action_packet["claim_boundary"]
     assert "does not delete or extract files" in action_packet["claim_boundary"]
+    operator_sequence = payload["release_surface_first_operator_sequence"]
+    assert operator_sequence["schema_version"] == (
+        "structural-scope-release-surface-first-operator-sequence.v1"
+    )
+    assert operator_sequence["status"] == "waiting_for_owner_decision"
+    assert payload["release_surface_first_operator_sequence_status"] == (
+        "waiting_for_owner_decision"
+    )
+    assert operator_sequence["current_step_id"] == (
+        "fill_release_surface_first_owner_decisions"
+    )
+    assert payload["release_surface_first_current_step_id"] == (
+        "fill_release_surface_first_owner_decisions"
+    )
+    assert operator_sequence["pending_decision_count"] == 1
+    assert operator_sequence["ready_for_manual_cleanup_application"] is False
+    assert operator_sequence["blockers"] == intake["blockers"]
+    assert operator_sequence["step_count"] == 7
+    sequence_steps = {
+        step["step_id"]: step for step in operator_sequence["steps"]
+    }
+    assert sequence_steps["fill_release_surface_first_owner_decisions"][
+        "runnable_now"
+    ] is True
+    assert sequence_steps["fill_release_surface_first_owner_decisions"][
+        "status"
+    ] == "waiting_for_owner_input"
+    assert sequence_steps["validate_filled_owner_decisions"][
+        "runnable_now"
+    ] is False
+    assert sequence_steps["manual_cleanup_application"]["runnable_now"] is False
+    assert (
+        "--owner-decisions <filled-release-surface-first-owner-decisions.csv>"
+        in sequence_steps["validate_filled_owner_decisions"][
+            "validation_commands"
+        ][0]
+    )
     assert payload["next_owner_review_batch"]["batch_id"] == "release_surface_first"
     assert payload["next_owner_review_batch"]["priority"] == 1
     assert payload["next_owner_review_batch"]["paths"] == [release_surface_path]
@@ -888,6 +925,19 @@ def test_application_plan_surfaces_partial_release_surface_cleanup_batch(
     assert payload["release_surface_first_batch_cleanup_application_preflight"][
         "cleanup_path_count"
     ] == 1
+    operator_sequence = payload["release_surface_first_operator_sequence"]
+    assert operator_sequence["status"] == "ready_for_manual_cleanup_application"
+    assert operator_sequence["current_step_id"] == "manual_cleanup_application"
+    assert operator_sequence["ready_for_manual_cleanup_application"] is True
+    assert operator_sequence["blockers"] == []
+    sequence_steps = {
+        step["step_id"]: step for step in operator_sequence["steps"]
+    }
+    assert sequence_steps["fill_release_surface_first_owner_decisions"][
+        "status"
+    ] == "complete"
+    assert sequence_steps["manual_cleanup_preflight"]["runnable_now"] is True
+    assert sequence_steps["manual_cleanup_application"]["runnable_now"] is True
     release_template = payload["release_surface_first_batch_decision_template"]
     assert release_template["expected_path_count"] == 1
     assert release_template["decision_pending_count"] == 0

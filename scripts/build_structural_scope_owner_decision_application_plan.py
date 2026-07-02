@@ -1067,6 +1067,159 @@ def _release_surface_first_owner_action_packet(
     }
 
 
+def _release_surface_first_operator_sequence(
+    *,
+    action_packet: dict[str, Any],
+    intake: dict[str, Any],
+    cleanup_preflight: dict[str, Any],
+) -> dict[str, Any]:
+    if not action_packet:
+        return {}
+    submission = _as_dict(action_packet.get("owner_decision_submission_options"))
+    template_paths = _as_dict(action_packet.get("template_paths"))
+    pending_decision_count = int(action_packet.get("pending_decision_count", 0) or 0)
+    intake_ready = bool(intake.get("ready_for_manual_cleanup_application"))
+    preflight_ready = bool(cleanup_preflight.get("ready"))
+    ready_for_manual_cleanup = bool(intake_ready and preflight_ready)
+    blockers = _deduped(
+        [
+            *[str(item) for item in _as_list(intake.get("blockers"))],
+            *[str(item) for item in _as_list(cleanup_preflight.get("blockers"))],
+        ]
+    )
+    if ready_for_manual_cleanup:
+        status = "ready_for_manual_cleanup_application"
+        current_step_id = "manual_cleanup_application"
+    elif pending_decision_count:
+        status = "waiting_for_owner_decision"
+        current_step_id = "fill_release_surface_first_owner_decisions"
+    else:
+        status = "blocked_release_surface_first_sequence"
+        current_step_id = "resolve_release_surface_first_blockers"
+    owner_input_waiting = bool(pending_decision_count)
+    steps = [
+        {
+            "step_id": "fill_release_surface_first_owner_decisions",
+            "owner": "scope_owner",
+            "status": "waiting_for_owner_input" if owner_input_waiting else "complete",
+            "runnable_now": True,
+            "required_artifacts": [
+                value for value in [template_paths.get("json"), template_paths.get("csv")] if value
+            ],
+            "acceptance": [
+                "all release_surface_first rows have owner_decision",
+                "owner_identity, owner_role, decision_timestamp_utc, and evidence_reference are populated",
+                "retain_quarantined_with_signed_owner_exception is not used for release-surface paths",
+            ],
+        },
+        {
+            "step_id": "validate_filled_owner_decisions",
+            "owner": "release_engineering",
+            "status": "waiting_on_owner_input" if owner_input_waiting else "ready",
+            "runnable_now": not owner_input_waiting,
+            "validation_commands": [
+                submission.get("validate_filled_csv_command", ""),
+                submission.get("validate_canonical_owner_decisions_command", ""),
+            ],
+            "acceptance": [
+                "release_surface_first_batch_decision_intake.ready_for_manual_cleanup_application == true",
+                "release_surface_first_batch_blockers is empty",
+            ],
+        },
+        {
+            "step_id": "merge_filled_batch_to_candidate",
+            "owner": "release_engineering",
+            "status": "waiting_on_owner_input" if owner_input_waiting else "ready",
+            "runnable_now": not owner_input_waiting,
+            "validation_commands": [
+                submission.get("merge_and_validate_filled_csv_command", ""),
+                submission.get("validate_merged_candidate_command", ""),
+            ],
+            "acceptance": [
+                "candidate owner decisions validate without release-surface blockers",
+                "candidate merge report remains non-mutating",
+            ],
+        },
+        {
+            "step_id": "manual_cleanup_preflight",
+            "owner": "release_engineering",
+            "status": "ready" if ready_for_manual_cleanup else "waiting_on_prior_steps",
+            "runnable_now": ready_for_manual_cleanup,
+            "validation_commands": [
+                "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked"
+            ],
+            "acceptance": [
+                "cleanup_application_preflight.ready == true",
+                "destructive_commands_enabled == false",
+                "human confirmation is still required before git rm",
+            ],
+        },
+        {
+            "step_id": "manual_cleanup_application",
+            "owner": "human_scope_owner",
+            "status": "ready" if ready_for_manual_cleanup else "waiting_on_prior_steps",
+            "runnable_now": ready_for_manual_cleanup,
+            "required_action": "delete_or_extract_release_surface_paths_after_owner_confirmation",
+            "acceptance": [
+                "delete decisions are removed from the structural repository",
+                "extract decisions have external archive/reference captured before removal",
+            ],
+        },
+        {
+            "step_id": "refresh_scope_receipts",
+            "owner": "release_engineering",
+            "status": "waiting_on_manual_cleanup",
+            "runnable_now": False,
+            "validation_commands": [
+                "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+                "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+            ],
+            "acceptance": [
+                "release-surface paths no longer block structural scope cleanup",
+                "quarantine and owner-review receipts match the post-cleanup source state",
+            ],
+        },
+        {
+            "step_id": "refresh_readiness_snapshot",
+            "owner": "release_engineering",
+            "status": "waiting_on_refreshed_scope_receipts",
+            "runnable_now": False,
+            "validation_commands": [
+                "python3 scripts/build_product_readiness_snapshot.py --check",
+                "python3 scripts/build_structural_product_development_roadmap.py",
+            ],
+            "acceptance": [
+                "product snapshot structural_scope release-surface blocker is removed only after refreshed receipts prove it",
+                "roadmap primary blocker is recomputed from current evidence",
+            ],
+        },
+    ]
+    for step in steps:
+        if "validation_commands" in step:
+            step["validation_commands"] = [
+                str(command)
+                for command in step["validation_commands"]
+                if str(command)
+            ]
+    return {
+        "schema_version": "structural-scope-release-surface-first-operator-sequence.v1",
+        "batch_id": "release_surface_first",
+        "status": status,
+        "current_step_id": current_step_id,
+        "ready_for_manual_cleanup_application": ready_for_manual_cleanup,
+        "pending_decision_count": pending_decision_count,
+        "blockers": blockers,
+        "step_count": len(steps),
+        "steps": steps,
+        "claim_boundary": (
+            "This sequence is an operator handoff only. It does not record owner "
+            "decisions, delete files, extract files, or close structural scope "
+            "cleanup without refreshed post-decision receipts."
+        ),
+    }
+
+
 def _status_from_packet(packet: dict[str, Any]) -> str:
     if not packet.get("contract_pass"):
         return "blocked_scope_cleanup"
@@ -1189,6 +1342,13 @@ def build_application_plan(
         _release_surface_first_owner_action_packet(
             template=release_surface_first_batch_decision_template,
             intake=release_surface_first_batch_decision_intake,
+        )
+    )
+    release_surface_first_operator_sequence = (
+        _release_surface_first_operator_sequence(
+            action_packet=release_surface_first_owner_action_packet,
+            intake=release_surface_first_batch_decision_intake,
+            cleanup_preflight=release_surface_first_batch_cleanup_application_preflight,
         )
     )
     application_blockers = _deduped(
@@ -1354,6 +1514,15 @@ def build_application_plan(
         ),
         "release_surface_first_owner_action_packet": (
             release_surface_first_owner_action_packet
+        ),
+        "release_surface_first_operator_sequence": (
+            release_surface_first_operator_sequence
+        ),
+        "release_surface_first_operator_sequence_status": _text(
+            release_surface_first_operator_sequence.get("status")
+        ),
+        "release_surface_first_current_step_id": _text(
+            release_surface_first_operator_sequence.get("current_step_id")
         ),
         "release_surface_first_batch_template_paths": _as_dict(
             release_surface_first_batch_decision_template.get(
@@ -1547,6 +1716,34 @@ def _markdown(payload: dict[str, Any]) -> str:
                 f"`{row.get('origin_wave', '')}` | "
                 f"`{first_added}` | "
                 f"`{row['recommended_owner_decision_primary']}` |"
+            )
+        lines.append("")
+    operator_sequence = payload.get("release_surface_first_operator_sequence")
+    operator_sequence = (
+        operator_sequence if isinstance(operator_sequence, dict) else {}
+    )
+    if operator_sequence:
+        lines.extend(["## Release Surface First Operator Sequence", ""])
+        lines.append(f"- `status`: `{operator_sequence.get('status')}`")
+        lines.append(
+            "- `current_step_id`: "
+            f"`{operator_sequence.get('current_step_id')}`"
+        )
+        lines.append(
+            "- `ready_for_manual_cleanup_application`: "
+            f"`{operator_sequence.get('ready_for_manual_cleanup_application')}`"
+        )
+        if operator_sequence.get("blockers"):
+            lines.extend(f"- `{item}`" for item in operator_sequence["blockers"])
+        else:
+            lines.append("- blockers: none")
+        lines.extend(["", "| Step | Status | Runnable |", "|---|---|---:|"])
+        for step in operator_sequence.get("steps", []):
+            lines.append(
+                "| "
+                f"`{step.get('step_id')}` | "
+                f"`{step.get('status')}` | "
+                f"`{step.get('runnable_now')}` |"
             )
         lines.append("")
     next_batch_template = payload.get("next_owner_review_batch_decision_template")
