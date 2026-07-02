@@ -1,7 +1,7 @@
 # Performance Bottleneck Map
 
 - `summary`: `Performance profiling: PASS | ndtha=106.34s(solver=92.93,state=7.81,iface=5.12,halo=0.47) | ssi_contact=160steps/1.01iters/newton=0/zero_gap_skip=1.00/pairs=290:354/sweep=4/4 | moving_load=warm=0.002/0.002s,steady=0.002/0.002s,scale=0.619/1.246/2.505s | gpu_host_ops=2 unavoidable/0 optimizable | sprint=3(ndtha_partitioned_runtime,ssi_contact_convergence_path,moving_load_kernel_warmup_observability)`
-- `generated_at`: `2026-07-02T12:31:54.329822+00:00`
+- `generated_at`: `2026-07-02T17:31:13.818269+00:00`
 
 ## Baseline
 
