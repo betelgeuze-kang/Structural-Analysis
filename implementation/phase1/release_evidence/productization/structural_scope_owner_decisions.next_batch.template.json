@@ -99,6 +99,7 @@
     "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface"
   ],
   "post_batch_verification": [
+    "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
     "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
     "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
     "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
@@ -108,7 +109,7 @@
     "owner_decision_required": true,
     "preconditions": [
       "owner fills matching decision rows in structural_scope_owner_decisions.json or CSV",
-      "owner_decision_validation_pass=true for these rows",
+      "release_surface_first_batch_application_ready=true for this batch",
       "human confirms the batch cleanup scope"
     ],
     "primary_delete_git_rm_args": [

@@ -30,6 +30,14 @@
 - `primary_delete_path_count`: `3`
 - `primary_extract_path_count`: `0`
 
+## Post Batch Verification
+
+- `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked`
+- `python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked`
+- `python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template`
+- `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions`
+- `python3 scripts/build_product_readiness_snapshot.py --check`
+
 ## Claim Boundary
 
 This is a fixed release_surface_first fill-in template and cleanup preview only. It is not an owner decision, does not delete files, and cannot close scope cleanup without recorded owner evidence and a refreshed post-decision structural scope audit.

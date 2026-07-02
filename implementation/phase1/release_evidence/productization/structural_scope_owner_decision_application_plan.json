@@ -82,12 +82,12 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T03:05:17.619801+00:00",
+  "generated_at": "2026-07-02T03:13:46.136362+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:56eee33ad18d1566d238a3a8d2af4e729d59b04e958a0cb562515f19472152b8",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:826c36a8adcd4325d2d4389800e65dddf2739a13c4273d69cf50233869f4e7aa",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:bbbef204ef8bf3eaffa8e57c34587b54a25c1808d93949fdd2b3323517078f85",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:bbfea80d51617cb1d231eca95d4129507a784b0f9d3bb1d95315f992b70ea68d",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:4e87ae50c4850edd04dd7be8c2740eff518a81c7630db18ee35e15094e7bc497"
   },
   "next_actions": [
@@ -221,6 +221,7 @@
       "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface"
     ],
     "post_batch_verification": [
+      "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
       "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
       "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
       "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
@@ -230,7 +231,7 @@
       "owner_decision_required": true,
       "preconditions": [
         "owner fills matching decision rows in structural_scope_owner_decisions.json or CSV",
-        "owner_decision_validation_pass=true for these rows",
+        "release_surface_first_batch_application_ready=true for this batch",
         "human confirms the batch cleanup scope"
       ],
       "primary_delete_git_rm_args": [
@@ -3560,6 +3561,7 @@
       "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface"
     ],
     "post_batch_verification": [
+      "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
       "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
       "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
       "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
@@ -3569,7 +3571,7 @@
       "owner_decision_required": true,
       "preconditions": [
         "owner fills all release_surface_first rows in structural_scope_owner_decisions.json or CSV",
-        "owner_decision_validation_pass=true for these release surface rows",
+        "release_surface_first_batch_application_ready=true",
         "human confirms release-surface cleanup scope before any git rm"
       ],
       "primary_delete_git_rm_args": [
@@ -3618,7 +3620,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "bdfb99244fc827444b9819527b9d95e60c9f8990",
+  "source_commit_sha": "f6255c16a29e738ba95f5208f92dc00a16330745",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
