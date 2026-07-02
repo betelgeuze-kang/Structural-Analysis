@@ -77,7 +77,11 @@
       ],
       "priority": 2,
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
-      "reference_role": "implementation_runtime_or_manifest_reference"
+      "reference_role": "implementation_runtime_or_manifest_reference",
+      "release_freshness_source_boundary_path_count": 1,
+      "release_freshness_source_boundary_paths": [
+        "implementation/phase1/README.md"
+      ]
     },
     {
       "batch_id": "cleanup_refs_03_script_reference",
@@ -113,7 +117,9 @@
       ],
       "priority": 3,
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
-      "reference_role": "script_reference"
+      "reference_role": "script_reference",
+      "release_freshness_source_boundary_path_count": 0,
+      "release_freshness_source_boundary_paths": []
     },
     {
       "batch_id": "cleanup_refs_04_test_reference",
@@ -154,7 +160,9 @@
       ],
       "priority": 4,
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
-      "reference_role": "test_reference"
+      "reference_role": "test_reference",
+      "release_freshness_source_boundary_path_count": 0,
+      "release_freshness_source_boundary_paths": []
     },
     {
       "batch_id": "cleanup_refs_05_documentation_reference",
@@ -176,7 +184,11 @@
       ],
       "priority": 5,
       "recommended_cleanup_action": "rewrite_structural_docs_to_scope_boundary_only",
-      "reference_role": "documentation_reference"
+      "reference_role": "documentation_reference",
+      "release_freshness_source_boundary_path_count": 1,
+      "release_freshness_source_boundary_paths": [
+        "docs/engine-ai-and-comparison-commercialization-gaps.md"
+      ]
     },
     {
       "batch_id": "cleanup_refs_06_other_reference",
@@ -198,7 +210,11 @@
       ],
       "priority": 6,
       "recommended_cleanup_action": "remove_non_structural_scope_ignore_or_metadata_reference",
-      "reference_role": "other_reference"
+      "reference_role": "other_reference",
+      "release_freshness_source_boundary_path_count": 1,
+      "release_freshness_source_boundary_paths": [
+        ".gitignore"
+      ]
     }
   ],
   "blocking_reference_role_counts": {
@@ -211,6 +227,7 @@
   "blocking_reference_rows": [
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": true,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -230,10 +247,12 @@
       "path": ".gitignore",
       "recommended_cleanup_action": "remove_non_structural_scope_ignore_or_metadata_reference",
       "reference_role": "other_reference",
-      "reference_role_priority": 6
+      "reference_role_priority": 6,
+      "release_freshness_source_boundary": true
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": true,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -254,10 +273,12 @@
       "path": "docs/engine-ai-and-comparison-commercialization-gaps.md",
       "recommended_cleanup_action": "rewrite_structural_docs_to_scope_boundary_only",
       "reference_role": "documentation_reference",
-      "reference_role_priority": 5
+      "reference_role_priority": 5,
+      "release_freshness_source_boundary": true
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": true,
       "matched_quarantined_path_count": 8,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -290,10 +311,12 @@
       "path": "implementation/phase1/README.md",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": true
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -315,10 +338,12 @@
       "path": "implementation/phase1/branch64_microbatch_profile_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -330,10 +355,12 @@
       "path": "implementation/phase1/ci-gate-reason-codebook.md",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -351,10 +378,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -372,10 +401,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.nightly.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -393,10 +424,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.nightly.require_ndtha.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -414,10 +447,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.pr.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -435,10 +470,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.pr.require_hip.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -454,10 +491,12 @@
       "path": "implementation/phase1/ci_gate_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -469,10 +508,12 @@
       "path": "implementation/phase1/ci_gate_report.nightly.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -488,10 +529,12 @@
       "path": "implementation/phase1/ci_gate_report.nightly.require_ndtha.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -503,10 +546,12 @@
       "path": "implementation/phase1/ci_gate_report.pr.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -518,10 +563,12 @@
       "path": "implementation/phase1/ci_gate_report.pr.require_hip.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -543,10 +590,12 @@
       "path": "implementation/phase1/commercial_readiness_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -570,10 +619,12 @@
       "path": "implementation/phase1/commercialization-gap-redteam-playbook.md",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -595,10 +646,12 @@
       "path": "implementation/phase1/nightly_release_gate_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -618,10 +671,12 @@
       "path": "implementation/phase1/organize_phase1_workspace.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -643,10 +698,12 @@
       "path": "implementation/phase1/p0_core_gap_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -668,10 +725,12 @@
       "path": "implementation/phase1/p0_engine_perf_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -689,10 +748,12 @@
       "path": "implementation/phase1/phase1_ci_gate.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -708,10 +769,12 @@
       "path": "implementation/phase1/physics_branching_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -727,10 +790,12 @@
       "path": "implementation/phase1/physics_guided_branching.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -752,10 +817,12 @@
       "path": "implementation/phase1/profile_branch64_microbatch_cache.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -777,10 +844,12 @@
       "path": "implementation/phase1/profile_p0_engine_path.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -802,10 +871,12 @@
       "path": "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -827,10 +898,12 @@
       "path": "implementation/phase1/run_megastructure_commercial_readiness.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -852,10 +925,12 @@
       "path": "implementation/phase1/run_nightly_release_gate.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -877,10 +952,12 @@
       "path": "implementation/phase1/run_p0_core_gap_pipeline.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -896,10 +973,12 @@
       "path": "implementation/phase1/run_phase1_steps.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 7,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -929,10 +1008,12 @@
       "path": "implementation/phase1/run_phase1_topk_pipeline.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -954,10 +1035,12 @@
       "path": "implementation/phase1/run_scaleout_io_profile.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -977,10 +1060,12 @@
       "path": "implementation/phase1/rust_nonlinear_frame_bridge.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1000,10 +1085,12 @@
       "path": "implementation/phase1/rust_track_lf_bridge.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1025,10 +1112,12 @@
       "path": "implementation/phase1/scaleout_io_profile_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -1046,10 +1135,12 @@
       "path": "implementation/phase1/static_artifact_validation_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -1067,10 +1158,12 @@
       "path": "implementation/phase1/static_artifact_validation_report.nightly.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -1088,10 +1181,12 @@
       "path": "implementation/phase1/static_artifact_validation_report.pr.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -1109,10 +1204,12 @@
       "path": "implementation/phase1/validate_phase1_artifacts.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -1128,10 +1225,12 @@
       "path": "implementation/phase1/winning_ticket_backprop.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -1147,10 +1246,12 @@
       "path": "implementation/phase1/winning_ticket_backprop_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1172,10 +1273,12 @@
       "path": "implementation/phase1/zero_copy_real_probe.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1197,10 +1300,12 @@
       "path": "implementation/phase1/zero_copy_real_probe_report.forbidden.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1222,10 +1327,12 @@
       "path": "implementation/phase1/zero_copy_real_probe_report.required.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1247,10 +1354,12 @@
       "path": "implementation/phase1/zero_copy_real_probe_report_strict.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 22,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
@@ -1340,10 +1449,12 @@
       "path": "scripts/build_public_benchmark_operator_intake_packet.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 15,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -1415,10 +1526,12 @@
       "path": "scripts/build_public_benchmark_source_of_truth.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1438,10 +1551,12 @@
       "path": "scripts/check_repo_hygiene.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 12,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -1489,10 +1604,12 @@
       "path": "scripts/materialize_public_benchmark_harness_bundle.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 2,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
@@ -1514,10 +1631,12 @@
       "path": "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 13,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -1561,10 +1680,12 @@
       "path": "scripts/materialize_public_benchmark_phase2_from_rows.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 2,
       "matched_quarantined_paths": [
         "scripts/score_symmetry_aware_ligand_rmsd.py",
@@ -1585,10 +1706,12 @@
       "path": "scripts/materialize_public_benchmark_rmsd_scorecard.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1608,10 +1731,12 @@
       "path": "scripts/plan_source_boundary_cleanup.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -1625,10 +1750,12 @@
       "path": "scripts/validate_public_benchmark_external_receipts.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -1642,10 +1769,12 @@
       "path": "tests/test_build_goal_bottleneck_roadmap_surface.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -1660,10 +1789,12 @@
       "path": "tests/test_build_non_expert_release_briefing_report.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -1677,10 +1808,12 @@
       "path": "tests/test_build_product_capabilities_surface.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 18,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
@@ -1751,10 +1884,12 @@
       "path": "tests/test_build_public_benchmark_operator_intake_packet.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 17,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
@@ -1831,10 +1966,12 @@
       "path": "tests/test_build_public_benchmark_source_of_truth.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1854,10 +1991,12 @@
       "path": "tests/test_check_repo_hygiene.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 6,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -1893,10 +2032,12 @@
       "path": "tests/test_materialize_public_benchmark_harness_bundle.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 2,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
@@ -1918,10 +2059,12 @@
       "path": "tests/test_materialize_public_benchmark_operator_bundle_from_rows.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -1937,10 +2080,12 @@
       "path": "tests/test_materialize_public_benchmark_phase2_from_rows.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -1952,10 +2097,12 @@
       "path": "tests/test_materialize_public_benchmark_rmsd_scorecard.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1975,10 +2122,12 @@
       "path": "tests/test_plan_source_boundary_cleanup.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -1992,19 +2141,20 @@
       "path": "tests/test_validate_public_benchmark_external_receipts.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     }
   ],
   "claim_boundary": "This impact report is non-mutating. It does not approve owner decisions, delete files, or close scope cleanup. It only identifies non-quarantined tracked references that must be reviewed before PocketMD/GPCR/MD3Bead-family artifacts are deleted or extracted from the structural-analysis repository.",
   "cleanup_impact_clear": false,
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T08:58:40.813340+00:00",
+  "generated_at": "2026-07-02T09:08:17.463233+00:00",
   "governance_reference_path_count": 49,
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:e22085fff573457d46d0d9fa78facb24a84c3c18dbbd3e27df491a60c7863568",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:8c28b99117af00ab4a6f02d0ed7660320a5c375c8bfe27da4235516a99845679",
-    "scripts/build_structural_scope_cleanup_impact_report.py": "sha256:7fb910372a06e8f0ed681c769a7675cc1dc1248a5045806764e23859ef018391"
+    "scripts/build_structural_scope_cleanup_impact_report.py": "sha256:d1fd8bfbee9706948647abaebd46a52adb3ff607d5fa437682b8e75a3eca3d2c"
   },
   "next_actions": [
     "record owner delete/extract decisions for quarantined non-structural paths",
@@ -2075,7 +2225,11 @@
     ],
     "priority": 2,
     "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
-    "reference_role": "implementation_runtime_or_manifest_reference"
+    "reference_role": "implementation_runtime_or_manifest_reference",
+    "release_freshness_source_boundary_path_count": 1,
+    "release_freshness_source_boundary_paths": [
+      "implementation/phase1/README.md"
+    ]
   },
   "origin_report": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
   "owner_decision_pending_count": 86,
@@ -2094,6 +2248,7 @@
   "reference_rows": [
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": true,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2113,10 +2268,12 @@
       "path": ".gitignore",
       "recommended_cleanup_action": "remove_non_structural_scope_ignore_or_metadata_reference",
       "reference_role": "other_reference",
-      "reference_role_priority": 6
+      "reference_role_priority": 6,
+      "release_freshness_source_boundary": true
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -2133,10 +2290,12 @@
       "path": "docs/commercialization-gap-current-state.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": true,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2157,10 +2316,12 @@
       "path": "docs/engine-ai-and-comparison-commercialization-gaps.md",
       "recommended_cleanup_action": "rewrite_structural_docs_to_scope_boundary_only",
       "reference_role": "documentation_reference",
-      "reference_role_priority": 5
+      "reference_role_priority": 5,
+      "release_freshness_source_boundary": true
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -2174,10 +2335,12 @@
       "path": "docs/pm-release-gate-milestones.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": true,
       "matched_quarantined_path_count": 8,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -2210,10 +2373,12 @@
       "path": "implementation/phase1/README.md",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": true
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2235,10 +2400,12 @@
       "path": "implementation/phase1/branch64_microbatch_profile_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -2250,10 +2417,12 @@
       "path": "implementation/phase1/ci-gate-reason-codebook.md",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -2271,10 +2440,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -2292,10 +2463,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.nightly.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -2313,10 +2486,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.nightly.require_ndtha.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -2334,10 +2509,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.pr.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -2355,10 +2532,12 @@
       "path": "implementation/phase1/ci_artifact_manifest.pr.require_hip.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -2374,10 +2553,12 @@
       "path": "implementation/phase1/ci_gate_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -2389,10 +2570,12 @@
       "path": "implementation/phase1/ci_gate_report.nightly.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -2408,10 +2591,12 @@
       "path": "implementation/phase1/ci_gate_report.nightly.require_ndtha.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -2423,10 +2608,12 @@
       "path": "implementation/phase1/ci_gate_report.pr.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -2438,10 +2625,12 @@
       "path": "implementation/phase1/ci_gate_report.pr.require_hip.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2463,10 +2652,12 @@
       "path": "implementation/phase1/commercial_readiness_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2490,10 +2681,12 @@
       "path": "implementation/phase1/commercialization-gap-redteam-playbook.md",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2515,10 +2708,12 @@
       "path": "implementation/phase1/nightly_release_gate_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2538,10 +2733,12 @@
       "path": "implementation/phase1/organize_phase1_workspace.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2563,10 +2760,12 @@
       "path": "implementation/phase1/p0_core_gap_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2588,10 +2787,12 @@
       "path": "implementation/phase1/p0_engine_perf_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -2609,10 +2810,12 @@
       "path": "implementation/phase1/phase1_ci_gate.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -2628,10 +2831,12 @@
       "path": "implementation/phase1/physics_branching_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -2647,10 +2852,12 @@
       "path": "implementation/phase1/physics_guided_branching.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2672,10 +2879,12 @@
       "path": "implementation/phase1/profile_branch64_microbatch_cache.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2697,10 +2906,12 @@
       "path": "implementation/phase1/profile_p0_engine_path.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -2722,10 +2933,12 @@
       "path": "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -2754,10 +2967,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -2786,10 +3001,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -2818,10 +3035,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -2850,10 +3069,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -2882,10 +3103,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -2914,10 +3137,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -2945,10 +3170,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -2977,10 +3204,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3009,10 +3238,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3040,10 +3271,12 @@
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 67,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -3166,10 +3399,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3203,10 +3438,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -3329,10 +3566,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -3455,10 +3694,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -3581,10 +3822,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3616,10 +3859,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -3742,10 +3987,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3773,10 +4020,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3804,10 +4053,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3835,10 +4086,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3866,10 +4119,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3897,10 +4152,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3928,10 +4185,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -3959,10 +4218,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -4085,10 +4346,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -4211,10 +4474,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -4337,10 +4602,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -4463,10 +4730,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -4589,10 +4858,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -4715,10 +4986,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -4740,10 +5013,12 @@
       "path": "implementation/phase1/run_megastructure_commercial_readiness.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -4765,10 +5040,12 @@
       "path": "implementation/phase1/run_nightly_release_gate.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -4790,10 +5067,12 @@
       "path": "implementation/phase1/run_p0_core_gap_pipeline.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -4809,10 +5088,12 @@
       "path": "implementation/phase1/run_phase1_steps.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 7,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -4842,10 +5123,12 @@
       "path": "implementation/phase1/run_phase1_topk_pipeline.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -4867,10 +5150,12 @@
       "path": "implementation/phase1/run_scaleout_io_profile.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -4890,10 +5175,12 @@
       "path": "implementation/phase1/rust_nonlinear_frame_bridge.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -4913,10 +5200,12 @@
       "path": "implementation/phase1/rust_track_lf_bridge.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -4938,10 +5227,12 @@
       "path": "implementation/phase1/scaleout_io_profile_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -4959,10 +5250,12 @@
       "path": "implementation/phase1/static_artifact_validation_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -4980,10 +5273,12 @@
       "path": "implementation/phase1/static_artifact_validation_report.nightly.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -5001,10 +5296,12 @@
       "path": "implementation/phase1/static_artifact_validation_report.pr.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_md3bead_parity_report.json"
@@ -5022,10 +5319,12 @@
       "path": "implementation/phase1/validate_phase1_artifacts.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -5041,10 +5340,12 @@
       "path": "implementation/phase1/winning_ticket_backprop.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py"
@@ -5060,10 +5361,12 @@
       "path": "implementation/phase1/winning_ticket_backprop_report.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -5085,10 +5388,12 @@
       "path": "implementation/phase1/zero_copy_real_probe.py",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -5110,10 +5415,12 @@
       "path": "implementation/phase1/zero_copy_real_probe_report.forbidden.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -5135,10 +5442,12 @@
       "path": "implementation/phase1/zero_copy_real_probe_report.required.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -5160,10 +5469,12 @@
       "path": "implementation/phase1/zero_copy_real_probe_report_strict.json",
       "recommended_cleanup_action": "remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts",
       "reference_role": "implementation_runtime_or_manifest_reference",
-      "reference_role_priority": 2
+      "reference_role_priority": 2,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -5177,10 +5488,12 @@
       "path": "scripts/build_pm_release_blocker_action_register.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 8,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -5231,10 +5544,12 @@
       "path": "scripts/build_product_readiness_snapshot.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 22,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
@@ -5324,10 +5639,12 @@
       "path": "scripts/build_public_benchmark_operator_intake_packet.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 15,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -5399,10 +5716,12 @@
       "path": "scripts/build_public_benchmark_source_of_truth.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -5423,10 +5742,12 @@
       "path": "scripts/build_structural_scope_cleanup_impact_report.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -5447,10 +5768,12 @@
       "path": "scripts/build_structural_scope_origin_report.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -5463,10 +5786,12 @@
       "path": "scripts/build_structural_scope_owner_review_packet.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -5486,10 +5811,12 @@
       "path": "scripts/check_repo_hygiene.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -5510,10 +5837,12 @@
       "path": "scripts/check_structural_scope_contamination.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 12,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -5561,10 +5890,12 @@
       "path": "scripts/materialize_public_benchmark_harness_bundle.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 2,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
@@ -5586,10 +5917,12 @@
       "path": "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 13,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -5633,10 +5966,12 @@
       "path": "scripts/materialize_public_benchmark_phase2_from_rows.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 2,
       "matched_quarantined_paths": [
         "scripts/score_symmetry_aware_ligand_rmsd.py",
@@ -5657,10 +5992,12 @@
       "path": "scripts/materialize_public_benchmark_rmsd_scorecard.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -5680,10 +6017,12 @@
       "path": "scripts/plan_source_boundary_cleanup.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 8,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
@@ -5718,10 +6057,12 @@
       "path": "scripts/report_pm_release_gate.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -5735,10 +6076,12 @@
       "path": "scripts/validate_public_benchmark_external_receipts.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_script_or_remove_quarantined_path_refs",
       "reference_role": "script_reference",
-      "reference_role_priority": 3
+      "reference_role_priority": 3,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -5752,10 +6095,12 @@
       "path": "tests/test_build_goal_bottleneck_roadmap_surface.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -5770,10 +6115,12 @@
       "path": "tests/test_build_non_expert_release_briefing_report.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -5801,10 +6148,12 @@
       "path": "tests/test_build_pm_release_blocker_action_register.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -5818,10 +6167,12 @@
       "path": "tests/test_build_product_capabilities_surface.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 19,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -5900,10 +6251,12 @@
       "path": "tests/test_build_product_readiness_snapshot.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 18,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
@@ -5974,10 +6327,12 @@
       "path": "tests/test_build_public_benchmark_operator_intake_packet.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 17,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
@@ -6054,10 +6409,12 @@
       "path": "tests/test_build_public_benchmark_source_of_truth.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 7,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -6086,10 +6443,12 @@
       "path": "tests/test_build_structural_scope_cleanup_impact_report.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -6115,10 +6474,12 @@
       "path": "tests/test_build_structural_scope_origin_report.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -6144,10 +6505,12 @@
       "path": "tests/test_build_structural_scope_owner_decision_application_plan.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 6,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -6180,10 +6543,12 @@
       "path": "tests/test_build_structural_scope_owner_review_packet.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -6203,10 +6568,12 @@
       "path": "tests/test_check_repo_hygiene.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 9,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -6256,10 +6623,12 @@
       "path": "tests/test_check_structural_scope_contamination.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 6,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
@@ -6295,10 +6664,12 @@
       "path": "tests/test_materialize_public_benchmark_harness_bundle.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 2,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
@@ -6320,10 +6691,12 @@
       "path": "tests/test_materialize_public_benchmark_operator_bundle_from_rows.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -6339,10 +6712,12 @@
       "path": "tests/test_materialize_public_benchmark_phase2_from_rows.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -6354,10 +6729,12 @@
       "path": "tests/test_materialize_public_benchmark_rmsd_scorecard.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 2,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -6379,10 +6756,12 @@
       "path": "tests/test_merge_structural_scope_owner_decision_batch.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 5,
       "matched_quarantined_paths": [
         "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -6402,10 +6781,12 @@
       "path": "tests/test_plan_source_boundary_cleanup.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 16,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
@@ -6465,10 +6846,12 @@
       "path": "tests/test_report_pm_release_gate.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
@@ -6486,10 +6869,12 @@
       "path": "tests/test_report_release_evidence_freshness.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": true,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 0,
       "matched_quarantined_paths": [],
       "matched_scope_tokens": [
@@ -6503,8 +6888,15 @@
       "path": "tests/test_validate_public_benchmark_external_receipts.py",
       "recommended_cleanup_action": "delete_or_extract_molecular_tests_or_update_scope_guard_tests",
       "reference_role": "test_reference",
-      "reference_role_priority": 4
+      "reference_role_priority": 4,
+      "release_freshness_source_boundary": false
     }
+  ],
+  "release_freshness_source_boundary_reference_count": 3,
+  "release_freshness_source_boundary_reference_paths": [
+    ".gitignore",
+    "docs/engine-ai-and-comparison-commercialization-gaps.md",
+    "implementation/phase1/README.md"
   ],
   "release_surface_blocking_reference_path_count": 0,
   "release_surface_blocking_reference_rows": [],
@@ -6703,6 +7095,7 @@
   "release_surface_reference_rows": [
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -6731,10 +7124,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -6763,10 +7158,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -6795,10 +7192,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -6827,10 +7226,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -6859,10 +7260,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -6891,10 +7294,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -6922,10 +7327,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -6954,10 +7361,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -6986,10 +7395,12 @@
       "path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7017,10 +7428,12 @@
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 67,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -7143,10 +7556,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7180,10 +7595,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -7306,10 +7723,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -7432,10 +7851,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -7558,10 +7979,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7593,10 +8016,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -7719,10 +8144,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7750,10 +8177,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7781,10 +8210,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7812,10 +8243,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7843,10 +8276,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7874,10 +8309,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7905,10 +8342,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -7936,10 +8375,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -8062,10 +8503,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -8188,10 +8631,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -8314,10 +8759,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -8440,10 +8887,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -8566,10 +9015,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 86,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_scientific_validity_report.md",
@@ -8692,10 +9143,12 @@
       "path": "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 8,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
@@ -8730,10 +9183,12 @@
       "path": "scripts/report_pm_release_gate.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -8761,10 +9216,12 @@
       "path": "tests/test_build_pm_release_blocker_action_register.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 7,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -8793,10 +9250,12 @@
       "path": "tests/test_build_structural_scope_cleanup_impact_report.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -8822,10 +9281,12 @@
       "path": "tests/test_build_structural_scope_origin_report.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 3,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -8851,10 +9312,12 @@
       "path": "tests/test_build_structural_scope_owner_decision_application_plan.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 6,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -8887,10 +9350,12 @@
       "path": "tests/test_build_structural_scope_owner_review_packet.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 9,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -8940,10 +9405,12 @@
       "path": "tests/test_check_structural_scope_contamination.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 2,
       "matched_quarantined_paths": [
         "implementation/phase1/md3bead_soa.py",
@@ -8965,10 +9432,12 @@
       "path": "tests/test_merge_structural_scope_owner_decision_batch.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "scope_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 16,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
@@ -9028,10 +9497,12 @@
       "path": "tests/test_report_pm_release_gate.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     },
     {
       "blocking_cleanup_reference": false,
+      "cleanup_requires_release_receipt_refresh": false,
       "matched_quarantined_path_count": 1,
       "matched_quarantined_paths": [
         "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
@@ -9049,13 +9520,14 @@
       "path": "tests/test_report_release_evidence_freshness.py",
       "recommended_cleanup_action": "review_reference_before_owner_cleanup_application",
       "reference_role": "release_governance_reference",
-      "reference_role_priority": 99
+      "reference_role_priority": 99,
+      "release_freshness_source_boundary": false
     }
   ],
   "reuse_policy": "structural_scope_cleanup_impact_report_from_owner_review_and_tracked_references",
   "reused_evidence": false,
   "schema_version": "structural-scope-cleanup-impact-report.v1",
-  "source_commit_sha": "75588a4d19a9131974d0aad5add850c8e20f7aaa",
+  "source_commit_sha": "1ad277fbb9acda29f8f43d07daed0c941169f79a",
   "status": "blocked_cleanup_impact",
   "summary_line": "Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=116 | blocking=67 | owner_pending=86"
 }
