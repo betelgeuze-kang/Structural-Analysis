@@ -3082,7 +3082,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T21:42:13.099964+00:00",
+  "generated_at": "2026-07-02T21:44:20.335434+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3110,7 +3110,7 @@
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:348747b2ba789df69213dba771f2e69515480bcd4a842e9a1efc72bb530ced5f",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d502bde0c5d759ffb3a312852a4e975ae889a42aa54b08cecf770791506dda59",
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:a1a62aeaf7db7cb84cace244b412f84d75b156baa60313444c4eb7de3f3223bf",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:f1bb5ce5c7e8d69d85f20200701b2fb916e08e95bcba9c60e58924122ee2fe94",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:2879349f7f5a08123c51d6d3fd2a037145008531a2fd242d1f26f56a4ad1259f",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:3f97d2be2beac1febf4fc6d9cf71664428c273290fb92405de9146f58eff62e9",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:0653cda129de37ef99896df138c1495eb621fe4b0b48ca1fcb0c8112c4a53fc2",
@@ -3419,7 +3419,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "a7e03f2c0398cdd4158f45a0765bb343a12ef014",
+  "source_commit_sha": "1f270779a3ff1f1794bd6a68923a0a356847a89e",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -4470,38 +4470,58 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T21:42:09.926728+00:00",
+        "generated_at": "2026-07-02T21:43:58.174556+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "a7e03f2c0398cdd4158f45a0765bb343a12ef014",
+        "source_commit_sha": "1f270779a3ff1f1794bd6a68923a0a356847a89e",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+          "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
+          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
+        ],
         "generated_at": "2026-07-02T21:41:30.980064+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "a7e03f2c0398cdd4158f45a0765bb343a12ef014",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+          "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
+          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
+        ],
         "generated_at": "2026-07-02T21:41:49.429600+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "a7e03f2c0398cdd4158f45a0765bb343a12ef014",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
@@ -4543,15 +4563,7 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
+        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4576,15 +4588,7 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
-        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
-        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
-        " M implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
+        " M implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json"
       ]
     }
   },
