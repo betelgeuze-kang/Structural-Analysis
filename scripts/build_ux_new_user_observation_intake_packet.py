@@ -165,9 +165,15 @@ DERIVED_CHECK_SPECS = (
     },
     {
         "field": "evidence_ref_not_generated_gate_artifact",
-        "required_value": "evidence_ref must not point to generated UX report or intake artifacts",
+        "required_value": (
+            "evidence_ref must not point to generated UX/PM/DP/readiness gate or automated "
+            "browser-rehearsal artifacts"
+        ),
         "check": "evidence_ref_not_generated_gate_artifact_pass",
-        "owner_note": "Generated gate reports are validation outputs, not separate human-observation evidence.",
+        "owner_note": (
+            "Generated gate reports and automated rehearsal receipts are validation outputs, "
+            "not separate human-observation evidence."
+        ),
     },
 )
 

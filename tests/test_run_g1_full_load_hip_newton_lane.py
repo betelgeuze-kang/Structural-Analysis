@@ -3234,6 +3234,50 @@ def test_auto_select_with_no_loadable_candidates_blocks(tmp_path: Path) -> None:
     assert resolution["selection"]["selected_checkpoint"] is None
 
 
+def test_auto_select_no_loadable_candidates_preserves_workspace_frontier_context(
+    tmp_path: Path,
+) -> None:
+    unreadable = tmp_path / "manifest_candidate.npz"
+    unreadable.write_bytes(b"not a safe npz checkpoint")
+    source = tmp_path / "source.json"
+    _write_evidence_source(
+        source,
+        candidates=[unreadable],
+        prefix_keys=("compact_checkpoint",),
+    )
+    workspace_root = tmp_path / "productization"
+    _checkpoint(workspace_root / "frontier.npz", load_scale=0.82)
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+        evidence_sources=(source,),
+        hip_consistency_proof_json=proof,
+        workspace_checkpoint_scan_root=workspace_root,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert "auto_select_no_loadable_candidates" in payload["blockers"]
+    assert payload["checkpoint_resolution_gate"]["highest_observed_load_scale"] is None
+    inventory = payload["workspace_checkpoint_inventory"]
+    assert inventory["loadable_count"] == 1
+    assert inventory["highest_observed_load_scale"] == 0.82
+    next_actions = {row["id"]: row for row in payload["lane_next_actions"]}
+    action = next_actions["build_consistent_newton_full_load_checkpoint_candidate_runner"]
+    assert action["highest_observed_load_scale"] == 0.82
+    assert action["highest_observed_load_scale_source"] == (
+        "workspace_checkpoint_inventory"
+    )
+    assert abs(action["highest_observed_gap_to_required_load_scale"] - 0.18) < 1e-12
+    assert action["workspace_highest_observed_load_scale"] == 0.82
+
+
 def test_cli_auto_select_default_and_auto_arg_use_evidence_scan(tmp_path: Path) -> None:
     out = tmp_path / "lane.json"
     default_args = run_g1_full_load_hip_newton_lane.build_parser().parse_args(

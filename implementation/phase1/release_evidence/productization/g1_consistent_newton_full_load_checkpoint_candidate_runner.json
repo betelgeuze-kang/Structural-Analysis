@@ -17,6 +17,7 @@
   },
   "claim_boundary": "This packet defines the next G1 runner contract for generating a consistent residual/Jacobian Newton full-load checkpoint candidate. It does not create the checkpoint, close the consistent Newton gate, prove full-load 1.0 equilibrium, promote G1 closure, or allow an exhausted row-only support/link retuning loop to count as progress.",
   "closure_blockers": [
+    "auto_select_no_loadable_candidates",
     "checkpoint_load_scale_below_required_full_load",
     "checkpoint_resolution_no_full_load_candidate",
     "hip_consistency_proof_source_commit_sha_mismatch",
@@ -39,7 +40,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-01T18:21:26.695317+00:00",
+  "generated_at": "2026-07-01T22:48:11.621504+00:00",
   "hip_worker_contract": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -88,7 +89,7 @@
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:64c8ae7e0041b0980d265b817c8af380b8019767c8e8f0e7ec737d77d1a1af67",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:bb90b6e5f2fc0754f7f8a9ab4f5f8755160846cab066941c0317c7d33ce5c413",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:358b7610b8fd3d0a7b5aa869b5de3f210be0aa8da69d93b5d8ba0774b49e98ec",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:0c7539798ab5ae1b91154edebdc718c7c7d13a3e067f63de179b3ae728e321a0",
     "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:0efde34dd1a294c6e2a7f18d236ea934e2f9c4654427228e4275e6734b82fd84"
@@ -190,10 +191,10 @@
     "runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner"
   },
   "schema_version": "g1-consistent-newton-full-load-checkpoint-candidate-runner.v1",
-  "source_commit_sha": "0ce1036034a7a6cc9a68991ebf1f9693a7218c6a",
+  "source_commit_sha": "4a55f6205b6f788a44ff66534c2c92bdf6efa73f",
   "status": "ready_for_runner_implementation",
   "summary": {
-    "closure_blocker_count": 18,
+    "closure_blocker_count": 19,
     "consistent_residual_jacobian_newton_gate_passed": false,
     "contract_blocker_count": 0,
     "contract_pass": true,
@@ -215,7 +216,7 @@
     "row_only_correction_loop_stopped": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "summary_line": "G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=0.656/1 | closure_blockers=18",
+  "summary_line": "G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=0.656/1 | closure_blockers=19",
   "verification_commands": [
     "python3 scripts/run_g1_full_load_hip_newton_lane.py --checkpoint-npz <full-load-checkpoint.npz> --fail-blocked",
     "python3 scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py --fail-blocked",

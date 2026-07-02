@@ -1,6 +1,6 @@
 # G1 Consistent Newton Full-Load Runner Contract
 
-- `summary_line`: `G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=0.656/1 | closure_blockers=18`
+- `summary_line`: `G1 consistent Newton full-load runner contract: READY_FOR_RUNNER_IMPLEMENTATION | contract_pass=True | observed_load=0.656/1 | closure_blockers=19`
 - `contract_pass`: `True`
 - `evidence_closure_pass`: `False`
 - `runner_id`: `build_consistent_newton_full_load_checkpoint_candidate_runner`
@@ -29,6 +29,7 @@
 
 ## Closure Blockers
 
+- `auto_select_no_loadable_candidates`
 - `checkpoint_load_scale_below_required_full_load`
 - `checkpoint_resolution_no_full_load_candidate`
 - `hip_consistency_proof_source_commit_sha_mismatch`

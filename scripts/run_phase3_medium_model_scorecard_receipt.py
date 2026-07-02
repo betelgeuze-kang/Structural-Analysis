@@ -13,6 +13,7 @@ import resource
 import sys
 import time
 from typing import Any, Sequence
+from urllib.parse import urlparse
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,6 +30,16 @@ DEFAULT_TIMEOUT_SECONDS = 3600
 DEFAULT_MEMORY_LIMIT_GB = 32.0
 SCHEMA_VERSION = "phase3-medium-model-scorecard-receipt.v1"
 ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS = {"PASS", "APPROVED_REVIEW"}
+PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
+MEDIUM_RECEIPT_DIR = PRODUCTIZATION / "medium_model_scorecard_receipts"
+SUPPORTED_REVIEW_EVIDENCE_URI_SCHEMES = {"https", "operator-review", "ticket", "jira"}
+GENERATED_REVIEW_EVIDENCE_REF_PATHS = {
+    PRODUCTIZATION / "phase3_medium_model_scorecard_readiness_receipt.json",
+    PRODUCTIZATION / "phase6_benchmark_scale_status.json",
+    PRODUCTIZATION / "developer_preview_rc_status.json",
+    PRODUCTIZATION / "developer_preview_final_gate_owner_packet.json",
+    PRODUCTIZATION / "product_readiness_snapshot.json",
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -64,6 +75,92 @@ def _normalized_decision(value: Any) -> str:
     return str(value or "").strip().upper().replace("-", "_").replace(" ", "_")
 
 
+def _same_resolved_path(first: Path, second: Path) -> bool:
+    try:
+        return first.resolve() == second.resolve()
+    except Exception:
+        return False
+
+
+def _relative_path(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT).as_posix()
+    except Exception:
+        return str(path)
+
+
+def _is_template_like_path(path: Path) -> bool:
+    try:
+        resolved = path.resolve()
+    except Exception:
+        resolved = path
+    try:
+        templates_dir = (ROOT / "docs" / "templates").resolve()
+        if resolved.is_relative_to(templates_dir):
+            return True
+    except Exception:
+        pass
+    name = resolved.name.lower()
+    return bool(".template." in name or name.endswith(".template"))
+
+
+def _is_generated_review_evidence_ref_path(path: Path) -> bool:
+    try:
+        resolved = path.resolve()
+    except Exception:
+        resolved = path
+    for generated_path in GENERATED_REVIEW_EVIDENCE_REF_PATHS:
+        if _same_resolved_path(resolved, ROOT / generated_path):
+            return True
+    try:
+        medium_receipt_dir = (ROOT / MEDIUM_RECEIPT_DIR).resolve()
+        if resolved.is_relative_to(medium_receipt_dir):
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def _review_evidence_ref_resolution(*, review_path: Path, evidence_ref: str) -> dict[str, Any]:
+    text = evidence_ref.strip()
+    if not text:
+        return {"kind": "missing", "resolvable": False, "resolved_path": "", "blockers": []}
+    parsed = urlparse(text)
+    if parsed.scheme:
+        if parsed.scheme in SUPPORTED_REVIEW_EVIDENCE_URI_SCHEMES and bool(parsed.netloc or parsed.path):
+            return {"kind": f"{parsed.scheme}_reference", "resolvable": True, "resolved_path": "", "blockers": []}
+        return {
+            "kind": "unsupported_uri",
+            "resolvable": False,
+            "resolved_path": "",
+            "blockers": ["scorecard_or_review_evidence_ref_unsupported_uri"],
+        }
+    path = Path(text).expanduser()
+    candidates = [path] if path.is_absolute() else [ROOT / path, review_path.parent / path]
+    for candidate in candidates:
+        if not candidate.exists():
+            continue
+        blockers: list[str] = []
+        if _same_resolved_path(candidate, review_path):
+            blockers.append("scorecard_or_review_evidence_ref_self_reference")
+        if _is_template_like_path(candidate):
+            blockers.append("scorecard_or_review_evidence_ref_template_artifact")
+        if _is_generated_review_evidence_ref_path(candidate):
+            blockers.append("scorecard_or_review_evidence_ref_generated_gate_artifact")
+        return {
+            "kind": "local_path",
+            "resolvable": True,
+            "resolved_path": _relative_path(candidate),
+            "blockers": blockers,
+        }
+    return {
+        "kind": "local_path_missing",
+        "resolvable": False,
+        "resolved_path": "",
+        "blockers": ["scorecard_or_review_evidence_ref_unresolvable"],
+    }
+
+
 def _scorecard_or_review_status(path: Path | None) -> dict[str, Any]:
     if path is None:
         return {
@@ -94,6 +191,10 @@ def _scorecard_or_review_status(path: Path | None) -> dict[str, Any]:
         or ""
     ).strip()
     reviewer = str(payload.get("reviewer") or payload.get("approved_by") or "").strip()
+    evidence_ref_resolution = _review_evidence_ref_resolution(
+        review_path=path,
+        evidence_ref=evidence_ref,
+    )
     blockers: list[str] = []
     if not payload:
         blockers.append("scorecard_or_review_json_invalid_or_empty")
@@ -101,6 +202,8 @@ def _scorecard_or_review_status(path: Path | None) -> dict[str, Any]:
         blockers.append("scorecard_or_review_decision_not_accepted")
     if not evidence_ref:
         blockers.append("scorecard_or_review_evidence_ref_missing")
+    else:
+        blockers.extend(str(blocker) for blocker in evidence_ref_resolution["blockers"])
     if not reviewer:
         blockers.append("scorecard_or_review_reviewer_missing")
     return {
@@ -109,8 +212,10 @@ def _scorecard_or_review_status(path: Path | None) -> dict[str, Any]:
         "contract_pass": not blockers,
         "decision": decision,
         "evidence_ref": evidence_ref,
+        "evidence_ref_kind": evidence_ref_resolution["kind"],
+        "evidence_ref_resolved_path": evidence_ref_resolution["resolved_path"],
         "reviewer": reviewer,
-        "blockers": blockers,
+        "blockers": sorted(dict.fromkeys(blockers)),
     }
 
 

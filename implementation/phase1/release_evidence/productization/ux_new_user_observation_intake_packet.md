@@ -32,7 +32,7 @@
 | `evidence_ref_not_self_reference` | `` | `derived from observation timestamps` | evidence_ref must not point back to the observation JSON itself | `evidence_ref_not_self_reference_pass` = `False` |
 | `evidence_ref_not_template_reference` | `` | `derived from observation timestamps` | evidence_ref must not point to the UX observation template | `evidence_ref_not_template_reference_pass` = `False` |
 | `evidence_ref_not_template_artifact` | `` | `derived from observation timestamps` | evidence_ref must not point to docs/templates or a .template.* artifact | `evidence_ref_not_template_artifact_pass` = `False` |
-| `evidence_ref_not_generated_gate_artifact` | `` | `derived from observation timestamps` | evidence_ref must not point to generated UX report or intake artifacts | `evidence_ref_not_generated_gate_artifact_pass` = `False` |
+| `evidence_ref_not_generated_gate_artifact` | `` | `derived from observation timestamps` | evidence_ref must not point to generated UX/PM/DP/readiness gate or automated browser-rehearsal artifacts | `evidence_ref_not_generated_gate_artifact_pass` = `False` |
 
 ## Gate Unblock Plan
 

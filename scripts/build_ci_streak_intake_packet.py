@@ -118,6 +118,11 @@ def _source_lane(
         github_lane.get("pull_request_run_source_present") is True if lane == "pr" else None
     )
     run_count = _as_int(github_lane.get("run_count"))
+    job_start_blockers = [
+        row
+        for row in github_lane.get("job_start_blockers", [])
+        if isinstance(row, dict)
+    ]
     blockers = [
         *(["github_actions_ci_streak_evidence_missing"] if not source_file_present else []),
         *(["github_actions_ci_streak_evidence_schema_invalid"] if source_file_present and not source_schema_pass else []),
@@ -154,6 +159,8 @@ def _source_lane(
         "source_consecutive_pass_count": source_consecutive,
         "source_run_count": run_count,
         "source_release_credit_pass": source_release_credit_pass,
+        "job_start_blocker_count": len(job_start_blockers),
+        "job_start_blockers": job_start_blockers,
         "workflow_registered": workflow_registered,
         "workflow_state": workflow_state,
         "workflow_active": workflow_active,
@@ -303,6 +310,11 @@ def _lane_row(lane: str, manifest: dict[str, Any], source_evidence: dict[str, An
     threshold_pass = bool(manifest_threshold_pass and source_credit_pass and consecutive >= threshold)
     blockers = [str(item) for item in manifest_lane.get("blockers", []) if isinstance(item, str)]
     blockers.extend(str(item) for item in source_lane.get("blockers", []) if isinstance(item, str))
+    job_start_blockers = [
+        row
+        for row in source_lane.get("job_start_blockers", [])
+        if isinstance(row, dict)
+    ]
     if not threshold_pass and not blockers:
         blockers = [f"{lane}_ci_{threshold}_consecutive_pass_evidence_missing"]
     return {
@@ -349,11 +361,54 @@ def _lane_row(lane: str, manifest: dict[str, Any], source_evidence: dict[str, An
         ],
         "source_evidence_release_credit_pass": source_credit_pass,
         "source_evidence_blockers": [str(item) for item in source_lane.get("blockers", []) if isinstance(item, str)],
+        "job_start_blocker_count": len(job_start_blockers),
+        "job_start_blockers": job_start_blockers,
         "streak_source": str(manifest_lane.get("streak_source", "")),
         "owner_action": str(manifest_lane.get("owner_action", "")),
         "claim_boundary": str(manifest_lane.get("claim_boundary", "")),
         "blockers": _dedupe(blockers),
     }
+
+
+def _job_start_blocker_queue(lane_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    queue: list[dict[str, Any]] = []
+    for row in lane_rows:
+        blockers = [
+            blocker
+            for blocker in row.get("job_start_blockers", [])
+            if isinstance(blocker, dict)
+        ]
+        if not blockers:
+            continue
+        reason_codes = sorted(
+            {
+                str(blocker.get("reason_code", "") or "")
+                for blocker in blockers
+                if str(blocker.get("reason_code", "") or "")
+            }
+        )
+        first = blockers[0]
+        queue.append(
+            {
+                "lane": row["lane"],
+                "status": "external_runner_recovery_required",
+                "job_start_blocker_count": len(blockers),
+                "reason_codes": reason_codes,
+                "first_run_id": first.get("run_id"),
+                "first_run_url": str(first.get("url", "") or ""),
+                "first_head_sha": str(first.get("head_sha", "") or ""),
+                "first_head_branch": str(first.get("head_branch", "") or ""),
+                "first_queued_minutes": first.get("queued_minutes"),
+                "first_message": str(first.get("message", "") or ""),
+                "sample_blockers": blockers[:5],
+                "owner_action": (
+                    f"Resolve the {row['lane']} GitHub Actions job-start blocker, "
+                    "bring the required self-hosted runner online, rerun the workflow, "
+                    f"then collect {row['threshold']} consecutive successful run(s)."
+                ),
+            }
+        )
+    return queue
 
 
 def build_packet(
@@ -380,6 +435,7 @@ def build_packet(
         _lane_row("pr", manifest, source_evidence),
         _lane_row("nightly", manifest, source_evidence),
     ]
+    job_start_queue = _job_start_blocker_queue(lane_rows)
     blockers = [
         f"{row['lane']}:{blocker}"
         for row in lane_rows
@@ -436,6 +492,10 @@ def build_packet(
             "runner_online_matching_runner_count": runner_precondition["online_matching_runner_count"],
             "runner_ready_runner_count": runner_precondition["ready_runner_count"],
             "runner_owner_action": runner_precondition["owner_action"],
+            "job_start_blocker_lane_count": len(job_start_queue),
+            "job_start_blocker_count": sum(
+                row["job_start_blocker_count"] for row in job_start_queue
+            ),
             "source_evidence_generated_at": source_evidence["generated_at"],
             "source_evidence_age_hours": source_evidence["age_hours"],
             "source_evidence_freshness_pass": source_evidence["freshness_pass"],
@@ -478,6 +538,8 @@ def build_packet(
             ),
         },
         "lane_rows": lane_rows,
+        "job_start_blocker_queue": job_start_queue,
+        "first_job_start_blocker": job_start_queue[0] if job_start_queue else {},
         "current_blockers": blockers,
         "current_blocker_count": len(blockers),
         "validation_commands": [
@@ -540,6 +602,22 @@ def _markdown(payload: dict[str, Any]) -> str:
                 ),
             ]
         )
+    if payload.get("job_start_blocker_queue"):
+        lines.extend(
+            [
+                "",
+                "## Job Start Blocker Queue",
+                "",
+                "| Lane | Count | Reason Codes | First Run | Owner Action |",
+                "|---|---:|---|---|---|",
+            ]
+        )
+        for row in payload["job_start_blocker_queue"]:
+            lines.append(
+                f"| `{row['lane']}` | `{row['job_start_blocker_count']}` | "
+                f"`{', '.join(row['reason_codes'])}` | "
+                f"`{row['first_run_id']}` | {row['owner_action']} |"
+            )
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:
         lines.append(f"- `{command}`")

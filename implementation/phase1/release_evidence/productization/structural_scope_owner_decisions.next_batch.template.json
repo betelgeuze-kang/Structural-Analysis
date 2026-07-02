@@ -1,0 +1,142 @@
+{
+  "batch_id": "release_surface_first",
+  "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+  "claim_boundary": "This is a batch fill-in template and cleanup preview only. It is not an owner decision, does not delete files, and does not close scope cleanup without recorded owner evidence and refreshed audits.",
+  "conditional_required_fields": [
+    "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
+    "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception"
+  ],
+  "decision_pending_count": 3,
+  "decision_rows": [
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "external_archive_reference": "",
+      "families": [
+        "molecular_docking"
+      ],
+      "matched_tokens": [
+        "gpcr"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "path_area": "release_surface",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
+      "row_id": "release_surface_first-001",
+      "signed_owner_exception_reference": ""
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "external_archive_reference": "",
+      "families": [
+        "molecular_science_evidence"
+      ],
+      "matched_tokens": [
+        "h_bond"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "path_area": "release_surface",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
+      "row_id": "release_surface_first-002",
+      "signed_owner_exception_reference": ""
+    },
+    {
+      "allowed_owner_decisions": [
+        "delete_from_structural_repository",
+        "extract_to_molecular_or_science_repository",
+        "retain_quarantined_with_signed_owner_exception"
+      ],
+      "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+      "decision_timestamp_utc": "",
+      "evidence_reference": "",
+      "external_archive_reference": "",
+      "families": [
+        "molecular_dynamics"
+      ],
+      "matched_tokens": [
+        "pocketmd"
+      ],
+      "owner_decision": "",
+      "owner_identity": "",
+      "owner_role": "",
+      "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+      "path_area": "release_surface",
+      "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+      "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+      "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+      "recommended_owner_decision_primary": "delete_from_structural_repository",
+      "row_id": "release_surface_first-003",
+      "signed_owner_exception_reference": ""
+    }
+  ],
+  "generated_template_paths": {
+    "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
+    "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
+    "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md"
+  },
+  "path_area": "release_surface",
+  "post_batch_verification": [
+    "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+    "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+    "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+    "python3 scripts/build_product_readiness_snapshot.py --check"
+  ],
+  "primary_cleanup_preview": {
+    "owner_decision_required": true,
+    "preconditions": [
+      "owner fills matching decision rows in structural_scope_owner_decisions.json or CSV",
+      "owner_decision_validation_pass=true for these rows",
+      "human confirms the batch cleanup scope"
+    ],
+    "primary_delete_git_rm_args": [
+      "git",
+      "rm",
+      "--",
+      "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+    ],
+    "primary_delete_path_count": 3,
+    "primary_delete_paths": [
+      "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+    ],
+    "primary_extract_path_count": 0,
+    "primary_extract_paths": [],
+    "primary_extract_post_archive_git_rm_args": [],
+    "safe_to_auto_apply": false
+  },
+  "required_owner_fill_fields": [
+    "owner_decision",
+    "owner_identity",
+    "owner_role",
+    "decision_timestamp_utc",
+    "evidence_reference"
+  ],
+  "schema_version": "structural-scope-owner-decisions.v1"
+}

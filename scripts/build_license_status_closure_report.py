@@ -33,6 +33,25 @@ DEFAULT_PM_BLOCKER_ACTION_REGISTER = Path(
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
 )
 DEFAULT_PM_BLOCKER_ACTION_REGISTER_MD = DEFAULT_PM_BLOCKER_ACTION_REGISTER.with_suffix(".md")
+DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"
+)
+DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET_MD = DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET.with_suffix(".md")
+DEFAULT_PRODUCT_READINESS_SNAPSHOT = Path(
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+)
+GENERATED_GATE_EVIDENCE_REF_PATHS = {
+    DEFAULT_OUT,
+    DEFAULT_INTAKE_PACKET,
+    DEFAULT_INTAKE_PACKET_MD,
+    DEFAULT_PM_RELEASE_GATE_REPORT,
+    DEFAULT_PM_RELEASE_GATE_REPORT_MD,
+    DEFAULT_PM_BLOCKER_ACTION_REGISTER,
+    DEFAULT_PM_BLOCKER_ACTION_REGISTER_MD,
+    DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET,
+    DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET_MD,
+    DEFAULT_PRODUCT_READINESS_SNAPSHOT,
+}
 PASS_STATUSES = {"active", "approved", "valid"}
 ALLOWED_TIERS = {"paid-pilot", "limited-commercial"}
 ALLOWED_APPROVER_ROLES = {"product_owner", "legal_counsel", "product_and_legal", "delegated_product_owner"}
@@ -184,6 +203,17 @@ def _is_template_like_path(path: Path, *, repo_root: Path) -> bool:
     return bool(".template." in name or name.endswith(".template"))
 
 
+def _is_generated_gate_artifact_path(path: Path, *, repo_root: Path) -> bool:
+    try:
+        resolved = path.resolve()
+    except Exception:
+        resolved = path
+    for generated_path in GENERATED_GATE_EVIDENCE_REF_PATHS:
+        if _same_resolved_path(resolved, repo_root / generated_path):
+            return True
+    return False
+
+
 def _validation_commands() -> list[str]:
     return [
         f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_OUT}",
@@ -264,6 +294,7 @@ def _gate_unblock_plan(
                 "evidence_ref is a ticket/jira/legal/docusign reference, https URL, or existing local evidence path",
                 "evidence_ref is not license_status.json itself",
                 "evidence_ref is not docs/templates or a .template artifact",
+                "evidence_ref is not a generated PM/license/readiness gate artifact",
             ],
         },
         {
@@ -313,6 +344,10 @@ def build_report(
     evidence_ref_template_artifact = bool(
         resolved_evidence_path and _is_template_like_path(Path(resolved_evidence_path), repo_root=repo_root)
     )
+    evidence_ref_generated_gate_artifact = bool(
+        resolved_evidence_path
+        and _is_generated_gate_artifact_path(Path(resolved_evidence_path), repo_root=repo_root)
+    )
     product_scope = payload.get("product_scope", payload.get("scope", payload.get("features")))
     expires_at = _text(payload, "expires_at_utc", "expires_at", "valid_until")
     perpetual = bool(payload.get("perpetual", False))
@@ -356,6 +391,8 @@ def build_report(
         blockers.append("license_evidence_ref_template_reference")
     elif evidence_ref_template_artifact:
         blockers.append("license_evidence_ref_template_artifact")
+    elif evidence_ref_generated_gate_artifact:
+        blockers.append("license_evidence_ref_generated_gate_artifact")
     if _scope_count(product_scope) == 0:
         blockers.append("license_product_scope_missing")
     elif not REQUIRED_PRODUCT_SCOPE.issubset(_scope_values(product_scope)):
@@ -441,6 +478,9 @@ def build_report(
             "evidence_ref_not_template_artifact_pass": bool(
                 evidence_ref and evidence_ref_resolution["resolvable"] and not evidence_ref_template_artifact
             ),
+            "evidence_ref_not_generated_gate_artifact_pass": bool(
+                evidence_ref and evidence_ref_resolution["resolvable"] and not evidence_ref_generated_gate_artifact
+            ),
             "product_scope_present_pass": _scope_count(product_scope) > 0,
             "product_scope_boundary_pass": bool(REQUIRED_PRODUCT_SCOPE.issubset(_scope_values(product_scope))),
             "placeholder_values_absent_pass": placeholder_values_absent_pass,
@@ -453,6 +493,7 @@ def build_report(
                 and not evidence_ref_self_reference
                 and not evidence_ref_template_reference
                 and not evidence_ref_template_artifact
+                and not evidence_ref_generated_gate_artifact
                 and approval_ref
                 and license_id
                 and approval_ref.lower() != license_id.lower()

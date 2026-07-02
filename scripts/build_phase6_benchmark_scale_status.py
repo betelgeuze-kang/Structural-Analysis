@@ -294,8 +294,11 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
             {"opensees-megatall", "large-model-performance"},
         ),
     ]
-    if medium_current < medium_required:
-        medium_blockers.append(f"medium_structural_models_current_below_required:{medium_current}/{medium_required}")
+    if medium_local_candidate_count < medium_required:
+        medium_blockers.append(
+            "medium_structural_models_current_below_required:"
+            f"{medium_local_candidate_count}/{medium_required}"
+        )
     if medium_review < medium_required:
         medium_blockers.append(f"medium_model_pass_or_review_below_required:{medium_review}/{medium_required}")
     if large_source_models < large_required:

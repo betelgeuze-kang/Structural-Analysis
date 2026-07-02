@@ -5543,6 +5543,62 @@ def test_snapshot_surfaces_g1_full_load_lane_blocker(tmp_path: Path) -> None:
     assert payload["paid_pilot_ready"] is False
 
 
+def test_snapshot_preserves_g1_workspace_frontier_observed_load(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
+        "schema_version": "g1-full-load-hip-newton-lane.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": False,
+        "contract_pass": False,
+        "status": "blocked",
+        "checkpoint": {"load_scale": None},
+        "checkpoint_resolution_gate": {
+            "highest_observed_load_scale": None,
+            "required_load_scale": 1.0,
+            "passed": False,
+            "blockers": ["checkpoint_resolution_no_full_load_candidate"],
+        },
+        "workspace_checkpoint_inventory": {
+            "enabled": True,
+            "highest_observed_load_scale": 0.656,
+            "full_load_candidate_count": 0,
+        },
+        "lane_next_actions": [
+            {
+                "id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
+                "highest_observed_load_scale": 0.656,
+                "highest_observed_load_scale_source": (
+                    "workspace_checkpoint_inventory"
+                ),
+            }
+        ],
+        "required_load_scale": 1.0,
+        "full_load_tolerance": 1.0e-12,
+        "full_load_input_pass": False,
+        "blockers": ["auto_select_no_loadable_candidates"],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    g1 = payload["components"]["g1"]
+    assert g1["full_load_hip_newton_lane_observed_load_scale"] == 0.656
+    assert g1["full_load_hip_newton_lane_observed_load_scale_source"] == (
+        "workspace_checkpoint_inventory"
+    )
+    assert g1["full_load_hip_newton_lane_ready"] is False
+    assert "g1_full_load_lane::auto_select_no_loadable_candidates" in (
+        _g1_detail_blockers(payload)
+    )
+
+
 def test_snapshot_blocks_ready_g1_lane_without_child_hip_refresh_evidence(
     tmp_path: Path,
 ) -> None:

@@ -288,15 +288,15 @@
     }
   ],
   "gate_unblock_plan_count": 7,
-  "generated_at": "2026-07-01T21:29:13.006375+00:00",
+  "generated_at": "2026-07-01T23:03:10.903351+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
     "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:d5def43be6655852bafe22677ce5838ca865958b52d36f6d01ade554b86ba4fd",
-    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:2ddad03d4e0a9d371b4fb04bd56f40f44ee864da4af793620e9340871364eaff",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:6d832cf96fc5684bea088265509378f5ec84311a94e4218c4b73a7caf2ebd08f",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
-    "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:cf3aea4d0d7cc042a667730a91bed318718f18f4db4f8d00d9a506beee143921",
+    "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:d11eb9c3537e1921390b634a51c62a77feef5b42a6827b2bd40146ea6b55323d",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82"
   },
   "lanes": [
@@ -320,6 +320,151 @@
   },
   "local_topology_contract_pass": true,
   "medium_model_benchmark_pass_claim": false,
+  "medium_model_case_execution_queue": {
+    "case_ready_count": 0,
+    "claim_boundary": "This queue translates the medium-model RC gate into five execution slots. It is non-promoting and does not replace actual source, license, reference-output, normalization, scorecard, or PASS/REVIEW receipts.",
+    "missing_case_count": 3,
+    "next_case_slot": {
+      "blockers": [
+        "license_review_pending",
+        "reference_outputs_missing",
+        "normalization_receipts_missing",
+        "opensees_medium_scorecard_execution_missing",
+        "medium_model_pass_or_review_missing"
+      ],
+      "case_id": "SCBF16B",
+      "claim_boundary": "This slot is execution scheduling only. It does not create source, license, reference, normalization, scorecard, or PASS/REVIEW evidence.",
+      "next_required_inputs": [
+        "approved OpenSees medium product/legal license receipt",
+        "reference output checksum or approved REVIEW baseline",
+        "passing phase3-medium-normalization-receipt.v1 normalization receipt",
+        "medium scorecard receipt, result artifact, and validation report",
+        "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
+      ],
+      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "scorecard_receipt_path": null,
+      "slot": 1,
+      "slot_status": "selected_blocked",
+      "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+      "source_sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80"
+    },
+    "queue_rows": [
+      {
+        "blockers": [
+          "license_review_pending",
+          "reference_outputs_missing",
+          "normalization_receipts_missing",
+          "opensees_medium_scorecard_execution_missing",
+          "medium_model_pass_or_review_missing"
+        ],
+        "case_id": "SCBF16B",
+        "claim_boundary": "This slot is execution scheduling only. It does not create source, license, reference, normalization, scorecard, or PASS/REVIEW evidence.",
+        "next_required_inputs": [
+          "approved OpenSees medium product/legal license receipt",
+          "reference output checksum or approved REVIEW baseline",
+          "passing phase3-medium-normalization-receipt.v1 normalization receipt",
+          "medium scorecard receipt, result artifact, and validation report",
+          "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
+        ],
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "scorecard_receipt_path": null,
+        "slot": 1,
+        "slot_status": "selected_blocked",
+        "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+        "source_sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80"
+      },
+      {
+        "blockers": [
+          "license_review_pending",
+          "reference_outputs_missing",
+          "normalization_receipts_missing",
+          "opensees_medium_scorecard_execution_missing",
+          "medium_model_pass_or_review_missing"
+        ],
+        "case_id": "SCBF16B_shell_beam_mix",
+        "claim_boundary": "This slot is execution scheduling only. It does not create source, license, reference, normalization, scorecard, or PASS/REVIEW evidence.",
+        "next_required_inputs": [
+          "approved OpenSees medium product/legal license receipt",
+          "reference output checksum or approved REVIEW baseline",
+          "passing phase3-medium-normalization-receipt.v1 normalization receipt",
+          "medium scorecard receipt, result artifact, and validation report",
+          "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
+        ],
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "scorecard_receipt_path": null,
+        "slot": 2,
+        "slot_status": "selected_blocked",
+        "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+        "source_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc"
+      },
+      {
+        "blockers": [
+          "medium_structural_models_current_below_required:2/5"
+        ],
+        "case_id": "OPERATOR_ATTACHED_MEDIUM_CASE_3",
+        "claim_boundary": "This placeholder reserves an RC medium-model slot. It cannot receive scorecard credit until an operator-attached case and all per-case evidence are present.",
+        "next_required_inputs": [
+          "authoritative medium structural model case",
+          "stable source id",
+          "source/model checksum",
+          "reference output or approved REVIEW baseline",
+          "normalization receipt",
+          "scorecard/review decision"
+        ],
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "scorecard_receipt_path": "",
+        "slot": 3,
+        "slot_status": "operator_selection_required",
+        "source_path": "OPERATOR_ATTACHED_MODEL.json",
+        "source_sha256": "OPERATOR_ATTACHED_SHA256"
+      },
+      {
+        "blockers": [
+          "medium_structural_models_current_below_required:2/5"
+        ],
+        "case_id": "OPERATOR_ATTACHED_MEDIUM_CASE_4",
+        "claim_boundary": "This placeholder reserves an RC medium-model slot. It cannot receive scorecard credit until an operator-attached case and all per-case evidence are present.",
+        "next_required_inputs": [
+          "authoritative medium structural model case",
+          "stable source id",
+          "source/model checksum",
+          "reference output or approved REVIEW baseline",
+          "normalization receipt",
+          "scorecard/review decision"
+        ],
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "scorecard_receipt_path": "",
+        "slot": 4,
+        "slot_status": "operator_selection_required",
+        "source_path": "OPERATOR_ATTACHED_MODEL.json",
+        "source_sha256": "OPERATOR_ATTACHED_SHA256"
+      },
+      {
+        "blockers": [
+          "medium_structural_models_current_below_required:2/5"
+        ],
+        "case_id": "OPERATOR_ATTACHED_MEDIUM_CASE_5",
+        "claim_boundary": "This placeholder reserves an RC medium-model slot. It cannot receive scorecard credit until an operator-attached case and all per-case evidence are present.",
+        "next_required_inputs": [
+          "authoritative medium structural model case",
+          "stable source id",
+          "source/model checksum",
+          "reference output or approved REVIEW baseline",
+          "normalization receipt",
+          "scorecard/review decision"
+        ],
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "scorecard_receipt_path": "",
+        "slot": 5,
+        "slot_status": "operator_selection_required",
+        "source_path": "OPERATOR_ATTACHED_MODEL.json",
+        "source_sha256": "OPERATOR_ATTACHED_SHA256"
+      }
+    ],
+    "required_case_count": 5,
+    "schema_version": "phase3-medium-model-case-execution-queue.v1",
+    "selected_case_count": 2
+  },
   "missing_evidence_breakdown": [
     {
       "blocker": "license_review_pending",
@@ -758,7 +903,7 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "ebda65ccfd5e9ed6cbf2260661f4f24ac4255fc1",
+  "source_commit_sha": "9e906cb7861d92283965968ee81715658b2e541e",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
   "source_url_verified": true,

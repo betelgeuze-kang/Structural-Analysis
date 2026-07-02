@@ -29,8 +29,44 @@ DEFAULT_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
 )
 DEFAULT_INTAKE_PACKET_MD = DEFAULT_INTAKE_PACKET.with_suffix(".md")
+DEFAULT_PHASE5_GUI_WORKFLOW = Path(
+    "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json"
+)
+DEFAULT_PHASE5_TASK_BASED_UX_BROWSER_EXECUTION = Path(
+    "implementation/phase1/release_evidence/productization/phase5_task_based_ux_browser_execution_receipt.json"
+)
+DEFAULT_PHASE6_UX_OBSERVATION_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json"
+)
+DEFAULT_DEVELOPER_PREVIEW_RC_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
+)
+DEFAULT_DEVELOPER_PREVIEW_FINAL_GATE_OWNER_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json"
+)
+DEFAULT_PM_RELEASE_GATE_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+)
+DEFAULT_PM_RELEASE_GATE_REPORT_MD = DEFAULT_PM_RELEASE_GATE_REPORT.with_suffix(".md")
+DEFAULT_PRODUCT_READINESS_SNAPSHOT = Path(
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+)
 DEFAULT_TEMPLATE = Path("docs/templates/ux_new_user_observation.template.json")
 DEFAULT_TIMESTAMP_TOLERANCE_MINUTES = 1.0
+GENERATED_UX_EVIDENCE_REF_PATHS = {
+    DEFAULT_OUT,
+    DEFAULT_OUT_MD,
+    DEFAULT_INTAKE_PACKET,
+    DEFAULT_INTAKE_PACKET_MD,
+    DEFAULT_PHASE5_GUI_WORKFLOW,
+    DEFAULT_PHASE5_TASK_BASED_UX_BROWSER_EXECUTION,
+    DEFAULT_PHASE6_UX_OBSERVATION_STATUS,
+    DEFAULT_DEVELOPER_PREVIEW_RC_STATUS,
+    DEFAULT_DEVELOPER_PREVIEW_FINAL_GATE_OWNER_PACKET,
+    DEFAULT_PM_RELEASE_GATE_REPORT,
+    DEFAULT_PM_RELEASE_GATE_REPORT_MD,
+    DEFAULT_PRODUCT_READINESS_SNAPSHOT,
+}
 ACCEPTED_DECISIONS = {"accepted", "approved", "pass", "signed", "approved_for_release"}
 EXTERNAL_REFERENCE_PREFIXES = ("ticket:", "jira:", "ux:", "user-study:")
 PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "OWNER_INPUT_REQUIRED")
@@ -245,16 +281,14 @@ def _is_template_like_path(path: Path, *, repo_root: Path) -> bool:
 
 
 def _is_generated_ux_gate_artifact(path: Path, *, repo_root: Path) -> bool:
-    generated_paths = {
-        (repo_root / DEFAULT_OUT).resolve(),
-        (repo_root / DEFAULT_OUT_MD).resolve(),
-        (repo_root / DEFAULT_INTAKE_PACKET).resolve(),
-        (repo_root / DEFAULT_INTAKE_PACKET_MD).resolve(),
-    }
     try:
-        return path.resolve() in generated_paths
+        resolved = path.resolve()
     except Exception:
-        return False
+        resolved = path
+    for generated_path in GENERATED_UX_EVIDENCE_REF_PATHS:
+        if _same_resolved_path(resolved, repo_root / generated_path):
+            return True
+    return False
 
 
 def _next_actions(contract_pass: bool) -> list[str]:
@@ -316,7 +350,7 @@ def _gate_unblock_plan(
                 "evidence_ref is a ticket/jira/ux/user-study reference, https URL, or existing local evidence path",
                 "evidence_ref is not the observation JSON itself",
                 "evidence_ref is not docs/templates or a .template artifact",
-                "evidence_ref is not a generated UX report or intake artifact",
+                "evidence_ref is not a generated UX/PM/DP/readiness gate or automated browser-rehearsal artifact",
                 "approval_decision is accepted, approved, pass, signed, or approved_for_release",
             ],
         },

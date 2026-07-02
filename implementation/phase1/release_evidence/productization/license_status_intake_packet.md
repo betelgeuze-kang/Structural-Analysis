@@ -1,6 +1,6 @@
 # License Status Intake Packet
 
-- `summary_line`: `License status intake: BLOCKED | fields=0/16 | blockers=10`
+- `summary_line`: `License status intake: BLOCKED | fields=0/17 | blockers=10`
 - `status`: `blocked`
 - `contract_pass`: `False`
 - `gate_unblock_plan_count`: `6`
@@ -27,6 +27,7 @@
 | `evidence_ref_not_self_reference` | `` | evidence_ref must not point back to license_status.json | `evidence_ref_not_self_reference_pass` = `False` |
 | `evidence_ref_not_template_reference` | `` | evidence_ref must not point to the license status template | `evidence_ref_not_template_reference_pass` = `False` |
 | `evidence_ref_not_template_artifact` | `` | evidence_ref must not point to docs/templates or a .template.* artifact | `evidence_ref_not_template_artifact_pass` = `False` |
+| `evidence_ref_not_generated_gate_artifact` | `` | evidence_ref must not point to generated PM/license/readiness gate artifacts | `evidence_ref_not_generated_gate_artifact_pass` = `False` |
 
 ## Gate Unblock Plan
 
@@ -53,6 +54,7 @@
   - evidence_ref is a ticket/jira/legal/docusign reference, https URL, or existing local evidence path
   - evidence_ref is not license_status.json itself
   - evidence_ref is not docs/templates or a .template artifact
+  - evidence_ref is not a generated PM/license/readiness gate artifact
 - `regenerate_release_gate_evidence`
   - license_status_closure_report.json contract_pass=true
   - license_status_intake_packet.json contract_pass=true

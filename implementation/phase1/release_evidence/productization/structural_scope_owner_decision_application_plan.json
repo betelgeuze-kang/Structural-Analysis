@@ -46,6 +46,7 @@
   },
   "cleanup_family_counts": {},
   "cleanup_path_area_counts": {},
+  "cleanup_priority_batches": [],
   "cleanup_required_count": 0,
   "cleanup_rows": [],
   "closure_blockers": [
@@ -58,12 +59,12 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-01T21:52:36.253061+00:00",
+  "generated_at": "2026-07-02T05:28:11.667108+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:1d4c06f2794448c0ca594b32d073647f312ef02c677c2e5081b35ffed4beb44e",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:74442161282fa31da789bd335158452591b4e32efda29ad2609de9d8446e7f05",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
-    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:43feb4774a90618c021a086b1cc8f95ae4f8adbe714d63eb5f05183cf59be835",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:86b4042083e579dc4ad5cd6a2be15c4ba1c15eae810f6932a16e7abf03e925f5",
+    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:80edad0f3f3c4f87f64c95e388bdbcfe945c7ac8fa77b3f001833b4eeb2e4e11",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:79d9c4a6b673e85ea5e4b73f3a6a6ffba3690e2b434d39f22b42e169b356dd2c",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:b6d7e6bd9fa121f9321f3dae4cc03fbf44cdf3d27d51a61466bf1b2b3a4bfedb"
   },
   "next_actions": [
@@ -75,6 +76,169 @@
     "rerun structural scope audit and owner review packet",
     "refresh product readiness snapshot"
   ],
+  "next_cleanup_application_batch": {},
+  "next_owner_review_batch": {
+    "batch_id": "release_surface_first",
+    "family_counts": {
+      "molecular_docking": 1,
+      "molecular_dynamics": 1,
+      "molecular_science_evidence": 1
+    },
+    "path_area": "release_surface",
+    "path_count": 3,
+    "paths": [
+      "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+    ],
+    "priority": 1,
+    "recommended_owner_decision_primary_counts": {
+      "delete_from_structural_repository": 3
+    },
+    "review_goal": "record owner delete/extract/retain decisions without mutating the repository"
+  },
+  "next_owner_review_batch_decision_template": {
+    "batch_id": "release_surface_first",
+    "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+    "claim_boundary": "This is a batch fill-in template and cleanup preview only. It is not an owner decision, does not delete files, and does not close scope cleanup without recorded owner evidence and refreshed audits.",
+    "conditional_required_fields": [
+      "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
+      "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception"
+    ],
+    "decision_pending_count": 3,
+    "decision_rows": [
+      {
+        "allowed_owner_decisions": [
+          "delete_from_structural_repository",
+          "extract_to_molecular_or_science_repository",
+          "retain_quarantined_with_signed_owner_exception"
+        ],
+        "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+        "decision_timestamp_utc": "",
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "families": [
+          "molecular_docking"
+        ],
+        "matched_tokens": [
+          "gpcr"
+        ],
+        "owner_decision": "",
+        "owner_identity": "",
+        "owner_role": "",
+        "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "path_area": "release_surface",
+        "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+        "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-001",
+        "signed_owner_exception_reference": ""
+      },
+      {
+        "allowed_owner_decisions": [
+          "delete_from_structural_repository",
+          "extract_to_molecular_or_science_repository",
+          "retain_quarantined_with_signed_owner_exception"
+        ],
+        "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+        "decision_timestamp_utc": "",
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "families": [
+          "molecular_science_evidence"
+        ],
+        "matched_tokens": [
+          "h_bond"
+        ],
+        "owner_decision": "",
+        "owner_identity": "",
+        "owner_role": "",
+        "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "path_area": "release_surface",
+        "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+        "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-002",
+        "signed_owner_exception_reference": ""
+      },
+      {
+        "allowed_owner_decisions": [
+          "delete_from_structural_repository",
+          "extract_to_molecular_or_science_repository",
+          "retain_quarantined_with_signed_owner_exception"
+        ],
+        "current_release_action": "keep_quarantined_until_owner_delete_or_extract_decision",
+        "decision_timestamp_utc": "",
+        "evidence_reference": "",
+        "external_archive_reference": "",
+        "families": [
+          "molecular_dynamics"
+        ],
+        "matched_tokens": [
+          "pocketmd"
+        ],
+        "owner_decision": "",
+        "owner_identity": "",
+        "owner_role": "",
+        "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "path_area": "release_surface",
+        "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
+        "recommended_owner_decision": "delete_from_structural_repository_or_extract_only_if_owner_requires_history",
+        "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "row_id": "release_surface_first-003",
+        "signed_owner_exception_reference": ""
+      }
+    ],
+    "generated_template_paths": {
+      "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
+      "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
+      "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md"
+    },
+    "path_area": "release_surface",
+    "post_batch_verification": [
+      "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+      "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+      "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+      "python3 scripts/build_product_readiness_snapshot.py --check"
+    ],
+    "primary_cleanup_preview": {
+      "owner_decision_required": true,
+      "preconditions": [
+        "owner fills matching decision rows in structural_scope_owner_decisions.json or CSV",
+        "owner_decision_validation_pass=true for these rows",
+        "human confirms the batch cleanup scope"
+      ],
+      "primary_delete_git_rm_args": [
+        "git",
+        "rm",
+        "--",
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "primary_delete_path_count": 3,
+      "primary_delete_paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "primary_extract_path_count": 0,
+      "primary_extract_paths": [],
+      "primary_extract_post_archive_git_rm_args": [],
+      "safe_to_auto_apply": false
+    },
+    "required_owner_fill_fields": [
+      "owner_decision",
+      "owner_identity",
+      "owner_role",
+      "decision_timestamp_utc",
+      "evidence_reference"
+    ],
+    "schema_version": "structural-scope-owner-decisions.v1"
+  },
   "owner_decision_pending_count": 86,
   "owner_decision_recorded_count": 0,
   "owner_decision_template_paths": {
@@ -89,6 +253,178 @@
   "owner_decision_validation_pass": false,
   "owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
   "owner_decisions_present": false,
+  "owner_review_priority_batches": [
+    {
+      "batch_id": "release_surface_first",
+      "family_counts": {
+        "molecular_docking": 1,
+        "molecular_dynamics": 1,
+        "molecular_science_evidence": 1
+      },
+      "path_area": "release_surface",
+      "path_count": 3,
+      "paths": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "priority": 1,
+      "recommended_owner_decision_primary_counts": {
+        "delete_from_structural_repository": 3
+      },
+      "review_goal": "record owner delete/extract/retain decisions without mutating the repository"
+    },
+    {
+      "batch_id": "productization_evidence_second",
+      "family_counts": {
+        "molecular_docking": 21,
+        "molecular_dynamics": 9,
+        "molecular_science_evidence": 6
+      },
+      "path_area": "productization_evidence",
+      "path_count": 36,
+      "paths": [
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.md",
+        "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_template.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.md",
+        "implementation/phase1/release_evidence/productization/public_benchmark_casf_pdbbind_operator_template.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_operator_template.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_coordinate_operator_template.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_success_harness.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_operator_template.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_rows_template.csv",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_operator_handoff.md",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.json",
+        "implementation/phase1/release_evidence/productization/science_actual_closure_row_audit.md"
+      ],
+      "priority": 2,
+      "recommended_owner_decision_primary_counts": {
+        "delete_from_structural_repository": 36
+      },
+      "review_goal": "record owner delete/extract/retain decisions without mutating the repository"
+    },
+    {
+      "batch_id": "script_cleanup_third",
+      "family_counts": {
+        "molecular_docking": 13,
+        "molecular_dynamics": 3,
+        "molecular_science_evidence": 3
+      },
+      "path_area": "script",
+      "path_count": 19,
+      "paths": [
+        "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
+        "scripts/build_gpcr_hard_decoy_product_report.py",
+        "scripts/build_h_bond_backmap_operator_intake_packet.py",
+        "scripts/build_pocketmd_lite_product_surface.py",
+        "scripts/build_science_actual_closure_operator_handoff.py",
+        "scripts/materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+        "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+        "scripts/materialize_pocketmd_lite_operator_intake_from_rows.py",
+        "scripts/materialize_pocketmd_lite_topk_survival_report.py",
+        "scripts/materialize_public_benchmark_enrichment_scorecard.py",
+        "scripts/materialize_public_benchmark_pose_success_harness.py",
+        "scripts/materialize_public_benchmark_pose_validity_input.py",
+        "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
+        "scripts/materialize_public_benchmark_subset_manifest.py",
+        "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+        "scripts/materialize_science_actual_closure_from_rows.py",
+        "scripts/score_symmetry_aware_ligand_rmsd.py",
+        "scripts/validate_public_benchmark_pose_validity.py",
+        "scripts/validate_public_benchmark_subset_manifest.py"
+      ],
+      "priority": 3,
+      "recommended_owner_decision_primary_counts": {
+        "extract_to_molecular_or_science_repository": 19
+      },
+      "review_goal": "record owner delete/extract/retain decisions without mutating the repository"
+    },
+    {
+      "batch_id": "test_cleanup_fourth",
+      "family_counts": {
+        "molecular_docking": 13,
+        "molecular_dynamics": 3,
+        "molecular_science_evidence": 3
+      },
+      "path_area": "test",
+      "path_count": 19,
+      "paths": [
+        "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
+        "tests/test_build_gpcr_hard_decoy_product_report.py",
+        "tests/test_build_h_bond_backmap_operator_intake_packet.py",
+        "tests/test_build_pocketmd_lite_product_surface.py",
+        "tests/test_build_science_actual_closure_operator_handoff.py",
+        "tests/test_materialize_gpcr_hard_decoy_operator_template_from_rows.py",
+        "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
+        "tests/test_materialize_pocketmd_lite_operator_intake_from_rows.py",
+        "tests/test_materialize_pocketmd_lite_topk_survival_report.py",
+        "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+        "tests/test_materialize_public_benchmark_pose_success_harness.py",
+        "tests/test_materialize_public_benchmark_pose_validity_input.py",
+        "tests/test_materialize_public_benchmark_posebusters_validity_packet.py",
+        "tests/test_materialize_public_benchmark_subset_manifest.py",
+        "tests/test_materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+        "tests/test_materialize_science_actual_closure_from_rows.py",
+        "tests/test_score_symmetry_aware_ligand_rmsd.py",
+        "tests/test_validate_public_benchmark_pose_validity.py",
+        "tests/test_validate_public_benchmark_subset_manifest.py"
+      ],
+      "priority": 4,
+      "recommended_owner_decision_primary_counts": {
+        "extract_to_molecular_or_science_repository": 19
+      },
+      "review_goal": "record owner delete/extract/retain decisions without mutating the repository"
+    },
+    {
+      "batch_id": "implementation_phase1_cleanup_fifth",
+      "family_counts": {
+        "molecular_dynamics": 9
+      },
+      "path_area": "implementation_phase1",
+      "path_count": 9,
+      "paths": [
+        "implementation/phase1/md3bead_scientific_validity_report.md",
+        "implementation/phase1/md3bead_soa.py",
+        "implementation/phase1/rust_hip_md3bead_hook.py",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+        "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+        "implementation/phase1/rust_hip_md3bead_hook/src/main.rs",
+        "implementation/phase1/rust_md3bead_parity_report.json",
+        "implementation/phase1/validate_md3bead_rust_parity.py"
+      ],
+      "priority": 5,
+      "recommended_owner_decision_primary_counts": {
+        "extract_to_molecular_or_science_repository": 9
+      },
+      "review_goal": "record owner delete/extract/retain decisions without mutating the repository"
+    }
+  ],
+  "partial_cleanup_ready": false,
   "pending_owner_decision_family_counts": {
     "molecular_docking": 48,
     "molecular_dynamics": 25,
@@ -118,6 +454,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -143,6 +482,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -168,6 +510,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -193,6 +538,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -218,6 +566,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -243,6 +594,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -268,6 +622,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -293,6 +650,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -318,6 +678,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -343,6 +706,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -368,6 +734,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -393,6 +762,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -418,6 +790,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -443,6 +818,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -468,6 +846,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -493,6 +874,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -518,6 +902,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -543,6 +930,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -568,6 +958,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -593,6 +986,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -618,6 +1014,10 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "casf_pdbbind",
+        "pdbbind"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -643,6 +1043,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -668,6 +1071,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -693,6 +1099,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -718,6 +1127,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -743,6 +1155,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -768,6 +1183,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -793,6 +1211,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -818,6 +1239,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -843,6 +1267,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -868,6 +1295,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "symmetry_rmsd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -893,6 +1323,11 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -918,6 +1353,11 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -943,6 +1383,11 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -968,6 +1413,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -993,6 +1441,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1018,6 +1469,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1043,6 +1497,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1068,6 +1525,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1093,6 +1553,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1118,6 +1581,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1143,6 +1609,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1168,6 +1637,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1193,6 +1665,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1218,6 +1693,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1243,6 +1721,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1268,6 +1749,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1293,6 +1777,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "md3bead"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1318,6 +1805,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1343,6 +1833,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1368,6 +1861,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1393,6 +1889,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1418,6 +1917,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1443,6 +1945,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1468,6 +1973,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1493,6 +2001,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1518,6 +2029,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1543,6 +2057,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1568,6 +2085,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1593,6 +2113,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1618,6 +2141,10 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "posebusters",
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1643,6 +2170,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1668,6 +2198,11 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1693,6 +2228,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1718,6 +2256,10 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "ligand",
+        "symmetry_aware_ligand"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1743,6 +2285,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1768,6 +2313,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1793,6 +2341,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1818,6 +2369,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1843,6 +2397,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "h_bond"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1868,6 +2425,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1893,6 +2453,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1918,6 +2481,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1943,6 +2509,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gpcr"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1968,6 +2537,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1993,6 +2565,9 @@
         "molecular_dynamics"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "pocketmd"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2018,6 +2593,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_enrichment"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2043,6 +2621,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2068,6 +2649,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2093,6 +2677,10 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "posebusters",
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2118,6 +2706,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2143,6 +2734,11 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "gnina",
+        "public_benchmark_vina_gnina",
+        "vina"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2168,6 +2764,9 @@
         "molecular_science_evidence"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "science_actual"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2193,6 +2792,10 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "ligand",
+        "symmetry_aware_ligand"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2218,6 +2821,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_pose"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2243,6 +2849,9 @@
         "molecular_docking"
       ],
       "manual_application_required": true,
+      "matched_tokens": [
+        "public_benchmark_subset"
+      ],
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2268,6 +2877,7 @@
   "post_decision_cleanup_applied_rows": [],
   "post_decision_cleanup_pending_count": 0,
   "quarantined_path_count": 86,
+  "release_surface_batch_cleanup_ready": false,
   "release_surface_cleanup_paths": [],
   "release_surface_cleanup_required_count": 0,
   "release_surface_excluded_path_count": 86,
@@ -2283,7 +2893,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "820f105aba97155d6e943ef91aee163bdd91bd0e",
+  "source_commit_sha": "9bb602c493bcdd420f65eea3f6c3524c781eb2cf",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",

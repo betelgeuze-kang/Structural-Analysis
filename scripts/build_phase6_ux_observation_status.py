@@ -25,6 +25,7 @@ PHASE5_GUI_WORKFLOW = PRODUCTIZATION / "phase5_gui_workflow_readiness_receipt.js
 SCHEMA_VERSION = "phase6-ux-observation-status.v1"
 TASK_BASED_UX_ENVIRONMENT_BLOCKER = "task_based_ux_browser_execution_environment_blocked"
 PREVIEW_LOOPBACK_BIND_REASON_CODE = "listen_eperm_127_0_0_1"
+PHASE5_HUMAN_OBSERVATION_BLOCKER = "human_new_user_observation_not_passed"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -364,6 +365,26 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
     missing_execution_steps = [
         str(step) for step in _as_list(phase5.get("missing_execution_workflow_steps")) if str(step)
     ]
+    phase5_blockers = _blockers(phase5)
+    phase5_non_human_blockers = [
+        blocker
+        for blocker in phase5_blockers
+        if blocker != PHASE5_HUMAN_OBSERVATION_BLOCKER
+    ]
+    phase5_human_spillover_only = bool(
+        not phase5_contract_pass
+        and phase5_blockers
+        and not phase5_non_human_blockers
+        and phase5_execution_count >= required_step_count
+        and browser_execution_passed
+        and not missing_execution_steps
+    )
+    phase5_execution_rehearsal_pass = bool(
+        phase5_execution_count >= required_step_count
+        and browser_execution_passed
+        and not phase5_non_human_blockers
+        and not missing_execution_steps
+    )
 
     blockers: list[str] = []
     if not human_observation_pass:
@@ -381,7 +402,7 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
         blockers.append(f"human_observation_required_workflow_steps_not_passed:{len(not_passed_observation_steps)}")
     if phase5_execution_count < required_step_count:
         blockers.append(f"phase5_workflow_execution_not_proven:{phase5_execution_count}/{required_step_count}")
-    if not phase5_contract_pass:
+    if not phase5_contract_pass and not phase5_human_spillover_only:
         blockers.append("phase5_gui_workflow_readiness_not_passed")
     if not browser_execution_passed:
         blockers.append("task_based_ux_browser_execution_not_passed")
@@ -389,7 +410,7 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
             blockers.append(str(browser_execution_environment["blocker"]))
 
     blockers.extend(f"observation_report:{blocker}" for blocker in _blockers(observation))
-    blockers.extend(f"phase5_gui_workflow:{blocker}" for blocker in _blockers(phase5))
+    blockers.extend(f"phase5_gui_workflow:{blocker}" for blocker in phase5_blockers)
     blockers = sorted(dict.fromkeys(blockers))
     contract_pass = bool(
         human_observation_pass
@@ -451,6 +472,12 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
         "phase5_workflow_gate": {
             "status": "ready" if phase5_contract_pass else "blocked",
             "contract_pass": phase5_contract_pass,
+            "execution_rehearsal_status": (
+                "ready" if phase5_execution_rehearsal_pass else "blocked"
+            ),
+            "execution_rehearsal_pass": phase5_execution_rehearsal_pass,
+            "human_observation_spillover_only": phase5_human_spillover_only,
+            "non_human_blockers": phase5_non_human_blockers,
             "receipt": PHASE5_GUI_WORKFLOW.as_posix(),
             "required_workflow_step_count": required_step_count,
             "workflow_shell_step_pass_count": phase5_shell_count,

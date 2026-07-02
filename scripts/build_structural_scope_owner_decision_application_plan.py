@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+from io import StringIO
 import json
 from pathlib import Path
 import sys
@@ -25,6 +27,11 @@ DEFAULT_QUARANTINE_MANIFEST = PRODUCTIZATION / "structural_scope_quarantine_mani
 DEFAULT_OWNER_DECISIONS = PRODUCTIZATION / "structural_scope_owner_decisions.json"
 DEFAULT_OUT = PRODUCTIZATION / "structural_scope_owner_decision_application_plan.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_NEXT_BATCH_TEMPLATE = (
+    PRODUCTIZATION / "structural_scope_owner_decisions.next_batch.template.json"
+)
+DEFAULT_NEXT_BATCH_TEMPLATE_MD = DEFAULT_NEXT_BATCH_TEMPLATE.with_suffix(".md")
+DEFAULT_NEXT_BATCH_TEMPLATE_CSV = DEFAULT_NEXT_BATCH_TEMPLATE.with_suffix(".csv")
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -65,6 +72,28 @@ def _deduped(items: list[str]) -> list[str]:
         seen.add(item)
         out.append(item)
     return out
+
+
+def _csv_text(rows: list[dict[str, Any]]) -> str:
+    output = StringIO()
+    writer = csv.DictWriter(
+        output,
+        fieldnames=list(owner_review.OWNER_DECISION_COLUMNS),
+        lineterminator="\n",
+    )
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(
+            {
+                column: (
+                    ";".join(str(item) for item in row[column])
+                    if isinstance(row.get(column), list)
+                    else str(row.get(column, ""))
+                )
+                for column in owner_review.OWNER_DECISION_COLUMNS
+            }
+        )
+    return output.getvalue()
 
 
 def _family_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
@@ -133,6 +162,7 @@ def _plan_row(row: dict[str, Any]) -> dict[str, Any]:
         "path": _text(row.get("path")),
         "path_area": _text(row.get("path_area")),
         "families": [str(item) for item in _as_list(row.get("families"))],
+        "matched_tokens": [str(item) for item in _as_list(row.get("matched_tokens"))],
         "owner_decision": _text(row.get("owner_decision")),
         "owner_decision_valid": bool(row.get("owner_decision_valid")),
         "owner_review_state": _text(row.get("owner_review_state")),
@@ -203,6 +233,240 @@ def _cleanup_command_manifest(cleanup_rows: list[dict[str, Any]]) -> dict[str, A
                 "python3 scripts/build_product_readiness_snapshot.py --check",
             ],
         },
+    }
+
+
+def _owner_review_priority_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    priority_order = [
+        ("release_surface", "release_surface_first"),
+        ("productization_evidence", "productization_evidence_second"),
+        ("script", "script_cleanup_third"),
+        ("test", "test_cleanup_fourth"),
+        ("implementation_phase1", "implementation_phase1_cleanup_fifth"),
+    ]
+    known_areas = {area for area, _batch_id in priority_order}
+    batches: list[dict[str, Any]] = []
+    for priority, (area, batch_id) in enumerate(priority_order, start=1):
+        batch_rows = [row for row in rows if row["path_area"] == area]
+        if not batch_rows:
+            continue
+        batches.append(
+            {
+                "batch_id": batch_id,
+                "priority": priority,
+                "path_area": area,
+                "path_count": len(batch_rows),
+                "paths": sorted(row["path"] for row in batch_rows),
+                "family_counts": _family_counts(batch_rows),
+                "recommended_owner_decision_primary_counts": _counts_by_key(
+                    batch_rows,
+                    "recommended_owner_decision_primary",
+                ),
+                "review_goal": (
+                    "record owner delete/extract/retain decisions without "
+                    "mutating the repository"
+                ),
+            }
+        )
+    other_rows = [row for row in rows if row["path_area"] not in known_areas]
+    if other_rows:
+        batches.append(
+            {
+                "batch_id": "other_owner_review_last",
+                "priority": len(priority_order) + 1,
+                "path_area": "other",
+                "path_count": len(other_rows),
+                "paths": sorted(row["path"] for row in other_rows),
+                "family_counts": _family_counts(other_rows),
+                "recommended_owner_decision_primary_counts": _counts_by_key(
+                    other_rows,
+                    "recommended_owner_decision_primary",
+                ),
+                "review_goal": (
+                    "record owner delete/extract/retain decisions without "
+                    "mutating the repository"
+                ),
+            }
+        )
+    return batches
+
+
+def _path_area_priority(path_area: str) -> tuple[int, str]:
+    priority = {
+        "release_surface": 1,
+        "productization_evidence": 2,
+        "script": 3,
+        "test": 4,
+        "implementation_phase1": 5,
+    }
+    return priority.get(path_area, 99), path_area
+
+
+def _cleanup_priority_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        groups.setdefault(row["path_area"] or "unknown", []).append(row)
+    batches: list[dict[str, Any]] = []
+    for path_area in sorted(groups, key=_path_area_priority):
+        batch_rows = sorted(groups[path_area], key=lambda item: item["path"])
+        batches.append(
+            {
+                "batch_id": f"{path_area}_cleanup",
+                "path_area": path_area,
+                "path_count": len(batch_rows),
+                "paths": [row["path"] for row in batch_rows],
+                "owner_decision_counts": _counts_by_key(
+                    batch_rows, "owner_decision"
+                ),
+                "family_counts": _family_counts(batch_rows),
+                "manual_application_required": True,
+                "safe_to_auto_apply": False,
+                "delete_paths": [
+                    row["path"]
+                    for row in batch_rows
+                    if row["owner_decision"] == "delete_from_structural_repository"
+                ],
+                "extract_paths": [
+                    row["path"]
+                    for row in batch_rows
+                    if row["owner_decision"]
+                    == "extract_to_molecular_or_science_repository"
+                ],
+                "post_apply_verification": [
+                    "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                    "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+                    "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+                    "python3 scripts/build_product_readiness_snapshot.py --check",
+                ],
+            }
+        )
+    for batch in batches:
+        batch["delete_git_rm_args"] = _git_rm_args(batch["delete_paths"])
+        batch["extract_post_archive_git_rm_args"] = _git_rm_args(
+            batch["extract_paths"]
+        )
+    return batches
+
+
+def _decision_template_row(row: dict[str, Any], *, index: int, batch_id: str) -> dict[str, Any]:
+    recommended = _text(row.get("recommended_owner_decision"))
+    post_decision_required_action = (
+        "delete_or_extract_path_then_rerun_scope_audit"
+        if recommended.startswith(
+            (
+                "delete_from_structural_repository",
+                "extract_to_molecular_or_science_repository",
+            )
+        )
+        else "keep_quarantined_with_signed_owner_exception"
+    )
+    return {
+        "row_id": f"{batch_id}-{index + 1:03d}",
+        "path": _text(row.get("path")),
+        "path_area": _text(row.get("path_area")),
+        "families": [str(item) for item in _as_list(row.get("families"))],
+        "matched_tokens": [str(item) for item in _as_list(row.get("matched_tokens"))],
+        "current_release_action": _text(row.get("current_release_action")),
+        "recommended_owner_decision": recommended,
+        "recommended_owner_decision_primary": _text(
+            row.get("recommended_owner_decision_primary")
+        ),
+        "recommended_owner_decision_alternate": _text(
+            row.get("recommended_owner_decision_alternate")
+        ),
+        "allowed_owner_decisions": list(owner_review.ALLOWED_OWNER_DECISIONS),
+        "owner_decision": "",
+        "owner_identity": "",
+        "owner_role": "",
+        "decision_timestamp_utc": "",
+        "evidence_reference": "",
+        "signed_owner_exception_reference": "",
+        "external_archive_reference": "",
+        "post_decision_required_action": post_decision_required_action,
+    }
+
+
+def _next_batch_decision_template(
+    *,
+    pending_owner_decision_rows: list[dict[str, Any]],
+    next_batch: dict[str, Any],
+) -> dict[str, Any]:
+    if not next_batch:
+        return {}
+    batch_paths = set(str(path) for path in _as_list(next_batch.get("paths")))
+    batch_rows = [
+        row
+        for row in pending_owner_decision_rows
+        if row.get("path") in batch_paths
+    ]
+    batch_id = _text(next_batch.get("batch_id")) or "next_owner_review_batch"
+    decision_rows = [
+        _decision_template_row(row, index=index, batch_id=batch_id)
+        for index, row in enumerate(sorted(batch_rows, key=lambda item: item["path"]))
+    ]
+    primary_delete_paths = [
+        row["path"]
+        for row in decision_rows
+        if row["recommended_owner_decision_primary"]
+        == "delete_from_structural_repository"
+    ]
+    primary_extract_paths = [
+        row["path"]
+        for row in decision_rows
+        if row["recommended_owner_decision_primary"]
+        == "extract_to_molecular_or_science_repository"
+    ]
+    return {
+        "schema_version": owner_review.DECISION_SCHEMA_VERSION,
+        "batch_id": batch_id,
+        "path_area": _text(next_batch.get("path_area")),
+        "decision_pending_count": len(decision_rows),
+        "decision_rows": decision_rows,
+        "canonical_owner_decisions_path": DEFAULT_OWNER_DECISIONS.as_posix(),
+        "generated_template_paths": {
+            "json": DEFAULT_NEXT_BATCH_TEMPLATE.as_posix(),
+            "csv": DEFAULT_NEXT_BATCH_TEMPLATE_CSV.as_posix(),
+            "markdown": DEFAULT_NEXT_BATCH_TEMPLATE_MD.as_posix(),
+        },
+        "required_owner_fill_fields": [
+            "owner_decision",
+            "owner_identity",
+            "owner_role",
+            "decision_timestamp_utc",
+            "evidence_reference",
+        ],
+        "conditional_required_fields": [
+            "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
+            "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception",
+        ],
+        "primary_cleanup_preview": {
+            "safe_to_auto_apply": False,
+            "owner_decision_required": True,
+            "primary_delete_path_count": len(primary_delete_paths),
+            "primary_delete_paths": primary_delete_paths,
+            "primary_delete_git_rm_args": _git_rm_args(primary_delete_paths),
+            "primary_extract_path_count": len(primary_extract_paths),
+            "primary_extract_paths": primary_extract_paths,
+            "primary_extract_post_archive_git_rm_args": _git_rm_args(
+                primary_extract_paths
+            ),
+            "preconditions": [
+                "owner fills matching decision rows in structural_scope_owner_decisions.json or CSV",
+                "owner_decision_validation_pass=true for these rows",
+                "human confirms the batch cleanup scope",
+            ],
+        },
+        "post_batch_verification": [
+            "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+            "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+            "python3 scripts/build_product_readiness_snapshot.py --check",
+        ],
+        "claim_boundary": (
+            "This is a batch fill-in template and cleanup preview only. It is not "
+            "an owner decision, does not delete files, and does not close scope "
+            "cleanup without recorded owner evidence and refreshed audits."
+        ),
     }
 
 
@@ -280,9 +544,23 @@ def build_application_plan(
     cleanup_rows = [
         row for row in rows if row["post_decision_cleanup_pending"] is True
     ]
+    cleanup_priority_batches = _cleanup_priority_batches(cleanup_rows)
+    next_cleanup_application_batch = (
+        cleanup_priority_batches[0] if cleanup_priority_batches else {}
+    )
     pending_owner_decision_rows = [
         row for row in rows if row["owner_decision_valid"] is False
     ]
+    owner_review_priority_batches = _owner_review_priority_batches(
+        pending_owner_decision_rows
+    )
+    next_owner_review_batch = (
+        owner_review_priority_batches[0] if owner_review_priority_batches else {}
+    )
+    next_owner_review_batch_decision_template = _next_batch_decision_template(
+        pending_owner_decision_rows=pending_owner_decision_rows,
+        next_batch=next_owner_review_batch,
+    )
     application_blockers = _deduped(
         [
             *owner_decision_validation_blockers,
@@ -374,6 +652,11 @@ def build_application_plan(
         "pending_owner_decision_primary_counts": _counts_by_key(
             pending_owner_decision_rows, "recommended_owner_decision_primary"
         ),
+        "owner_review_priority_batches": owner_review_priority_batches,
+        "next_owner_review_batch": next_owner_review_batch,
+        "next_owner_review_batch_decision_template": (
+            next_owner_review_batch_decision_template
+        ),
         "release_surface_owner_decision_required_count": sum(
             1 for row in pending_owner_decision_rows if row["path_area"] == "release_surface"
         ),
@@ -392,6 +675,13 @@ def build_application_plan(
             row["path"] for row in cleanup_rows if row["path_area"] == "release_surface"
         ],
         "cleanup_command_manifest": _cleanup_command_manifest(cleanup_rows),
+        "cleanup_priority_batches": cleanup_priority_batches,
+        "next_cleanup_application_batch": next_cleanup_application_batch,
+        "release_surface_batch_cleanup_ready": any(
+            batch.get("path_area") == "release_surface"
+            for batch in cleanup_priority_batches
+        ),
+        "partial_cleanup_ready": bool(cleanup_priority_batches),
         "cleanup_rows": cleanup_rows,
         "post_decision_cleanup_applied_rows": [
             row
@@ -449,7 +739,50 @@ def _markdown(payload: dict[str, Any]) -> str:
         "- `pending_owner_decision_primary_counts`: "
         f"`{payload['pending_owner_decision_primary_counts']}`"
     )
+    next_batch = payload.get("next_owner_review_batch")
+    next_batch = next_batch if isinstance(next_batch, dict) else {}
+    if next_batch:
+        lines.append(
+            "- `next_owner_review_batch`: "
+            f"`{next_batch.get('batch_id')}` "
+            f"paths=`{next_batch.get('path_count')}` "
+            f"area=`{next_batch.get('path_area')}`"
+        )
+    if payload.get("owner_review_priority_batches"):
+        lines.append(
+            "- `owner_review_priority_batches`: "
+            f"`{len(payload['owner_review_priority_batches'])}`"
+        )
     lines.append("")
+    next_batch_template = payload.get("next_owner_review_batch_decision_template")
+    next_batch_template = (
+        next_batch_template if isinstance(next_batch_template, dict) else {}
+    )
+    if next_batch_template:
+        lines.extend(["## Next Batch Decision Template", ""])
+        lines.append(
+            "- `batch_id`: "
+            f"`{next_batch_template.get('batch_id')}`"
+        )
+        lines.append(
+            "- `decision_pending_count`: "
+            f"`{next_batch_template.get('decision_pending_count')}`"
+        )
+        preview = next_batch_template.get("primary_cleanup_preview")
+        preview = preview if isinstance(preview, dict) else {}
+        lines.append(
+            "- `primary_delete_path_count`: "
+            f"`{preview.get('primary_delete_path_count', 0)}`"
+        )
+        lines.extend(["", "| Row | Path | Primary Decision |", "|---|---|---|"])
+        for row in next_batch_template.get("decision_rows", []):
+            lines.append(
+                "| "
+                f"`{row['row_id']}` | "
+                f"`{row['path']}` | "
+                f"`{row['recommended_owner_decision_primary']}` |"
+            )
+        lines.append("")
     if payload["owner_decision_validation_blockers"]:
         lines.extend(["## Owner Decision Validation Blockers", ""])
         lines.extend(
@@ -480,7 +813,73 @@ def _markdown(payload: dict[str, Any]) -> str:
         "- `extract_to_molecular_or_science_repository.path_count`: "
         f"`{manifest['extract_to_molecular_or_science_repository']['path_count']}`"
     )
+    if payload.get("cleanup_priority_batches"):
+        lines.extend(["", "## Cleanup Priority Batches", ""])
+        lines.extend(
+            [
+                "| Batch | Area | Paths | Delete | Extract |",
+                "|---|---|---:|---:|---:|",
+            ]
+        )
+        for batch in payload["cleanup_priority_batches"]:
+            lines.append(
+                "| "
+                f"`{batch['batch_id']}` | "
+                f"`{batch['path_area']}` | "
+                f"{batch['path_count']} | "
+                f"{len(batch['delete_paths'])} | "
+                f"{len(batch['extract_paths'])} |"
+            )
     lines.extend(["", "## Claim Boundary", "", str(payload["claim_boundary"]), ""])
+    return "\n".join(lines)
+
+
+def _next_batch_template_markdown(payload: dict[str, Any]) -> str:
+    if not payload:
+        return ""
+    lines = [
+        "# Structural Scope Next Batch Owner Decision Template",
+        "",
+        f"- `batch_id`: `{payload['batch_id']}`",
+        f"- `path_area`: `{payload['path_area']}`",
+        f"- `decision_pending_count`: `{payload['decision_pending_count']}`",
+        (
+            "- `external_archive_reference`: required when `owner_decision` is "
+            "`extract_to_molecular_or_science_repository`"
+        ),
+        (
+            "- `signed_owner_exception_reference`: required when `owner_decision` "
+            "is `retain_quarantined_with_signed_owner_exception`"
+        ),
+        "",
+        "| Row | Path | Primary Decision | Alternate Decision |",
+        "|---|---|---|---|",
+    ]
+    for row in payload["decision_rows"]:
+        lines.append(
+            "| "
+            f"`{row['row_id']}` | "
+            f"`{row['path']}` | "
+            f"`{row['recommended_owner_decision_primary']}` | "
+            f"`{row['recommended_owner_decision_alternate']}` |"
+        )
+    preview = payload.get("primary_cleanup_preview")
+    preview = preview if isinstance(preview, dict) else {}
+    lines.extend(
+        [
+            "",
+            "## Primary Cleanup Preview",
+            "",
+            f"- `safe_to_auto_apply`: `{preview.get('safe_to_auto_apply')}`",
+            f"- `primary_delete_path_count`: `{preview.get('primary_delete_path_count', 0)}`",
+            f"- `primary_extract_path_count`: `{preview.get('primary_extract_path_count', 0)}`",
+            "",
+            "## Claim Boundary",
+            "",
+            str(payload["claim_boundary"]),
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -492,6 +891,9 @@ def write_application_plan(
     owner_decisions_path: Path = DEFAULT_OWNER_DECISIONS,
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
+    next_batch_template_out: Path = DEFAULT_NEXT_BATCH_TEMPLATE,
+    next_batch_template_out_md: Path = DEFAULT_NEXT_BATCH_TEMPLATE_MD,
+    next_batch_template_out_csv: Path = DEFAULT_NEXT_BATCH_TEMPLATE_CSV,
 ) -> dict[str, Any]:
     payload = build_application_plan(
         repo_root=repo_root,
@@ -505,6 +907,26 @@ def write_application_plan(
     resolved_out.write_text(_json_text(payload), encoding="utf-8")
     resolved_out_md.parent.mkdir(parents=True, exist_ok=True)
     resolved_out_md.write_text(_markdown(payload), encoding="utf-8")
+    next_batch_template = payload.get("next_owner_review_batch_decision_template")
+    next_batch_template = (
+        next_batch_template if isinstance(next_batch_template, dict) else {}
+    )
+    if next_batch_template:
+        resolved_next = _resolve(repo_root, next_batch_template_out)
+        resolved_next_md = _resolve(repo_root, next_batch_template_out_md)
+        resolved_next_csv = _resolve(repo_root, next_batch_template_out_csv)
+        resolved_next.parent.mkdir(parents=True, exist_ok=True)
+        resolved_next.write_text(_json_text(next_batch_template), encoding="utf-8")
+        resolved_next_md.parent.mkdir(parents=True, exist_ok=True)
+        resolved_next_md.write_text(
+            _next_batch_template_markdown(next_batch_template),
+            encoding="utf-8",
+        )
+        resolved_next_csv.parent.mkdir(parents=True, exist_ok=True)
+        resolved_next_csv.write_text(
+            _csv_text(next_batch_template["decision_rows"]),
+            encoding="utf-8",
+        )
     return payload
 
 
@@ -516,6 +938,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--owner-decisions", type=Path, default=DEFAULT_OWNER_DECISIONS)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument(
+        "--next-batch-template-out",
+        type=Path,
+        default=DEFAULT_NEXT_BATCH_TEMPLATE,
+    )
+    parser.add_argument(
+        "--next-batch-template-out-md",
+        type=Path,
+        default=DEFAULT_NEXT_BATCH_TEMPLATE_MD,
+    )
+    parser.add_argument(
+        "--next-batch-template-out-csv",
+        type=Path,
+        default=DEFAULT_NEXT_BATCH_TEMPLATE_CSV,
+    )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     parser.add_argument(
@@ -539,6 +976,9 @@ def main(argv: list[str] | None = None) -> int:
         owner_decisions_path=args.owner_decisions,
         out=args.out,
         out_md=args.out_md,
+        next_batch_template_out=args.next_batch_template_out,
+        next_batch_template_out_md=args.next_batch_template_out_md,
+        next_batch_template_out_csv=args.next_batch_template_out_csv,
     )
     if args.json:
         print(_json_text(payload), end="")

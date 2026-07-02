@@ -69,7 +69,7 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert (
         medium_actions["run_medium_scorecard_receipts"]["remaining_case_count"] == 5
     )
-    assert "medium_structural_models_current_below_required:0/5" in medium["blockers"]
+    assert "medium_structural_models_current_below_required:2/5" in medium["blockers"]
     assert "medium_model_pass_or_review_below_required:0/5" in medium["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in medium["blockers"]
     medium_grouping = medium["blocker_grouping_metadata"]
@@ -79,7 +79,7 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert "opensees_medium_scorecard_execution_missing" in medium_grouping[
         "groups"
     ]["medium_scorecard_execution"]["blockers"]
-    assert "medium_structural_models_current_below_required:0/5" in medium_grouping[
+    assert "medium_structural_models_current_below_required:2/5" in medium_grouping[
         "groups"
     ]["medium_quantity_shortfall"]["blockers"]
     large = payload["large_gate"]

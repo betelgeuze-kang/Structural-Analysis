@@ -273,11 +273,11 @@
       "current_value": "",
       "field": "evidence_ref_not_generated_gate_artifact",
       "missing": false,
-      "owner_note": "Generated gate reports are validation outputs, not separate human-observation evidence.",
+      "owner_note": "Generated gate reports and automated rehearsal receipts are validation outputs, not separate human-observation evidence.",
       "placeholder": false,
       "report_check": "evidence_ref_not_generated_gate_artifact_pass",
       "report_check_pass": false,
-      "required_value": "evidence_ref must not point to generated UX report or intake artifacts",
+      "required_value": "evidence_ref must not point to generated UX/PM/DP/readiness gate or automated browser-rehearsal artifacts",
       "template_value": "derived from observation timestamps"
     }
   ],
@@ -340,7 +340,7 @@
         "evidence_ref is a ticket/jira/ux/user-study reference, https URL, or existing local evidence path",
         "evidence_ref is not the observation JSON itself",
         "evidence_ref is not docs/templates or a .template artifact",
-        "evidence_ref is not a generated UX report or intake artifact",
+        "evidence_ref is not a generated UX/PM/DP/readiness gate or automated browser-rehearsal artifact",
         "approval_decision is accepted, approved, pass, signed, or approved_for_release"
       ],
       "slot_id": "attach_separate_evidence_reference"
@@ -360,7 +360,7 @@
     }
   ],
   "gate_unblock_plan_count": 5,
-  "generated_at": "2026-07-01T21:44:07.235094+00:00",
+  "generated_at": "2026-07-01T22:31:56.919991+00:00",
   "next_actions": [
     "fill_ux_new_user_observation_record_from_template",
     "run_30_minute_human_new_user_core_workflow_observation",

@@ -22,6 +22,20 @@
 - `pending_owner_decision_family_counts`: `{'molecular_docking': 48, 'molecular_dynamics': 25, 'molecular_science_evidence': 13}`
 - `pending_owner_decision_recommended_owner_decision_counts`: `{'delete_from_structural_repository_or_extract_only_if_owner_requires_history': 39, 'extract_to_molecular_or_science_repository_or_delete_if_obsolete': 47}`
 - `pending_owner_decision_primary_counts`: `{'delete_from_structural_repository': 39, 'extract_to_molecular_or_science_repository': 47}`
+- `next_owner_review_batch`: `release_surface_first` paths=`3` area=`release_surface`
+- `owner_review_priority_batches`: `5`
+
+## Next Batch Decision Template
+
+- `batch_id`: `release_surface_first`
+- `decision_pending_count`: `3`
+- `primary_delete_path_count`: `3`
+
+| Row | Path | Primary Decision |
+|---|---|---|
+| `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `delete_from_structural_repository` |
+| `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `delete_from_structural_repository` |
+| `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `delete_from_structural_repository` |
 
 ## Owner Decision Validation Blockers
 

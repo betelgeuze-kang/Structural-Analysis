@@ -211,6 +211,16 @@
       "owner_note": "Any template-like file is rejected as product/legal approval evidence.",
       "required_value": "evidence_ref must not point to docs/templates or a .template.* artifact",
       "template_value": "derived from closure report"
+    },
+    {
+      "accepted_keys": [],
+      "closure_check": "evidence_ref_not_generated_gate_artifact_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "evidence_ref_not_generated_gate_artifact",
+      "owner_note": "Generated gate reports and intake packets verify approval evidence; they cannot be that evidence.",
+      "required_value": "evidence_ref must not point to generated PM/license/readiness gate artifacts",
+      "template_value": "derived from closure report"
     }
   ],
   "gate_unblock_plan": [
@@ -271,7 +281,8 @@
       "minimum_evidence": [
         "evidence_ref is a ticket/jira/legal/docusign reference, https URL, or existing local evidence path",
         "evidence_ref is not license_status.json itself",
-        "evidence_ref is not docs/templates or a .template artifact"
+        "evidence_ref is not docs/templates or a .template artifact",
+        "evidence_ref is not a generated PM/license/readiness gate artifact"
       ],
       "slot_id": "attach_distinct_retrievable_evidence_reference"
     },
@@ -291,7 +302,7 @@
     }
   ],
   "gate_unblock_plan_count": 6,
-  "generated_at": "2026-07-01T19:51:42.501326+00:00",
+  "generated_at": "2026-07-01T22:09:35.986952+00:00",
   "license_status_path": "implementation/phase1/release/support_bundle/license_status.json",
   "next_actions": [
     "fill_license_status_record_from_template",
@@ -306,13 +317,13 @@
   "summary": {
     "closure_blocker_count": 10,
     "closure_contract_pass": false,
-    "field_count": 16,
+    "field_count": 17,
     "field_pass_count": 0,
     "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
     "placeholder_values_absent_pass": true,
     "provenance_complete_pass": false
   },
-  "summary_line": "License status intake: BLOCKED | fields=0/16 | blockers=10",
+  "summary_line": "License status intake: BLOCKED | fields=0/17 | blockers=10",
   "template_path": "docs/templates/license_status.template.json",
   "validation_commands": [
     "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json",
