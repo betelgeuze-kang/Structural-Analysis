@@ -26,6 +26,12 @@ DEFAULT_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path
 DEFAULT_LOAD_DEPENDENT_COMPARISON = (
     PRODUCTIZATION / "g1_load_dependent_near_null_geometric_stiffness_comparison.json"
 )
+DEFAULT_CANDIDATE_RUNNER = (
+    PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
+)
+DEFAULT_HIP_REQUIRED_PROBE = (
+    PRODUCTIZATION / "mgt_residual_jacobian_consistency_hip_required_probe.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
 SCHEMA_VERSION = "g1-f2g-f2h-cause-narrowing-status.v1"
 REUSE_POLICY = "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice"
@@ -81,6 +87,17 @@ def _first(items: list[str], limit: int = 12) -> list[str]:
     return out
 
 
+def _deduped(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if not item or item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
+
+
 def _finding_ids(f2g_audit: dict[str, Any]) -> set[str]:
     return {
         str(row.get("finding_id") or "")
@@ -100,6 +117,22 @@ def _residual_growth_factor(f2h_status: dict[str, Any]) -> float | None:
     return values[-1] / values[0]
 
 
+def _g1_closure_blocker_ids(g1_full_load: dict[str, Any]) -> list[str]:
+    lane_blockers = [
+        f"g1_full_load_lane::{blocker}"
+        for blocker in _as_list(g1_full_load.get("blockers"))
+        if str(blocker)
+    ]
+    return _deduped(
+        [
+            "g1_closure::full_load_1p0_checkpoint_candidate_missing",
+            "g1_closure::consistent_residual_jacobian_newton_required",
+            "g1_closure::production_rocm_hip_residual_jvp_worker_required",
+            *[str(item) for item in lane_blockers],
+        ]
+    )
+
+
 def build_status(
     *,
     repo_root: Path = ROOT,
@@ -115,6 +148,8 @@ def build_status(
     g1_full_load = _load_json(repo_root, g1_full_load_path)
     global_connectivity = _load_json(repo_root, global_connectivity_path)
     load_dependent_comparison = _load_json(repo_root, load_dependent_comparison_path)
+    candidate_runner = _load_json(repo_root, DEFAULT_CANDIDATE_RUNNER)
+    hip_required_probe = _load_json(repo_root, DEFAULT_HIP_REQUIRED_PROBE)
 
     blockers: list[str] = []
     if not f2g_audit:
@@ -229,6 +264,19 @@ def build_status(
         "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
         "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
     ]
+    evidence_intake_artifacts = _deduped(
+        [
+            str(f2g_audit_path),
+            str(f2h_status_path),
+            str(global_connectivity_path),
+            str(load_dependent_comparison_path),
+            str(DEFAULT_CANDIDATE_RUNNER),
+            str(DEFAULT_HIP_REQUIRED_PROBE),
+            str(g1_full_load_path),
+            *required_next_receipts,
+        ]
+    )
+    g1_closure_blocker_ids = _g1_closure_blocker_ids(g1_full_load)
     decision_record = {
         "schema_version": "g1-f2g-f2h-next-lane-decision.v1",
         "global_connectivity_decision_record_present": global_decision_present,
@@ -249,6 +297,8 @@ def build_status(
         ],
         "primary_next_lane": primary_next_lane,
         "required_next_receipts": required_next_receipts,
+        "evidence_intake_artifacts": evidence_intake_artifacts,
+        "g1_closure_blocker_ids": g1_closure_blocker_ids,
         "claim_boundary": (
             "This decision routes the next G1 diagnostic slice only. It does not "
             "close G1, prove full-load 1.0 equilibrium, or prove production "
@@ -378,7 +428,56 @@ def build_status(
         "load_dependent_geometric_softening_signal": load_dependent_geometric_signal,
         "primary_next_lane": primary_next_lane,
         "required_next_receipt_count": len(required_next_receipts),
+        "evidence_intake_artifact_count": len(evidence_intake_artifacts),
+        "g1_closure_blocker_id_count": len(g1_closure_blocker_ids),
         "promotes_g1_closure": False,
+    }
+    row_only_correction_policy = {
+        "schema_version": "g1-row-only-correction-policy.v1",
+        "decision": (
+            "stop_support_or_elastic_link_row_only_loop"
+            if decision_record["stop_row_only_support_or_elastic_link_correction_loop"]
+            else "audit_before_more_row_only_corrections"
+        ),
+        "accepted_next_lanes": [
+            "consistent_residual_jacobian_newton_rocm_worker",
+            "load_dependent_near_null_geometric_stiffness_comparison",
+            "production_rocm_hip_residual_jvp_worker",
+        ],
+        "rejected_substitutes": [
+            "more support/link row-only correction without new authoritative rows",
+            "fixed-point residual used as physical direct residual",
+            "CPU diagnostic assembler counted as production ROCm/HIP closure",
+            "frontier residual descent counted as full-load 1.0 equilibrium",
+        ],
+        "required_receipts_before_reconsidering_row_only_loop": [
+            str(global_connectivity_path),
+            str(load_dependent_comparison_path),
+        ],
+    }
+    production_lane_evidence_policy = {
+        "schema_version": "g1-production-rocm-hip-evidence-policy.v1",
+        "closure_rule": (
+            "G1 closure requires a full-load 1.0 checkpoint, a passing consistent "
+            "residual/Jacobian Newton gate, and a production ROCm/HIP residual/JVP "
+            "worker path with no CPU fallback."
+        ),
+        "required_receipts": required_next_receipts,
+        "candidate_runner_status": str(candidate_runner.get("status", "missing")),
+        "hip_required_probe_status": str(hip_required_probe.get("status", "missing")),
+        "g1_full_load_lane_status": str(g1_full_load.get("status", "missing")),
+        "accepted_evidence": [
+            "full-load 1.0 checkpoint candidate with direct residual and increment gates",
+            "consistent residual/Jacobian Newton receipt",
+            "production ROCm/HIP residual/JVP residency proof with no CPU fallback",
+            "g1_full_load_hip_newton_lane_report.contract_pass == true",
+        ],
+        "rejected_substitutes": [
+            "non-promoting F2g/F2h diagnostic readiness",
+            "row-active residual frontier descent below full-load 1.0",
+            "CPU diagnostic direct residual proof counted as production HIP",
+            "HIP compatibility alias without device-resident residual/JVP proof",
+        ],
     }
     next_actions = [
         "stop_row_only_support_or_elastic_link_correction_loop"
@@ -468,6 +567,8 @@ def build_status(
                 g1_full_load_path,
                 global_connectivity_path,
                 load_dependent_comparison_path,
+                DEFAULT_CANDIDATE_RUNNER,
+                DEFAULT_HIP_REQUIRED_PROBE,
             ],
             reused_evidence=True,
             reuse_policy=REUSE_POLICY,
@@ -490,6 +591,12 @@ def build_status(
         ),
         "summary": summary,
         "root_cause_classification": root_cause_classification,
+        "g1_closure_blocker_ids": g1_closure_blocker_ids,
+        "g1_closure_blocker_id_count": len(g1_closure_blocker_ids),
+        "evidence_intake_artifacts": evidence_intake_artifacts,
+        "evidence_intake_artifact_count": len(evidence_intake_artifacts),
+        "row_only_correction_policy": row_only_correction_policy,
+        "production_lane_evidence_policy": production_lane_evidence_policy,
         "evidence_signals": evidence_signals,
         "signals": evidence_signals,
         "decision_record": decision_record,

@@ -123,6 +123,42 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
     assert payload["summary"]["primary_next_lane"] == (
         "consistent_residual_jacobian_newton_rocm_worker"
     )
+    assert payload["summary"]["g1_closure_blocker_id_count"] == 5
+    assert payload["summary"]["evidence_intake_artifact_count"] == 8
+    assert payload["g1_closure_blocker_id_count"] == 5
+    assert "g1_closure::full_load_1p0_checkpoint_candidate_missing" in payload[
+        "g1_closure_blocker_ids"
+    ]
+    assert "g1_closure::consistent_residual_jacobian_newton_required" in payload[
+        "g1_closure_blocker_ids"
+    ]
+    assert "g1_full_load_lane::hip_consistency_proof_gate_not_passed" in payload[
+        "g1_closure_blocker_ids"
+    ]
+    assert str(f2g) in payload["evidence_intake_artifacts"]
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
+    ) in payload["evidence_intake_artifacts"]
+    assert payload["decision_record"]["g1_closure_blocker_ids"] == payload[
+        "g1_closure_blocker_ids"
+    ]
+    assert payload["decision_record"]["evidence_intake_artifacts"] == payload[
+        "evidence_intake_artifacts"
+    ]
+    assert payload["row_only_correction_policy"]["decision"] == (
+        "stop_support_or_elastic_link_row_only_loop"
+    )
+    assert "more support/link row-only correction without new authoritative rows" in payload[
+        "row_only_correction_policy"
+    ]["rejected_substitutes"]
+    assert payload["production_lane_evidence_policy"]["closure_rule"].startswith(
+        "G1 closure requires a full-load 1.0 checkpoint"
+    )
+    assert payload["production_lane_evidence_policy"]["g1_full_load_lane_status"] == "missing"
+    assert "CPU diagnostic direct residual proof counted as production HIP" in payload[
+        "production_lane_evidence_policy"
+    ]["rejected_substitutes"]
     assert payload["root_cause_classification"] == {
         "support_or_elastic_link_row_gap": "deprioritized",
         "global_connectivity_or_load_path_transfer": "load_path_transfer_or_tangent_gap",
