@@ -191,6 +191,24 @@ def test_cleanup_impact_report_treats_pm_scope_tracking_as_release_governance(
         "public_benchmark_source_of_truth.json",
         "implementation/phase1/md3bead_soa.py\n",
     )
+    _write_text(
+        tmp_path / "scripts/report_pm_release_gate.py",
+        (
+            "implementation/phase1/release_evidence/surface/"
+            "gpcr_hard_decoy_evidence_surface.json\n"
+        ),
+    )
+    _write_text(
+        tmp_path / "tests/test_report_pm_release_gate.py",
+        "gpcr_hard_decoy_evidence_surface\n",
+    )
+    _write_text(
+        tmp_path / "tests/test_build_pm_release_blocker_action_register.py",
+        (
+            "implementation/phase1/release_evidence/surface/"
+            "gpcr_hard_decoy_evidence_surface.json\n"
+        ),
+    )
     _git_add(tmp_path)
 
     payload = impact_report.build_cleanup_impact_report(
@@ -209,10 +227,19 @@ def test_cleanup_impact_report_treats_pm_scope_tracking_as_release_governance(
     public_benchmark = rows[
         "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json"
     ]
+    pm_gate_script = rows["scripts/report_pm_release_gate.py"]
+    pm_gate_test = rows["tests/test_report_pm_release_gate.py"]
+    pm_blocker_test = rows["tests/test_build_pm_release_blocker_action_register.py"]
     assert pm_report["reference_role"] == "release_governance_reference"
     assert pm_report["blocking_cleanup_reference"] is False
     assert pm_handoff["reference_role"] == "release_governance_reference"
     assert pm_handoff["blocking_cleanup_reference"] is False
+    assert pm_gate_script["reference_role"] == "release_governance_reference"
+    assert pm_gate_script["blocking_cleanup_reference"] is False
+    assert pm_gate_test["reference_role"] == "release_governance_reference"
+    assert pm_gate_test["blocking_cleanup_reference"] is False
+    assert pm_blocker_test["reference_role"] == "release_governance_reference"
+    assert pm_blocker_test["blocking_cleanup_reference"] is False
     assert public_benchmark["reference_role"] == "productization_evidence_reference"
     assert public_benchmark["blocking_cleanup_reference"] is True
     assert payload["blocking_reference_role_counts"] == {
@@ -225,9 +252,9 @@ def test_cleanup_impact_report_treats_pm_scope_tracking_as_release_governance(
         "implementation/phase1/release_evidence/surface/"
         "gpcr_hard_decoy_evidence_surface.json"
     ]
-    assert release_surface_row["reference_path_count"] == 3
+    assert release_surface_row["reference_path_count"] == 6
     assert release_surface_row["blocking_cleanup_reference_path_count"] == 0
-    assert release_surface_row["governance_reference_path_count"] == 3
+    assert release_surface_row["governance_reference_path_count"] == 6
     assert release_surface_row["cleanup_ready_after_owner_decision"] is True
     assert payload["release_surface_cleanup_blocked_path_count"] == 0
     assert payload["next_reference_cleanup_batch"]["batch_id"] == (
