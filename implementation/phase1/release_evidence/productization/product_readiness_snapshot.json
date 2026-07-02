@@ -2932,11 +2932,11 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T08:49:49.356682+00:00",
+  "generated_at": "2026-07-02T08:59:05.189811+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
-    "README.md": "sha256:7ceca0a03483b7ad43383d96cc64604f061ce6a3f996e6190a147e5339d07c5f",
+    "README.md": "sha256:f303869d5f9e12a2958f00210bdfeee3b7d23476c457b43136acee2bfc919cd7",
     "docs/commercialization-gap-current-state.md": "sha256:114c463cba4f3e872275502791fb93839cc930a7b8385eed8d14ef7b109e78bc",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:c889f18344dc97487b0d245396396d864cba004b3a3efb16708fffd2cb0ce8b7",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:d003816417d1b7c130271920ca2f960ef90ae285b996bcf2dd4dccf0f3586f5f",
@@ -3282,7 +3282,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "6f1a390ea3b6ecc58b933ba5ffecc6d6204a0c69",
+  "source_commit_sha": "75588a4d19a9131974d0aad5add850c8e20f7aaa",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -4190,7 +4190,9 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json"
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4215,7 +4217,9 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json"
+        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ]
     }
   },
