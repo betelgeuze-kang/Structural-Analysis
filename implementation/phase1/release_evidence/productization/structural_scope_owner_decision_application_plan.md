@@ -53,6 +53,24 @@
 | `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `science_release_surface_seed` | `805535fc 2026-06-30` | `delete_from_structural_repository` |
 | `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `pocketmd_release_surface_materialization` | `01e6fe1b 2026-06-30` | `delete_from_structural_repository` |
 
+## Release Surface First Operator Sequence
+
+- `status`: `waiting_for_owner_decision`
+- `current_step_id`: `fill_release_surface_first_owner_decisions`
+- `ready_for_manual_cleanup_application`: `False`
+- `pending_release_surface_owner_decision_count=3`
+- `release_surface_cleanup_decision_count_below_expected=0/3`
+
+| Step | Status | Runnable |
+|---|---|---:|
+| `fill_release_surface_first_owner_decisions` | `waiting_for_owner_input` | `True` |
+| `validate_filled_owner_decisions` | `waiting_on_owner_input` | `False` |
+| `merge_filled_batch_to_candidate` | `waiting_on_owner_input` | `False` |
+| `manual_cleanup_preflight` | `waiting_on_prior_steps` | `False` |
+| `manual_cleanup_application` | `waiting_on_prior_steps` | `False` |
+| `refresh_scope_receipts` | `waiting_on_manual_cleanup` | `False` |
+| `refresh_readiness_snapshot` | `waiting_on_refreshed_scope_receipts` | `False` |
+
 ## Next Batch Decision Template
 
 - `batch_id`: `release_surface_first`

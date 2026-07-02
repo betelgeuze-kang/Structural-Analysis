@@ -82,13 +82,13 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T19:45:27.218300+00:00",
+  "generated_at": "2026-07-02T20:20:11.974545+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:ba9a4bba8b7a8f6645fe2bad80c51a9050d56c4657841be7eb2d04b673261f14",
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:beea4a8604da8c2dba697f3eff88c163e0f43cd67ee910142911ba6caf659f5b",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:64c6d94f32cdf1b5076515fcb0497cf0be545e37046dfc6e9160c140c1794fa1",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:cd264bdde8d70abfd08b9b11543f67d75b51ae1ae3c2a6b2c9516b147c30804b",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:bfc5634e5e59a0ec8c84a424833d3957fc04e908d2166f88f55c56884658f27f",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:605ea030922af67534c69fd716a89c3ff4a21dd35a23161bd875628551766307"
   },
   "next_actions": [
@@ -4118,6 +4118,121 @@
     "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
     "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
   },
+  "release_surface_first_current_step_id": "fill_release_surface_first_owner_decisions",
+  "release_surface_first_operator_sequence": {
+    "batch_id": "release_surface_first",
+    "blockers": [
+      "pending_release_surface_owner_decision_count=3",
+      "release_surface_cleanup_decision_count_below_expected=0/3"
+    ],
+    "claim_boundary": "This sequence is an operator handoff only. It does not record owner decisions, delete files, extract files, or close structural scope cleanup without refreshed post-decision receipts.",
+    "current_step_id": "fill_release_surface_first_owner_decisions",
+    "pending_decision_count": 3,
+    "ready_for_manual_cleanup_application": false,
+    "schema_version": "structural-scope-release-surface-first-operator-sequence.v1",
+    "status": "waiting_for_owner_decision",
+    "step_count": 7,
+    "steps": [
+      {
+        "acceptance": [
+          "all release_surface_first rows have owner_decision",
+          "owner_identity, owner_role, decision_timestamp_utc, and evidence_reference are populated",
+          "retain_quarantined_with_signed_owner_exception is not used for release-surface paths"
+        ],
+        "owner": "scope_owner",
+        "required_artifacts": [
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv"
+        ],
+        "runnable_now": true,
+        "status": "waiting_for_owner_input",
+        "step_id": "fill_release_surface_first_owner_decisions"
+      },
+      {
+        "acceptance": [
+          "release_surface_first_batch_decision_intake.ready_for_manual_cleanup_application == true",
+          "release_surface_first_batch_blockers is empty"
+        ],
+        "owner": "release_engineering",
+        "runnable_now": false,
+        "status": "waiting_on_owner_input",
+        "step_id": "validate_filled_owner_decisions",
+        "validation_commands": [
+          "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions <filled-release-surface-first-owner-decisions.csv> --fail-release-surface-first-blocked",
+          "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked"
+        ]
+      },
+      {
+        "acceptance": [
+          "candidate owner decisions validate without release-surface blockers",
+          "candidate merge report remains non-mutating"
+        ],
+        "owner": "release_engineering",
+        "runnable_now": false,
+        "status": "waiting_on_owner_input",
+        "step_id": "merge_filled_batch_to_candidate",
+        "validation_commands": [
+          "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions <filled-release-surface-first-owner-decisions.csv> --out <candidate-owner-decisions.json> --out-md <candidate-owner-decisions.md> --fail-release-surface-first-blocked",
+          "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions <candidate-owner-decisions.json> --fail-release-surface-first-blocked"
+        ]
+      },
+      {
+        "acceptance": [
+          "cleanup_application_preflight.ready == true",
+          "destructive_commands_enabled == false",
+          "human confirmation is still required before git rm"
+        ],
+        "owner": "release_engineering",
+        "runnable_now": false,
+        "status": "waiting_on_prior_steps",
+        "step_id": "manual_cleanup_preflight",
+        "validation_commands": [
+          "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked"
+        ]
+      },
+      {
+        "acceptance": [
+          "delete decisions are removed from the structural repository",
+          "extract decisions have external archive/reference captured before removal"
+        ],
+        "owner": "human_scope_owner",
+        "required_action": "delete_or_extract_release_surface_paths_after_owner_confirmation",
+        "runnable_now": false,
+        "status": "waiting_on_prior_steps",
+        "step_id": "manual_cleanup_application"
+      },
+      {
+        "acceptance": [
+          "release-surface paths no longer block structural scope cleanup",
+          "quarantine and owner-review receipts match the post-cleanup source state"
+        ],
+        "owner": "release_engineering",
+        "runnable_now": false,
+        "status": "waiting_on_manual_cleanup",
+        "step_id": "refresh_scope_receipts",
+        "validation_commands": [
+          "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+          "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+          "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions"
+        ]
+      },
+      {
+        "acceptance": [
+          "product snapshot structural_scope release-surface blocker is removed only after refreshed receipts prove it",
+          "roadmap primary blocker is recomputed from current evidence"
+        ],
+        "owner": "release_engineering",
+        "runnable_now": false,
+        "status": "waiting_on_refreshed_scope_receipts",
+        "step_id": "refresh_readiness_snapshot",
+        "validation_commands": [
+          "python3 scripts/build_product_readiness_snapshot.py --check",
+          "python3 scripts/build_structural_product_development_roadmap.py"
+        ]
+      }
+    ]
+  },
+  "release_surface_first_operator_sequence_status": "waiting_for_owner_decision",
   "release_surface_first_owner_action_packet": {
     "allowed_owner_decisions": [
       "delete_from_structural_repository",
@@ -4298,7 +4413,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet_and_origin_report",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "5d552dd2acff9bd69f135d1bdd7d46fc8c37f27e",
+  "source_commit_sha": "1ed450f4c779ed911441e6d6654f80235fad0fc3",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",

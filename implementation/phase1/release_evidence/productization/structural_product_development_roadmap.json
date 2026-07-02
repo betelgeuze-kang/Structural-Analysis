@@ -19,7 +19,7 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 65.4,
-  "generated_at": "2026-07-02T20:07:45.598298+00:00",
+  "generated_at": "2026-07-02T20:20:19.769141+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:98439fb1f17f2c24dac68eaa4c4a7ff60b535762eb4cd5097c32cb9f40a10d6b",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:920c814cfff48dc577ed40fa3af5d1b3f2bc518f2ba0c0f550e1d838395e42f4",
@@ -34,7 +34,7 @@
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:638ae8b45534a945f89c7cd458145f7709e4e59903bee358a01c9077078f2df3",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:1aca7623b14614849b22dfa335512a2c618b87c437fc8ecdabd2291af5488cc3",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:ba9a4bba8b7a8f6645fe2bad80c51a9050d56c4657841be7eb2d04b673261f14",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:7b70e5bd5827670d48a6fe3d5dd0b4d13bd98b4e5d04c59ec92db74e593f761e",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:677824f60546d7ce12dd1da1c585c18875f8158a47904d7b812d79743f3863bd",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:9806c4867bab76d3e2e080e817e364080ca1908399fb9799966bd3250da89a95",
     "scripts/build_structural_product_development_roadmap.py": "sha256:8c43a41a441395ec2b2a19905a876e7f2c5a0537124838a826778dc0c86428a9"
   },
@@ -519,7 +519,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "91626d5fe3782202e4b8ee62458ab0f946b814b5",
+  "source_commit_sha": "1ed450f4c779ed911441e6d6654f80235fad0fc3",
   "stage_average_progress_percent": 55.3,
   "stage_count": 8,
   "status": "blocked",

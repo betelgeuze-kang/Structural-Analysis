@@ -3082,7 +3082,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T20:07:00.763051+00:00",
+  "generated_at": "2026-07-02T20:20:19.980133+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3111,7 +3111,7 @@
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:6342d3583a0d2571e6aa65be8dbcde84d159ff9c38e4678739299337230bc55d",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a44fccc9a732fe6e440d484662a77a72faad5dc9bf6bfbf0616a738d37493b58",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:ba9a4bba8b7a8f6645fe2bad80c51a9050d56c4657841be7eb2d04b673261f14",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:7b70e5bd5827670d48a6fe3d5dd0b4d13bd98b4e5d04c59ec92db74e593f761e",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:677824f60546d7ce12dd1da1c585c18875f8158a47904d7b812d79743f3863bd",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:9806c4867bab76d3e2e080e817e364080ca1908399fb9799966bd3250da89a95",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:7fbe12edf47a44996868ef7aa47b2f5508a04b035d76c520e7e4de6c52a9a078",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:c8f173f081082c0306697c0a046e813491f3367936241b644a10c2f4369afa30",
@@ -3419,7 +3419,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "1f129e998692869e06ce6c4066a7eb5f0b13bc2c",
+  "source_commit_sha": "1ed450f4c779ed911441e6d6654f80235fad0fc3",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3519,8 +3519,10 @@
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
           "scripts/build_license_status_intake_packet.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_license_status_intake_packet.py"
+          "tests/test_build_license_status_intake_packet.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T20:05:34.038098+00:00",
         "input_checksum_present": true,
@@ -3703,6 +3705,7 @@
           "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_product_development_roadmap.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ci_streak_intake_packet.py",
@@ -3715,6 +3718,7 @@
           "tests/test_build_phase6_benchmark_scale_status.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py"
         ],
@@ -3732,8 +3736,10 @@
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
           "scripts/build_license_status_intake_packet.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_license_status_intake_packet.py"
+          "tests/test_build_license_status_intake_packet.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T19:53:51.072363+00:00",
         "input_checksum_present": true,
@@ -3749,10 +3755,12 @@
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
           "scripts/build_license_status_intake_packet.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_license_status_intake_packet.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py"
         ],
@@ -3853,6 +3861,7 @@
           "scripts/build_license_status_intake_packet.py",
           "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ci_streak_intake_packet.py",
@@ -3862,6 +3871,7 @@
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py"
         ],
@@ -4119,8 +4129,10 @@
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
           "scripts/build_license_status_intake_packet.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_license_status_intake_packet.py"
+          "tests/test_build_license_status_intake_packet.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T20:05:33.993231+00:00",
         "input_checksum_present": true,
@@ -4221,6 +4233,7 @@
           "scripts/build_license_status_intake_packet.py",
           "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ci_streak_intake_packet.py",
@@ -4231,6 +4244,7 @@
           "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
           "tests/test_build_phase6_benchmark_scale_status.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py"
         ],
@@ -4248,9 +4262,11 @@
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
           "scripts/build_license_status_intake_packet.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_license_status_intake_packet.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_ux_new_user_observation_intake_packet.py"
         ],
         "generated_at": "2026-07-02T19:45:01.675890+00:00",
@@ -4264,30 +4280,25 @@
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
-        "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py",
-          "scripts/build_license_status_intake_packet.py",
-          "scripts/build_ux_new_user_observation_intake_packet.py",
-          "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_license_status_intake_packet.py",
-          "tests/test_build_ux_new_user_observation_intake_packet.py"
-        ],
-        "generated_at": "2026-07-02T19:45:27.218300+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-02T20:20:11.974545+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "5d552dd2acff9bd69f135d1bdd7d46fc8c37f27e",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "1ed450f4c779ed911441e6d6654f80235fad0fc3",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "exact"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
           "scripts/build_license_status_intake_packet.py",
+          "scripts/build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_license_status_intake_packet.py"
+          "tests/test_build_license_status_intake_packet.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py"
         ],
         "generated_at": "2026-07-02T19:53:59.387649+00:00",
         "input_checksum_present": true,
@@ -4320,7 +4331,11 @@
     },
     "worktree": {
       "dirty": false,
-      "dirty_paths": [],
+      "dirty_paths": [
+        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md"
+      ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
         "candidate_release_control_commit_set_count": 0,
@@ -4343,7 +4358,11 @@
         "status": "ready",
         "track_or_add_required_path_count": 0
       },
-      "status_rows": []
+      "status_rows": [
+        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md"
+      ]
     }
   },
   "status": "blocked",
