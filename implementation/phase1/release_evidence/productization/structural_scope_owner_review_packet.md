@@ -14,6 +14,8 @@
 - `release_surface_post_decision_cleanup_pending_count`: `0`
 - `unquarantined_non_structural_path_count`: `0`
 - `owner_decisions_path`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json`
+- `owner_review_priority_batch_count`: `5`
+- `next_owner_review_batch`: `release_surface_first`
 
 ## Release Surface First
 
@@ -25,6 +27,16 @@
 | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `pending_owner_decision` | `` | `delete_or_extract_before_release_surface_cleanup` |
 | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `pending_owner_decision` | `` | `delete_or_extract_before_release_surface_cleanup` |
 | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `pending_owner_decision` | `` | `delete_or_extract_before_release_surface_cleanup` |
+
+## Owner Review Priority Batches
+
+| Priority | Batch | Area | Paths | Review Goal |
+|---:|---|---|---:|---|
+| 1 | `release_surface_first` | `release_surface` | 3 | `record owner delete/extract decisions only; retain exceptions are not allowed for release-surface paths` |
+| 2 | `productization_evidence_second` | `productization_evidence` | 36 | `record owner delete/extract/retain decisions without mutating the repository` |
+| 3 | `script_cleanup_third` | `script` | 19 | `record owner delete/extract/retain decisions without mutating the repository` |
+| 4 | `test_cleanup_fourth` | `test` | 19 | `record owner delete/extract/retain decisions without mutating the repository` |
+| 5 | `implementation_phase1_cleanup_fifth` | `implementation_phase1` | 9 | `record owner delete/extract/retain decisions without mutating the repository` |
 
 ## Review Groups
 

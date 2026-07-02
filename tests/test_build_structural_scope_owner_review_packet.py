@@ -192,6 +192,67 @@ def test_owner_review_packet_groups_quarantined_paths(tmp_path: Path) -> None:
     ] == "extract_to_molecular_or_science_repository"
 
 
+def test_owner_review_packet_surfaces_release_surface_first_priority_batch(
+    tmp_path: Path,
+) -> None:
+    audit_payload = _audit_payload()
+    manifest_payload = _manifest_payload()
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "pocketmd_lite_science_product_surface.json"
+    )
+    audit_payload["quarantined_non_structural_rows"].append(
+        {
+            "path": release_surface_path,
+            "git_state": "tracked",
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "quarantine_status": "quarantined",
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    manifest_payload["paths"].append(
+        {
+            "path": release_surface_path,
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    _write_json(audit, audit_payload)
+    _write_json(manifest, manifest_payload)
+
+    payload = owner_review.build_owner_review_packet(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+    )
+
+    assert payload["release_surface_owner_decision_required_count"] == 1
+    assert payload["next_owner_review_batch"]["batch_id"] == "release_surface_first"
+    assert payload["next_owner_review_batch"]["priority"] == 1
+    assert payload["next_owner_review_batch"]["path_area"] == "release_surface"
+    assert payload["next_owner_review_batch"]["path_count"] == 1
+    assert payload["next_owner_review_batch"]["paths"] == [release_surface_path]
+    assert payload["next_owner_review_batch"][
+        "recommended_owner_decision_primary_counts"
+    ] == {
+        "delete_from_structural_repository": 1,
+    }
+    assert payload["next_owner_review_batch"]["review_goal"] == (
+        "record owner delete/extract decisions only; retain exceptions are "
+        "not allowed for release-surface paths"
+    )
+    assert [
+        batch["batch_id"] for batch in payload["owner_review_priority_batches"]
+    ] == [
+        "release_surface_first",
+        "productization_evidence_second",
+        "implementation_phase1_cleanup_fifth",
+    ]
+
+
 def test_owner_review_packet_closes_with_signed_quarantine_exception_decisions(
     tmp_path: Path,
 ) -> None:
