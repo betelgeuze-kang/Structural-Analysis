@@ -86,6 +86,11 @@ RELEASE_GOVERNANCE_FILES = {
     "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
 }
+RELEASE_FRESHNESS_SOURCE_BOUNDARY_FILES = {
+    ".gitignore",
+    "docs/engine-ai-and-comparison-commercialization-gaps.md",
+    "implementation/phase1/README.md",
+}
 REFERENCE_ROLE_PRIORITY = {
     "productization_evidence_reference": 1,
     "implementation_runtime_or_manifest_reference": 2,
@@ -263,6 +268,10 @@ def _cleanup_action_for_role(role: str) -> str:
     )
 
 
+def _release_freshness_source_boundary(path: str) -> bool:
+    return path in RELEASE_FRESHNESS_SOURCE_BOUNDARY_FILES
+
+
 def _owner_decision_dependency(row: dict[str, Any]) -> str:
     if int(row.get("matched_quarantined_path_count", 0) or 0) > 0:
         return "owner_delete_extract_decision_then_reference_cleanup"
@@ -305,6 +314,8 @@ def _scan_references(
                 "path": path,
                 "reference_role": role,
                 "blocking_cleanup_reference": _blocking_reference_role(role),
+                "release_freshness_source_boundary": _release_freshness_source_boundary(path),
+                "cleanup_requires_release_receipt_refresh": _release_freshness_source_boundary(path),
                 "reference_role_priority": _reference_role_priority(role),
                 "recommended_cleanup_action": _cleanup_action_for_role(role),
                 "matched_term_count": len(matched_terms),
@@ -336,6 +347,8 @@ def _cleanup_reference_priority_batches(rows: list[dict[str, Any]]) -> list[dict
                 "matched_scope_tokens": set(),
                 "matched_quarantined_path_count": 0,
                 "owner_decision_dependency_counts": {},
+                "release_freshness_source_boundary_path_count": 0,
+                "release_freshness_source_boundary_paths": [],
                 "post_cleanup_verification": [
                     "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
                     "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
@@ -350,6 +363,9 @@ def _cleanup_reference_priority_batches(rows: list[dict[str, Any]]) -> list[dict
         )
         for token in _as_list(row.get("matched_scope_tokens")):
             group["matched_scope_tokens"].add(str(token))
+        if row.get("release_freshness_source_boundary"):
+            group["release_freshness_source_boundary_path_count"] += 1
+            group["release_freshness_source_boundary_paths"].append(row["path"])
         _increment(
             group["owner_decision_dependency_counts"],
             _text(row.get("owner_decision_dependency")) or "none",
@@ -361,6 +377,9 @@ def _cleanup_reference_priority_batches(rows: list[dict[str, Any]]) -> list[dict
                 **batch,
                 "paths": sorted(batch["paths"]),
                 "matched_scope_tokens": sorted(batch["matched_scope_tokens"]),
+                "release_freshness_source_boundary_paths": sorted(
+                    batch["release_freshness_source_boundary_paths"]
+                ),
                 "owner_decision_dependency_counts": dict(
                     sorted(batch["owner_decision_dependency_counts"].items())
                 ),
@@ -467,6 +486,9 @@ def build_cleanup_impact_report(
     cleanup_reference_priority_batches = _cleanup_reference_priority_batches(
         blocking_rows
     )
+    release_freshness_source_boundary_rows = [
+        row for row in blocking_rows if row.get("release_freshness_source_boundary")
+    ]
     owner_decision_pending_count = int(
         owner_review.get("owner_decision_pending_count", 0) or 0
     )
@@ -540,6 +562,12 @@ def build_cleanup_impact_report(
         "blocking_reference_role_counts": _counts_by_key(
             blocking_rows, "reference_role"
         ),
+        "release_freshness_source_boundary_reference_count": len(
+            release_freshness_source_boundary_rows
+        ),
+        "release_freshness_source_boundary_reference_paths": sorted(
+            row["path"] for row in release_freshness_source_boundary_rows
+        ),
         "release_surface_reference_path_count": len(release_surface_reference_rows),
         "release_surface_blocking_reference_path_count": len(
             release_surface_blocking_reference_rows
@@ -593,6 +621,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `owner_decision_pending_count`: `{payload['owner_decision_pending_count']}`",
         f"- `release_surface_cleanup_blocked_path_count`: `{payload['release_surface_cleanup_blocked_path_count']}`",
         f"- `blocking_reference_cleanup_batch_count`: `{payload['blocking_reference_cleanup_batch_count']}`",
+        f"- `release_freshness_source_boundary_reference_count`: `{payload['release_freshness_source_boundary_reference_count']}`",
         "",
         "## Reference Roles",
         "",
@@ -602,8 +631,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         "",
         "## Cleanup Batches",
         "",
-        "| Batch | Priority | Role | Paths | Action |",
-        "|---|---:|---|---:|---|",
+        "| Batch | Priority | Role | Paths | Source-Boundary Paths | Action |",
+        "|---|---:|---|---:|---:|---|",
     ]
     for batch in payload["blocking_reference_cleanup_batches"]:
         lines.append(
@@ -612,6 +641,7 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"{batch['priority']} | "
             f"`{batch['reference_role']}` | "
             f"{batch['path_count']} | "
+            f"{batch['release_freshness_source_boundary_path_count']} | "
             f"`{batch['recommended_cleanup_action']}` |"
         )
     lines.extend(
@@ -637,8 +667,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         "",
         "## Blocking References",
         "",
-        "| Path | Role | Terms | Scope Tokens | Quarantined Paths |",
-        "|---|---|---:|---|---:|",
+        "| Path | Role | Source Boundary | Terms | Scope Tokens | Quarantined Paths |",
+        "|---|---|---:|---:|---|---:|",
         ]
     )
     for row in payload["blocking_reference_rows"][:80]:
@@ -646,6 +676,7 @@ def _markdown(payload: dict[str, Any]) -> str:
             "| "
             f"`{row['path']}` | "
             f"`{row['reference_role']}` | "
+            f"`{row['release_freshness_source_boundary']}` | "
             f"{row['matched_term_count']} | "
             f"`{', '.join(row['matched_scope_tokens'])}` | "
             f"{row['matched_quarantined_path_count']} |"

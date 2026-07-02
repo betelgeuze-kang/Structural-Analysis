@@ -262,6 +262,75 @@ def test_cleanup_impact_report_treats_pm_scope_tracking_as_release_governance(
     )
 
 
+def test_cleanup_impact_report_flags_release_freshness_source_boundary_refs(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    owner_review = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_owner_review_packet.json"
+    )
+    origin = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_origin_report.json"
+    )
+    _write_json(owner_review, _owner_review_packet())
+    _write_json(origin, _origin_report())
+    _write_text(
+        tmp_path / "implementation/phase1/md3bead_soa.py",
+        "self reference should be ignored\n",
+    )
+    _write_text(
+        tmp_path / "implementation/phase1/README.md",
+        "runtime doc still references md3bead_soa.py\n",
+    )
+    _write_text(
+        tmp_path / "docs/engine-ai-and-comparison-commercialization-gaps.md",
+        "engine doc still references md3bead_soa.py\n",
+    )
+    _write_text(
+        tmp_path / ".gitignore",
+        "implementation/phase1/rust_hip_md3bead_hook/target/\n",
+    )
+    _git_add(tmp_path)
+
+    payload = impact_report.build_cleanup_impact_report(
+        repo_root=tmp_path,
+        owner_review_packet_path=owner_review,
+        origin_report_path=origin,
+    )
+
+    rows = {row["path"]: row for row in payload["blocking_reference_rows"]}
+    source_boundary_paths = {
+        ".gitignore",
+        "docs/engine-ai-and-comparison-commercialization-gaps.md",
+        "implementation/phase1/README.md",
+    }
+    assert set(payload["release_freshness_source_boundary_reference_paths"]) == (
+        source_boundary_paths
+    )
+    assert payload["release_freshness_source_boundary_reference_count"] == 3
+    for path in source_boundary_paths:
+        assert rows[path]["release_freshness_source_boundary"] is True
+        assert rows[path]["cleanup_requires_release_receipt_refresh"] is True
+
+    batch_by_role = {
+        batch["reference_role"]: batch
+        for batch in payload["blocking_reference_cleanup_batches"]
+    }
+    assert batch_by_role["implementation_runtime_or_manifest_reference"][
+        "release_freshness_source_boundary_paths"
+    ] == ["implementation/phase1/README.md"]
+    assert batch_by_role["documentation_reference"][
+        "release_freshness_source_boundary_paths"
+    ] == ["docs/engine-ai-and-comparison-commercialization-gaps.md"]
+    assert batch_by_role["other_reference"][
+        "release_freshness_source_boundary_paths"
+    ] == [".gitignore"]
+
+
 def test_cleanup_impact_report_ignores_generic_quarantined_basenames(
     tmp_path: Path,
 ) -> None:
