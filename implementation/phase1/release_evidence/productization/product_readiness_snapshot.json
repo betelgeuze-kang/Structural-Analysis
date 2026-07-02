@@ -2932,7 +2932,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T08:22:12.296583+00:00",
+  "generated_at": "2026-07-02T08:29:06.805206+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -3282,7 +3282,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "37c964c1b1f0cd1f8cc5b8d7d1bfec6b30049cd7",
+  "source_commit_sha": "cebb8c7757ca83dafda9c1552c531d4c9f89f32f",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
