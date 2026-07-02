@@ -110,6 +110,7 @@ def _write_base_inputs(tmp_path: Path) -> dict[str, Path]:
 
 def _near_null_packet(load_scale: float, node_ids: list[int]) -> dict:
     return {
+        "schema_version": comparison_module.NEAR_NULL_PACKET_SCHEMA_VERSION,
         "status": "ready",
         "contract_pass": True,
         "near_null_context": {"load_scale": load_scale, "near_null_mode_count": 8},
@@ -160,8 +161,40 @@ def test_comparison_ready_when_0p2_0p4_near_null_packets_are_attached(tmp_path: 
     assert payload["status"] == "ready"
     assert payload["contract_pass"] is True
     assert payload["summary"]["near_null_packet_comparison_ready"] is True
+    assert payload["summary"]["invalid_near_null_packet_count"] == 0
     assert payload["near_null_comparison"]["baseline_to_0p2_node_overlap"]["shared_count"] == 1
     assert payload["near_null_comparison"]["0p2_to_0p4_node_overlap"]["shared_count"] == 1
+
+
+def test_comparison_rejects_shape_only_near_null_packets(tmp_path: Path) -> None:
+    paths = _write_base_inputs(tmp_path)
+    packet = _near_null_packet(0.4, [])
+    packet.pop("schema_version")
+    _write_json(paths["near_null_0p2"], packet)
+    _write_json(paths["near_null_0p4"], _near_null_packet(0.4, [101, 104]))
+
+    payload = comparison_module.build_comparison(
+        repo_root=tmp_path,
+        f2h_status_path=paths["f2h_status"],
+        f2h_continuation_path=paths["f2h_continuation"],
+        f2g_audit_path=paths["f2g_audit"],
+        near_null_0p2_path=paths["near_null_0p2"],
+        near_null_0p4_path=paths["near_null_0p4"],
+    )
+
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["near_null_packet_comparison_ready"] is False
+    assert payload["summary"]["invalid_near_null_packet_count"] == 1
+    assert "load_dependent_near_null_packet_schema_mismatch:0.2" in payload["blockers"]
+    assert "load_dependent_near_null_packet_load_scale_mismatch:0.2" in payload["blockers"]
+    assert "load_dependent_near_null_packet_dominant_rows_missing:0.2" in payload["blockers"]
+    assert payload["near_null_comparison"]["packet_validation_blockers"]["0.2"] == [
+        "load_dependent_near_null_packet_schema_mismatch:0.2",
+        "load_dependent_near_null_packet_load_scale_mismatch:0.2",
+        "load_dependent_near_null_packet_dominant_rows_missing:0.2",
+        "load_dependent_near_null_packet_dominant_nodes_missing:0.2",
+    ]
 
 
 def test_write_comparison_writes_markdown_and_json(tmp_path: Path) -> None:

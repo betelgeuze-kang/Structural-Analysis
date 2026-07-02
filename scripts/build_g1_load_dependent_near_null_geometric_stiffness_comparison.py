@@ -27,10 +27,12 @@ DEFAULT_NEAR_NULL_0P4 = PRODUCTIZATION / "g1_load_dependent_near_null_0p4.local.
 DEFAULT_OUT = PRODUCTIZATION / "g1_load_dependent_near_null_geometric_stiffness_comparison.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 SCHEMA_VERSION = "g1-load-dependent-near-null-geometric-stiffness-comparison.v1"
+NEAR_NULL_PACKET_SCHEMA_VERSION = "g1-load-dependent-near-null-packet.v1"
 REUSE_POLICY = "non_promoting_f2h_load_response_and_optional_near_null_packets"
 REQUIRED_LOADS = (0.1, 0.2, 0.4)
 NEAR_NULL_PACKET_LOADS = (0.2, 0.4)
 SUPERLINEAR_TOLERANCE = 1.05
+LOAD_SCALE_TOLERANCE = 1.0e-9
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -159,6 +161,7 @@ def _near_null_summary(packet: dict[str, Any]) -> dict[str, Any]:
         if isinstance(row, dict) and row.get("node_id") is not None:
             node_ids.append(int(row["node_id"]))
     return {
+        "schema_version": str(packet.get("schema_version") or ""),
         "status": str(packet.get("status") or "missing"),
         "contract_pass": bool(packet.get("contract_pass")),
         "load_scale": _as_float(
@@ -175,6 +178,41 @@ def _near_null_summary(packet: dict[str, Any]) -> dict[str, Any]:
         ),
         "dominant_node_ids": sorted(set(node_ids)),
     }
+
+
+def _near_null_packet_validation_blockers(
+    packet: dict[str, Any],
+    *,
+    expected_load_scale: float,
+) -> list[str]:
+    load_key = f"{expected_load_scale:g}"
+    packet_summary = _near_null_summary(packet)
+    blockers: list[str] = []
+    if packet_summary["schema_version"] != NEAR_NULL_PACKET_SCHEMA_VERSION:
+        blockers.append(f"load_dependent_near_null_packet_schema_mismatch:{load_key}")
+    if packet_summary["status"] != "ready":
+        blockers.append(f"load_dependent_near_null_packet_not_ready:{load_key}")
+    if packet_summary["contract_pass"] is not True:
+        blockers.append(f"load_dependent_near_null_packet_contract_not_passed:{load_key}")
+    packet_load = packet_summary["load_scale"]
+    if packet_load is None:
+        blockers.append(f"load_dependent_near_null_packet_load_scale_missing:{load_key}")
+    elif abs(float(packet_load) - expected_load_scale) > LOAD_SCALE_TOLERANCE:
+        blockers.append(f"load_dependent_near_null_packet_load_scale_mismatch:{load_key}")
+    if packet_summary["near_null_mode_count"] <= 0:
+        blockers.append(f"load_dependent_near_null_packet_mode_count_missing:{load_key}")
+    if packet_summary["dominant_dof_row_count"] <= 0:
+        blockers.append(f"load_dependent_near_null_packet_dominant_rows_missing:{load_key}")
+    if not packet_summary["dominant_node_ids"]:
+        blockers.append(f"load_dependent_near_null_packet_dominant_nodes_missing:{load_key}")
+    source_blockers = [
+        str(item)
+        for item in _as_list(packet.get("blockers"))
+        if str(item)
+    ]
+    if source_blockers:
+        blockers.append(f"load_dependent_near_null_packet_has_source_blockers:{load_key}")
+    return blockers
 
 
 def _node_overlap(left: list[int], right: list[int]) -> dict[str, Any]:
@@ -232,13 +270,26 @@ def build_comparison(
         0.2: near_null_0p2,
         0.4: near_null_0p4,
     }
+    packet_validation_blockers: dict[str, list[str]] = {}
     for load, packet in packet_by_load.items():
+        load_key = f"{load:g}"
         if not packet:
             blockers.append(f"load_dependent_near_null_packet_missing:{load:g}")
-        elif packet.get("status") != "ready":
-            blockers.append(f"load_dependent_near_null_packet_not_ready:{load:g}")
+            packet_validation_blockers[load_key] = [
+                f"load_dependent_near_null_packet_missing:{load:g}"
+            ]
+            continue
+        packet_blockers = _near_null_packet_validation_blockers(
+            packet,
+            expected_load_scale=load,
+        )
+        packet_validation_blockers[load_key] = packet_blockers
+        blockers.extend(packet_blockers)
 
-    near_null_ready = bool(all(packet and packet.get("status") == "ready" for packet in packet_by_load.values()))
+    near_null_ready = bool(
+        all(packet_by_load.values())
+        and not any(packet_validation_blockers.values())
+    )
     ordered_rows = [rows[round(load, 10)] for load in REQUIRED_LOADS if round(load, 10) in rows]
     segments = [
         _segment(rows, 0.1, 0.2),
@@ -278,11 +329,15 @@ def build_comparison(
         "baseline_dominant_dof_row_count": _as_int(f2g_summary.get("dominant_dof_row_count")),
         "baseline_dominant_node_count": len(baseline_node_ids),
         "requested_packet_loads": list(NEAR_NULL_PACKET_LOADS),
+        "expected_packet_schema_version": NEAR_NULL_PACKET_SCHEMA_VERSION,
         "packet_summaries": packet_summaries,
+        "packet_validation_blockers": packet_validation_blockers,
         "comparison_ready": near_null_ready,
         "claim_boundary": (
             "A load-response trend is not a load-dependent modal comparison. "
-            "Near-null packet comparison remains blocked until 0.2 and 0.4 packets are attached."
+            "Near-null packet comparison remains blocked until validated 0.2 and 0.4 "
+            "packets with the expected schema, load scale, mode count, and dominant "
+            "rows are attached."
         ),
     }
     if near_null_ready:
@@ -340,6 +395,16 @@ def build_comparison(
             "superlinear_segment_count": len(superlinear_segments),
             "missing_load_count": len(missing_loads),
             "missing_near_null_packet_count": sum(1 for packet in packet_by_load.values() if not packet),
+            "invalid_near_null_packet_count": sum(
+                1
+                for packet in packet_by_load.values()
+                if packet
+            )
+            - sum(
+                1
+                for packet_blockers in packet_validation_blockers.values()
+                if not packet_blockers
+            ),
             "blocker_count": len(blockers),
         },
         "load_response_rows": ordered_rows,
@@ -381,6 +446,7 @@ def build_comparison(
             "no_G1_closure_claim",
             "no_full_load_1p0_claim",
             "no_modal_claim_without_0p2_0p4_near_null_packets",
+            "no_modal_claim_without_validated_near_null_packet_schema",
             "no_geometric_softening_promotion_without_consistent_newton_gate",
         ],
     }
