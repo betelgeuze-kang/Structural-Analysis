@@ -36,6 +36,30 @@ DEFAULT_DOCS = (
 )
 DEFAULT_RECEIPT_ROOT = Path("implementation/phase1/release_evidence/full_validation")
 
+FRESH_VALIDATION_PATH_ALIASES: dict[str, tuple[Path, ...]] = {
+    "implementation/phase1/contact_readiness_report.json": (
+        Path("implementation/phase1/release_evidence/performance/contact_readiness_report.json"),
+    ),
+    "implementation/phase1/foundation_soil_link_gate_report.json": (
+        Path("implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json"),
+    ),
+    "implementation/phase1/gpu_bottleneck_audit_report.json": (
+        Path("implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json"),
+    ),
+    "implementation/phase1/ssi_boundary_gate_report.json": (
+        Path("implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json"),
+    ),
+    "implementation/phase1/structural_contact_gate_report.json": (
+        Path("implementation/phase1/release_evidence/surface/structural_contact_gate_report.json"),
+    ),
+    "implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json": (
+        Path("implementation/phase1/release_evidence/midas/midas_native_writeback_diff_receipts_report.json"),
+    ),
+    "implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json": (
+        Path("implementation/phase1/release_evidence/kds/design_optimization_solver_loop_long_report.json"),
+    ),
+}
+
 DEFAULT_LANES: tuple[dict[str, Any], ...] = (
     {
         "lane_id": "commercial_benchmark_torch",
@@ -148,14 +172,35 @@ def _validate_receipt(receipt_path: Path, schema: dict[str, Any]) -> dict[str, A
     return validate_receipt_payload(payload, schema)
 
 
-def _resolve_artifact_path(path_value: str, receipt_path: Path) -> Path:
+def _repo_path(path: Path) -> Path:
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
+def _resolve_artifact_path_with_alias(path_value: str, receipt_path: Path) -> tuple[Path, dict[str, Any] | None]:
     path = Path(path_value)
     if path.is_absolute() or path.exists():
-        return path
+        return path, None
     receipt_relative = receipt_path.parent / path
     if receipt_relative.exists():
-        return receipt_relative
-    return path
+        return receipt_relative, None
+    for alias in FRESH_VALIDATION_PATH_ALIASES.get(path_value, ()):
+        alias_path = _repo_path(alias)
+        if alias_path.exists():
+            return alias_path, {
+                "original_path": path_value,
+                "resolved_path": str(alias),
+                "resolution": "legacy_release_evidence_path_alias",
+                "claim_boundary": (
+                    "Alias resolves a tracked path migration only. Artifact integrity still "
+                    "requires the resolved file sha256 to match the receipt expectation."
+                ),
+            }
+    return path, None
+
+
+def _resolve_artifact_path(path_value: str, receipt_path: Path) -> Path:
+    resolved, _alias = _resolve_artifact_path_with_alias(path_value, receipt_path)
+    return resolved
 
 
 def _sha256_ref(path: Path) -> str | None:
@@ -168,12 +213,13 @@ def _sha256_ref(path: Path) -> str | None:
     return f"sha256:{digest.hexdigest()}"
 
 
-def _receipt_artifact_integrity_blockers(
+def _receipt_artifact_integrity_check(
     receipt_payload: dict[str, Any],
     *,
     receipt_path: Path,
-) -> list[str]:
+) -> dict[str, Any]:
     blockers: list[str] = []
+    path_aliases: list[dict[str, Any]] = []
     receipt_artifacts = receipt_payload.get("receipt_artifacts")
     if isinstance(receipt_artifacts, list):
         for index, artifact in enumerate(receipt_artifacts):
@@ -183,8 +229,18 @@ def _receipt_artifact_integrity_blockers(
             expected_sha = artifact.get("sha256")
             if not isinstance(path_value, str) or not isinstance(expected_sha, str):
                 continue
-            resolved = _resolve_artifact_path(path_value, receipt_path)
+            resolved, alias_metadata = _resolve_artifact_path_with_alias(path_value, receipt_path)
             actual_sha = _sha256_ref(resolved)
+            if alias_metadata is not None:
+                path_aliases.append(
+                    {
+                        **alias_metadata,
+                        "receipt_field": f"receipt_artifacts[{index}].path",
+                        "expected_sha256": expected_sha,
+                        "actual_sha256": actual_sha,
+                        "sha256_match": actual_sha is not None and actual_sha.lower() == expected_sha.lower(),
+                    }
+                )
             if actual_sha is None:
                 blockers.append(f"receipt_artifacts[{index}].path_missing:{path_value}")
             elif actual_sha.lower() != expected_sha.lower():
@@ -195,13 +251,34 @@ def _receipt_artifact_integrity_blockers(
         for path_value, expected_sha in input_checksums.items():
             if not isinstance(path_value, str) or not isinstance(expected_sha, str):
                 continue
-            resolved = _resolve_artifact_path(path_value, receipt_path)
+            resolved, alias_metadata = _resolve_artifact_path_with_alias(path_value, receipt_path)
             actual_sha = _sha256_ref(resolved)
+            if alias_metadata is not None:
+                path_aliases.append(
+                    {
+                        **alias_metadata,
+                        "receipt_field": "input_checksums",
+                        "expected_sha256": expected_sha,
+                        "actual_sha256": actual_sha,
+                        "sha256_match": actual_sha is not None and actual_sha.lower() == expected_sha.lower(),
+                    }
+                )
             if actual_sha is None:
                 blockers.append(f"input_checksums.path_missing:{path_value}")
             elif actual_sha.lower() != expected_sha.lower():
                 blockers.append(f"input_checksums.sha256_mismatch:{path_value}")
-    return blockers
+    return {
+        "blockers": blockers,
+        "path_aliases": path_aliases,
+    }
+
+
+def _receipt_artifact_integrity_blockers(
+    receipt_payload: dict[str, Any],
+    *,
+    receipt_path: Path,
+) -> list[str]:
+    return list(_receipt_artifact_integrity_check(receipt_payload, receipt_path=receipt_path)["blockers"])
 
 
 def _fresh_validation_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
@@ -367,11 +444,13 @@ def _lane_row(
     }
     receipt_validator_pass = bool(validation.get("contract_pass"))
     receipt_validator_blockers = list(validation.get("blockers", []))
-    artifact_integrity_blockers = (
-        _receipt_artifact_integrity_blockers(receipt_payload, receipt_path=receipt_path)
+    artifact_integrity = (
+        _receipt_artifact_integrity_check(receipt_payload, receipt_path=receipt_path)
         if receipt_present and receipt_validator_pass
-        else []
+        else {"blockers": [], "path_aliases": []}
     )
+    artifact_integrity_blockers = list(artifact_integrity["blockers"])
+    artifact_path_aliases = list(artifact_integrity["path_aliases"])
     receipt_artifact_integrity_pass = receipt_present and not artifact_integrity_blockers
     lane_pass = bool(
         materialized_present
@@ -432,6 +511,8 @@ def _lane_row(
         "fresh_validation_receipt_contract_pass": receipt_validator_pass,
         "fresh_validation_receipt_artifact_integrity_pass": receipt_artifact_integrity_pass,
         "fresh_validation_receipt_artifact_integrity_blockers": artifact_integrity_blockers,
+        "fresh_validation_receipt_path_alias_count": len(artifact_path_aliases),
+        "fresh_validation_receipt_path_aliases": artifact_path_aliases,
         "fresh_validation_receipt_reason_code": validation.get("reason_code"),
         "fresh_validation_receipt_blockers": receipt_validator_blockers,
         "pass": lane_pass,
@@ -494,6 +575,9 @@ def build_status(
                 for row in rows
                 if row["pass"]
             ),
+            "fresh_validation_receipt_path_alias_count": sum(
+                int(row["fresh_validation_receipt_path_alias_count"]) for row in rows
+            ),
             "blocker_count": len(blockers),
         },
         "rows": rows,
@@ -505,7 +589,9 @@ def build_status(
             "A release evidence freshness PASS only proves metadata/source recency. Level 3 promotion "
             "still requires fresh validation receipts for each named lane, with reused_evidence=false, "
             "validated by implementation/phase1/validate_fresh_validation_receipt.py. Missing or invalid "
-            "receipts must stay blocked and must not be replaced by CPU-required hydrated reports."
+            "receipts must stay blocked and must not be replaced by CPU-required hydrated reports. Legacy "
+            "path aliases resolve only tracked release-evidence migrations and pass only when the resolved "
+            "file sha256 matches the receipt expectation."
         ),
     }
 

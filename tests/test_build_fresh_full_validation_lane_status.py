@@ -148,6 +148,41 @@ def test_fresh_full_validation_lane_status_passes_with_valid_fresh_receipt(tmp_p
     assert payload["blockers"] == []
 
 
+def test_fresh_full_validation_lane_status_resolves_checksum_verified_path_alias(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    docs = (_write_text(tmp_path / "runbook.md", "GPU-capable validation task\n"),)
+    materialized = _write_json(tmp_path / "gpu" / "solver_hip_e2e_contract_report.json", {"contract_pass": True})
+    legacy_ref = "implementation/phase1/legacy_gpu_solver_hip_report.json"
+    monkeypatch.setattr(
+        lane_status,
+        "FRESH_VALIDATION_PATH_ALIASES",
+        {legacy_ref: (materialized,)},
+    )
+    receipt_root = tmp_path / "receipts"
+    _write_json(
+        receipt_root / "gpu_hip_solver.fresh_validation_receipt.json",
+        _valid_receipt_payload(
+            artifact_path=Path(legacy_ref),
+            artifact_sha256=_sha256_ref(materialized),
+        ),
+    )
+
+    payload = lane_status.build_status(
+        docs=docs,
+        receipt_root=receipt_root,
+        lanes=(_lane(materialized),),
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["blockers"] == []
+    row = payload["rows"][0]
+    assert row["fresh_validation_receipt_path_alias_count"] == 2
+    assert payload["summary"]["fresh_validation_receipt_path_alias_count"] == 2
+    assert all(alias["sha256_match"] is True for alias in row["fresh_validation_receipt_path_aliases"])
+
+
 def test_fresh_full_validation_lane_status_blocks_artifact_sha_mismatch(tmp_path: Path) -> None:
     docs = (_write_text(tmp_path / "runbook.md", "GPU-capable validation task\n"),)
     materialized = _write_json(tmp_path / "gpu" / "solver_hip_e2e_contract_report.json", {"contract_pass": True})
@@ -178,6 +213,41 @@ def test_fresh_full_validation_lane_status_blocks_artifact_sha_mismatch(tmp_path
         and "sha256_mismatch" in blocker
         for blocker in payload["blockers"]
     )
+
+
+def test_fresh_full_validation_lane_status_keeps_path_alias_sha_mismatch_blocked(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    docs = (_write_text(tmp_path / "runbook.md", "GPU-capable validation task\n"),)
+    materialized = _write_json(tmp_path / "gpu" / "solver_hip_e2e_contract_report.json", {"contract_pass": True})
+    legacy_ref = "implementation/phase1/legacy_gpu_solver_hip_report.json"
+    monkeypatch.setattr(
+        lane_status,
+        "FRESH_VALIDATION_PATH_ALIASES",
+        {legacy_ref: (materialized,)},
+    )
+    receipt_root = tmp_path / "receipts"
+    _write_json(
+        receipt_root / "gpu_hip_solver.fresh_validation_receipt.json",
+        _valid_receipt_payload(
+            artifact_path=Path(legacy_ref),
+            artifact_sha256="sha256:" + "b" * 64,
+        ),
+    )
+
+    payload = lane_status.build_status(
+        docs=docs,
+        receipt_root=receipt_root,
+        lanes=(_lane(materialized),),
+    )
+
+    assert payload["contract_pass"] is False
+    row = payload["rows"][0]
+    assert row["fresh_validation_receipt_path_alias_count"] == 2
+    assert any(alias["sha256_match"] is False for alias in row["fresh_validation_receipt_path_aliases"])
+    assert any("sha256_mismatch" in blocker and legacy_ref in blocker for blocker in payload["blockers"])
+    assert not any("path_missing" in blocker and legacy_ref in blocker for blocker in payload["blockers"])
 
 
 def test_fresh_full_validation_lane_status_blocks_missing_receipt_artifact(tmp_path: Path) -> None:
