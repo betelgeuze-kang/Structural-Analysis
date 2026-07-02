@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-07-02T11:04:31.244251+00:00",
-  "source_commit_sha": "adadb0b9ba2769cf5996d31d6b6ee8a816f7b78d",
+  "generated_at": "2026-07-02T15:14:39.771753+00:00",
+  "source_commit_sha": "f353bfe1abe53fb31e018a278acf3f38f623d4ed",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -9,11 +9,11 @@
   "consistent_residual_jacobian_newton_passed": false,
   "consistent_residual_jacobian_newton_gate_passed": false,
   "rocm_hip_required": true,
-  "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback",
+  "execution_mode": "hip_required_runtime_preflight_only_no_child_execution",
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": false,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-07-02T11:04:31.246701+00:00",
+    "checked_at": "2026-07-02T15:14:39.778507+00:00",
     "hip_available": false,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -62,13 +62,13 @@
   "production_rocm_hip_residual_jvp_worker": {
     "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "source_commit_sha": "adadb0b9ba2769cf5996d31d6b6ee8a816f7b78d",
+    "source_commit_sha": "f353bfe1abe53fb31e018a278acf3f38f623d4ed",
     "ready": false,
     "status": "blocked",
     "blockers": [
       "consistent_residual_jacobian_newton_gate_not_passed",
       "current_tangent_residual_row_hip_replay_not_proven",
-      "direct_probe_not_executed",
+      "direct_probe_not_executed_preflight_only",
       "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
       "global_krylov_hip_solver_not_proven",
       "global_krylov_jvp_rows_not_retained",
@@ -80,7 +80,7 @@
     "residual_jvp_worker_path_ready": false,
     "residual_jvp_worker_path_blockers": [
       "current_tangent_residual_row_hip_replay_not_proven",
-      "direct_probe_not_executed",
+      "direct_probe_not_executed_preflight_only",
       "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
       "global_krylov_hip_solver_not_proven",
       "global_krylov_jvp_rows_not_retained",
@@ -99,7 +99,7 @@
         "ready": false,
         "blockers": [
           "current_tangent_residual_row_hip_replay_not_proven",
-          "direct_probe_not_executed",
+          "direct_probe_not_executed_preflight_only",
           "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
           "global_krylov_hip_solver_not_proven",
           "global_krylov_jvp_rows_not_retained",
@@ -133,7 +133,7 @@
         "id": "repair_production_rocm_hip_residual_jvp_worker_path",
         "blockers": [
           "current_tangent_residual_row_hip_replay_not_proven",
-          "direct_probe_not_executed",
+          "direct_probe_not_executed_preflight_only",
           "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
           "global_krylov_hip_solver_not_proven",
           "global_krylov_jvp_rows_not_retained",
@@ -160,7 +160,7 @@
     },
     "execution": {
       "child_direct_probe_executed": false,
-      "preflight_only": false,
+      "preflight_only": true,
       "child_error": null
     },
     "matrix_free_global_krylov": {
@@ -201,24 +201,37 @@
     },
     "claim_boundary": "This is a production-worker readiness contract for the HIP-required residual/JVP lane. It records required device-resident residual/JVP behavior and blocks G1 promotion unless the child proof retains global JVP rows, uses HIP for the accepted-state tangent refresh, avoids CPU fallback, and the consistent residual/Jacobian Newton gate passes. residual_jvp_worker_path_ready isolates the HIP residual/JVP worker proof from the remaining G1 closure gate."
   },
-  "component_only": true,
+  "component_only": false,
   "checkpoint": {
-    "path": "/tmp/structural-scope-fix-0702/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz"
+    "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz"
   },
   "load_scale": null,
   "shell_pressure_load_path_policy": "all_components",
+  "hip_direct_probe": {
+    "schema_version": "mgt-residual-jacobian-consistency-hip-direct-proof.v1",
+    "executed": false,
+    "execution_error": null,
+    "elapsed_seconds": 0.0,
+    "source_commit_sha": null,
+    "status": null,
+    "direct_residual_newton_ready": null,
+    "production_hip_residual_jacobian_path": false,
+    "hip_residual_engine_contract_passed": false,
+    "consistent_residual_jacobian_newton_gate_passed": false
+  },
   "direction_rows": [],
   "state_scale_sweep": [],
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 0.931419119995553
+    "total_seconds": 0.864322109031491
   },
-  "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but no usable HIP runtime was available. The probe did not fall back to the CPU diagnostic path and does not close G1.",
+  "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but this receipt only records the ROCm/HIP runtime preflight. The HIP-required direct residual Newton proof was not executed, this module's CPU diagnostic assembler was not used, and this receipt does not close G1.",
   "blockers": [
     "rocm_hip_runtime_unavailable",
     "hip_runtime::dev_kfd_missing",
     "hip_runtime::dev_dri_missing",
+    "hip_residual_jacobian_consistency_preflight_only",
     "hip_residual_jacobian_consistency_not_executed"
   ]
 }

@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-topk-comparison-experiment",
-  "generated_at": "2026-06-29T13:35:20.281088+00:00",
+  "generated_at": "2026-07-02T15:17:56.837389+00:00",
   "target_split": "test",
   "source_cases_path": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
-  "source_cases_sha256": "ada525eb701d8695caddf0300ada0553c20bae1a41460493676e6b2cab574544",
+  "source_cases_sha256": "47338700bb4d93ebc55d56af3fea68d4a1b88d1cff9ef2d5bd6ff20557f32150",
   "source_family_order": [
     "rwth_zenodo"
   ],
