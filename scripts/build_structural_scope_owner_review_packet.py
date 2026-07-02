@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from datetime import datetime, timezone
 from io import StringIO
 import json
 from pathlib import Path
@@ -129,6 +130,20 @@ def _as_dict(value: Any) -> dict[str, Any]:
 
 def _text(value: Any) -> str:
     return str(value or "").strip()
+
+
+def _is_utc_timestamp(value: Any) -> bool:
+    text = _text(value)
+    if not text:
+        return False
+    normalized = text[:-1] + "+00:00" if text.endswith("Z") else text
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return False
+    if parsed.tzinfo is None:
+        return False
+    return parsed.utcoffset() == timezone.utc.utcoffset(None)
 
 
 def _counts_by_key(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
@@ -387,6 +402,8 @@ def _owner_decision_overlay(
         missing.append("owner_role")
     if not decision_timestamp_utc:
         missing.append("decision_timestamp_utc")
+    elif not _is_utc_timestamp(decision_timestamp_utc):
+        missing.append("decision_timestamp_utc_not_utc")
     if not evidence_reference:
         missing.append("evidence_reference")
     if (

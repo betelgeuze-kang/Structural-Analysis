@@ -260,6 +260,36 @@ def test_owner_review_packet_requires_signed_reference_for_retain_exception(
     } == {("signed_owner_exception_reference",)}
 
 
+def test_owner_review_packet_requires_utc_owner_decision_timestamp(
+    tmp_path: Path,
+) -> None:
+    audit = tmp_path / "audit.json"
+    manifest = tmp_path / "manifest.json"
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(audit, _audit_payload())
+    _write_json(manifest, _manifest_payload())
+    payload = _decision_payload("delete_from_structural_repository")
+    payload["decision_rows"][0]["decision_timestamp_utc"] = "2026-07-02T00:00:00"
+    payload["decision_rows"][1]["decision_timestamp_utc"] = "2026-07-02T09:00:00+09:00"
+    _write_json(decisions, payload)
+
+    result = owner_review.build_owner_review_packet(
+        repo_root=tmp_path,
+        audit_path=audit,
+        quarantine_manifest_path=manifest,
+        owner_decisions_path=decisions,
+    )
+
+    assert result["status"] == "owner_decision_evidence_invalid"
+    assert result["owner_decision_recorded_count"] == 0
+    assert result["owner_decision_pending_count"] == 2
+    assert "owner_decisions_invalid_path_count=2" in result["closure_blockers"]
+    assert {
+        tuple(row["owner_decision_missing_requirements"])
+        for row in result["review_rows"]
+    } == {("decision_timestamp_utc_not_utc",)}
+
+
 def test_owner_review_packet_routes_delete_decisions_to_post_cleanup(
     tmp_path: Path,
 ) -> None:
