@@ -352,9 +352,26 @@
       "claim_boundary": "This packet is a Developer Preview owner-evidence handoff for blocked RC final gates. It does not create benchmark, Windows, or human UX evidence; does not promote Developer Preview readiness; and does not close Commercial Release, G1, customer shadow, external benchmark, license, SLA, or GitHub CI streak gates.",
       "contract_pass": true,
       "evidence_closure_pass": false,
+      "evidence_intake_artifact_count": 9,
       "final_gate_count": 9,
       "final_gate_pass_count": 6,
+      "owner_packet_blocker_id_count": 8,
+      "owner_packet_blocker_ids": [
+        "developer_preview_rc::selected_medium_models_pass_or_approved_review",
+        "product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review",
+        "developer_preview_rc::linux_windows_reproducibility_confirmed",
+        "product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed",
+        "developer_preview_rc::new_user_core_workflow_observation_passed",
+        "pm_release::ux::human_new_user_observation_missing_or_failed",
+        "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+        "product_readiness_snapshot::human_ux::*"
+      ],
       "owner_packet_count": 3,
+      "owner_packet_gate_ids": [
+        "selected_medium_models_pass_or_approved_review",
+        "linux_windows_reproducibility_confirmed",
+        "new_user_core_workflow_observation_passed"
+      ],
       "owner_review_required": true,
       "ready": true,
       "status": "ready_for_owner_review"
@@ -2803,7 +2820,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T01:03:27.594215+00:00",
+  "generated_at": "2026-07-02T01:08:44.300792+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2813,7 +2830,7 @@
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:e3a0f8c98e12ff31c1422f532cd7a46e7023713b189cd54d1cf164bc071622ee",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:43bc1085773b436d5c24210b9f11043f97a4a4ed4fa03f9107c47a370e0b661b",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:7def9431db66fa2089569389d37c7387031c094c40515ded4e998696c8f517e5",
-    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:dcf044cd1552c4289127a711d4090fd9b1c18947cb735eaaf220ef9dbc3bcb3a",
+    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:3cec970c676b847d52bb614833d7a9dc5f6f8b21e127610c7c8733c9b4306633",
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:300be1a9be55ce6d66f50d01468e96082a10af860c0e8791a402a93c6204e9a7",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:03f3beb6fd151ba5e3c49b4562b90a7a796bd6bf9e53247612c9f99224090021",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:bebcb3f079217973276f1278af2697785adfd1780d9df32e61d80f0779f748d9",
@@ -2829,7 +2846,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:1f3f663705a05b4d1e6d1312603a8e1c8664fbe62db3e64dc01b0a8bba61aa90",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:cc37e5f421731be82e2d6062b5d1e6d68b7243da2b9215e0b58224b064b16305",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5a54230ba4bfff7dddd13e4fa0dc249fa5b0d34efc91371bd1fa64b6dbda9a7c",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:74442161282fa31da789bd335158452591b4e32efda29ad2609de9d8446e7f05",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:9f423ab3ad34581df4638ba47c3c484ebef4756fe3dc5ece48cf73e39c91ca9e",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:835ddc941322369fc1475716358f15a05aebfdb45f3b45165dbeba86a36dcdba",
@@ -2837,7 +2854,7 @@
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:1e14dfca123e7f72932af68008d243781c33fe0dbfc3542cd74c49493b8e2863",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:599b96f86ffaea7375d6179d18bdd4e9dd9924df4e06ced7e4ebb07b841dbd2f"
+    "scripts/build_product_readiness_snapshot.py": "sha256:d58180379143e4058ae7bec022c8bf0c36c94dde6c7da630e29ccbdeac02c7dd"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -3133,7 +3150,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "470d603c7e1671a567ea111c13a76fb57c1da320",
+  "source_commit_sha": "e9ea2b2f557e0201d1ebf9d61f67e555e1b1f954",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3223,12 +3240,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T01:03:27.370833+00:00",
+        "generated_at": "2026-07-02T01:08:44.071665+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "470d603c7e1671a567ea111c13a76fb57c1da320",
+        "source_commit_sha": "e9ea2b2f557e0201d1ebf9d61f67e555e1b1f954",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3237,6 +3254,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3261,6 +3279,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3300,6 +3319,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3324,6 +3344,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3363,6 +3384,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3387,6 +3409,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3426,6 +3449,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3450,6 +3474,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3489,6 +3514,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3513,6 +3539,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3551,6 +3578,7 @@
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3558,6 +3586,7 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
           "tests/test_build_product_readiness_snapshot.py",
@@ -3579,6 +3608,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3603,6 +3633,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3642,6 +3673,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3666,6 +3698,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3704,6 +3737,7 @@
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3715,6 +3749,7 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3740,6 +3775,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3764,6 +3800,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3803,6 +3840,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3827,6 +3865,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3864,11 +3903,13 @@
       {
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/report_pm_release_gate.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
@@ -3887,11 +3928,13 @@
       {
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/report_pm_release_gate.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
@@ -3911,6 +3954,7 @@
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3923,6 +3967,7 @@
           "scripts/report_pm_release_gate.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3948,6 +3993,7 @@
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -3963,6 +4009,7 @@
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -3991,6 +4038,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -4015,6 +4063,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -4054,6 +4103,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -4078,6 +4128,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -4117,6 +4168,7 @@
         "changed_paths_since_source_commit": [
           "docs/templates/ux_new_user_observation.template.json",
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
@@ -4141,6 +4193,7 @@
           "scripts/run_phase3_large_model_execution_receipt.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
@@ -4179,6 +4232,7 @@
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "scripts/build_github_actions_ci_streak_evidence.py",
           "scripts/build_phase6_ux_observation_status.py",
@@ -4187,6 +4241,7 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
           "tests/test_build_phase6_ux_observation_status.py",
@@ -4207,10 +4262,12 @@
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/report_pm_release_gate.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
@@ -4227,42 +4284,32 @@
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_developer_preview_final_gate_owner_packet.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_developer_preview_final_gate_owner_packet.py",
+          "tests/test_build_product_readiness_snapshot.py"
+        ],
         "generated_at": "2026-07-02T01:03:27.204373+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "470d603c7e1671a567ea111c13a76fb57c1da320",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
-        "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py",
-          "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
-          "scripts/build_github_actions_ci_streak_evidence.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/build_structural_scope_owner_review_packet.py",
-          "scripts/report_pm_release_gate.py",
-          "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
-          "tests/test_build_github_actions_ci_streak_evidence.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py",
-          "tests/test_report_pm_release_gate.py"
-        ],
-        "generated_at": "2026-07-01T23:29:01.231219+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-02T01:08:43.913396+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "2f0465f6a8baa77d6023050395b83b02aa13021b",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "e9ea2b2f557e0201d1ebf9d61f67e555e1b1f954",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "exact"
       }
     ],
     "open_blocker_counts": {
@@ -4287,13 +4334,10 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
+        "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
+        "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
         "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4318,13 +4362,10 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
+        " M implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
+        " M implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
         " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
-        "?? implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
-        "?? implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
-        "?? implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       ]
     }
   },

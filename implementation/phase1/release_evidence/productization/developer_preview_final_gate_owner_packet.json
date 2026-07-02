@@ -14,15 +14,32 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
+  "evidence_intake_artifact_count": 9,
   "final_gate_count": 9,
   "final_gate_pass_count": 6,
-  "generated_at": "2026-07-01T23:29:01.231219+00:00",
+  "generated_at": "2026-07-02T01:08:43.913396+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:300be1a9be55ce6d66f50d01468e96082a10af860c0e8791a402a93c6204e9a7",
-    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:ff676eb35dd81e6456f067005cd13a20932ae19ce523b8508c15782abdbc08ff"
+    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:1827386d49784db328174de7b37148cd77b027941533099af2bc559b936631c7"
   },
+  "owner_packet_blocker_id_count": 8,
+  "owner_packet_blocker_ids": [
+    "developer_preview_rc::selected_medium_models_pass_or_approved_review",
+    "product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review",
+    "developer_preview_rc::linux_windows_reproducibility_confirmed",
+    "product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed",
+    "developer_preview_rc::new_user_core_workflow_observation_passed",
+    "pm_release::ux::human_new_user_observation_missing_or_failed",
+    "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+    "product_readiness_snapshot::human_ux::*"
+  ],
   "owner_packet_count": 3,
+  "owner_packet_gate_ids": [
+    "selected_medium_models_pass_or_approved_review",
+    "linux_windows_reproducibility_confirmed",
+    "new_user_core_workflow_observation_passed"
+  ],
   "owner_packets": [
     {
       "blocker_grouping_metadata": {
@@ -81,8 +98,13 @@
         "unassigned_blocker_count": 0,
         "unassigned_blockers": []
       },
+      "blocker_ids": [
+        "developer_preview_rc::selected_medium_models_pass_or_approved_review",
+        "product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review"
+      ],
       "closure_decision_required": "five_PASS_or_explicit_APPROVED_REVIEW_rows",
       "contract_pass": false,
+      "current_blocker_count": 7,
       "current_blockers": [
         "medium_structural_models_current_below_required:2/5",
         "license_review_pending",
@@ -92,13 +114,20 @@
         "reference_outputs_missing",
         "medium_model_pass_or_review_below_required:0/5"
       ],
+      "current_evidence_gap_state": "owner_evidence_required",
       "current_evidence_refs": [
         "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
         "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
         "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
         "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json"
       ],
+      "evidence_intake_artifact_count": 2,
+      "evidence_intake_artifacts": [
+        "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json"
+      ],
       "gate": "selected_medium_models_pass_or_approved_review",
+      "gate_id": "selected_medium_models_pass_or_approved_review",
       "notes": [
         "Requires passing or pre-approved REVIEW evidence for selected medium OpenSees/reference models. Local topology/parser evidence does not count as medium-model benchmark pass evidence."
       ],
@@ -109,6 +138,7 @@
         "candidate_case_count_without_scorecard_receipts",
         "license_pending_rows_used_as_pass_evidence"
       ],
+      "release_surface_impact_count": 2,
       "release_surface_impacts": [
         "developer_preview_rc::selected_medium_models_pass_or_approved_review",
         "product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review"
@@ -120,7 +150,9 @@
         "per_case_normalization_receipts",
         "per_case_scorecard_receipts_with_PASS_or_APPROVED_REVIEW"
       ],
+      "required_owner_evidence_count": 5,
       "status": "blocked",
+      "verification_command_count": 3,
       "verification_commands": [
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
@@ -157,17 +189,29 @@
         "unassigned_blocker_count": 0,
         "unassigned_blockers": []
       },
+      "blocker_ids": [
+        "developer_preview_rc::linux_windows_reproducibility_confirmed",
+        "product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed"
+      ],
       "closure_decision_required": "direct_windows_replay_receipt_passes",
       "contract_pass": false,
+      "current_blocker_count": 1,
       "current_blockers": [
         "platform_replay_receipt_missing:windows"
       ],
+      "current_evidence_gap_state": "owner_evidence_required",
       "current_evidence_refs": [
         "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
         "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
         "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json"
       ],
+      "evidence_intake_artifact_count": 2,
+      "evidence_intake_artifacts": [
+        "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json"
+      ],
       "gate": "linux_windows_reproducibility_confirmed",
+      "gate_id": "linux_windows_reproducibility_confirmed",
       "notes": [
         "Requires independent Linux and Windows receipts that replay the same seed benchmark commands and compare stable output checksums. Git clean-clone blockers are tracked under benchmark_results_clean_checkout_regenerated so this gate remains scoped to missing Linux/Windows parity evidence."
       ],
@@ -178,6 +222,7 @@
         "git_clean_clone_receipt_counted_twice",
         "manual_platform_claim_without_replay_receipt"
       ],
+      "release_surface_impact_count": 2,
       "release_surface_impacts": [
         "developer_preview_rc::linux_windows_reproducibility_confirmed",
         "product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed"
@@ -189,7 +234,9 @@
         "required_replay_commands_return_0",
         "stable_output_checksum_comparison"
       ],
+      "required_owner_evidence_count": 5,
       "status": "blocked",
+      "verification_command_count": 2,
       "verification_commands": [
         "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
         "python3 scripts/build_developer_preview_rc_status.py --check"
@@ -268,8 +315,15 @@
         "unassigned_blocker_count": 0,
         "unassigned_blockers": []
       },
+      "blocker_ids": [
+        "developer_preview_rc::new_user_core_workflow_observation_passed",
+        "pm_release::ux::human_new_user_observation_missing_or_failed",
+        "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+        "product_readiness_snapshot::human_ux::*"
+      ],
       "closure_decision_required": "accepted_human_new_user_observation",
       "contract_pass": false,
+      "current_blocker_count": 17,
       "current_blockers": [
         "human_new_user_observation_not_passed",
         "human_observation_required_workflow_steps_missing:5",
@@ -289,12 +343,22 @@
         "phase5_gui_workflow:human_new_user_observation_not_passed",
         "ux_observation_intake_packet_not_passed"
       ],
+      "current_evidence_gap_state": "owner_evidence_required",
       "current_evidence_refs": [
         "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json"
       ],
+      "evidence_intake_artifact_count": 5,
+      "evidence_intake_artifacts": [
+        "docs/templates/ux_new_user_observation.template.json",
+        "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
+        "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json"
+      ],
       "gate": "new_user_core_workflow_observation_passed",
+      "gate_id": "new_user_core_workflow_observation_passed",
       "notes": [
         "This gate requires a passing human new-user observation report. The intake packet is an owner handoff checklist only, automated browser/task evidence does not replace human observation, and visible workflow shell coverage does not satisfy the gate by itself."
       ],
@@ -306,6 +370,7 @@
         "self_referential_or_placeholder_evidence_refs",
         "gui_shell_coverage_without_user_observation"
       ],
+      "release_surface_impact_count": 4,
       "release_surface_impacts": [
         "developer_preview_rc::new_user_core_workflow_observation_passed",
         "pm_release::ux::human_new_user_observation_missing_or_failed",
@@ -322,7 +387,9 @@
         "non_placeholder_evidence_ref",
         "accepted_release_decision"
       ],
+      "required_owner_evidence_count": 8,
       "status": "blocked",
+      "verification_command_count": 4,
       "verification_commands": [
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
@@ -345,7 +412,7 @@
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "2f0465f6a8baa77d6023050395b83b02aa13021b",
+  "source_commit_sha": "e9ea2b2f557e0201d1ebf9d61f67e555e1b1f954",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
 }

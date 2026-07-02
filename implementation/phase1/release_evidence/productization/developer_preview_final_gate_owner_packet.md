@@ -30,6 +30,34 @@
 - `python3 scripts/build_phase6_ux_observation_status.py --check`
 - `python3 scripts/build_developer_preview_rc_status.py --check`
 
+## Evidence Intake Artifacts
+
+### `selected_medium_models_pass_or_approved_review`
+- `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+- `implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json`
+
+### `linux_windows_reproducibility_confirmed`
+- `implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json`
+- `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json`
+
+### `new_user_core_workflow_observation_passed`
+- `docs/templates/ux_new_user_observation.template.json`
+- `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
+- `implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
+- `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json`
+
+## Blocker IDs
+
+- `developer_preview_rc::selected_medium_models_pass_or_approved_review`
+- `product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review`
+- `developer_preview_rc::linux_windows_reproducibility_confirmed`
+- `product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed`
+- `developer_preview_rc::new_user_core_workflow_observation_passed`
+- `pm_release::ux::human_new_user_observation_missing_or_failed`
+- `pm_release::ux::human_new_user_30min_sample_evidence_missing`
+- `product_readiness_snapshot::human_ux::*`
+
 ## Release Surface Impacts
 
 ### `selected_medium_models_pass_or_approved_review`
