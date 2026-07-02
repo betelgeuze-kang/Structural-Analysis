@@ -1,0 +1,113 @@
+# Structural Scope Cleanup Impact Report
+
+- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=131 | blocking=100 | owner_pending=86`
+- `contract_pass`: `False`
+- `cleanup_impact_clear`: `False`
+- `quarantined_path_count`: `86`
+- `reference_path_count`: `131`
+- `blocking_cleanup_reference_path_count`: `100`
+- `owner_decision_pending_count`: `86`
+
+## Reference Roles
+
+- `reference_role_counts`: `{'documentation_reference': 2, 'implementation_runtime_or_manifest_reference': 48, 'other_reference': 1, 'productization_evidence_reference': 17, 'release_governance_reference': 4, 'scope_governance_reference': 27, 'script_reference': 14, 'test_reference': 18}`
+- `blocking_reference_role_counts`: `{'documentation_reference': 2, 'implementation_runtime_or_manifest_reference': 48, 'other_reference': 1, 'productization_evidence_reference': 17, 'script_reference': 14, 'test_reference': 18}`
+
+## Blocking References
+
+| Path | Role | Terms | Scope Tokens | Quarantined Paths |
+|---|---|---:|---|---:|
+| `.gitignore` | `other_reference` | 1 | `md3bead` | 5 |
+| `README.md` | `documentation_reference` | 0 | `gnina, gpcr, md3bead, pdbbind, pocketmd` | 0 |
+| `docs/engine-ai-and-comparison-commercialization-gaps.md` | `documentation_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/README.md` | `implementation_runtime_or_manifest_reference` | 11 | `md3bead` | 8 |
+| `implementation/phase1/branch64_microbatch_profile_report.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/ci-gate-reason-codebook.md` | `implementation_runtime_or_manifest_reference` | 0 | `md3bead` | 0 |
+| `implementation/phase1/ci_artifact_manifest.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/ci_artifact_manifest.nightly.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/ci_artifact_manifest.nightly.require_ndtha.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/ci_artifact_manifest.pr.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/ci_artifact_manifest.pr.require_hip.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/ci_gate_report.json` | `implementation_runtime_or_manifest_reference` | 1 | `md3bead` | 1 |
+| `implementation/phase1/ci_gate_report.nightly.json` | `implementation_runtime_or_manifest_reference` | 0 | `md3bead` | 0 |
+| `implementation/phase1/ci_gate_report.nightly.require_ndtha.json` | `implementation_runtime_or_manifest_reference` | 1 | `md3bead` | 1 |
+| `implementation/phase1/ci_gate_report.pr.json` | `implementation_runtime_or_manifest_reference` | 0 | `md3bead` | 0 |
+| `implementation/phase1/ci_gate_report.pr.require_hip.json` | `implementation_runtime_or_manifest_reference` | 0 | `md3bead` | 0 |
+| `implementation/phase1/commercial_readiness_report.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/commercialization-gap-redteam-playbook.md` | `implementation_runtime_or_manifest_reference` | 7 | `md3bead` | 5 |
+| `implementation/phase1/mgt_hip_full_residual_backend.py` | `implementation_runtime_or_manifest_reference` | 2 | `` | 2 |
+| `implementation/phase1/native_runtime_artifact_manifest.json` | `implementation_runtime_or_manifest_reference` | 11 | `md3bead` | 5 |
+| `implementation/phase1/nightly_release_gate_report.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/organize_phase1_workspace.py` | `implementation_runtime_or_manifest_reference` | 1 | `md3bead` | 5 |
+| `implementation/phase1/p0_core_gap_report.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/p0_engine_perf_report.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/phase1_ci_gate.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/physics_branching_report.json` | `implementation_runtime_or_manifest_reference` | 1 | `md3bead` | 1 |
+| `implementation/phase1/physics_guided_branching.py` | `implementation_runtime_or_manifest_reference` | 1 | `md3bead` | 1 |
+| `implementation/phase1/profile_branch64_microbatch_cache.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/profile_p0_engine_path.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/release_evidence/commercial/commercial_readiness_report.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/release_evidence/productization/g1_current_frontier_engine_acceleration_assessment.json` | `productization_evidence_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/release_evidence/productization/g1_rocm_rust_hip_acceleration_assessment.json` | `productization_evidence_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/release_evidence/productization/mgt_rust_hip_full_residual_ffi_followup376_probe.json` | `productization_evidence_reference` | 1 | `` | 1 |
+| `implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json` | `productization_evidence_reference` | 9 | `gpcr, h_bond, md3bead, pocketmd` | 3 |
+| `implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md` | `productization_evidence_reference` | 9 | `gpcr, h_bond, md3bead, pocketmd` | 3 |
+| `implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json` | `productization_evidence_reference` | 9 | `gpcr, h_bond, md3bead, pocketmd` | 3 |
+| `implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md` | `productization_evidence_reference` | 9 | `gpcr, h_bond, md3bead, pocketmd` | 3 |
+| `implementation/phase1/release_evidence/productization/pm_release_gate_report.json` | `productization_evidence_reference` | 9 | `gpcr, h_bond, pocketmd` | 3 |
+| `implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json` | `productization_evidence_reference` | 9 | `gpcr, h_bond, md3bead, pocketmd` | 3 |
+| `implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` | `productization_evidence_reference` | 9 | `gpcr, h_bond, md3bead, pocketmd` | 3 |
+| `implementation/phase1/release_evidence/productization/public_benchmark_external_receipts_validation.json` | `productization_evidence_reference` | 0 | `casf_pdbbind, gnina, pdbbind` | 0 |
+| `implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json` | `productization_evidence_reference` | 18 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 6 |
+| `implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json` | `productization_evidence_reference` | 66 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 22 |
+| `implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md` | `productization_evidence_reference` | 66 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 22 |
+| `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.json` | `productization_evidence_reference` | 12 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 12 |
+| `implementation/phase1/release_evidence/productization/public_benchmark_phase2_row_audit.md` | `productization_evidence_reference` | 0 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 0 |
+| `implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json` | `productization_evidence_reference` | 57 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 19 |
+| `implementation/phase1/run_megastructure_commercial_readiness.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/run_nightly_release_gate.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/run_p0_core_gap_pipeline.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/run_phase1_steps.py` | `implementation_runtime_or_manifest_reference` | 1 | `md3bead` | 1 |
+| `implementation/phase1/run_phase1_topk_pipeline.py` | `implementation_runtime_or_manifest_reference` | 9 | `md3bead` | 7 |
+| `implementation/phase1/run_scaleout_io_profile.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/runtime_sbom.json` | `implementation_runtime_or_manifest_reference` | 5 | `md3bead` | 5 |
+| `implementation/phase1/runtime_version_compatibility_matrix.json` | `implementation_runtime_or_manifest_reference` | 1 | `md3bead` | 5 |
+| `implementation/phase1/rust_nonlinear_frame_bridge.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/rust_track_lf_bridge.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/scaleout_io_profile_report.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/static_artifact_validation_report.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/static_artifact_validation_report.nightly.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/static_artifact_validation_report.pr.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/validate_phase1_artifacts.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 1 |
+| `implementation/phase1/winning_ticket_backprop.py` | `implementation_runtime_or_manifest_reference` | 1 | `md3bead` | 1 |
+| `implementation/phase1/winning_ticket_backprop_report.json` | `implementation_runtime_or_manifest_reference` | 1 | `md3bead` | 1 |
+| `implementation/phase1/zero_copy_real_probe.py` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/zero_copy_real_probe_report.forbidden.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/zero_copy_real_probe_report.required.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `implementation/phase1/zero_copy_real_probe_report_strict.json` | `implementation_runtime_or_manifest_reference` | 3 | `md3bead` | 5 |
+| `scripts/build_pm_release_blocker_action_register.py` | `script_reference` | 0 | `gpcr, md3bead, pocketmd` | 0 |
+| `scripts/build_product_readiness_snapshot.py` | `script_reference` | 20 | `casf_pdbbind, gnina, gpcr, h_bond, md3bead, pdbbind, pocketmd, posebusters, science_actual, symmetry_aware_ligand` | 8 |
+| `scripts/build_public_benchmark_operator_intake_packet.py` | `script_reference` | 51 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 22 |
+| `scripts/build_public_benchmark_source_of_truth.py` | `script_reference` | 39 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 15 |
+| `scripts/build_runtime_packaging_manifest.py` | `script_reference` | 7 | `md3bead` | 5 |
+| `scripts/build_science_evidence_surface_seeds.py` | `script_reference` | 11 | `gpcr, h_bond` | 6 |
+| `scripts/check_repo_hygiene.py` | `script_reference` | 1 | `md3bead` | 5 |
+| `scripts/materialize_public_benchmark_harness_bundle.py` | `script_reference` | 18 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 12 |
+| `scripts/materialize_public_benchmark_operator_bundle_from_rows.py` | `script_reference` | 2 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 2 |
+| `scripts/materialize_public_benchmark_phase2_from_rows.py` | `script_reference` | 13 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 13 |
+| `scripts/materialize_public_benchmark_rmsd_scorecard.py` | `script_reference` | 4 | `gnina, symmetry_aware_ligand` | 2 |
+| `scripts/plan_source_boundary_cleanup.py` | `script_reference` | 1 | `md3bead` | 5 |
+
+## Blockers
+
+- `owner_decision_pending_count=86`
+- `blocking_cleanup_reference_path_count=100`
+
+## Next Actions
+
+- `record owner delete/extract decisions for quarantined non-structural paths`
+- `resolve non-governance references before applying delete/extract cleanup`
+
+## Claim Boundary
+
+This impact report is non-mutating. It does not approve owner decisions, delete files, or close scope cleanup. It only identifies non-quarantined tracked references that must be reviewed before PocketMD/GPCR/MD3Bead-family artifacts are deleted or extracted from the structural-analysis repository.
