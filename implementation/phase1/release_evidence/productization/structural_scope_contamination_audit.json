@@ -10,7 +10,7 @@
   },
   "first_non_structural_path": "implementation/phase1/md3bead_scientific_validity_report.md",
   "first_unquarantined_non_structural_path": "",
-  "generated_at": "2026-07-02T06:31:07.032700+00:00",
+  "generated_at": "2026-07-02T06:53:34.790427+00:00",
   "git_state_counts": {
     "tracked": 86
   },
@@ -27,7 +27,7 @@
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/structural_contact_validation_report.json": "sha256:16b6eeb31aa563062128a7b670497925b83a3e51dc30e51c81bf0d5aaeca8fe9",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
-    "scripts/check_structural_scope_contamination.py": "sha256:cb0b9f7f26b730540d402b16e4d198db486289c3a13d86b224ff6e38ecc1f31f"
+    "scripts/check_structural_scope_contamination.py": "sha256:29e0bac1df2cc166be8e5ef2d80e3bc570a7a6dc32ed91c3537f66bde38688b5"
   },
   "next_actions": [
     "keep_quarantine_manifest_exact_until_non_structural_paths_are_deleted_or_extracted",
@@ -1436,6 +1436,12 @@
   ],
   "non_structural_tracked_path_count": 86,
   "non_structural_untracked_path_count": 0,
+  "owner_cleanup_closure_blockers": [
+    "quarantined_non_structural_owner_cleanup_pending_count=86",
+    "release_surface_quarantined_owner_cleanup_pending_count=3"
+  ],
+  "owner_cleanup_closure_ready": false,
+  "owner_cleanup_pending_path_count": 86,
   "path_area_counts": {
     "implementation_phase1": 9,
     "productization_evidence": 36,
@@ -2856,6 +2862,7 @@
       ]
     }
   ],
+  "quarantined_owner_cleanup_pending_path_count": 86,
   "quarantined_path_area_counts": {
     "implementation_phase1": 9,
     "productization_evidence": 36,
@@ -2863,6 +2870,7 @@
     "script": 19,
     "test": 19
   },
+  "release_surface_owner_cleanup_pending_path_count": 3,
   "release_surface_quarantine_boundary": {
     "claim_boundary": "Quarantined release-surface paths are explicitly excluded from the building structural-analysis release surface. They are skipped by the structural text guard only because the quarantine manifest keeps them outside release claims; they still require owner delete/extract decisions before scope cleanup can close.",
     "quarantined_paths_claim_eligible": false,
@@ -2904,7 +2912,7 @@
   "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths_with_release_surface_quarantine_manifest",
   "reused_evidence": false,
   "schema_version": "structural-scope-contamination-audit.v1",
-  "source_commit_sha": "992a36aa427130a7f175fa2452aa73ef1dc6d6ea",
+  "source_commit_sha": "d14b402fd0f0da9ea2b478529d37877e8d76be53",
   "status": "quarantined",
   "tracked_path_count": 5761,
   "unquarantined_family_counts": {},
@@ -2913,6 +2921,7 @@
   "unquarantined_non_structural_rows": [],
   "unquarantined_non_structural_tracked_path_count": 0,
   "unquarantined_non_structural_untracked_path_count": 0,
+  "unquarantined_owner_cleanup_pending_path_count": 0,
   "unquarantined_path_area_counts": {},
   "untracked_path_count": 0
 }

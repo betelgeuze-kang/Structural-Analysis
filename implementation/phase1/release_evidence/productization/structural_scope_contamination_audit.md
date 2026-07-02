@@ -10,6 +10,9 @@
 - `first_non_structural_path`: `implementation/phase1/md3bead_scientific_validity_report.md`
 - `first_unquarantined_non_structural_path`: `none`
 - `release_surface_text_leak_path_count`: `0`
+- `owner_cleanup_closure_ready`: `False`
+- `owner_cleanup_pending_path_count`: `86`
+- `release_surface_owner_cleanup_pending_path_count`: `3`
 
 ## Quarantine
 
@@ -38,6 +41,12 @@
 ## Release Surface Text Guard
 
 No guarded structural release surface text leaks detected.
+
+## Owner Cleanup Closure
+
+- blockers:
+  - `quarantined_non_structural_owner_cleanup_pending_count=86`
+  - `release_surface_quarantined_owner_cleanup_pending_count=3`
 
 ## Release Surface Quarantine Boundary
 
