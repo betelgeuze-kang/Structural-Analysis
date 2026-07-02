@@ -60,6 +60,18 @@ DEFAULT_STRUCTURAL_SCOPE_QUARANTINE_MANIFEST = Path(
 DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISIONS = Path(
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json"
 )
+DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_TEMPLATE_CSV = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "structural_scope_owner_decisions.release_surface_first.template.csv"
+)
+DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_FILLED_CSV = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "structural_scope_owner_decisions.release_surface_first.filled.csv"
+)
+DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_CANDIDATE = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "structural_scope_owner_decisions.release_surface_first.candidate.json"
+)
 DEFAULT_STRUCTURAL_SCOPE_ORIGIN_REPORT = Path(
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json"
 )
@@ -639,6 +651,10 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
             f"python3 scripts/build_structural_scope_origin_report.py --out {DEFAULT_STRUCTURAL_SCOPE_ORIGIN_REPORT} --out-md {DEFAULT_STRUCTURAL_SCOPE_ORIGIN_REPORT.with_suffix('.md')}",
             f"python3 scripts/build_structural_scope_cleanup_impact_report.py --out {DEFAULT_STRUCTURAL_SCOPE_CLEANUP_IMPACT_REPORT} --out-md {DEFAULT_STRUCTURAL_SCOPE_CLEANUP_IMPACT_REPORT.with_suffix('.md')}",
             f"python3 scripts/build_structural_scope_owner_decision_application_plan.py --out {DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN} --out-md {DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN.with_suffix('.md')}",
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            f"--batch-owner-decisions {DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_TEMPLATE_CSV} "
+            f"--out {DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_CANDIDATE} "
+            f"--out-md {DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_CANDIDATE.with_suffix('.md')}",
             "python3 scripts/build_product_readiness_snapshot.py",
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
@@ -719,6 +735,14 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
             "python3 scripts/build_structural_scope_origin_report.py --fail-blocked",
             "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            f"--batch-owner-decisions {DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_FILLED_CSV} "
+            f"--out {DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_CANDIDATE} "
+            f"--out-md {DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_CANDIDATE.with_suffix('.md')} "
+            "--fail-release-surface-first-blocked",
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            f"--owner-decisions {DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_CANDIDATE} "
+            "--fail-release-surface-first-blocked",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
             "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
             "python3 scripts/build_product_readiness_snapshot.py --check",

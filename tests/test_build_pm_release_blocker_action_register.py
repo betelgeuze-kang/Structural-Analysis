@@ -323,6 +323,11 @@ def test_build_register_prioritizes_structural_scope_cleanup_plan(tmp_path: Path
         for command in row["reproduction_commands"]
     )
     assert any(
+        "merge_structural_scope_owner_decision_batch.py" in command
+        and "structural_scope_owner_decisions.release_surface_first.template.csv" in command
+        for command in row["reproduction_commands"]
+    )
+    assert any(
         "build_structural_scope_origin_report.py" in command
         for command in row["reproduction_commands"]
     )
@@ -344,6 +349,18 @@ def test_build_register_prioritizes_structural_scope_cleanup_plan(tmp_path: Path
     )
     assert any(
         "--fail-release-surface-first-blocked" in command
+        for command in row["verification_commands"]
+    )
+    assert any(
+        "merge_structural_scope_owner_decision_batch.py" in command
+        and "structural_scope_owner_decisions.release_surface_first.filled.csv" in command
+        for command in row["verification_commands"]
+    )
+    assert any(
+        "--owner-decisions "
+        "implementation/phase1/release_evidence/productization/"
+        "structural_scope_owner_decisions.release_surface_first.candidate.json"
+        in command
         for command in row["verification_commands"]
     )
     assert "structural_scope_owner_review_packet" in row["evidence_artifacts"]

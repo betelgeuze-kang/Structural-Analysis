@@ -28,15 +28,15 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T07:10:14.551226+00:00",
+  "generated_at": "2026-07-02T07:36:26.366839+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:ff4a13158b40581704ed179f79dac5454ee322c79c5e80e28d89149ce85d2ae5",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:5767b4546cdfe290af10c4c69e51b6bc14c050219c66d7051537cae7440b04a2",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:92a1f4f7a1491e6d638a4d93fdc750ea8e0c8f3762328ace5b31370382d2b13f",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9a75f30c000fe05713ab0ebfc8b56c1de5fcddde2857b8b768144c0da1503217",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:773b5287115b905d71aa68b59c2ded344b6be130fb46c459fe4582e366bb7e40",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:e6277f1c5541bcec3756229c6d1732984cf984107722718a6677aa6e31e71915",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:7ec48747941e6affe89b3446ab2617bfc17df50fc659ce5f76fef9d41cb08b33",
-    "scripts/build_pm_release_blocker_action_register.py": "sha256:9919b9f8a46782e746614096408cd2877acb31723c3d5a5f4393c0d79db45468"
+    "scripts/build_pm_release_blocker_action_register.py": "sha256:63ee58b786754fc591e54730f9c3ad94126100ccb95813b188ced398925d6be4"
   },
   "next_actions": [
     "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
@@ -305,6 +305,7 @@
         "python3 scripts/build_structural_scope_origin_report.py --out implementation/phase1/release_evidence/productization/structural_scope_origin_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
         "python3 scripts/build_structural_scope_cleanup_impact_report.py --out implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
+        "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.md",
         "python3 scripts/build_product_readiness_snapshot.py",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
       ],
@@ -325,6 +326,8 @@
         "python3 scripts/build_structural_scope_origin_report.py --fail-blocked",
         "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
+        "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.filled.csv --out implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.md --fail-release-surface-first-blocked",
+        "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --fail-release-surface-first-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
         "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
         "python3 scripts/build_product_readiness_snapshot.py --check",
@@ -2234,7 +2237,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "2329137e9ca879afedb7eb3da9d90748a4747c43",
+  "source_commit_sha": "f58d953a03c01b89326591826680eb5c8b9fe89d",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,
