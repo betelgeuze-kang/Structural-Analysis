@@ -133,6 +133,22 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
     assert payload["contract_pass"] is False
     assert payload["status"] == "blocked"
     assert payload["reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED"
+    assert payload["release_area"] == "ux"
+    assert payload["release_area_blocker_ids"] == [
+        "pm_release::ux::human_new_user_observation_missing_or_failed",
+        "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+    ]
+    assert payload["developer_preview_final_gate_id"] == "new_user_core_workflow_observation_passed"
+    assert payload["developer_preview_blocker_ids"] == [
+        "developer_preview_rc::new_user_core_workflow_observation_passed"
+    ]
+    assert "human_ux::observation_file_missing" in payload["product_readiness_blocker_ids"]
+    assert "ux_new_user_observation::observation_file_missing" in payload["blocker_ids"]
+    assert (
+        "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json"
+        in payload["evidence_intake_artifacts"]
+    )
+    assert "automated browser smoke" in payload["human_observation_evidence_policy"]["rejected_substitutes"][0]
     assert payload["summary"]["field_pass_count"] == 0
     assert payload["summary"]["observation_blocker_count"] == 2
     assert payload["gate_unblock_plan_count"] == 2
@@ -231,6 +247,10 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
     assert payload["contract_pass"] is True
     assert payload["status"] == "ready"
     assert payload["reason_code"] == "PASS"
+    assert payload["release_area_blocker_ids"] == []
+    assert payload["developer_preview_blocker_ids"] == []
+    assert payload["product_readiness_blocker_ids"] == []
+    assert payload["blocker_ids"] == []
     assert payload["summary"]["field_pass_count"] == 24
     assert payload["summary"]["field_count"] == 24
     assert payload["gate_unblock_plan"] == []
@@ -274,6 +294,9 @@ def test_ux_observation_intake_packet_cli_writes_markdown(tmp_path: Path, capsys
     assert "new_user \\| first_time_user \\| pilot_user" in markdown
     assert "Gate Unblock Plan" in markdown
     assert "Validation Commands" in markdown
+    assert "Blocker IDs" in markdown
+    assert "Human Observation Evidence Policy" in markdown
+    assert "phase6_ux_observation_status.json" in markdown
 
 
 def test_ux_observation_intake_reuses_report_gate_unblock_plan(tmp_path: Path) -> None:

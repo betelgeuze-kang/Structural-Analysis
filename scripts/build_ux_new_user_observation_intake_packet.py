@@ -18,6 +18,56 @@ DEFAULT_OBSERVATION_REPORT = Path(
 )
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+PHASE6_UX_OBSERVATION_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json"
+)
+PM_RELEASE_GATE_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
+PRODUCT_READINESS_SNAPSHOT = Path(
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+)
+DEVELOPER_PREVIEW_RC_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
+)
+RELEASE_AREA = "ux"
+RELEASE_AREA_BLOCKER_IDS = (
+    "pm_release::ux::human_new_user_observation_missing_or_failed",
+    "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+)
+DEVELOPER_PREVIEW_FINAL_GATE_ID = "new_user_core_workflow_observation_passed"
+DEVELOPER_PREVIEW_BLOCKER_IDS = (
+    f"developer_preview_rc::{DEVELOPER_PREVIEW_FINAL_GATE_ID}",
+)
+EVIDENCE_INTAKE_ARTIFACTS = (
+    DEFAULT_TEMPLATE,
+    DEFAULT_OBSERVATION,
+    DEFAULT_OBSERVATION_REPORT,
+    DEFAULT_OUT,
+    PHASE6_UX_OBSERVATION_STATUS,
+    PM_RELEASE_GATE_REPORT,
+    PRODUCT_READINESS_SNAPSHOT,
+    DEVELOPER_PREVIEW_RC_STATUS,
+)
+HUMAN_OBSERVATION_EVIDENCE_POLICY = {
+    "accepted_evidence": [
+        "human-observed 30-minute new-user workflow record with anonymized participant_ref",
+        "observer-owned note, ticket, recording reference, or signed evidence bundle",
+        "timezone-aware started_at_utc/completed_at_utc plus matching completion_minutes <= 30",
+        "all five required workflow steps observed with passing outcomes",
+        "approval_decision explicitly accepted for release evidence",
+    ],
+    "rejected_substitutes": [
+        "automated browser smoke or task-based UX rehearsal without human observation",
+        "generated UX/PM/DP/readiness gate reports used as evidence_ref",
+        "docs/templates or *.template.* files",
+        "the observation JSON self-referencing itself as separate evidence",
+        "operator/expert rehearsal that is not a new-user observation",
+    ],
+    "closure_rule": (
+        "The UX PM release area and Developer Preview UX final gate close only after "
+        "ux_new_user_observation_report.json and phase6_ux_observation_status.json "
+        "both pass from a real human 30-minute new-user sample."
+    ),
+}
 
 FIELD_SPECS = (
     {
@@ -208,6 +258,27 @@ def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+def _dedupe_str(rows: list[Any]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for row in rows:
+        item = str(row or "")
+        if not item or item in seen:
+            continue
+        seen.add(item)
+        deduped.append(item)
+    return deduped
+
+
+def _human_ux_blocker_ids(blockers: list[str]) -> list[str]:
+    if not blockers:
+        return []
+    detail_ids = [f"human_ux::{blocker}" for blocker in blockers if blocker]
+    if detail_ids:
+        return detail_ids
+    return ["human_ux::observation_file_missing"]
+
+
 def _field_status(*, field: str, check_name: str, observation_report: dict[str, Any]) -> dict[str, Any]:
     checks = _as_dict(observation_report.get("checks"))
     summary = _as_dict(observation_report.get("summary"))
@@ -361,13 +432,25 @@ def build_packet(
     validation_commands = [
         f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_OBSERVATION_REPORT}",
         f"python3 scripts/build_ux_new_user_observation_intake_packet.py --out {DEFAULT_OUT}",
+        f"python3 scripts/build_phase6_ux_observation_status.py --out {PHASE6_UX_OBSERVATION_STATUS}",
+        f"python3 scripts/build_developer_preview_rc_status.py --out {DEVELOPER_PREVIEW_RC_STATUS}",
         "python3 scripts/report_pm_release_gate.py "
         "--out implementation/phase1/release_evidence/productization/pm_release_gate_report.json "
         "--out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py "
         "--out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json "
         "--out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        f"python3 scripts/build_product_readiness_snapshot.py --out {PRODUCT_READINESS_SNAPSHOT}",
     ]
+    release_area_blocker_ids = list(RELEASE_AREA_BLOCKER_IDS) if not contract_pass else []
+    developer_preview_blocker_ids = list(DEVELOPER_PREVIEW_BLOCKER_IDS) if not contract_pass else []
+    product_readiness_blocker_ids = _human_ux_blocker_ids(blockers) if not contract_pass else []
+    blocker_ids = _dedupe_str(
+        release_area_blocker_ids
+        + developer_preview_blocker_ids
+        + product_readiness_blocker_ids
+        + [f"ux_new_user_observation::{blocker}" for blocker in blockers]
+    )
     gate_unblock_plan = _gate_unblock_plan(
         observation_path=observation_path,
         template_path=template_path,
@@ -383,6 +466,14 @@ def build_packet(
         "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
+        "release_area": RELEASE_AREA,
+        "release_area_blocker_ids": release_area_blocker_ids,
+        "developer_preview_final_gate_id": DEVELOPER_PREVIEW_FINAL_GATE_ID,
+        "developer_preview_blocker_ids": developer_preview_blocker_ids,
+        "product_readiness_blocker_ids": product_readiness_blocker_ids,
+        "blocker_ids": blocker_ids,
+        "evidence_intake_artifacts": [str(path) for path in EVIDENCE_INTAKE_ARTIFACTS],
+        "human_observation_evidence_policy": HUMAN_OBSERVATION_EVIDENCE_POLICY,
         "observation_path": str(observation_path),
         "template_path": str(template_path),
         "observation_report_path": str(observation_report_path),
@@ -440,14 +531,43 @@ def _markdown(payload: dict[str, Any]) -> str:
         "",
         f"- `summary_line`: `{payload['summary_line']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
+        f"- `release_area`: `{payload['release_area']}`",
+        f"- `blocker_ids`: `{len(payload['blocker_ids'])}`",
         f"- `gate_unblock_plan_count`: `{payload['gate_unblock_plan_count']}`",
         f"- `observation_path`: `{payload['observation_path']}`",
         f"- `template_path`: `{payload['template_path']}`",
         f"- `owner_action`: {payload['summary']['owner_action']}",
         "",
-        "| Field | Current | Template | Required | Report Check |",
-        "|---|---|---|---|---|",
+        "## Blocker IDs",
+        "",
     ]
+    if payload["blocker_ids"]:
+        lines.extend(f"- `{cell(blocker_id)}`" for blocker_id in payload["blocker_ids"])
+    else:
+        lines.append("- none")
+    lines.extend(
+        [
+            "",
+            "## Evidence Intake Artifacts",
+            "",
+        ]
+    )
+    lines.extend(f"- `{cell(artifact)}`" for artifact in payload["evidence_intake_artifacts"])
+    lines.extend(
+        [
+            "",
+            "## Human Observation Evidence Policy",
+            "",
+            f"- `closure_rule`: {payload['human_observation_evidence_policy']['closure_rule']}",
+            "- `accepted_evidence`: "
+            + "; ".join(payload["human_observation_evidence_policy"]["accepted_evidence"]),
+            "- `rejected_substitutes`: "
+            + "; ".join(payload["human_observation_evidence_policy"]["rejected_substitutes"]),
+            "",
+            "| Field | Current | Template | Required | Report Check |",
+            "|---|---|---|---|---|",
+        ]
+    )
     for row in payload["field_rows"]:
         lines.append(
             f"| `{cell(row['field'])}` | `{cell(row['current_value'])}` | `{cell(row['template_value'])}` | "
