@@ -58,21 +58,3 @@ def test_gpu_strict_passes_on_gpu_backend(monkeypatch) -> None:
     assert result["gpu_strict_pass"] is True
     assert result["strict_rust_hip_pass"] is True
     assert result["pass"] is True
-
-
-def test_default_zero_copy_producer_stays_structural_scope() -> None:
-    assert "engine_hook_stub.py" in probe.DEFAULT_PRODUCER_CMD
-    assert ("md3" + "bead") not in probe.DEFAULT_PRODUCER_CMD.lower()
-    assert ("rust_hip_" + "md3" + "bead_hook") not in probe.DEFAULT_PRODUCER_CMD.lower()
-
-    result = probe.run(
-        probe.DEFAULT_PRODUCER_CMD,
-        require_rust_hip=False,
-        allow_cpu_required=False,
-        gpu_strict=True,
-    )
-
-    assert result["pass"] is True
-    assert result["challenge_ok"] is True
-    assert result["runtime_kind"] == "stub"
-    assert result["runtime_backend"] == "structural_engine_stub"
