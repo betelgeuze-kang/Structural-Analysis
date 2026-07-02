@@ -25,10 +25,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T21:14:24.501393+00:00",
+  "generated_at": "2026-07-02T21:22:13.674370+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:9d914078911395f790b1fc006d6093a0482dfd248b3e9dc33a62f9bb319829aa",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9e965f3e2bf94ae644648104e2e35430f112a7c2390b099376e26e93029b75a0",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:348747b2ba789df69213dba771f2e69515480bcd4a842e9a1efc72bb530ced5f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d502bde0c5d759ffb3a312852a4e975ae889a42aa54b08cecf770791506dda59",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:390c963b64828e63b71920b554bb49dfb6763c3051f78b8b8ec2e5db73ae5947"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -196,6 +196,7 @@
         "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
       },
       "reproduction_commands": [
+        "python3 scripts/fill_ux_new_user_observation_from_human_sample.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation.json --report-out implementation/phase1/release_evidence/productization/ux_new_user_observation.fill_report.json --participant-ref <anonymized-participant-ref> --participant-role <new_user|first_time_user|pilot_user> --new-to-product true --sample-project-id <sample-project-id> --observer <human-observer> --started-at-utc <started-at-utc> --completed-at-utc <completed-at-utc> --completion-minutes <minutes> --blocker-count 0 --evidence-ref <human-observation-evidence-ref> --approval-decision <accepted|approved|pass|signed|approved_for_release> --all-required-steps-passed --fail-blocked",
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -235,6 +236,7 @@
         "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
       },
       "reproduction_commands": [
+        "python3 scripts/fill_ux_new_user_observation_from_human_sample.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation.json --report-out implementation/phase1/release_evidence/productization/ux_new_user_observation.fill_report.json --participant-ref <anonymized-participant-ref> --participant-role <new_user|first_time_user|pilot_user> --new-to-product true --sample-project-id <sample-project-id> --observer <human-observer> --started-at-utc <started-at-utc> --completed-at-utc <completed-at-utc> --completion-minutes <minutes> --blocker-count 0 --evidence-ref <human-observation-evidence-ref> --approval-decision <accepted|approved|pass|signed|approved_for_release> --all-required-steps-passed --fail-blocked",
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -506,7 +508,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "0b421055df3812c4c04723f6963a8fe10fa6d679",
+  "source_commit_sha": "0b2525675b3bdc790bc3783233ab95bf9ff27f0a",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
