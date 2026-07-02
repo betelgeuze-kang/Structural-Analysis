@@ -1203,6 +1203,8 @@ def _markdown(payload: dict[str, Any]) -> str:
             for artifact in row.get("source_intake_evidence_intake_artifacts", []):
                 lines.append(f"- `evidence_artifact`: `{artifact}`")
             lines.append("")
+    while lines and lines[-1] == "":
+        lines.pop()
     return "\n".join(lines) + "\n"
 
 
