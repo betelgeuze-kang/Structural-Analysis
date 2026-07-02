@@ -50,7 +50,7 @@
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-02T15:15:57.797875+00:00",
+  "generated_at": "2026-07-02T15:26:19.813659+00:00",
   "hip_worker_contract": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -127,10 +127,10 @@
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker"
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:1b434076e31f910d7454c355d120e2307d3948d9bfe81748b173d0c75a2034b0",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:809bab70f0d2b323158ecd3833b3f5250c6f3303bdb3d1b10b4e6eba4c79094c",
-    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:55855b35e376ac0b72c739dac29611b5d16b85010b25b9721774b49b49002daa",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:070d8c728d6094987262c86745e9693fd1127f503a1bbf8d77fe2a6a3b716015",
+    "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:f9780c0a1bcb6c21c6efd6638b7bb3cceec4f6ab54ba571533a834fef271c2db",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e3cfb4c5a47e7999d85b6260c1ab51926df962e7d45bc872e4c9372eaf8793f1",
+    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:c16a7e154afe8500a7471369656f71ce0597d0a0817c7b18976b95ee51802714",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:fff3f1e0393a6dde86c0ea737f7e51fc95fd41c82f8513656378323c964f3376",
     "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py": "sha256:0efde34dd1a294c6e2a7f18d236ea934e2f9c4654427228e4275e6734b82fd84"
   },
   "next_actions": [
@@ -230,7 +230,7 @@
     "runner_id": "build_consistent_newton_full_load_checkpoint_candidate_runner"
   },
   "schema_version": "g1-consistent-newton-full-load-checkpoint-candidate-runner.v1",
-  "source_commit_sha": "f353bfe1abe53fb31e018a278acf3f38f623d4ed",
+  "source_commit_sha": "ab0aee6bfb8a3aa94b9e04e51e1deed8237bfbe2",
   "status": "blocked_runner_contract",
   "summary": {
     "closure_blocker_count": 27,

@@ -1,7 +1,7 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-07-02T14:54:56.666811+00:00",
-  "source_commit_sha": "81859a9954a86d2e151b183fadde01d8dbf3b376",
+  "generated_at": "2026-07-02T15:36:09.163414+00:00",
+  "source_commit_sha": "ab0aee6bfb8a3aa94b9e04e51e1deed8237bfbe2",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
@@ -286,13 +286,14 @@
                 "rocm_hip_runtime_unavailable",
                 "hip_runtime::dev_kfd_missing",
                 "hip_runtime::dev_dri_missing",
+                "hip_residual_jacobian_consistency_preflight_only",
                 "hip_residual_jacobian_consistency_not_executed"
               ],
               "production_rocm_hip_residual_jvp_worker_ready": false,
               "production_rocm_hip_residual_jvp_worker_blockers": [
                 "consistent_residual_jacobian_newton_gate_not_passed",
                 "current_tangent_residual_row_hip_replay_not_proven",
-                "direct_probe_not_executed",
+                "direct_probe_not_executed_preflight_only",
                 "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
                 "global_krylov_hip_solver_not_proven",
                 "global_krylov_jvp_rows_not_retained",
@@ -301,7 +302,7 @@
                 "runtime::dev_dri_missing",
                 "runtime::dev_kfd_missing"
               ],
-              "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback"
+              "execution_mode": "hip_required_runtime_preflight_only_no_child_execution"
             },
             "non_closing_reasons": [
               "production_hip_path_not_proven",
@@ -337,7 +338,7 @@
             "hip_consistency_proof_worker_g1_closure_gate_not_ready",
             "hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
             "hip_consistency_proof_worker::current_tangent_residual_row_hip_replay_not_proven",
-            "hip_consistency_proof_worker::direct_probe_not_executed",
+            "hip_consistency_proof_worker::direct_probe_not_executed_preflight_only",
             "hip_consistency_proof_worker::global_krylov_accepted_state_tangent_refresh_hip_not_proven",
             "hip_consistency_proof_worker::global_krylov_hip_solver_not_proven",
             "hip_consistency_proof_worker::global_krylov_jvp_rows_not_retained",
@@ -32487,19 +32488,17 @@
               "blocking_reasons": [
                 "receipt_not_ready",
                 "residual_jacobian_consistency_not_ready",
-                "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven",
-                "consistent_residual_jacobian::state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency",
-                "hip_direct_probe::consistent_jacobian_or_globalization_required",
-                "hip_direct_probe::direct_residual_gate_not_closed",
-                "hip_direct_probe::full_load_gate_not_closed",
-                "hip_direct_probe::regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
-                "hip_direct_probe_consistent_residual_jacobian_not_closed",
-                "production_rocm_hip_residual_jvp_worker::consistent_residual_jacobian_newton_gate_not_passed",
+                "rocm_hip_runtime_unavailable",
+                "hip_runtime::dev_kfd_missing",
+                "hip_runtime::dev_dri_missing",
+                "hip_residual_jacobian_consistency_preflight_only",
+                "hip_residual_jacobian_consistency_not_executed",
                 "residual_gate_not_closed",
                 "production_in_process_rocm_hip_residency_not_claimed",
-                "latest_checkpoint_not_advertised"
+                "latest_checkpoint_not_advertised",
+                "claim_boundary_disclaims_closure"
               ],
-              "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested and routed to the HIP-required direct residual Newton proof path. The probe does not use this module's CPU diagnostic assembler. This receipt closes neither full G1 nor release readiness unless the child HIP residual engine contract and consistent residual/Jacobian Newton gate both pass without blockers.",
+              "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but this receipt only records the ROCm/HIP runtime preflight. The HIP-required direct residual Newton proof was not executed, this module's CPU diagnostic assembler was not used, and this receipt does not close G1.",
               "component_only": false,
               "contract_pass": false,
               "controller_start_checkpoint": null,
@@ -32509,7 +32508,7 @@
               "latest_checkpoint_promoted_by_summary": null,
               "latest_checkpoint_retained_by_summary": null,
               "latest_remaining_residual_margin_to_gate_n": null,
-              "load_scale": 0.656,
+              "load_scale": null,
               "missing_controller_replay_artifact_count": 0,
               "missing_controller_replay_artifacts": [],
               "next_solver_step": null,

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-30T01:30:28.794395+00:00",
-  "source_commit_sha": "9eb7edaf52a38ce1d287fba839cc167c9d8afe83",
+  "generated_at": "2026-07-02T15:34:10.635245+00:00",
+  "source_commit_sha": "ab0aee6bfb8a3aa94b9e04e51e1deed8237bfbe2",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "contract_pass": true,
@@ -342,7 +342,7 @@
     "implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_fixture_regression_report.json": "sha256:0b638c4ac46758ed9e65c078dae83ad7783a566c03525425b9605f316c72d954",
     "implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_refresh_alignment_report.json": "sha256:5a4d61d7887a583c709a488d177d82f273fe84750ef82ae65e2df733d2ee1aa3",
     "implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json": "sha256:2e6bdaab47358db2788928716d5a880403a02270cb6f3a6ccd674938e0a18661",
-    "implementation/phase1/release/release_gap_report.json": "sha256:96ad0be47c4174581cba9d807d01c04dd99ab4be69fb3c716e92551123b5fa14",
-    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:f170936ad99dfb8a9b717a185ec9bc945ac04ef67a4e076be76510edea9aa1b4"
+    "implementation/phase1/release/release_gap_report.json": "sha256:d76bbbe5539dbae0607206409a7c10abe7e8552306244c965cdf9268164e701c",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:b85c948fb870c71d7b81d930c2a284aa5979ff251ccef213fc8edce973c496a2"
   }
 }
