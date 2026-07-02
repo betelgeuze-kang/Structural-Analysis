@@ -104,6 +104,9 @@ class SnapshotInputPaths:
     )
     structural_scope_contamination: Path = PRODUCTIZATION / "structural_scope_contamination_audit.json"
     structural_scope_owner_review: Path = PRODUCTIZATION / "structural_scope_owner_review_packet.json"
+    structural_scope_owner_decision_application_plan: Path = (
+        PRODUCTIZATION / "structural_scope_owner_decision_application_plan.json"
+    )
     developer_preview_final_gate_owner_packet: Path = (
         PRODUCTIZATION / "developer_preview_final_gate_owner_packet.json"
     )
@@ -315,6 +318,7 @@ def _receipt_commit_allowed_paths(
         "external_benchmark_submission_updates",
         "structural_scope_contamination",
         "structural_scope_owner_review",
+        "structural_scope_owner_decision_application_plan",
         "developer_preview_final_gate_owner_packet",
         "phase3_release_control_cleanup_plan",
         "self_hosted_runner_status",
@@ -538,6 +542,9 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         },
         "structural_scope_contamination_audit": {
             "scripts/check_structural_scope_contamination.py",
+        },
+        "structural_scope_owner_decision_application_plan": {
+            "scripts/build_structural_scope_owner_decision_application_plan.py",
         },
         "pm_release_gate_report": {
             "scripts/check_github_development_sync_preflight.py",
@@ -1769,6 +1776,11 @@ def build_snapshot(
         paths.structural_scope_owner_review,
         blockers,
     )
+    structural_scope_cleanup_plan = _load_json(
+        repo_root,
+        paths.structural_scope_owner_decision_application_plan,
+        blockers,
+    )
     developer_preview_final_gate_owner_packet = _load_json(
         repo_root,
         paths.developer_preview_final_gate_owner_packet,
@@ -1861,6 +1873,9 @@ def build_snapshot(
         "external_benchmark_submission_updates": external_benchmark_updates,
         "structural_scope_contamination_audit": structural_scope,
         "structural_scope_owner_review_packet": structural_scope_owner_review,
+        "structural_scope_owner_decision_application_plan": (
+            structural_scope_cleanup_plan
+        ),
         "developer_preview_final_gate_owner_packet": (
             developer_preview_final_gate_owner_packet
         ),
@@ -2099,6 +2114,68 @@ def build_snapshot(
         blockers.extend(f"structural_scope::{item}" for item in scope_blockers)
         if not scope_blockers:
             blockers.append("structural_scope:not_ready")
+    structural_scope_cleanup_blockers: list[str] = []
+    structural_scope_cleanup_ready = bool(
+        structural_scope_cleanup_plan.get("contract_pass")
+        and structural_scope_cleanup_plan.get("evidence_closure_pass")
+        and str(structural_scope_cleanup_plan.get("status", "")).lower()
+        == "complete"
+        and not _as_list(structural_scope_cleanup_plan.get("application_blockers"))
+        and not _as_list(structural_scope_cleanup_plan.get("plan_blockers"))
+    )
+    if not structural_scope_cleanup_ready:
+        owner_pending = _as_int(
+            structural_scope_cleanup_plan.get("owner_decision_pending_count"), 0
+        )
+        cleanup_pending = _as_int(
+            structural_scope_cleanup_plan.get("post_decision_cleanup_pending_count"),
+            0,
+        )
+        release_surface_owner_pending = _as_int(
+            structural_scope_cleanup_plan.get(
+                "release_surface_owner_decision_required_count"
+            ),
+            0,
+        )
+        release_surface_cleanup_pending = _as_int(
+            structural_scope_cleanup_plan.get("release_surface_cleanup_required_count"),
+            0,
+        )
+        if owner_pending:
+            structural_scope_cleanup_blockers.append(
+                f"owner_decision_pending_count={owner_pending}"
+            )
+        if release_surface_owner_pending:
+            structural_scope_cleanup_blockers.append(
+                "release_surface_owner_decision_required_count="
+                f"{release_surface_owner_pending}"
+            )
+        if cleanup_pending:
+            structural_scope_cleanup_blockers.append(
+                f"post_decision_cleanup_pending_count={cleanup_pending}"
+            )
+        if release_surface_cleanup_pending:
+            structural_scope_cleanup_blockers.append(
+                "release_surface_cleanup_required_count="
+                f"{release_surface_cleanup_pending}"
+            )
+        structural_scope_cleanup_blockers.extend(
+            str(item)
+            for item in _as_list(
+                structural_scope_cleanup_plan.get("application_blockers")
+            )
+        )
+        if not structural_scope_cleanup_blockers:
+            structural_scope_cleanup_blockers.append(
+                "owner_decision_application_plan_not_closed"
+            )
+        structural_scope_cleanup_blockers = sorted(
+            dict.fromkeys(structural_scope_cleanup_blockers)
+        )
+        blockers.extend(
+            f"structural_scope::{item}"
+            for item in structural_scope_cleanup_blockers
+        )
 
     g1_claim_boundary = str(g1.get("claim_boundary", ""))
     if "full_g1_closure_ready" in g1:
@@ -2824,6 +2901,101 @@ def build_snapshot(
                 "ready": bool(
                     structural_scope_owner_review.get("contract_pass")
                     and not _as_list(structural_scope_owner_review.get("blockers"))
+                ),
+            },
+            "structural_scope_cleanup": {
+                "contract_pass": bool(
+                    structural_scope_cleanup_plan.get("contract_pass")
+                ),
+                "evidence_closure_pass": bool(
+                    structural_scope_cleanup_plan.get("evidence_closure_pass")
+                ),
+                "application_ready": bool(
+                    structural_scope_cleanup_plan.get("application_ready")
+                ),
+                "status": str(structural_scope_cleanup_plan.get("status", "")),
+                "owner_decision_pending_count": _as_int(
+                    structural_scope_cleanup_plan.get(
+                        "owner_decision_pending_count"
+                    ),
+                    0,
+                ),
+                "owner_decision_recorded_count": _as_int(
+                    structural_scope_cleanup_plan.get(
+                        "owner_decision_recorded_count"
+                    ),
+                    0,
+                ),
+                "post_decision_cleanup_pending_count": _as_int(
+                    structural_scope_cleanup_plan.get(
+                        "post_decision_cleanup_pending_count"
+                    ),
+                    0,
+                ),
+                "cleanup_required_count": _as_int(
+                    structural_scope_cleanup_plan.get("cleanup_required_count"),
+                    0,
+                ),
+                "release_surface_owner_decision_required_count": _as_int(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_owner_decision_required_count"
+                    ),
+                    0,
+                ),
+                "release_surface_cleanup_required_count": _as_int(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_cleanup_required_count"
+                    ),
+                    0,
+                ),
+                "delete_decision_count": _as_int(
+                    structural_scope_cleanup_plan.get("delete_decision_count"),
+                    0,
+                ),
+                "extract_decision_count": _as_int(
+                    structural_scope_cleanup_plan.get("extract_decision_count"),
+                    0,
+                ),
+                "retain_quarantined_exception_count": _as_int(
+                    structural_scope_cleanup_plan.get(
+                        "retain_quarantined_exception_count"
+                    ),
+                    0,
+                ),
+                "pending_owner_decision_path_area_counts": _as_dict(
+                    structural_scope_cleanup_plan.get(
+                        "pending_owner_decision_path_area_counts"
+                    )
+                ),
+                "pending_owner_decision_family_counts": _as_dict(
+                    structural_scope_cleanup_plan.get(
+                        "pending_owner_decision_family_counts"
+                    )
+                ),
+                "next_owner_review_batch": _as_dict(
+                    structural_scope_cleanup_plan.get("next_owner_review_batch")
+                ),
+                "next_cleanup_application_batch": _as_dict(
+                    structural_scope_cleanup_plan.get(
+                        "next_cleanup_application_batch"
+                    )
+                ),
+                "next_batch_template_paths": _as_dict(
+                    _as_dict(
+                        structural_scope_cleanup_plan.get(
+                            "next_owner_review_batch_decision_template"
+                        )
+                    ).get("generated_template_paths")
+                ),
+                "owner_decision_template_paths": _as_dict(
+                    structural_scope_cleanup_plan.get(
+                        "owner_decision_template_paths"
+                    )
+                ),
+                "blockers": structural_scope_cleanup_blockers,
+                "ready": structural_scope_cleanup_ready,
+                "claim_boundary": str(
+                    structural_scope_cleanup_plan.get("claim_boundary", "")
                 ),
             },
             "g1": {

@@ -175,6 +175,9 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         external_benchmark_submission_updates=Path("external_benchmark_submission_updates.json"),
         structural_scope_contamination=Path("structural_scope_contamination_audit.json"),
         structural_scope_owner_review=Path("structural_scope_owner_review_packet.json"),
+        structural_scope_owner_decision_application_plan=Path(
+            "structural_scope_owner_decision_application_plan.json"
+        ),
         developer_preview_final_gate_owner_packet=Path(
             "developer_preview_final_gate_owner_packet.json"
         ),
@@ -341,6 +344,43 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
             "extract_to_molecular_or_science_repository",
             "retain_quarantined_with_signed_owner_exception",
         ],
+        "blockers": [],
+    })
+    _write_json(tmp_path / "structural_scope_owner_decision_application_plan.json", {
+        "schema_version": "structural-scope-owner-decision-application-plan.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "structural_scope_contamination_audit.json": "sha256:abc123",
+            "structural_scope_owner_review_packet.json": "sha256:def456",
+        },
+        "reused_evidence": False,
+        "reuse_policy": (
+            "structural_scope_owner_decision_application_plan_from_owner_review_packet"
+        ),
+        "status": "complete",
+        "contract_pass": True,
+        "application_ready": False,
+        "evidence_closure_pass": True,
+        "owner_decision_validation_pass": True,
+        "owner_decision_recorded_count": 0,
+        "owner_decision_pending_count": 0,
+        "post_decision_cleanup_pending_count": 0,
+        "cleanup_required_count": 0,
+        "release_surface_owner_decision_required_count": 0,
+        "release_surface_cleanup_required_count": 0,
+        "delete_decision_count": 0,
+        "extract_decision_count": 0,
+        "retain_quarantined_exception_count": 0,
+        "pending_owner_decision_path_area_counts": {},
+        "pending_owner_decision_family_counts": {},
+        "next_owner_review_batch": {},
+        "next_cleanup_application_batch": {},
+        "next_owner_review_batch_decision_template": {},
+        "owner_decision_template_paths": {},
+        "application_blockers": [],
+        "plan_blockers": [],
         "blockers": [],
     })
     _write_json(tmp_path / "developer_preview_final_gate_owner_packet.json", {
@@ -4940,6 +4980,95 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
         ],
         "blockers": [],
     })
+    _write_json(tmp_path / "structural_scope_owner_decision_application_plan.json", {
+        "schema_version": "structural-scope-owner-decision-application-plan.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": source_commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "structural_scope_contamination_audit.json": "sha256:abc123",
+            "structural_scope_owner_review_packet.json": "sha256:def456",
+        },
+        "reused_evidence": False,
+        "reuse_policy": (
+            "structural_scope_owner_decision_application_plan_from_owner_review_packet"
+        ),
+        "status": "pending_owner_decisions",
+        "contract_pass": True,
+        "application_ready": False,
+        "evidence_closure_pass": False,
+        "owner_decision_validation_pass": False,
+        "owner_decision_recorded_count": 0,
+        "owner_decision_pending_count": 2,
+        "post_decision_cleanup_pending_count": 0,
+        "cleanup_required_count": 0,
+        "release_surface_owner_decision_required_count": 0,
+        "release_surface_cleanup_required_count": 0,
+        "delete_decision_count": 0,
+        "extract_decision_count": 0,
+        "retain_quarantined_exception_count": 0,
+        "pending_owner_decision_path_area_counts": {
+            "productization_evidence": 1,
+            "script": 1,
+        },
+        "pending_owner_decision_family_counts": {
+            "molecular_docking": 1,
+            "molecular_dynamics": 1,
+        },
+        "next_owner_review_batch": {
+            "batch_id": "productization_evidence_second",
+            "path_area": "productization_evidence",
+            "path_count": 1,
+            "paths": [
+                (
+                    "implementation/phase1/release_evidence/productization/"
+                    "pocketmd_lite_contract.json"
+                )
+            ],
+        },
+        "next_cleanup_application_batch": {},
+        "next_owner_review_batch_decision_template": {
+            "batch_id": "productization_evidence_second",
+            "generated_template_paths": {
+                "json": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "structural_scope_owner_decisions.next_batch.template.json"
+                ),
+                "csv": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "structural_scope_owner_decisions.next_batch.template.csv"
+                ),
+                "markdown": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "structural_scope_owner_decisions.next_batch.template.md"
+                ),
+            },
+        },
+        "owner_decision_template_paths": {
+            "json": (
+                "implementation/phase1/release_evidence/productization/"
+                "structural_scope_owner_decisions.template.json"
+            ),
+            "csv": (
+                "implementation/phase1/release_evidence/productization/"
+                "structural_scope_owner_decisions.template.csv"
+            ),
+            "markdown": (
+                "implementation/phase1/release_evidence/productization/"
+                "structural_scope_owner_decisions.template.md"
+            ),
+        },
+        "application_blockers": [
+            "owner_decisions_missing",
+            "owner_decision_pending_count=2",
+        ],
+        "plan_blockers": ["owner_decision_pending_count=2"],
+        "blockers": ["owner_decision_pending_count=2"],
+        "claim_boundary": (
+            "Fixture cleanup plan keeps quarantined artifacts outside the structural "
+            "release surface until owner decisions are recorded."
+        ),
+    })
     _commit_all(tmp_path, "receipt")
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -4955,7 +5084,9 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     assert component["unquarantined_non_structural_path_count"] == 0
     assert component["release_surface_text_leak_path_count"] == 0
     assert not [
-        blocker for blocker in payload["blockers"] if blocker.startswith("structural_scope::")
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("structural_scope::unquarantined")
     ]
     assert (
         "structural_scope_not_clean"
@@ -4967,6 +5098,28 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     assert owner_review["owner_decision_pending_count"] == 2
     assert owner_review["release_surface_excluded_path_count"] == 2
     assert owner_review["unquarantined_non_structural_path_count"] == 0
+    cleanup = payload["components"]["structural_scope_cleanup"]
+    assert cleanup["ready"] is False
+    assert cleanup["contract_pass"] is True
+    assert cleanup["status"] == "pending_owner_decisions"
+    assert cleanup["owner_decision_pending_count"] == 2
+    assert cleanup["post_decision_cleanup_pending_count"] == 0
+    assert cleanup["pending_owner_decision_path_area_counts"] == {
+        "productization_evidence": 1,
+        "script": 1,
+    }
+    assert cleanup["next_owner_review_batch"]["batch_id"] == (
+        "productization_evidence_second"
+    )
+    assert cleanup["next_batch_template_paths"]["csv"].endswith(
+        "structural_scope_owner_decisions.next_batch.template.csv"
+    )
+    assert cleanup["blockers"] == [
+        "owner_decision_pending_count=2",
+        "owner_decisions_missing",
+    ]
+    assert "structural_scope::owner_decision_pending_count=2" in payload["blockers"]
+    assert "structural scope" in payload["root_blockers"]
 
 
 def test_snapshot_surfaces_developer_preview_final_gate_owner_packet(
