@@ -1,0 +1,704 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-structural-contact-validation",
+  "generated_at": "2026-07-02T05:10:08.359068+00:00",
+  "inputs": {
+    "out": "implementation/phase1/release_evidence/surface/structural_contact_validation_report.json"
+  },
+  "checks": {
+    "contact_validation_pass": true,
+    "event_sequence_pass": true,
+    "support_search_surface_pass": true,
+    "node_to_surface_proxy_pass": true,
+    "contact_family_surface_pass": true,
+    "support_search_family_surface_pass": true,
+    "node_to_surface_proxy_family_surface_pass": true
+  },
+  "summary": {
+    "validated_category_count": 6,
+    "required_category_count": 6,
+    "contact_uplift_event_sequence_mismatch": 0,
+    "link_model_types": [
+      "bearing_bilinear",
+      "compression_only_penalty",
+      "coulomb_friction",
+      "kelvin_voigt_pounding",
+      "normal_gap_unilateral",
+      "uplift_seat_unilateral"
+    ],
+    "implementation_catalog": {
+      "gap": {
+        "link_name": "gap",
+        "implementation_class": "GapLink",
+        "stiffness": 80000.0,
+        "gap_opening": 0.004
+      },
+      "uplift": {
+        "link_name": "uplift",
+        "implementation_class": "UpliftLink",
+        "stiffness": 75000.0,
+        "seating_tolerance": 0.0
+      },
+      "compression-only": {
+        "link_name": "compression-only",
+        "implementation_class": "CompressionOnlyLink",
+        "stiffness": 90000.0,
+        "preload": 0.0
+      },
+      "bearing": {
+        "link_name": "bearing",
+        "implementation_class": "BearingLink",
+        "elastic_stiffness": 120000.0,
+        "yield_force": 180.0,
+        "post_yield_ratio": 0.12
+      },
+      "friction": {
+        "link_name": "friction",
+        "implementation_class": "FrictionLink",
+        "tangential_stiffness": 60000.0,
+        "friction_coefficient": 0.42,
+        "normal_force": 320.0
+      },
+      "pounding": {
+        "link_name": "pounding",
+        "implementation_class": "PoundingLink",
+        "contact_stiffness": 180000.0,
+        "damping": 220.0,
+        "impact_gap": 0.003
+      }
+    },
+    "foundation_support_model_types": [
+      "p-y",
+      "pile_head",
+      "q-z",
+      "t-z"
+    ],
+    "device_model_types": [
+      "friction_pendulum",
+      "lead_rubber_bearing",
+      "tmd",
+      "viscoelastic_damper",
+      "viscous_damper"
+    ],
+    "support_link_model_types": [
+      "bearing_bilinear",
+      "compression_only_penalty",
+      "coulomb_friction",
+      "friction_pendulum",
+      "kelvin_voigt_pounding",
+      "lead_rubber_bearing",
+      "normal_gap_unilateral",
+      "p-y",
+      "pile_head",
+      "q-z",
+      "t-z",
+      "tmd",
+      "uplift_seat_unilateral",
+      "viscoelastic_damper",
+      "viscous_damper"
+    ],
+    "support_library_group_counts": {
+      "contact": 6,
+      "foundation": 4,
+      "device": 5
+    },
+    "support_implementation_catalogs": {
+      "special_link_library": {
+        "gap": {
+          "link_name": "gap",
+          "implementation_class": "GapLink",
+          "stiffness": 80000.0,
+          "gap_opening": 0.004
+        },
+        "uplift": {
+          "link_name": "uplift",
+          "implementation_class": "UpliftLink",
+          "stiffness": 75000.0,
+          "seating_tolerance": 0.0
+        },
+        "compression-only": {
+          "link_name": "compression-only",
+          "implementation_class": "CompressionOnlyLink",
+          "stiffness": 90000.0,
+          "preload": 0.0
+        },
+        "bearing": {
+          "link_name": "bearing",
+          "implementation_class": "BearingLink",
+          "elastic_stiffness": 120000.0,
+          "yield_force": 180.0,
+          "post_yield_ratio": 0.12
+        },
+        "friction": {
+          "link_name": "friction",
+          "implementation_class": "FrictionLink",
+          "tangential_stiffness": 60000.0,
+          "friction_coefficient": 0.42,
+          "normal_force": 320.0
+        },
+        "pounding": {
+          "link_name": "pounding",
+          "implementation_class": "PoundingLink",
+          "contact_stiffness": 180000.0,
+          "damping": 220.0,
+          "impact_gap": 0.003
+        }
+      },
+      "foundation_link_library": {
+        "p-y": {
+          "link_name": "p-y",
+          "implementation_class": "PySoilSpring",
+          "lateral_stiffness": 90000.0,
+          "yield_force": 180.0,
+          "post_yield_ratio": 0.18,
+          "support_role": "soil_lateral_support",
+          "search_surface_mode": "node_to_soil_surface_proxy",
+          "search_family": "foundation_support_search",
+          "node_to_surface_proxy": true,
+          "support_search_ready": true,
+          "support_depth_rank": 3,
+          "sample_probe_state": "plastic",
+          "sample_probe_engaged": true,
+          "sample_probe_force": 244.8,
+          "contact_family": "soil_lateral_interface",
+          "contact_search_axis": "local-x",
+          "search_normal": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "search_patch_area_m2": 6.4,
+          "tributary_length_m": 8.0,
+          "search_radius_m": 0.4,
+          "support_candidate_ready": true,
+          "sample_probe_tangent": 16200.0,
+          "sample_probe_closure": 1.0,
+          "sample_probe_energy_like": 0.7344,
+          "sample_response_ratio": 1.36
+        },
+        "t-z": {
+          "link_name": "t-z",
+          "implementation_class": "TzSoilSpring",
+          "axial_stiffness": 75000.0,
+          "shaft_capacity": 220.0,
+          "residual_ratio": 0.4,
+          "support_role": "shaft_friction_transfer",
+          "search_surface_mode": "node_to_shaft_surface_proxy",
+          "search_family": "foundation_support_search",
+          "node_to_surface_proxy": true,
+          "support_search_ready": true,
+          "support_depth_rank": 3,
+          "sample_probe_state": "residual",
+          "sample_probe_engaged": true,
+          "sample_probe_force": 88.0,
+          "contact_family": "shaft_friction_interface",
+          "contact_search_axis": "local-z",
+          "search_normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "search_patch_area_m2": 20.106192982974676,
+          "tributary_length_m": 2.5132741228718345,
+          "search_radius_m": 0.4,
+          "support_candidate_ready": true,
+          "sample_probe_tangent": 0.0,
+          "sample_probe_closure": 0.0,
+          "sample_probe_energy_like": 0.44,
+          "sample_response_ratio": 0.4
+        },
+        "q-z": {
+          "link_name": "q-z",
+          "implementation_class": "QzSoilSpring",
+          "tip_stiffness": 140000.0,
+          "tip_capacity": 320.0,
+          "cap_ratio": 1.0,
+          "support_role": "tip_bearing_transfer",
+          "search_surface_mode": "node_to_tip_surface_proxy",
+          "search_family": "foundation_support_search",
+          "node_to_surface_proxy": true,
+          "support_search_ready": true,
+          "support_depth_rank": 3,
+          "sample_probe_state": "capped",
+          "sample_probe_engaged": true,
+          "sample_probe_force": 320.0,
+          "contact_family": "tip_bearing_interface",
+          "contact_search_axis": "local-z",
+          "search_normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "search_patch_area_m2": 0.5026548245743669,
+          "tributary_length_m": 0.8,
+          "search_radius_m": 0.4,
+          "support_candidate_ready": true,
+          "sample_probe_tangent": 0.0,
+          "sample_probe_closure": 0.004,
+          "sample_probe_energy_like": 1.28,
+          "sample_response_ratio": 1.0
+        },
+        "pile_head": {
+          "link_name": "pile_head",
+          "implementation_class": "PileHeadSpring",
+          "rotational_stiffness": 40000.0,
+          "yield_moment": 140.0,
+          "post_yield_ratio": 0.1,
+          "support_role": "head_fixity_transfer",
+          "search_surface_mode": "support_head_rotation_search",
+          "search_family": "foundation_support_search",
+          "node_to_surface_proxy": false,
+          "support_search_ready": true,
+          "support_depth_rank": 2,
+          "sample_probe_state": "post-yield",
+          "sample_probe_engaged": true,
+          "sample_probe_force": 142.0,
+          "contact_family": "pile_head_fixity_interface",
+          "contact_search_axis": "rotation-y",
+          "search_normal": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "search_patch_area_m2": 9.0,
+          "tributary_length_m": 3.0,
+          "search_radius_m": 1.5,
+          "support_candidate_ready": true,
+          "sample_probe_tangent": 4000.0,
+          "sample_probe_closure": 0.0,
+          "sample_probe_energy_like": 0.28400000000000003,
+          "sample_response_ratio": 1.0142857142857142
+        }
+      },
+      "device_library": {
+        "viscous_damper": {
+          "link_name": "viscous_damper",
+          "implementation_class": "ViscousDamper",
+          "damping_coefficient": 1400.0,
+          "exponent": 0.35,
+          "device_family": "damper",
+          "support_role": "energy_dissipation_path",
+          "search_surface_mode": "brace_end_support_search",
+          "search_family": "device_support_search",
+          "contact_integration_surface": "brace_end_support_link",
+          "node_to_surface_proxy": false,
+          "support_search_ready": true,
+          "support_depth_rank": 1,
+          "sample_probe_displacement": 0.0,
+          "sample_probe_velocity": 0.35,
+          "sample_probe_state": "dissipating",
+          "sample_probe_engaged": true,
+          "sample_probe_force": 969.5090138189523,
+          "sample_probe_tangent": 0.0,
+          "sample_probe_energy_like": 339.3281548366333,
+          "contact_proxy_ready": true,
+          "search_ready_signature": "damper:brace_end_support_search:brace_end_support_link"
+        },
+        "viscoelastic_damper": {
+          "link_name": "viscoelastic_damper",
+          "implementation_class": "ViscoelasticDamper",
+          "stiffness": 8000.0,
+          "damping_coefficient": 600.0,
+          "device_family": "damper",
+          "support_role": "stiffness_damping_coupler",
+          "search_surface_mode": "brace_end_support_search",
+          "search_family": "device_support_search",
+          "contact_integration_surface": "brace_end_support_link",
+          "node_to_surface_proxy": false,
+          "support_search_ready": true,
+          "support_depth_rank": 2,
+          "sample_probe_displacement": 0.012,
+          "sample_probe_velocity": 0.18,
+          "sample_probe_state": "viscoelastic",
+          "sample_probe_engaged": true,
+          "sample_probe_force": 204.0,
+          "sample_probe_tangent": 8000.0,
+          "sample_probe_energy_like": 1.224,
+          "contact_proxy_ready": true,
+          "search_ready_signature": "damper:brace_end_support_search:brace_end_support_link"
+        },
+        "friction_pendulum": {
+          "link_name": "friction_pendulum",
+          "implementation_class": "FrictionPendulumBearing",
+          "radius_m": 3.2,
+          "friction_coefficient": 0.05,
+          "vertical_load": 1800.0,
+          "device_family": "isolation_bearing",
+          "support_role": "isolation_interface",
+          "search_surface_mode": "node_to_surface_isolation_proxy",
+          "search_family": "device_support_search",
+          "contact_integration_surface": "node_to_surface_proxy",
+          "node_to_surface_proxy": true,
+          "support_search_ready": true,
+          "support_depth_rank": 3,
+          "sample_probe_displacement": 0.08,
+          "sample_probe_velocity": 0.0,
+          "sample_probe_state": "stick",
+          "sample_probe_engaged": true,
+          "sample_probe_force": 45.0,
+          "sample_probe_tangent": 562.5,
+          "sample_probe_energy_like": 1.8,
+          "contact_proxy_ready": true,
+          "search_ready_signature": "isolation_bearing:node_to_surface_isolation_proxy:node_to_surface_proxy"
+        },
+        "lead_rubber_bearing": {
+          "link_name": "lead_rubber_bearing",
+          "implementation_class": "LeadRubberBearing",
+          "elastic_stiffness": 9500.0,
+          "yield_force": 180.0,
+          "post_yield_ratio": 0.1,
+          "device_family": "isolation_bearing",
+          "support_role": "isolation_bearing_support",
+          "search_surface_mode": "node_to_surface_isolation_proxy",
+          "search_family": "device_support_search",
+          "contact_integration_surface": "node_to_surface_proxy",
+          "node_to_surface_proxy": true,
+          "support_search_ready": true,
+          "support_depth_rank": 3,
+          "sample_probe_displacement": 0.03,
+          "sample_probe_velocity": 0.0,
+          "sample_probe_state": "yielded",
+          "sample_probe_engaged": true,
+          "sample_probe_force": 190.5,
+          "sample_probe_tangent": 950.0,
+          "sample_probe_energy_like": 5.715,
+          "contact_proxy_ready": true,
+          "search_ready_signature": "isolation_bearing:node_to_surface_isolation_proxy:node_to_surface_proxy"
+        },
+        "tmd": {
+          "link_name": "tmd",
+          "implementation_class": "TunedMassDamper",
+          "stiffness": 2200.0,
+          "damping": 180.0,
+          "mass": 450.0,
+          "device_family": "tuned_mass",
+          "support_role": "secondary_mass_tuning",
+          "search_surface_mode": "tuned_mass_attachment_search",
+          "search_family": "device_support_search",
+          "contact_integration_surface": "secondary_mass_attachment",
+          "node_to_surface_proxy": false,
+          "support_search_ready": true,
+          "support_depth_rank": 1,
+          "sample_probe_displacement": 0.01,
+          "sample_probe_velocity": 0.15,
+          "sample_probe_state": "tracking",
+          "sample_probe_engaged": true,
+          "sample_probe_force": 49.0,
+          "sample_probe_tangent": 2200.0,
+          "sample_probe_energy_like": 5.3075,
+          "contact_proxy_ready": true,
+          "search_ready_signature": "tuned_mass:tuned_mass_attachment_search:secondary_mass_attachment"
+        }
+      }
+    },
+    "support_search_model_types": [
+      "friction_pendulum",
+      "lead_rubber_bearing",
+      "p-y",
+      "pile_head",
+      "q-z",
+      "t-z",
+      "tmd",
+      "viscoelastic_damper",
+      "viscous_damper"
+    ],
+    "node_to_surface_proxy_model_types": [
+      "friction_pendulum",
+      "lead_rubber_bearing",
+      "p-y",
+      "q-z",
+      "t-z"
+    ],
+    "contact_search_surface_types": [
+      "bearing_bilinear",
+      "compression_only_penalty",
+      "coulomb_friction",
+      "kelvin_voigt_pounding",
+      "normal_gap_unilateral",
+      "uplift_seat_unilateral"
+    ],
+    "contact_family_count": 6,
+    "search_surface_mode_counts": {
+      "node_to_soil_surface_proxy": 1,
+      "node_to_shaft_surface_proxy": 1,
+      "node_to_tip_surface_proxy": 1,
+      "support_head_rotation_search": 1,
+      "brace_end_support_search": 2,
+      "node_to_surface_isolation_proxy": 2,
+      "tuned_mass_attachment_search": 1
+    },
+    "search_family_counts": {
+      "foundation_support_search": 4,
+      "device_support_search": 5
+    },
+    "support_search_family_types": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "node_to_surface_proxy_family_types": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "support_search_family_requirements": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "search_ready_group_counts": {
+      "contact": 6,
+      "support_ready": 9,
+      "node_to_surface_proxy": 5
+    },
+    "support_depth_score": 21,
+    "support_search_evidence_rows": [
+      {
+        "link_name": "p-y",
+        "support_role": "soil_lateral_support",
+        "search_surface_mode": "node_to_soil_surface_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "plastic",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "t-z",
+        "support_role": "shaft_friction_transfer",
+        "search_surface_mode": "node_to_shaft_surface_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "residual",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "q-z",
+        "support_role": "tip_bearing_transfer",
+        "search_surface_mode": "node_to_tip_surface_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "capped",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "pile_head",
+        "support_role": "head_fixity_transfer",
+        "search_surface_mode": "support_head_rotation_search",
+        "node_to_surface_proxy": false,
+        "support_search_ready": true,
+        "sample_probe_state": "post-yield",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "viscous_damper",
+        "support_role": "energy_dissipation_path",
+        "search_surface_mode": "brace_end_support_search",
+        "node_to_surface_proxy": false,
+        "support_search_ready": true,
+        "sample_probe_state": "dissipating",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "viscoelastic_damper",
+        "support_role": "stiffness_damping_coupler",
+        "search_surface_mode": "brace_end_support_search",
+        "node_to_surface_proxy": false,
+        "support_search_ready": true,
+        "sample_probe_state": "viscoelastic",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "friction_pendulum",
+        "support_role": "isolation_interface",
+        "search_surface_mode": "node_to_surface_isolation_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "stick",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "lead_rubber_bearing",
+        "support_role": "isolation_bearing_support",
+        "search_surface_mode": "node_to_surface_isolation_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "yielded",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "tmd",
+        "support_role": "secondary_mass_tuning",
+        "search_surface_mode": "tuned_mass_attachment_search",
+        "node_to_surface_proxy": false,
+        "support_search_ready": true,
+        "sample_probe_state": "tracking",
+        "sample_probe_engaged": true
+      }
+    ]
+  },
+  "categories": {
+    "gap": {
+      "validated": true,
+      "implementation_class": "GapLink",
+      "checks": {
+        "open_gap_zero_force": true,
+        "closure_force_linear": true,
+        "closure_tangent_linear": true
+      },
+      "sample_points": {
+        "open": {
+          "displacement": 0.002,
+          "force": 0.0,
+          "state": "open"
+        },
+        "closed": {
+          "displacement": 0.006,
+          "force": 160.0,
+          "state": "closed"
+        }
+      },
+      "link_model_type": "normal_gap_unilateral"
+    },
+    "uplift": {
+      "validated": true,
+      "implementation_class": "UpliftLink",
+      "checks": {
+        "uplift_releases_contact": true,
+        "seating_restores_compression": true
+      },
+      "sample_points": {
+        "uplifted": {
+          "displacement": 0.003,
+          "force": 0.0,
+          "state": "uplifted"
+        },
+        "seated": {
+          "displacement": -0.002,
+          "force": 150.0,
+          "state": "seated"
+        }
+      },
+      "link_model_type": "uplift_seat_unilateral"
+    },
+    "compression_only": {
+      "validated": true,
+      "implementation_class": "CompressionOnlyLink",
+      "checks": {
+        "tension_releases": true,
+        "compression_carries_force": true
+      },
+      "sample_points": {
+        "released": {
+          "displacement": -0.001,
+          "force": 0.0,
+          "state": "released"
+        },
+        "compressed": {
+          "displacement": 0.003,
+          "force": 270.0,
+          "state": "compression"
+        }
+      },
+      "link_model_type": "compression_only_penalty"
+    },
+    "bearing": {
+      "validated": true,
+      "implementation_class": "BearingLink",
+      "checks": {
+        "elastic_branch_linear": true,
+        "post_yield_branch_active": true
+      },
+      "sample_points": {
+        "elastic": {
+          "displacement": 0.001,
+          "force": 120.0,
+          "state": "elastic"
+        },
+        "post_yield": {
+          "displacement": 0.004,
+          "force": 216.0,
+          "state": "post-yield"
+        }
+      },
+      "link_model_type": "bearing_bilinear"
+    },
+    "friction": {
+      "validated": true,
+      "implementation_class": "FrictionLink",
+      "checks": {
+        "stick_branch_linear": true,
+        "slip_branch_capped": true
+      },
+      "sample_points": {
+        "stick": {
+          "displacement": 0.001,
+          "force": 60.0,
+          "state": "stick"
+        },
+        "slip": {
+          "displacement": 0.004,
+          "force": 134.4,
+          "state": "slip"
+        }
+      },
+      "link_model_type": "coulomb_friction"
+    },
+    "pounding": {
+      "validated": true,
+      "implementation_class": "PoundingLink",
+      "checks": {
+        "pre_impact_open": true,
+        "impact_force_kelvin_voigt": true
+      },
+      "sample_points": {
+        "separated": {
+          "displacement": 0.002,
+          "velocity": 0.4,
+          "force": 0.0,
+          "state": "separated"
+        },
+        "impact": {
+          "displacement": 0.006,
+          "velocity": 0.5,
+          "force": 650.0,
+          "state": "impact"
+        }
+      },
+      "link_model_type": "kelvin_voigt_pounding"
+    }
+  },
+  "event_sequence": {
+    "contact_uplift_event_sequence_mismatch": 0,
+    "rows": [
+      {
+        "step": 1,
+        "uplift_state": "uplifted",
+        "expected_uplift": "uplifted",
+        "pounding_state": "separated",
+        "expected_pounding": "separated",
+        "mismatch": 0
+      },
+      {
+        "step": 2,
+        "uplift_state": "seated",
+        "expected_uplift": "seated",
+        "pounding_state": "separated",
+        "expected_pounding": "separated",
+        "mismatch": 0
+      },
+      {
+        "step": 3,
+        "uplift_state": "seated",
+        "expected_uplift": "seated",
+        "pounding_state": "impact",
+        "expected_pounding": "impact",
+        "mismatch": 0
+      }
+    ]
+  },
+  "summary_line": "Structural contact validation: PASS | validated=6/6 | event_sequence=0 | contact=6 | foundation=4 | device=5 | support_search=9 | node_surface_proxy=5",
+  "limitations": [
+    "This validation covers deterministic constitutive link behavior and contact-uplift chronology, not full finite-element general contact solve parity.",
+    "Friction and pounding are validated against closed-form branch expectations for the implemented link laws."
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "validated special-link constitutive library"
+}

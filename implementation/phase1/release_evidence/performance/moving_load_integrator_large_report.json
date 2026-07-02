@@ -1,0 +1,1880 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-moving-load-integrator",
+  "generated_at": "2026-07-02T05:11:36.331189+00:00",
+  "inputs": {
+    "config": {
+      "length_m": 60.0,
+      "node_count": 161,
+      "support_type": "pinned",
+      "bending_stiffness_n_m2": 6500000.0,
+      "winkler_k_n_per_m2": 6000000.0,
+      "pasternak_g_n": 1200000.0,
+      "mass_per_length_kg_m": 400.0,
+      "rayleigh_alpha_m": 0.02,
+      "rayleigh_beta_k": 3e-05,
+      "dt_s": 0.0025,
+      "total_time_s": 2.4,
+      "beta_newmark": 0.25,
+      "gamma_newmark": 0.5,
+      "cg_tol": 1e-08,
+      "cg_max_iter": 1200,
+      "dense_cached_solve_max_nodes": 641,
+      "dense_cached_solve_budget_mb": 96.0
+    },
+    "speed_m_s": 22.2,
+    "axle_loads_n": [
+      85000.0,
+      85000.0,
+      85000.0,
+      85000.0
+    ],
+    "axle_offsets_m": [
+      0.0,
+      2.5,
+      5.0,
+      7.5
+    ],
+    "steps": 960
+  },
+  "checks": {
+    "finite_response": true,
+    "non_divergent_response": true,
+    "linear_solver_converged": true,
+    "equilibrium_residual_pass": true,
+    "energy_balance_pass": true
+  },
+  "metrics": {
+    "max_displacement_m": 0.006695647655964197,
+    "max_acceleration_mps2": 48.30717032040022,
+    "max_residual": 1.3377612745366605,
+    "residual_ratio": 5.901887975897032e-06,
+    "elapsed_seconds": 1.2460488920041826,
+    "time_steps_per_second": 770.4352583275502,
+    "milliseconds_per_step": 1.2979675958376902,
+    "step_count": 960,
+    "input_work_j": 1263.2742510109463,
+    "dissipated_energy_j": 318.90344829683016,
+    "final_kinetic_j": 12.574477465902964,
+    "final_potential_j": 1004.0124558724478,
+    "energy_balance_relative_error": 0.05716583755779323,
+    "active_axle_count_mean": 3.71875,
+    "active_axle_count_max": 4,
+    "sparse_contact_step_count": 0,
+    "sparse_contact_step_ratio": 0.0,
+    "batched_axle_assembly_enabled": true,
+    "batched_track_load_schedule_enabled": true,
+    "batched_track_solve_enabled": true,
+    "cached_track_solve_inverse_enabled": true,
+    "dense_cached_solve_enabled": true,
+    "dense_cached_solve_mode": "cached_inverse",
+    "dense_cached_solve_max_nodes": 641,
+    "dense_cached_solve_budget_mb": 96.0,
+    "dense_cached_solve_estimated_mb": 0.5932846069335938
+  },
+  "trace_head": [
+    {
+      "step": 1,
+      "time_s": 0.0025,
+      "active_axle_count": 1,
+      "max_abs_u_m": 3.347915268574432e-05,
+      "max_abs_a_mps2": 21.426657718876363,
+      "max_abs_residual": 6.548361852765083e-11,
+      "linear_residual": 2.000888343900442e-11
+    },
+    {
+      "step": 2,
+      "time_s": 0.005,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0001355810646178404,
+      "max_abs_a_mps2": 22.717248090670285,
+      "max_abs_residual": 7.130438461899757e-10,
+      "linear_residual": 1.0913936421275139e-10
+    },
+    {
+      "step": 3,
+      "time_s": 0.0075,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.00032598034226551527,
+      "max_abs_a_mps2": 21.505685090239258,
+      "max_abs_residual": 4.2782630771398544e-09,
+      "linear_residual": 1.382431946694851e-10
+    },
+    {
+      "step": 4,
+      "time_s": 0.01,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0005584951611114673,
+      "max_abs_a_mps2": 20.436733649041848,
+      "max_abs_residual": 1.2543750926852226e-08,
+      "linear_residual": 2.0372681319713593e-10
+    },
+    {
+      "step": 5,
+      "time_s": 0.0125,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0008222193798047225,
+      "max_abs_a_mps2": 17.31645333738997,
+      "max_abs_residual": 4.2928149923682213e-07,
+      "linear_residual": 3.7834979593753815e-10
+    },
+    {
+      "step": 6,
+      "time_s": 0.015,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0011390540577368878,
+      "max_abs_a_mps2": 16.28706227626547,
+      "max_abs_residual": 3.3230753615498543e-06,
+      "linear_residual": 9.313225746154785e-10
+    },
+    {
+      "step": 7,
+      "time_s": 0.0175,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0014733877675613732,
+      "max_abs_a_mps2": 13.838750643368861,
+      "max_abs_residual": 1.3039447367191315e-05,
+      "linear_residual": 1.0477378964424133e-09
+    },
+    {
+      "step": 8,
+      "time_s": 0.02,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0018037533685502634,
+      "max_abs_a_mps2": 13.171907499899964,
+      "max_abs_residual": 2.279898035340011e-05,
+      "linear_residual": 8.149072527885437e-10
+    },
+    {
+      "step": 9,
+      "time_s": 0.0225,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0021045864704495243,
+      "max_abs_a_mps2": 16.152586712685768,
+      "max_abs_residual": 2.8330017812550068e-05,
+      "linear_residual": 9.89530235528946e-10
+    },
+    {
+      "step": 10,
+      "time_s": 0.025,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0023530801816441143,
+      "max_abs_a_mps2": 14.734312334256371,
+      "max_abs_residual": 0.0002805584081215784,
+      "linear_residual": 1.1641532182693481e-09
+    },
+    {
+      "step": 11,
+      "time_s": 0.0275,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.002574550679122295,
+      "max_abs_a_mps2": 16.68505588075825,
+      "max_abs_residual": 0.0008316857420140877,
+      "linear_residual": 1.3969838619232178e-09
+    },
+    {
+      "step": 12,
+      "time_s": 0.03,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0027749495131559423,
+      "max_abs_a_mps2": 14.276151886941784,
+      "max_abs_residual": 0.001485334476456046,
+      "linear_residual": 8.149072527885437e-10
+    },
+    {
+      "step": 13,
+      "time_s": 0.0325,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.002945970640127282,
+      "max_abs_a_mps2": 15.017864176046501,
+      "max_abs_residual": 0.0016372447171306703,
+      "linear_residual": 1.3969838619232178e-09
+    },
+    {
+      "step": 14,
+      "time_s": 0.035,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.003101276620008621,
+      "max_abs_a_mps2": 14.678184135007987,
+      "max_abs_residual": 0.0003171864443629602,
+      "linear_residual": 3.3760443329811096e-09
+    },
+    {
+      "step": 15,
+      "time_s": 0.0375,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0032263076211752817,
+      "max_abs_a_mps2": 13.192308452835283,
+      "max_abs_residual": 0.003617730400947039,
+      "linear_residual": 2.2118911147117615e-09
+    },
+    {
+      "step": 16,
+      "time_s": 0.04,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.003333107925386232,
+      "max_abs_a_mps2": 10.721439013221845,
+      "max_abs_residual": 0.01002442387289193,
+      "linear_residual": 2.2118911147117615e-09
+    },
+    {
+      "step": 17,
+      "time_s": 0.0425,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0034068389354173223,
+      "max_abs_a_mps2": 10.503922179026896,
+      "max_abs_residual": 0.015204789694507781,
+      "linear_residual": 1.6298145055770874e-09
+    },
+    {
+      "step": 18,
+      "time_s": 0.045,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0034647079316278587,
+      "max_abs_a_mps2": 9.294868022874242,
+      "max_abs_residual": 0.013982046705905304,
+      "linear_residual": 2.0954757928848267e-09
+    },
+    {
+      "step": 19,
+      "time_s": 0.0475,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0035301381151864215,
+      "max_abs_a_mps2": 8.692833699098165,
+      "max_abs_residual": 0.006353426390433015,
+      "linear_residual": 1.3969838619232178e-09
+    },
+    {
+      "step": 20,
+      "time_s": 0.05,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.003617130824505607,
+      "max_abs_a_mps2": 8.520586687216397,
+      "max_abs_residual": 0.002645137435365541,
+      "linear_residual": 1.0477378964424133e-09
+    },
+    {
+      "step": 21,
+      "time_s": 0.0525,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0037245419185454624,
+      "max_abs_a_mps2": 9.381483817059443,
+      "max_abs_residual": 0.011008473014953779,
+      "linear_residual": 2.444721758365631e-09
+    },
+    {
+      "step": 22,
+      "time_s": 0.055,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.003843532596681422,
+      "max_abs_a_mps2": 11.394198643938369,
+      "max_abs_residual": 0.019464448963844916,
+      "linear_residual": 2.561137080192566e-09
+    },
+    {
+      "step": 23,
+      "time_s": 0.0575,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.00396106633509173,
+      "max_abs_a_mps2": 11.638631049809833,
+      "max_abs_residual": 0.024746153438400142,
+      "linear_residual": 1.862645149230957e-09
+    },
+    {
+      "step": 24,
+      "time_s": 0.06,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004072427037116612,
+      "max_abs_a_mps2": 12.091045337626927,
+      "max_abs_residual": 0.023152653902798193,
+      "linear_residual": 2.561137080192566e-09
+    },
+    {
+      "step": 25,
+      "time_s": 0.0625,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004176799530746766,
+      "max_abs_a_mps2": 12.409229498345141,
+      "max_abs_residual": 0.015322881077281636,
+      "linear_residual": 1.3969838619232178e-09
+    },
+    {
+      "step": 26,
+      "time_s": 0.065,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004286607764234613,
+      "max_abs_a_mps2": 11.343699257950549,
+      "max_abs_residual": 0.0028711343293252867,
+      "linear_residual": 2.0954757928848267e-09
+    },
+    {
+      "step": 27,
+      "time_s": 0.0675,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004410114756485776,
+      "max_abs_a_mps2": 12.10910377677888,
+      "max_abs_residual": 0.010901005666994479,
+      "linear_residual": 1.5133991837501526e-09
+    },
+    {
+      "step": 28,
+      "time_s": 0.07,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004505234328781714,
+      "max_abs_a_mps2": 17.73105377138484,
+      "max_abs_residual": 0.021351820451428694,
+      "linear_residual": 1.1641532182693481e-09
+    },
+    {
+      "step": 29,
+      "time_s": 0.0725,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004622918796073211,
+      "max_abs_a_mps2": 13.626403854568036,
+      "max_abs_residual": 0.027422054980661414,
+      "linear_residual": 1.7462298274040222e-09
+    },
+    {
+      "step": 30,
+      "time_s": 0.075,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004746693195466363,
+      "max_abs_a_mps2": 18.784455040607995,
+      "max_abs_residual": 0.028092421597648354,
+      "linear_residual": 1.979060471057892e-09
+    },
+    {
+      "step": 31,
+      "time_s": 0.0775,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0048536055924971455,
+      "max_abs_a_mps2": 15.832675991519496,
+      "max_abs_residual": 0.023566404716348188,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 32,
+      "time_s": 0.08,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004920965970566639,
+      "max_abs_a_mps2": 13.718203434203158,
+      "max_abs_residual": 0.019182317733623222,
+      "linear_residual": 2.3283064365386963e-09
+    },
+    {
+      "step": 33,
+      "time_s": 0.0825,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004953278182954313,
+      "max_abs_a_mps2": 12.070690907236836,
+      "max_abs_residual": 0.01385901998173722,
+      "linear_residual": 2.3283064365386963e-09
+    },
+    {
+      "step": 34,
+      "time_s": 0.085,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0049600265727444215,
+      "max_abs_a_mps2": 13.05402399909894,
+      "max_abs_residual": 0.003317855699606298,
+      "linear_residual": 1.979060471057892e-09
+    },
+    {
+      "step": 35,
+      "time_s": 0.08750000000000001,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.0049277957296709335,
+      "max_abs_a_mps2": 13.694696726436195,
+      "max_abs_residual": 0.007691457270993851,
+      "linear_residual": 2.7939677238464355e-09
+    },
+    {
+      "step": 36,
+      "time_s": 0.09,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004858004052262206,
+      "max_abs_a_mps2": 11.710964919454113,
+      "max_abs_residual": 0.018147284607039182,
+      "linear_residual": 2.561137080192566e-09
+    },
+    {
+      "step": 37,
+      "time_s": 0.0925,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004819928556481253,
+      "max_abs_a_mps2": 9.552882836927484,
+      "max_abs_residual": 0.02907167679381928,
+      "linear_residual": 3.4924596548080444e-09
+    },
+    {
+      "step": 38,
+      "time_s": 0.095,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004812121586522357,
+      "max_abs_a_mps2": 9.752917229937633,
+      "max_abs_residual": 0.03290315436561286,
+      "linear_residual": 2.7939677238464355e-09
+    },
+    {
+      "step": 39,
+      "time_s": 0.0975,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004809636293953291,
+      "max_abs_a_mps2": 13.957551354645409,
+      "max_abs_residual": 0.029531016855798953,
+      "linear_residual": 1.6298145055770874e-09
+    },
+    {
+      "step": 40,
+      "time_s": 0.1,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.00480049090021637,
+      "max_abs_a_mps2": 9.865312393971815,
+      "max_abs_residual": 0.023135450668178237,
+      "linear_residual": 2.3283064365386963e-09
+    },
+    {
+      "step": 41,
+      "time_s": 0.10250000000000001,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004776966570472257,
+      "max_abs_a_mps2": 10.738939842174776,
+      "max_abs_residual": 0.012465168435255691,
+      "linear_residual": 1.6298145055770874e-09
+    },
+    {
+      "step": 42,
+      "time_s": 0.105,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004729444162596496,
+      "max_abs_a_mps2": 7.585218258912128,
+      "max_abs_residual": 0.002420888260985521,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 43,
+      "time_s": 0.1075,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004677996733840084,
+      "max_abs_a_mps2": 7.728496669806364,
+      "max_abs_residual": 0.005921785664668278,
+      "linear_residual": 2.3283064365386963e-09
+    },
+    {
+      "step": 44,
+      "time_s": 0.11,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.004638930519490735,
+      "max_abs_a_mps2": 11.66478247997149,
+      "max_abs_residual": 0.016404998113330294,
+      "linear_residual": 2.0954757928848267e-09
+    },
+    {
+      "step": 45,
+      "time_s": 0.1125,
+      "active_axle_count": 1,
+      "max_abs_u_m": 0.00467672322271988,
+      "max_abs_a_mps2": 10.19996071893084,
+      "max_abs_residual": 0.023243848246238485,
+      "linear_residual": 3.026798367500305e-09
+    },
+    {
+      "step": 46,
+      "time_s": 0.115,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0047524602654959985,
+      "max_abs_a_mps2": 25.887183004518405,
+      "max_abs_residual": 0.02632691188773606,
+      "linear_residual": 3.026798367500305e-09
+    },
+    {
+      "step": 47,
+      "time_s": 0.11750000000000001,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.004841848386693031,
+      "max_abs_a_mps2": 20.9371381460291,
+      "max_abs_residual": 0.029695801800698973,
+      "linear_residual": 1.3969838619232178e-09
+    },
+    {
+      "step": 48,
+      "time_s": 0.12,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.004897758954326866,
+      "max_abs_a_mps2": 22.697115788380405,
+      "max_abs_residual": 0.027633483085082844,
+      "linear_residual": 1.862645149230957e-09
+    },
+    {
+      "step": 49,
+      "time_s": 0.1225,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.004926657179378905,
+      "max_abs_a_mps2": 19.614348463285467,
+      "max_abs_residual": 0.01998021060717292,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 50,
+      "time_s": 0.125,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005003776727543877,
+      "max_abs_a_mps2": 18.37325519235544,
+      "max_abs_residual": 0.012283376883715391,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 51,
+      "time_s": 0.1275,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005144399854200888,
+      "max_abs_a_mps2": 15.91250236566144,
+      "max_abs_residual": 0.003327514132251963,
+      "linear_residual": 3.4924596548080444e-09
+    },
+    {
+      "step": 52,
+      "time_s": 0.13,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005322589984033885,
+      "max_abs_a_mps2": 14.878317994282408,
+      "max_abs_residual": 0.008867228956660256,
+      "linear_residual": 3.259629011154175e-09
+    },
+    {
+      "step": 53,
+      "time_s": 0.1325,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005522288516851268,
+      "max_abs_a_mps2": 18.02443483931618,
+      "max_abs_residual": 0.020494020165642723,
+      "linear_residual": 4.190951585769653e-09
+    },
+    {
+      "step": 54,
+      "time_s": 0.135,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005735627529507516,
+      "max_abs_a_mps2": 20.501747993953433,
+      "max_abs_residual": 0.027654703240841627,
+      "linear_residual": 1.6298145055770874e-09
+    },
+    {
+      "step": 55,
+      "time_s": 0.1375,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0059346711711262545,
+      "max_abs_a_mps2": 23.061986274109934,
+      "max_abs_residual": 0.032207117284997366,
+      "linear_residual": 2.3283064365386963e-09
+    },
+    {
+      "step": 56,
+      "time_s": 0.14,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.006064484030304102,
+      "max_abs_a_mps2": 25.331736265998828,
+      "max_abs_residual": 0.03305495606036857,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 57,
+      "time_s": 0.14250000000000002,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.006154939322552405,
+      "max_abs_a_mps2": 23.526319468707424,
+      "max_abs_residual": 0.02809082442399813,
+      "linear_residual": 6.752088665962219e-09
+    },
+    {
+      "step": 58,
+      "time_s": 0.145,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.006165949914699172,
+      "max_abs_a_mps2": 19.843394262831215,
+      "max_abs_residual": 0.022104383515397785,
+      "linear_residual": 5.820766091346741e-09
+    },
+    {
+      "step": 59,
+      "time_s": 0.1475,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0061198348854294565,
+      "max_abs_a_mps2": 25.534182830580786,
+      "max_abs_residual": 0.014639708199865709,
+      "linear_residual": 6.05359673500061e-09
+    },
+    {
+      "step": 60,
+      "time_s": 0.15,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.006048123556160159,
+      "max_abs_a_mps2": 21.015978519190597,
+      "max_abs_residual": 0.0035172951211279724,
+      "linear_residual": 3.4924596548080444e-09
+    },
+    {
+      "step": 61,
+      "time_s": 0.1525,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005964290981765057,
+      "max_abs_a_mps2": 16.331985154672406,
+      "max_abs_residual": 0.009350377271402976,
+      "linear_residual": 3.4924596548080444e-09
+    },
+    {
+      "step": 62,
+      "time_s": 0.155,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005900556677794173,
+      "max_abs_a_mps2": 14.154547819645556,
+      "max_abs_residual": 0.024263075225519515,
+      "linear_residual": 3.4924596548080444e-09
+    },
+    {
+      "step": 63,
+      "time_s": 0.1575,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005836168773425833,
+      "max_abs_a_mps2": 17.330980864905253,
+      "max_abs_residual": 0.0336244915088173,
+      "linear_residual": 3.026798367500305e-09
+    },
+    {
+      "step": 64,
+      "time_s": 0.16,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0057342067771949095,
+      "max_abs_a_mps2": 18.726342947998074,
+      "max_abs_residual": 0.03135130634018424,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 65,
+      "time_s": 0.1625,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005632362039251293,
+      "max_abs_a_mps2": 15.3383410192387,
+      "max_abs_residual": 0.02427946010902815,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 66,
+      "time_s": 0.165,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005559315503989725,
+      "max_abs_a_mps2": 13.725961259170582,
+      "max_abs_residual": 0.012846252865983843,
+      "linear_residual": 2.0954757928848267e-09
+    },
+    {
+      "step": 67,
+      "time_s": 0.1675,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0055170644384183,
+      "max_abs_a_mps2": 14.532214197235781,
+      "max_abs_residual": 0.005258544696971512,
+      "linear_residual": 3.259629011154175e-09
+    },
+    {
+      "step": 68,
+      "time_s": 0.17,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0055214958092605106,
+      "max_abs_a_mps2": 16.414220922967846,
+      "max_abs_residual": 0.020418444988536066,
+      "linear_residual": 2.561137080192566e-09
+    },
+    {
+      "step": 69,
+      "time_s": 0.17250000000000001,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005587387883518002,
+      "max_abs_a_mps2": 18.18426263393874,
+      "max_abs_residual": 0.025629170816500846,
+      "linear_residual": 2.3283064365386963e-09
+    },
+    {
+      "step": 70,
+      "time_s": 0.17500000000000002,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005695534212053583,
+      "max_abs_a_mps2": 16.253598188437078,
+      "max_abs_residual": 0.02561095046075934,
+      "linear_residual": 2.0954757928848267e-09
+    },
+    {
+      "step": 71,
+      "time_s": 0.1775,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005802048616089475,
+      "max_abs_a_mps2": 16.58097860234008,
+      "max_abs_residual": 0.02191906446887515,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 72,
+      "time_s": 0.18,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005891478298772327,
+      "max_abs_a_mps2": 15.795230533754873,
+      "max_abs_residual": 0.014386184103386768,
+      "linear_residual": 3.958120942115784e-09
+    },
+    {
+      "step": 73,
+      "time_s": 0.1825,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005949666781118901,
+      "max_abs_a_mps2": 22.768629581145227,
+      "max_abs_residual": 0.010789257099531824,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 74,
+      "time_s": 0.185,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.006004969885000191,
+      "max_abs_a_mps2": 23.632916988750583,
+      "max_abs_residual": 0.010495582745534193,
+      "linear_residual": 6.51925802230835e-09
+    },
+    {
+      "step": 75,
+      "time_s": 0.1875,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0060641273314688115,
+      "max_abs_a_mps2": 28.98764238407181,
+      "max_abs_residual": 0.009274313468267792,
+      "linear_residual": 3.026798367500305e-09
+    },
+    {
+      "step": 76,
+      "time_s": 0.19,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0061134043619145975,
+      "max_abs_a_mps2": 18.207931603066996,
+      "max_abs_residual": 0.010221616059880034,
+      "linear_residual": 4.6566128730773926e-09
+    },
+    {
+      "step": 77,
+      "time_s": 0.1925,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.006148203300084334,
+      "max_abs_a_mps2": 14.467622701276328,
+      "max_abs_residual": 0.008321497502038255,
+      "linear_residual": 3.259629011154175e-09
+    },
+    {
+      "step": 78,
+      "time_s": 0.195,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.006152239975709927,
+      "max_abs_a_mps2": 18.588575153684616,
+      "max_abs_residual": 0.004683296647272073,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 79,
+      "time_s": 0.1975,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.006097587926709544,
+      "max_abs_a_mps2": 23.82455645276768,
+      "max_abs_residual": 0.0074958987224817974,
+      "linear_residual": 6.05359673500061e-09
+    },
+    {
+      "step": 80,
+      "time_s": 0.2,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0060229609710114335,
+      "max_abs_a_mps2": 16.815801756348,
+      "max_abs_residual": 0.010544736649080733,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 81,
+      "time_s": 0.2025,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005946351185072149,
+      "max_abs_a_mps2": 15.25243204560267,
+      "max_abs_residual": 0.013096216878352607,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 82,
+      "time_s": 0.20500000000000002,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005861510211358869,
+      "max_abs_a_mps2": 14.296748296108163,
+      "max_abs_residual": 0.01991342171663746,
+      "linear_residual": 3.958120942115784e-09
+    },
+    {
+      "step": 83,
+      "time_s": 0.20750000000000002,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005769089884378185,
+      "max_abs_a_mps2": 18.203476828363428,
+      "max_abs_residual": 0.022876388927215885,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 84,
+      "time_s": 0.21,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0057160077829499535,
+      "max_abs_a_mps2": 18.475138842256875,
+      "max_abs_residual": 0.01909177975176135,
+      "linear_residual": 2.7939677238464355e-09
+    },
+    {
+      "step": 85,
+      "time_s": 0.2125,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0057090605996373825,
+      "max_abs_a_mps2": 15.117333566854185,
+      "max_abs_residual": 0.015057414337206865,
+      "linear_residual": 3.026798367500305e-09
+    },
+    {
+      "step": 86,
+      "time_s": 0.215,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005685694714648826,
+      "max_abs_a_mps2": 16.020056329139052,
+      "max_abs_residual": 0.010420006502499746,
+      "linear_residual": 2.7939677238464355e-09
+    },
+    {
+      "step": 87,
+      "time_s": 0.2175,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005656868005417152,
+      "max_abs_a_mps2": 16.11704931561375,
+      "max_abs_residual": 0.004569961273773515,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 88,
+      "time_s": 0.22,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005627337420373311,
+      "max_abs_a_mps2": 13.765821669089183,
+      "max_abs_residual": 0.0027370323323339107,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 89,
+      "time_s": 0.2225,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.0056194807776669044,
+      "max_abs_a_mps2": 21.291810010018036,
+      "max_abs_residual": 0.00415430951397866,
+      "linear_residual": 2.7939677238464355e-09
+    },
+    {
+      "step": 90,
+      "time_s": 0.225,
+      "active_axle_count": 2,
+      "max_abs_u_m": 0.005654557961472078,
+      "max_abs_a_mps2": 18.9041948371238,
+      "max_abs_residual": 0.007041453421152255,
+      "linear_residual": 3.259629011154175e-09
+    },
+    {
+      "step": 91,
+      "time_s": 0.2275,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.005735202577255076,
+      "max_abs_a_mps2": 26.44370895058208,
+      "max_abs_residual": 0.012440412432624726,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 92,
+      "time_s": 0.23,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.005845232028464804,
+      "max_abs_a_mps2": 22.416045600838483,
+      "max_abs_residual": 0.015530998643953353,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 93,
+      "time_s": 0.2325,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.005932190522106046,
+      "max_abs_a_mps2": 25.739689870690196,
+      "max_abs_residual": 0.017373744121869095,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 94,
+      "time_s": 0.23500000000000001,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.0059577415489999105,
+      "max_abs_a_mps2": 25.895503202168488,
+      "max_abs_residual": 0.022400559828383848,
+      "linear_residual": 6.752088665962219e-09
+    },
+    {
+      "step": 95,
+      "time_s": 0.23750000000000002,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.005967169447335785,
+      "max_abs_a_mps2": 19.19635898270655,
+      "max_abs_residual": 0.027408931957324967,
+      "linear_residual": 3.4924596548080444e-09
+    },
+    {
+      "step": 96,
+      "time_s": 0.24,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006014255067460348,
+      "max_abs_a_mps2": 19.192851821923096,
+      "max_abs_residual": 0.033068009885028005,
+      "linear_residual": 3.259629011154175e-09
+    },
+    {
+      "step": 97,
+      "time_s": 0.2425,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.00610865581827524,
+      "max_abs_a_mps2": 17.767526352986394,
+      "max_abs_residual": 0.041947731166146696,
+      "linear_residual": 2.7939677238464355e-09
+    },
+    {
+      "step": 98,
+      "time_s": 0.245,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006251796306341851,
+      "max_abs_a_mps2": 24.606779186550074,
+      "max_abs_residual": 0.04915962094673887,
+      "linear_residual": 4.190951585769653e-09
+    },
+    {
+      "step": 99,
+      "time_s": 0.2475,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.0064384353748203485,
+      "max_abs_a_mps2": 25.38814851364285,
+      "max_abs_residual": 0.04798091441625729,
+      "linear_residual": 4.6566128730773926e-09
+    },
+    {
+      "step": 100,
+      "time_s": 0.25,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006603435145091588,
+      "max_abs_a_mps2": 29.112406616593756,
+      "max_abs_residual": 0.042264374264050275,
+      "linear_residual": 6.51925802230835e-09
+    },
+    {
+      "step": 101,
+      "time_s": 0.2525,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006687050906624607,
+      "max_abs_a_mps2": 27.1913039855004,
+      "max_abs_residual": 0.037083495742990635,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 102,
+      "time_s": 0.255,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006695647655964197,
+      "max_abs_a_mps2": 23.376198726416384,
+      "max_abs_residual": 0.028013063209073152,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 103,
+      "time_s": 0.2575,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006694935392520132,
+      "max_abs_a_mps2": 18.04015055994368,
+      "max_abs_residual": 0.020856923205428757,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 104,
+      "time_s": 0.26,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006646719780429913,
+      "max_abs_a_mps2": 31.840543954197162,
+      "max_abs_residual": 0.01919353884568409,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 105,
+      "time_s": 0.2625,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006579960456109282,
+      "max_abs_a_mps2": 26.973045522963865,
+      "max_abs_residual": 0.012966007314389572,
+      "linear_residual": 3.026798367500305e-09
+    },
+    {
+      "step": 106,
+      "time_s": 0.265,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.0065205107107332225,
+      "max_abs_a_mps2": 19.77658220845432,
+      "max_abs_residual": 0.0032194017630899907,
+      "linear_residual": 2.3283064365386963e-09
+    },
+    {
+      "step": 107,
+      "time_s": 0.2675,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006446286345354971,
+      "max_abs_a_mps2": 18.495327772444362,
+      "max_abs_residual": 0.005280525947000569,
+      "linear_residual": 5.3551048040390015e-09
+    },
+    {
+      "step": 108,
+      "time_s": 0.27,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006375176261078414,
+      "max_abs_a_mps2": 22.776612277030093,
+      "max_abs_residual": 0.008133081239975581,
+      "linear_residual": 3.958120942115784e-09
+    },
+    {
+      "step": 109,
+      "time_s": 0.2725,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006300321041419598,
+      "max_abs_a_mps2": 29.85407305615431,
+      "max_abs_residual": 9.197409781336319e-05,
+      "linear_residual": 2.3283064365386963e-09
+    },
+    {
+      "step": 110,
+      "time_s": 0.275,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006242339116906537,
+      "max_abs_a_mps2": 17.892768473111165,
+      "max_abs_residual": 0.014014526317623677,
+      "linear_residual": 5.587935447692871e-09
+    },
+    {
+      "step": 111,
+      "time_s": 0.2775,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006202169763355669,
+      "max_abs_a_mps2": 14.44170901514441,
+      "max_abs_residual": 0.031671891810049146,
+      "linear_residual": 3.026798367500305e-09
+    },
+    {
+      "step": 112,
+      "time_s": 0.28,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.0061908016031656295,
+      "max_abs_a_mps2": 21.105352002972477,
+      "max_abs_residual": 0.05246683915834183,
+      "linear_residual": 3.958120942115784e-09
+    },
+    {
+      "step": 113,
+      "time_s": 0.28250000000000003,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006194881245593422,
+      "max_abs_a_mps2": 22.366244033967806,
+      "max_abs_residual": 0.06881535456614074,
+      "linear_residual": 6.752088665962219e-09
+    },
+    {
+      "step": 114,
+      "time_s": 0.28500000000000003,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.00620694236506553,
+      "max_abs_a_mps2": 19.505805986887445,
+      "max_abs_residual": 0.07322877545448137,
+      "linear_residual": 4.190951585769653e-09
+    },
+    {
+      "step": 115,
+      "time_s": 0.28750000000000003,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006262440909444115,
+      "max_abs_a_mps2": 19.406551030323737,
+      "max_abs_residual": 0.06833354073660303,
+      "linear_residual": 3.259629011154175e-09
+    },
+    {
+      "step": 116,
+      "time_s": 0.29,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006344212027239513,
+      "max_abs_a_mps2": 13.771420360404463,
+      "max_abs_residual": 0.05913044210865337,
+      "linear_residual": 6.51925802230835e-09
+    },
+    {
+      "step": 117,
+      "time_s": 0.2925,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006405669270221141,
+      "max_abs_a_mps2": 15.320160337293775,
+      "max_abs_residual": 0.043232047150013386,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 118,
+      "time_s": 0.295,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.0065008218683892255,
+      "max_abs_a_mps2": 25.153962452366674,
+      "max_abs_residual": 0.028850684061580978,
+      "linear_residual": 3.958120942115784e-09
+    },
+    {
+      "step": 119,
+      "time_s": 0.2975,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006589452653941093,
+      "max_abs_a_mps2": 28.02695262607513,
+      "max_abs_residual": 0.02228405648156695,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 120,
+      "time_s": 0.3,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006627487216031933,
+      "max_abs_a_mps2": 36.59655220614844,
+      "max_abs_residual": 0.015700872931120102,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 121,
+      "time_s": 0.3025,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006600240015046711,
+      "max_abs_a_mps2": 17.547811701779658,
+      "max_abs_residual": 0.010391358310471333,
+      "linear_residual": 5.587935447692871e-09
+    },
+    {
+      "step": 122,
+      "time_s": 0.305,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.0065538644769367535,
+      "max_abs_a_mps2": 16.25834153001826,
+      "max_abs_residual": 0.0052987674689575215,
+      "linear_residual": 5.587935447692871e-09
+    },
+    {
+      "step": 123,
+      "time_s": 0.3075,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006502509099861732,
+      "max_abs_a_mps2": 23.66091519999447,
+      "max_abs_residual": 0.0014462698527495377,
+      "linear_residual": 4.6566128730773926e-09
+    },
+    {
+      "step": 124,
+      "time_s": 0.31,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006453038314438132,
+      "max_abs_a_mps2": 30.71933897210027,
+      "max_abs_residual": 0.003172011209244374,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 125,
+      "time_s": 0.3125,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006459118643291637,
+      "max_abs_a_mps2": 15.528616156111896,
+      "max_abs_residual": 0.00024164304431906203,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 126,
+      "time_s": 0.315,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006456524780661316,
+      "max_abs_a_mps2": 14.980281499309047,
+      "max_abs_residual": 0.00817371006041867,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 127,
+      "time_s": 0.3175,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.0063905219556675275,
+      "max_abs_a_mps2": 19.112443046886973,
+      "max_abs_residual": 0.020635161228256038,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 128,
+      "time_s": 0.32,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006272728684367434,
+      "max_abs_a_mps2": 26.4884630171075,
+      "max_abs_residual": 0.029012304768912145,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 129,
+      "time_s": 0.3225,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006150336531741205,
+      "max_abs_a_mps2": 21.005500398745824,
+      "max_abs_residual": 0.03028847186214989,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 130,
+      "time_s": 0.325,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006063316237921751,
+      "max_abs_a_mps2": 18.77460083437643,
+      "max_abs_residual": 0.025533872489177156,
+      "linear_residual": 5.3551048040390015e-09
+    },
+    {
+      "step": 131,
+      "time_s": 0.3275,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006017432054532294,
+      "max_abs_a_mps2": 21.96605827828435,
+      "max_abs_residual": 0.018832563707292138,
+      "linear_residual": 4.190951585769653e-09
+    },
+    {
+      "step": 132,
+      "time_s": 0.33,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006045385754220821,
+      "max_abs_a_mps2": 19.600569399949585,
+      "max_abs_residual": 0.011679369395096728,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 133,
+      "time_s": 0.3325,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006124430170357419,
+      "max_abs_a_mps2": 20.20968473173082,
+      "max_abs_residual": 0.0060043994253646815,
+      "linear_residual": 6.28642737865448e-09
+    },
+    {
+      "step": 134,
+      "time_s": 0.335,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006187378405092996,
+      "max_abs_a_mps2": 25.34156878112245,
+      "max_abs_residual": 0.003720077823345491,
+      "linear_residual": 3.259629011154175e-09
+    },
+    {
+      "step": 135,
+      "time_s": 0.3375,
+      "active_axle_count": 3,
+      "max_abs_u_m": 0.006219051847336731,
+      "max_abs_a_mps2": 25.74032056151698,
+      "max_abs_residual": 6.204323835845571e-05,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 136,
+      "time_s": 0.34,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006231488653026001,
+      "max_abs_a_mps2": 21.265641737198138,
+      "max_abs_residual": 0.006533402181958081,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 137,
+      "time_s": 0.3425,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006241619769516575,
+      "max_abs_a_mps2": 27.33155150756783,
+      "max_abs_residual": 0.015810212600626983,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 138,
+      "time_s": 0.34500000000000003,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006282701041799544,
+      "max_abs_a_mps2": 30.663788763160557,
+      "max_abs_residual": 0.026472526500583626,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 139,
+      "time_s": 0.34750000000000003,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006344390078400194,
+      "max_abs_a_mps2": 32.63437915351566,
+      "max_abs_residual": 0.03637136550969444,
+      "linear_residual": 5.3551048040390015e-09
+    },
+    {
+      "step": 140,
+      "time_s": 0.35000000000000003,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.0064290149906856536,
+      "max_abs_a_mps2": 19.742937223793387,
+      "max_abs_residual": 0.04438267488148995,
+      "linear_residual": 7.450580596923828e-09
+    },
+    {
+      "step": 141,
+      "time_s": 0.3525,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.00647332091571812,
+      "max_abs_a_mps2": 21.63891727649636,
+      "max_abs_residual": 0.04694330264464952,
+      "linear_residual": 5.820766091346741e-09
+    },
+    {
+      "step": 142,
+      "time_s": 0.355,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006449724266242383,
+      "max_abs_a_mps2": 21.967208782922576,
+      "max_abs_residual": 0.04716090066358447,
+      "linear_residual": 4.190951585769653e-09
+    },
+    {
+      "step": 143,
+      "time_s": 0.3575,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006370505684538846,
+      "max_abs_a_mps2": 37.24024296650821,
+      "max_abs_residual": 0.04868462003651075,
+      "linear_residual": 6.51925802230835e-09
+    },
+    {
+      "step": 144,
+      "time_s": 0.36,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006295553657589247,
+      "max_abs_a_mps2": 29.61550167896093,
+      "max_abs_residual": 0.05393351207021624,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 145,
+      "time_s": 0.3625,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006399302877333,
+      "max_abs_a_mps2": 29.94822170416966,
+      "max_abs_residual": 0.06501468749775086,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 146,
+      "time_s": 0.365,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006493469078397538,
+      "max_abs_a_mps2": 27.21834492247055,
+      "max_abs_residual": 0.07585901037964504,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 147,
+      "time_s": 0.3675,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006505376170723488,
+      "max_abs_a_mps2": 24.945383486845163,
+      "max_abs_residual": 0.0875950580521021,
+      "linear_residual": 4.307366907596588e-09
+    },
+    {
+      "step": 148,
+      "time_s": 0.37,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006481278759237796,
+      "max_abs_a_mps2": 25.144850770534298,
+      "max_abs_residual": 0.09959498475654982,
+      "linear_residual": 6.51925802230835e-09
+    },
+    {
+      "step": 149,
+      "time_s": 0.3725,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006444418568791424,
+      "max_abs_a_mps2": 35.176163538745975,
+      "max_abs_residual": 0.10704674343651277,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 150,
+      "time_s": 0.375,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006398000291291165,
+      "max_abs_a_mps2": 29.60864209325731,
+      "max_abs_residual": 0.1172700734641694,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 151,
+      "time_s": 0.3775,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006374017945793107,
+      "max_abs_a_mps2": 19.916775725678512,
+      "max_abs_residual": 0.13256142834075035,
+      "linear_residual": 5.587935447692871e-09
+    },
+    {
+      "step": 152,
+      "time_s": 0.38,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006339376814730414,
+      "max_abs_a_mps2": 20.26066771972923,
+      "max_abs_residual": 0.14945922434344538,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 153,
+      "time_s": 0.3825,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006299210526071398,
+      "max_abs_a_mps2": 27.466349633549214,
+      "max_abs_residual": 0.16300529319960333,
+      "linear_residual": 6.51925802230835e-09
+    },
+    {
+      "step": 154,
+      "time_s": 0.385,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.0062448147610707294,
+      "max_abs_a_mps2": 38.52206896655497,
+      "max_abs_residual": 0.17062999295558257,
+      "linear_residual": 5.3551048040390015e-09
+    },
+    {
+      "step": 155,
+      "time_s": 0.3875,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006171840763837586,
+      "max_abs_a_mps2": 19.293952556519443,
+      "max_abs_residual": 0.17617912167861505,
+      "linear_residual": 6.05359673500061e-09
+    },
+    {
+      "step": 156,
+      "time_s": 0.39,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006130176997600032,
+      "max_abs_a_mps2": 17.124162144561694,
+      "max_abs_residual": 0.17691261216680232,
+      "linear_residual": 6.984919309616089e-09
+    },
+    {
+      "step": 157,
+      "time_s": 0.3925,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006115334485706957,
+      "max_abs_a_mps2": 29.031913782507356,
+      "max_abs_residual": 0.17654327891204957,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 158,
+      "time_s": 0.395,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006165353866937763,
+      "max_abs_a_mps2": 29.36326441911108,
+      "max_abs_residual": 0.18238470058349776,
+      "linear_residual": 4.6566128730773926e-09
+    },
+    {
+      "step": 159,
+      "time_s": 0.3975,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006236681661289137,
+      "max_abs_a_mps2": 20.182107643076375,
+      "max_abs_residual": 0.19599816839490813,
+      "linear_residual": 6.984919309616089e-09
+    },
+    {
+      "step": 160,
+      "time_s": 0.4,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.0062774977634930396,
+      "max_abs_a_mps2": 19.250916896210168,
+      "max_abs_residual": 0.2205105546518098,
+      "linear_residual": 5.3551048040390015e-09
+    },
+    {
+      "step": 161,
+      "time_s": 0.4025,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006231745044064569,
+      "max_abs_a_mps2": 18.043403182292188,
+      "max_abs_residual": 0.2511612351108852,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 162,
+      "time_s": 0.405,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006227232266194337,
+      "max_abs_a_mps2": 18.326158763305454,
+      "max_abs_residual": 0.28338402795452566,
+      "linear_residual": 6.05359673500061e-09
+    },
+    {
+      "step": 163,
+      "time_s": 0.40750000000000003,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006311282283181178,
+      "max_abs_a_mps2": 31.430407255600976,
+      "max_abs_residual": 0.3121655284157896,
+      "linear_residual": 6.28642737865448e-09
+    },
+    {
+      "step": 164,
+      "time_s": 0.41000000000000003,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006406950949706471,
+      "max_abs_a_mps2": 32.05208262315906,
+      "max_abs_residual": 0.33415376276843745,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 165,
+      "time_s": 0.41250000000000003,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006437973589429952,
+      "max_abs_a_mps2": 36.83050318542824,
+      "max_abs_residual": 0.3557218405403546,
+      "linear_residual": 5.820766091346741e-09
+    },
+    {
+      "step": 166,
+      "time_s": 0.41500000000000004,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006389026738136774,
+      "max_abs_a_mps2": 16.995470432559777,
+      "max_abs_residual": 0.37623723963940847,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 167,
+      "time_s": 0.4175,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006320757238044741,
+      "max_abs_a_mps2": 21.837066396145907,
+      "max_abs_residual": 0.39750687973355525,
+      "linear_residual": 6.28642737865448e-09
+    },
+    {
+      "step": 168,
+      "time_s": 0.42,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.0062641464182460966,
+      "max_abs_a_mps2": 31.55865757706433,
+      "max_abs_residual": 0.4177683209281895,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 169,
+      "time_s": 0.4225,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006214560789787406,
+      "max_abs_a_mps2": 34.354883577256274,
+      "max_abs_residual": 0.4300639665834751,
+      "linear_residual": 7.683411240577698e-09
+    },
+    {
+      "step": 170,
+      "time_s": 0.425,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.0062806854938071265,
+      "max_abs_a_mps2": 16.029618883061648,
+      "max_abs_residual": 0.4392091552117563,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 171,
+      "time_s": 0.4275,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006335939139798099,
+      "max_abs_a_mps2": 19.092561944223927,
+      "max_abs_residual": 0.4431457261516698,
+      "linear_residual": 5.587935447692871e-09
+    },
+    {
+      "step": 172,
+      "time_s": 0.43,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006301991036032878,
+      "max_abs_a_mps2": 28.461601854315454,
+      "max_abs_residual": 0.44673673357215193,
+      "linear_residual": 6.51925802230835e-09
+    },
+    {
+      "step": 173,
+      "time_s": 0.4325,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.0061840494081857374,
+      "max_abs_a_mps2": 30.207786215395437,
+      "max_abs_residual": 0.4619087788469187,
+      "linear_residual": 5.587935447692871e-09
+    },
+    {
+      "step": 174,
+      "time_s": 0.435,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.0061736234089050344,
+      "max_abs_a_mps2": 27.880799931432332,
+      "max_abs_residual": 0.48442007778430707,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 175,
+      "time_s": 0.4375,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006209334883692204,
+      "max_abs_a_mps2": 28.651360853192973,
+      "max_abs_residual": 0.5138382367772465,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 176,
+      "time_s": 0.44,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006206912064062296,
+      "max_abs_a_mps2": 24.52026417188946,
+      "max_abs_residual": 0.5491490765616618,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 177,
+      "time_s": 0.4425,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006169573567349126,
+      "max_abs_a_mps2": 21.069545604059936,
+      "max_abs_residual": 0.5819940145247529,
+      "linear_residual": 4.6566128730773926e-09
+    },
+    {
+      "step": 178,
+      "time_s": 0.445,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006141785128751076,
+      "max_abs_a_mps2": 27.838590914654876,
+      "max_abs_residual": 0.6108435084679513,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 179,
+      "time_s": 0.4475,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006166559861968181,
+      "max_abs_a_mps2": 31.294531459793994,
+      "max_abs_residual": 0.638934405415057,
+      "linear_residual": 5.587935447692871e-09
+    },
+    {
+      "step": 180,
+      "time_s": 0.45,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006177333302342182,
+      "max_abs_a_mps2": 27.516257106353912,
+      "max_abs_residual": 0.667333526074799,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 181,
+      "time_s": 0.4525,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006134681375069629,
+      "max_abs_a_mps2": 21.641270541079002,
+      "max_abs_residual": 0.695457794486174,
+      "linear_residual": 3.725290298461914e-09
+    },
+    {
+      "step": 182,
+      "time_s": 0.455,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006081907059272477,
+      "max_abs_a_mps2": 20.002620876478083,
+      "max_abs_residual": 0.7262305720059885,
+      "linear_residual": 7.2177499532699585e-09
+    },
+    {
+      "step": 183,
+      "time_s": 0.4575,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006108685761586501,
+      "max_abs_a_mps2": 36.041920211704046,
+      "max_abs_residual": 0.7541550644082236,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 184,
+      "time_s": 0.46,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006105733454431427,
+      "max_abs_a_mps2": 37.68037356008613,
+      "max_abs_residual": 0.7749455548346305,
+      "linear_residual": 6.28642737865448e-09
+    },
+    {
+      "step": 185,
+      "time_s": 0.4625,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006199531310681803,
+      "max_abs_a_mps2": 17.759570075321363,
+      "max_abs_residual": 0.7941032892354087,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 186,
+      "time_s": 0.465,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006282683066684415,
+      "max_abs_a_mps2": 16.15412508092828,
+      "max_abs_residual": 0.8066191231691846,
+      "linear_residual": 5.122274160385132e-09
+    },
+    {
+      "step": 187,
+      "time_s": 0.4675,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006325948495850896,
+      "max_abs_a_mps2": 27.103505590765906,
+      "max_abs_residual": 0.8151485806206438,
+      "linear_residual": 4.6566128730773926e-09
+    },
+    {
+      "step": 188,
+      "time_s": 0.47000000000000003,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006301287012806924,
+      "max_abs_a_mps2": 33.467170714923384,
+      "max_abs_residual": 0.8270465076875553,
+      "linear_residual": 5.587935447692871e-09
+    },
+    {
+      "step": 189,
+      "time_s": 0.47250000000000003,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006243765096205957,
+      "max_abs_a_mps2": 24.333198001735834,
+      "max_abs_residual": 0.8407738903815698,
+      "linear_residual": 4.190951585769653e-09
+    },
+    {
+      "step": 190,
+      "time_s": 0.47500000000000003,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006212880861207699,
+      "max_abs_a_mps2": 29.341352947471755,
+      "max_abs_residual": 0.8563282072611855,
+      "linear_residual": 6.28642737865448e-09
+    },
+    {
+      "step": 191,
+      "time_s": 0.47750000000000004,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006168728998946362,
+      "max_abs_a_mps2": 22.973411821159416,
+      "max_abs_residual": 0.8709514561251126,
+      "linear_residual": 6.28642737865448e-09
+    },
+    {
+      "step": 192,
+      "time_s": 0.48,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006125078408779851,
+      "max_abs_a_mps2": 22.858755468612433,
+      "max_abs_residual": 0.8831564881611484,
+      "linear_residual": 6.28642737865448e-09
+    },
+    {
+      "step": 193,
+      "time_s": 0.4825,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006238629178977074,
+      "max_abs_a_mps2": 23.97763552671905,
+      "max_abs_residual": 0.8920272141403984,
+      "linear_residual": 4.423782229423523e-09
+    },
+    {
+      "step": 194,
+      "time_s": 0.485,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006297089653225584,
+      "max_abs_a_mps2": 32.83153471822398,
+      "max_abs_residual": 0.8999348338516029,
+      "linear_residual": 4.6566128730773926e-09
+    },
+    {
+      "step": 195,
+      "time_s": 0.4875,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006247075382740194,
+      "max_abs_a_mps2": 24.55622208357294,
+      "max_abs_residual": 0.910995209252178,
+      "linear_residual": 3.026798367500305e-09
+    },
+    {
+      "step": 196,
+      "time_s": 0.49,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006132402445777524,
+      "max_abs_a_mps2": 12.03909760388533,
+      "max_abs_residual": 0.9290178092021506,
+      "linear_residual": 4.889443516731262e-09
+    },
+    {
+      "step": 197,
+      "time_s": 0.4925,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006083525412496448,
+      "max_abs_a_mps2": 24.999880655091065,
+      "max_abs_residual": 0.9699113560454862,
+      "linear_residual": 7.683411240577698e-09
+    },
+    {
+      "step": 198,
+      "time_s": 0.495,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006130767233111918,
+      "max_abs_a_mps2": 32.659143895810146,
+      "max_abs_residual": 1.0198700854566596,
+      "linear_residual": 5.587935447692871e-09
+    },
+    {
+      "step": 199,
+      "time_s": 0.4975,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006117999433326669,
+      "max_abs_a_mps2": 34.994012664892324,
+      "max_abs_residual": 1.0571092874142778,
+      "linear_residual": 3.259629011154175e-09
+    },
+    {
+      "step": 200,
+      "time_s": 0.5,
+      "active_axle_count": 4,
+      "max_abs_u_m": 0.006114189198097709,
+      "max_abs_a_mps2": 23.033609035305044,
+      "max_abs_residual": 1.0931981871763128,
+      "linear_residual": 6.752088665962219e-09
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "moving-load Newmark integration completed and checks passed"
+}

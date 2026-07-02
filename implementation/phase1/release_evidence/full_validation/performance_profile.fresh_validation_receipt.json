@@ -2,21 +2,21 @@
   "claim_boundary": "Receipt attests that the named lane produced real, freshly-run evidence (reused_evidence=false) and that the runner's own contract checks passed (contract_pass=true, reason_code=PASS). It does not authorize Level 3 promotion, release publication, or any external claim. Promotion, claim-boundary review, and release decisions remain with the human owner.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-23T16:17:42.577760+00:00",
+  "generated_at": "2026-07-02T05:12:08.898873+00:00",
   "input_checksums": {
-    "implementation/phase1/contact_readiness_report.json": "sha256:d7ea68437ef267d48a0a7fa988e38175a6758b92c26af6df05060a63f4ab742f",
-    "implementation/phase1/foundation_soil_link_gate_report.json": "sha256:bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
-    "implementation/phase1/gpu_bottleneck_audit_report.json": "sha256:d3474ec03a8a04df8dd207a702179d7016958f70158313f47c80c0e2871a5ab1",
-    "implementation/phase1/moving_load_integrator_large_report.json": "sha256:1ab74391eb57141fd0e2ae637812bd1070ea61cdcdffd7031e746cbc5476d3ee",
     "implementation/phase1/moving_load_integrator_report.json": "sha256:c9447c168bc9402d060f24890e1c7043e0a2a087ce8fbbab5b9ae8b1021f7496",
-    "implementation/phase1/moving_load_integrator_xlarge_report.json": "sha256:74b6648f55482326a2e771525b7c6e346e7e7e7d9228606c8d8ec10d8f187dff",
     "implementation/phase1/ndtha_long_profile_report.json": "sha256:d9d9af8ffd289a5d9375ae3a4ce4caa7208161157f2c2c700e274d6dbd2a0f90",
     "implementation/phase1/p0_engine_perf_report.json": "sha256:710205fb0891e16c8640cf27faab034d73d864755ad59f04dc4756f47118b9ec",
+    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:adf8958b1d5c3e93c955b773b670997f5f01880cbf9434df6824a1e8524c0d7e",
+    "implementation/phase1/release_evidence/performance/contact_readiness_report.json": "sha256:d7ea68437ef267d48a0a7fa988e38175a6758b92c26af6df05060a63f4ab742f",
+    "implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json": "sha256:bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
+    "implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json": "sha256:d3474ec03a8a04df8dd207a702179d7016958f70158313f47c80c0e2871a5ab1",
+    "implementation/phase1/release_evidence/performance/moving_load_integrator_large_report.json": "sha256:04f3dbf9868411e5094b8caa51c0a9a22686a3a7db753650678526eb0692fb21",
+    "implementation/phase1/release_evidence/performance/moving_load_integrator_xlarge_report.json": "sha256:423f8d284503c90dcad324aa4d560dceec2500d68e098a247e1fc9aa91fd052b",
+    "implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json": "sha256:b2fa4163270480a6dc52dde3829fa07a03da21b690246075af217d3011b0efb6",
+    "implementation/phase1/release_evidence/performance/vti_contact_window_variant_sweep_report.json": "sha256:94b00203735c2dc1168a9ecbf8be1dd01301e5b0bdc70968c1af5a8d0e2721d7",
     "implementation/phase1/run_performance_profiling_gate.py": "sha256:ccd7cf6ac832759ac755a8347375d07f2e2a7ac6bfa04ac2dfe49a0d8fb5efc3",
-    "implementation/phase1/solver_hip_e2e_contract_report.json": "sha256:b1351c13b406990f0be83b713007844149f69c5e87d0b5d3feb8e2859305dabb",
-    "implementation/phase1/ssi_boundary_gate_report.json": "sha256:b2fa4163270480a6dc52dde3829fa07a03da21b690246075af217d3011b0efb6",
     "implementation/phase1/track_lf_solver_report.json": "sha256:8dfa500da4e3824c1601a3a0984f93d4b86e6ce72032b48de946d072d0a2c947",
-    "implementation/phase1/vti_contact_window_variant_sweep_report.json": "sha256:73aaabc5965416c287758b25d615e7d0137ea1ae09f6191e1e20207a4e91e46f",
     "implementation/phase1/vti_coupled_solver_report.json": "sha256:1a558e92871126a2c25bb6286b6597bb0f1ff12ebc25e315098197a55fde22e4"
   },
   "lane_id": "performance_profile",
@@ -25,32 +25,32 @@
     {
       "kind": "gate_report",
       "path": "implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json",
-      "sha256": "sha256:d026f4a785b97eff0eada1c7616c17451ed431c2474840686dec7b8b64ef347f"
+      "sha256": "sha256:c4b9dc9299e46d21487be62b6d0c735261119da8fca71243599ebe6ea2591109"
     },
     {
       "kind": "bottleneck_map",
       "path": "implementation/phase1/release_evidence/performance/performance_bottleneck_map.md",
-      "sha256": "sha256:9a6868b1199361ee87c33616c15dd1e2716aaa2c9dbf968e6b0006b0c3c0d63b"
+      "sha256": "sha256:9ba81bb57fa4b172da3f80b68e75359e581f117964d5c205d9828bd703103911"
     },
     {
       "kind": "sprint_targets",
       "path": "implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json",
-      "sha256": "sha256:edd9569028486706ba0cbd64be82b3cd2ab1891fb874dee07c357cfa02a5454a"
+      "sha256": "sha256:ba878305eb5954b20e24f5803088f1dcf2ba4ec7011cbffaf8a3ba01f6e29f38"
     },
     {
       "kind": "sprint_targets_markdown",
       "path": "implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md",
-      "sha256": "sha256:518c4140825b234a3b5223781596ff0fe8ea28548e188c0d18a7fa832bb263ca"
+      "sha256": "sha256:5b7141fba333a1569c7e343a160f6086a0371cb5636f42187ed96c0c7dbfd324"
     }
   ],
   "reused_evidence": false,
   "runner": "performance_validation",
   "schema_version": "fresh-validation-receipt.v1",
-  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_commit_sha": "9a57a895a782678b6f5b9c6ed6b27c19eda41d51",
   "summary": {
-    "case_count": 7,
-    "duration_seconds": 0.979859,
-    "passed_case_count": 7
+    "case_count": 14,
+    "duration_seconds": 0.920557,
+    "passed_case_count": 14
   },
-  "validation_command": "python3 implementation/phase1/run_performance_profiling_gate.py --out implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json --bottleneck-map-md implementation/phase1/release_evidence/performance/performance_bottleneck_map.md --sprint-targets-json implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json --sprint-targets-md implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md"
+  "validation_command": "python3 implementation/phase1/run_performance_profiling_gate.py --p0-engine-perf-report implementation/phase1/p0_engine_perf_report.json --gpu-bottleneck-audit-report implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json --ndtha-long-profile-report implementation/phase1/ndtha_long_profile_report.json --track-lf-solver-report implementation/phase1/track_lf_solver_report.json --moving-load-integrator-report implementation/phase1/moving_load_integrator_report.json --moving-load-integrator-large-report implementation/phase1/release_evidence/performance/moving_load_integrator_large_report.json --moving-load-integrator-xlarge-report implementation/phase1/release_evidence/performance/moving_load_integrator_xlarge_report.json --vti-coupled-solver-report implementation/phase1/vti_coupled_solver_report.json --vti-contact-window-variant-sweep-report implementation/phase1/release_evidence/performance/vti_contact_window_variant_sweep_report.json --ssi-boundary-report implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json --contact-readiness-report implementation/phase1/release_evidence/performance/contact_readiness_report.json --foundation-soil-link-report implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json --solver-hip-e2e-report implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json --out implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json --bottleneck-map-md implementation/phase1/release_evidence/performance/performance_bottleneck_map.md --sprint-targets-json implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json --sprint-targets-md implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md"
 }

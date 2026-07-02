@@ -1,7 +1,7 @@
 # Performance Bottleneck Map
 
-- `summary`: `Performance profiling: PASS | ndtha=106.34s(solver=92.93,state=7.81,iface=5.12,halo=0.47) | ssi_contact=160steps/1.01iters/newton=0/zero_gap_skip=1.00/pairs=290:354/sweep=4/4 | moving_load=warm=0.001/0.001s,steady=0.001/0.001s,scale=0.619/1.226/2.464s | gpu_host_ops=2 unavoidable/0 optimizable | sprint=3(ndtha_partitioned_runtime,ssi_contact_convergence_path,moving_load_kernel_warmup_observability)`
-- `generated_at`: `2026-06-23T16:17:42.499522+00:00`
+- `summary`: `Performance profiling: PASS | ndtha=106.34s(solver=92.93,state=7.81,iface=5.12,halo=0.47) | ssi_contact=160steps/1.01iters/newton=0/zero_gap_skip=1.00/pairs=290:354/sweep=4/4 | moving_load=warm=0.001/0.001s,steady=0.001/0.001s,scale=0.619/1.246/2.505s | gpu_host_ops=2 unavoidable/0 optimizable | sprint=3(ndtha_partitioned_runtime,ssi_contact_convergence_path,moving_load_kernel_warmup_observability)`
+- `generated_at`: `2026-07-02T05:12:08.847890+00:00`
 
 ## Baseline
 
@@ -26,9 +26,9 @@
 | SSI/contact stable zero-gap skip ratio | 1.000 |
 | SSI/contact variant sweep pass | 4/4 |
 | SSI/contact variant sweep zero-gap | 4/4 |
-| SSI/contact variant sweep pruned | 4/4 |
-| SSI/contact variant zero-gap range | 1.000-1.000 |
-| SSI/contact variant pruned range | 0.211-0.460 |
+| SSI/contact variant sweep pruned | 1/4 |
+| SSI/contact variant zero-gap range | 0.948-0.979 |
+| SSI/contact variant pruned range | 0.000-0.182 |
 | Moving-load Euler elapsed | 0.001316s |
 | Moving-load Timoshenko elapsed | 0.001360s |
 | Moving-load warmup skew | 1.108x |
@@ -40,8 +40,8 @@
 | Moving-load active axle mean | 3.438 |
 | Moving-load sparse-step ratio | 0.000 |
 | Moving-load integrator elapsed | 0.619326s |
-| Moving-load large elapsed | 1.226361s |
-| Moving-load xlarge elapsed | 2.463841s |
+| Moving-load large elapsed | 1.246049s |
+| Moving-load xlarge elapsed | 2.505040s |
 | Moving-load large cached inverse | True |
 | Moving-load xlarge cached inverse | True |
 | VTI elapsed | 0.044577s |
@@ -71,7 +71,7 @@
   - `retry_attempt_count_mean`: `0.0`
   - `retry_attempts_per_completed_step_mean`: `0.0`
   - `peak_vram_mb_mean`: `0.0`
-  - `hip_kernel_invocation_count_total`: `848`
+  - `hip_kernel_invocation_count_total`: `883`
 - `first_actions`:
   - Use the new solver/state-update/interface split to isolate the dominant portion of step solve time.
   - Apply Jacobian/stiffness reuse only if solver time dominates the new split.
@@ -104,11 +104,11 @@
   - `variant_sweep_pass_count`: `4`
   - `variant_sweep_zero_gap_positive_count`: `4`
   - `variant_sweep_retained_force_positive_count`: `0`
-  - `variant_sweep_track_static_pruned_positive_count`: `4`
-  - `variant_sweep_zero_gap_skip_ratio_min`: `1.0`
-  - `variant_sweep_zero_gap_skip_ratio_max`: `1.0`
-  - `variant_sweep_track_static_pruned_ratio_min`: `0.2111801242236025`
-  - `variant_sweep_track_static_pruned_ratio_max`: `0.45962732919254656`
+  - `variant_sweep_track_static_pruned_positive_count`: `1`
+  - `variant_sweep_zero_gap_skip_ratio_min`: `0.9478260869565217`
+  - `variant_sweep_zero_gap_skip_ratio_max`: `0.9786856127886323`
+  - `variant_sweep_track_static_pruned_ratio_min`: `0.0`
+  - `variant_sweep_track_static_pruned_ratio_max`: `0.18232044198895028`
   - `residual_settle_case_count`: `4`
   - `contact_converged_ratio`: `0.99375`
 - `first_actions`:
@@ -139,11 +139,11 @@
   - `steady_state_skew_ratio`: `1.209732348138949`
   - `moving_load_integrator_elapsed_seconds`: `0.6193264630001067`
   - `moving_load_integrator_time_steps_per_second`: `775.0355082113088`
-  - `moving_load_large_elapsed_seconds`: `1.2263612499991723`
-  - `moving_load_large_time_steps_per_second`: `391.401799429266`
+  - `moving_load_large_elapsed_seconds`: `1.2460488920041826`
+  - `moving_load_large_time_steps_per_second`: `770.4352583275502`
   - `moving_load_large_cached_track_solve_inverse_enabled`: `True`
-  - `moving_load_xlarge_elapsed_seconds`: `2.4638405079986114`
-  - `moving_load_xlarge_time_steps_per_second`: `194.81780514677314`
+  - `moving_load_xlarge_elapsed_seconds`: `2.5050403800269123`
+  - `moving_load_xlarge_time_steps_per_second`: `766.454710793673`
   - `moving_load_xlarge_cached_track_solve_inverse_enabled`: `True`
   - `moving_load_active_axle_count_mean`: `3.4375`
   - `moving_load_sparse_contact_step_ratio`: `0.0`
