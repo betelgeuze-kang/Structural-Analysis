@@ -19,7 +19,7 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 65.4,
-  "generated_at": "2026-07-02T13:50:10.332661+00:00",
+  "generated_at": "2026-07-02T13:52:11.961920+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:1d4666f87685b3d8f4cbcd9deeaded31d62d138ce7b27199fdcbdd643ef60c4c",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:0fa577808f940eb817ba77dafb41aecb6d2302111b44960ab217035515f2edc4",
@@ -499,7 +499,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "03c713687b0c115678ec8db754bde9eb26c4eb88",
+  "source_commit_sha": "6a5d7740602f271541ccf5ddc3f23bee72e170cc",
   "stage_average_progress_percent": 55.3,
   "stage_count": 8,
   "status": "blocked",
