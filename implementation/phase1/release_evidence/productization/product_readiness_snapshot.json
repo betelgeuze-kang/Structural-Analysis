@@ -2844,7 +2844,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T01:56:07.663527+00:00",
+  "generated_at": "2026-07-02T01:57:28.425687+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2870,7 +2870,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8fed7eb722cacc577adc08e66463c691f7cf346fa24b483784e0f75173a2797d",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:10718e8da4e3afd0aaedc568cfaa0afec550db42cd391ded820a4e3d7a8ccacb",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0d209fa5c329a9fdd43f7ebf9bcd6e21a92b5fccc08bcd08f6ff921731bb25a5",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:74442161282fa31da789bd335158452591b4e32efda29ad2609de9d8446e7f05",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:9f423ab3ad34581df4638ba47c3c484ebef4756fe3dc5ece48cf73e39c91ca9e",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:835ddc941322369fc1475716358f15a05aebfdb45f3b45165dbeba86a36dcdba",
@@ -3174,7 +3174,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "1b111cce093ecabec5109d4b1fcb6356c0e14111",
+  "source_commit_sha": "930c306025d89720d7c1db443172860455ff4e22",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3264,12 +3264,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T01:54:13.542939+00:00",
+        "generated_at": "2026-07-02T01:57:28.201956+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "1b111cce093ecabec5109d4b1fcb6356c0e14111",
+        "source_commit_sha": "930c306025d89720d7c1db443172860455ff4e22",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -4444,11 +4444,8 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "README.md",
-        "docs/commercialization-gap-current-state.md",
         "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4473,11 +4470,8 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M README.md",
-        " M docs/commercialization-gap-current-state.md",
         " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       ]
     }
   },
