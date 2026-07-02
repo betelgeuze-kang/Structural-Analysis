@@ -243,6 +243,52 @@ def _group_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [groups[key] for key in sorted(groups)]
 
 
+def _release_surface_owner_review_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    release_rows = sorted(
+        [row for row in rows if _text(row.get("path_area")) == "release_surface"],
+        key=lambda item: _text(item.get("path")),
+    )
+    pending_rows = [
+        row for row in release_rows if row.get("owner_decision_valid") is not True
+    ]
+    recorded_rows = [
+        row for row in release_rows if row.get("owner_decision_valid") is True
+    ]
+    cleanup_pending_rows = [
+        row for row in release_rows if row.get("post_decision_cleanup_pending") is True
+    ]
+    retain_exception_rows = [
+        row
+        for row in release_rows
+        if _text(row.get("owner_decision"))
+        == "retain_quarantined_with_signed_owner_exception"
+    ]
+    return {
+        "path_count": len(release_rows),
+        "paths": [row["path"] for row in release_rows],
+        "owner_decision_required_count": len(pending_rows),
+        "owner_decision_required_paths": [row["path"] for row in pending_rows],
+        "owner_decision_recorded_count": len(recorded_rows),
+        "owner_decision_recorded_paths": [row["path"] for row in recorded_rows],
+        "post_decision_cleanup_pending_count": len(cleanup_pending_rows),
+        "post_decision_cleanup_pending_paths": [
+            row["path"] for row in cleanup_pending_rows
+        ],
+        "retain_exception_count": len(retain_exception_rows),
+        "retain_exception_paths": [row["path"] for row in retain_exception_rows],
+        "allowed_owner_decisions": list(RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS),
+        "retain_quarantined_exception_allowed": False,
+        "recommended_owner_decision_primary": "delete_from_structural_repository",
+        "recommended_owner_decision_alternate": (
+            "extract_to_molecular_or_science_repository"
+        ),
+        "review_goal": (
+            "record owner delete/extract decisions for release-surface "
+            "non-structural artifacts before any manual cleanup"
+        ),
+    }
+
+
 def _decision_rows(payload: dict[str, Any]) -> list[dict[str, Any]]:
     rows = payload.get("decision_rows")
     if not isinstance(rows, list):
@@ -639,6 +685,7 @@ def build_owner_review_packet(
     post_decision_cleanup_pending_count = sum(
         1 for row in review_rows if row.get("post_decision_cleanup_pending") is True
     )
+    release_surface_owner_review = _release_surface_owner_review_summary(review_rows)
     packet_complete = bool(audit and manifest and not blockers)
     evidence_closure_pass = bool(
         packet_complete
@@ -735,6 +782,22 @@ def build_owner_review_packet(
         "unquarantined_non_structural_path_count": len(unquarantined_rows),
         "path_area_counts": _counts_by_key(review_rows, "path_area"),
         "family_counts": _family_counts(review_rows),
+        "release_surface_owner_review": release_surface_owner_review,
+        "release_surface_path_count": release_surface_owner_review["path_count"],
+        "release_surface_paths": release_surface_owner_review["paths"],
+        "release_surface_owner_decision_required_count": (
+            release_surface_owner_review["owner_decision_required_count"]
+        ),
+        "release_surface_owner_decision_required_paths": (
+            release_surface_owner_review["owner_decision_required_paths"]
+        ),
+        "release_surface_post_decision_cleanup_pending_count": (
+            release_surface_owner_review["post_decision_cleanup_pending_count"]
+        ),
+        "release_surface_allowed_owner_decisions": list(
+            RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+        ),
+        "release_surface_retain_quarantined_exception_allowed": False,
         "review_group_count": len(_group_rows(review_rows)),
         "review_groups": _group_rows(review_rows),
         "allowed_owner_decisions": list(ALLOWED_OWNER_DECISIONS),
@@ -797,14 +860,43 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `post_decision_cleanup_applied_count`: `{payload['post_decision_cleanup_applied_count']}`",
         f"- `post_decision_cleanup_missing_owner_decision_count`: `{payload['post_decision_cleanup_missing_owner_decision_count']}`",
         f"- `release_surface_excluded_path_count`: `{payload['release_surface_excluded_path_count']}`",
+        f"- `release_surface_path_count`: `{payload['release_surface_path_count']}`",
+        f"- `release_surface_owner_decision_required_count`: `{payload['release_surface_owner_decision_required_count']}`",
+        f"- `release_surface_post_decision_cleanup_pending_count`: `{payload['release_surface_post_decision_cleanup_pending_count']}`",
         f"- `unquarantined_non_structural_path_count`: `{payload['unquarantined_non_structural_path_count']}`",
         f"- `owner_decisions_path`: `{payload['owner_decisions']['path']}`",
         "",
+        "## Release Surface First",
+        "",
+        f"- `allowed_owner_decisions`: `{', '.join(payload['release_surface_allowed_owner_decisions'])}`",
+        (
+            "- `retain_quarantined_with_signed_owner_exception_allowed`: "
+            f"`{payload['release_surface_retain_quarantined_exception_allowed']}`"
+        ),
+        "",
+        "| Path | State | Owner Decision | Required Action |",
+        "|---|---|---|---|",
+    ]
+    release_surface_paths = set(payload["release_surface_paths"])
+    for row in payload["review_rows"]:
+        if row["path"] not in release_surface_paths:
+            continue
+        lines.append(
+            "| "
+            f"`{row['path']}` | "
+            f"`{row['owner_review_state']}` | "
+            f"`{row['owner_decision']}` | "
+            "`delete_or_extract_before_release_surface_cleanup` |"
+        )
+    lines.extend(
+        [
+            "",
         "## Review Groups",
         "",
         "| Family | Area | Paths | Recommended Decision |",
         "|---|---|---:|---|",
-    ]
+        ]
+    )
     for group in payload["review_groups"]:
         lines.append(
             "| "

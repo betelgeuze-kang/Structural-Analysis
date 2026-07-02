@@ -152,6 +152,14 @@ def test_owner_review_packet_groups_quarantined_paths(tmp_path: Path) -> None:
         "implementation_phase1": 1,
         "productization_evidence": 1,
     }
+    assert payload["release_surface_path_count"] == 0
+    assert payload["release_surface_paths"] == []
+    assert payload["release_surface_owner_decision_required_count"] == 0
+    assert payload["release_surface_owner_decision_required_paths"] == []
+    assert payload["release_surface_allowed_owner_decisions"] == list(
+        owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+    )
+    assert payload["release_surface_retain_quarantined_exception_allowed"] is False
     rows = {row["path"]: row for row in payload["review_rows"]}
     assert rows["implementation/phase1/md3bead_soa.py"]["structural_release_claim_eligible"] is False
     assert rows["implementation/phase1/md3bead_soa.py"]["owner_review_state"] == "pending_owner_decision"
@@ -444,6 +452,18 @@ def test_owner_review_packet_rejects_release_surface_retain_exception(
         "owner_decisions_release_surface_retain_exception_count=1"
         in result["closure_blockers"]
     )
+    assert result["release_surface_path_count"] == 1
+    assert result["release_surface_paths"] == [release_surface_path]
+    assert result["release_surface_owner_decision_required_count"] == 1
+    assert result["release_surface_owner_decision_required_paths"] == [
+        release_surface_path
+    ]
+    assert result["release_surface_post_decision_cleanup_pending_count"] == 0
+    assert result["release_surface_allowed_owner_decisions"] == list(
+        owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+    )
+    assert result["release_surface_retain_quarantined_exception_allowed"] is False
+    assert result["release_surface_owner_review"]["retain_exception_count"] == 1
     assert rows[release_surface_path]["allowed_owner_decisions"] == list(
         owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
     )
@@ -531,6 +551,8 @@ def test_owner_review_packet_writes_json_and_markdown(tmp_path: Path) -> None:
     )
     markdown = out_md.read_text(encoding="utf-8")
     assert "# Structural Scope Owner Review Packet" in markdown
+    assert "## Release Surface First" in markdown
+    assert "release_surface_owner_decision_required_count" in markdown
     assert "implementation/phase1/md3bead_soa.py" in markdown
 
 
