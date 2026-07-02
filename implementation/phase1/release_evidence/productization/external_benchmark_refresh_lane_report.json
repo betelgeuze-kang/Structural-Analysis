@@ -1,6 +1,6 @@
 {
   "schema_version": "external-benchmark-refresh-lane.v1",
-  "generated_at": "2026-06-23T16:51:28.172909+00:00",
+  "generated_at": "2026-07-02T12:25:53.803985+00:00",
   "contract_pass": true,
   "reason_code": "PASS_EXTERNAL_BENCHMARK_REFRESH_LANE",
   "blockers": [],

@@ -1,8 +1,8 @@
 {
-  "claim_boundary": "This receipt attests only that a safe local external benchmark refresh runner regenerated the execution status manifest from checked-in execution manifest and completed updates and still reports execution_complete_no_fail for the 10 hardest external benchmark tasks. It does not re-run or submit external benchmarks, assert final external V&V or authority acceptance, close EB receipts, or promote Level 3/readiness on its own.",
+  "claim_boundary": "Receipt attests that the named lane produced real, freshly-run evidence (reused_evidence=false) and that the runner's own contract checks passed (contract_pass=true, reason_code=PASS). It does not authorize Level 3 promotion, release publication, or any external claim. Promotion, claim-boundary review, and release decisions remain with the human owner.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-23T16:51:28.183255+00:00",
+  "generated_at": "2026-07-02T12:25:53.809150+00:00",
   "input_checksums": {
     "implementation/phase1/generate_external_benchmark_execution_status_manifest.py": "sha256:63170b07caebac3629396242011e0739159af4d5e003a0d0bec083a3e59c10f7",
     "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json": "sha256:707a3a3f45488486d51a8f94d6d1465ba9803acd376b9534932e3bf6c14a4e66",
@@ -21,26 +21,26 @@
     {
       "kind": "execution_status_manifest",
       "path": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
-      "sha256": "sha256:430033195d5de60ed9c0108804b82438387b988404352897d317f74bb768d0b3"
+      "sha256": "sha256:3f3e3716799f0b71948da4da340ba38e0a6355963d34582862bc361ae357d13d"
     },
     {
       "kind": "execution_status_manifest_md",
       "path": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
-      "sha256": "sha256:f78694a588c356a969456dccd1bca93ba50470e45e9dbdc8d2dd6e43adfd342d"
+      "sha256": "sha256:b37abe0f156eb2fc9bf5daa9b10a9247ed6ca43708e74e5a9074e069982c5be7"
     },
     {
       "kind": "external_benchmark_refresh_lane_report",
       "path": "implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json",
-      "sha256": "sha256:48db33528d98acffeccd11b7357d9deb606ca966b5647a52519cf7cecbc6c726"
+      "sha256": "sha256:a3744e888c79801396460ba0219471233d7215b6f38f09be7d46ed54777ee5d2"
     }
   ],
   "reused_evidence": false,
   "runner": "benchmark_productization_validation",
   "schema_version": "fresh-validation-receipt.v1",
-  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_commit_sha": "b0f7c83253936abe8041cbc2b027363ac3febff0",
   "summary": {
     "case_count": 10,
-    "duration_seconds": 0.035508,
+    "duration_seconds": 0.035144,
     "passed_case_count": 10
   },
   "validation_command": "python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json"

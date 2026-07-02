@@ -1,7 +1,7 @@
 # Performance Bottleneck Map
 
-- `summary`: `Performance profiling: PASS | ndtha=106.34s(solver=92.93,state=7.81,iface=5.12,halo=0.47) | ssi_contact=160steps/1.01iters/newton=0/zero_gap_skip=1.00/pairs=290:354/sweep=4/4 | moving_load=warm=0.001/0.001s,steady=0.001/0.001s,scale=0.619/1.246/2.505s | gpu_host_ops=2 unavoidable/0 optimizable | sprint=3(ndtha_partitioned_runtime,ssi_contact_convergence_path,moving_load_kernel_warmup_observability)`
-- `generated_at`: `2026-07-02T05:12:08.847890+00:00`
+- `summary`: `Performance profiling: PASS | ndtha=106.34s(solver=92.93,state=7.81,iface=5.12,halo=0.47) | ssi_contact=160steps/1.01iters/newton=0/zero_gap_skip=1.00/pairs=290:354/sweep=4/4 | moving_load=warm=0.002/0.002s,steady=0.002/0.002s,scale=0.619/1.246/2.505s | gpu_host_ops=2 unavoidable/0 optimizable | sprint=3(ndtha_partitioned_runtime,ssi_contact_convergence_path,moving_load_kernel_warmup_observability)`
+- `generated_at`: `2026-07-02T12:31:54.329822+00:00`
 
 ## Baseline
 
@@ -29,13 +29,13 @@
 | SSI/contact variant sweep pruned | 1/4 |
 | SSI/contact variant zero-gap range | 0.948-0.979 |
 | SSI/contact variant pruned range | 0.000-0.182 |
-| Moving-load Euler elapsed | 0.001316s |
-| Moving-load Timoshenko elapsed | 0.001360s |
-| Moving-load warmup skew | 1.108x |
-| Moving-load Euler warm-up | 0.000757s |
-| Moving-load Timoshenko warm-up | 0.000683s |
-| Moving-load Euler steady-state | 0.000560s |
-| Moving-load Timoshenko steady-state | 0.000677s |
+| Moving-load Euler elapsed | 0.003619s |
+| Moving-load Timoshenko elapsed | 0.003592s |
+| Moving-load warmup skew | 1.017x |
+| Moving-load Euler warm-up | 0.001822s |
+| Moving-load Timoshenko warm-up | 0.001791s |
+| Moving-load Euler steady-state | 0.001797s |
+| Moving-load Timoshenko steady-state | 0.001801s |
 | Moving-load fast path | True |
 | Moving-load active axle mean | 3.438 |
 | Moving-load sparse-step ratio | 0.000 |
@@ -71,7 +71,7 @@
   - `retry_attempt_count_mean`: `0.0`
   - `retry_attempts_per_completed_step_mean`: `0.0`
   - `peak_vram_mb_mean`: `0.0`
-  - `hip_kernel_invocation_count_total`: `883`
+  - `hip_kernel_invocation_count_total`: `0`
 - `first_actions`:
   - Use the new solver/state-update/interface split to isolate the dominant portion of step solve time.
   - Apply Jacobian/stiffness reuse only if solver time dominates the new split.
@@ -128,15 +128,15 @@
 - `headline`: Moving-load runtime observability is now coarse-grained, but warm-up skew and missing stage-level timers still block fast optimization loops.
 - `optimization_hypothesis`: Warm-up and steady-state timers are now separated and the benchmark fast path is active, so the next gain is to keep the first-kernel path cheap while optimizing the steady-state moving-load path independently.
 - `evidence`: 
-  - `track_euler_elapsed_seconds`: `0.001316345999839541`
-  - `track_timoshenko_elapsed_seconds`: `0.0013601470004687144`
-  - `track_euler_warmup_elapsed_seconds`: `0.0007566660001430137`
-  - `track_timoshenko_warmup_elapsed_seconds`: `0.0006830840002294281`
-  - `track_euler_steady_state_elapsed_seconds`: `0.0005596799996965274`
-  - `track_timoshenko_steady_state_elapsed_seconds`: `0.0006770630002392863`
+  - `track_euler_elapsed_seconds`: `0.00361876399256289`
+  - `track_timoshenko_elapsed_seconds`: `0.003592083987314254`
+  - `track_euler_warmup_elapsed_seconds`: `0.0018219070043414831`
+  - `track_timoshenko_warmup_elapsed_seconds`: `0.0017909170128405094`
+  - `track_euler_steady_state_elapsed_seconds`: `0.001796856988221407`
+  - `track_timoshenko_steady_state_elapsed_seconds`: `0.0018011669744737446`
   - `benchmark_fast_path_enabled`: `True`
-  - `warmup_skew_ratio`: `1.1077202802127872`
-  - `steady_state_skew_ratio`: `1.209732348138949`
+  - `warmup_skew_ratio`: `1.0173039796253995`
+  - `steady_state_skew_ratio`: `1.0023986250884684`
   - `moving_load_integrator_elapsed_seconds`: `0.6193264630001067`
   - `moving_load_integrator_time_steps_per_second`: `775.0355082113088`
   - `moving_load_large_elapsed_seconds`: `1.2460488920041826`

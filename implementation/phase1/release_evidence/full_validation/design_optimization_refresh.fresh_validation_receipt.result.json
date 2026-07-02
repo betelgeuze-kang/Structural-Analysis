@@ -2,7 +2,7 @@
   "blockers": [],
   "command_result": {
     "returncode": 0,
-    "stderr_tail": "",
+    "stderr_tail": "   Compiling structural_runtime_ffi v0.1.0 (/home/betelgeuze/건축구조분석/implementation/phase1/structural_runtime_ffi)\n    Finished `release` profile [optimized] target(s) in 0.37s\n",
     "stdout_tail": "Wrote long design optimization solver loop report: /home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json\n"
   },
   "contract_pass": true,

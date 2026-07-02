@@ -15,9 +15,9 @@
 - `commercial_solver_gap_ready`: `False`
 - `ai_engine_gap_ready`: `False`
 - `release_allowed`: `False`
-- `blocked_release_count`: `7`
+- `blocked_release_count`: `8`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `23`
+- `operator_action_count`: `16`
 - `approval_token_count`: `7`
 - `stale_artifact_count`: `0`
 - `evidence_surface_count`: `8`
@@ -51,4 +51,4 @@
 | ux UX | blocked | human_new_user_observation_missing_or_failed, human_new_user_30min_sample_evidence_missing |
 | support Support | pass | none |
 | security Security | blocked | license_status_not_configured |
-| github_sync GitHub Development Sync | blocked | github_sync_remote_sync_pending, github_sync_preflight_not_synced |
+| github_sync GitHub Development Sync | blocked | github_sync_preflight::worktree_not_clean, github_sync_remote_sync_pending, github_sync_preflight_not_synced |
