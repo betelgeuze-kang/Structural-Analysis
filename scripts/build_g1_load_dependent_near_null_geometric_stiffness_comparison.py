@@ -362,6 +362,7 @@ def build_comparison(
         **release_evidence_metadata(
             input_paths=[
                 Path("scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py"),
+                Path("scripts/build_g1_load_dependent_near_null_packet.py"),
                 f2h_status_path,
                 f2h_continuation_path,
                 f2g_audit_path,
