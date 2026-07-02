@@ -28,11 +28,11 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T04:46:42.300127+00:00",
+  "generated_at": "2026-07-02T04:48:03.965465+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:f5f2e7f0086e77af946238f5fb00d0ad2bc32b89da2a2a6ce537c72d5f87af21",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:2b86a34a327cf23d297c33477721543a32832f0c9952a5c0bd270c82e7ae698f",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:ef3b4cf0eb1739a62ed216929782f2da78b034d40108e1a33c51f8d87c289241",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:dd30bf5f6738916e225f3c30360031c3e103fa37aa00b697fc38eec28fc94198",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9a75f30c000fe05713ab0ebfc8b56c1de5fcddde2857b8b768144c0da1503217",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:04a9192b6ec8162812cb7a7415761ab188710522404e75bc9730cf4aa0dbb26b",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:a916d9965090d7a7a6814a6c9bca8f6da9e4aadbbaaadd3f4415cd7f24037523",
@@ -3458,7 +3458,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "5f5276bc17e8f7f2a93215183d04ea46b14581c3",
+  "source_commit_sha": "cec44f6450874e561a2a41c4b62d8088a08f31fb",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,
