@@ -12,8 +12,12 @@ def test_ci_runs_source_boundary_inventory_as_a_candidate_gate() -> None:
 
     assert "PR quality gate" in workflow
     assert "scripts/verify_quality_gate.py --mode pr" in workflow
+    assert "group: ci-${{ github.workflow }}-${{ github.ref }}" in workflow
+    assert "cancel-in-progress: true" in workflow
     assert "Full quality gate" in nightly
     assert "scripts/verify_quality_gate.py --mode full" in nightly
+    assert "group: nightly-full-quality-${{ github.ref }}" in nightly
+    assert "cancel-in-progress: true" in nightly
 
     gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
     assert "scripts/plan_source_boundary_cleanup.py" in gate
