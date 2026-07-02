@@ -16,6 +16,11 @@
     "workstation_delivery_readiness": "implementation/phase1/workstation_delivery_readiness.json"
   },
   "blockers": [
+    "P0 release and core evidence::p0_release_publication_open",
+    "P1 validation and benchmark breadth::p1_inputs_not_ready",
+    "P1 validation and benchmark breadth::p1_execution_blocked",
+    "P1 validation and benchmark breadth::p1_benchmark_breadth_not_ready",
+    "P1 validation and benchmark breadth::p1_benchmark_execution_blocked",
     "Strict external and residual holdout evidence::external_receipt_or_closure_pending:hardest_external_10case",
     "Strict external and residual holdout evidence::external_receipt_or_closure_pending:korean_public_structures",
     "Strict external and residual holdout evidence::external_receipt_or_closure_pending:peer_spd_hinge",
@@ -28,23 +33,30 @@
   "full_autonomous_replacement_ready": false,
   "gates": [
     {
-      "blockers": [],
+      "blockers": [
+        "p0_release_publication_open"
+      ],
       "core_evidence_closed": true,
       "label": "P0 release and core evidence",
-      "ok": true,
-      "p0_closed": true,
-      "release_publication_closed": true,
-      "status": "ready"
+      "ok": false,
+      "p0_closed": false,
+      "release_publication_closed": false,
+      "status": "blocked"
     },
     {
-      "benchmark_breadth_inputs_ready": true,
-      "blockers": [],
+      "benchmark_breadth_inputs_ready": false,
+      "blockers": [
+        "p1_inputs_not_ready",
+        "p1_execution_blocked",
+        "p1_benchmark_breadth_not_ready",
+        "p1_benchmark_execution_blocked"
+      ],
       "label": "P1 validation and benchmark breadth",
-      "ok": true,
-      "p1_benchmark_execution_unblocked": true,
-      "p1_execution_unblocked": true,
-      "p1_inputs_ready": true,
-      "status": "ready"
+      "ok": false,
+      "p1_benchmark_execution_unblocked": false,
+      "p1_execution_unblocked": false,
+      "p1_inputs_ready": false,
+      "status": "blocked"
     },
     {
       "blockers": [
@@ -119,8 +131,8 @@
       "status": "ready"
     },
     {
-      "allowlisted_files": 21,
-      "allowlisted_mib": 608.017,
+      "allowlisted_files": 20,
+      "allowlisted_mib": 299.528,
       "blockers": [],
       "candidate_files": 0,
       "label": "Source boundary and artifact footprint",
@@ -128,12 +140,12 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-07-01T07:47:42.127607+00:00",
+  "generated_at": "2026-07-02T05:40:42.398056+00:00",
   "independent_commercial_product_ready": false,
   "input_checksums": {
-    "README.md": "sha256:00b5fed28e18fd581bfc85fbba1a8bd808cbb5857dd6835f496bd0abbd84ee35",
+    "README.md": "sha256:c0c15974ad2a13b120230871a0403fa4bdf033e47912fa4ca54e1a282dc221b7",
     "docs/architecture-definition-document.md": "sha256:69aadd156758df4429bcc0d223f68f115818c6bff8239550043cd0e840748222",
-    "docs/commercialization-gap-current-state.md": "sha256:ada26d77e07ed56ac4b711032acf6ed778c56fcca43efc5fac7307dd157b3505",
+    "docs/commercialization-gap-current-state.md": "sha256:0daf4e8cbf5d8c4fe1fb6e24a0671e4857ee3a8d5ce295fa64e7739305224c0f",
     "docs/commercialization-improvement-priority-assessment.md": "sha256:c4ae5576d72aac533864aad1e6ca926ae325e981c566ea08901e50f91e70298a",
     "docs/independent-commercial-productization-plan.md": "sha256:739f2c5ff437dc3e2cb8131177a9d6f22d632fa788decab829be197219b11537",
     "docs/production-ops-security.md": "sha256:f83f3482d42d11a62c615659f5050e7e8f2dd5b603ff29208331129b2354a21f",
@@ -144,27 +156,27 @@
     "implementation/phase1/production_runtime_packaging_manifest.json": "sha256:9b76649f947ec13ab53e248f181735ddede6d900c60ac0573a030534c2f2d958",
     "implementation/phase1/project_ops_api_service.py": "sha256:a8b316fa8a7f7c28ab51752137d11891cf3b3c69978febddc3d1a50d7a8ea80b",
     "implementation/phase1/project_ops_deployment_drill_manifest.json": "sha256:9de92a86a0a414b222d4b6724a9ce54da33e31ea9fd5859f66194e289d0fa1c5",
-    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:43bcf6304589ae4a66cf3330d423689a79848824ddf99a29c30acf88439f6dff",
-    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:b3110c59559f8a4b977412fba82ecc6e6ee5a6f18d5c4d8123d6a489ddf755a3",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:f071d2394be667a073f460a907c8c71bb627beb7f245ffbcf745ac704bae3c04",
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:a18b2fd0075876d6a8bc3205f18138cf7b231cafcd11664c67e80038e0e7e2f4",
     "implementation/phase1/source_boundary_allowlist.json": "sha256:3fe8d06bc0118b4ceb92498b3250657d964cc60ce00f420569938f860e18a507",
     "implementation/phase1/structure_viewer_browser_performance_probe.json": "sha256:bf7c000487aee9b46112110b3b8a3f65e43806babd3e96b44bc4e3ffafba64d4",
     "implementation/phase1/structure_viewer_performance_budget_manifest.json": "sha256:812cb97ff4be17e3fefe7c6c5aec9ada413974a91f3bd3df5e4c61351f939996",
     "implementation/phase1/structure_viewer_visual_regression_baseline.json": "sha256:70908d83636063c26f0fb0136f928365e0fca2dc826dcefa44efffe8dc1b6503",
-    "implementation/phase1/support_bundle_manifest.json": "sha256:de94b1b97b4ce08e1733fc39a5a2ad662eb11b47fd05328cfacf0412bda72463",
-    "implementation/phase1/workstation_delivery_readiness.json": "sha256:70b17342ca14c247a8eab30e58a298eed93f1baee7c4a4f5a0cee931484bf95f",
+    "implementation/phase1/support_bundle_manifest.json": "sha256:080b20c4279f66d3eebd3d82047cf6cf25c3202103715b881116a6799e453281",
+    "implementation/phase1/workstation_delivery_readiness.json": "sha256:e0d5c3f8830e73b6e83fa98ddc817850e760efefe9f5cc6090beb9e0ac4a930c",
     "implementation/phase1/zero_copy_real_probe_report_strict.json": "sha256:00befd00a5c44e17d02b5f89dd94d59983ac71208fa976e13326ce0170463884"
   },
   "next_actions": [
     "Fill and validate the P1 evidence intake manifest before building EB sidecars.",
     "Attach real EB receipt URL/path for all four external benchmark lanes."
   ],
-  "readiness_score": 80.0,
+  "readiness_score": 50.0,
   "recommended_claim": "Commercial engineer-in-loop acceleration for 95-99% repeated workflows; not a full autonomous commercial replacement.",
   "reused_evidence": false,
   "schema_version": "independent-commercial-product-readiness.v1",
-  "source_commit_sha": "7df90e6e6b4c592260b13ca9aa104af31285a5a6",
+  "source_commit_sha": "b4e599b73222114f5c7b7537235e5552381ebafe",
   "status": "blocked",
-  "summary_line": "Independent commercial product readiness: BLOCKED | score=80.0/100 | full_autonomous_replacement_ready=False",
+  "summary_line": "Independent commercial product readiness: BLOCKED | score=50.0/100 | full_autonomous_replacement_ready=False",
   "workstation_delivery_service": {
     "blockers": [],
     "claim_boundary": {
