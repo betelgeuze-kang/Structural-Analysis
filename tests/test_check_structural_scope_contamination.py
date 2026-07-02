@@ -253,6 +253,15 @@ def test_scope_audit_blocks_release_surface_text_leak(tmp_path: Path) -> None:
         "release_surface_text_non_structural_token_path_count=1"
         in payload["blockers"]
     )
+    assert payload["release_surface_quarantine_boundary"]["status"] == (
+        "blocked_release_surface_text_leak"
+    )
+    assert payload["release_surface_quarantine_boundary"][
+        "structural_release_surface_text_leak_path_count"
+    ] == 1
+    assert payload["release_surface_quarantine_boundary"][
+        "quarantined_paths_claim_eligible"
+    ] is False
     assert payload["next_actions"] == [
         "remove_non_structural_tokens_from_structural_release_surface_outputs",
         "regenerate_release_freshness_pm_snapshot_after_scope_cleanup",
@@ -346,6 +355,33 @@ def test_scope_audit_skips_quarantined_release_surface_text_guard(tmp_path: Path
             "gpcr_hard_decoy_evidence_surface.json"
         )
     ]
+    assert payload["release_surface_quarantine_boundary"] == {
+        "schema_version": (
+            "structural-scope-release-surface-quarantine-boundary.v1"
+        ),
+        "status": "quarantined_paths_excluded_pending_owner_cleanup",
+        "structural_release_surface_text_guard_path_count": 0,
+        "structural_release_surface_text_leak_path_count": 0,
+        "quarantined_release_surface_path_count": 1,
+        "quarantined_release_surface_paths": [
+            (
+                "implementation/phase1/release_evidence/surface/"
+                "gpcr_hard_decoy_evidence_surface.json"
+            )
+        ],
+        "quarantined_release_surface_owner_action": (
+            "delete_or_extract_after_owner_review"
+        ),
+        "structural_release_claim_eligible": True,
+        "quarantined_paths_claim_eligible": False,
+        "claim_boundary": (
+            "Quarantined release-surface paths are explicitly excluded from the "
+            "building structural-analysis release surface. They are skipped by "
+            "the structural text guard only because the quarantine manifest "
+            "keeps them outside release claims; they still require owner "
+            "delete/extract decisions before scope cleanup can close."
+        ),
+    }
 
 
 def test_scope_audit_writes_json_and_markdown(tmp_path: Path) -> None:
@@ -362,4 +398,5 @@ def test_scope_audit_writes_json_and_markdown(tmp_path: Path) -> None:
     markdown = out_md.read_text(encoding="utf-8")
     assert "# Structural Scope Contamination Audit" in markdown
     assert "| Git State | Count |" in markdown
+    assert "## Release Surface Quarantine Boundary" in markdown
     assert "implementation/phase1/md3bead_soa.py" in markdown

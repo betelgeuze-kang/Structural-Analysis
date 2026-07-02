@@ -345,6 +345,42 @@ def _release_surface_text_leak_rows(
     return rows
 
 
+def _release_surface_quarantine_boundary(
+    *,
+    guard_paths: list[Path],
+    skipped_quarantined_paths: list[str],
+    leak_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if leak_rows:
+        status = "blocked_release_surface_text_leak"
+    elif skipped_quarantined_paths:
+        status = "quarantined_paths_excluded_pending_owner_cleanup"
+    else:
+        status = "clean_structural_release_surface"
+    return {
+        "schema_version": "structural-scope-release-surface-quarantine-boundary.v1",
+        "status": status,
+        "structural_release_surface_text_guard_path_count": len(guard_paths),
+        "structural_release_surface_text_leak_path_count": len(leak_rows),
+        "quarantined_release_surface_path_count": len(skipped_quarantined_paths),
+        "quarantined_release_surface_paths": skipped_quarantined_paths,
+        "quarantined_release_surface_owner_action": (
+            "delete_or_extract_after_owner_review"
+            if skipped_quarantined_paths
+            else "none"
+        ),
+        "structural_release_claim_eligible": not leak_rows,
+        "quarantined_paths_claim_eligible": False,
+        "claim_boundary": (
+            "Quarantined release-surface paths are explicitly excluded from the "
+            "building structural-analysis release surface. They are skipped by "
+            "the structural text guard only because the quarantine manifest "
+            "keeps them outside release claims; they still require owner "
+            "delete/extract decisions before scope cleanup can close."
+        ),
+    }
+
+
 def build_audit(
     *,
     repo_root: Path = ROOT,
@@ -386,6 +422,11 @@ def build_audit(
     release_surface_text_leak_rows = _release_surface_text_leak_rows(
         repo_root=repo_root,
         guard_paths=release_surface_text_guard_paths,
+    )
+    release_surface_quarantine_boundary = _release_surface_quarantine_boundary(
+        guard_paths=release_surface_text_guard_paths,
+        skipped_quarantined_paths=release_surface_text_guard_skipped_quarantined_paths,
+        leak_rows=release_surface_text_leak_rows,
     )
 
     blockers = [f"quarantine_manifest::{item}" for item in manifest_blockers]
@@ -459,6 +500,7 @@ def build_audit(
         ),
         "release_surface_text_leak_path_count": len(release_surface_text_leak_rows),
         "release_surface_text_leak_rows": release_surface_text_leak_rows,
+        "release_surface_quarantine_boundary": release_surface_quarantine_boundary,
         "blockers": blockers,
         "first_non_structural_path": rows[0]["path"] if rows else "",
         "first_unquarantined_non_structural_path": (
@@ -603,6 +645,30 @@ def _markdown(payload: dict[str, Any]) -> str:
             )
     else:
         lines.append("No guarded structural release surface text leaks detected.")
+    boundary = payload.get("release_surface_quarantine_boundary", {})
+    lines.extend(
+        [
+            "",
+            "## Release Surface Quarantine Boundary",
+            "",
+            f"- `status`: `{boundary.get('status', 'unknown')}`",
+            f"- `quarantined_release_surface_path_count`: `{boundary.get('quarantined_release_surface_path_count', 0)}`",
+            f"- `quarantined_paths_claim_eligible`: `{boundary.get('quarantined_paths_claim_eligible', False)}`",
+            "",
+        ]
+    )
+    quarantined_surface_paths = boundary.get("quarantined_release_surface_paths", [])
+    if quarantined_surface_paths:
+        lines.extend(["| Quarantined Release-Surface Path | Owner Action |", "|---|---|"])
+        for path in quarantined_surface_paths:
+            lines.append(
+                "| "
+                f"`{path}` | "
+                f"`{boundary.get('quarantined_release_surface_owner_action', 'owner_review_required')}` |"
+            )
+        lines.extend(["", str(boundary.get("claim_boundary", "")), ""])
+    else:
+        lines.append("No quarantined release-surface paths are currently skipped by the guard.")
     lines.extend(
         [
             "",
