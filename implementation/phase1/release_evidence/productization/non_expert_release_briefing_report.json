@@ -1,45 +1,89 @@
 {
   "blocked_science_or_beta_phase_count": 0,
   "blocked_science_or_beta_phases": [],
-  "blockers": [
-    "non_expert_release_briefing_missing_or_not_ready",
-    "briefing_required_key_missing:plain_status",
-    "briefing_required_key_missing:primary_release_blocker",
-    "briefing_required_key_missing:release_area_owner_handoffs",
-    "briefing_required_key_missing:human_ux_release_gate",
-    "briefing_required_key_missing:blocked_science_or_beta_phases",
-    "briefing_required_key_missing:claim_boundaries"
+  "blockers": [],
+  "claim_boundaries": [
+    "do_not_claim_limited_commercial_release_until_release_allowed_true",
+    "do_not_replace_human_ux_observation_with_templates_or_automation"
   ],
-  "claim_boundaries": [],
   "claim_boundary": "This report is a plain-language read model over /goal bottleneck evidence. It does not create new release evidence, close human UX observation, attach owner decisions, or move quarantined non-structural artifacts into the structural release scope.",
-  "contract_pass": false,
+  "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_handoff": {},
-  "generated_at": "2026-07-02T04:30:35.739184+00:00",
+  "generated_at": "2026-07-02T04:34:19.279451+00:00",
   "human_ux_summary": {
-    "evidence_artifacts": {},
+    "evidence_artifacts": {
+      "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+      "observation_source": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
+      "owner_intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+      "template": "docs/templates/ux_new_user_observation.template.json"
+    },
     "human_observation_contract_pass": false,
-    "max_completion_minutes": null,
-    "missing_field_count": 0,
-    "owner_action": "",
+    "max_completion_minutes": 30,
+    "missing_field_count": 14,
+    "owner_action": "attach a passing human new-user observation record before claiming the UX release-area gate",
     "owner_intake_contract_pass": false,
-    "plain_status": "",
-    "release_area_blocker_count": 0,
-    "required_workflow_step_count": 0,
-    "status": "unknown",
-    "validation_commands": [],
+    "plain_status": "Human new-user observation evidence is still required for the UX release-area gate. Automated rehearsal or templates do not close it.",
+    "release_area_blocker_count": 2,
+    "required_workflow_step_count": 5,
+    "status": "blocked",
+    "validation_commands": [
+      "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+      "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+      "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "python3 scripts/build_phase6_ux_observation_status.py --out implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+      "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+      "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+    ],
     "workflow_step_pass_count": 0
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:e49112dfc767bfcd187e7545c25e69e89b1da4b6b8dc38ed57e571aafb64727b",
+    "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json": "sha256:36ef723b7a40da19beeaa39e9dacbc6a7597032fbb47978a280e2bc060d16aa8",
     "scripts/build_non_expert_release_briefing_report.py": "sha256:c8425a9b99789f4be43384a640a6386d8df9510916dba96075572ff99811eeb7"
   },
-  "next_owner_action_count": 0,
-  "next_owner_actions": [],
-  "plain_status": "",
-  "primary_release_blocker": "",
-  "primary_roadmap_bottleneck": "",
-  "primary_roadmap_phase_id": "",
+  "next_owner_action_count": 5,
+  "next_owner_actions": [
+    {
+      "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+      "external_input_required": true,
+      "owner": "release_ci_owner",
+      "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+      "source": "release_area"
+    },
+    {
+      "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+      "external_input_required": true,
+      "owner": "release_ci_owner",
+      "owner_action": "Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+      "source": "release_area"
+    },
+    {
+      "blocker_id": "ux::human_new_user_observation_missing_or_failed",
+      "external_input_required": true,
+      "owner": "ux_research_owner",
+      "owner_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "source": "release_area"
+    },
+    {
+      "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
+      "external_input_required": true,
+      "owner": "ux_research_owner",
+      "owner_action": "Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "source": "release_area"
+    },
+    {
+      "blocker_id": "security::license_status_not_configured",
+      "external_input_required": true,
+      "owner": "product_legal_owner",
+      "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
+      "source": "release_area"
+    }
+  ],
+  "plain_status": "Release is blocked. The product can remain in restricted alpha/beta preparation, but it must not be presented as fully release-ready.",
+  "primary_release_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+  "primary_roadmap_bottleneck": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+  "primary_roadmap_phase_id": "phase_1_goal_release_cockpit",
   "read_model": {
     "alternate_routes": [
       "/goal/bottleneck",
@@ -50,11 +94,11 @@
     "mutation_allowed": false,
     "route": "/goal/non-expert-release-briefing"
   },
-  "read_model_ready": false,
-  "reason_code": "ERR_NON_EXPERT_BRIEFING_INCOMPLETE",
+  "read_model_ready": true,
+  "reason_code": "PASS",
   "release_allowed": false,
-  "release_area_blocker_count": 0,
-  "release_area_owner_handoff_count": 0,
+  "release_area_blocker_count": 5,
+  "release_area_owner_handoff_count": 5,
   "reuse_policy": "non_expert_release_briefing_report_from_goal_bottleneck_surface",
   "reused_evidence": true,
   "route": "/goal/non-expert-release-briefing",
@@ -62,6 +106,6 @@
   "source_artifacts": {
     "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json"
   },
-  "source_commit_sha": "6292b493dbecd4660f9349f40a7dd37e750fa608",
-  "status": "blocked_report_incomplete"
+  "source_commit_sha": "2d3832426d45d8eddc498e5bbde037b072b39db5",
+  "status": "ready_release_blocked"
 }
