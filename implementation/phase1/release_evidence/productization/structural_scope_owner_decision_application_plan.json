@@ -82,13 +82,13 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T20:47:02.531406+00:00",
+  "generated_at": "2026-07-02T20:59:47.044399+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:ba9a4bba8b7a8f6645fe2bad80c51a9050d56c4657841be7eb2d04b673261f14",
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:beea4a8604da8c2dba697f3eff88c163e0f43cd67ee910142911ba6caf659f5b",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:64c6d94f32cdf1b5076515fcb0497cf0be545e37046dfc6e9160c140c1794fa1",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:ad9131ca8e631e0f225b02a360652237fa8d3b4c43922f53978b96041791940d",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:da0f5af8e897c1560bd910495cf785170b6cd8eaaca4ecf5a2f8cd40968d2936",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:605ea030922af67534c69fd716a89c3ff4a21dd35a23161bd875628551766307"
   },
   "next_actions": [
@@ -241,6 +241,7 @@
       "candidate_owner_decisions_placeholder": "<candidate-owner-decisions.json>",
       "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
       "claim_boundary": "A filled JSON/CSV can validate a scoped owner-review batch, but final closure still requires recorded owner evidence, manual cleanup where applicable, and refreshed structural scope receipts.",
+      "fill_owner_decisions_from_template_command": "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv --out <filled-next-batch-owner-decisions.json> --out-md <filled-next-batch-owner-decisions.md> --out-csv <filled-next-batch-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
       "fill_release_surface_owner_decisions_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv --out <filled-next-batch-owner-decisions.json> --out-md <filled-next-batch-owner-decisions.md> --out-csv <filled-next-batch-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked",
       "filled_csv_placeholder": "<filled-next-batch-owner-decisions.csv>",
       "filled_json_placeholder": "<filled-next-batch-owner-decisions.json>",
@@ -4064,6 +4065,7 @@
       "candidate_owner_decisions_placeholder": "<candidate-owner-decisions.json>",
       "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
       "claim_boundary": "A filled JSON/CSV can validate a scoped owner-review batch, but final closure still requires recorded owner evidence, manual cleanup where applicable, and refreshed structural scope receipts.",
+      "fill_owner_decisions_from_template_command": "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
       "fill_release_surface_owner_decisions_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked",
       "filled_csv_placeholder": "<filled-release-surface-first-owner-decisions.csv>",
       "filled_json_placeholder": "<filled-release-surface-first-owner-decisions.json>",
@@ -4152,7 +4154,8 @@
           "retain_quarantined_with_signed_owner_exception is not used for release-surface paths"
         ],
         "materialization_commands": [
-          "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked"
+          "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked",
+          "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked"
         ],
         "owner": "scope_owner",
         "required_artifacts": [
@@ -4347,6 +4350,7 @@
       "candidate_owner_decisions_placeholder": "<candidate-owner-decisions.json>",
       "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
       "claim_boundary": "A filled JSON/CSV can validate a scoped owner-review batch, but final closure still requires recorded owner evidence, manual cleanup where applicable, and refreshed structural scope receipts.",
+      "fill_owner_decisions_from_template_command": "python3 scripts/fill_structural_scope_owner_decisions_from_template.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --external-archive-reference <external-archive-reference-for-extract-decisions> --fail-blocked",
       "fill_release_surface_owner_decisions_command": "python3 scripts/fill_structural_scope_release_surface_owner_decisions.py --template implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out <filled-release-surface-first-owner-decisions.json> --out-md <filled-release-surface-first-owner-decisions.md> --out-csv <filled-release-surface-first-owner-decisions.csv> --decision recommended_primary --owner-identity <owner-identity> --owner-role <owner-role> --decision-timestamp-utc <decision-timestamp-utc> --evidence-reference <owner-evidence-reference> --fail-blocked",
       "filled_csv_placeholder": "<filled-release-surface-first-owner-decisions.csv>",
       "filled_json_placeholder": "<filled-release-surface-first-owner-decisions.json>",
@@ -4434,7 +4438,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet_and_origin_report",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "ec5620ac6c25836bacf2173331ae8f6a418c896d",
+  "source_commit_sha": "6af4142517722a08aba1fab5c2c15b513a86b9b2",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
