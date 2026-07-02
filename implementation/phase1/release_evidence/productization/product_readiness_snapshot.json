@@ -2968,7 +2968,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T13:40:17.541132+00:00",
+  "generated_at": "2026-07-02T13:56:27.156820+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -2994,7 +2994,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:7d316838d808a6d391b457d879b10f93ba71360f605222a882e4ffb2f64ab96d",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:0c64995005435ccb2609b75d9df39cf61f2acc5ae95ebd5c9506963c5e9bf53d",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:c0657c67f7a5ac6ded55577322bdc7e1f48c690d430f5e5f6ff42df54f4b1988",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:55b89d90a13c873557940a7b5515601c4a40315fab87cfef3bfbf485c062ace8",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:3c4ae375b1fe44065e2a22d4bd2ab0ecb12776a8f4e5c0433ab231d717bbea80",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:73f1dda2ca80b4db9872cd7da3a4f247974181ecddabecb6190e269f95b61864",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:b4df0acb72e51794008937ca72be82274cab7548c40ab7272473c36b72f8aee6",
@@ -3306,7 +3306,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "a47c0a49efa8c2f5ea2bb70d3e3a65ff97aeebcf",
+  "source_commit_sha": "7806246d03b4b4a28a31609c40a80dc69e11f8c2",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3403,23 +3403,15 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [
-          ".github/workflows/dp-windows-parity.yml",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_phase6_platform_replay_receipt.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "tests/test_build_phase6_platform_replay_receipt.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_dp_windows_parity_workflow.py"
-        ],
-        "generated_at": "2026-07-02T13:20:32.477112+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-02T13:56:17.579046+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "7806246d03b4b4a28a31609c40a80dc69e11f8c2",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
@@ -3428,8 +3420,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:56.091782+00:00",
@@ -3448,8 +3442,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:25.787042+00:00",
@@ -3468,8 +3464,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:43.125844+00:00",
@@ -3488,8 +3486,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:27.138608+00:00",
@@ -3508,8 +3508,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:21:41.740692+00:00",
@@ -3523,15 +3525,18 @@
       },
       {
         "artifact": "developer_preview_rc_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_product_development_roadmap.py"
+        ],
         "generated_at": "2026-07-02T13:40:17.305340+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "a47c0a49efa8c2f5ea2bb70d3e3a65ff97aeebcf",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
@@ -3540,8 +3545,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:26.660409+00:00",
@@ -3560,8 +3567,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:43.212961+00:00",
@@ -3580,8 +3589,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:43.279005+00:00",
@@ -3600,8 +3611,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:25.692158+00:00",
@@ -3620,8 +3633,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:43.240822+00:00",
@@ -3640,8 +3655,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:20:14.764487+00:00",
@@ -3660,8 +3677,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-01T10:19:19.231347+00:00",
@@ -3680,8 +3699,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:25.720165+00:00",
@@ -3700,8 +3721,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:25.698432+00:00",
@@ -3720,8 +3743,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:43.357698+00:00",
@@ -3740,8 +3765,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:20:07.272537+00:00",
@@ -3760,8 +3787,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:56.081203+00:00",
@@ -3780,8 +3809,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:43.289326+00:00",
@@ -3800,8 +3831,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:55.915518+00:00",
@@ -3820,8 +3853,10 @@
           "scripts/build_developer_preview_rc_status.py",
           "scripts/build_phase6_platform_replay_receipt.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_structural_product_development_roadmap.py",
           "tests/test_build_phase6_platform_replay_receipt.py",
           "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_structural_product_development_roadmap.py",
           "tests/test_dp_windows_parity_workflow.py"
         ],
         "generated_at": "2026-07-02T13:19:55.928604+00:00",
@@ -3835,15 +3870,18 @@
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "scripts/build_structural_product_development_roadmap.py",
+          "tests/test_build_structural_product_development_roadmap.py"
+        ],
         "generated_at": "2026-07-02T13:40:17.355009+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "a47c0a49efa8c2f5ea2bb70d3e3a65ff97aeebcf",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       }
     ],
     "open_blocker_counts": {
@@ -3868,9 +3906,9 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
-        "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+        "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "implementation/phase1/release_evidence/productization/github_development_sync_preflight_report.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -3895,9 +3933,9 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
-        " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight_report.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       ]
     }
   },
