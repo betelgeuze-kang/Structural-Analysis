@@ -1,11 +1,11 @@
 # Structural Scope Cleanup Impact Report
 
-- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=115 | blocking=66 | owner_pending=86`
+- `summary_line`: `Structural scope cleanup impact report: BLOCKED_CLEANUP_IMPACT | quarantined=86 | references=114 | blocking=65 | owner_pending=86`
 - `contract_pass`: `False`
 - `cleanup_impact_clear`: `False`
 - `quarantined_path_count`: `86`
-- `reference_path_count`: `115`
-- `blocking_cleanup_reference_path_count`: `66`
+- `reference_path_count`: `114`
+- `blocking_cleanup_reference_path_count`: `65`
 - `owner_decision_pending_count`: `86`
 - `release_surface_cleanup_blocked_path_count`: `0`
 - `blocking_reference_cleanup_batch_count`: `5`
@@ -13,15 +13,15 @@
 
 ## Reference Roles
 
-- `reference_role_counts`: `{'documentation_reference': 1, 'implementation_runtime_or_manifest_reference': 43, 'other_reference': 1, 'release_governance_reference': 19, 'scope_governance_reference': 30, 'script_reference': 9, 'test_reference': 12}`
-- `blocking_reference_role_counts`: `{'documentation_reference': 1, 'implementation_runtime_or_manifest_reference': 43, 'other_reference': 1, 'script_reference': 9, 'test_reference': 12}`
-- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 9, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 12, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 43, 'remove_non_structural_scope_ignore_or_metadata_reference': 1, 'rewrite_structural_docs_to_scope_boundary_only': 1}`
+- `reference_role_counts`: `{'documentation_reference': 1, 'implementation_runtime_or_manifest_reference': 42, 'other_reference': 1, 'release_governance_reference': 19, 'scope_governance_reference': 30, 'script_reference': 9, 'test_reference': 12}`
+- `blocking_reference_role_counts`: `{'documentation_reference': 1, 'implementation_runtime_or_manifest_reference': 42, 'other_reference': 1, 'script_reference': 9, 'test_reference': 12}`
+- `blocking_reference_cleanup_action_counts`: `{'delete_or_extract_molecular_script_or_remove_quarantined_path_refs': 9, 'delete_or_extract_molecular_tests_or_update_scope_guard_tests': 12, 'remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts': 42, 'remove_non_structural_scope_ignore_or_metadata_reference': 1, 'rewrite_structural_docs_to_scope_boundary_only': 1}`
 
 ## Cleanup Batches
 
 | Batch | Priority | Role | Paths | Source-Boundary Paths | Action |
 |---|---:|---|---:|---:|---|
-| `cleanup_refs_02_implementation_runtime_or_manifest_reference` | 2 | `implementation_runtime_or_manifest_reference` | 43 | 1 | `remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts` |
+| `cleanup_refs_02_implementation_runtime_or_manifest_reference` | 2 | `implementation_runtime_or_manifest_reference` | 42 | 1 | `remove_md3bead_runtime_manifest_or_regenerate_structural_runtime_artifacts` |
 | `cleanup_refs_03_script_reference` | 3 | `script_reference` | 9 | 0 | `delete_or_extract_molecular_script_or_remove_quarantined_path_refs` |
 | `cleanup_refs_04_test_reference` | 4 | `test_reference` | 12 | 0 | `delete_or_extract_molecular_tests_or_update_scope_guard_tests` |
 | `cleanup_refs_05_documentation_reference` | 5 | `documentation_reference` | 1 | 1 | `rewrite_structural_docs_to_scope_boundary_only` |
@@ -82,7 +82,6 @@
 | `implementation/phase1/winning_ticket_backprop_report.json` | `implementation_runtime_or_manifest_reference` | `False` | 1 | `md3bead` | 1 |
 | `implementation/phase1/zero_copy_real_probe.py` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 5 |
 | `implementation/phase1/zero_copy_real_probe_report.forbidden.json` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 5 |
-| `implementation/phase1/zero_copy_real_probe_report.required.json` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 5 |
 | `implementation/phase1/zero_copy_real_probe_report_strict.json` | `implementation_runtime_or_manifest_reference` | `False` | 3 | `md3bead` | 5 |
 | `scripts/build_public_benchmark_operator_intake_packet.py` | `script_reference` | `False` | 51 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 22 |
 | `scripts/build_public_benchmark_source_of_truth.py` | `script_reference` | `False` | 39 | `casf_pdbbind, gnina, pdbbind, posebusters, symmetry_aware_ligand` | 15 |
@@ -109,7 +108,7 @@
 ## Blockers
 
 - `owner_decision_pending_count=86`
-- `blocking_cleanup_reference_path_count=66`
+- `blocking_cleanup_reference_path_count=65`
 
 ## Next Actions
 

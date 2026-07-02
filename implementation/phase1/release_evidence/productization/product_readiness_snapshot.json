@@ -2932,7 +2932,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T09:17:01.865243+00:00",
+  "generated_at": "2026-07-02T09:22:54.198740+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2966,7 +2966,7 @@
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:e0d5c3f8830e73b6e83fa98ddc817850e760efefe9f5cc6090beb9e0ac4a930c",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:5c9417d647b3859c16cbcbeb221556683c430b6d6e29d1c6328ba9af312c0af8"
+    "scripts/build_product_readiness_snapshot.py": "sha256:f310a9bdbef621cc53d56c8cbe6a245c743e0f72910f86e3ba34ca9d76139644"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -3282,7 +3282,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "27fcedd078b4cf1ca466934ac16b481d33e063b1",
+  "source_commit_sha": "6d7da7697ee093074398cc311f4e9e0ad24c981b",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -4175,7 +4175,6 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
         "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ],
@@ -4202,7 +4201,6 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
         " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
         " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
       ]
