@@ -12,7 +12,10 @@ SCRIPT_PATH = REPO_ROOT / "scripts" / "build_goal_bottleneck_roadmap_surface.py"
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-spec = importlib.util.spec_from_file_location("build_goal_bottleneck_roadmap_surface", SCRIPT_PATH)
+spec = importlib.util.spec_from_file_location(
+    "build_goal_bottleneck_roadmap_surface",
+    SCRIPT_PATH,
+)
 assert spec is not None
 module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
@@ -41,7 +44,10 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert surface["read_model"] == {
         "route": "/goal/bottleneck",
         "alternate_routes": ["/goal/roadmap"],
-        "artifact": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "goal_bottleneck_roadmap_surface.json"
+        ),
         "mutation_allowed": False,
     }
     assert surface["source_of_truth_gap_summary"] == {
@@ -81,7 +87,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     pm_report = json.loads(
         (
             REPO_ROOT
-            / "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+            / "implementation/phase1/release_evidence/productization/"
+            / "pm_release_gate_report.json"
         ).read_text(encoding="utf-8")
     )
     decision = pm_report["release_decision"]
@@ -101,12 +108,15 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         )
     }
     assert kpis["blocked_release_count"] == len(pm_report["full_release_blockers"])
-    assert kpis["first_blocker"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    assert kpis["first_blocker"] == (
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    )
     assert kpis["evidence_surface_count"] == 8
     assert kpis["locked_evidence_surface_count"] == 0
     assert kpis["missing_evidence_surface_count"] == 0
     assert surface["science_evidence_surface_bottlenecks"] == []
     assert surface["non_expert_release_briefing_ready"] is True
+
     briefing = surface["non_expert_release_briefing"]
     assert briefing["audience"] == "non_expert_pm_operator"
     assert briefing["release_allowed"] is False
@@ -115,23 +125,26 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
+
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
     }
+    assert set(release_area_handoffs) == set(pm_report["release_area_blockers"])
     required_release_area_handoffs = {
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "report::commercial_packaging_milestone_not_green",
+        "support::pm_blocker_closure_board_count_mismatch",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
     }
     assert required_release_area_handoffs.issubset(release_area_handoffs)
-    extra_handoffs = set(release_area_handoffs) - required_release_area_handoffs
-    assert all(blocker.startswith("github_sync::") for blocker in extra_handoffs)
     assert kpis["blocked_release_count"] >= len(required_release_area_handoffs)
     assert briefing["release_area_blocker_count"] == len(release_area_handoffs)
     assert briefing["release_area_owner_handoff_count"] == len(release_area_handoffs)
+
     ci_handoff = release_area_handoffs[
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     ]
@@ -142,14 +155,13 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert "Bring at least one GitHub Actions self-hosted runner online" in ci_handoff[
         "owner_action"
     ]
-    assert "rerun the workflow" in ci_handoff[
-        "owner_action"
-    ]
+    assert "rerun the workflow" in ci_handoff["owner_action"]
     assert "collect 30 additional consecutive successful CI run" in ci_handoff[
         "owner_action"
     ]
     assert ci_handoff["acceptance_criteria_count"] == 4
     assert "ci_streak_intake_packet" in ci_handoff["evidence_artifact_keys"]
+
     ux_handoff = release_area_handoffs[
         "ux::human_new_user_observation_missing_or_failed"
     ]
@@ -163,6 +175,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     ]
     assert security_handoff["owner"] == "product_legal_owner"
     assert security_handoff["evidence_state"] == "not_configured"
+
     assert briefing["human_ux_blockers"] == [
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
@@ -222,6 +235,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "browser rehearsal evidence does not satisfy the PM UX release-area "
         "gate by itself."
     )
+
     assert briefing["primary_roadmap_bottleneck"] == (
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
@@ -257,6 +271,15 @@ def test_goal_bottleneck_surface_does_not_read_molecular_release_artifacts(
     surface = module.build_goal_bottleneck_roadmap_surface(repo_root=REPO_ROOT)
     forbidden_tokens = ("gpcr", "pocketmd", "md3bead")
 
+    assert not hasattr(module, "_gpcr_row")
+    assert not hasattr(module, "_pocketmd_row")
+    assert not hasattr(module, "_science_evidence_surface_rows")
+    assert not any(
+        token in name.lower()
+        for name in dir(module)
+        if name.startswith("DEFAULT_")
+        for token in forbidden_tokens
+    )
     assert not any(
         token in path.lower()
         for path in loaded_paths
@@ -367,512 +390,14 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
     assert surface["primary_roadmap_phase_id"] == "phase_1_goal_release_cockpit"
-    return
-
-    assert rows["phase_0_source_of_truth_hardening"]["state"] == "ready"
-    assert rows["phase_0_source_of_truth_hardening"]["summary"][
-        "classification_rows"
-    ][0] == {
-        "candidate": "accuracy_parity_scorecard",
-        "classification": "fix",
-        "freshness_policy": "direct_leaf_row",
-        "freshness_label": "accuracy_parity_scorecard",
-        "validation_basis": [
-            "leaf_artifact_in_default_freshness_rows",
-            "science_scorecard_overall_pass_field",
-            "benchmark_contract_and_kpi_fields",
-            "public_hf_and_source_family_checks",
-            "stability_suite_pass_field",
-        ],
-    }
-    assert rows["phase_1_goal_release_cockpit"]["state"] == "ready"
-    assert rows["phase_1_goal_release_cockpit"]["first_blocker"] == (
-        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
-    )
-    phase_1_summary = rows["phase_1_goal_release_cockpit"]["summary"]
-    science_rows = {
-        row["surface_family"]: row
-        for row in phase_1_summary["science_evidence_surface_status_rows"]
-    }
-    assert set(science_rows) == {"h_bond", "gpcr", "pocketmd_lite"}
-    assert phase_1_summary["first_locked_science_evidence_surface"][
-        "surface_family"
-    ] == "h_bond"
-    assert science_rows["h_bond"] == {
-        "bottleneck": "h_bond_evidence_surface_locked",
-        "capability_blocker_count": 2,
-        "capability_id": "h_bond_backmap_evidence",
-        "capability_state": "blocked",
-        "evidence_artifact_count": 3,
-        "first_blocked_target": "operator_attached_h_bond_backmap_cases",
-        "first_next_action": "fill_h_bond_backmap_operator_intake_packet",
-        "locked": True,
-        "locked_count": 1,
-        "operator_intake_packet_status": "ready_for_operator_input",
-        "operator_intake_required_slot_count": 3,
-        "present": True,
-        "root_cause_tags": [
-            "operator_receipts_required",
-            "operator_handoff_required",
-        ],
-        "status": "locked",
-        "surface_count": 1,
-        "surface_family": "h_bond",
-        "surface_ids": ["h_bond_backmap_evidence_surface"],
-    }
-    assert science_rows["gpcr"]["bottleneck"] == "broad_gpcr_family_claim_locked"
-    assert science_rows["gpcr"]["first_blocked_target"] == "DRD2"
-    assert science_rows["gpcr"]["root_cause_tags"] == [
-        "hard_decoy_rows_required",
-        "operator_values_required",
-    ]
-    assert science_rows["gpcr"]["first_next_action"] == (
-        "fill_gpcr_hard_decoy_operator_intake_packet"
-    )
-    assert science_rows["gpcr"]["operator_intake_required_slot_count"] == 3
-
-    phase_2 = rows["phase_2_public_benchmark_harness"]
-    assert phase_2["state"] == "blocked"
-    assert phase_2["bottleneck"] == "public_benchmark_source_of_truth_not_ready"
-    assert phase_2["first_blocker"] == "casf_pdbbind_source_material_not_attached"
-    assert phase_2["first_blocked_target"] == "casf_pdbbind_subset_intake"
-    assert phase_2["root_cause_tags"] == [
-        "operator_source_material_required",
-        "operator_receipts_required",
-    ]
-    assert phase_2["linked_routes"] == [
-        "/product/public-benchmark",
-        "/product/public-benchmark/operator-intake",
-        "/product/capabilities",
-    ]
-    assert phase_2["summary"]["read_model_ready"] is True
-    assert phase_2["summary"]["source_of_truth_route"] == "/product/public-benchmark"
-    assert phase_2["summary"]["operator_intake_route"] == (
-        "/product/public-benchmark/operator-intake"
-    )
-    assert phase_2["summary"]["gate_unblock_plan_count"] == 4
-    assert phase_2["summary"]["operator_evidence_gap_count"] == 4
-    assert phase_2["summary"]["first_operator_evidence_gap"]["slot_id"] == (
-        "casf_pdbbind_subset_intake"
-    )
-    assert phase_2["summary"]["first_operator_evidence_gap"][
-        "blocked_tier_beta_criteria"
-    ] == [
-        "casf_pdbbind_subset_materialized",
-        "external_receipts_attached",
-    ]
-    assert phase_2["summary"]["operator_handoff_queue_count"] == 4
-    assert phase_2["summary"]["first_operator_handoff"]["handoff_id"] == (
-        "public_benchmark::casf_pdbbind_subset_intake"
-    )
-    assert phase_2["summary"]["first_operator_handoff"][
-        "blocked_tier_beta_criteria"
-    ] == [
-        "casf_pdbbind_subset_materialized",
-        "external_receipts_attached",
-    ]
-    assert phase_2["summary"]["operator_handoff_queue"][0][
-        "materialization_command"
-    ].startswith("python3 scripts/materialize_public_benchmark_subset_manifest.py")
-    assert phase_2["summary"]["minimum_subset_case_count"] == 12
-    assert phase_2["summary"]["tier_beta_gate_status"] == "blocked"
-    assert phase_2["summary"]["tier_beta_failed_criterion_count"] == 8
-    assert phase_2["summary"]["tier_beta_failed_criteria"] == [
-        "casf_pdbbind_subset_materialized",
-        "real_pose_validity_packet_materialized",
-        "symmetry_rmsd_scorecard_real_cases",
-        "posebusters_style_validity_real_ligands",
-        "casf_pdbbind_pose_success_harness_ready",
-        "dud_e_lit_pcba_enrichment_ready",
-        "vina_gnina_comparison_ready",
-        "external_receipts_attached",
-    ]
-    assert phase_2["blocked_criteria_count"] == 8
-    assert phase_2["blocked_criteria"] == phase_2["summary"][
-        "tier_beta_failed_criteria"
-    ]
-    assert [
-        row["criterion_id"] for row in phase_2["summary"]["tier_beta_gate_criteria"]
-    ] == [
-        "casf_pdbbind_subset_materialized",
-        "real_pose_validity_packet_materialized",
-        "symmetry_rmsd_scorecard_real_cases",
-        "posebusters_style_validity_real_ligands",
-        "casf_pdbbind_pose_success_harness_ready",
-        "dud_e_lit_pcba_enrichment_ready",
-        "vina_gnina_comparison_ready",
-        "external_receipts_attached",
-    ]
-    assert all(
-        row["pass"] is False for row in phase_2["summary"]["tier_beta_gate_criteria"]
-    )
-    assert {
-        row["slot_id"]: row["status"]
-        for row in phase_2["summary"]["operator_intake_slots"]
-    } == {
-        "casf_pdbbind_subset_intake": "operator_input_required",
-        "pose_coordinate_intake": "operator_input_required",
-        "dud_e_lit_pcba_enrichment_intake": "operator_input_required",
-        "vina_gnina_comparison_intake": "operator_input_required",
-    }
-    gate_plan = {
-        row["slot_id"]: row
-        for row in phase_2["summary"]["gate_unblock_plan"]
-    }
-    assert gate_plan["casf_pdbbind_subset_intake"][
-        "unblocks_tier_beta_criteria"
-    ] == [
-        "casf_pdbbind_subset_materialized",
-        "external_receipts_attached",
-    ]
-    assert gate_plan["pose_coordinate_intake"]["materialization_steps"] == [
-        "materialize_pose_validity_input",
-        "materialize_posebusters_validity_packet",
-        "materialize_symmetry_rmsd_scorecard",
-        "materialize_pose_success_harness",
-    ]
-    assert gate_plan["pose_coordinate_intake"]["template_artifact"].endswith(
-        "public_benchmark_pose_coordinate_operator_template.json"
-    )
-    gap_register = {
-        row["slot_id"]: row
-        for row in phase_2["summary"]["operator_evidence_gap_register"]
-    }
-    assert gap_register["pose_coordinate_intake"]["blocked_tier_beta_criteria"] == [
-        "real_pose_validity_packet_materialized",
-        "symmetry_rmsd_scorecard_real_cases",
-        "posebusters_style_validity_real_ligands",
-        "casf_pdbbind_pose_success_harness_ready",
-    ]
-    assert gap_register["casf_pdbbind_subset_intake"]["first_next_action"] == (
-        "attach at least 12 local CASF/PDBBind case descriptors"
-    )
-    assert phase_2["summary"]["operator_template_artifacts"][
-        "casf_pdbbind_subset_intake"
-    ].endswith("public_benchmark_casf_pdbbind_operator_template.json")
-    assert phase_2["summary"]["pose_validity_packet_summary"]["real_benchmark_case_count"] == 0
-    assert phase_2["summary"]["symmetry_rmsd_scorecard_summary"] == {
-        "status": "ready",
-        "dry_run_case_count": 1,
-        "real_benchmark_case_count": 0,
-        "dry_run_pose_success": True,
-    }
-    assert phase_2["summary"]["vina_gnina_comparison_adapter_summary"][
-        "real_comparison_case_count"
-    ] == 0
-    assert (
-        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
-        in phase_2["evidence_artifacts"]
-    )
-    assert phase_2["summary"]["harness_bundle_artifact"].endswith(
-        "public_benchmark_harness_bundle.json"
-    )
-    assert phase_2["summary"]["harness_bundle_index"]["artifact"] == (
-        "implementation/phase1/release_evidence/productization/public_benchmark_harness_bundle.json"
-    )
-    assert "attach_dud_e_lit_pcba_enrichment_intake" in phase_2["next_actions"]
-    assert "attach_vina_gnina_comparison_intake" in phase_2["next_actions"]
-
-    phase_3 = rows["phase_3_gpcr_hard_decoy_closure"]
-    assert phase_3["state"] == "blocked"
-    assert phase_3["bottleneck"] == "broad_gpcr_family_claim_locked"
-    assert phase_3["first_blocker"] == "DRD2:hard_decoy_rows_required_for_actual_closure"
-    assert phase_3["first_blocked_target"] == "DRD2"
-    assert phase_3["root_cause_tags"] == [
-        "hard_decoy_rows_required",
-        "operator_values_required",
-    ]
-    assert phase_3["linked_routes"] == [
-        "/product/gpcr-hard-decoy-suite-report",
-        "/product/gpcr-hard-decoy-suite-report/operator-intake",
-        "/product/capabilities",
-    ]
-    assert (
-        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json"
-        in phase_3["evidence_artifacts"]
-    )
-    assert phase_3["summary"]["operator_intake_packet_status"] == "ready_for_operator_input"
-    assert phase_3["summary"]["product_report_route"] == (
-        "/product/gpcr-hard-decoy-suite-report"
-    )
-    assert phase_3["summary"]["operator_intake_route"] == (
-        "/product/gpcr-hard-decoy-suite-report/operator-intake"
-    )
-    assert phase_3["summary"]["operator_intake_required_slot_count"] == 3
-    assert phase_3["summary"]["gate_unblock_plan_count"] == 3
-    assert phase_3["summary"]["minimum_target_count"] == 3
-    assert phase_3["summary"]["minimum_metric_field_count_per_target"] == 4
-    assert phase_3["summary"]["operator_evidence_gap_count"] == 3
-    assert phase_3["summary"]["first_operator_evidence_gap"]["slot_id"] == (
-        "drd2_hard_decoy_metrics"
-    )
-    assert phase_3["summary"]["first_operator_evidence_gap"]["handoff_id"] == (
-        "gpcr_hard_decoy::drd2_hard_decoy_metrics"
-    )
-    assert phase_3["summary"]["first_operator_evidence_gap"]["target_id"] == "DRD2"
-    assert phase_3["summary"]["first_operator_evidence_gap"][
-        "blocked_phase3_criteria"
-    ] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
-    assert phase_3["summary"]["first_operator_evidence_gap"][
-        "first_next_action"
-    ] == "fill DRD2 hard-decoy metrics in the GPCR operator intake packet"
-    assert phase_3["summary"]["phase3_exit_gate_status"] == "blocked"
-    assert phase_3["summary"]["phase3_failed_criterion_count"] == 5
-    assert phase_3["summary"]["phase3_failed_criteria"] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
-    assert phase_3["blocked_criteria_count"] == 5
-    assert phase_3["blocked_criteria"] == phase_3["summary"][
-        "phase3_failed_criteria"
-    ]
-    assert [
-        row["criterion_id"] for row in phase_3["summary"]["phase3_exit_gate_criteria"]
-    ] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
-    assert phase_3["summary"]["phase3_exit_gate_criteria"][0][
-        "current_by_target"
-    ] == {"DRD2": None, "HTR2A": None, "OPRM1": None}
-    assert phase_3["summary"]["phase3_exit_gate_criteria"][0][
-        "failed_targets"
-    ] == ["DRD2", "HTR2A", "OPRM1"]
-    assert {
-        row["target_id"]: row["status"]
-        for row in phase_3["summary"]["operator_target_slots"]
-    } == {
-        "DRD2": "operator_input_required",
-        "HTR2A": "operator_input_required",
-        "OPRM1": "operator_input_required",
-    }
-    assert {
-        row["target_id"]: row["template_artifact"]
-        for row in phase_3["summary"]["operator_target_slots"]
-    } == {
-        "DRD2": (
-            "implementation/phase1/release_evidence/productization/"
-            "gpcr_hard_decoy_operator_template.json"
-        ),
-        "HTR2A": (
-            "implementation/phase1/release_evidence/productization/"
-            "gpcr_hard_decoy_operator_template.json"
-        ),
-        "OPRM1": (
-            "implementation/phase1/release_evidence/productization/"
-            "gpcr_hard_decoy_operator_template.json"
-        ),
-    }
-    assert {
-        row["target_id"]: row["phase3_blocked"]
-        for row in phase_3["summary"]["operator_evidence_gap_register"]
-    } == {"DRD2": True, "HTR2A": True, "OPRM1": True}
-    gate_plan = {row["target_id"]: row for row in phase_3["summary"]["gate_unblock_plan"]}
-    assert gate_plan["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
-    assert gate_plan["DRD2"]["status"] == "operator_input_required"
-    assert gate_plan["DRD2"]["unblocks_phase3_criteria"] == [
-        "ranking_pr_auc_ci_low_min",
-        "top20_hit_rate_min",
-        "decoys_above_positive_count_max",
-        "no_positive_out_anchored_by_top_decoys",
-        "raw_hard_decoy_rows_actual_closure",
-    ]
-    assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"][
-        "decoys_above_positive_count"
-    ] == "<=0"
-    assert gate_plan["DRD2"]["template_artifact"] == (
-        "implementation/phase1/release_evidence/productization/"
-        "gpcr_hard_decoy_operator_template.json"
-    )
-    assert gate_plan["DRD2"]["materialization_steps"] == [
-        "materialize_gpcr_hard_decoy_suite_report",
-        "refresh_gpcr_hard_decoy_product_report",
-        "refresh_product_capabilities_surface",
-        "refresh_goal_bottleneck_roadmap_surface",
-    ]
-    assert (
-        "materialize_gpcr_hard_decoy_suite_report.py"
-        in gate_plan["DRD2"]["materialization_command"]
-    )
-    assert gate_plan["DRD2"]["validation_command"] == gate_plan["DRD2"][
-        "materialization_command"
-    ]
-    assert (
-        phase_3["summary"]["first_operator_evidence_gap"]["validation_command"]
-        == gate_plan["DRD2"]["validation_command"]
-    )
-    assert phase_3["summary"]["first_operator_evidence_gap"][
-        "template_artifact"
-    ] == (
-        "implementation/phase1/release_evidence/productization/"
-        "gpcr_hard_decoy_operator_template.json"
-    )
-    assert "fill_gpcr_hard_decoy_operator_intake_packet" in phase_3["next_actions"]
-
-    phase_4 = rows["phase_4_pocketmd_lite"]
-    assert phase_4["state"] == "blocked"
-    assert phase_4["bottleneck"] == "pocketmd_lite_science_product_surface_locked"
-    assert phase_4["first_blocker"] == "pocketmd_lite_topk_candidate_rows_missing"
-    assert phase_4["first_blocked_target"] == "top_k_refinement_operator_intake"
-    assert phase_4["linked_routes"] == [
-        "/product/pocketmd-lite",
-        "/product/pocketmd-lite/operator-intake",
-        "/product/pocketmd-lite/handoff",
-        "/product/capabilities",
-    ]
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "pocketmd_lite_operator_intake_packet.json"
-        in phase_4["evidence_artifacts"]
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "pocketmd_lite_readonly_api.json"
-        in phase_4["evidence_artifacts"]
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "pocketmd_lite_delivery_handoff.json"
-        in phase_4["evidence_artifacts"]
-    )
-    assert (
-        "implementation/phase1/release_evidence/productization/"
-        "pocketmd_lite_operator_template.json"
-        in phase_4["evidence_artifacts"]
-    )
-    assert phase_4["summary"]["readonly_api_status"] == "ready_for_seed_artifacts"
-    assert phase_4["summary"]["readonly_api_route"] == "/product/pocketmd-lite"
-    assert phase_4["summary"]["readonly_api_endpoint_count"] == 7
-    assert phase_4["summary"]["handoff_status"] == (
-        "handoff_ready_operator_evidence_required"
-    )
-    assert phase_4["summary"]["handoff_route"] == "/product/pocketmd-lite/handoff"
-    assert phase_4["summary"]["handoff_acceptance_criteria_count"] == 8
-    assert phase_4["summary"]["handoff_phase4_exit_gate_required_status"] == "ready"
-    assert phase_4["summary"]["operator_intake_packet_status"] == (
-        "ready_for_operator_input"
-    )
-    assert phase_4["summary"]["operator_intake_route"] == (
-        "/product/pocketmd-lite/operator-intake"
-    )
-    assert phase_4["summary"]["operator_template_artifact"].endswith(
-        "pocketmd_lite_operator_template.json"
-    )
-    assert phase_4["summary"]["operator_intake_required_slot_count"] == 1
-    assert phase_4["summary"]["gate_unblock_plan_count"] == 1
-    assert phase_4["summary"]["minimum_refinement_case_count"] == 3
-    assert phase_4["summary"]["minimum_top_k_candidate_count"] == 6
-    assert phase_4["summary"]["operator_intake_slots"] == [
-        {
-            "required": True,
-            "required_case_field_count": 16,
-            "slot_id": "top_k_refinement_rows",
-            "status": "operator_input_required",
-            "template_artifact": (
-                "implementation/phase1/release_evidence/productization/"
-                "pocketmd_lite_operator_template.json"
-            ),
-        }
-    ]
-    assert phase_4["summary"]["operator_evidence_gap_count"] == 1
-    assert phase_4["summary"]["first_operator_evidence_gap"]["slot_id"] == (
-        "top_k_refinement_rows"
-    )
-    assert phase_4["summary"]["first_operator_evidence_gap"][
-        "blocked_phase4_criteria"
-    ] == [
-        "top_k_refinement_rows_present",
-        "top_k_refinement_case_coverage",
-        "local_min_survival_materialized",
-        "contact_persistence_materialized",
-        "h_bond_persistence_materialized",
-        "clash_relief_materialized",
-        "uncertainty_summary_materialized",
-        "report_blockers_resolved",
-    ]
-    assert phase_4["summary"]["first_operator_evidence_gap"][
-        "first_next_action"
-    ] == "attach top-k candidate refinement rows"
-    assert phase_4["summary"]["phase4_exit_gate_status"] == "blocked"
-    assert phase_4["summary"]["phase4_failed_criterion_count"] == 8
-    assert phase_4["summary"]["phase4_failed_criteria"] == [
-        "top_k_refinement_rows_present",
-        "top_k_refinement_case_coverage",
-        "local_min_survival_materialized",
-        "contact_persistence_materialized",
-        "h_bond_persistence_materialized",
-        "clash_relief_materialized",
-        "uncertainty_summary_materialized",
-        "report_blockers_resolved",
-    ]
-    assert phase_4["blocked_criteria_count"] == 8
-    assert phase_4["blocked_criteria"] == phase_4["summary"][
-        "phase4_failed_criteria"
-    ]
-    gate_plan = phase_4["summary"]["gate_unblock_plan"][0]
-    assert gate_plan["slot_id"] == "top_k_refinement_rows"
-    assert gate_plan["status"] == "operator_input_required"
-    assert gate_plan["template_artifact"].endswith(
-        "pocketmd_lite_operator_template.json"
-    )
-    assert gate_plan["unblocks_phase4_criteria"] == [
-        "top_k_refinement_rows_present",
-        "top_k_refinement_case_coverage",
-        "local_min_survival_materialized",
-        "contact_persistence_materialized",
-        "h_bond_persistence_materialized",
-        "clash_relief_materialized",
-        "uncertainty_summary_materialized",
-        "report_blockers_resolved",
-    ]
-    assert gate_plan["materialization_steps"] == [
-        "materialize_pocketmd_lite_operator_intake_from_rows",
-        "materialize_pocketmd_lite_topk_survival_report",
-        "refresh_product_capabilities_surface",
-        "refresh_goal_bottleneck_roadmap_surface",
-    ]
-    assert (
-        "materialize_pocketmd_lite_operator_intake_from_rows.py"
-        in gate_plan["raw_row_import_command"]
-    )
-    assert (
-        "materialize_pocketmd_lite_topk_survival_report.py"
-        in gate_plan["materialization_command"]
-    )
-    assert gate_plan["validation_command"] == gate_plan["materialization_command"]
-    assert (
-        phase_4["summary"]["first_operator_evidence_gap"]["validation_command"]
-        == gate_plan["validation_command"]
-    )
-    assert "materialize_pocketmd_lite_operator_intake_from_rows" in phase_4["next_actions"]
-    assert "fill_pocketmd_lite_operator_intake_packet" in phase_4["next_actions"]
-    assert "regenerate_goal_bottleneck_action_board" in phase_4["next_actions"]
-
-    assert surface["primary_roadmap_bottleneck"] == "public_benchmark_source_of_truth_not_ready"
-    assert surface["primary_roadmap_phase_id"] == "phase_2_public_benchmark_harness"
 
 
 def test_goal_bottleneck_roadmap_surface_cli_writes_payload(tmp_path: Path) -> None:
     out = tmp_path / "productization" / "goal_bottleneck_roadmap_surface.json"
 
     assert module.main(["--repo-root", str(REPO_ROOT), "--out", str(out)]) == 0
-    payload = json.loads(out.read_text(encoding="utf-8"))
 
-    assert payload["input_checksums"][
-        "scripts/build_goal_bottleneck_roadmap_surface.py"
-    ].startswith("sha256:")
-    assert payload["reused_evidence"] is True
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "goal-bottleneck-roadmap-surface.v1"
     assert payload["surface_id"] == "goal_bottleneck_roadmap_surface"
-    assert payload["primary_next_actions"][0] == "work_release_decision_operator_actions"
+    assert payload["summary_line"].startswith("Goal bottleneck roadmap surface: READY")

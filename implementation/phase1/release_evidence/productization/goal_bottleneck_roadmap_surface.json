@@ -14,7 +14,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-02T03:41:27.343655+00:00",
+  "generated_at": "2026-07-02T03:55:29.528310+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8b276070ec76756e1fd50f43edb48fb3cce075b2bfec23c318a9a49ba670d4cc",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5910d3b119c617a083468675248b3fb31f28a84a42f731b19a18f42d857f2553",
@@ -22,7 +22,7 @@
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:a916d9965090d7a7a6814a6c9bca8f6da9e4aadbbaaadd3f4415cd7f24037523",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:76f44d8618dfba4d62dc00e039cf6e290d5f6cdb2cb91296d9ec3021c0cea509",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:8050868db685a7aab8c9ddd678c0b65933e6e91782d6f84d17bd4175d0d5da8c"
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:5e1b5c6a6e191b60d27fb1ac521965986a372c0329649a463367b0cfe27f3af1"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -481,7 +481,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "cecec05ce3cef15106dbf5941ec7c70925432876",
+  "source_commit_sha": "0764018634df67b0a5c6f145e6585ed9e0ca8a57",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

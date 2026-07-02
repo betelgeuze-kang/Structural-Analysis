@@ -196,7 +196,8 @@ def build_report(
         "claim_boundary": (
             "This report is a plain-language read model over /goal bottleneck evidence. "
             "It does not create new release evidence, close human UX observation, attach "
-            "public benchmark data, or unlock GPCR/PocketMD science claims."
+            "owner decisions, or move quarantined non-structural artifacts into the "
+            "structural release scope."
         ),
     }
 
@@ -223,7 +224,7 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"- Owner action: {human_ux.get('owner_action', '') or 'none'}",
             f"- Workflow steps passed: `{human_ux.get('workflow_step_pass_count', 0)}/{human_ux.get('required_workflow_step_count', 0)}`",
             "",
-            "## Science And Beta Blockers",
+            "## Scoped Release Blockers",
             "",
         ]
     )

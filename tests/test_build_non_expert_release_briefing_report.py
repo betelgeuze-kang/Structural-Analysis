@@ -53,41 +53,43 @@ def test_non_expert_release_briefing_report_wraps_goal_briefing() -> None:
     assert payload["release_area_blocker_count"] == goal_briefing[
         "release_area_blocker_count"
     ]
-    assert payload["blocked_science_or_beta_phase_count"] == 3
-    assert [
-        row["phase_id"] for row in payload["blocked_science_or_beta_phases"]
-    ] == [
-        "phase_2_public_benchmark_harness",
-        "phase_3_gpcr_hard_decoy_closure",
-        "phase_4_pocketmd_lite",
-    ]
+    assert payload["blocked_science_or_beta_phase_count"] == 0
+    assert payload["blocked_science_or_beta_phases"] == []
     assert payload["human_ux_summary"]["status"] == "blocked"
     assert payload["human_ux_summary"]["human_observation_contract_pass"] is False
     assert payload["human_ux_summary"]["owner_intake_contract_pass"] is False
     assert payload["human_ux_summary"]["workflow_step_pass_count"] == 0
     assert payload["human_ux_summary"]["required_workflow_step_count"] == 5
-    assert payload["first_operator_handoff"]["slot_id"] == "casf_pdbbind_subset_intake"
-    assert payload["first_operator_handoff"]["first_blocker"] == (
-        "casf_pdbbind_source_material_not_attached"
-    )
-    assert payload["next_owner_action_count"] >= len(
+    assert payload["first_operator_handoff"] == {}
+    assert payload["next_owner_action_count"] == len(
         goal_briefing["release_area_owner_handoffs"]
     )
-    assert payload["next_owner_actions"][0] == {
-        "source": "goal_operator_handoff",
-        "blocker_id": "casf_pdbbind_source_material_not_attached",
-        "owner": "operator",
-        "external_input_required": True,
-        "owner_action": "attach at least 12 local CASF/PDBBind case descriptors",
-    }
+    assert payload["next_owner_actions"][0]["source"] == "release_area"
+    assert payload["next_owner_actions"][0]["blocker_id"] == (
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    )
+    assert payload["next_owner_actions"][0]["owner"] == "release_ci_owner"
+    assert payload["next_owner_actions"][0]["external_input_required"] is True
+    assert "self-hosted runner" in payload["next_owner_actions"][0]["owner_action"]
     assert "do_not_replace_human_ux_observation_with_templates_or_automation" in payload[
         "claim_boundaries"
     ]
     assert "does not create new release evidence" in payload["claim_boundary"]
+    assert "quarantined non-structural artifacts" in payload["claim_boundary"]
     assert payload["reused_evidence"] is True
     assert payload["reuse_policy"] == (
         "non_expert_release_briefing_report_from_goal_bottleneck_surface"
     )
+
+
+def test_non_expert_release_briefing_report_has_no_molecular_claim_surface() -> None:
+    payload = module.build_report(repo_root=REPO_ROOT)
+    forbidden_tokens = ("gpcr", "pocketmd", "md3bead", "casf", "pdbbind")
+    payload_text = json.dumps(payload, ensure_ascii=False).lower()
+
+    assert not any(token in payload_text for token in forbidden_tokens)
+    assert payload["blocked_science_or_beta_phase_count"] == 0
+    assert payload["first_operator_handoff"] == {}
 
 
 def test_non_expert_release_briefing_report_blocks_when_goal_briefing_missing(
@@ -131,5 +133,7 @@ def test_non_expert_release_briefing_report_cli_writes_json_and_markdown(
     assert payload["contract_pass"] is True
     assert "# Non-Expert Release Briefing" in markdown
     assert "Human UX Gate" in markdown
-    assert "Science And Beta Blockers" in markdown
-    assert "do_not_claim_tier_beta_until_public_benchmark_ready_true" in markdown
+    assert "Scoped Release Blockers" in markdown
+    assert "do_not_claim_tier_beta_until_public_benchmark_ready_true" not in markdown
+    assert "GPCR" not in markdown
+    assert "PocketMD" not in markdown
