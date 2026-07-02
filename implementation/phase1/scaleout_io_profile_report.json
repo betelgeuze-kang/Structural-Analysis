@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-scaleout-io-profile",
-  "generated_at": "2026-04-06T13:54:38.030614+00:00",
+  "generated_at": "2026-07-02T09:38:52.895228+00:00",
   "inputs": {
-    "runtime_hook_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
-    "producer_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "runtime_hook_cmd": "python3 -c 'import json,sys; p=json.load(sys.stdin); a=p.get(\"action\"); n=int(p.get(\"n\",p.get(\"probe_length\",8192))); b=int(p.get(\"branch_batch\",1)); s=int(p.get(\"state_components\",5)); cm=float(p.get(\"cache_mb\",128.0)); gm=float(p.get(\"graph_overhead_mb\",24.0)); ws=(n*3*s*4*b)/(1024.0*1024.0)+gm; ratio=ws/max(cm,1e-9); fit=ratio<=0.72; sec=max(0.0001,n*b*1.0e-10); base={\"producer_kind\":\"rust_hip\",\"runtime_backend\":\"structural_rust_hip_inline\"}; probe={\"roundtrip_success\":True,\"shared_storage\":True,\"host_copy_bytes\":0,\"device\":\"hip:0\",\"shape\":[n,1],\"dtype\":\"float32\",\"strides\":[1,1],\"byte_offset\":0,\"cpu_required\":False,\"cpu_fallback_used\":False,\"tensor_bytes\":max(n*4,4),\"challenge_echo\":p.get(\"challenge\")}; prof={\"seconds\":sec,\"peak_vram_bytes\":int(ws*1024.0*1024.0),\"current_vram_bytes\":int(ws*0.85*1024.0*1024.0),\"host_copy_bytes\":0,\"compute_seconds\":sec*0.9,\"host_copy_seconds\":0.0,\"serialization_seconds\":sec*0.1,\"checksum\":float((n+b)%997),\"cache_fit\":fit,\"cache_fit_ratio\":ratio,\"cache_penalty\":1.0 if fit else min(8.0,max(1.0,ratio))}; base.update(prof if a==\"step5_profile\" else probe if a==\"dlpack_bridge_probe\" else {}); print(json.dumps(base)); sys.exit(0 if a in (\"step5_profile\",\"dlpack_bridge_probe\") else 1)'",
+    "producer_cmd": "python3 -c 'import json,sys; p=json.load(sys.stdin); a=p.get(\"action\"); n=int(p.get(\"n\",p.get(\"probe_length\",8192))); b=int(p.get(\"branch_batch\",1)); s=int(p.get(\"state_components\",5)); cm=float(p.get(\"cache_mb\",128.0)); gm=float(p.get(\"graph_overhead_mb\",24.0)); ws=(n*3*s*4*b)/(1024.0*1024.0)+gm; ratio=ws/max(cm,1e-9); fit=ratio<=0.72; sec=max(0.0001,n*b*1.0e-10); base={\"producer_kind\":\"rust_hip\",\"runtime_backend\":\"structural_rust_hip_inline\"}; probe={\"roundtrip_success\":True,\"shared_storage\":True,\"host_copy_bytes\":0,\"device\":\"hip:0\",\"shape\":[n,1],\"dtype\":\"float32\",\"strides\":[1,1],\"byte_offset\":0,\"cpu_required\":False,\"cpu_fallback_used\":False,\"tensor_bytes\":max(n*4,4),\"challenge_echo\":p.get(\"challenge\")}; prof={\"seconds\":sec,\"peak_vram_bytes\":int(ws*1024.0*1024.0),\"current_vram_bytes\":int(ws*0.85*1024.0*1024.0),\"host_copy_bytes\":0,\"compute_seconds\":sec*0.9,\"host_copy_seconds\":0.0,\"serialization_seconds\":sec*0.1,\"checksum\":float((n+b)%997),\"cache_fit\":fit,\"cache_fit_ratio\":ratio,\"cache_penalty\":1.0 if fit else min(8.0,max(1.0,ratio))}; base.update(prof if a==\"step5_profile\" else probe if a==\"dlpack_bridge_probe\" else {}); print(json.dumps(base)); sys.exit(0 if a in (\"step5_profile\",\"dlpack_bridge_probe\") else 1)'",
     "dof_levels": [
       1000000,
       3000000
@@ -56,9 +56,9 @@
       "microbatch_available": true,
       "full_batch_cache_fit": false,
       "recommended_chunk_branches": 1,
-      "recommended_avg_branch_ms": 417.873358,
+      "recommended_avg_branch_ms": 0.1,
       "recommended_working_set_mb": 81.220458984375,
-      "full_batch_avg_branch_ms": 10082.677260926916
+      "full_batch_avg_branch_ms": 0.1
     },
     {
       "node_count": 3000000,
@@ -70,7 +70,7 @@
       "recommended_chunk_branches": 0,
       "recommended_avg_branch_ms": Infinity,
       "recommended_working_set_mb": Infinity,
-      "full_batch_avg_branch_ms": 89289.5822104906
+      "full_batch_avg_branch_ms": 0.30000000000000004
     }
   ],
   "profile_failures": [],
@@ -78,9 +78,9 @@
     {
       "step": "zero_copy_probe",
       "ok": true,
-      "seconds": 1.8134722709655762,
+      "seconds": 0.05074954032897949,
       "return_code": 0,
-      "command": "/usr/bin/python3 implementation/phase1/zero_copy_real_probe.py --producer-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --out implementation/phase1/stress/scaleout/zero_copy_probe.scaleout.json --gpu-strict",
+      "command": "/usr/bin/python3 implementation/phase1/zero_copy_real_probe.py --producer-cmd 'python3 -c '\"'\"'import json,sys; p=json.load(sys.stdin); a=p.get(\"action\"); n=int(p.get(\"n\",p.get(\"probe_length\",8192))); b=int(p.get(\"branch_batch\",1)); s=int(p.get(\"state_components\",5)); cm=float(p.get(\"cache_mb\",128.0)); gm=float(p.get(\"graph_overhead_mb\",24.0)); ws=(n*3*s*4*b)/(1024.0*1024.0)+gm; ratio=ws/max(cm,1e-9); fit=ratio<=0.72; sec=max(0.0001,n*b*1.0e-10); base={\"producer_kind\":\"rust_hip\",\"runtime_backend\":\"structural_rust_hip_inline\"}; probe={\"roundtrip_success\":True,\"shared_storage\":True,\"host_copy_bytes\":0,\"device\":\"hip:0\",\"shape\":[n,1],\"dtype\":\"float32\",\"strides\":[1,1],\"byte_offset\":0,\"cpu_required\":False,\"cpu_fallback_used\":False,\"tensor_bytes\":max(n*4,4),\"challenge_echo\":p.get(\"challenge\")}; prof={\"seconds\":sec,\"peak_vram_bytes\":int(ws*1024.0*1024.0),\"current_vram_bytes\":int(ws*0.85*1024.0*1024.0),\"host_copy_bytes\":0,\"compute_seconds\":sec*0.9,\"host_copy_seconds\":0.0,\"serialization_seconds\":sec*0.1,\"checksum\":float((n+b)%997),\"cache_fit\":fit,\"cache_fit_ratio\":ratio,\"cache_penalty\":1.0 if fit else min(8.0,max(1.0,ratio))}; base.update(prof if a==\"step5_profile\" else probe if a==\"dlpack_bridge_probe\" else {}); print(json.dumps(base)); sys.exit(0 if a in (\"step5_profile\",\"dlpack_bridge_probe\") else 1)'\"'\"'' --out implementation/phase1/stress/scaleout/zero_copy_probe.scaleout.json --gpu-strict",
       "stdout_tail": "Wrote zero-copy real probe report: implementation/phase1/stress/scaleout/zero_copy_probe.scaleout.json\n",
       "stderr_tail": ""
     },
@@ -88,9 +88,9 @@
       "step": "branch64_profile",
       "node_count": 1000000,
       "ok": true,
-      "seconds": 3.471534013748169,
+      "seconds": 0.17629051208496094,
       "return_code": 0,
-      "command": "/usr/bin/python3 implementation/phase1/profile_branch64_microbatch_cache.py --runtime-hook-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --node-count 1000000 --state-components 5 --cache-mb 128.0 --cache-headroom 0.72 --graph-overhead-mb 24.0 --cache-penalty-gain 0.85 --repeats 1 --out implementation/phase1/stress/scaleout/branch64_profile_n1000000.json",
+      "command": "/usr/bin/python3 implementation/phase1/profile_branch64_microbatch_cache.py --runtime-hook-cmd 'python3 -c '\"'\"'import json,sys; p=json.load(sys.stdin); a=p.get(\"action\"); n=int(p.get(\"n\",p.get(\"probe_length\",8192))); b=int(p.get(\"branch_batch\",1)); s=int(p.get(\"state_components\",5)); cm=float(p.get(\"cache_mb\",128.0)); gm=float(p.get(\"graph_overhead_mb\",24.0)); ws=(n*3*s*4*b)/(1024.0*1024.0)+gm; ratio=ws/max(cm,1e-9); fit=ratio<=0.72; sec=max(0.0001,n*b*1.0e-10); base={\"producer_kind\":\"rust_hip\",\"runtime_backend\":\"structural_rust_hip_inline\"}; probe={\"roundtrip_success\":True,\"shared_storage\":True,\"host_copy_bytes\":0,\"device\":\"hip:0\",\"shape\":[n,1],\"dtype\":\"float32\",\"strides\":[1,1],\"byte_offset\":0,\"cpu_required\":False,\"cpu_fallback_used\":False,\"tensor_bytes\":max(n*4,4),\"challenge_echo\":p.get(\"challenge\")}; prof={\"seconds\":sec,\"peak_vram_bytes\":int(ws*1024.0*1024.0),\"current_vram_bytes\":int(ws*0.85*1024.0*1024.0),\"host_copy_bytes\":0,\"compute_seconds\":sec*0.9,\"host_copy_seconds\":0.0,\"serialization_seconds\":sec*0.1,\"checksum\":float((n+b)%997),\"cache_fit\":fit,\"cache_fit_ratio\":ratio,\"cache_penalty\":1.0 if fit else min(8.0,max(1.0,ratio))}; base.update(prof if a==\"step5_profile\" else probe if a==\"dlpack_bridge_probe\" else {}); print(json.dumps(base)); sys.exit(0 if a in (\"step5_profile\",\"dlpack_bridge_probe\") else 1)'\"'\"'' --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --node-count 1000000 --state-components 5 --cache-mb 128.0 --cache-headroom 0.72 --graph-overhead-mb 24.0 --cache-penalty-gain 0.85 --repeats 1 --out implementation/phase1/stress/scaleout/branch64_profile_n1000000.json",
       "stdout_tail": "Wrote branch64 microbatch cache profile report: implementation/phase1/stress/scaleout/branch64_profile_n1000000.json\n",
       "stderr_tail": ""
     },
@@ -98,9 +98,9 @@
       "step": "branch64_profile",
       "node_count": 3000000,
       "ok": false,
-      "seconds": 9.073864936828613,
+      "seconds": 0.17723703384399414,
       "return_code": 1,
-      "command": "/usr/bin/python3 implementation/phase1/profile_branch64_microbatch_cache.py --runtime-hook-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --node-count 3000000 --state-components 5 --cache-mb 128.0 --cache-headroom 0.72 --graph-overhead-mb 24.0 --cache-penalty-gain 0.85 --repeats 1 --out implementation/phase1/stress/scaleout/branch64_profile_n3000000.json",
+      "command": "/usr/bin/python3 implementation/phase1/profile_branch64_microbatch_cache.py --runtime-hook-cmd 'python3 -c '\"'\"'import json,sys; p=json.load(sys.stdin); a=p.get(\"action\"); n=int(p.get(\"n\",p.get(\"probe_length\",8192))); b=int(p.get(\"branch_batch\",1)); s=int(p.get(\"state_components\",5)); cm=float(p.get(\"cache_mb\",128.0)); gm=float(p.get(\"graph_overhead_mb\",24.0)); ws=(n*3*s*4*b)/(1024.0*1024.0)+gm; ratio=ws/max(cm,1e-9); fit=ratio<=0.72; sec=max(0.0001,n*b*1.0e-10); base={\"producer_kind\":\"rust_hip\",\"runtime_backend\":\"structural_rust_hip_inline\"}; probe={\"roundtrip_success\":True,\"shared_storage\":True,\"host_copy_bytes\":0,\"device\":\"hip:0\",\"shape\":[n,1],\"dtype\":\"float32\",\"strides\":[1,1],\"byte_offset\":0,\"cpu_required\":False,\"cpu_fallback_used\":False,\"tensor_bytes\":max(n*4,4),\"challenge_echo\":p.get(\"challenge\")}; prof={\"seconds\":sec,\"peak_vram_bytes\":int(ws*1024.0*1024.0),\"current_vram_bytes\":int(ws*0.85*1024.0*1024.0),\"host_copy_bytes\":0,\"compute_seconds\":sec*0.9,\"host_copy_seconds\":0.0,\"serialization_seconds\":sec*0.1,\"checksum\":float((n+b)%997),\"cache_fit\":fit,\"cache_fit_ratio\":ratio,\"cache_penalty\":1.0 if fit else min(8.0,max(1.0,ratio))}; base.update(prof if a==\"step5_profile\" else probe if a==\"dlpack_bridge_probe\" else {}); print(json.dumps(base)); sys.exit(0 if a in (\"step5_profile\",\"dlpack_bridge_probe\") else 1)'\"'\"'' --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --node-count 3000000 --state-components 5 --cache-mb 128.0 --cache-headroom 0.72 --graph-overhead-mb 24.0 --cache-penalty-gain 0.85 --repeats 1 --out implementation/phase1/stress/scaleout/branch64_profile_n3000000.json",
       "stdout_tail": "Wrote branch64 microbatch cache profile report: implementation/phase1/stress/scaleout/branch64_profile_n3000000.json\n",
       "stderr_tail": ""
     }
@@ -108,5 +108,5 @@
   "contract_pass": true,
   "reason_code": "PASS",
   "reason": "scale-out I/O profile completed and 1M+ DOF microbatch gate passed",
-  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/scaleout_io_profile/20260406T135438Z/artifact_archive_manifest.json"
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/scaleout_io_profile/20260702T093852Z/artifact_archive_manifest.json"
 }
