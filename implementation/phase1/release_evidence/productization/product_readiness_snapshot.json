@@ -3100,7 +3100,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T18:25:29.113368+00:00",
+  "generated_at": "2026-07-02T18:30:02.888228+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3128,9 +3128,9 @@
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:cc920ef0d8637fef6648159ae981e2bc5397f32b2a9a5b6d574f4341bb766b7e",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2fb1dd88fb3e9a7bf4cda00971cb5cdac62fbca1d475eeecf6c2b67e8edcb3a3",
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:c5945a2ffa3e8c6bbf8c8ce6fef84571ddf4212a1af68d8b269c7c20b1a3788c",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:ffc2c9fdfb3c4e017821a356f73f5b09c881e2ac8f4d2e6547446a945a1d57ba",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:56d639eac6f8471f1fe9dfcdb3d9f33d9397e1603765631d9b6600009c7fef38",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:63493813e7abeeac46bacf5ff51dec9845dfc853e43e292d821079fcc552a2ee",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:764c11da8604f2cf9b4d5744baabc4b71f06bc8516ce78514c4f40f7a27f641a",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:35f54a2139cb5f348658bbb5132ae0c298faa138698dbae53ed1ed1e0434c0f2",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:7fbe12edf47a44996868ef7aa47b2f5508a04b035d76c520e7e4de6c52a9a078",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:c8f173f081082c0306697c0a046e813491f3367936241b644a10c2f4369afa30",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -3442,7 +3442,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "964a7275ace05c46d832f367531e6e8460febc09",
+  "source_commit_sha": "f8e949ca63c2c8a9ecc9a92c140e41c4c9d77af2",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3770,7 +3770,16 @@
       {
         "artifact": "g1_f2g_f2h_cause_narrowing_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json"
+          "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
         ],
         "generated_at": "2026-07-02T18:25:13.674571+00:00",
         "input_checksum_present": true,
@@ -4000,68 +4009,62 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
-          "scripts/build_developer_preview_final_gate_owner_packet.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_product_development_roadmap.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/build_structural_scope_owner_review_packet.py",
-          "tests/test_build_developer_preview_final_gate_owner_packet.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_product_development_roadmap.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py"
+          "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
         ],
-        "generated_at": "2026-07-02T17:37:26.275687+00:00",
+        "generated_at": "2026-07-02T18:29:41.999676+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "7cab0311a6cf1ec65541c66b848d75396af69a6e",
+        "source_commit_sha": "a60eaa2c143d9a08af333fe15382dbaa8d94ff73",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
-          "scripts/build_developer_preview_final_gate_owner_packet.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_product_development_roadmap.py",
-          "tests/test_build_developer_preview_final_gate_owner_packet.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_product_development_roadmap.py"
+          "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
         ],
-        "generated_at": "2026-07-02T17:57:21.156645+00:00",
+        "generated_at": "2026-07-02T18:28:48.156843+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "8a8acb76002fed95633461014c61516dfbee3318",
+        "source_commit_sha": "a60eaa2c143d9a08af333fe15382dbaa8d94ff73",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
-          "scripts/build_developer_preview_final_gate_owner_packet.py",
-          "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_product_development_roadmap.py",
-          "tests/test_build_developer_preview_final_gate_owner_packet.py",
-          "tests/test_build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_product_development_roadmap.py"
+          "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
+          "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
         ],
-        "generated_at": "2026-07-02T17:57:21.213526+00:00",
+        "generated_at": "2026-07-02T18:29:41.953204+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "8a8acb76002fed95633461014c61516dfbee3318",
+        "source_commit_sha": "a60eaa2c143d9a08af333fe15382dbaa8d94ff73",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
