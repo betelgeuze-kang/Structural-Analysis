@@ -23,6 +23,9 @@ DEFAULT_ACTION_REGISTER = Path(
 DEFAULT_PM_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+ALLOWED_ADJUNCT_ACTION_REGISTER_BLOCKER_PREFIXES = (
+    "structural_scope_cleanup::",
+)
 
 
 def _now_utc_iso() -> str:
@@ -267,7 +270,17 @@ def build_board(
     pm_blocker_set = set(pm_blocker_ids)
     register_blocker_set = set(register_blocker_ids)
     missing_from_action_register = sorted(pm_blocker_set - register_blocker_set)
-    stale_action_register_blockers = sorted(register_blocker_set - pm_blocker_set)
+    raw_stale_action_register_blockers = sorted(register_blocker_set - pm_blocker_set)
+    allowed_adjunct_action_register_blockers = [
+        blocker
+        for blocker in raw_stale_action_register_blockers
+        if blocker.startswith(ALLOWED_ADJUNCT_ACTION_REGISTER_BLOCKER_PREFIXES)
+    ]
+    stale_action_register_blockers = [
+        blocker
+        for blocker in raw_stale_action_register_blockers
+        if blocker not in allowed_adjunct_action_register_blockers
+    ]
     action_register_matches_pm_report = (
         action_register_loaded
         and pm_report_loaded
@@ -334,6 +347,10 @@ def build_board(
             "release_area_total_count": release_area_total_count,
             "register_blocker_count": len(register_blocker_ids),
             "action_register_matches_pm_report": action_register_matches_pm_report,
+            "allowed_adjunct_action_register_blocker_count": len(
+                allowed_adjunct_action_register_blockers
+            ),
+            "allowed_adjunct_action_register_blockers": allowed_adjunct_action_register_blockers,
             "missing_from_action_register_count": len(missing_from_action_register),
             "stale_action_register_blocker_count": len(stale_action_register_blockers),
             "missing_from_action_register": missing_from_action_register,

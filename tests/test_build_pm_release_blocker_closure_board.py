@@ -254,6 +254,60 @@ def test_build_board_blocks_stale_action_register(tmp_path: Path) -> None:
     ]
 
 
+def test_build_board_allows_structural_scope_cleanup_adjunct_handoff(
+    tmp_path: Path,
+) -> None:
+    pm_report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: BLOCKED | release_areas=BLOCKED",
+            "full_release_gate_ready": False,
+            "full_release_blockers": ["security::license_status_not_configured"],
+        },
+    )
+    action_register = _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "contract_pass": False,
+            "summary": {"open_blocker_count": 2, "all_open_blockers_have_handoff": True},
+            "rows": [
+                {
+                    "blocker_id": "structural_scope_cleanup::owner_review_decisions_pending",
+                    "owner": "release_scope_owner",
+                    "external_input_required": True,
+                    "owner_input_required": True,
+                    "next_action": "Record owner decisions for quarantined non-structural paths.",
+                    "handoff_ready": True,
+                    "handoff_state": "external_owner_input_ready",
+                },
+                {
+                    "blocker_id": "security::license_status_not_configured",
+                    "owner": "product_legal_owner",
+                    "external_input_required": True,
+                    "owner_input_required": True,
+                    "next_action": "Attach license approval evidence.",
+                    "handoff_ready": True,
+                    "handoff_state": "external_owner_input_ready",
+                },
+            ],
+        },
+    )
+
+    payload = build_board_module.build_board(
+        action_register=action_register,
+        pm_report=pm_report,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_PM_RELEASE_BLOCKERS_OPEN"
+    assert payload["summary"]["action_register_matches_pm_report"] is True
+    assert payload["summary"]["missing_from_action_register"] == []
+    assert payload["summary"]["stale_action_register_blockers"] == []
+    assert payload["summary"]["allowed_adjunct_action_register_blockers"] == [
+        "structural_scope_cleanup::owner_review_decisions_pending"
+    ]
+
+
 def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     pm_report = _write_json(
         tmp_path / "pm_release_gate_report.json",

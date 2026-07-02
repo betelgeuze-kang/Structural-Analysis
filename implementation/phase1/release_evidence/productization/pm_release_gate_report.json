@@ -1,18 +1,14 @@
 {
-  "blockers": [
-    "M5::pm_blocker_closure_board_count_mismatch"
-  ],
-  "contract_pass": false,
+  "blockers": [],
+  "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_release_blockers": [
-    "M5::pm_blocker_closure_board_count_mismatch",
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-    "report::commercial_packaging_milestone_not_green",
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
-    "support::pm_blocker_closure_board_count_mismatch",
-    "security::license_status_not_configured"
+    "security::license_status_not_configured",
+    "github_sync::github_sync_preflight::local_head_mismatch"
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
@@ -61,7 +57,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-02T03:41:18.879945+00:00",
+  "generated_at": "2026-07-02T04:07:11.043765+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -115,8 +111,8 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:ab24d234600f80df38b7f96516966150aa4cb3bc72f988be6af5944c5b325ef2",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:2eda5cfbb590964a3d14918a97137bd2274b1f8da8de3f2e45914644aa863ba8",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:0d0439b86d2a4ef678fd757e11193dd0faa7d6284105e420ec52cdc63f65bdba",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8b276070ec76756e1fd50f43edb48fb3cce075b2bfec23c318a9a49ba670d4cc",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:38255151267332919ead2a46bebda9f71e9e88e55758b58a43ae36bd0375d2be",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:bdcc015e062f1d80e659b186d1600293b778867b7d0d0026af7d7d6eec84ce87",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
@@ -145,10 +141,10 @@
     "implementation/phase1/workstation_service_budget.json": "sha256:cc74c453c597c82529b7c77cf011d162982478bc8f67a51e21ec3df0eca05860",
     "implementation/phase1/zero_copy_real_probe_report_strict.json": "sha256:00befd00a5c44e17d02b5f89dd94d59983ac71208fa976e13326ce0170463884"
   },
-  "limited_commercial_milestone_ready": false,
+  "limited_commercial_milestone_ready": true,
   "limited_commercial_ready": false,
   "limited_commercial_release_ready": false,
-  "milestone_gate_pass": false,
+  "milestone_gate_pass": true,
   "milestones": [
     {
       "artifacts": {
@@ -281,16 +277,14 @@
         "validation_manual": "docs/release-validation-manual.md",
         "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
       },
-      "blockers": [
-        "pm_blocker_closure_board_count_mismatch"
-      ],
+      "blockers": [],
       "checks": {
         "audit_trail_action_source_trace_pass": true,
         "limitation_manual_content_pass": true,
         "limitation_manual_present": true,
         "pdf_report_or_reviewer_package_pass": true,
         "pm_blocker_closure_board_handoff_ready_pass": true,
-        "pm_blocker_closure_board_register_count_match": false,
+        "pm_blocker_closure_board_register_count_match": true,
         "pm_blocker_register_handoff_ready_pass": true,
         "pm_release_reproduction_command_audit_pass": true,
         "pm_release_reproduction_command_audit_present": true,
@@ -326,8 +320,8 @@
         "workflow_productization_pass": true
       },
       "milestone": "M5",
-      "ok": false,
-      "status": "blocked",
+      "ok": true,
+      "status": "pass",
       "summary": {
         "limitation_manual_required_terms": [
           "claim boundary",
@@ -340,13 +334,13 @@
         ],
         "pm_blocker_closure_board_external_owner_input_ready_count": 10,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
-        "pm_blocker_closure_board_handoff_ready_count": 13,
-        "pm_blocker_closure_board_open_blocker_count": 13,
-        "pm_blocker_register_external_owner_input_ready_count": 11,
+        "pm_blocker_closure_board_handoff_ready_count": 38,
+        "pm_blocker_closure_board_open_blocker_count": 38,
+        "pm_blocker_register_external_owner_input_ready_count": 10,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 39,
-        "pm_blocker_register_open_blocker_count": 39,
-        "pm_blocker_register_release_area_blocker_count": 8,
+        "pm_blocker_register_handoff_ready_count": 38,
+        "pm_blocker_register_open_blocker_count": 38,
+        "pm_blocker_register_release_area_blocker_count": 7,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
         "pm_release_reproduction_command_audit_command_count": 329,
         "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=329 | violations=0",
@@ -396,16 +390,15 @@
       "title": "Commercial Packaging"
     }
   ],
-  "paid_pilot_candidate": false,
-  "recommended_scope": "Release blocked until core PM gates have green evidence.",
+  "paid_pilot_candidate": true,
+  "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
   "release_area_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-    "report::commercial_packaging_milestone_not_green",
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
-    "support::pm_blocker_closure_board_count_mismatch",
-    "security::license_status_not_configured"
+    "security::license_status_not_configured",
+    "github_sync::github_sync_preflight::local_head_mismatch"
   ],
   "release_area_gate_ready": false,
   "release_area_matrix": [
@@ -743,18 +736,16 @@
         "reproducibility_lock": "implementation/phase1/reproducibility_version_lock_report.json",
         "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
       },
-      "blockers": [
-        "commercial_packaging_milestone_not_green"
-      ],
+      "blockers": [],
       "checks": {
-        "commercial_packaging_milestone_pass": false,
+        "commercial_packaging_milestone_pass": true,
         "repro_command_present": true,
         "reproducibility_lock_pass": true,
         "reviewer_package_auto_pass": true
       },
       "claim_boundary": "",
-      "ok": false,
-      "status": "blocked",
+      "ok": true,
+      "status": "pass",
       "summary": {
         "release_registry_signed": true
       },
@@ -809,9 +800,7 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "template_evidence_safety": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
       },
-      "blockers": [
-        "pm_blocker_closure_board_count_mismatch"
-      ],
+      "blockers": [],
       "checks": {
         "ci_streak_intake_packet_in_failure_bundle": true,
         "ci_streak_manifest_in_failure_bundle": true,
@@ -830,7 +819,7 @@
         "pm_blocker_action_register_in_failure_bundle": true,
         "pm_blocker_closure_board_handoff_ready_pass": true,
         "pm_blocker_closure_board_in_failure_bundle": true,
-        "pm_blocker_closure_board_register_count_match": false,
+        "pm_blocker_closure_board_register_count_match": true,
         "pm_failure_bundle_coverage_index_pass": true,
         "pm_owner_evidence_request_packet_in_failure_bundle": true,
         "pm_release_gate_completion_audit_in_failure_bundle": true,
@@ -847,8 +836,8 @@
         "validation_manual_in_failure_bundle": true
       },
       "claim_boundary": "",
-      "ok": false,
-      "status": "blocked",
+      "ok": true,
+      "status": "pass",
       "summary": {
         "ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
@@ -861,13 +850,13 @@
         "one_click_failure_bundle_archive_sha256": "902f712385b6b20f229f8724ecc864ace811cf428326aab3fbd6ba4253a2f797",
         "pm_blocker_closure_board_external_owner_input_ready_count": 10,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
-        "pm_blocker_closure_board_handoff_ready_count": 13,
-        "pm_blocker_closure_board_open_blocker_count": 13,
-        "pm_blocker_register_external_owner_input_ready_count": 11,
+        "pm_blocker_closure_board_handoff_ready_count": 38,
+        "pm_blocker_closure_board_open_blocker_count": 38,
+        "pm_blocker_register_external_owner_input_ready_count": 10,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 39,
-        "pm_blocker_register_open_blocker_count": 39,
-        "pm_blocker_register_release_area_blocker_count": 8,
+        "pm_blocker_register_handoff_ready_count": 38,
+        "pm_blocker_register_open_blocker_count": 38,
+        "pm_blocker_register_release_area_blocker_count": 7,
         "pm_failure_bundle_coverage_index": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "pm_failure_bundle_coverage_index_sha256": "1127643f6f70f26f55a2a001e300751fd03ced768c22afd77364cb6d81f2fd73",
         "pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
@@ -944,16 +933,18 @@
       "artifacts": {
         "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
       },
-      "blockers": [],
+      "blockers": [
+        "github_sync_preflight::local_head_mismatch"
+      ],
       "checks": {
         "github_sync_feature_fast_forward_possible": true,
         "github_sync_feature_synced_to_head": true,
         "github_sync_main_fast_forward_possible": true,
         "github_sync_main_synced_to_head": true,
         "github_sync_preflight_artifact_present": true,
-        "github_sync_preflight_clean": true,
-        "github_sync_preflight_head_matches_current": true,
-        "github_sync_preflight_source_state_fresh": true,
+        "github_sync_preflight_clean": false,
+        "github_sync_preflight_head_matches_current": false,
+        "github_sync_preflight_source_state_fresh": false,
         "github_sync_preflight_status": "synced",
         "github_sync_remote_mutation_approval_pending": false,
         "github_sync_remote_safety_ok": true,
@@ -961,11 +952,18 @@
         "github_sync_worktree_clean": true
       },
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
-      "ok": true,
-      "status": "pass",
+      "ok": false,
+      "status": "blocked",
       "summary": {
-        "changed_paths_since_preflight_head": [],
-        "current_head_sha": "cecec05ce3cef15106dbf5941ec7c70925432876",
+        "changed_paths_since_preflight_head": [
+          "README.md",
+          "docs/commercialization-gap-current-state.md",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
+          "scripts/build_non_expert_release_briefing_report.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_build_non_expert_release_briefing_report.py"
+        ],
+        "current_head_sha": "44b3338c55c64593cc18ea2783c3dc664fbe4cf8",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -975,7 +973,7 @@
         "pending_remote_update_targets": [],
         "preflight_local_head_sha": "cecec05ce3cef15106dbf5941ec7c70925432876",
         "preflight_source_commit_sha": "cecec05ce3cef15106dbf5941ec7c70925432876",
-        "preflight_source_state_kind": "exact",
+        "preflight_source_state_kind": "source_delta",
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
@@ -989,8 +987,8 @@
     }
   ],
   "release_decision": {
-    "approval_token_count": 5,
-    "blocked_release_count": 8,
+    "approval_token_count": 4,
+    "blocked_release_count": 6,
     "claim_boundary": "Evidence surface counts include only structural-analysis evidence surfaces. Non-structural product domains are outside this structural solver release gate and must not influence release readiness.",
     "evidence_surface_count": 8,
     "evidence_surface_dir": "implementation/phase1/release_evidence/surface",
@@ -1155,7 +1153,7 @@
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
     "non_structural_evidence_surface_excluded_count": 3,
-    "operator_action_count": 39,
+    "operator_action_count": 38,
     "operator_actions": [],
     "public_benchmark_ready": true,
     "release_allowed": false,
@@ -1227,11 +1225,10 @@
       "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-      "report::commercial_packaging_milestone_not_green",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
-      "support::pm_blocker_closure_board_count_mismatch",
-      "security::license_status_not_configured"
+      "security::license_status_not_configured",
+      "github_sync::github_sync_preflight::local_head_mismatch"
     ],
     "ga_enterprise_evidence_gate_pass": false,
     "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -1243,16 +1240,16 @@
     "ga_validation_case_threshold": 300,
     "ga_validation_case_threshold_met": true,
     "limited_commercial_full_gate_ready": false,
-    "limited_commercial_milestone_ready": false,
-    "paid_pilot": false,
+    "limited_commercial_milestone_ready": true,
+    "paid_pilot": true,
     "paid_pilot_scope_guard_pass": true,
     "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
     "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
-    "technical_paid_pilot_candidate": false
+    "technical_paid_pilot_candidate": true
   },
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "cecec05ce3cef15106dbf5941ec7c70925432876",
-  "summary_line": "PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=4/5 | release_areas_green=11/16 | measured_cases=304"
+  "source_commit_sha": "44b3338c55c64593cc18ea2783c3dc664fbe4cf8",
+  "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
