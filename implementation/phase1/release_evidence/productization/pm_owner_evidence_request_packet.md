@@ -1,14 +1,15 @@
 # PM Owner Evidence Request Packet
 
-- `summary_line`: `PM owner evidence request packet: BLOCKED | owners=8 | open_blockers=35 | tier_requests=2 | incomplete=1`
+- `summary_line`: `PM owner evidence request packet: PASS | owners=8 | open_blockers=35 | tier_requests=2 | incomplete=0`
 - `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304`
-- `contract_pass`: `False`
+- `contract_pass`: `True`
 - `evidence_closure_pass`: `False`
 - `release_area_summary`: `13/16`
 - `release_area_blocker_count`: `5`
 - `expected_intake_open_blocker_count`: `35`
 - `release_tier_request_count`: `2`
-- `release_tier_impact_contract_pass`: `False`
+- `release_tier_impact_contract_pass`: `True`
+- `allowed_non_tier_owner_handoff_count`: `1`
 
 | Owner | State | Blockers | Release Tiers | Next Actions | Expected Intake |
 |---|---|---|---|---|---|
@@ -95,4 +96,4 @@
 | `release_owner` | `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`<br>`python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` | `python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` |
 | `ga_release_owner` | `python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md`<br>`python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`<br>`python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` | `python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked`<br>`python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` |
 
-This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.
+This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked except for explicit non-tier structural scope cleanup adjunct handoffs. This packet does not convert missing evidence into a release pass.

@@ -11,13 +11,13 @@
     "pm_milestones": "5/5",
     "pm_release_areas": "13/16",
     "release_ready": false,
-    "snapshot_blocker_count": 87,
+    "snapshot_blocker_count": 88,
     "snapshot_status": "stale_or_inconsistent",
     "workstation_delivery_ready": true
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 62.5,
-  "generated_at": "2026-07-02T04:24:10.470503+00:00",
+  "generated_at": "2026-07-02T04:30:35.728440+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:6c08d327691796c5108262267e1f89f928f0addd36c6d4d3d9c4c66eb52fb6d8",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:e3a0f8c98e12ff31c1422f532cd7a46e7023713b189cd54d1cf164bc071622ee",
@@ -29,7 +29,7 @@
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:ca58151d432993bb1851ff196a45a55c3dd80b6fe38b306b863cdf9a2fbdc7c2",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:685c73a02fbfc4cc0eb5a9bb30505c9f49d7137d99090dd55458f4ddf5cc816f",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:4764e3c31f16d1f85f3a23e7c4aebf641c31991d22e6343837a8c7985c95e6be",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:b7a43406b8ea736ecfec9c6a20c9b70ebe202ceb4cedcd58858162b2e5278dfc",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:4ed67a10ede22e3bbb2a34e548a9ff011168a26dd42ae5c0a1eb7bcea6896d06",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9a75f30c000fe05713ab0ebfc8b56c1de5fcddde2857b8b768144c0da1503217",
     "scripts/build_structural_product_development_roadmap.py": "sha256:2b7c4189a272f2112c3c05bd0a562df7c80f39b2a5d33f35b95eac5907fb4d8c"
   },
@@ -175,7 +175,7 @@
       "summary": {
         "fresh_artifact_count": 14,
         "fresh_artifact_pass_count": 14,
-        "snapshot_blocker_count": 87,
+        "snapshot_blocker_count": 88,
         "stale_or_inconsistent": true
       }
     },
@@ -404,7 +404,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "f5cb904005cd0619321a2f6537f9ddabbf73556f",
+  "source_commit_sha": "6292b493dbecd4660f9349f40a7dd37e750fa608",
   "stage_average_progress_percent": 46.5,
   "stage_count": 7,
   "status": "blocked",

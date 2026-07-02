@@ -354,6 +354,59 @@ def test_build_packet_blocks_when_reviewer_handoff_omits_release_tier_impact(tmp
     assert payload["owner_packets"][0]["request_rows"][0]["blocked_release_tiers"] == []
 
 
+def test_build_packet_allows_structural_scope_cleanup_without_release_tier(tmp_path: Path) -> None:
+    scope_row = _row(
+        "structural_scope_cleanup::owner_review_decisions_pending",
+        owner="release_scope_owner",
+        owner_action="Record owner delete/extract decisions for quarantined scope paths.",
+        intake_path=(
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decision_application_plan.json"
+        ),
+    )
+    scope_row["scope"] = "release_surface_scope"
+    scope_row["title"] = "Structural scope cleanup"
+    action_register = _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY",
+            "summary": {"open_blocker_count": 1},
+            "rows": [scope_row],
+        },
+    )
+    reviewer_handoff = _write_json(
+        tmp_path / "pm_release_gate_reviewer_handoff.json",
+        {
+            "release_tier_rows": [
+                {
+                    "requirement_id": "release_tier.limited_commercial_full_gate_ready",
+                    "status": "blocked",
+                    "blockers": ["security::license_status_not_configured"],
+                    "next_action": "Close release-area blockers.",
+                    "claim_boundary": "Limited Commercial cannot be promoted while blockers remain.",
+                }
+            ]
+        },
+    )
+
+    payload = build_packet_module.build_packet(
+        action_register=action_register,
+        reviewer_handoff=reviewer_handoff,
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["reason_code"] == "PASS"
+    assert payload["summary"]["release_tier_impact_contract_pass"] is True
+    assert payload["summary"]["missing_release_tier_impact_count"] == 0
+    assert payload["summary"]["allowed_non_tier_owner_handoff_count"] == 1
+    assert payload["allowed_non_tier_owner_handoffs"] == [
+        "structural_scope_cleanup::owner_review_decisions_pending"
+    ]
+    assert payload["missing_release_tier_impacts"] == []
+    assert payload["owner_packets"][0]["request_rows"][0]["blocked_release_tiers"] == []
+    assert "allowed_non_tier_owner_handoff_count" in build_packet_module._markdown(payload)
+
+
 def test_build_packet_surfaces_blocked_release_tier_owner_requests(tmp_path: Path) -> None:
     ga_intake = _write_json(
         tmp_path / "ga_enterprise_signoff_intake_packet.json",

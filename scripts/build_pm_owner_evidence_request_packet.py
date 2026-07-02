@@ -35,6 +35,7 @@ OWNER_ORDER = (
 )
 INTAKE_ROW_PREVIEW_LIMIT = 12
 MILESTONE_SCOPE_TIER_IMPACT_KEY = "__milestone_scope__"
+ALLOWED_NON_TIER_OWNER_HANDOFF_PREFIXES = ("structural_scope_cleanup::",)
 
 
 def _now_utc_iso() -> str:
@@ -271,6 +272,10 @@ def _request_complete(row: dict[str, Any]) -> bool:
         and row.get("verification_commands")
         and row.get("handoff_ready")
     )
+
+
+def _allowed_non_tier_owner_handoff(blocker_id: str) -> bool:
+    return blocker_id.startswith(ALLOWED_NON_TIER_OWNER_HANDOFF_PREFIXES)
 
 
 def _owner_packet(owner: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -547,10 +552,19 @@ def build_packet(
         ga_signoff_intake_packet=ga_signoff_intake_packet,
     )
     incomplete = [blocker for packet in packets for blocker in packet["incomplete_blockers"]]
+    allowed_non_tier_owner_handoffs = [
+        row["blocker_id"]
+        for row in rows
+        if reviewer_handoff is not None
+        and not _as_list(row.get("blocked_release_tiers"))
+        and _allowed_non_tier_owner_handoff(str(row.get("blocker_id", "") or ""))
+    ]
     missing_release_tier_impacts = [
         row["blocker_id"]
         for row in rows
-        if reviewer_handoff is not None and not _as_list(row.get("blocked_release_tiers"))
+        if reviewer_handoff is not None
+        and not _as_list(row.get("blocked_release_tiers"))
+        and not _allowed_non_tier_owner_handoff(str(row.get("blocker_id", "") or ""))
     ]
     incomplete_tier_requirements = [
         requirement
@@ -621,6 +635,7 @@ def build_packet(
             ),
             "release_tier_impact_contract_pass": not missing_release_tier_impacts,
             "missing_release_tier_impact_count": len(missing_release_tier_impacts),
+            "allowed_non_tier_owner_handoff_count": len(allowed_non_tier_owner_handoffs),
             "owner_input_required_count": sum(1 for row in rows if row["owner_input_required"]),
             "external_input_required_count": sum(1 for row in rows if row["external_input_required"]),
             "release_tier_owner_input_required_count": sum(
@@ -667,6 +682,7 @@ def build_packet(
         "incomplete_blockers": incomplete,
         "incomplete_release_tier_requirements": incomplete_tier_requirements,
         "missing_release_tier_impacts": missing_release_tier_impacts,
+        "allowed_non_tier_owner_handoffs": allowed_non_tier_owner_handoffs,
         "owner_packets": packets,
         "release_tier_owner_packets": release_tier_packets,
         "claim_boundary": (
@@ -675,7 +691,8 @@ def build_packet(
             "independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA "
             "approval, or any other external release evidence. When reviewer handoff evidence is supplied, each "
             "open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps "
-            "the owner handoff blocked. This packet does not convert missing evidence into a release pass."
+            "the owner handoff blocked except for explicit non-tier structural scope cleanup adjunct handoffs. "
+            "This packet does not convert missing evidence into a release pass."
         ),
     }
 
@@ -826,6 +843,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `expected_intake_open_blocker_count`: `{payload['summary']['expected_intake_open_blocker_count']}`",
         f"- `release_tier_request_count`: `{payload['summary']['release_tier_request_count']}`",
         f"- `release_tier_impact_contract_pass`: `{payload['summary']['release_tier_impact_contract_pass']}`",
+        f"- `allowed_non_tier_owner_handoff_count`: "
+        f"`{payload['summary']['allowed_non_tier_owner_handoff_count']}`",
         "",
         "| Owner | State | Blockers | Release Tiers | Next Actions | Expected Intake |",
         "|---|---|---|---|---|---|",

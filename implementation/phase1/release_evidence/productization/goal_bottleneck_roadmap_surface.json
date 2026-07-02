@@ -14,7 +14,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_operator_evidence_handoff": {},
   "first_operator_evidence_handoff_slot": {},
-  "generated_at": "2026-07-02T04:24:10.473269+00:00",
+  "generated_at": "2026-07-02T04:30:35.736209+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:b13804399618a5175c440d64349b8df10b610a7cb0a577da5bafe344e8112a0e",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:4764e3c31f16d1f85f3a23e7c4aebf641c31991d22e6343837a8c7985c95e6be",
@@ -435,7 +435,7 @@
   "schema_version": "goal-bottleneck-roadmap-surface.v1",
   "science_evidence_surface_bottlenecks": [],
   "science_evidence_surface_status": {},
-  "source_commit_sha": "f5cb904005cd0619321a2f6537f9ddabbf73556f",
+  "source_commit_sha": "6292b493dbecd4660f9349f40a7dd37e750fa608",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

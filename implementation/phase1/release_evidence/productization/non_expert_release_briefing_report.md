@@ -1,18 +1,18 @@
 # Non-Expert Release Briefing
 
-Status: `ready_release_blocked`
+Status: `blocked_report_incomplete`
 Release allowed: `False`
-Primary blocker: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
+Primary blocker: `none`
 
 ## Plain Status
 
-Release is blocked. The product can remain in restricted alpha/beta preparation, but it must not be presented as fully release-ready.
+No plain-language status available.
 
 ## Human UX Gate
 
-- Status: `blocked`
-- Owner action: attach a passing human new-user observation record before claiming the UX release-area gate
-- Workflow steps passed: `0/5`
+- Status: `unknown`
+- Owner action: none
+- Workflow steps passed: `0/0`
 
 ## Scoped Release Blockers
 
@@ -24,8 +24,6 @@ Release is blocked. The product can remain in restricted alpha/beta preparation,
 
 ## Claim Boundaries
 
-- `do_not_claim_limited_commercial_release_until_release_allowed_true`
-- `do_not_replace_human_ux_observation_with_templates_or_automation`
 
 ## Report Boundary
 
