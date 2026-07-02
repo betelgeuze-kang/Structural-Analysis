@@ -530,8 +530,8 @@ python3 implementation/phase1/run_phased_multidomain_modules.py \
 python implementation/phase1/run_phase1_steps.py --out-dir implementation/phase1/step_outputs --repeats 3 --strict
 ```
 
-- `step1_fire_loop.json`은 release claim용 구조해석 산출물이 아니라 runtime-relaxation contract receipt입니다.
-- 주요 물리지표: `max_unbalanced_force`, `kinetic_energy`, `system_temperature`, hook exit/status metadata.
+- `step1_fire_loop.json`은 mock decay 루프가 아니라 `md3bead_soa.py`의 3-Bead(CA/SC/CB) 포스필드 완화 계산 결과를 기록합니다.
+- 주요 물리지표: `max_unbalanced_force`, `kinetic_energy`, `system_temperature`, `model=3bead_ca_sc_cb`
 
 실엔진 계측 강제 모드:
 
@@ -812,14 +812,15 @@ python implementation/phase1/run_phase1_topk_pipeline.py \
   --out-manifest implementation/phase1/pipeline_manifest.json
 ```
 
-- 파이프라인 런타임 훅은 release claim용 구조해석 훅을 명시적으로 넘겨야 합니다.
-- legacy non-structural runtime receipts are quarantined outside the structural solver release surface and must not be used as structural evidence.
+- 파이프라인 기본 런타임 훅은 `rust_hip_md3bead_hook.py`를 사용하며, `step1_case/step5_profile`가 Rust 3-Bead SoA 경로로 실행됩니다.
+- `rust_md3bead_parity_report.json`이 생성되며, Python 참조모델과 Rust 훅의 1:1 동치 여부를 CI gate에서 함께 판정합니다.
 
-### MGT Rust/HIP residual FFI probe
+### Rust 3-Bead 훅 단독 동치 검증
 
 ```bash
-python implementation/phase1/run_mgt_rust_hip_full_residual_ffi_probe.py \
-  --output-json implementation/phase1/release_evidence/productization/mgt_rust_hip_full_residual_ffi_followup376_probe.json
+python implementation/phase1/validate_md3bead_rust_parity.py \
+  --rust-hook-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
+  --out implementation/phase1/rust_md3bead_parity_report.json
 ```
 
 ### 비선형 Lennard-Jones 맵핑 커널 검증
@@ -846,7 +847,7 @@ python implementation/phase1/dynamic_time_history_contract_stub.py \
 
 ```bash
 python implementation/phase1/profile_branch64_microbatch_cache.py \
-  --runtime-hook-cmd "python3 implementation/phase1/engine_hook_stub.py" \
+  --runtime-hook-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
   --branches 64 \
   --chunk-candidates 64,32,16,8,4 \
   --node-count 100000 \
@@ -860,7 +861,7 @@ python implementation/phase1/profile_branch64_microbatch_cache.py \
 
 ```bash
 python implementation/phase1/profile_p0_engine_path.py \
-  --producer-cmd "python3 implementation/phase1/engine_hook_stub.py" \
+  --producer-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
   --allow-cpu-required \
   --out implementation/phase1/p0_engine_perf_report.json
 ```
@@ -1046,8 +1047,8 @@ python implementation/phase1/run_noise_sensitivity_stress.py \
   --out implementation/phase1/noise_sensitivity_stress_report.json
 
 python implementation/phase1/run_scaleout_io_profile.py \
-  --runtime-hook-cmd "python3 implementation/phase1/engine_hook_stub.py" \
-  --producer-cmd "python3 implementation/phase1/engine_hook_stub.py" \
+  --runtime-hook-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
+  --producer-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
   --dof-levels 100000,300000,1000000,3000000 \
   --allow-cpu-required \
   --out implementation/phase1/scaleout_io_profile_report.json
