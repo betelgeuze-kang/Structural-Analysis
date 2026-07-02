@@ -19,7 +19,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked except for explicit non-tier structural scope cleanup adjunct handoffs. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-07-02T07:45:34.042428+00:00",
+  "generated_at": "2026-07-02T15:08:00.187449+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -152,7 +152,7 @@
             "runner_precondition_pass": false,
             "runner_ready_runner_count": 0,
             "runner_status": "blocked",
-            "source_evidence_age_hours": 19.206,
+            "source_evidence_age_hours": 26.966,
             "source_evidence_freshness_pass": true,
             "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
             "source_evidence_pass": false,
@@ -373,7 +373,7 @@
               "runner_precondition_pass": false,
               "runner_ready_runner_count": 0,
               "runner_status": "blocked",
-              "source_evidence_age_hours": 19.206,
+              "source_evidence_age_hours": 26.966,
               "source_evidence_freshness_pass": true,
               "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
               "source_evidence_pass": false,
@@ -530,7 +530,7 @@
               "runner_precondition_pass": false,
               "runner_ready_runner_count": 0,
               "runner_status": "blocked",
-              "source_evidence_age_hours": 19.206,
+              "source_evidence_age_hours": 26.966,
               "source_evidence_freshness_pass": true,
               "source_evidence_generated_at": "2026-07-01T10:19:19.231347+00:00",
               "source_evidence_pass": false,
@@ -2400,43 +2400,35 @@
     },
     {
       "acceptance_criteria": [
-        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
-        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
-        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`",
-        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`",
-        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_runner_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`",
         "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-        "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`",
-        "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json` absent from `ga_enterprise_blockers`",
-        "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md` absent from `ga_enterprise_blockers`",
-        "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json` absent from `ga_enterprise_blockers`",
-        "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json` absent from `ga_enterprise_blockers`",
-        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
-        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
-        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`",
-        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`",
-        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
-        "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`",
-        "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json` absent from `ga_enterprise_blockers`",
-        "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz` absent from `ga_enterprise_blockers`",
-        "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json` absent from `ga_enterprise_blockers`",
-        "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz` absent from `ga_enterprise_blockers`"
+        "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`",
+        "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json` absent from `ga_enterprise_blockers`",
+        "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/run_solver_hip_e2e_contract.py` absent from `ga_enterprise_blockers`",
+        "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/zero_copy_real_probe_report_strict.json` absent from `ga_enterprise_blockers`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`",
+        "`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json` absent from `ga_enterprise_blockers`"
       ],
       "blocked_release_tiers": [
         "release_tier.ga_enterprise_evidence_gate_pass"
       ],
-      "blocker_count": 10,
+      "blocker_count": 6,
       "blocker_ids": [
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz"
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/run_solver_hip_e2e_contract.py",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/zero_copy_real_probe_report_strict.json",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
       ],
       "evidence_states": [
         "ready_for_pm_regeneration"
@@ -2451,33 +2443,31 @@
       "intake_lane_request_rows": [],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
-        "Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence."
+        "Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+        "Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence."
       ],
       "owner": "validation_lane_owner",
       "owner_input_required": false,
       "reproduction_commands": [
-        "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-        "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked"
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
       ],
       "request_rows": [
         {
           "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_runner_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`",
             "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`"
+            "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
+          "blocker_id": "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed",
           "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
           "evidence_artifacts": {
             "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
@@ -2490,10 +2480,9 @@
           "external_input_required": false,
           "handoff_ready": true,
           "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+          "next_action": "Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
           "owner_input_required": false,
           "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
             "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -2508,18 +2497,18 @@
         },
         {
           "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_runner_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`",
             "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json` absent from `ga_enterprise_blockers`"
+            "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
+          "blocker_id": "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
           "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
           "evidence_artifacts": {
             "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
@@ -2532,10 +2521,9 @@
           "external_input_required": false,
           "handoff_ready": true,
           "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+          "next_action": "Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
           "owner_input_required": false,
           "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
             "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -2550,18 +2538,18 @@
         },
         {
           "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_runner_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`",
             "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md` absent from `ga_enterprise_blockers`"
+            "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/run_solver_hip_e2e_contract.py` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
+          "blocker_id": "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/run_solver_hip_e2e_contract.py",
           "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
           "evidence_artifacts": {
             "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
@@ -2574,10 +2562,9 @@
           "external_input_required": false,
           "handoff_ready": true,
           "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+          "next_action": "Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
           "owner_input_required": false,
           "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
             "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -2592,18 +2579,18 @@
         },
         {
           "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_runner_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`",
             "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json` absent from `ga_enterprise_blockers`"
+            "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/zero_copy_real_probe_report_strict.json` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+          "blocker_id": "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/zero_copy_real_probe_report_strict.json",
           "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
           "evidence_artifacts": {
             "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
@@ -2616,10 +2603,9 @@
           "external_input_required": false,
           "handoff_ready": true,
           "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+          "next_action": "Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
           "owner_input_required": false,
           "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
             "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -2634,18 +2620,18 @@
         },
         {
           "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`",
             "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json` absent from `ga_enterprise_blockers`"
+            "`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
+          "blocker_id": "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
           "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
           "evidence_artifacts": {
             "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
@@ -2658,10 +2644,9 @@
           "external_input_required": false,
           "handoff_ready": true,
           "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+          "next_action": "Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
           "owner_input_required": false,
           "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
             "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -2676,18 +2661,18 @@
         },
         {
           "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`",
             "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed` absent from `ga_enterprise_blockers`"
+            "`fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
+          "blocker_id": "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
           "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
           "evidence_artifacts": {
             "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
@@ -2700,178 +2685,9 @@
           "external_input_required": false,
           "handoff_ready": true,
           "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+          "next_action": "Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
           "owner_input_required": false,
           "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
-            "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-          ],
-          "scope": "ga_enterprise",
-          "title": "fresh_full_validation",
-          "verification_commands": [
-            "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-          ]
-        },
-        {
-          "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
-            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json` absent from `ga_enterprise_blockers`"
-          ],
-          "blocked_release_tiers": [
-            "release_tier.ga_enterprise_evidence_gate_pass"
-          ],
-          "blocker_id": "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
-          "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
-          "evidence_artifacts": {
-            "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-          },
-          "evidence_state": "ready_for_pm_regeneration",
-          "expected_intake_artifact": "",
-          "expected_intake_detail": {},
-          "expected_intake_path": "",
-          "external_input_required": false,
-          "handoff_ready": true,
-          "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
-          "owner_input_required": false,
-          "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
-            "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-          ],
-          "scope": "ga_enterprise",
-          "title": "fresh_full_validation",
-          "verification_commands": [
-            "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-          ]
-        },
-        {
-          "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
-            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz` absent from `ga_enterprise_blockers`"
-          ],
-          "blocked_release_tiers": [
-            "release_tier.ga_enterprise_evidence_gate_pass"
-          ],
-          "blocker_id": "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
-          "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
-          "evidence_artifacts": {
-            "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-          },
-          "evidence_state": "ready_for_pm_regeneration",
-          "expected_intake_artifact": "",
-          "expected_intake_detail": {},
-          "expected_intake_path": "",
-          "external_input_required": false,
-          "handoff_ready": true,
-          "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
-          "owner_input_required": false,
-          "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
-            "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-          ],
-          "scope": "ga_enterprise",
-          "title": "fresh_full_validation",
-          "verification_commands": [
-            "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-          ]
-        },
-        {
-          "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
-            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json` absent from `ga_enterprise_blockers`"
-          ],
-          "blocked_release_tiers": [
-            "release_tier.ga_enterprise_evidence_gate_pass"
-          ],
-          "blocker_id": "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
-          "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
-          "evidence_artifacts": {
-            "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-          },
-          "evidence_state": "ready_for_pm_regeneration",
-          "expected_intake_artifact": "",
-          "expected_intake_detail": {},
-          "expected_intake_path": "",
-          "external_input_required": false,
-          "handoff_ready": true,
-          "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
-          "owner_input_required": false,
-          "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
-            "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-          ],
-          "scope": "ga_enterprise",
-          "title": "fresh_full_validation",
-          "verification_commands": [
-            "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-          ]
-        },
-        {
-          "acceptance_criteria": [
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`",
-            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
-            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
-            "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz` absent from `ga_enterprise_blockers`"
-          ],
-          "blocked_release_tiers": [
-            "release_tier.ga_enterprise_evidence_gate_pass"
-          ],
-          "blocker_id": "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
-          "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
-          "evidence_artifacts": {
-            "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-          },
-          "evidence_state": "ready_for_pm_regeneration",
-          "expected_intake_artifact": "",
-          "expected_intake_detail": {},
-          "expected_intake_path": "",
-          "external_input_required": false,
-          "handoff_ready": true,
-          "handoff_state": "local_remediation_ready",
-          "next_action": "Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
-          "owner_input_required": false,
-          "reproduction_commands": [
-            "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
             "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -2978,16 +2794,12 @@
         "family_validation_manual_signoff_missing",
         "customer_audit_failure_bundle_sla_missing",
         "customer_shadow::completed_shadow_case_count_below_minimum",
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
-        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/run_solver_hip_e2e_contract.py",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/zero_copy_real_probe_report_strict.json",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "ux::human_new_user_observation_missing_or_failed",
@@ -3255,16 +3067,12 @@
             "family_validation_manual_signoff_missing",
             "customer_audit_failure_bundle_sla_missing",
             "customer_shadow::completed_shadow_case_count_below_minimum",
-            "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
-            "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
-            "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
-            "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
-            "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
-            "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
-            "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
-            "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
-            "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
-            "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+            "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed",
+            "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+            "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/run_solver_hip_e2e_contract.py",
+            "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/zero_copy_real_probe_report_strict.json",
+            "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
+            "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.sha256_mismatch:implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
             "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
             "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
             "ux::human_new_user_observation_missing_or_failed",
@@ -3433,7 +3241,7 @@
   "schema_version": "pm-owner-evidence-request-packet.v1",
   "summary": {
     "allowed_non_tier_owner_handoff_count": 1,
-    "blocked_release_tier_impact_count": 24,
+    "blocked_release_tier_impact_count": 20,
     "evidence_closure_pass": false,
     "expected_intake_contract_pass_count": 2,
     "expected_intake_count": 6,
@@ -3449,8 +3257,8 @@
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "missing_release_tier_impact_count": 0,
-    "open_blocker_count": 20,
-    "open_blocker_with_release_tier_impact_count": 19,
+    "open_blocker_count": 16,
+    "open_blocker_with_release_tier_impact_count": 15,
     "owner_input_required_count": 10,
     "owner_packet_count": 8,
     "paid_pilot_candidate": true,
@@ -3465,5 +3273,5 @@
     "release_tier_owner_packet_count": 2,
     "release_tier_request_count": 2
   },
-  "summary_line": "PM owner evidence request packet: PASS | owners=8 | open_blockers=20 | tier_requests=2 | incomplete=0"
+  "summary_line": "PM owner evidence request packet: PASS | owners=8 | open_blockers=16 | tier_requests=2 | incomplete=0"
 }
