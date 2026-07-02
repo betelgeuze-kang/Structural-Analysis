@@ -913,6 +913,98 @@ def _release_surface_first_batch_decision_template(
     }
 
 
+def _release_surface_first_owner_action_packet(
+    *,
+    template: dict[str, Any],
+    intake: dict[str, Any],
+) -> dict[str, Any]:
+    if not template:
+        return {}
+    decision_rows = [
+        row for row in _as_list(template.get("decision_rows")) if isinstance(row, dict)
+    ]
+    pending_decision_count = int(intake.get("pending_decision_count", 0) or 0)
+    if bool(intake.get("ready_for_manual_cleanup_application")):
+        status = "owner_decisions_recorded_ready_for_manual_cleanup"
+    elif pending_decision_count:
+        status = "ready_for_owner_decision_request"
+    else:
+        status = _text(intake.get("status")) or "pending_owner_decisions"
+    return {
+        "schema_version": (
+            "structural-scope-release-surface-first-owner-action-packet.v1"
+        ),
+        "batch_id": "release_surface_first",
+        "status": status,
+        "ready_to_request_owner_decision": bool(decision_rows and pending_decision_count),
+        "path_area": "release_surface",
+        "path_count": len(decision_rows),
+        "paths": [_text(row.get("path")) for row in decision_rows],
+        "release_surface_owner_decision_required_count": pending_decision_count,
+        "pending_decision_count": pending_decision_count,
+        "current_intake_status": _text(intake.get("status")),
+        "current_intake_blockers": [
+            str(item) for item in _as_list(intake.get("blockers"))
+        ],
+        "allowed_owner_decisions": list(
+            owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+        ),
+        "disallowed_owner_decisions": [
+            "retain_quarantined_with_signed_owner_exception",
+        ],
+        "required_owner_fields": [
+            "owner_decision",
+            "owner_identity",
+            "owner_role",
+            "decision_timestamp_utc",
+            "evidence_reference",
+        ],
+        "conditional_required_fields": [
+            "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
+        ],
+        "primary_recommendation_counts": _counts_by_key(
+            decision_rows, "recommended_owner_decision_primary"
+        ),
+        "decision_request_rows": [
+            {
+                "row_id": _text(row.get("row_id")),
+                "path": _text(row.get("path")),
+                "families": [str(item) for item in _as_list(row.get("families"))],
+                "matched_tokens": [
+                    str(item) for item in _as_list(row.get("matched_tokens"))
+                ],
+                "allowed_owner_decisions": [
+                    str(item) for item in _as_list(row.get("allowed_owner_decisions"))
+                ],
+                "recommended_owner_decision_primary": _text(
+                    row.get("recommended_owner_decision_primary")
+                ),
+                "recommended_owner_decision_alternate": _text(
+                    row.get("recommended_owner_decision_alternate")
+                ),
+                "post_decision_required_action": _text(
+                    row.get("post_decision_required_action")
+                ),
+            }
+            for row in decision_rows
+        ],
+        "template_paths": _as_dict(template.get("generated_template_paths")),
+        "owner_decision_submission_options": _as_dict(
+            template.get("owner_decision_submission_options")
+        ),
+        "primary_cleanup_preview": _as_dict(template.get("primary_cleanup_preview")),
+        "post_decision_verification": [
+            str(item) for item in _as_list(template.get("post_batch_verification"))
+        ],
+        "claim_boundary": (
+            "This packet is an owner-review request surface only. It is not an "
+            "owner decision, does not delete or extract files, and cannot close "
+            "structural scope cleanup without recorded owner evidence, manual "
+            "cleanup where applicable, and refreshed post-decision scope audits."
+        ),
+    }
+
+
 def _status_from_packet(packet: dict[str, Any]) -> str:
     if not packet.get("contract_pass"):
         return "blocked_scope_cleanup"
@@ -1020,6 +1112,12 @@ def build_application_plan(
     release_surface_first_batch_decision_template = (
         _release_surface_first_batch_decision_template(
             rows=rows,
+            intake=release_surface_first_batch_decision_intake,
+        )
+    )
+    release_surface_first_owner_action_packet = (
+        _release_surface_first_owner_action_packet(
+            template=release_surface_first_batch_decision_template,
             intake=release_surface_first_batch_decision_intake,
         )
     )
@@ -1175,6 +1273,9 @@ def build_application_plan(
         "release_surface_first_batch_decision_template": (
             release_surface_first_batch_decision_template
         ),
+        "release_surface_first_owner_action_packet": (
+            release_surface_first_owner_action_packet
+        ),
         "release_surface_first_batch_template_paths": _as_dict(
             release_surface_first_batch_decision_template.get(
                 "generated_template_paths"
@@ -1308,6 +1409,45 @@ def _markdown(payload: dict[str, Any]) -> str:
             lines.append(
                 "- `release_surface_first_batch_template.csv`: "
                 f"`{template_paths.get('csv')}`"
+            )
+        lines.append("")
+    action_packet = payload.get("release_surface_first_owner_action_packet")
+    action_packet = action_packet if isinstance(action_packet, dict) else {}
+    if action_packet:
+        lines.extend(["## Release Surface First Owner Action Packet", ""])
+        lines.append(f"- `status`: `{action_packet.get('status')}`")
+        lines.append(
+            "- `ready_to_request_owner_decision`: "
+            f"`{action_packet.get('ready_to_request_owner_decision')}`"
+        )
+        lines.append(
+            "- `release_surface_owner_decision_required_count`: "
+            f"`{action_packet.get('release_surface_owner_decision_required_count')}`"
+        )
+        lines.append(
+            "- `allowed_owner_decisions`: "
+            f"`{action_packet.get('allowed_owner_decisions')}`"
+        )
+        lines.append(
+            "- `disallowed_owner_decisions`: "
+            f"`{action_packet.get('disallowed_owner_decisions')}`"
+        )
+        packet_template_paths = action_packet.get("template_paths")
+        packet_template_paths = (
+            packet_template_paths if isinstance(packet_template_paths, dict) else {}
+        )
+        if packet_template_paths:
+            lines.append(
+                "- `owner_decision_template.csv`: "
+                f"`{packet_template_paths.get('csv')}`"
+            )
+        lines.extend(["", "| Row | Path | Primary Decision |", "|---|---|---|"])
+        for row in action_packet.get("decision_request_rows", []):
+            lines.append(
+                "| "
+                f"`{row['row_id']}` | "
+                f"`{row['path']}` | "
+                f"`{row['recommended_owner_decision_primary']}` |"
             )
         lines.append("")
     next_batch_template = payload.get("next_owner_review_batch_decision_template")

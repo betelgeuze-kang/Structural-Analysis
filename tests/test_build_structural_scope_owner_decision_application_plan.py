@@ -196,6 +196,7 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
     assert payload["release_surface_first_batch_ready"] is False
     assert payload["release_surface_first_batch_blockers"] == []
     assert payload["release_surface_first_batch_decision_template"] == {}
+    assert payload["release_surface_first_owner_action_packet"] == {}
     assert payload["release_surface_first_batch_template_paths"] == {}
     assert payload["owner_decision_template_paths"] == {
         "json": (
@@ -317,6 +318,71 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
     assert payload["release_surface_first_batch_template_paths"] == (
         release_template["generated_template_paths"]
     )
+    action_packet = payload["release_surface_first_owner_action_packet"]
+    assert action_packet["schema_version"] == (
+        "structural-scope-release-surface-first-owner-action-packet.v1"
+    )
+    assert action_packet["batch_id"] == "release_surface_first"
+    assert action_packet["status"] == "ready_for_owner_decision_request"
+    assert action_packet["ready_to_request_owner_decision"] is True
+    assert action_packet["path_area"] == "release_surface"
+    assert action_packet["path_count"] == 1
+    assert action_packet["paths"] == [release_surface_path]
+    assert action_packet["release_surface_owner_decision_required_count"] == 1
+    assert action_packet["pending_decision_count"] == 1
+    assert action_packet["current_intake_status"] == "pending_owner_decisions"
+    assert action_packet["current_intake_blockers"] == intake["blockers"]
+    assert action_packet["allowed_owner_decisions"] == list(
+        application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+    )
+    assert action_packet["disallowed_owner_decisions"] == [
+        "retain_quarantined_with_signed_owner_exception"
+    ]
+    assert action_packet["required_owner_fields"] == [
+        "owner_decision",
+        "owner_identity",
+        "owner_role",
+        "decision_timestamp_utc",
+        "evidence_reference",
+    ]
+    assert action_packet["conditional_required_fields"] == [
+        "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository"
+    ]
+    assert action_packet["primary_recommendation_counts"] == {
+        "delete_from_structural_repository": 1
+    }
+    assert action_packet["decision_request_rows"] == [
+        {
+            "row_id": "release_surface_first-001",
+            "path": release_surface_path,
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "allowed_owner_decisions": list(
+                application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+            ),
+            "recommended_owner_decision_primary": "delete_from_structural_repository",
+            "recommended_owner_decision_alternate": (
+                "extract_to_molecular_or_science_repository"
+            ),
+            "post_decision_required_action": (
+                "delete_or_extract_path_then_rerun_scope_audit"
+            ),
+        }
+    ]
+    assert action_packet["template_paths"] == release_template[
+        "generated_template_paths"
+    ]
+    assert action_packet["owner_decision_submission_options"] == release_template[
+        "owner_decision_submission_options"
+    ]
+    assert action_packet["primary_cleanup_preview"] == release_template[
+        "primary_cleanup_preview"
+    ]
+    assert action_packet["post_decision_verification"] == release_template[
+        "post_batch_verification"
+    ]
+    assert "not an owner decision" in action_packet["claim_boundary"]
+    assert "does not delete or extract files" in action_packet["claim_boundary"]
     assert payload["next_owner_review_batch"]["batch_id"] == "release_surface_first"
     assert payload["next_owner_review_batch"]["priority"] == 1
     assert payload["next_owner_review_batch"]["paths"] == [release_surface_path]

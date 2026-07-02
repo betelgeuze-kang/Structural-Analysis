@@ -36,6 +36,21 @@
 - `release_surface_cleanup_decision_count_below_expected=0/3`
 - `release_surface_first_batch_template.csv`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv`
 
+## Release Surface First Owner Action Packet
+
+- `status`: `ready_for_owner_decision_request`
+- `ready_to_request_owner_decision`: `True`
+- `release_surface_owner_decision_required_count`: `3`
+- `allowed_owner_decisions`: `['delete_from_structural_repository', 'extract_to_molecular_or_science_repository']`
+- `disallowed_owner_decisions`: `['retain_quarantined_with_signed_owner_exception']`
+- `owner_decision_template.csv`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv`
+
+| Row | Path | Primary Decision |
+|---|---|---|
+| `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `delete_from_structural_repository` |
+| `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `delete_from_structural_repository` |
+| `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `delete_from_structural_repository` |
+
 ## Next Batch Decision Template
 
 - `batch_id`: `release_surface_first`
