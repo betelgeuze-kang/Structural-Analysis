@@ -82,7 +82,7 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T17:54:51.292348+00:00",
+  "generated_at": "2026-07-02T17:57:21.213526+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:c5945a2ffa3e8c6bbf8c8ce6fef84571ddf4212a1af68d8b269c7c20b1a3788c",
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:d30b4ca73ba4180e0493cef0ea1ea2eaaecd706520b98107c1b5e8805d3fb852",
@@ -4298,7 +4298,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet_and_origin_report",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "9022f7dcd7d1ab3f09d61ab1644f4ab99c89a1bf",
+  "source_commit_sha": "8a8acb76002fed95633461014c61516dfbee3318",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
