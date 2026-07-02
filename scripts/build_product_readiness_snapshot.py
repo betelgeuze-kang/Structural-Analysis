@@ -474,6 +474,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         "scripts/build_developer_preview_final_gate_owner_packet.py",
         "scripts/build_g1_consistent_newton_full_load_checkpoint_candidate_runner.py",
         "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
+        "scripts/build_runtime_packaging_manifest.py",
         "scripts/build_support_bundle.py",
         "scripts/build_ci_streak_intake_packet.py",
         "scripts/build_license_status_intake_packet.py",
