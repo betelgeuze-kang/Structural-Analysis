@@ -18,10 +18,10 @@
   "evidence_refresh_command_count": 12,
   "final_gate_count": 9,
   "final_gate_pass_count": 6,
-  "generated_at": "2026-07-02T21:22:13.472335+00:00",
+  "generated_at": "2026-07-02T21:31:49.218234+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:733e88e8357068ce0f05374b10aa1950564ea7c4b4376019cd8a2a8796d5367d",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:c03ea8fdf5eeb357b53b248ff3610773a88eccdb726c7c703d0be3100b90154f",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
     "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:549709a01a1944322065cab7ba5afdfc5a79d1c8ec21af95c5618f4e3defa956"
   },
@@ -1080,6 +1080,9 @@
             "do_not_omit_stable_artifact_checksums",
             "do_not_attach_dirty_worktree_receipt"
           ],
+          "materialization_commands": [
+            "python3 scripts/fill_phase6_windows_platform_replay_receipt.py --out implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json --os-name <windows-os-name> --os-version <windows-os-version> --python-version <windows-python-version> --node-version <windows-node-version> --replay-environment <windows-replay-environment> --receipt-origin <windows-replay-evidence-ref> --working-tree-clean true --all-required-commands-zero --fail-blocked"
+          ],
           "minimum_evidence": [
             "receipt exists at the required artifact path",
             "receipt platform matches the required platform",
@@ -1169,6 +1172,9 @@
                 "do_not_omit_stable_artifact_checksums",
                 "do_not_attach_dirty_worktree_receipt"
               ],
+              "materialization_commands": [
+                "python3 scripts/fill_phase6_windows_platform_replay_receipt.py --out implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json --os-name <windows-os-name> --os-version <windows-os-version> --python-version <windows-python-version> --node-version <windows-node-version> --replay-environment <windows-replay-environment> --receipt-origin <windows-replay-evidence-ref> --working-tree-clean true --all-required-commands-zero --fail-blocked"
+              ],
               "minimum_evidence": [
                 "receipt exists at the required artifact path",
                 "receipt platform matches the required platform",
@@ -1223,6 +1229,9 @@
                 "do_not_omit_stable_artifact_checksums",
                 "do_not_attach_dirty_worktree_receipt"
               ],
+              "materialization_commands": [
+                "python3 scripts/fill_phase6_windows_platform_replay_receipt.py --out implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json --os-name <windows-os-name> --os-version <windows-os-version> --python-version <windows-python-version> --node-version <windows-node-version> --replay-environment <windows-replay-environment> --receipt-origin <windows-replay-evidence-ref> --working-tree-clean true --all-required-commands-zero --fail-blocked"
+              ],
               "minimum_evidence": [
                 "receipt exists at the required artifact path",
                 "receipt platform matches the required platform",
@@ -1274,6 +1283,9 @@
                 "do_not_set_contract_pass_true_without_command_return_code_zero",
                 "do_not_omit_stable_artifact_checksums",
                 "do_not_attach_dirty_worktree_receipt"
+              ],
+              "materialization_commands": [
+                "python3 scripts/fill_phase6_windows_platform_replay_receipt.py --out implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json --os-name <windows-os-name> --os-version <windows-os-version> --python-version <windows-python-version> --node-version <windows-node-version> --replay-environment <windows-replay-environment> --receipt-origin <windows-replay-evidence-ref> --working-tree-clean true --all-required-commands-zero --fail-blocked"
               ],
               "minimum_evidence": [
                 "receipt exists at the required artifact path",
@@ -1823,7 +1835,7 @@
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "0b2525675b3bdc790bc3783233ab95bf9ff27f0a",
+  "source_commit_sha": "1c32b972b956f66da79c463d28495980dc083285",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
 }
