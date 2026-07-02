@@ -1,7 +1,7 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-07-02T13:19:56.091782+00:00",
-  "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
+  "generated_at": "2026-07-02T14:54:56.440500+00:00",
+  "source_commit_sha": "81859a9954a86d2e151b183fadde01d8dbf3b376",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_freeze_boundary_status.json": "sha256:85722797bc2ff90c5fc6492aee108418d64ab73b5965d9770c0969a6e777c0f5",

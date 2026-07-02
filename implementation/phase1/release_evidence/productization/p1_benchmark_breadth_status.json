@@ -385,7 +385,7 @@
       "summary_line": "Korean source collect: PASS | sources=22 | collected=10 | metadata_only=12 | rejected=0 | bytes=6628988 | seed_complete=22 | exact_topology=7 | native_writeback=7 | curated_local_ifc=5/7 | p0_focus=18"
     }
   ],
-  "generated_at": "2026-07-02T14:39:30.414181+00:00",
+  "generated_at": "2026-07-02T14:56:47.715071+00:00",
   "input_checksums": {
     "implementation/phase1/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
     "implementation/phase1/hf_benchmark_report.atwood_open.json": "sha256:5cf552c1aa8c5ca61b5677bf2dad3fc13c5876a962034a882e5834c2e5229320",
@@ -398,8 +398,8 @@
     "implementation/phase1/open_data/korea/korean_public_structure_collection_report.json": "sha256:5f440ab967a05a6303c30acb4b1f68bb86c9229219989ebef0aec0d1ddc1f711",
     "implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_benchmark_gate_report.json": "sha256:23ff66874024c15d800a9f2b359bb11435d9520899a719100821487be0bb0962",
     "implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json": "sha256:2e6bdaab47358db2788928716d5a880403a02270cb6f3a6ccd674938e0a18661",
-    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:0fa577808f940eb817ba77dafb41aecb6d2302111b44960ab217035515f2edc4",
-    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:3a287eb48182eafee85f505d0e8f3d2a1c0d717385084f681dd0e35252d4242b",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:5d2bb6ec40211514384874c7dc51365e9cd25dde880067b40b0cc81158a16fce",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:4c01a45d76215e14394b494c33d0469397d9846bd5180a280a1fed1a975d5853",
     "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:ed9e75f623895b34ba20f33c2296a1a5e0391af9170aa0742932688957aa0459"
   },
   "next_action": "run P1 quality/fallback/benchmark breadth execution",
@@ -410,7 +410,7 @@
   "reuse_policy": "status_rebuilt_from_existing_p1_readiness_commercial_benchmark_and_sidecar_receipts",
   "reused_evidence": true,
   "schema_version": "p1-benchmark-breadth-status.v1",
-  "source_commit_sha": "2620936c5165e7cb97ae4f192128509ea14db6e3",
+  "source_commit_sha": "81859a9954a86d2e151b183fadde01d8dbf3b376",
   "status": "ready",
   "summary": {
     "benchmark_report_count": 10,

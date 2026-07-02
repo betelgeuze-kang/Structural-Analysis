@@ -1609,10 +1609,11 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-02T13:19:43.279005+00:00",
+  "generated_at": "2026-07-02T14:55:46.558880+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [
       ".github/workflows/ci.yml",
+      ".github/workflows/dp-windows-parity.yml",
       ".github/workflows/nightly-full-quality.yml",
       "docs/pm-release-gate-milestones.md",
       "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
@@ -1625,6 +1626,16 @@
       "implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.json",
       "implementation/phase1/release_evidence/performance/performance_optimization_sprint_targets.md",
       "implementation/phase1/release_evidence/performance/performance_profiling_gate_report.json",
+      "implementation/phase1/run_solver_hip_e2e_contract.py",
+      "scripts/build_developer_preview_rc_status.py",
+      "scripts/build_phase6_platform_replay_receipt.py",
+      "scripts/build_product_readiness_snapshot.py",
+      "scripts/build_structural_product_development_roadmap.py",
+      "tests/test_build_phase6_platform_replay_receipt.py",
+      "tests/test_build_product_readiness_snapshot.py",
+      "tests/test_build_structural_product_development_roadmap.py",
+      "tests/test_dp_windows_parity_workflow.py",
+      "tests/test_run_solver_hip_e2e_contract.py",
       "tests/test_source_boundary_ci_contract.py"
     ],
     "consistent_residual_jacobian_newton_gate_passed": false,
@@ -1836,7 +1847,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
+  "source_commit_sha": "81859a9954a86d2e151b183fadde01d8dbf3b376",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",

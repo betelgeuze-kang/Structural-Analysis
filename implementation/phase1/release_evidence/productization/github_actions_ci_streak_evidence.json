@@ -4,8 +4,8 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "generated_at": "2026-07-01T10:19:19.231347+00:00",
   "input_checksums": {
-    ".github/workflows": "dir-sha256:bddcbfaf22ff9ec53c71ffdc1d5a804d9d1ce1d7c9a0d116b74a901dae1d8c81",
-    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:dbefd1b7f977278775b876b16aab3a5d5b7d05bcc40dea270a60da79aa67c210"
+    ".github/workflows": "dir-sha256:bf7d902412a1f2216afd7baa1b12ca45023e1c58cd35e32774b434d40160bdff",
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:1d2640e3114d87472c647bfd0ac3c4f14db27576f156009b22382d72c682000a"
   },
   "lanes": {
     "nightly": {
@@ -1643,7 +1643,7 @@
   "repo": "betelgeuze-kang/Structural-Analysis",
   "reused_evidence": true,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
+  "source_commit_sha": "81859a9954a86d2e151b183fadde01d8dbf3b376",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 1,
@@ -1660,8 +1660,8 @@
   },
   "threshold": 30,
   "workflow_discovery": {
-    "local_workflow_count": 8,
-    "local_workflow_metadata_generated_at": "2026-07-02T13:17:12.516733+00:00",
+    "local_workflow_count": 9,
+    "local_workflow_metadata_generated_at": "2026-07-02T14:55:11.265501+00:00",
     "local_workflows": [
       {
         "exists": true,
@@ -1708,6 +1708,22 @@
         "runs_on": [
           "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}",
           "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
+        "schedule_trigger_present": false,
+        "self_hosted_runner_default": true,
+        "trigger_events": [
+          "workflow_dispatch"
+        ],
+        "workflow_dispatch_trigger_present": true
+      },
+      {
+        "exists": true,
+        "github_hosted_runner_default": false,
+        "name": "DP Windows Parity Receipt",
+        "path": ".github/workflows/dp-windows-parity.yml",
+        "pull_request_trigger_present": false,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_WINDOWS_RUNNER_LABELS || '[\"self-hosted\",\"windows\",\"x64\"]') }}"
         ],
         "schedule_trigger_present": false,
         "self_hosted_runner_default": true,
