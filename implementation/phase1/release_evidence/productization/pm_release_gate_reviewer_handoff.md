@@ -50,7 +50,7 @@ Acceptance criteria:
 - `structural_scope_owner_decision_application_plan.json.release_surface_owner_decision_required_count == 0`
 - `structural_scope_owner_decision_application_plan.json.retain_quarantined_exception_count == 0`
 - `structural_scope_owner_decision_application_plan.json.evidence_closure_pass == true` after manual delete/extract cleanup
-- `check_structural_scope_contamination.py --fail-blocked` exits 0 after cleanup and release evidence regeneration
+- `check_structural_scope_contamination.py --check --fail-blocked` exits 0 after cleanup and release evidence regeneration
 
 Evidence artifact paths:
 - `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
@@ -80,7 +80,7 @@ Verification commands:
 - `python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.filled.csv --out implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.md --fail-release-surface-first-blocked`
 - `python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --fail-release-surface-first-blocked`
 - `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions`
-- `python3 scripts/check_structural_scope_contamination.py --fail-blocked`
+- `python3 scripts/check_structural_scope_contamination.py --check --fail-blocked`
 - `python3 scripts/build_product_readiness_snapshot.py --check`
 - `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
 
@@ -201,6 +201,7 @@ Evidence artifact paths:
 - `viewer_quality`: `implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json`
 
 Reproduction commands:
+- `python3 scripts/fill_ux_new_user_observation_from_human_sample.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation.json --report-out implementation/phase1/release_evidence/productization/ux_new_user_observation.fill_report.json --participant-ref <anonymized-participant-ref> --participant-role <new_user|first_time_user|pilot_user> --new-to-product true --sample-project-id <sample-project-id> --observer <human-observer> --started-at-utc <started-at-utc> --completed-at-utc <completed-at-utc> --completion-minutes <minutes> --blocker-count 0 --evidence-ref <human-observation-evidence-ref> --approval-decision <accepted|approved|pass|signed|approved_for_release> --all-required-steps-passed --fail-blocked`
 - `python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
 - `python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
 - `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
@@ -244,6 +245,7 @@ Evidence artifact paths:
 - `viewer_quality`: `implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json`
 
 Reproduction commands:
+- `python3 scripts/fill_ux_new_user_observation_from_human_sample.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation.json --report-out implementation/phase1/release_evidence/productization/ux_new_user_observation.fill_report.json --participant-ref <anonymized-participant-ref> --participant-role <new_user|first_time_user|pilot_user> --new-to-product true --sample-project-id <sample-project-id> --observer <human-observer> --started-at-utc <started-at-utc> --completed-at-utc <completed-at-utc> --completion-minutes <minutes> --blocker-count 0 --evidence-ref <human-observation-evidence-ref> --approval-decision <accepted|approved|pass|signed|approved_for_release> --all-required-steps-passed --fail-blocked`
 - `python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
 - `python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
 - `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
@@ -289,6 +291,7 @@ Evidence artifact paths:
 - `security_runbook`: `docs/production-ops-security.md`
 
 Reproduction commands:
+- `python3 scripts/fill_license_status_from_approval.py --out implementation/phase1/release/support_bundle/license_status.json --report-out implementation/phase1/release_evidence/productization/license_status.fill_report.json --license-id <license-id> --issuer <product-or-legal-owner> --approver-role <product_owner|legal_counsel|product_and_legal|delegated_product_owner> --approval-ref <approval-ref> --approved-at-utc <approved-at-utc> --evidence-ref <approval-evidence-ref> --expires-at-utc <future-expiry-utc> --fail-blocked`
 - `python3 scripts/build_license_status_intake_packet.py --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json`
 - `python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json`
 - `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
@@ -465,7 +468,7 @@ Verdict change conditions:
 - Evidence state: `fresh_validation_result_failed`
 - External input required: `False`
 - Owner input required: `False`
-- Next action: Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+- Next action: Restore a ROCm/HIP runtime that exposes the required GPU device interfaces, then rerun the gpu_hip_solver fresh validation receipt builder and regenerate the fresh full-validation lane status. Required preflight: /dev/kfd is present and accessible to the validation user; /dev/dri render node is present and accessible to the validation user; ROCm/HIP runtime libraries are discoverable by the validation command; implementation/phase1/run_solver_hip_e2e_contract.py returns PASS. Then rerun `gpu_capable_rocm_hip_validation` and regenerate fresh full-validation and PM release evidence.
 
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`
@@ -507,7 +510,7 @@ Verdict change conditions:
 - Evidence state: `fresh_validation_result_failed`
 - External input required: `False`
 - Owner input required: `False`
-- Next action: Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.
+- Next action: Restore a ROCm/HIP runtime that exposes the required GPU device interfaces, then rerun the gpu_hip_solver fresh validation receipt builder and regenerate the fresh full-validation lane status. Required preflight: /dev/kfd is present and accessible to the validation user; /dev/dri render node is present and accessible to the validation user; ROCm/HIP runtime libraries are discoverable by the validation command; implementation/phase1/run_solver_hip_e2e_contract.py returns PASS. Then rerun `gpu_capable_rocm_hip_validation` and regenerate fresh full-validation and PM release evidence.
 
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`

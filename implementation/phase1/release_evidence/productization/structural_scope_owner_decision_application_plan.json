@@ -37,7 +37,7 @@
       "path_count": 0,
       "paths": [],
       "post_apply_verification": [
-        "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+        "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
         "python3 scripts/build_structural_scope_owner_review_packet.py",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-blocked",
         "python3 scripts/build_product_readiness_snapshot.py --check"
@@ -51,7 +51,7 @@
       "path_count": 0,
       "paths": [],
       "post_apply_verification": [
-        "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+        "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
         "python3 scripts/build_structural_scope_owner_review_packet.py",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-blocked",
         "python3 scripts/build_product_readiness_snapshot.py --check"
@@ -82,13 +82,13 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T21:41:49.429600+00:00",
+  "generated_at": "2026-07-02T22:02:06.843179+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:abf20c60c47ad2f45feec3e58aa6a6597ee3364f57e77ae9ec47891df227b709",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:9a74f3781a36ab4cecda3d80cc5249026a609cd044565d0fb936c0ca1833b96a",
     "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:beea4a8604da8c2dba697f3eff88c163e0f43cd67ee910142911ba6caf659f5b",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:64c6d94f32cdf1b5076515fcb0497cf0be545e37046dfc6e9160c140c1794fa1",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:da0f5af8e897c1560bd910495cf785170b6cd8eaaca4ecf5a2f8cd40968d2936",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:74d468933419c7f29e55517e82c873b09fbdaae54fbfd04cf51cc3020ef096f4",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:605ea030922af67534c69fd716a89c3ff4a21dd35a23161bd875628551766307"
   },
   "next_actions": [
@@ -262,7 +262,7 @@
     ],
     "post_batch_verification": [
       "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
-      "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+      "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
       "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
       "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
       "python3 scripts/build_product_readiness_snapshot.py --check"
@@ -4086,7 +4086,7 @@
     ],
     "post_batch_verification": [
       "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
-      "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+      "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
       "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
       "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
       "python3 scripts/build_product_readiness_snapshot.py --check"
@@ -4229,7 +4229,7 @@
         "status": "waiting_on_manual_cleanup",
         "step_id": "refresh_scope_receipts",
         "validation_commands": [
-          "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+          "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
           "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
           "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions"
         ]
@@ -4375,7 +4375,7 @@
     "pending_decision_count": 3,
     "post_decision_verification": [
       "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
-      "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+      "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
       "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
       "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
       "python3 scripts/build_product_readiness_snapshot.py --check"
@@ -4438,7 +4438,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet_and_origin_report",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "a7e03f2c0398cdd4158f45a0765bb343a12ef014",
+  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",

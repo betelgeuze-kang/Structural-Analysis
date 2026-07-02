@@ -25,10 +25,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T21:22:13.674370+00:00",
+  "generated_at": "2026-07-02T22:06:22.217537+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:348747b2ba789df69213dba771f2e69515480bcd4a842e9a1efc72bb530ced5f",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d502bde0c5d759ffb3a312852a4e975ae889a42aa54b08cecf770791506dda59",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:c09638b0663cc2841d2323120b137d7e119fe9f375f2f89ca02053b09c1aab4f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0d8c066f3566bd0155a4fc61f40df2f3b67636a3faef50621017d6bd840845c3",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:390c963b64828e63b71920b554bb49dfb6763c3051f78b8b8ec2e5db73ae5947"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -45,7 +45,7 @@
         "`structural_scope_owner_decision_application_plan.json.release_surface_owner_decision_required_count == 0`",
         "`structural_scope_owner_decision_application_plan.json.retain_quarantined_exception_count == 0`",
         "`structural_scope_owner_decision_application_plan.json.evidence_closure_pass == true` after manual delete/extract cleanup",
-        "`check_structural_scope_contamination.py --fail-blocked` exits 0 after cleanup and release evidence regeneration"
+        "`check_structural_scope_contamination.py --check --fail-blocked` exits 0 after cleanup and release evidence regeneration"
       ],
       "blocker_id": "structural_scope_cleanup::owner_review_decisions_pending",
       "claim_boundary": "This application plan is non-mutating. It never deletes or extracts files. It only classifies owner decisions into manual follow-up actions and keeps quarantined non-structural artifacts outside the building structural-analysis release surface until owner evidence and post-decision scope audit closure are present.",
@@ -87,7 +87,7 @@
         "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.filled.csv --out implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.md --fail-release-surface-first-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --fail-release-surface-first-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
-        "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
+        "python3 scripts/check_structural_scope_contamination.py --check --fail-blocked",
         "python3 scripts/build_product_readiness_snapshot.py --check",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
@@ -508,7 +508,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "0b2525675b3bdc790bc3783233ab95bf9ff27f0a",
+  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,

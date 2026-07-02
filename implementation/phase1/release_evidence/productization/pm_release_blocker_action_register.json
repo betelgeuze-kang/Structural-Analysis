@@ -28,15 +28,15 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T21:22:13.635127+00:00",
+  "generated_at": "2026-07-02T22:06:13.369959+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:500b7803686ab0e8a38937948dc8831ce19bf9ef6461e601121ef434e39ba81a",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:9ddb5502fc9eb5911082834fb184629f72eb488fd8b53425594c32a52ef06a2f",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d502bde0c5d759ffb3a312852a4e975ae889a42aa54b08cecf770791506dda59",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:e28efe1b66c79d77ba2e63cc8c20a8e8651902e21e54199ed8ce37ccf35dac7a",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:8ea34ad9ee537c7f4e1979b115b7f32383f0032ae595b0badba8ab3fd9e97543",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0d8c066f3566bd0155a4fc61f40df2f3b67636a3faef50621017d6bd840845c3",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:62ac84fe512e6b0873cf409b1faca9919f98d5df272f4c191db7f54f82fd8ccc",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:18bc58bb2a7bb2ae2d64a9e7b2476f32697392860e8eab9d28e5ad6949dababe",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
-    "scripts/build_pm_release_blocker_action_register.py": "sha256:f98aa8721e110017d42eb60b00cd78e3be850b08e8f504233b0b9ec16e3f5b62"
+    "scripts/build_pm_release_blocker_action_register.py": "sha256:7ad36778461baa79f656ed870b84fdf37b95fdbf264f3a94bc717228ab82b8e9"
   },
   "next_actions": [
     "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
@@ -66,7 +66,7 @@
         "`structural_scope_owner_decision_application_plan.json.release_surface_owner_decision_required_count == 0`",
         "`structural_scope_owner_decision_application_plan.json.retain_quarantined_exception_count == 0`",
         "`structural_scope_owner_decision_application_plan.json.evidence_closure_pass == true` after manual delete/extract cleanup",
-        "`check_structural_scope_contamination.py --fail-blocked` exits 0 after cleanup and release evidence regeneration"
+        "`check_structural_scope_contamination.py --check --fail-blocked` exits 0 after cleanup and release evidence regeneration"
       ],
       "blocker_code": "owner_review_decisions_pending",
       "blocker_id": "structural_scope_cleanup::owner_review_decisions_pending",
@@ -321,7 +321,7 @@
         "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.filled.csv --out implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.md --fail-release-surface-first-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --fail-release-surface-first-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
-        "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
+        "python3 scripts/check_structural_scope_contamination.py --check --fail-blocked",
         "python3 scripts/build_product_readiness_snapshot.py --check",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
@@ -1640,7 +1640,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "0b2525675b3bdc790bc3783233ab95bf9ff27f0a",
+  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,
