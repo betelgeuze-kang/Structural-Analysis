@@ -28,13 +28,13 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T17:57:40.987060+00:00",
+  "generated_at": "2026-07-02T19:08:41.912363+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:2d06b055d9ab5605562c585a1a6e8977fe7ff9726b29dc70261f26a9796d215b",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:5767b4546cdfe290af10c4c69e51b6bc14c050219c66d7051537cae7440b04a2",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2fb1dd88fb3e9a7bf4cda00971cb5cdac62fbca1d475eeecf6c2b67e8edcb3a3",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6de2a358fe150685ac720b2812494842769d560d8c3f4add33edfbc508654bc8",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:ffc2c9fdfb3c4e017821a356f73f5b09c881e2ac8f4d2e6547446a945a1d57ba",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8f4430daf4fb597cf1a05c1085509a780fafc5f91f26487472c2326317f4073d",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6e84b9f38689cb291e281897b8781f5cabf4f4814de79781f37a4b479ac24979",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:306fbc00053e16b06c4918cdb2f8e4b6bf7bbf658428cd0d8aac77b55b0cf37e",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:d8d18ae72a44048b3f4be961099095fa473aa500ca49dd7ef3859981c9d18346",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:ec89a59a2b32465d7cbb22c455c4cfd4663b901397142c19214f0cb792966fdf"
   },
@@ -1993,7 +1993,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "a948594d93c93d515c0e87677fe2ead13d0e7ac8",
+  "source_commit_sha": "ba1a11c08d530efd3c46eed347537ca7b52a08a6",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,

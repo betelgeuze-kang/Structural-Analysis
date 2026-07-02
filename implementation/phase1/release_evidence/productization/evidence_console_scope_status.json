@@ -137,15 +137,15 @@
       "present": true
     }
   ],
-  "generated_at": "2026-07-02T16:09:28.168570+00:00",
+  "generated_at": "2026-07-02T19:04:29.308292+00:00",
   "input_checksums": {
-    "README.md": "sha256:5df54f8eca7eab943e18a1c63b5ff444dfe6ffa2c68646f72228cb04e9616071",
-    "docs/commercialization-gap-current-state.md": "sha256:df5c2262dcb46b9b550ceaa5589b9ff095a073569500207479506930628d9917",
+    "README.md": "sha256:b6432d43570da9e002285caf70e46414bb801d5bd4a0d9f42fb9078fd38ce43d",
+    "docs/commercialization-gap-current-state.md": "sha256:99a543145b761bfc3b8be5dc68a58b7ec43fa1d25d01382d6df807a690cae137",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:0c85df1de3520e7831dd57c1e7b0c910af0e3daac986ca41a0582b8b46f2d9de",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:98439fb1f17f2c24dac68eaa4c4a7ff60b535762eb4cd5097c32cb9f40a10d6b",
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
     "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:1ae0e22dbf9d7cc6cb653c4186634cbf460f1099aa65a941105603258abf4482",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:31934f05ea59c9ad7bcc4c4129e0f6460458b5625f959aef64730a95474fa8a1",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:0558c52e53ef027601b9438b6d51fc159e2a47d8ae2a7c6e6eccb5cf519c2ff5",
     "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:a0a9db552ca4a14869ae38c052ec55c0ebcb0a970e03d24092857676a86d0958"
   },
   "launch_ready": false,
@@ -228,7 +228,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "28d391369ab9648d0fdc4693fddfffc429e5947f",
+  "source_commit_sha": "8a8f698e246f41ddd7283df1c5887f0176a1cb11",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [
