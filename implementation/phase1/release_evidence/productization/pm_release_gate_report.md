@@ -1,6 +1,6 @@
 # PM Release Gate
 
-- `summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=4/5 | release_areas_green=10/16 | measured_cases=304`
+- `summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=4/5 | release_areas_green=11/16 | measured_cases=304`
 - `recommended_scope`: Release blocked until core PM gates have green evidence.
 - `paid_pilot_candidate`: `False`
 - `limited_commercial_milestone_ready`: `False`
@@ -15,10 +15,10 @@
 - `commercial_solver_gap_ready`: `False`
 - `ai_engine_gap_ready`: `False`
 - `release_allowed`: `False`
-- `blocked_release_count`: `9`
+- `blocked_release_count`: `8`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `29`
-- `approval_token_count`: `4`
+- `operator_action_count`: `39`
+- `approval_token_count`: `5`
 - `stale_artifact_count`: `0`
 - `evidence_surface_count`: `8`
 - `missing_evidence_surface_count`: `0`
@@ -51,4 +51,4 @@
 | ux UX | blocked | human_new_user_observation_missing_or_failed, human_new_user_30min_sample_evidence_missing |
 | support Support | blocked | pm_blocker_closure_board_count_mismatch |
 | security Security | blocked | license_status_not_configured |
-| github_sync GitHub Development Sync | blocked | github_sync_preflight::local_head_mismatch |
+| github_sync GitHub Development Sync | pass | none |
