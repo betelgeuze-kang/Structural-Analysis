@@ -47,7 +47,7 @@ Structural product roadmap: BLOCKED | evidence_progress=65.4% | stage_average=55
 ## Recommended Next Slices
 
 - `close_structural_scope_owner_review_and_release_surface_cleanup`
-  - exit condition: release-surface GPCR/H-bond/PocketMD paths have owner delete/extract decisions
+  - exit condition: release-surface non-structural paths have owner delete/extract decisions
   - current `next_owner_review_batch`: `release_surface_first`
 - `land_ci_license_ux_release_area_evidence`
   - exit condition: 30 consecutive PR CI passes recorded
