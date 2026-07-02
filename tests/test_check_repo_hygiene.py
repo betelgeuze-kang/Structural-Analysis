@@ -18,7 +18,7 @@ def test_default_mode_allows_tracked_source_boundary_candidates() -> None:
         "implementation/phase1/stress/solver_cache.json",
         "implementation/phase1/workspace/public_input.csv",
         "implementation/phase1/output/report.json",
-        "implementation/phase1/rust_hip_md3bead_hook/target/debug/build.log",
+        "implementation/phase1/structural_rust_solver/target/debug/build.log",
     ]
 
     assert check_repo_hygiene.check_tracked_files(files) == []
@@ -29,7 +29,7 @@ def test_strict_source_boundary_reports_generated_prefixes() -> None:
         "implementation/phase1/stress/solver_cache.json",
         "implementation/phase1/workspace/public_input.csv",
         "implementation/phase1/output/report.json",
-        "implementation/phase1/rust_hip_md3bead_hook/target/debug/build.log",
+        "implementation/phase1/structural_rust_solver/target/debug/build.log",
         "implementation/phase1/src/keep.py",
     ]
 
@@ -39,7 +39,7 @@ def test_strict_source_boundary_reports_generated_prefixes() -> None:
         "source-boundary candidate is tracked: implementation/phase1/stress/solver_cache.json",
         "source-boundary candidate is tracked: implementation/phase1/workspace/public_input.csv",
         "source-boundary candidate is tracked: implementation/phase1/output/report.json",
-        "source-boundary candidate is tracked: implementation/phase1/rust_hip_md3bead_hook/target/debug/build.log",
+        "source-boundary candidate is tracked: implementation/phase1/structural_rust_solver/target/debug/build.log",
     ]
 
 
@@ -74,6 +74,7 @@ def test_inventory_reports_large_files_above_threshold(tmp_path: Path, monkeypat
         "risky_prefix_counts": {
             "implementation/phase1/workspace/": 2,
         },
+        "risky_part_counts": {},
         "large_files": [
             {
                 "path": "implementation/phase1/src/large.py",

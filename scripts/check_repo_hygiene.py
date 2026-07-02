@@ -21,8 +21,10 @@ STRICT_SOURCE_BOUNDARY_PREFIXES = (
     "implementation/phase1/stress/",
     "implementation/phase1/workspace/",
     "implementation/phase1/output/",
-    "implementation/phase1/rust_hip_md3bead_hook/target/",
 )
+STRICT_SOURCE_BOUNDARY_PARTS = {
+    "target",
+}
 FORBIDDEN_PATH_PARTS = {
     ".cache",
     "cache",
@@ -84,6 +86,12 @@ def _is_raw_data_path(path: str) -> bool:
     )
 
 
+def _is_strict_source_boundary_candidate(path: str) -> bool:
+    if any(path.startswith(prefix) for prefix in STRICT_SOURCE_BOUNDARY_PREFIXES):
+        return True
+    return bool(set(Path(path).parts) & STRICT_SOURCE_BOUNDARY_PARTS)
+
+
 def check_tracked_files(files: list[str], *, strict_source_boundary: bool = False) -> list[str]:
     errors: list[str] = []
     for path in files:
@@ -92,7 +100,7 @@ def check_tracked_files(files: list[str], *, strict_source_boundary: bool = Fals
         path_parts = set(Path(path).parts)
         if any(path.startswith(prefix) for prefix in FORBIDDEN_PREFIXES):
             errors.append(f"generated path is tracked: {path}")
-        if strict_source_boundary and any(path.startswith(prefix) for prefix in STRICT_SOURCE_BOUNDARY_PREFIXES):
+        if strict_source_boundary and _is_strict_source_boundary_candidate(path):
             errors.append(f"source-boundary candidate is tracked: {path}")
         if path_parts & FORBIDDEN_PATH_PARTS:
             errors.append(f"cache path is tracked: {path}")
@@ -121,11 +129,20 @@ def build_inventory(files: list[str], *, warn_large_files_mb: float | None = Non
         prefix: sum(1 for path in files if path.startswith(prefix))
         for prefix in STRICT_SOURCE_BOUNDARY_PREFIXES
     }
+    risky_part_counts = {
+        part: sum(1 for path in files if part in Path(path).parts)
+        for part in STRICT_SOURCE_BOUNDARY_PARTS
+    }
     inventory: dict[str, object] = {
         "total_files": len(files),
         "risky_prefix_counts": {
             prefix: count
             for prefix, count in risky_prefix_counts.items()
+            if count
+        },
+        "risky_part_counts": {
+            part: count
+            for part, count in risky_part_counts.items()
             if count
         },
         "large_files": [],
