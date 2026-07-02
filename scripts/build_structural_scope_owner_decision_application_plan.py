@@ -917,6 +917,12 @@ def build_application_plan(
         row for row in rows if row["post_decision_cleanup_pending"] is True
     ]
     cleanup_application_preflight = _cleanup_application_preflight(cleanup_rows)
+    release_surface_cleanup_rows = [
+        row for row in cleanup_rows if row["path_area"] == "release_surface"
+    ]
+    release_surface_first_batch_cleanup_application_preflight = (
+        _cleanup_application_preflight(release_surface_cleanup_rows)
+    )
     cleanup_priority_batches = _cleanup_priority_batches(cleanup_rows)
     next_cleanup_application_batch = (
         cleanup_priority_batches[0] if cleanup_priority_batches else {}
@@ -1052,12 +1058,43 @@ def build_application_plan(
                 "ready_for_manual_cleanup_application"
             )
         ),
+        "release_surface_first_batch_application_ready": bool(
+            release_surface_first_batch_decision_intake.get(
+                "ready_for_manual_cleanup_application"
+            )
+            and release_surface_first_batch_cleanup_application_preflight.get(
+                "ready"
+            )
+        ),
         "release_surface_first_batch_blockers": [
             str(item)
             for item in _as_list(
                 release_surface_first_batch_decision_intake.get("blockers")
             )
         ],
+        "release_surface_first_batch_application_blockers": _deduped(
+            [
+                *[
+                    str(item)
+                    for item in _as_list(
+                        release_surface_first_batch_decision_intake.get(
+                            "blockers"
+                        )
+                    )
+                ],
+                *[
+                    str(item)
+                    for item in _as_list(
+                        release_surface_first_batch_cleanup_application_preflight.get(
+                            "blockers"
+                        )
+                    )
+                ],
+            ]
+        ),
+        "release_surface_first_batch_cleanup_application_preflight": (
+            release_surface_first_batch_cleanup_application_preflight
+        ),
         "release_surface_first_batch_decision_template": (
             release_surface_first_batch_decision_template
         ),
@@ -1581,6 +1618,15 @@ def build_parser() -> argparse.ArgumentParser:
             "A valid delete/extract decision file may still leave cleanup pending."
         ),
     )
+    parser.add_argument(
+        "--fail-release-surface-first-blocked",
+        action="store_true",
+        help=(
+            "Exit non-zero until every release-surface-first row has a valid "
+            "owner delete/extract decision and a non-mutating cleanup preflight "
+            "is ready, even if non-release-surface owner decisions remain pending."
+        ),
+    )
     return parser
 
 
@@ -1616,6 +1662,10 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.fail_invalid_owner_decisions and not payload[
         "owner_decision_validation_pass"
+    ]:
+        return 1
+    if args.fail_release_surface_first_blocked and not payload[
+        "release_surface_first_batch_application_ready"
     ]:
         return 1
     return 1 if args.fail_blocked and not payload["evidence_closure_pass"] else 0

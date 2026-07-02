@@ -721,6 +721,14 @@ def test_application_plan_surfaces_partial_release_surface_cleanup_batch(
     assert intake["blockers"] == []
     assert payload["release_surface_first_batch_ready"] is True
     assert payload["release_surface_first_batch_blockers"] == []
+    assert payload["release_surface_first_batch_application_ready"] is True
+    assert payload["release_surface_first_batch_application_blockers"] == []
+    assert payload["release_surface_first_batch_cleanup_application_preflight"][
+        "status"
+    ] == "ready_for_manual_cleanup_application"
+    assert payload["release_surface_first_batch_cleanup_application_preflight"][
+        "cleanup_path_count"
+    ] == 1
     release_template = payload["release_surface_first_batch_decision_template"]
     assert release_template["expected_path_count"] == 1
     assert release_template["decision_pending_count"] == 0
@@ -1092,3 +1100,87 @@ def test_application_plan_fail_invalid_owner_decisions_exit_code(
     assert json.loads((tmp_path / "valid_plan.json").read_text(encoding="utf-8"))[
         "owner_decision_validation_pass"
     ] is True
+
+
+def test_application_plan_fail_release_surface_first_blocked_exit_code(
+    tmp_path: Path,
+) -> None:
+    audit = _audit_payload()
+    manifest = _manifest_payload()
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "pocketmd_lite_science_product_surface.json"
+    )
+    audit["quarantined_non_structural_rows"].append(
+        {
+            "path": release_surface_path,
+            "git_state": "tracked",
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "quarantine_status": "quarantined",
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    manifest["paths"].append(
+        {
+            "path": release_surface_path,
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    _write_json(audit_path, audit)
+    _write_json(manifest_path, manifest)
+
+    blocked_exit = application_plan.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--audit",
+            str(audit_path),
+            "--quarantine-manifest",
+            str(manifest_path),
+            "--owner-decisions",
+            str(tmp_path / "missing_decisions.json"),
+            "--out",
+            str(tmp_path / "blocked_release_surface_plan.json"),
+            "--out-md",
+            str(tmp_path / "blocked_release_surface_plan.md"),
+            "--fail-release-surface-first-blocked",
+        ]
+    )
+    assert blocked_exit == 1
+
+    decisions = tmp_path / "owner_decisions.json"
+    _write_json(
+        decisions,
+        _decision_payload(
+            (release_surface_path, "delete_from_structural_repository"),
+        ),
+    )
+    ready_exit = application_plan.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--audit",
+            str(audit_path),
+            "--quarantine-manifest",
+            str(manifest_path),
+            "--owner-decisions",
+            str(decisions),
+            "--out",
+            str(tmp_path / "ready_release_surface_plan.json"),
+            "--out-md",
+            str(tmp_path / "ready_release_surface_plan.md"),
+            "--fail-release-surface-first-blocked",
+        ]
+    )
+    assert ready_exit == 0
+    ready_payload = json.loads(
+        (tmp_path / "ready_release_surface_plan.json").read_text(encoding="utf-8")
+    )
+    assert ready_payload["release_surface_first_batch_application_ready"] is True
+    assert ready_payload["release_surface_first_batch_application_blockers"] == []
+    assert ready_payload["owner_decision_pending_count"] == 2
+    assert ready_payload["owner_decision_validation_pass"] is False
