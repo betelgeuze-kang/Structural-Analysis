@@ -276,7 +276,18 @@ def test_cleanup_impact_report_flags_release_freshness_source_boundary_refs(
         / "implementation/phase1/release_evidence/productization/"
         "structural_scope_origin_report.json"
     )
-    _write_json(owner_review, _owner_review_packet())
+    packet = _owner_review_packet()
+    packet["review_rows"].append(
+        {
+            "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+            "path_area": "implementation_phase1",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["md3bead"],
+            "owner_review_state": "pending_owner_decision",
+        }
+    )
+    packet["owner_decision_pending_count"] = 3
+    _write_json(owner_review, packet)
     _write_json(origin, _origin_report())
     _write_text(
         tmp_path / "implementation/phase1/md3bead_soa.py",
@@ -382,6 +393,48 @@ def test_cleanup_impact_report_ignores_generic_quarantined_basenames(
         "mgt_rust_hip_full_residual_ffi_followup376_probe.json"
     ) not in paths
     assert payload["blocking_cleanup_reference_path_count"] == 0
+
+
+def test_cleanup_impact_report_tracks_scope_token_only_rows_without_blocking(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    owner_review = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_owner_review_packet.json"
+    )
+    origin = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_origin_report.json"
+    )
+    _write_json(owner_review, _owner_review_packet())
+    _write_json(origin, _origin_report())
+    _write_text(
+        tmp_path / "implementation/phase1/md3bead_soa.py",
+        "self reference should be ignored\n",
+    )
+    _write_text(
+        tmp_path / "tests/test_scope_token_guard.py",
+        "forbidden_tokens = ('gpcr', 'pocketmd', 'md3bead')\n",
+    )
+    _git_add(tmp_path)
+
+    payload = impact_report.build_cleanup_impact_report(
+        repo_root=tmp_path,
+        owner_review_packet_path=owner_review,
+        origin_report_path=origin,
+    )
+
+    rows = {row["path"]: row for row in payload["reference_rows"]}
+    token_guard = rows["tests/test_scope_token_guard.py"]
+    assert token_guard["matched_quarantined_path_count"] == 0
+    assert token_guard["owner_decision_dependency"] == "scope_token_review_before_cleanup"
+    assert token_guard["blocking_cleanup_reference"] is False
+    assert payload["blocking_cleanup_reference_path_count"] == 0
+    assert payload["blocking_reference_cleanup_batch_count"] == 0
+    assert payload["cleanup_impact_clear"] is True
 
 
 def test_cleanup_impact_report_can_be_clear_except_owner_decisions(

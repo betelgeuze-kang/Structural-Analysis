@@ -257,6 +257,10 @@ def _blocking_reference_role(role: str) -> bool:
     }
 
 
+def _blocking_cleanup_reference(role: str, matched_paths: list[str]) -> bool:
+    return bool(_blocking_reference_role(role) and matched_paths)
+
+
 def _reference_role_priority(role: str) -> int:
     return REFERENCE_ROLE_PRIORITY.get(role, 99)
 
@@ -313,7 +317,7 @@ def _scan_references(
             {
                 "path": path,
                 "reference_role": role,
-                "blocking_cleanup_reference": _blocking_reference_role(role),
+                "blocking_cleanup_reference": _blocking_cleanup_reference(role, matched_paths),
                 "release_freshness_source_boundary": _release_freshness_source_boundary(path),
                 "cleanup_requires_release_receipt_refresh": _release_freshness_source_boundary(path),
                 "reference_role_priority": _reference_role_priority(role),
