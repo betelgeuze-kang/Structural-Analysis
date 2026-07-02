@@ -8,9 +8,9 @@
     "molecular_dynamics": 25,
     "molecular_science_evidence": 13
   },
-  "generated_at": "2026-07-02T14:29:49.757237+00:00",
+  "generated_at": "2026-07-02T17:26:24.679343+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:6b6bd983462a49c6f6d40fbda86b76f75bdfd3711343c758de436af5112f7282",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:835fddeff709daceb8550ab99262ec5fb397aa53093b4fa7a066396df7b19197",
     "scripts/build_structural_scope_origin_report.py": "sha256:a8fb4630af97ff0f8ef860ee46d625510dcf3c8e25f856e37b52490f5521973c"
   },
   "missing_origin_count": 0,
@@ -2428,7 +2428,7 @@
   "reused_evidence": false,
   "root_cause_summary": "Quarantined non-structural paths entered this structural-analysis repository through tracked molecular runtime and science productization waves, then were later excluded from structural release claims by the scope quarantine manifest.",
   "schema_version": "structural-scope-origin-report.v1",
-  "source_commit_sha": "f1c2b71dedf74375c51e359eeb5723c37469bcd2",
+  "source_commit_sha": "159f435dcae55c953b0a8931a78ec4efa9905fd9",
   "status": "ready_for_owner_review_origin_evidence",
   "summary_line": "Structural scope origin report: READY_FOR_OWNER_REVIEW_ORIGIN_EVIDENCE | paths=86 | waves=37 | release_surface=3 | missing_origin=0"
 }
