@@ -480,7 +480,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-02T19:34:29.237702+00:00",
+  "generated_at": "2026-07-02T19:53:51.072363+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -505,8 +505,8 @@
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:9e61ef1db0ab2e01a3917d1e410a9677e8e5170aa5b9fb7ccc344bc98ee30cdd",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:042ed67e1d625082c5fac4439121442e0ca0505e96bb09f2788b6da04e537c03",
     "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:1da775e8d0cc6b97d1b7454f5b983a9d26660121753f8dfb0cc3b8d925f28291",
-    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:5cd0049e6dacf551e8eab911489964ee1a7630d0af56ee955cf423b72b2f8f9f",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:d8d18ae72a44048b3f4be961099095fa473aa500ca49dd7ef3859981c9d18346",
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:b325a4089b8912355a2007414d17d534c3448b66fb578423904b647e996c6c1a",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:8b3440f0281881df8894ebe24a331837e39484773f878e444592e984ea443b0a",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:7fbe12edf47a44996868ef7aa47b2f5508a04b035d76c520e7e4de6c52a9a078",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "scripts/build_phase6_platform_replay_receipt.py": "sha256:4033a3af3c9149894b6df4091c07f7b6c3262bee3253cc301848bb3dab1a5ce6",
@@ -3240,6 +3240,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "58271baed3d677dadc09d932ba14c1c4fb06227b",
+  "source_commit_sha": "f3e60e5dcb7fe4159340aae8c718ff69769917be",
   "status": "blocked"
 }
