@@ -3411,6 +3411,14 @@ def test_snapshot_allows_scaleout_io_profile_as_generated_receipt() -> None:
     )
 
 
+def test_snapshot_allows_structural_scope_boundary_cleanup_paths() -> None:
+    for path in [
+        ".gitignore",
+        "docs/engine-ai-and-comparison-commercialization-gaps.md",
+    ]:
+        assert build_product_readiness_snapshot._receipt_commit_allowed_path(path, set())
+
+
 def test_snapshot_allows_zero_copy_probe_reports_as_generated_receipts() -> None:
     for path in [
         "implementation/phase1/zero_copy_real_probe_report.forbidden.json",

@@ -341,8 +341,10 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
     if path in allowed_paths:
         return True
     if path in {
+        ".gitignore",
         "README.md",
         "docs/commercialization-gap-current-state.md",
+        "docs/engine-ai-and-comparison-commercialization-gaps.md",
         "docs/pm-release-gate-milestones.md",
     }:
         return True
