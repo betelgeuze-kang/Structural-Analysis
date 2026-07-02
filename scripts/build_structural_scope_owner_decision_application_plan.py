@@ -780,6 +780,8 @@ def _owner_decision_submission_options(
         "canonical_owner_decisions_path": DEFAULT_OWNER_DECISIONS.as_posix(),
         "template_csv_path": template_csv_path,
         "filled_csv_placeholder": filled_csv_placeholder,
+        "candidate_owner_decisions_placeholder": "<candidate-owner-decisions.json>",
+        "candidate_merge_report_placeholder": "<candidate-owner-decisions.md>",
         "validate_canonical_owner_decisions_command": (
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
             f"{validation_flag}"
@@ -787,6 +789,24 @@ def _owner_decision_submission_options(
         "validate_filled_csv_command": (
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
             f"--owner-decisions {filled_csv_placeholder} {validation_flag}"
+        ),
+        "merge_filled_csv_to_candidate_command": (
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            f"--batch-owner-decisions {filled_csv_placeholder} "
+            "--out <candidate-owner-decisions.json> "
+            "--out-md <candidate-owner-decisions.md>"
+        ),
+        "merge_and_validate_filled_csv_command": (
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            f"--batch-owner-decisions {filled_csv_placeholder} "
+            "--out <candidate-owner-decisions.json> "
+            "--out-md <candidate-owner-decisions.md> "
+            f"{validation_flag}"
+        ),
+        "validate_merged_candidate_command": (
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            "--owner-decisions <candidate-owner-decisions.json> "
+            f"{validation_flag}"
         ),
         "claim_boundary": (
             "A filled CSV can validate a scoped owner-review batch, but final "
@@ -1501,6 +1521,18 @@ def _owner_decision_submission_markdown_lines(payload: dict[str, Any]) -> list[s
     lines.append(
         "- `validate_filled_csv_command`: "
         f"`{options.get('validate_filled_csv_command', '')}`"
+    )
+    lines.append(
+        "- `merge_filled_csv_to_candidate_command`: "
+        f"`{options.get('merge_filled_csv_to_candidate_command', '')}`"
+    )
+    lines.append(
+        "- `merge_and_validate_filled_csv_command`: "
+        f"`{options.get('merge_and_validate_filled_csv_command', '')}`"
+    )
+    lines.append(
+        "- `validate_merged_candidate_command`: "
+        f"`{options.get('validate_merged_candidate_command', '')}`"
     )
     return lines
 

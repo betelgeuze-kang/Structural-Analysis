@@ -29,6 +29,9 @@
 - `template_csv_path`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv`
 - `validate_canonical_owner_decisions_command`: `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked`
 - `validate_filled_csv_command`: `python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions <filled-next-batch-owner-decisions.csv> --fail-release-surface-first-blocked`
+- `merge_filled_csv_to_candidate_command`: `python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions <filled-next-batch-owner-decisions.csv> --out <candidate-owner-decisions.json> --out-md <candidate-owner-decisions.md>`
+- `merge_and_validate_filled_csv_command`: `python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions <filled-next-batch-owner-decisions.csv> --out <candidate-owner-decisions.json> --out-md <candidate-owner-decisions.md> --fail-release-surface-first-blocked`
+- `validate_merged_candidate_command`: `python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions <candidate-owner-decisions.json> --fail-release-surface-first-blocked`
 
 ## Post Batch Verification
 

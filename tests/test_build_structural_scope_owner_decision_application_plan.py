@@ -360,6 +360,8 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "structural_scope_owner_decisions.next_batch.template.csv"
         ),
         "filled_csv_placeholder": "<filled-next-batch-owner-decisions.csv>",
+        "candidate_owner_decisions_placeholder": "<candidate-owner-decisions.json>",
+        "candidate_merge_report_placeholder": "<candidate-owner-decisions.md>",
         "validate_canonical_owner_decisions_command": (
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
             "--fail-release-surface-first-blocked"
@@ -367,6 +369,24 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
         "validate_filled_csv_command": (
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
             "--owner-decisions <filled-next-batch-owner-decisions.csv> "
+            "--fail-release-surface-first-blocked"
+        ),
+        "merge_filled_csv_to_candidate_command": (
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            "--batch-owner-decisions <filled-next-batch-owner-decisions.csv> "
+            "--out <candidate-owner-decisions.json> "
+            "--out-md <candidate-owner-decisions.md>"
+        ),
+        "merge_and_validate_filled_csv_command": (
+            "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+            "--batch-owner-decisions <filled-next-batch-owner-decisions.csv> "
+            "--out <candidate-owner-decisions.json> "
+            "--out-md <candidate-owner-decisions.md> "
+            "--fail-release-surface-first-blocked"
+        ),
+        "validate_merged_candidate_command": (
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+            "--owner-decisions <candidate-owner-decisions.json> "
             "--fail-release-surface-first-blocked"
         ),
         "claim_boundary": (
@@ -1071,9 +1091,20 @@ def test_application_plan_writes_release_surface_first_template(
         "--owner-decisions <filled-release-surface-first-owner-decisions.csv> "
         "--fail-release-surface-first-blocked"
     )
+    assert template_payload["owner_decision_submission_options"][
+        "merge_and_validate_filled_csv_command"
+    ] == (
+        "python3 scripts/merge_structural_scope_owner_decision_batch.py "
+        "--batch-owner-decisions "
+        "<filled-release-surface-first-owner-decisions.csv> "
+        "--out <candidate-owner-decisions.json> "
+        "--out-md <candidate-owner-decisions.md> "
+        "--fail-release-surface-first-blocked"
+    )
     next_markdown = next_template_md.read_text(encoding="utf-8")
     release_markdown = release_template_md.read_text(encoding="utf-8")
     assert "Release Surface First Batch" in release_markdown
+    assert "merge_and_validate_filled_csv_command" in release_markdown
     assert (
         "`external_archive_reference`: required when `owner_decision` is "
         "`extract_to_molecular_or_science_repository`"
