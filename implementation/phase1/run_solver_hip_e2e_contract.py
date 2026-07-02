@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 import json
 import math
 from pathlib import Path
+import shutil
 import time
 from typing import Any
 
@@ -38,6 +39,7 @@ REASONS = {
     "PASS": "solver-wide hip end-to-end contract passed",
     "ERR_INVALID_INPUT": "invalid solver hip e2e input",
     "ERR_STRICT_PROBE_FAIL": "strict zero-copy probe is not gpu-strict clean",
+    "ERR_ROCM_RUNTIME_UNAVAILABLE": "ROCm/HIP runtime device interface is unavailable",
     "ERR_NONLINEAR_FRAME_GPU_FAIL": "nonlinear frame static loop is not GPU-resident",
     "ERR_NDTHA_GPU_FAIL": "nonlinear frame NDTHA loop is not GPU-resident",
     "ERR_TRACK_GPU_FAIL": "track LF loop is not GPU-resident",
@@ -150,6 +152,50 @@ def _runtime_surrogate_free_pass(runtime: dict[str, Any]) -> tuple[bool, dict[st
     }
 
 
+def _rocm_runtime_environment_status(
+    *,
+    rocminfo_path: str,
+    rocm_smi_path: str,
+    dev_kfd_present: bool,
+    dev_dri_present: bool,
+) -> dict[str, Any]:
+    blockers: list[str] = []
+    if not rocminfo_path:
+        blockers.append("rocminfo_not_found")
+    if not dev_kfd_present:
+        blockers.append("dev_kfd_missing")
+    if not dev_dri_present:
+        blockers.append("dev_dri_missing")
+    runtime_device_interface_present = bool(dev_kfd_present and dev_dri_present)
+    contract_pass = bool(rocminfo_path and runtime_device_interface_present)
+    return {
+        "schema_version": "rocm-runtime-environment-status.v1",
+        "status": "ready" if contract_pass else "blocked",
+        "contract_pass": contract_pass,
+        "rocminfo_path": rocminfo_path,
+        "rocm_smi_path": rocm_smi_path,
+        "dev_kfd_present": dev_kfd_present,
+        "dev_dri_present": dev_dri_present,
+        "runtime_device_interface_present": runtime_device_interface_present,
+        "blockers": blockers,
+        "claim_boundary": (
+            "This environment check only proves that the local ROCm/HIP device "
+            "interface is visible enough to attempt production GPU execution. "
+            "It does not replace solver telemetry, kernel invocation counts, "
+            "device residency, CPU-fallback checks, or CPU/GPU parity evidence."
+        ),
+    }
+
+
+def _collect_rocm_runtime_environment() -> dict[str, Any]:
+    return _rocm_runtime_environment_status(
+        rocminfo_path=shutil.which("rocminfo") or "",
+        rocm_smi_path=shutil.which("rocm-smi") or "",
+        dev_kfd_present=Path("/dev/kfd").exists(),
+        dev_dri_present=Path("/dev/dri").exists(),
+    )
+
+
 def _append_solver_result(
     row_results: list[dict[str, Any]],
     *,
@@ -186,6 +232,7 @@ def run_solver_hip_e2e_contract(*, strict_probe: dict, min_device_residency_rati
         and not bool(strict_probe.get("cpu_required", False))
         and not bool(strict_probe.get("cpu_fallback_used", False))
     )
+    rocm_environment = _collect_rocm_runtime_environment()
 
     row_results: list[dict[str, Any]] = []
     frame_gpu_results: list[bool] = []
@@ -688,6 +735,7 @@ def run_solver_hip_e2e_contract(*, strict_probe: dict, min_device_residency_rati
         track_surrogate_results.append(surrogate_pass)
 
     checks = {
+        "rocm_runtime_environment_pass": bool(rocm_environment.get("contract_pass")),
         "strict_probe_pass": strict_probe_pass,
         "nonlinear_frame_gpu_pass": bool(all(frame_gpu_results)),
         "ndtha_gpu_pass": bool(all(ndtha_gpu_results)),
@@ -742,6 +790,8 @@ def run_solver_hip_e2e_contract(*, strict_probe: dict, min_device_residency_rati
 
     if not checks["strict_probe_pass"]:
         reason_code = "ERR_STRICT_PROBE_FAIL"
+    elif not checks["rocm_runtime_environment_pass"]:
+        reason_code = "ERR_ROCM_RUNTIME_UNAVAILABLE"
     elif not checks["nonlinear_frame_gpu_pass"]:
         reason_code = "ERR_NONLINEAR_FRAME_GPU_FAIL"
     elif not checks["ndtha_gpu_pass"]:
@@ -772,7 +822,8 @@ def run_solver_hip_e2e_contract(*, strict_probe: dict, min_device_residency_rati
         f"topologies={len({str((row.get('metadata') or {}).get('topology_family', '')).strip() for row in row_results if str((row.get('metadata') or {}).get('topology_family', '')).strip()})} | "
         f"load_paths={len({str((row.get('metadata') or {}).get('load_path_family', '')).strip() for row in row_results if str((row.get('metadata') or {}).get('load_path_family', '')).strip()})} | "
         f"device_residency_min={min((_finite((row.get('runtime') or {}).get('device_residency_ratio', 0.0), 0.0) for row in row_results), default=0.0):.2f} | "
-        f"hip_kernels={sum(int(_finite((row.get('runtime') or {}).get('hip_kernel_invocation_count', 0), 0.0)) for row in row_results)}"
+        f"hip_kernels={sum(int(_finite((row.get('runtime') or {}).get('hip_kernel_invocation_count', 0), 0.0)) for row in row_results)} | "
+        f"rocm_env={rocm_environment['status']}"
     )
 
     return {
@@ -786,6 +837,7 @@ def run_solver_hip_e2e_contract(*, strict_probe: dict, min_device_residency_rati
             "cpu_required": bool(strict_probe.get("cpu_required", False)),
             "cpu_fallback_used": bool(strict_probe.get("cpu_fallback_used", False)),
         },
+        "rocm_environment": rocm_environment,
         "summary": {
             "solver_count": len(row_results),
             "gpu_solver_count": sum(1 for row in row_results if bool((row.get("runtime") or {}).get("gpu_main_loop_pass", False))),
