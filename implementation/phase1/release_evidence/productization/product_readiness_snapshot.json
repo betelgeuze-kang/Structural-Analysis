@@ -2187,8 +2187,8 @@
     "github_actions_runner_policy": {
       "contract_pass": true,
       "ready": true,
-      "runs_on_count": 9,
-      "workflow_count": 8
+      "runs_on_count": 10,
+      "workflow_count": 9
     },
     "github_actions_self_hosted_runner": {
       "contract_pass": false,
@@ -2968,18 +2968,18 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T13:21:41.925323+00:00",
+  "generated_at": "2026-07-02T13:40:17.541132+00:00",
   "independent_product_ready": false,
   "input_checksums": {
-    ".github/workflows": "sha256-dir:83d0b025abb164befe6fa64660b3ff69061312792ed0e20871210395be9107c6",
+    ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
     "README.md": "sha256:5f77194331443f3cbbfd6357dcd8cbe47a30a53ee16e80d085e9b4db885876b7",
     "docs/commercialization-gap-current-state.md": "sha256:7844a0ab40f8fb44b746469d39160059bdc17526777539b37c5ad720b162bb6b",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:1d4666f87685b3d8f4cbcd9deeaded31d62d138ce7b27199fdcbdd643ef60c4c",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:0fa577808f940eb817ba77dafb41aecb6d2302111b44960ab217035515f2edc4",
     "implementation/phase1/release/independent_product_readiness.json": "sha256:3eff32c4fc57838f644ca03fb01ed2b2c8143315656156640e2d350bc2f3c0d8",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:b3151444bf829d35b502de317ec0502568e676ce9537ed8634ead349efb2c4ab",
-    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:436ece2aa693e8190ef7db9cea32f400683139fbbf221da57eed708be8a5120b",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:b74c0a14e60689c55bb16d257139ec10148a63d2892e6a32bb6b3d6d1e5662cf",
+    "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:ea5c7c6d4a3910cbda35a91fdf5cdfe46305087a125423449afcf27a232329ec",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:cc8a0880bf087021e318027687a31faa483a109b1bbd5a7bbc1bfcc276a1c0d4",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f1bf2e5a404d7dce22a175576cb7f020ce7c4f6bf8dcf9417fc5cd157e8b26b9",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:3a287eb48182eafee85f505d0e8f3d2a1c0d717385084f681dd0e35252d4242b",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:6cfe531b34ace2fe1faf4c57757ccb6d98eedcdfd5a4e07d98d3d8a8f2add373",
@@ -3002,7 +3002,7 @@
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:990b64dd49a8bab2ac3e0f384ebd71f488e7e84e32066243ea98ad2a13854652",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:d8c270b94de2ffd9f0bfddd049c1134c5c99bd537f9b2b1fe9357a7a3e70a0e1"
+    "scripts/build_product_readiness_snapshot.py": "sha256:1a0d18c8b988c4c3e4330c13ec319f8b16c8c77e56fba1b1202d6df7724be676"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -3306,7 +3306,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
+  "source_commit_sha": "a47c0a49efa8c2f5ea2bb70d3e3a65ff97aeebcf",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3345,6 +3345,14 @@
           "runs_on": "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}",
           "self_hosted_default": true,
           "workflow": ".github/workflows/deploy-pages.yml"
+        },
+        {
+          "github_hosted_label": false,
+          "line": 18,
+          "ok": true,
+          "runs_on": "${{ fromJSON(vars.STRUCTURAL_WINDOWS_RUNNER_LABELS || '[\"self-hosted\",\"windows\",\"x64\"]') }}",
+          "self_hosted_default": true,
+          "workflow": ".github/workflows/dp-windows-parity.yml"
         },
         {
           "github_hosted_label": false,
@@ -3387,287 +3395,455 @@
           "workflow": ".github/workflows/workflow-contract-ci.yml"
         }
       ],
-      "runs_on_count": 9,
+      "runs_on_count": 10,
       "schema_version": "github-actions-runner-policy.v1",
       "status": "pass",
-      "workflow_count": 8
+      "workflow_count": 9
     },
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:20:32.477112+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_closure_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:56.091782+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "commercial_gap_ledger_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:25.787042+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "gap_ledger_evidence_audit",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:43.125844+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "phase1_core_api_contract",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:27.138608+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_readiness",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:21:41.740692+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T13:21:41.804559+00:00",
+        "generated_at": "2026-07-02T13:40:17.305340+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
+        "source_commit_sha": "a47c0a49efa8c2f5ea2bb70d3e3a65ff97aeebcf",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:26.660409+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:43.212961+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:43.279005+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "customer_shadow_evidence_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:25.692158+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "workstation_delivery_readiness",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:43.240822+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "independent_product_readiness",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:20:14.764487+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "github_actions_ci_streak_evidence",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-01T10:19:19.231347+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "ux_new_user_observation_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:25.720165+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "license_status_closure_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:25.698432+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "paid_pilot_scope_guard_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:43.357698+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_readiness",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:20:07.272537+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "external_benchmark_submission_updates",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:56.081203+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "structural_scope_contamination_audit",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:43.289326+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:55.915518+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          ".github/workflows/dp-windows-parity.yml",
+          "scripts/build_developer_preview_rc_status.py",
+          "scripts/build_phase6_platform_replay_receipt.py",
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_phase6_platform_replay_receipt.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_dp_windows_parity_workflow.py"
+        ],
         "generated_at": "2026-07-02T13:19:55.928604+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "2535d4c8647429b77671775cf43d9582ca795880",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "non_artifact_source_paths_changed"
       },
       {
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T07:56:41.651717+00:00",
+        "generated_at": "2026-07-02T13:40:17.355009+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "afb4292fbc6ed337fc78bd624fb445692a32bb1a",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "a47c0a49efa8c2f5ea2bb70d3e3a65ff97aeebcf",
         "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_kind": "exact"
       }
     ],
     "open_blocker_counts": {
@@ -3692,36 +3868,9 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/customer_shadow_evidence_status.json",
-        "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md",
-        "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+        "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
         "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-        "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
-        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
-        "implementation/phase1/release_evidence/productization/gap_closure_status.json",
-        "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json",
-        "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
-        "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        "implementation/phase1/release_evidence/productization/license_status_closure_report.json",
-        "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
-        "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
-        "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
-        "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
-        "implementation/phase1/workstation_delivery_readiness.json"
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -3746,36 +3895,9 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/customer_shadow_evidence_status.json",
-        " M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
-        " M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md",
-        " M implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+        " M implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
         " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        " M implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
-        " M implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
-        " M implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
-        " M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
-        " M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
-        " M implementation/phase1/release_evidence/productization/gap_closure_status.json",
-        " M implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json",
-        " M implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
-        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
-        " M implementation/phase1/release_evidence/productization/license_status_closure_report.json",
-        " M implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
-        " M implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        " M implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        " M implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-        " M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
-        " M implementation/phase1/workstation_delivery_readiness.json"
+        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
   },
