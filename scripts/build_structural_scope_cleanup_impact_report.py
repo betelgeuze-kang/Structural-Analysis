@@ -66,8 +66,15 @@ SCOPE_GOVERNANCE_FILES = {
 RELEASE_GOVERNANCE_FILES = {
     "docs/commercialization-gap-current-state.md",
     "docs/pm-release-gate-milestones.md",
+    "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
+    "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
 }
 REFERENCE_ROLE_PRIORITY = {

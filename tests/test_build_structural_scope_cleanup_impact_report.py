@@ -137,6 +137,79 @@ def test_cleanup_impact_report_classifies_blocking_and_governance_refs(
     assert "blocking_cleanup_reference_path_count=2" in payload["blockers"]
 
 
+def test_cleanup_impact_report_treats_pm_scope_tracking_as_release_governance(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    owner_review = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_owner_review_packet.json"
+    )
+    origin = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "structural_scope_origin_report.json"
+    )
+    _write_json(owner_review, _owner_review_packet())
+    _write_json(origin, _origin_report())
+    _write_text(
+        tmp_path / "implementation/phase1/md3bead_soa.py",
+        "self reference should be ignored\n",
+    )
+    _write_text(
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "pm_release_gate_report.json",
+        (
+            "implementation/phase1/release_evidence/surface/"
+            "gpcr_hard_decoy_evidence_surface.json\n"
+        ),
+    )
+    _write_text(
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "pm_release_gate_reviewer_handoff.md",
+        "Owner decision pending for gpcr_hard_decoy_evidence_surface.json.\n",
+    )
+    _write_text(
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_source_of_truth.json",
+        "implementation/phase1/md3bead_soa.py\n",
+    )
+    _git_add(tmp_path)
+
+    payload = impact_report.build_cleanup_impact_report(
+        repo_root=tmp_path,
+        owner_review_packet_path=owner_review,
+        origin_report_path=origin,
+    )
+
+    rows = {row["path"]: row for row in payload["reference_rows"]}
+    pm_report = rows[
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+    ]
+    pm_handoff = rows[
+        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
+    ]
+    public_benchmark = rows[
+        "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json"
+    ]
+    assert pm_report["reference_role"] == "release_governance_reference"
+    assert pm_report["blocking_cleanup_reference"] is False
+    assert pm_handoff["reference_role"] == "release_governance_reference"
+    assert pm_handoff["blocking_cleanup_reference"] is False
+    assert public_benchmark["reference_role"] == "productization_evidence_reference"
+    assert public_benchmark["blocking_cleanup_reference"] is True
+    assert payload["blocking_reference_role_counts"] == {
+        "productization_evidence_reference": 1,
+    }
+    assert payload["next_reference_cleanup_batch"]["batch_id"] == (
+        "cleanup_refs_01_productization_evidence_reference"
+    )
+
+
 def test_cleanup_impact_report_can_be_clear_except_owner_decisions(
     tmp_path: Path,
 ) -> None:
