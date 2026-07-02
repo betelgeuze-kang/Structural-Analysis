@@ -14,24 +14,25 @@ import numpy as np
 
 
 ROOT = Path(__file__).resolve().parent
-CRATE_DIR = ROOT / "rust_hip_md3bead_hook"
+CRATE_DIR = ROOT / "structural_runtime_ffi"
 TARGET_DIR = CRATE_DIR / "target" / "release"
 
 
 def _shared_lib_name() -> str:
     if os.name == "nt":
-        return "rust_hip_md3bead_hook.dll"
+        return "structural_runtime_ffi.dll"
     if os.uname().sysname.lower() == "darwin":  # type: ignore[attr-defined]
-        return "librust_hip_md3bead_hook.dylib"
-    return "librust_hip_md3bead_hook.so"
+        return "libstructural_runtime_ffi.dylib"
+    return "libstructural_runtime_ffi.so"
 
 
 def _latest_source_mtime() -> float:
     latest = 0.0
     for p in (CRATE_DIR / "src").rglob("*.rs"):
         latest = max(latest, p.stat().st_mtime)
-    latest = max(latest, (CRATE_DIR / "Cargo.toml").stat().st_mtime)
-    latest = max(latest, (CRATE_DIR / "Cargo.lock").stat().st_mtime)
+    for manifest in (CRATE_DIR / "Cargo.toml", CRATE_DIR / "Cargo.lock"):
+        if manifest.exists():
+            latest = max(latest, manifest.stat().st_mtime)
     return latest
 
 
