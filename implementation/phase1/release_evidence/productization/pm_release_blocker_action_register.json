@@ -28,15 +28,15 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T21:05:47.909961+00:00",
+  "generated_at": "2026-07-02T21:14:24.460306+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:500b7803686ab0e8a38937948dc8831ce19bf9ef6461e601121ef434e39ba81a",
-    "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:df2b7aad2968199ea05f42c45b7b4297c0dd2afe4d9afcaedfac318134562113",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:f8410d9baae8ab23a8689036f876e774adb7afc56fe47e909b8c639ce5b9c9df",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:f42ec81bba4cc8f3aeedea9f217ebd37bca1bb24e867c9912ceec2a5c31837a7",
+    "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:9ddb5502fc9eb5911082834fb184629f72eb488fd8b53425594c32a52ef06a2f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9e965f3e2bf94ae644648104e2e35430f112a7c2390b099376e26e93029b75a0",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:917c0aefd1df26af0c2cf3ec1103ade3976fda9df8ce483fce98c0e8dae3e6d6",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:8ea34ad9ee537c7f4e1979b115b7f32383f0032ae595b0badba8ab3fd9e97543",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:8b3440f0281881df8894ebe24a331837e39484773f878e444592e984ea443b0a",
-    "scripts/build_pm_release_blocker_action_register.py": "sha256:45d7eb37ef5b3a9c7ce5e4e0e2ec9fabc3724aa2658b4062c5d0d633a190d4af"
+    "scripts/build_pm_release_blocker_action_register.py": "sha256:18e68d6b9649672b7bf764b819a632052a759dd872f3c6ab04743170eeb05df7"
   },
   "next_actions": [
     "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
@@ -1084,6 +1084,7 @@
       "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
       "owner_input_required": true,
       "reproduction_commands": [
+        "python3 scripts/fill_license_status_from_approval.py --out implementation/phase1/release/support_bundle/license_status.json --report-out implementation/phase1/release_evidence/productization/license_status.fill_report.json --license-id <license-id> --issuer <product-or-legal-owner> --approver-role <product_owner|legal_counsel|product_and_legal|delegated_product_owner> --approval-ref <approval-ref> --approved-at-utc <approved-at-utc> --evidence-ref <approval-evidence-ref> --expires-at-utc <future-expiry-utc> --fail-blocked",
         "python3 scripts/build_license_status_intake_packet.py --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
         "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -1637,7 +1638,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "85c423b9a9baaed0ff20b698584b8653331bd37e",
+  "source_commit_sha": "0b421055df3812c4c04723f6963a8fe10fa6d679",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,
