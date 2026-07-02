@@ -25,6 +25,9 @@ DEFAULT_HIP_PROBE = PRODUCTIZATION / "mgt_residual_jacobian_consistency_hip_requ
 DEFAULT_GLOBAL_CONNECTIVITY = PRODUCTIZATION / "g1_global_connectivity_load_path_audit.json"
 DEFAULT_OUT = PRODUCTIZATION / "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_SOLVER_HIP_E2E = Path(
+    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
+)
 
 RUNNER_ID = "build_consistent_newton_full_load_checkpoint_candidate_runner"
 PREFERRED_GENERATOR = "consistent_residual_jacobian_newton_rocm_full_load_candidate"
@@ -159,6 +162,130 @@ def _routing_blockers(
     return blockers
 
 
+def _worker_path_blocker_category(blocker: str) -> str:
+    if blocker.startswith("runtime::") or blocker == "rocm_hip_runtime_unavailable":
+        return "runtime_device_interface"
+    if blocker == "direct_probe_not_executed_preflight_only":
+        return "hip_required_direct_probe"
+    if blocker == "production_hip_residual_jacobian_path_not_proven":
+        return "production_hip_residual_jacobian_path"
+    if blocker.startswith("global_krylov_"):
+        return "matrix_free_global_krylov"
+    if blocker.startswith("current_tangent_residual_row_"):
+        return "current_tangent_residual_row_replay"
+    return "other"
+
+
+def _worker_path_repair_plan(
+    *,
+    worker: dict[str, Any],
+    hip_probe_path: Path,
+) -> dict[str, Any]:
+    blockers = _strings(worker.get("residual_jvp_worker_path_blockers"))
+    if not blockers and worker.get("residual_jvp_worker_path_ready") is not True:
+        blockers = _strings(worker.get("blockers"))
+    categories: dict[str, dict[str, Any]] = {}
+    for blocker in blockers:
+        category = _worker_path_blocker_category(blocker)
+        row = categories.setdefault(
+            category,
+            {
+                "blocker_count": 0,
+                "blockers": [],
+                "required_receipts": [],
+                "acceptance": [],
+            },
+        )
+        row["blockers"].append(blocker)
+        row["blocker_count"] += 1
+    category_contracts = {
+        "runtime_device_interface": {
+            "required_receipts": [DEFAULT_SOLVER_HIP_E2E.as_posix()],
+            "acceptance": [
+                "ROCm/HIP runtime device nodes are present",
+                "solver_hip_e2e_contract_report.json contract_pass == true",
+            ],
+        },
+        "hip_required_direct_probe": {
+            "required_receipts": [hip_probe_path.as_posix()],
+            "acceptance": [
+                "HIP-required direct probe executed, not preflight-only",
+                "cpu_diagnostic_assembler_used == false",
+            ],
+        },
+        "production_hip_residual_jacobian_path": {
+            "required_receipts": [hip_probe_path.as_posix()],
+            "acceptance": [
+                "production_hip_residual_jacobian_path == true",
+                "no CPU fallback path is counted as production HIP",
+            ],
+        },
+        "matrix_free_global_krylov": {
+            "required_receipts": [hip_probe_path.as_posix()],
+            "acceptance": [
+                "matrix_free_global_krylov.proof.hip_krylov_solver_used == true",
+                "matrix_free_global_krylov.proof.jvp_rows_retained == true",
+                "accepted-state tangent refresh uses HIP, not CPU",
+            ],
+        },
+        "current_tangent_residual_row_replay": {
+            "required_receipts": [hip_probe_path.as_posix()],
+            "acceptance": [
+                "current tangent residual row correction attempted with HIP batch replay",
+                "accepted-state tangent refresh CPU fallback remains false",
+            ],
+        },
+        "other": {
+            "required_receipts": [hip_probe_path.as_posix()],
+            "acceptance": ["unclassified worker-path blocker is resolved or reclassified"],
+        },
+    }
+    for category, row in categories.items():
+        contract = category_contracts[category]
+        row["required_receipts"] = contract["required_receipts"]
+        row["acceptance"] = contract["acceptance"]
+    ordered_categories = [
+        category
+        for category in (
+            "runtime_device_interface",
+            "hip_required_direct_probe",
+            "production_hip_residual_jacobian_path",
+            "matrix_free_global_krylov",
+            "current_tangent_residual_row_replay",
+            "other",
+        )
+        if category in categories
+    ]
+    return {
+        "schema_version": "g1-production-rocm-hip-worker-path-repair-plan.v1",
+        "status": "blocked" if blockers else "ready",
+        "next_action_id": (
+            "repair_production_rocm_hip_residual_jvp_worker_path"
+            if blockers
+            else "rerun_g1_full_load_hip_newton_lane"
+        ),
+        "blocker_count": len(blockers),
+        "blockers": blockers,
+        "category_count": len(categories),
+        "category_order": ordered_categories,
+        "category_counts": {
+            category: int(categories[category]["blocker_count"])
+            for category in ordered_categories
+        },
+        "categories": {category: categories[category] for category in ordered_categories},
+        "runtime_blockers": _strings(_as_dict(worker.get("runtime")).get("runtime_blockers")),
+        "required_receipts": [
+            hip_probe_path.as_posix(),
+            DEFAULT_SOLVER_HIP_E2E.as_posix(),
+        ],
+        "claim_boundary": (
+            "This repair plan classifies the missing production ROCm/HIP residual/JVP "
+            "worker path. It does not execute HIP, prove device residency, create a "
+            "full-load checkpoint, or promote G1 closure."
+        ),
+    }
+
+
 def _closure_blockers(
     *,
     g1_lane: dict[str, Any],
@@ -259,6 +386,10 @@ def build_runner_packet(
     action = _find_runner_action(g1_lane)
     checkpoint_gate = _as_dict(g1_lane.get("checkpoint_resolution_gate"))
     worker = _as_dict(hip_probe.get("production_rocm_hip_residual_jvp_worker"))
+    worker_path_repair_plan = _worker_path_repair_plan(
+        worker=worker,
+        hip_probe_path=hip_probe_path,
+    )
     terminal_partition = _as_dict(worker.get("terminal_gate_partition"))
     routing_blockers = _routing_blockers(action=action, cause_narrowing=cause_narrowing)
     contract_blockers = [
@@ -355,6 +486,15 @@ def build_runner_packet(
                 "residual_jvp_worker_path_ready"
             )
             is True,
+            "worker_path_repair_blocker_count": worker_path_repair_plan[
+                "blocker_count"
+            ],
+            "worker_path_repair_category_count": worker_path_repair_plan[
+                "category_count"
+            ],
+            "worker_path_repair_next_action_id": worker_path_repair_plan[
+                "next_action_id"
+            ],
             "g1_closure_gate_ready": worker.get("g1_closure_gate_ready") is True,
             "consistent_residual_jacobian_newton_gate_passed": hip_probe.get(
                 "consistent_residual_jacobian_newton_gate_passed"
@@ -466,7 +606,12 @@ def build_runner_packet(
             is True,
             "terminal_gate_partition": terminal_partition,
             "worker_blockers": _strings(worker.get("blockers")),
+            "worker_path_blockers": _strings(
+                worker.get("residual_jvp_worker_path_blockers")
+            ),
+            "worker_path_repair_plan": worker_path_repair_plan,
         },
+        "worker_path_repair_plan": worker_path_repair_plan,
         "verification_commands": [
             (
                 "python3 scripts/run_g1_full_load_hip_newton_lane.py "
@@ -531,6 +676,16 @@ def _markdown(payload: dict[str, Any]) -> str:
     if payload["blockers"]:
         lines.extend(["", "## Contract Blockers", ""])
         lines.extend(f"- `{item}`" for item in payload["blockers"])
+    repair_plan = _as_dict(payload.get("worker_path_repair_plan"))
+    if repair_plan:
+        lines.extend(["", "## Worker Path Repair Plan", ""])
+        lines.append(f"- `next_action_id`: `{repair_plan.get('next_action_id')}`")
+        lines.append(f"- `blocker_count`: `{repair_plan.get('blocker_count')}`")
+        for category in _as_list(repair_plan.get("category_order")):
+            lines.append(
+                f"- `{category}`: "
+                f"`{_as_dict(repair_plan.get('category_counts')).get(category, 0)}`"
+            )
     if payload["closure_blockers"]:
         lines.extend(["", "## Closure Blockers", ""])
         lines.extend(f"- `{item}`" for item in payload["closure_blockers"])

@@ -213,6 +213,17 @@ def _write_minimal_inputs(repo_root: Path) -> None:
                 "required_load_scale": 1.0,
                 "highest_observed_load_scale": 0.656,
             },
+            "worker_path_repair_plan": {
+                "schema_version": "g1-production-rocm-hip-worker-path-repair-plan.v1",
+                "status": "blocked",
+                "next_action_id": "repair_production_rocm_hip_residual_jvp_worker_path",
+                "blocker_count": 3,
+                "category_counts": {
+                    "runtime_device_interface": 1,
+                    "matrix_free_global_krylov": 1,
+                    "current_tangent_residual_row_replay": 1,
+                },
+            },
         },
     )
     _write_json(
@@ -325,6 +336,12 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         ]["current_position"]["active_terminal_requirement"]
         == "full_load_checkpoint_1p0"
     )
+    assert (
+        details[
+            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path"
+        ]["current_position"]["rocm_worker_path_repair_next_action"]
+        == "repair_production_rocm_hip_residual_jvp_worker_path"
+    )
     assert details[
         "collect_customer_shadow_and_external_benchmark_terminal_receipts"
     ]["current_position"]["completed_shadow_case_count"] == 1
@@ -390,6 +407,23 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         ]
         is True
     )
+    assert (
+        stages["g1_solver_closure"]["summary"]["rocm_worker_path_repair_status"]
+        == "blocked"
+    )
+    assert (
+        stages["g1_solver_closure"]["summary"][
+            "rocm_worker_path_repair_blocker_count"
+        ]
+        == 3
+    )
+    assert stages["g1_solver_closure"]["summary"][
+        "rocm_worker_path_repair_category_counts"
+    ] == {
+        "runtime_device_interface": 1,
+        "matrix_free_global_krylov": 1,
+        "current_tangent_residual_row_replay": 1,
+    }
     assert (
         stages["g1_solver_closure"]["summary"][
             "load_dependent_near_null_geometric_stiffness_comparison_status"

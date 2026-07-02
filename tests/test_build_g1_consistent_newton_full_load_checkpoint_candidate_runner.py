@@ -199,6 +199,27 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert payload["checkpoint_gap"]["highest_observed_load_scale"] == 0.656
     assert payload["hip_worker_contract"]["residual_jvp_worker_path_ready"] is True
     assert payload["hip_worker_contract"]["g1_closure_gate_ready"] is False
+    assert payload["worker_path_repair_plan"] == {
+        "schema_version": "g1-production-rocm-hip-worker-path-repair-plan.v1",
+        "status": "ready",
+        "next_action_id": "rerun_g1_full_load_hip_newton_lane",
+        "blocker_count": 0,
+        "blockers": [],
+        "category_count": 0,
+        "category_order": [],
+        "category_counts": {},
+        "categories": {},
+        "runtime_blockers": [],
+        "required_receipts": [
+            paths["hip"].as_posix(),
+            "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+        ],
+        "claim_boundary": (
+            "This repair plan classifies the missing production ROCm/HIP residual/JVP "
+            "worker path. It does not execute HIP, prove device residency, create a "
+            "full-load checkpoint, or promote G1 closure."
+        ),
+    }
     assert payload["next_actions"][0]["gap_to_required_load_scale"] == 0.344
     assert payload["next_actions"][1]["required_receipts"] == [
         paths["hip"].as_posix()
@@ -209,6 +230,60 @@ def test_runner_packet_is_ready_for_implementation_without_promoting_g1(
     assert "consistent_residual_jacobian_newton_gate_not_passed" in payload[
         "closure_blockers"
     ]
+
+
+def test_runner_packet_classifies_blocked_worker_path_repair_plan(tmp_path: Path) -> None:
+    paths = _write_inputs(tmp_path)
+    hip_payload = json.loads(paths["hip"].read_text(encoding="utf-8"))
+    worker = hip_payload["production_rocm_hip_residual_jvp_worker"]
+    worker["residual_jvp_worker_path_ready"] = False
+    worker["residual_jvp_worker_path_blockers"] = [
+        "rocm_hip_runtime_unavailable",
+        "runtime::dev_kfd_missing",
+        "direct_probe_not_executed_preflight_only",
+        "production_hip_residual_jacobian_path_not_proven",
+        "global_krylov_jvp_rows_not_retained",
+        "current_tangent_residual_row_hip_replay_not_proven",
+    ]
+    worker["runtime"] = {"runtime_blockers": ["dev_kfd_missing"]}
+    _write_json(paths["hip"], hip_payload)
+
+    payload = runner.build_runner_packet(
+        repo_root=tmp_path,
+        g1_lane_path=paths["g1_lane"],
+        cause_narrowing_path=paths["cause"],
+        hip_probe_path=paths["hip"],
+        global_connectivity_path=paths["global"],
+    )
+
+    assert payload["status"] == "blocked_runner_contract"
+    assert (
+        "production_rocm_hip_residual_jvp_worker_path_not_ready"
+        in payload["blockers"]
+    )
+    repair = payload["worker_path_repair_plan"]
+    assert repair["status"] == "blocked"
+    assert repair["next_action_id"] == "repair_production_rocm_hip_residual_jvp_worker_path"
+    assert repair["blocker_count"] == 6
+    assert repair["category_counts"] == {
+        "runtime_device_interface": 2,
+        "hip_required_direct_probe": 1,
+        "production_hip_residual_jacobian_path": 1,
+        "matrix_free_global_krylov": 1,
+        "current_tangent_residual_row_replay": 1,
+    }
+    assert repair["runtime_blockers"] == ["dev_kfd_missing"]
+    assert repair["categories"]["matrix_free_global_krylov"]["acceptance"] == [
+        "matrix_free_global_krylov.proof.hip_krylov_solver_used == true",
+        "matrix_free_global_krylov.proof.jvp_rows_retained == true",
+        "accepted-state tangent refresh uses HIP, not CPU",
+    ]
+    assert payload["summary"]["worker_path_repair_blocker_count"] == 6
+    assert payload["summary"]["worker_path_repair_category_count"] == 5
+    assert (
+        payload["summary"]["worker_path_repair_next_action_id"]
+        == "repair_production_rocm_hip_residual_jvp_worker_path"
+    )
 
 
 def test_runner_packet_blocks_when_lane_does_not_route_to_runner(tmp_path: Path) -> None:

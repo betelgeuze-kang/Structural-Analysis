@@ -373,6 +373,9 @@ def build_structural_product_development_roadmap(
     g1_runner_checkpoint_gap = _as_dict(
         g1_consistent_newton_runner.get("checkpoint_gap")
     )
+    g1_worker_repair_plan = _as_dict(
+        g1_consistent_newton_runner.get("worker_path_repair_plan")
+    )
     g1_global_summary = _as_dict(g1_global_connectivity.get("summary"))
     g1_global_decision = _as_dict(g1_global_connectivity.get("decision_record"))
     g1_cause_signals = _as_dict(g1_cause_narrowing.get("evidence_signals"))
@@ -593,6 +596,18 @@ def build_structural_product_development_roadmap(
                 ),
                 "consistent_newton_full_load_runner_required_load_scale": (
                     g1_runner_checkpoint_gap.get("required_load_scale")
+                ),
+                "rocm_worker_path_repair_status": str(
+                    g1_worker_repair_plan.get("status") or "missing"
+                ),
+                "rocm_worker_path_repair_next_action": str(
+                    g1_worker_repair_plan.get("next_action_id") or "missing"
+                ),
+                "rocm_worker_path_repair_blocker_count": _as_int(
+                    g1_worker_repair_plan.get("blocker_count")
+                ),
+                "rocm_worker_path_repair_category_counts": _as_dict(
+                    g1_worker_repair_plan.get("category_counts")
                 ),
                 "full_load_hip_observed_load_scale": _as_dict(components.get("g1")).get(
                     "full_load_hip_newton_lane_observed_load_scale"
@@ -824,6 +839,18 @@ def build_structural_product_development_roadmap(
                 ),
                 "consistent_newton_full_load_runner_id": str(
                     g1_runner_contract.get("runner_id") or ""
+                ),
+                "rocm_worker_path_repair_status": str(
+                    g1_worker_repair_plan.get("status") or "missing"
+                ),
+                "rocm_worker_path_repair_next_action": str(
+                    g1_worker_repair_plan.get("next_action_id") or "missing"
+                ),
+                "rocm_worker_path_repair_blocker_count": _as_int(
+                    g1_worker_repair_plan.get("blocker_count")
+                ),
+                "rocm_worker_path_repair_category_counts": _as_dict(
+                    g1_worker_repair_plan.get("category_counts")
                 ),
                 "recommended_g1_next_direction": g1_recommended_next_lane,
                 "terminal_requirements": (
