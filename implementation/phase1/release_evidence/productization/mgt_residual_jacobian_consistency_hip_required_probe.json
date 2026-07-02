@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-07-02T11:00:31.176608+00:00",
-  "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
+  "generated_at": "2026-07-02T11:04:31.244251+00:00",
+  "source_commit_sha": "adadb0b9ba2769cf5996d31d6b6ee8a816f7b78d",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -13,7 +13,7 @@
   "cpu_diagnostic_assembler_used": false,
   "production_hip_residual_jacobian_path": false,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-07-02T11:00:31.178160+00:00",
+    "checked_at": "2026-07-02T11:04:31.246701+00:00",
     "hip_available": false,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -62,7 +62,7 @@
   "production_rocm_hip_residual_jvp_worker": {
     "schema_version": "production-rocm-hip-residual-jvp-worker-contract.v1",
     "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
-    "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
+    "source_commit_sha": "adadb0b9ba2769cf5996d31d6b6ee8a816f7b78d",
     "ready": false,
     "status": "blocked",
     "blockers": [
@@ -212,7 +212,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 0.8681101810070686
+    "total_seconds": 0.931419119995553
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but no usable HIP runtime was available. The probe did not fall back to the CPU diagnostic path and does not close G1.",
   "blockers": [

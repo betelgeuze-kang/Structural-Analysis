@@ -229,7 +229,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-02T11:01:45.507091+00:00",
+  "generated_at": "2026-07-02T11:05:12.636339+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -248,11 +248,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:45095637bd6b640a7c87328fb4994d432b3ff4ba0ab4818863ec4cee1aa935d3",
+      "input_checksum": "sha256:219f03310df10dba23320ef4897dfc3eba668d8614db86423221659a50191a72",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
+      "source_commit_sha": "adadb0b9ba2769cf5996d31d6b6ee8a816f7b78d",
       "status": "blocked"
     }
   },
@@ -260,7 +260,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d8cdf2989191bbff716779c472be3600e326f5f86a6bccb9093aca4b012ac778",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:45095637bd6b640a7c87328fb4994d432b3ff4ba0ab4818863ec4cee1aa935d3"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:219f03310df10dba23320ef4897dfc3eba668d8614db86423221659a50191a72"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -1829,7 +1829,7 @@
           "dev_kfd_missing",
           "dev_dri_missing"
         ],
-        "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
+        "source_commit_sha": "adadb0b9ba2769cf5996d31d6b6ee8a816f7b78d",
         "source_state_fresh": true,
         "source_state_kind": "exact",
         "status": "partial"
@@ -2212,6 +2212,6 @@
       }
     }
   },
-  "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
+  "source_commit_sha": "adadb0b9ba2769cf5996d31d6b6ee8a816f7b78d",
   "status": "blocked"
 }

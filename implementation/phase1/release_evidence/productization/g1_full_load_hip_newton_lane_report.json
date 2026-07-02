@@ -1489,7 +1489,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-07-02T11:00:39.459431+00:00",
+  "generated_at": "2026-07-02T11:04:38.819732+00:00",
   "hip_consistency_proof": {
     "changed_paths_since_source_commit": [],
     "consistent_residual_jacobian_newton_gate_passed": false,
@@ -1599,7 +1599,7 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
+    "source_commit_sha": "adadb0b9ba2769cf5996d31d6b6ee8a816f7b78d",
     "source_state_fresh": true,
     "source_state_kind": "exact",
     "status": "partial"
@@ -1608,7 +1608,7 @@
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:c0dac94d41b89f15f30cd6304676775cc4114198f7ce6474c8a31de028d83a49",
     "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:960660c2a71d1083e9fef226aee25dbf8debdf5345813ff80d7bf78875e9cbc8",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:c0be5f8ab3a2aa3b9b0beffe1a6316bb20a984361bee8d25f63f14cc759d4e4f",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:c1e2fb1825762c55ed778fdb8be16f980a3c19f6a305b148a762b8818d1cc9e5",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:26231b6d8aea08199264cb3ee4e5f24417d58265664a18c88aa74c579a2ab5e3"
   },
   "lane_next_actions": [
@@ -1648,6 +1648,8 @@
       "cause_narrowing_row_only_correction_loop_stopped": true,
       "cause_narrowing_support_or_link_row_gap_disfavored": true,
       "id": "close_consistent_residual_jacobian_newton_gate",
+      "lane_refresh_command": "python3 scripts/run_g1_full_load_hip_newton_lane.py --out implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json --child-output-json implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
+      "proof_refresh_command": "python3 implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py --component-only --require-hip-residual-engine --output-json implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
       "reason": "hip_consistency_proof_gate_not_passed",
       "receipt_blockers": [
         "rocm_hip_runtime_unavailable",
@@ -1655,11 +1657,31 @@
         "hip_runtime::dev_dri_missing",
         "hip_residual_jacobian_consistency_not_executed"
       ],
+      "runtime_blockers": [
+        "dev_kfd_missing",
+        "dev_dri_missing"
+      ],
+      "runtime_preconditions": [
+        "run on a production ROCm/HIP worker host with /dev/kfd and /dev/dri available",
+        "keep CPU fallback disallowed for the required residual/JVP proof",
+        "retain global JVP rows and accepted-state tangent refresh on HIP"
+      ],
       "worker_g1_closure_gate_blockers": [
         "consistent_residual_jacobian_newton_gate_not_passed"
       ],
       "worker_g1_closure_gate_ready": false,
       "worker_id": "consistent_residual_jacobian_newton_rocm_worker",
+      "worker_residual_jvp_path_blockers": [
+        "current_tangent_residual_row_hip_replay_not_proven",
+        "direct_probe_not_executed",
+        "global_krylov_accepted_state_tangent_refresh_hip_not_proven",
+        "global_krylov_hip_solver_not_proven",
+        "global_krylov_jvp_rows_not_retained",
+        "production_hip_residual_jacobian_path_not_proven",
+        "rocm_hip_runtime_unavailable",
+        "runtime::dev_dri_missing",
+        "runtime::dev_kfd_missing"
+      ],
       "worker_residual_jvp_path_ready": false
     },
     {
@@ -1678,7 +1700,7 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "67522a578e40d58abb0f584078179e164dd630ed",
+  "source_commit_sha": "adadb0b9ba2769cf5996d31d6b6ee8a816f7b78d",
   "status": "blocked",
   "terminal_requirement_breakdown": {
     "active_terminal_requirement_id": "full_load_checkpoint_1p0",
