@@ -3600,6 +3600,14 @@ def test_snapshot_allows_scaleout_io_profile_as_generated_receipt() -> None:
     )
 
 
+def test_snapshot_allows_structural_runtime_perf_reports_as_generated_receipts() -> None:
+    for path in [
+        "implementation/phase1/p0_engine_perf_report.json",
+        "implementation/phase1/track_lf_solver_report.json",
+    ]:
+        assert build_product_readiness_snapshot._receipt_commit_allowed_path(path, set())
+
+
 def test_snapshot_allows_structural_scope_boundary_cleanup_paths() -> None:
     for path in [
         ".gitignore",
