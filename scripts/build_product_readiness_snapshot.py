@@ -561,6 +561,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         },
         "license_status_closure_report": {
             "scripts/build_license_status_closure_report.py",
+            "scripts/fill_license_status_from_approval.py",
         },
         "mgt_g1_direct_residual_terminal_gate_report": {
             "scripts/build_mgt_g1_direct_residual_terminal_gate_report.py",

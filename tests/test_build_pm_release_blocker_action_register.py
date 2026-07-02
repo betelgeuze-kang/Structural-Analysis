@@ -194,6 +194,7 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert security_row["external_input_required"] is True
     assert security_row["resolution_type"] == "product_legal_decision_required"
     assert security_row["owner_action"] == "Populate license status from approved legal evidence."
+    assert any("fill_license_status_from_approval.py" in command for command in security_row["reproduction_commands"])
     assert any("build_license_status_intake_packet.py" in command for command in security_row["reproduction_commands"])
     assert any("build_license_status_closure_report.py" in command for command in security_row["reproduction_commands"])
     assert any("build_license_status_closure_report.py" in command for command in security_row["verification_commands"])

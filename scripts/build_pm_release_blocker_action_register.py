@@ -900,6 +900,14 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         ]
     if namespace == "security" and "license" in code:
         return [
+            "python3 scripts/fill_license_status_from_approval.py "
+            "--out implementation/phase1/release/support_bundle/license_status.json "
+            "--report-out implementation/phase1/release_evidence/productization/license_status.fill_report.json "
+            "--license-id <license-id> --issuer <product-or-legal-owner> "
+            "--approver-role <product_owner|legal_counsel|product_and_legal|delegated_product_owner> "
+            "--approval-ref <approval-ref> --approved-at-utc <approved-at-utc> "
+            "--evidence-ref <approval-evidence-ref> --expires-at-utc <future-expiry-utc> "
+            "--fail-blocked",
             f"python3 scripts/build_license_status_intake_packet.py --out {DEFAULT_LICENSE_STATUS_INTAKE_PACKET}",
             f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_LICENSE_STATUS_CLOSURE}",
             pm_report_command,
