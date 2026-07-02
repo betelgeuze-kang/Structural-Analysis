@@ -63,7 +63,9 @@ Acceptance criteria:
 Evidence artifact paths:
 - `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
 - `product_readiness_snapshot`: `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+- `structural_scope_cleanup_impact_report`: `implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json`
 - `structural_scope_contamination_audit`: `implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json`
+- `structural_scope_origin_report`: `implementation/phase1/release_evidence/productization/structural_scope_origin_report.json`
 - `structural_scope_owner_decision_application_plan`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json`
 - `structural_scope_owner_decisions`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json`
 - `structural_scope_owner_review_packet`: `implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json`
@@ -72,11 +74,15 @@ Evidence artifact paths:
 Reproduction commands:
 - `python3 scripts/check_structural_scope_contamination.py --out implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json --out-md implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md`
 - `python3 scripts/build_structural_scope_owner_review_packet.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md --write-decision-template`
+- `python3 scripts/build_structural_scope_origin_report.py --out implementation/phase1/release_evidence/productization/structural_scope_origin_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_origin_report.md`
+- `python3 scripts/build_structural_scope_cleanup_impact_report.py --out implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md`
 - `python3 scripts/build_structural_scope_owner_decision_application_plan.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md`
 - `python3 scripts/build_product_readiness_snapshot.py`
 - `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
 
 Verification commands:
+- `python3 scripts/build_structural_scope_origin_report.py --fail-blocked`
+- `python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked`
 - `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked`
 - `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions`
 - `python3 scripts/check_structural_scope_contamination.py --fail-blocked`

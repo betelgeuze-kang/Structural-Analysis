@@ -19,7 +19,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked except for explicit non-tier structural scope cleanup adjunct handoffs. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-07-02T05:50:48.446737+00:00",
+  "generated_at": "2026-07-02T07:05:37.072090+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -2303,6 +2303,8 @@
       "reproduction_commands": [
         "python3 scripts/check_structural_scope_contamination.py --out implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json --out-md implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
         "python3 scripts/build_structural_scope_owner_review_packet.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md --write-decision-template",
+        "python3 scripts/build_structural_scope_origin_report.py --out implementation/phase1/release_evidence/productization/structural_scope_origin_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
+        "python3 scripts/build_structural_scope_cleanup_impact_report.py --out implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
         "python3 scripts/build_product_readiness_snapshot.py",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -2323,7 +2325,9 @@
           "evidence_artifacts": {
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
             "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+            "structural_scope_cleanup_impact_report": "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
             "structural_scope_contamination_audit": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
+            "structural_scope_origin_report": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
             "structural_scope_owner_decision_application_plan": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
             "structural_scope_owner_decisions": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
             "structural_scope_owner_review_packet": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
@@ -2358,6 +2362,8 @@
           "reproduction_commands": [
             "python3 scripts/check_structural_scope_contamination.py --out implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json --out-md implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
             "python3 scripts/build_structural_scope_owner_review_packet.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md --write-decision-template",
+            "python3 scripts/build_structural_scope_origin_report.py --out implementation/phase1/release_evidence/productization/structural_scope_origin_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
+            "python3 scripts/build_structural_scope_cleanup_impact_report.py --out implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
             "python3 scripts/build_product_readiness_snapshot.py",
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -2365,6 +2371,8 @@
           "scope": "release_surface_scope",
           "title": "Structural Scope Cleanup",
           "verification_commands": [
+            "python3 scripts/build_structural_scope_origin_report.py --fail-blocked",
+            "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
             "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
@@ -2375,6 +2383,8 @@
       ],
       "request_state": "ready_for_owner_input",
       "verification_commands": [
+        "python3 scripts/build_structural_scope_origin_report.py --fail-blocked",
+        "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
         "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
