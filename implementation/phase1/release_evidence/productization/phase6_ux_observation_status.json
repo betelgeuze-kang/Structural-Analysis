@@ -200,7 +200,7 @@
       "python3 scripts/build_developer_preview_rc_status.py --check"
     ]
   },
-  "generated_at": "2026-07-02T05:31:39.226642+00:00",
+  "generated_at": "2026-07-02T13:12:02.965107+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -232,9 +232,9 @@
     "workflow_step_pass_count": 0
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:018fd543d2490165f6cd3d005093b3c234e3fa590d7d8f25f7cc8b1496006f40",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:7ec48747941e6affe89b3446ab2617bfc17df50fc659ce5f76fef9d41cb08b33",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:3ea9c4b54e36a220375087aedb9fa7fa8b1314b29290c117239c2e960e83bb14",
+    "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:5bc106b5824d41c84c6e8f16549b48589ea92029e8592bd012128d08a2b8b7ba",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:fb2c18eb3e65c5374c7a4ded129767a8eda6c7ee74cafd052745aafbe7bec161",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:f490d66c9f5c605a99b0fa8013467382f4a4f66e46ed32a9697e3d1666144536",
     "scripts/build_phase6_ux_observation_status.py": "sha256:871c654074772cfa0153dcff929d2bb7b1ad5ce9e1cac1a52228c8d1616edb89"
   },
   "intake_packet_gate": {
@@ -405,7 +405,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "fb3778ef26814b0d22c5790bc6c4acaae79b9e8e",
+  "source_commit_sha": "672658d16b19e91fa35acead82a077df83360a67",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=5/5 | browser=True"
 }
