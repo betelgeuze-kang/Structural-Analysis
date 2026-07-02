@@ -401,7 +401,13 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
             "claim_boundary": "Fixture has no release-surface cleanup rows.",
         },
         "release_surface_first_batch_ready": False,
+        "release_surface_first_batch_application_ready": False,
         "release_surface_first_batch_blockers": [],
+        "release_surface_first_batch_application_blockers": [],
+        "release_surface_first_batch_cleanup_application_preflight": {
+            "status": "no_cleanup_required",
+            "ready": False,
+        },
         "release_surface_first_batch_template_paths": {},
         "next_owner_review_batch_decision_template": {},
         "owner_decision_template_paths": {},
@@ -5077,7 +5083,13 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
             "claim_boundary": "Fixture has no release-surface cleanup rows.",
         },
         "release_surface_first_batch_ready": False,
+        "release_surface_first_batch_application_ready": False,
         "release_surface_first_batch_blockers": [],
+        "release_surface_first_batch_application_blockers": [],
+        "release_surface_first_batch_cleanup_application_preflight": {
+            "status": "no_cleanup_required",
+            "ready": False,
+        },
         "release_surface_first_batch_template_paths": {},
         "next_owner_review_batch_decision_template": {
             "batch_id": "productization_evidence_second",
@@ -5174,7 +5186,13 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     assert cleanup["release_surface_first_batch_pending_decision_count"] == 0
     assert cleanup["release_surface_first_batch_completion_ratio"] == 1.0
     assert cleanup["release_surface_first_batch_ready"] is False
+    assert cleanup["release_surface_first_batch_application_ready"] is False
     assert cleanup["release_surface_first_batch_blockers"] == []
+    assert cleanup["release_surface_first_batch_application_blockers"] == []
+    assert cleanup["release_surface_first_batch_cleanup_application_preflight"] == {
+        "status": "no_cleanup_required",
+        "ready": False,
+    }
     assert cleanup["release_surface_first_batch_template_paths"] == {}
     assert cleanup["next_batch_template_paths"]["csv"].endswith(
         "structural_scope_owner_decisions.next_batch.template.csv"

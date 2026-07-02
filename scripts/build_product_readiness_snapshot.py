@@ -3066,9 +3066,24 @@ def build_snapshot(
                         "release_surface_first_batch_ready"
                     )
                 ),
+                "release_surface_first_batch_application_ready": bool(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_first_batch_application_ready"
+                    )
+                ),
                 "release_surface_first_batch_blockers": _as_list(
                     structural_scope_cleanup_plan.get(
                         "release_surface_first_batch_blockers"
+                    )
+                ),
+                "release_surface_first_batch_application_blockers": _as_list(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_first_batch_application_blockers"
+                    )
+                ),
+                "release_surface_first_batch_cleanup_application_preflight": _as_dict(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_first_batch_cleanup_application_preflight"
                     )
                 ),
                 "release_surface_first_batch_template_paths": _as_dict(
