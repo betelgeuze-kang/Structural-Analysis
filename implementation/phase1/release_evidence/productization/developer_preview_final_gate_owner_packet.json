@@ -14,16 +14,17 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "evidence_intake_artifact_count": 9,
+  "evidence_intake_artifact_count": 12,
   "final_gate_count": 9,
   "final_gate_pass_count": 6,
-  "generated_at": "2026-07-02T01:08:43.913396+00:00",
+  "generated_at": "2026-07-02T01:35:29.093735+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:300be1a9be55ce6d66f50d01468e96082a10af860c0e8791a402a93c6204e9a7",
-    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:1827386d49784db328174de7b37148cd77b027941533099af2bc559b936631c7"
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:9983597d1f29bf1a960419f1bcefdbfee959160539bd71506b7ec2aec3571518",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:a916d9965090d7a7a6814a6c9bca8f6da9e4aadbbaaadd3f4415cd7f24037523",
+    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:393c1882b10486c35dc552ff64734c67994ccbb75b7e0f82f5fc6edbb72f7b10"
   },
-  "owner_packet_blocker_id_count": 8,
+  "owner_packet_blocker_id_count": 32,
   "owner_packet_blocker_ids": [
     "developer_preview_rc::selected_medium_models_pass_or_approved_review",
     "product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -32,7 +33,31 @@
     "developer_preview_rc::new_user_core_workflow_observation_passed",
     "pm_release::ux::human_new_user_observation_missing_or_failed",
     "pm_release::ux::human_new_user_30min_sample_evidence_missing",
-    "product_readiness_snapshot::human_ux::*"
+    "product_readiness_snapshot::human_ux::*",
+    "human_ux::observation_file_missing",
+    "human_ux::contract_signal_not_pass",
+    "human_ux::required_fields_missing",
+    "human_ux::participant_not_new_user",
+    "human_ux::new_to_product_not_confirmed",
+    "human_ux::completion_minutes_missing",
+    "human_ux::workflow_steps_missing",
+    "human_ux::required_workflow_steps_missing",
+    "human_ux::required_workflow_step_not_passed",
+    "human_ux::blocking_usability_issue_present",
+    "human_ux::evidence_ref_missing",
+    "human_ux::approval_decision_not_accepted",
+    "ux_new_user_observation::observation_file_missing",
+    "ux_new_user_observation::contract_signal_not_pass",
+    "ux_new_user_observation::required_fields_missing",
+    "ux_new_user_observation::participant_not_new_user",
+    "ux_new_user_observation::new_to_product_not_confirmed",
+    "ux_new_user_observation::completion_minutes_missing",
+    "ux_new_user_observation::workflow_steps_missing",
+    "ux_new_user_observation::required_workflow_steps_missing",
+    "ux_new_user_observation::required_workflow_step_not_passed",
+    "ux_new_user_observation::blocking_usability_issue_present",
+    "ux_new_user_observation::evidence_ref_missing",
+    "ux_new_user_observation::approval_decision_not_accepted"
   ],
   "owner_packet_count": 3,
   "owner_packet_gate_ids": [
@@ -128,6 +153,7 @@
       ],
       "gate": "selected_medium_models_pass_or_approved_review",
       "gate_id": "selected_medium_models_pass_or_approved_review",
+      "human_observation_evidence_policy": {},
       "notes": [
         "Requires passing or pre-approved REVIEW evidence for selected medium OpenSees/reference models. Local topology/parser evidence does not count as medium-model benchmark pass evidence."
       ],
@@ -152,6 +178,11 @@
       ],
       "required_owner_evidence_count": 5,
       "status": "blocked",
+      "upstream_intake_artifact": "",
+      "upstream_intake_blocker_id_count": 0,
+      "upstream_intake_blocker_ids": [],
+      "upstream_intake_contract_pass": false,
+      "upstream_intake_status": "",
       "verification_command_count": 3,
       "verification_commands": [
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
@@ -212,6 +243,7 @@
       ],
       "gate": "linux_windows_reproducibility_confirmed",
       "gate_id": "linux_windows_reproducibility_confirmed",
+      "human_observation_evidence_policy": {},
       "notes": [
         "Requires independent Linux and Windows receipts that replay the same seed benchmark commands and compare stable output checksums. Git clean-clone blockers are tracked under benchmark_results_clean_checkout_regenerated so this gate remains scoped to missing Linux/Windows parity evidence."
       ],
@@ -236,6 +268,11 @@
       ],
       "required_owner_evidence_count": 5,
       "status": "blocked",
+      "upstream_intake_artifact": "",
+      "upstream_intake_blocker_id_count": 0,
+      "upstream_intake_blocker_ids": [],
+      "upstream_intake_contract_pass": false,
+      "upstream_intake_status": "",
       "verification_command_count": 2,
       "verification_commands": [
         "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
@@ -319,7 +356,31 @@
         "developer_preview_rc::new_user_core_workflow_observation_passed",
         "pm_release::ux::human_new_user_observation_missing_or_failed",
         "pm_release::ux::human_new_user_30min_sample_evidence_missing",
-        "product_readiness_snapshot::human_ux::*"
+        "product_readiness_snapshot::human_ux::*",
+        "human_ux::observation_file_missing",
+        "human_ux::contract_signal_not_pass",
+        "human_ux::required_fields_missing",
+        "human_ux::participant_not_new_user",
+        "human_ux::new_to_product_not_confirmed",
+        "human_ux::completion_minutes_missing",
+        "human_ux::workflow_steps_missing",
+        "human_ux::required_workflow_steps_missing",
+        "human_ux::required_workflow_step_not_passed",
+        "human_ux::blocking_usability_issue_present",
+        "human_ux::evidence_ref_missing",
+        "human_ux::approval_decision_not_accepted",
+        "ux_new_user_observation::observation_file_missing",
+        "ux_new_user_observation::contract_signal_not_pass",
+        "ux_new_user_observation::required_fields_missing",
+        "ux_new_user_observation::participant_not_new_user",
+        "ux_new_user_observation::new_to_product_not_confirmed",
+        "ux_new_user_observation::completion_minutes_missing",
+        "ux_new_user_observation::workflow_steps_missing",
+        "ux_new_user_observation::required_workflow_steps_missing",
+        "ux_new_user_observation::required_workflow_step_not_passed",
+        "ux_new_user_observation::blocking_usability_issue_present",
+        "ux_new_user_observation::evidence_ref_missing",
+        "ux_new_user_observation::approval_decision_not_accepted"
       ],
       "closure_decision_required": "accepted_human_new_user_observation",
       "contract_pass": false,
@@ -349,16 +410,36 @@
         "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json"
       ],
-      "evidence_intake_artifact_count": 5,
+      "evidence_intake_artifact_count": 8,
       "evidence_intake_artifacts": [
         "docs/templates/ux_new_user_observation.template.json",
         "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
         "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json"
+        "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+        "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
       ],
       "gate": "new_user_core_workflow_observation_passed",
       "gate_id": "new_user_core_workflow_observation_passed",
+      "human_observation_evidence_policy": {
+        "accepted_evidence": [
+          "human-observed 30-minute new-user workflow record with anonymized participant_ref",
+          "observer-owned note, ticket, recording reference, or signed evidence bundle",
+          "timezone-aware started_at_utc/completed_at_utc plus matching completion_minutes <= 30",
+          "all five required workflow steps observed with passing outcomes",
+          "approval_decision explicitly accepted for release evidence"
+        ],
+        "closure_rule": "The UX PM release area and Developer Preview UX final gate close only after ux_new_user_observation_report.json and phase6_ux_observation_status.json both pass from a real human 30-minute new-user sample.",
+        "rejected_substitutes": [
+          "automated browser smoke or task-based UX rehearsal without human observation",
+          "generated UX/PM/DP/readiness gate reports used as evidence_ref",
+          "docs/templates or *.template.* files",
+          "the observation JSON self-referencing itself as separate evidence",
+          "operator/expert rehearsal that is not a new-user observation"
+        ]
+      },
       "notes": [
         "This gate requires a passing human new-user observation report. The intake packet is an owner handoff checklist only, automated browser/task evidence does not replace human observation, and visible workflow shell coverage does not satisfy the gate by itself."
       ],
@@ -368,7 +449,12 @@
         "automated_browser_smoke_without_human_observation",
         "template_ux_observation_json",
         "self_referential_or_placeholder_evidence_refs",
-        "gui_shell_coverage_without_user_observation"
+        "gui_shell_coverage_without_user_observation",
+        "automated browser smoke or task-based UX rehearsal without human observation",
+        "generated UX/PM/DP/readiness gate reports used as evidence_ref",
+        "docs/templates or *.template.* files",
+        "the observation JSON self-referencing itself as separate evidence",
+        "operator/expert rehearsal that is not a new-user observation"
       ],
       "release_surface_impact_count": 4,
       "release_surface_impacts": [
@@ -389,6 +475,39 @@
       ],
       "required_owner_evidence_count": 8,
       "status": "blocked",
+      "upstream_intake_artifact": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+      "upstream_intake_blocker_id_count": 27,
+      "upstream_intake_blocker_ids": [
+        "pm_release::ux::human_new_user_observation_missing_or_failed",
+        "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+        "developer_preview_rc::new_user_core_workflow_observation_passed",
+        "human_ux::observation_file_missing",
+        "human_ux::contract_signal_not_pass",
+        "human_ux::required_fields_missing",
+        "human_ux::participant_not_new_user",
+        "human_ux::new_to_product_not_confirmed",
+        "human_ux::completion_minutes_missing",
+        "human_ux::workflow_steps_missing",
+        "human_ux::required_workflow_steps_missing",
+        "human_ux::required_workflow_step_not_passed",
+        "human_ux::blocking_usability_issue_present",
+        "human_ux::evidence_ref_missing",
+        "human_ux::approval_decision_not_accepted",
+        "ux_new_user_observation::observation_file_missing",
+        "ux_new_user_observation::contract_signal_not_pass",
+        "ux_new_user_observation::required_fields_missing",
+        "ux_new_user_observation::participant_not_new_user",
+        "ux_new_user_observation::new_to_product_not_confirmed",
+        "ux_new_user_observation::completion_minutes_missing",
+        "ux_new_user_observation::workflow_steps_missing",
+        "ux_new_user_observation::required_workflow_steps_missing",
+        "ux_new_user_observation::required_workflow_step_not_passed",
+        "ux_new_user_observation::blocking_usability_issue_present",
+        "ux_new_user_observation::evidence_ref_missing",
+        "ux_new_user_observation::approval_decision_not_accepted"
+      ],
+      "upstream_intake_contract_pass": false,
+      "upstream_intake_status": "blocked",
       "verification_command_count": 4,
       "verification_commands": [
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -412,7 +531,7 @@
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "e9ea2b2f557e0201d1ebf9d61f67e555e1b1f954",
+  "source_commit_sha": "97f640a441099ea409539666d699ec8df2beb459",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
 }

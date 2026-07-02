@@ -46,6 +46,16 @@
 - `implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
 - `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
 - `implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json`
+- `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+- `implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
+
+## Human Observation Evidence Policy
+
+### `new_user_core_workflow_observation_passed`
+- `closure_rule`: The UX PM release area and Developer Preview UX final gate close only after ux_new_user_observation_report.json and phase6_ux_observation_status.json both pass from a real human 30-minute new-user sample.
+- `accepted_evidence`: human-observed 30-minute new-user workflow record with anonymized participant_ref; observer-owned note, ticket, recording reference, or signed evidence bundle; timezone-aware started_at_utc/completed_at_utc plus matching completion_minutes <= 30; all five required workflow steps observed with passing outcomes; approval_decision explicitly accepted for release evidence
+- `rejected_substitutes`: automated browser smoke or task-based UX rehearsal without human observation; generated UX/PM/DP/readiness gate reports used as evidence_ref; docs/templates or *.template.* files; the observation JSON self-referencing itself as separate evidence; operator/expert rehearsal that is not a new-user observation
 
 ## Blocker IDs
 
@@ -57,6 +67,30 @@
 - `pm_release::ux::human_new_user_observation_missing_or_failed`
 - `pm_release::ux::human_new_user_30min_sample_evidence_missing`
 - `product_readiness_snapshot::human_ux::*`
+- `human_ux::observation_file_missing`
+- `human_ux::contract_signal_not_pass`
+- `human_ux::required_fields_missing`
+- `human_ux::participant_not_new_user`
+- `human_ux::new_to_product_not_confirmed`
+- `human_ux::completion_minutes_missing`
+- `human_ux::workflow_steps_missing`
+- `human_ux::required_workflow_steps_missing`
+- `human_ux::required_workflow_step_not_passed`
+- `human_ux::blocking_usability_issue_present`
+- `human_ux::evidence_ref_missing`
+- `human_ux::approval_decision_not_accepted`
+- `ux_new_user_observation::observation_file_missing`
+- `ux_new_user_observation::contract_signal_not_pass`
+- `ux_new_user_observation::required_fields_missing`
+- `ux_new_user_observation::participant_not_new_user`
+- `ux_new_user_observation::new_to_product_not_confirmed`
+- `ux_new_user_observation::completion_minutes_missing`
+- `ux_new_user_observation::workflow_steps_missing`
+- `ux_new_user_observation::required_workflow_steps_missing`
+- `ux_new_user_observation::required_workflow_step_not_passed`
+- `ux_new_user_observation::blocking_usability_issue_present`
+- `ux_new_user_observation::evidence_ref_missing`
+- `ux_new_user_observation::approval_decision_not_accepted`
 
 ## Release Surface Impacts
 
