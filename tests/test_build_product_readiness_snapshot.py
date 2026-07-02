@@ -3397,6 +3397,38 @@ def test_snapshot_structural_scope_cleanup_impact_helper_does_not_stale_leaf_rec
     ]
 
 
+def test_snapshot_repo_hygiene_helper_does_not_stale_leaf_receipts(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/check_repo_hygiene.py",
+        "print('repo hygiene boundary policy changed')\n",
+    )
+    _commit_all(tmp_path, "repo hygiene helper change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"] is True
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
 def test_snapshot_allows_branch64_microbatch_profile_as_generated_receipt() -> None:
     assert build_product_readiness_snapshot._receipt_commit_allowed_path(
         "implementation/phase1/branch64_microbatch_profile_report.json",
