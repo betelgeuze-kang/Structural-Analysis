@@ -10,30 +10,33 @@
   },
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 5,
+    "release_area_blocker_count": 8,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
-      "security::license_status_not_configured"
+      "security::license_status_not_configured",
+      "github_sync::github_sync_preflight::remote_mutation_approval_required",
+      "github_sync::github_sync_remote_sync_pending",
+      "github_sync::github_sync_preflight_not_synced"
     ],
-    "release_area_green_count": 13,
-    "release_area_summary": "13/16",
+    "release_area_green_count": 12,
+    "release_area_summary": "12/16",
     "release_area_total_count": 16
   },
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T07:10:21.385562+00:00",
+  "generated_at": "2026-07-02T12:01:36.691955+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:58ce750794e6db66faa1982c7a04032082069edc1083880fab7aa32c6f254bf4",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:92a1f4f7a1491e6d638a4d93fdc750ea8e0c8f3762328ace5b31370382d2b13f",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:ce296b20d492a2aa7af12686c2cf4eea824c7451ae1e65914644b9d31d1a0e6a",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0a679f4135946cf6293ea51aee1b08fba87382768a58e1682a8f87f3bbf727ec",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:390c963b64828e63b71920b554bb49dfb6763c3051f78b8b8ec2e5db73ae5947"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
   "reuse_policy": "pm_release_blocker_closure_board_aggregates_action_register_and_pm_report",
   "reused_evidence": true,
@@ -74,6 +77,7 @@
         "python3 scripts/build_structural_scope_origin_report.py --out implementation/phase1/release_evidence/productization/structural_scope_origin_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
         "python3 scripts/build_structural_scope_cleanup_impact_report.py --out implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
+        "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.md",
         "python3 scripts/build_product_readiness_snapshot.py",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
       ],
@@ -83,6 +87,8 @@
         "python3 scripts/build_structural_scope_origin_report.py --fail-blocked",
         "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
+        "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.filled.csv --out implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.md --fail-release-surface-first-blocked",
+        "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --fail-release-surface-first-blocked",
         "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
         "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
         "python3 scripts/build_product_readiness_snapshot.py --check",
@@ -286,6 +292,108 @@
     },
     {
       "acceptance_criteria": [
+        "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+        "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+        "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
+      ],
+      "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
+      "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+      "closure_state": "external_owner_input_ready",
+      "evidence_state": "approval_required",
+      "external_input_required": true,
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner": "release_owner",
+      "owner_input_required": true,
+      "primary_evidence_artifacts": {
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "reproduction_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "r4_remote_mutation_approval_required",
+      "scope": "release_area",
+      "verification_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+        "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+        "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
+      ],
+      "blocker_id": "github_sync::github_sync_remote_sync_pending",
+      "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+      "closure_state": "external_owner_input_ready",
+      "evidence_state": "approval_required",
+      "external_input_required": true,
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner": "release_owner",
+      "owner_input_required": true,
+      "primary_evidence_artifacts": {
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "reproduction_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "r4_remote_mutation_approval_required",
+      "scope": "release_area",
+      "verification_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+        "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+        "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+        "`origin/codex/seed-pr-ci-source-evidence` and `origin/main` match local release HEAD"
+      ],
+      "blocker_id": "github_sync::github_sync_preflight_not_synced",
+      "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+      "closure_state": "external_owner_input_ready",
+      "evidence_state": "approval_required",
+      "external_input_required": true,
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "next_action": "Feature branch is synced to the release HEAD. Obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the remaining main fast-forward, then run the pending main remote-update command from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner": "release_owner",
+      "owner_input_required": true,
+      "primary_evidence_artifacts": {
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "reproduction_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "r4_remote_mutation_approval_required",
+      "scope": "release_area",
+      "verification_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
         "`ga_enterprise_readiness_report.json.contract_pass == true` or no `independent_vv_missing` blocker",
         "`ga_enterprise_signoff_intake_packet.json` shows independent V&V evidence accepted",
         "`independent_vv_missing` absent from `ga_enterprise_blockers`"
@@ -447,6 +555,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -484,6 +593,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -521,6 +631,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -558,6 +669,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -595,6 +707,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id external_benchmark_refresh --runner benchmark_productization_validation --validation-command \"python3 implementation/phase1/run_external_benchmark_refresh_lane.py --execution-manifest implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --updates-json implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --status-manifest-out implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json --report-out implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json\" --input implementation/phase1/generate_external_benchmark_execution_status_manifest.py --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json --input implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json --input implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json --input implementation/phase1/run_external_benchmark_refresh_lane.py --receipt-artifact implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json:hardest_external_10case_kickoff_gate_report --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json:execution_status_manifest --receipt-artifact implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md:execution_status_manifest_md --receipt-artifact implementation/phase1/release_evidence/productization/external_benchmark_refresh_lane_report.json:external_benchmark_refresh_lane_report --output-receipt implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.result.json --case-count 10 --passed-case-count 10 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -632,6 +745,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -669,6 +783,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -706,6 +821,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -743,6 +859,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -780,6 +897,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "reproduction_commands": [
+        "python3 scripts/build_fresh_validation_receipt.py --lane-id design_optimization_refresh --runner design_optimization_validation --validation-command \"python3 implementation/phase1/run_design_optimization_solver_loop_long.py\" --input implementation/phase1/release/design_optimization/design_objective_calibration_report.json --input implementation/phase1/release/design_optimization/design_optimization_dataset.npz --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json:solver_loop_long_report --receipt-artifact implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz:solver_loop_long_state --output-receipt implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json --out-result implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json --case-count 1 --passed-case-count 1 --fail-blocked",
         "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -794,7 +912,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "2329137e9ca879afedb7eb3da9d90748a4747c43",
+  "source_commit_sha": "f8aed21a28404767d205797e9f54e70466622a92",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
@@ -804,33 +922,33 @@
       "structural_scope_cleanup::owner_review_decisions_pending"
     ],
     "closure_state_counts": {
-      "external_owner_input_ready": 10,
+      "external_owner_input_ready": 13,
       "local_remediation_ready": 10
     },
-    "external_input_required_count": 10,
-    "external_owner_input_ready_count": 10,
+    "external_input_required_count": 13,
+    "external_owner_input_ready_count": 13,
     "full_release_gate_ready": false,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 20,
+    "handoff_ready_count": 23,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "local_remediation_ready_count": 10,
     "missing_from_action_register": [],
     "missing_from_action_register_count": 0,
-    "open_blocker_count": 20,
-    "owner_input_required_count": 10,
+    "open_blocker_count": 23,
+    "owner_input_required_count": 13,
     "paid_pilot_candidate": true,
-    "pm_report_blocker_count": 19,
+    "pm_report_blocker_count": 22,
     "pm_report_loaded": true,
-    "register_blocker_count": 20,
-    "register_open_blocker_count": 20,
-    "release_area_blocker_count": 5,
+    "register_blocker_count": 23,
+    "register_open_blocker_count": 23,
+    "release_area_blocker_count": 8,
     "release_area_gate_ready": false,
-    "release_area_green_count": 13,
+    "release_area_green_count": 12,
     "release_area_total_count": 16,
     "stale_action_register_blocker_count": 0,
     "stale_action_register_blockers": []
   },
-  "summary_line": "PM release blocker closure board: BLOCKED | open=20 | external_owner_ready=10 | handoff_not_ready=0"
+  "summary_line": "PM release blocker closure board: BLOCKED | open=23 | external_owner_ready=13 | handoff_not_ready=0"
 }
