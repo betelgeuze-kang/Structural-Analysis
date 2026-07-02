@@ -3039,7 +3039,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T18:05:35.050947+00:00",
+  "generated_at": "2026-07-02T18:06:44.038468+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:13f8b5fc640dac773ab1e2f703629368491289820ccee061a75681351f64fed1",
@@ -3051,7 +3051,7 @@
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:e5c1907c5808b9118af6601f4bdb158b16fea76d0f6953c4d7be8327c5ff1281",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:5d878f42a457cccad707441dc2f9cf3c601213edf9169352d8e341c820356dee",
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:6213767f7db8ff9e4dbddcb9aed2255e1b19c9d22f0a691af3d90867664f1ab7",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:6b0e8298218bfaca8e711cc5e4787cc736bba1b157534ef5b8afd2b443850ddf",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f35626eb0b28ebb3317ab49e2d65c327e78afdfc7fe2cdd7c520d006fe84253b",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:0ed3bde8defdc895bd4e83da8acd80d8b1a40156381f03be745b9c501759129d",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:93a923628e52afa0fe3ee6887e5c83ac024b6de4af8edd00e947b5d312ad906e",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:11389f3ef0058f6a862e08b5b6277e46c12d5831c8e1e84ce6c6620d5720720d",
@@ -3380,7 +3380,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "dc4ab45fe7de9833ad1b86cd134bb7763bda21f4",
+  "source_commit_sha": "af9f359cfaf8fa09dc59cda85d81594d75d2ec95",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3578,29 +3578,29 @@
       {
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
-          "scripts/build_developer_preview_final_gate_owner_packet.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/build_structural_scope_owner_review_packet.py",
-          "tests/test_build_developer_preview_final_gate_owner_packet.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py"
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
         ],
-        "generated_at": "2026-07-02T17:43:32.449787+00:00",
+        "generated_at": "2026-07-02T18:05:55.916021+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "681ed1de40d4dd89b48ce1f10637b4c44db1e01c",
+        "source_commit_sha": "eb6e859955716eba230df4910c6f2238f2acc965",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
           "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
-          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
         ],
         "generated_at": "2026-07-02T18:05:10.841702+00:00",
         "input_checksum_present": true,
@@ -3910,7 +3910,11 @@
         "changed_paths_since_source_commit": [
           "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json",
           "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.md",
-          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+          "implementation/phase1/release_evidence/productization/developer_preview_readiness.md",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json"
         ],
         "generated_at": "2026-07-02T18:05:10.886626+00:00",
         "input_checksum_present": true,
