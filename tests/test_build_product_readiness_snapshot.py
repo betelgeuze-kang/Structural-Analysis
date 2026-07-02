@@ -3566,6 +3566,35 @@ def test_snapshot_runtime_packaging_helper_does_not_stale_leaf_receipts(
     ]
 
 
+def test_snapshot_runtime_packaging_receipts_do_not_stale_leaf_receipts(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    for path in [
+        "implementation/phase1/native_runtime_artifact_manifest.json",
+        "implementation/phase1/production_runtime_packaging_manifest.json",
+        "implementation/phase1/runtime_sbom.json",
+        "implementation/phase1/runtime_version_compatibility_matrix.json",
+    ]:
+        _write_json(tmp_path / path, {"status": "runtime_receipt_refreshed"})
+    _commit_all(tmp_path, "runtime packaging receipt refresh")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
 def test_snapshot_license_status_intake_helper_does_not_stale_leaf_receipts(
     tmp_path: Path,
 ) -> None:
