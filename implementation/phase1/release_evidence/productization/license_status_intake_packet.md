@@ -5,6 +5,9 @@
 - `contract_pass`: `False`
 - `gate_unblock_plan_count`: `6`
 - `reason_code`: `ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED`
+- `release_area`: `security`
+- `blocker_id_count`: `11`
+- `evidence_intake_artifact_count`: `6`
 - `license_status_path`: `implementation/phase1/release/support_bundle/license_status.json`
 - `template_path`: `docs/templates/license_status.template.json`
 - `owner_action`: Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.
@@ -59,6 +62,45 @@
   - license_status_closure_report.json contract_pass=true
   - license_status_intake_packet.json contract_pass=true
   - PM release security area no longer blocks license_status_not_configured
+
+## Blocker IDs
+
+- `pm_release::security::license_status_not_configured`
+- `license::license_status_not_active`
+- `license::license_tier_missing`
+- `license::license_id_missing`
+- `license::license_issuer_or_approver_missing`
+- `license::license_approver_role_missing`
+- `license::license_approval_reference_missing`
+- `license::license_approved_at_missing`
+- `license::license_evidence_ref_missing`
+- `license::license_product_scope_missing`
+- `license::license_expiry_missing_or_invalid`
+
+## Evidence Intake Artifacts
+
+- `implementation/phase1/release/support_bundle/license_status.json`
+- `docs/templates/license_status.template.json`
+- `implementation/phase1/release_evidence/productization/license_status_closure_report.json`
+- `implementation/phase1/release_evidence/productization/license_status_intake_packet.json`
+- `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+
+## Approval Evidence Policy
+
+Accepted evidence references:
+- ticket:<id>
+- jira:<id>
+- legal:<id>
+- docusign:<id>
+- https URL
+- existing local evidence path
+
+Rejected substitutes:
+- license_status.json self-reference
+- docs/templates or .template artifacts
+- generated PM/license/readiness gate artifacts
+- placeholder values such as OWNER_INPUT_REQUIRED or EVIDENCE-REF
 
 ## Validation Commands
 

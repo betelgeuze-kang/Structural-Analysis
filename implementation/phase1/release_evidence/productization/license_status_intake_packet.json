@@ -1,4 +1,34 @@
 {
+  "approval_evidence_policy": {
+    "accepted_evidence_ref_kinds": [
+      "ticket:<id>",
+      "jira:<id>",
+      "legal:<id>",
+      "docusign:<id>",
+      "https URL",
+      "existing local evidence path"
+    ],
+    "rejected_evidence_refs": [
+      "license_status.json self-reference",
+      "docs/templates or .template artifacts",
+      "generated PM/license/readiness gate artifacts",
+      "placeholder values such as OWNER_INPUT_REQUIRED or EVIDENCE-REF"
+    ]
+  },
+  "blocker_id_count": 11,
+  "blocker_ids": [
+    "pm_release::security::license_status_not_configured",
+    "license::license_status_not_active",
+    "license::license_tier_missing",
+    "license::license_id_missing",
+    "license::license_issuer_or_approver_missing",
+    "license::license_approver_role_missing",
+    "license::license_approval_reference_missing",
+    "license::license_approved_at_missing",
+    "license::license_evidence_ref_missing",
+    "license::license_product_scope_missing",
+    "license::license_expiry_missing_or_invalid"
+  ],
   "claim_boundary": "This intake packet is an owner handoff checklist. It does not create legal approval and does not make the PM security release area pass until the closure report passes.",
   "closure_report_path": "implementation/phase1/release_evidence/productization/license_status_closure_report.json",
   "contract_pass": false,
@@ -13,6 +43,15 @@
     "license_evidence_ref_missing",
     "license_product_scope_missing",
     "license_expiry_missing_or_invalid"
+  ],
+  "evidence_intake_artifact_count": 6,
+  "evidence_intake_artifacts": [
+    "implementation/phase1/release/support_bundle/license_status.json",
+    "docs/templates/license_status.template.json",
+    "implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+    "implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   ],
   "field_rows": [
     {
@@ -302,7 +341,7 @@
     }
   ],
   "gate_unblock_plan_count": 6,
-  "generated_at": "2026-07-01T22:09:35.986952+00:00",
+  "generated_at": "2026-07-02T01:13:12.933703+00:00",
   "license_status_path": "implementation/phase1/release/support_bundle/license_status.json",
   "next_actions": [
     "fill_license_status_record_from_template",
@@ -312,11 +351,17 @@
     "rerun_license_status_and_release_gates"
   ],
   "reason_code": "ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED",
+  "release_area": "security",
+  "release_area_blocker_ids": [
+    "pm_release::security::license_status_not_configured"
+  ],
   "schema_version": "license-status-intake-packet.v1",
   "status": "blocked",
   "summary": {
+    "blocker_id_count": 11,
     "closure_blocker_count": 10,
     "closure_contract_pass": false,
+    "evidence_intake_artifact_count": 6,
     "field_count": 17,
     "field_pass_count": 0,
     "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
