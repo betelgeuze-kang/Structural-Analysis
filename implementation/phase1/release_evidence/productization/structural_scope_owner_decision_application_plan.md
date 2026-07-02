@@ -44,12 +44,14 @@
 - `allowed_owner_decisions`: `['delete_from_structural_repository', 'extract_to_molecular_or_science_repository']`
 - `disallowed_owner_decisions`: `['retain_quarantined_with_signed_owner_exception']`
 - `owner_decision_template.csv`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv`
+- `origin_context_source_report`: `implementation/phase1/release_evidence/productization/structural_scope_origin_report.json`
+- `origin_context_complete`: `True`
 
-| Row | Path | Primary Decision |
-|---|---|---|
-| `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `delete_from_structural_repository` |
-| `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `delete_from_structural_repository` |
-| `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `delete_from_structural_repository` |
+| Row | Path | Origin Wave | First Added | Primary Decision |
+|---|---|---|---|---|
+| `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `science_release_surface_seed` | `805535fc 2026-06-30` | `delete_from_structural_repository` |
+| `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `science_release_surface_seed` | `805535fc 2026-06-30` | `delete_from_structural_repository` |
+| `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `pocketmd_release_surface_materialization` | `01e6fe1b 2026-06-30` | `delete_from_structural_repository` |
 
 ## Next Batch Decision Template
 

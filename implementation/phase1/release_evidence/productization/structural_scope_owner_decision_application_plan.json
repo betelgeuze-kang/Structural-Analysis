@@ -82,13 +82,14 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T17:37:50.774381+00:00",
+  "generated_at": "2026-07-02T17:54:51.292348+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:c5945a2ffa3e8c6bbf8c8ce6fef84571ddf4212a1af68d8b269c7c20b1a3788c",
+    "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json": "sha256:d30b4ca73ba4180e0493cef0ea1ea2eaaecd706520b98107c1b5e8805d3fb852",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:caf450883e496c6f6687083be4393caa7ce320daddf0f6ad0b5072f53114ed27",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:f147b7fc33036ac044f0a958f3b4566f89ca3ebb009dfd0d6d369280b0e2d7f0",
-    "scripts/build_structural_scope_owner_review_packet.py": "sha256:3968df9311831ce70d865fd29332cff649946dc673df17a63cd299cf8f9211ca"
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:cd264bdde8d70abfd08b9b11543f67d75b51ae1ae3c2a6b2c9516b147c30804b",
+    "scripts/build_structural_scope_owner_review_packet.py": "sha256:48a25998813bcba5aaa2f8aa36a3d8cf8eeca6f8aae38ed711cc69c65d976742"
   },
   "next_actions": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
@@ -141,9 +142,14 @@
         "families": [
           "molecular_docking"
         ],
+        "first_added_commit_date": "2026-06-30",
+        "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+        "first_added_commit_short_sha": "805535fc",
+        "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
         "matched_tokens": [
           "gpcr"
         ],
+        "origin_wave": "science_release_surface_seed",
         "owner_decision": "",
         "owner_identity": "",
         "owner_role": "",
@@ -168,9 +174,14 @@
         "families": [
           "molecular_science_evidence"
         ],
+        "first_added_commit_date": "2026-06-30",
+        "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+        "first_added_commit_short_sha": "805535fc",
+        "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
         "matched_tokens": [
           "h_bond"
         ],
+        "origin_wave": "science_release_surface_seed",
         "owner_decision": "",
         "owner_identity": "",
         "owner_role": "",
@@ -195,9 +206,14 @@
         "families": [
           "molecular_dynamics"
         ],
+        "first_added_commit_date": "2026-06-30",
+        "first_added_commit_sha": "01e6fe1b298a976bd4dee9c399ed79f0fb4e4818",
+        "first_added_commit_short_sha": "01e6fe1b",
+        "first_added_commit_subject": "Materialize PocketMD Lite product surface",
         "matched_tokens": [
           "pocketmd"
         ],
+        "origin_wave": "pocketmd_release_surface_materialization",
         "owner_decision": "",
         "owner_identity": "",
         "owner_role": "",
@@ -279,6 +295,10 @@
     ],
     "schema_version": "structural-scope-owner-decisions.v1"
   },
+  "origin_context_attached_count": 86,
+  "origin_context_missing_path_count": 0,
+  "origin_context_row_count": 86,
+  "origin_context_source_report": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
   "owner_decision_pending_count": 86,
   "owner_decision_recorded_count": 0,
   "owner_decision_template_paths": {
@@ -498,10 +518,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-04-26",
+      "first_added_commit_sha": "2b655fe3d2e07b037ab8dbd6b21d1c7163b4d705",
+      "first_added_commit_short_sha": "2b655fe3",
+      "first_added_commit_subject": "Import structural analysis workbench implementation",
       "manual_application_required": true,
       "matched_tokens": [
         "md3bead"
       ],
+      "origin_wave": "initial_bulk_import_with_md3bead_runtime",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -531,10 +556,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-04-26",
+      "first_added_commit_sha": "2b655fe3d2e07b037ab8dbd6b21d1c7163b4d705",
+      "first_added_commit_short_sha": "2b655fe3",
+      "first_added_commit_subject": "Import structural analysis workbench implementation",
       "manual_application_required": true,
       "matched_tokens": [
         "md3bead"
       ],
+      "origin_wave": "initial_bulk_import_with_md3bead_runtime",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -564,10 +594,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "759a6419f21152b619c7e606db800cdd9fdef0d1",
+      "first_added_commit_short_sha": "759a6419",
+      "first_added_commit_subject": "Refresh GPCR intake artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -597,10 +632,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "759a6419f21152b619c7e606db800cdd9fdef0d1",
+      "first_added_commit_short_sha": "759a6419",
+      "first_added_commit_subject": "Refresh GPCR intake artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -630,10 +670,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "c808ffd2168aff637dd09378a93f5f0e876aef36",
+      "first_added_commit_short_sha": "c808ffd2",
+      "first_added_commit_subject": "Add GPCR hard-decoy suite materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -663,10 +708,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "685a32eaa19c487fa37399ad0d9d3b2742d4ff83",
+      "first_added_commit_short_sha": "685a32ea",
+      "first_added_commit_subject": "Add GPCR product report artifact",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -696,10 +746,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "866f14d3d00de35e0a15b0672e8a46b11e092bd1",
+      "first_added_commit_short_sha": "866f14d3",
+      "first_added_commit_subject": "Add GPCR hard-decoy row starter",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -729,10 +784,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "92689e289f0314cc7a7103a5b032c062abb61244",
+      "first_added_commit_short_sha": "92689e28",
+      "first_added_commit_subject": "Materialize blocked GPCR hard-decoy suite report",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -762,10 +822,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "271e2ce69af98165d17fd4c0e6e1dd633df085fe",
+      "first_added_commit_short_sha": "271e2ce6",
+      "first_added_commit_subject": "Refresh GPCR hard-decoy audit evidence",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -795,10 +860,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "572f09fe108a4b9938d5ed028bf1eb5f5c682cb4",
+      "first_added_commit_short_sha": "572f09fe",
+      "first_added_commit_subject": "Add H-bond BackMap operator intake packet",
       "manual_application_required": true,
       "matched_tokens": [
         "h_bond"
       ],
+      "origin_wave": "h_bond_backmap_science_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -828,10 +898,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "572f09fe108a4b9938d5ed028bf1eb5f5c682cb4",
+      "first_added_commit_short_sha": "572f09fe",
+      "first_added_commit_subject": "Add H-bond BackMap operator intake packet",
       "manual_application_required": true,
       "matched_tokens": [
         "h_bond"
       ],
+      "origin_wave": "h_bond_backmap_science_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -861,10 +936,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "01e6fe1b298a976bd4dee9c399ed79f0fb4e4818",
+      "first_added_commit_short_sha": "01e6fe1b",
+      "first_added_commit_subject": "Materialize PocketMD Lite product surface",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_release_surface_materialization",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -894,10 +974,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "01e6fe1b298a976bd4dee9c399ed79f0fb4e4818",
+      "first_added_commit_short_sha": "01e6fe1b",
+      "first_added_commit_subject": "Materialize PocketMD Lite product surface",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_release_surface_materialization",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -927,10 +1012,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "7e3a561452795275e5bc9e2ebd287b2a9d35d3f0",
+      "first_added_commit_short_sha": "7e3a5614",
+      "first_added_commit_subject": "Refresh PocketMD Lite operator intake artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -960,10 +1050,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "7e3a561452795275e5bc9e2ebd287b2a9d35d3f0",
+      "first_added_commit_short_sha": "7e3a5614",
+      "first_added_commit_subject": "Refresh PocketMD Lite operator intake artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -993,10 +1088,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "26a231ce847956922000a5dd11ec83b122e54dff",
+      "first_added_commit_short_sha": "26a231ce",
+      "first_added_commit_subject": "Refresh replay parity and operator handoff surfaces",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1026,10 +1126,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "01e6fe1b298a976bd4dee9c399ed79f0fb4e4818",
+      "first_added_commit_short_sha": "01e6fe1b",
+      "first_added_commit_subject": "Materialize PocketMD Lite product surface",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_release_surface_materialization",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1059,10 +1164,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "80c81c538d7d706ee79ab84c0c3e56a450a9ca0e",
+      "first_added_commit_short_sha": "80c81c53",
+      "first_added_commit_subject": "Add PocketMD Lite top-k row starter",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1092,10 +1202,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "01e6fe1b298a976bd4dee9c399ed79f0fb4e4818",
+      "first_added_commit_short_sha": "01e6fe1b",
+      "first_added_commit_subject": "Materialize PocketMD Lite product surface",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_release_surface_materialization",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1125,10 +1240,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "df2a47df2e6f5dd77cb210ba3579775358ec2c2b",
+      "first_added_commit_short_sha": "df2a47df",
+      "first_added_commit_subject": "Refresh PocketMD Lite top-k audit evidence",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1158,11 +1278,16 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "26a231ce847956922000a5dd11ec83b122e54dff",
+      "first_added_commit_short_sha": "26a231ce",
+      "first_added_commit_subject": "Refresh replay parity and operator handoff surfaces",
       "manual_application_required": true,
       "matched_tokens": [
         "casf_pdbbind",
         "pdbbind"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1192,10 +1317,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "26a231ce847956922000a5dd11ec83b122e54dff",
+      "first_added_commit_short_sha": "26a231ce",
+      "first_added_commit_subject": "Refresh replay parity and operator handoff surfaces",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_enrichment"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1225,10 +1355,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "c6fb1fe6c43f2e81816743a9ee4b0f293571aebc",
+      "first_added_commit_short_sha": "c6fb1fe6",
+      "first_added_commit_subject": "Refresh public benchmark row starter artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_enrichment"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1258,10 +1393,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "c0b779c2e248b549d61b6c14c3e7ab939e8052e3",
+      "first_added_commit_short_sha": "c0b779c2",
+      "first_added_commit_subject": "Refresh public benchmark harness artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_enrichment"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1291,10 +1431,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "26a231ce847956922000a5dd11ec83b122e54dff",
+      "first_added_commit_short_sha": "26a231ce",
+      "first_added_commit_subject": "Refresh replay parity and operator handoff surfaces",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1324,10 +1469,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "c6fb1fe6c43f2e81816743a9ee4b0f293571aebc",
+      "first_added_commit_short_sha": "c6fb1fe6",
+      "first_added_commit_subject": "Refresh public benchmark row starter artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1357,10 +1507,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "f516132ace23a12b37073f7017fcfc4bcb765650",
+      "first_added_commit_short_sha": "f516132a",
+      "first_added_commit_subject": "Add public benchmark pose success harness",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1390,10 +1545,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "3e79e84a10672472fe01b22ee78e06635df427d4",
+      "first_added_commit_short_sha": "3e79e84a",
+      "first_added_commit_subject": "Materialize public benchmark source artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1423,10 +1583,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "3e79e84a10672472fe01b22ee78e06635df427d4",
+      "first_added_commit_short_sha": "3e79e84a",
+      "first_added_commit_subject": "Materialize public benchmark source artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_subset"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1456,10 +1621,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "c6fb1fe6c43f2e81816743a9ee4b0f293571aebc",
+      "first_added_commit_short_sha": "c6fb1fe6",
+      "first_added_commit_subject": "Refresh public benchmark row starter artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_subset"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1489,10 +1659,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "3e79e84a10672472fe01b22ee78e06635df427d4",
+      "first_added_commit_short_sha": "3e79e84a",
+      "first_added_commit_subject": "Materialize public benchmark source artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "symmetry_rmsd"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1522,12 +1697,17 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "646d358a2923e005e5caa37fa790cf2aafc2636a",
+      "first_added_commit_short_sha": "646d358a",
+      "first_added_commit_subject": "Refresh public benchmark Vina GNINA artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "gnina",
         "public_benchmark_vina_gnina",
         "vina"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1557,12 +1737,17 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "26a231ce847956922000a5dd11ec83b122e54dff",
+      "first_added_commit_short_sha": "26a231ce",
+      "first_added_commit_subject": "Refresh replay parity and operator handoff surfaces",
       "manual_application_required": true,
       "matched_tokens": [
         "gnina",
         "public_benchmark_vina_gnina",
         "vina"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1592,12 +1777,17 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "c6fb1fe6c43f2e81816743a9ee4b0f293571aebc",
+      "first_added_commit_short_sha": "c6fb1fe6",
+      "first_added_commit_subject": "Refresh public benchmark row starter artifacts",
       "manual_application_required": true,
       "matched_tokens": [
         "gnina",
         "public_benchmark_vina_gnina",
         "vina"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1627,10 +1817,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "7d5c52fc2a6990d1f65ff155bd8084b76379eafb",
+      "first_added_commit_short_sha": "7d5c52fc",
+      "first_added_commit_subject": "Add science closure operator handoff",
       "manual_application_required": true,
       "matched_tokens": [
         "science_actual"
       ],
+      "origin_wave": "science_actual_closure_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1660,10 +1855,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "7d5c52fc2a6990d1f65ff155bd8084b76379eafb",
+      "first_added_commit_short_sha": "7d5c52fc",
+      "first_added_commit_subject": "Add science closure operator handoff",
       "manual_application_required": true,
       "matched_tokens": [
         "science_actual"
       ],
+      "origin_wave": "science_actual_closure_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1693,10 +1893,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "5bde57ae29664cae21a2accf60cbf35983676743",
+      "first_added_commit_short_sha": "5bde57ae",
+      "first_added_commit_subject": "Add science actual closure row runner",
       "manual_application_required": true,
       "matched_tokens": [
         "science_actual"
       ],
+      "origin_wave": "science_actual_closure_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1726,10 +1931,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "a801661c06ac0deffb4ecb5f50272a8753748be9",
+      "first_added_commit_short_sha": "a801661c",
+      "first_added_commit_subject": "Refresh science actual closure audit evidence",
       "manual_application_required": true,
       "matched_tokens": [
         "science_actual"
       ],
+      "origin_wave": "science_actual_closure_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1758,10 +1968,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+      "first_added_commit_short_sha": "805535fc",
+      "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "science_release_surface_seed",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1790,10 +2005,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+      "first_added_commit_short_sha": "805535fc",
+      "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
       "manual_application_required": true,
       "matched_tokens": [
         "h_bond"
       ],
+      "origin_wave": "science_release_surface_seed",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1822,10 +2042,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "01e6fe1b298a976bd4dee9c399ed79f0fb4e4818",
+      "first_added_commit_short_sha": "01e6fe1b",
+      "first_added_commit_subject": "Materialize PocketMD Lite product surface",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_release_surface_materialization",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1855,10 +2080,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-04-26",
+      "first_added_commit_sha": "2b655fe3d2e07b037ab8dbd6b21d1c7163b4d705",
+      "first_added_commit_short_sha": "2b655fe3",
+      "first_added_commit_subject": "Import structural analysis workbench implementation",
       "manual_application_required": true,
       "matched_tokens": [
         "md3bead"
       ],
+      "origin_wave": "initial_bulk_import_with_md3bead_runtime",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1888,10 +2118,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-04-26",
+      "first_added_commit_sha": "2b655fe3d2e07b037ab8dbd6b21d1c7163b4d705",
+      "first_added_commit_short_sha": "2b655fe3",
+      "first_added_commit_subject": "Import structural analysis workbench implementation",
       "manual_application_required": true,
       "matched_tokens": [
         "md3bead"
       ],
+      "origin_wave": "initial_bulk_import_with_md3bead_runtime",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1921,10 +2156,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-04-26",
+      "first_added_commit_sha": "2b655fe3d2e07b037ab8dbd6b21d1c7163b4d705",
+      "first_added_commit_short_sha": "2b655fe3",
+      "first_added_commit_subject": "Import structural analysis workbench implementation",
       "manual_application_required": true,
       "matched_tokens": [
         "md3bead"
       ],
+      "origin_wave": "initial_bulk_import_with_md3bead_runtime",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1954,10 +2194,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-04-26",
+      "first_added_commit_sha": "2b655fe3d2e07b037ab8dbd6b21d1c7163b4d705",
+      "first_added_commit_short_sha": "2b655fe3",
+      "first_added_commit_subject": "Import structural analysis workbench implementation",
       "manual_application_required": true,
       "matched_tokens": [
         "md3bead"
       ],
+      "origin_wave": "initial_bulk_import_with_md3bead_runtime",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -1987,10 +2232,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-04-26",
+      "first_added_commit_sha": "2b655fe3d2e07b037ab8dbd6b21d1c7163b4d705",
+      "first_added_commit_short_sha": "2b655fe3",
+      "first_added_commit_subject": "Import structural analysis workbench implementation",
       "manual_application_required": true,
       "matched_tokens": [
         "md3bead"
       ],
+      "origin_wave": "initial_bulk_import_with_md3bead_runtime",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2020,10 +2270,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-04-26",
+      "first_added_commit_sha": "2b655fe3d2e07b037ab8dbd6b21d1c7163b4d705",
+      "first_added_commit_short_sha": "2b655fe3",
+      "first_added_commit_subject": "Import structural analysis workbench implementation",
       "manual_application_required": true,
       "matched_tokens": [
         "md3bead"
       ],
+      "origin_wave": "initial_bulk_import_with_md3bead_runtime",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2053,10 +2308,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-04-26",
+      "first_added_commit_sha": "2b655fe3d2e07b037ab8dbd6b21d1c7163b4d705",
+      "first_added_commit_short_sha": "2b655fe3",
+      "first_added_commit_subject": "Import structural analysis workbench implementation",
       "manual_application_required": true,
       "matched_tokens": [
         "md3bead"
       ],
+      "origin_wave": "initial_bulk_import_with_md3bead_runtime",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2086,10 +2346,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "9c7decd038785dc6a15e4f580edd379226f5d067",
+      "first_added_commit_short_sha": "9c7decd0",
+      "first_added_commit_subject": "Add GPCR hard-decoy operator intake packet",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2119,10 +2384,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "d8e044b6e4782367c286e4ad59e09de0463feae4",
+      "first_added_commit_short_sha": "d8e044b6",
+      "first_added_commit_subject": "Add GPCR hard-decoy product report contract",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2152,10 +2422,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "572f09fe108a4b9938d5ed028bf1eb5f5c682cb4",
+      "first_added_commit_short_sha": "572f09fe",
+      "first_added_commit_subject": "Add H-bond BackMap operator intake packet",
       "manual_application_required": true,
       "matched_tokens": [
         "h_bond"
       ],
+      "origin_wave": "h_bond_backmap_science_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2185,10 +2460,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "bc1c088666829ac112be83fb19cf2e1fbb082006",
+      "first_added_commit_short_sha": "bc1c0886",
+      "first_added_commit_subject": "Add PocketMD Lite product surface contract",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2218,10 +2498,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "7d5c52fc2a6990d1f65ff155bd8084b76379eafb",
+      "first_added_commit_short_sha": "7d5c52fc",
+      "first_added_commit_subject": "Add science closure operator handoff",
       "manual_application_required": true,
       "matched_tokens": [
         "science_actual"
       ],
+      "origin_wave": "science_actual_closure_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2251,10 +2536,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "dbb6aa6db6a4497b1fe2d1a9b0ab30922d4b0c3b",
+      "first_added_commit_short_sha": "dbb6aa6d",
+      "first_added_commit_subject": "Add GPCR hard-decoy raw row importer",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2284,10 +2574,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "c808ffd2168aff637dd09378a93f5f0e876aef36",
+      "first_added_commit_short_sha": "c808ffd2",
+      "first_added_commit_subject": "Add GPCR hard-decoy suite materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2317,10 +2612,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "6b86aa2ce6c0ecd984b022aa8acb54d47b13058d",
+      "first_added_commit_short_sha": "6b86aa2c",
+      "first_added_commit_subject": "Add PocketMD Lite raw row importer",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2350,10 +2650,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "0461fa0234fa22385124793e27509f1a2b7dcf1c",
+      "first_added_commit_short_sha": "0461fa02",
+      "first_added_commit_subject": "Add PocketMD Lite top-k materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2383,10 +2688,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "0f53c4637d51dd105e5a16b6d0496d84fa5c7b23",
+      "first_added_commit_short_sha": "0f53c463",
+      "first_added_commit_subject": "Add public benchmark enrichment materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_enrichment"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2416,10 +2726,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "f516132ace23a12b37073f7017fcfc4bcb765650",
+      "first_added_commit_short_sha": "f516132a",
+      "first_added_commit_subject": "Add public benchmark pose success harness",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2449,10 +2764,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "89be102de6fde7dc04ca086048bb9db747cf31f4",
+      "first_added_commit_short_sha": "89be102d",
+      "first_added_commit_subject": "Add public benchmark pose validity materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2482,11 +2802,16 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "3dbea443546cf674e9cefb038e24ef36823eb0be",
+      "first_added_commit_short_sha": "3dbea443",
+      "first_added_commit_subject": "Add public benchmark PoseBusters packet materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "posebusters",
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2516,10 +2841,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "0a4c6a6c65318a42aa96505ca1fbd93653ec6c59",
+      "first_added_commit_short_sha": "0a4c6a6c",
+      "first_added_commit_subject": "Add public benchmark subset materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_subset"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2549,12 +2879,17 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "aedfaf4da15ce3591dafc6714eb0102c3f9b0df4",
+      "first_added_commit_short_sha": "aedfaf4d",
+      "first_added_commit_subject": "Add public benchmark Vina GNINA comparison adapter",
       "manual_application_required": true,
       "matched_tokens": [
         "gnina",
         "public_benchmark_vina_gnina",
         "vina"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2584,10 +2919,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "5bde57ae29664cae21a2accf60cbf35983676743",
+      "first_added_commit_short_sha": "5bde57ae",
+      "first_added_commit_subject": "Add science actual closure row runner",
       "manual_application_required": true,
       "matched_tokens": [
         "science_actual"
       ],
+      "origin_wave": "science_actual_closure_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2617,11 +2957,16 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "1e75077752bf56854ee1c0203d0ce5e4d3199e33",
+      "first_added_commit_short_sha": "1e750777",
+      "first_added_commit_subject": "Seed public benchmark harness contracts",
       "manual_application_required": true,
       "matched_tokens": [
         "ligand",
         "symmetry_aware_ligand"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2651,10 +2996,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "c8ff0a6d7dfe12e52d907ce20ffed4dccfd29675",
+      "first_added_commit_short_sha": "c8ff0a6d",
+      "first_added_commit_subject": "Add public benchmark pose validity validator",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2684,10 +3034,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "02f5738c707d4f56425ca17184b8d560077cabd4",
+      "first_added_commit_short_sha": "02f5738c",
+      "first_added_commit_subject": "Add public benchmark subset manifest validator",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_subset"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2717,10 +3072,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "9c7decd038785dc6a15e4f580edd379226f5d067",
+      "first_added_commit_short_sha": "9c7decd0",
+      "first_added_commit_subject": "Add GPCR hard-decoy operator intake packet",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2750,10 +3110,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "d8e044b6e4782367c286e4ad59e09de0463feae4",
+      "first_added_commit_short_sha": "d8e044b6",
+      "first_added_commit_subject": "Add GPCR hard-decoy product report contract",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2783,10 +3148,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "572f09fe108a4b9938d5ed028bf1eb5f5c682cb4",
+      "first_added_commit_short_sha": "572f09fe",
+      "first_added_commit_subject": "Add H-bond BackMap operator intake packet",
       "manual_application_required": true,
       "matched_tokens": [
         "h_bond"
       ],
+      "origin_wave": "h_bond_backmap_science_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2816,10 +3186,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "bc1c088666829ac112be83fb19cf2e1fbb082006",
+      "first_added_commit_short_sha": "bc1c0886",
+      "first_added_commit_subject": "Add PocketMD Lite product surface contract",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2849,10 +3224,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "7d5c52fc2a6990d1f65ff155bd8084b76379eafb",
+      "first_added_commit_short_sha": "7d5c52fc",
+      "first_added_commit_subject": "Add science closure operator handoff",
       "manual_application_required": true,
       "matched_tokens": [
         "science_actual"
       ],
+      "origin_wave": "science_actual_closure_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2882,10 +3262,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "dbb6aa6db6a4497b1fe2d1a9b0ab30922d4b0c3b",
+      "first_added_commit_short_sha": "dbb6aa6d",
+      "first_added_commit_subject": "Add GPCR hard-decoy raw row importer",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2915,10 +3300,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "c808ffd2168aff637dd09378a93f5f0e876aef36",
+      "first_added_commit_short_sha": "c808ffd2",
+      "first_added_commit_subject": "Add GPCR hard-decoy suite materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "gpcr_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2948,10 +3338,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "6b86aa2ce6c0ecd984b022aa8acb54d47b13058d",
+      "first_added_commit_short_sha": "6b86aa2c",
+      "first_added_commit_subject": "Add PocketMD Lite raw row importer",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -2981,10 +3376,15 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "0461fa0234fa22385124793e27509f1a2b7dcf1c",
+      "first_added_commit_short_sha": "0461fa02",
+      "first_added_commit_subject": "Add PocketMD Lite top-k materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_productization_evidence_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3014,10 +3414,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "0f53c4637d51dd105e5a16b6d0496d84fa5c7b23",
+      "first_added_commit_short_sha": "0f53c463",
+      "first_added_commit_subject": "Add public benchmark enrichment materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_enrichment"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3047,10 +3452,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "f516132ace23a12b37073f7017fcfc4bcb765650",
+      "first_added_commit_short_sha": "f516132a",
+      "first_added_commit_subject": "Add public benchmark pose success harness",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3080,10 +3490,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "89be102de6fde7dc04ca086048bb9db747cf31f4",
+      "first_added_commit_short_sha": "89be102d",
+      "first_added_commit_subject": "Add public benchmark pose validity materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3113,11 +3528,16 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "3dbea443546cf674e9cefb038e24ef36823eb0be",
+      "first_added_commit_short_sha": "3dbea443",
+      "first_added_commit_subject": "Add public benchmark PoseBusters packet materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "posebusters",
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3147,10 +3567,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "0a4c6a6c65318a42aa96505ca1fbd93653ec6c59",
+      "first_added_commit_short_sha": "0a4c6a6c",
+      "first_added_commit_subject": "Add public benchmark subset materializer",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_subset"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3180,12 +3605,17 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "aedfaf4da15ce3591dafc6714eb0102c3f9b0df4",
+      "first_added_commit_short_sha": "aedfaf4d",
+      "first_added_commit_subject": "Add public benchmark Vina GNINA comparison adapter",
       "manual_application_required": true,
       "matched_tokens": [
         "gnina",
         "public_benchmark_vina_gnina",
         "vina"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3215,10 +3645,15 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-07-01",
+      "first_added_commit_sha": "5bde57ae29664cae21a2accf60cbf35983676743",
+      "first_added_commit_short_sha": "5bde57ae",
+      "first_added_commit_subject": "Add science actual closure row runner",
       "manual_application_required": true,
       "matched_tokens": [
         "science_actual"
       ],
+      "origin_wave": "science_actual_closure_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3248,11 +3683,16 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "1e75077752bf56854ee1c0203d0ce5e4d3199e33",
+      "first_added_commit_short_sha": "1e750777",
+      "first_added_commit_subject": "Seed public benchmark harness contracts",
       "manual_application_required": true,
       "matched_tokens": [
         "ligand",
         "symmetry_aware_ligand"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3282,10 +3722,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "c8ff0a6d7dfe12e52d907ce20ffed4dccfd29675",
+      "first_added_commit_short_sha": "c8ff0a6d",
+      "first_added_commit_subject": "Add public benchmark pose validity validator",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_pose"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3315,10 +3760,15 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-29",
+      "first_added_commit_sha": "02f5738c707d4f56425ca17184b8d560077cabd4",
+      "first_added_commit_short_sha": "02f5738c",
+      "first_added_commit_subject": "Add public benchmark subset manifest validator",
       "manual_application_required": true,
       "matched_tokens": [
         "public_benchmark_subset"
       ],
+      "origin_wave": "molecular_public_benchmark_wave",
       "owner_decision": "",
       "owner_decision_valid": false,
       "owner_review_state": "pending_owner_decision",
@@ -3497,9 +3947,14 @@
         "families": [
           "molecular_docking"
         ],
+        "first_added_commit_date": "2026-06-30",
+        "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+        "first_added_commit_short_sha": "805535fc",
+        "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
         "matched_tokens": [
           "gpcr"
         ],
+        "origin_wave": "science_release_surface_seed",
         "owner_decision": "",
         "owner_identity": "",
         "owner_role": "",
@@ -3524,9 +3979,14 @@
         "families": [
           "molecular_science_evidence"
         ],
+        "first_added_commit_date": "2026-06-30",
+        "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+        "first_added_commit_short_sha": "805535fc",
+        "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
         "matched_tokens": [
           "h_bond"
         ],
+        "origin_wave": "science_release_surface_seed",
         "owner_decision": "",
         "owner_identity": "",
         "owner_role": "",
@@ -3551,9 +4011,14 @@
         "families": [
           "molecular_dynamics"
         ],
+        "first_added_commit_date": "2026-06-30",
+        "first_added_commit_sha": "01e6fe1b298a976bd4dee9c399ed79f0fb4e4818",
+        "first_added_commit_short_sha": "01e6fe1b",
+        "first_added_commit_subject": "Materialize PocketMD Lite product surface",
         "matched_tokens": [
           "pocketmd"
         ],
+        "origin_wave": "pocketmd_release_surface_materialization",
         "owner_decision": "",
         "owner_identity": "",
         "owner_role": "",
@@ -3573,6 +4038,17 @@
       "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
       "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
     },
+    "origin_context_complete": true,
+    "origin_context_fields": [
+      "origin_wave",
+      "first_added_commit_sha",
+      "first_added_commit_short_sha",
+      "first_added_commit_date",
+      "first_added_commit_subject"
+    ],
+    "origin_context_missing_path_count": 0,
+    "origin_context_missing_paths": [],
+    "origin_context_source_report": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
     "owner_decision_submission_options": {
       "accepted_submission_formats": [
         "json",
@@ -3666,9 +4142,14 @@
         "families": [
           "molecular_docking"
         ],
+        "first_added_commit_date": "2026-06-30",
+        "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+        "first_added_commit_short_sha": "805535fc",
+        "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
         "matched_tokens": [
           "gpcr"
         ],
+        "origin_wave": "science_release_surface_seed",
         "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
         "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
         "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
@@ -3683,9 +4164,14 @@
         "families": [
           "molecular_science_evidence"
         ],
+        "first_added_commit_date": "2026-06-30",
+        "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+        "first_added_commit_short_sha": "805535fc",
+        "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
         "matched_tokens": [
           "h_bond"
         ],
+        "origin_wave": "science_release_surface_seed",
         "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
         "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
         "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
@@ -3700,9 +4186,14 @@
         "families": [
           "molecular_dynamics"
         ],
+        "first_added_commit_date": "2026-06-30",
+        "first_added_commit_sha": "01e6fe1b298a976bd4dee9c399ed79f0fb4e4818",
+        "first_added_commit_short_sha": "01e6fe1b",
+        "first_added_commit_subject": "Materialize PocketMD Lite product surface",
         "matched_tokens": [
           "pocketmd"
         ],
+        "origin_wave": "pocketmd_release_surface_materialization",
         "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
         "post_decision_required_action": "delete_or_extract_path_then_rerun_scope_audit",
         "recommended_owner_decision_alternate": "extract_to_molecular_or_science_repository",
@@ -3713,6 +4204,10 @@
     "disallowed_owner_decisions": [
       "retain_quarantined_with_signed_owner_exception"
     ],
+    "origin_context_complete": true,
+    "origin_context_missing_path_count": 0,
+    "origin_context_missing_paths": [],
+    "origin_context_source_report": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
     "owner_decision_submission_options": {
       "accepted_submission_formats": [
         "json",
@@ -3800,10 +4295,10 @@
   "retain_exception_rows": [],
   "retain_quarantined_exception_count": 0,
   "retain_quarantined_exception_path_count": 0,
-  "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
+  "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet_and_origin_report",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "7cab0311a6cf1ec65541c66b848d75396af69a6e",
+  "source_commit_sha": "9022f7dcd7d1ab3f09d61ab1644f4ab99c89a1bf",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",

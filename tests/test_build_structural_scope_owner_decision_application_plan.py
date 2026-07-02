@@ -251,14 +251,33 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
     )
     audit_path = tmp_path / "audit.json"
     manifest_path = tmp_path / "manifest.json"
+    origin_report_path = tmp_path / "origin_report.json"
     _write_json(audit_path, audit)
     _write_json(manifest_path, manifest)
+    _write_json(
+        origin_report_path,
+        {
+            "origin_rows": [
+                {
+                    "path": release_surface_path,
+                    "origin_wave": "pocketmd_productization_evidence_wave",
+                    "first_added_commit_sha": "01e6fe1b00000000000000000000000000000000",
+                    "first_added_commit_short_sha": "01e6fe1b",
+                    "first_added_commit_date": "2026-06-30",
+                    "first_added_commit_subject": (
+                        "Materialize PocketMD Lite product surface"
+                    ),
+                }
+            ]
+        },
+    )
 
     payload = application_plan.build_application_plan(
         repo_root=tmp_path,
         audit_path=audit_path,
         quarantine_manifest_path=manifest_path,
         owner_decisions_path=tmp_path / "missing_decisions.json",
+        origin_report_path=origin_report_path,
     )
 
     assert payload["status"] == "pending_owner_decisions"
@@ -312,6 +331,16 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
         "release_surface_first-001"
     )
     assert release_template["decision_rows"][0]["path"] == release_surface_path
+    assert release_template["origin_context_source_report"] == (
+        origin_report_path.as_posix()
+    )
+    assert release_template["origin_context_complete"] is True
+    assert release_template["decision_rows"][0]["origin_wave"] == (
+        "pocketmd_productization_evidence_wave"
+    )
+    assert release_template["decision_rows"][0]["first_added_commit_short_sha"] == (
+        "01e6fe1b"
+    )
     assert release_template["decision_rows"][0]["allowed_owner_decisions"] == list(
         application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
     )
@@ -363,6 +392,13 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "recommended_owner_decision_primary": "delete_from_structural_repository",
             "recommended_owner_decision_alternate": (
                 "extract_to_molecular_or_science_repository"
+            ),
+            "origin_wave": "pocketmd_productization_evidence_wave",
+            "first_added_commit_sha": "01e6fe1b00000000000000000000000000000000",
+            "first_added_commit_short_sha": "01e6fe1b",
+            "first_added_commit_date": "2026-06-30",
+            "first_added_commit_subject": (
+                "Materialize PocketMD Lite product surface"
             ),
             "post_decision_required_action": (
                 "delete_or_extract_path_then_rerun_scope_audit"
@@ -484,6 +520,13 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
             "recommended_owner_decision_primary": "delete_from_structural_repository",
             "recommended_owner_decision_alternate": (
                 "extract_to_molecular_or_science_repository"
+            ),
+            "origin_wave": "pocketmd_productization_evidence_wave",
+            "first_added_commit_sha": "01e6fe1b00000000000000000000000000000000",
+            "first_added_commit_short_sha": "01e6fe1b",
+            "first_added_commit_date": "2026-06-30",
+            "first_added_commit_subject": (
+                "Materialize PocketMD Lite product surface"
             ),
             "allowed_owner_decisions": list(
                 application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
@@ -1107,8 +1150,26 @@ def test_application_plan_writes_release_surface_first_template(
     )
     audit_path = tmp_path / "audit.json"
     manifest_path = tmp_path / "manifest.json"
+    origin_report_path = tmp_path / "origin_report.json"
     _write_json(audit_path, audit)
     _write_json(manifest_path, manifest)
+    _write_json(
+        origin_report_path,
+        {
+            "origin_rows": [
+                {
+                    "path": release_surface_path,
+                    "origin_wave": "pocketmd_productization_evidence_wave",
+                    "first_added_commit_sha": "01e6fe1b00000000000000000000000000000000",
+                    "first_added_commit_short_sha": "01e6fe1b",
+                    "first_added_commit_date": "2026-06-30",
+                    "first_added_commit_subject": (
+                        "Materialize PocketMD Lite product surface"
+                    ),
+                }
+            ]
+        },
+    )
     out = tmp_path / "plan.json"
     out_md = tmp_path / "plan.md"
     next_template = tmp_path / "next_batch.template.json"
@@ -1123,6 +1184,7 @@ def test_application_plan_writes_release_surface_first_template(
         audit_path=audit_path,
         quarantine_manifest_path=manifest_path,
         owner_decisions_path=tmp_path / "missing_decisions.json",
+        origin_report_path=origin_report_path,
         out=out,
         out_md=out_md,
         next_batch_template_out=next_template,
@@ -1138,6 +1200,13 @@ def test_application_plan_writes_release_surface_first_template(
     assert template_payload["expected_path_count"] == 1
     assert template_payload["decision_pending_count"] == 1
     assert template_payload["decision_rows"][0]["path"] == release_surface_path
+    assert template_payload["origin_context_complete"] is True
+    assert template_payload["decision_rows"][0]["origin_wave"] == (
+        "pocketmd_productization_evidence_wave"
+    )
+    assert template_payload["decision_rows"][0]["first_added_commit_short_sha"] == (
+        "01e6fe1b"
+    )
     assert template_payload["primary_cleanup_preview"]["preconditions"] == [
         (
             "owner fills all release_surface_first rows in "
@@ -1170,6 +1239,8 @@ def test_application_plan_writes_release_surface_first_template(
     next_markdown = next_template_md.read_text(encoding="utf-8")
     release_markdown = release_template_md.read_text(encoding="utf-8")
     assert "Release Surface First Batch" in release_markdown
+    assert "pocketmd_productization_evidence_wave" in release_markdown
+    assert "01e6fe1b 2026-06-30" in release_markdown
     assert "merge_and_validate_filled_csv_command" in release_markdown
     assert (
         "`external_archive_reference`: required when `owner_decision` is "
@@ -1199,6 +1270,8 @@ def test_application_plan_writes_release_surface_first_template(
     assert csv_rows[0]["allowed_owner_decisions"] == ";".join(
         application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
     )
+    assert csv_rows[0]["origin_wave"] == "pocketmd_productization_evidence_wave"
+    assert csv_rows[0]["first_added_commit_short_sha"] == "01e6fe1b"
 
 
 def test_application_plan_fail_invalid_owner_decisions_exit_code(

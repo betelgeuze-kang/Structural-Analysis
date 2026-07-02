@@ -18,11 +18,11 @@
 
 ## Decision Rows
 
-| Row | Path | Primary Decision | Alternate Decision |
-|---|---|---|---|
-| `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `delete_from_structural_repository` | `extract_to_molecular_or_science_repository` |
-| `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `delete_from_structural_repository` | `extract_to_molecular_or_science_repository` |
-| `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `delete_from_structural_repository` | `extract_to_molecular_or_science_repository` |
+| Row | Path | Origin Wave | First Added | Primary Decision | Alternate Decision |
+|---|---|---|---|---|---|
+| `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `science_release_surface_seed` | `805535fc 2026-06-30` | `delete_from_structural_repository` | `extract_to_molecular_or_science_repository` |
+| `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `science_release_surface_seed` | `805535fc 2026-06-30` | `delete_from_structural_repository` | `extract_to_molecular_or_science_repository` |
+| `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `pocketmd_release_surface_materialization` | `01e6fe1b 2026-06-30` | `delete_from_structural_repository` | `extract_to_molecular_or_science_repository` |
 
 ## Primary Cleanup Preview
 

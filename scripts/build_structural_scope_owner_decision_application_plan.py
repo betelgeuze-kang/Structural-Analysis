@@ -25,6 +25,7 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_AUDIT = PRODUCTIZATION / "structural_scope_contamination_audit.json"
 DEFAULT_QUARANTINE_MANIFEST = PRODUCTIZATION / "structural_scope_quarantine_manifest.json"
 DEFAULT_OWNER_DECISIONS = PRODUCTIZATION / "structural_scope_owner_decisions.json"
+DEFAULT_ORIGIN_REPORT = PRODUCTIZATION / "structural_scope_origin_report.json"
 DEFAULT_OUT = PRODUCTIZATION / "structural_scope_owner_decision_application_plan.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_NEXT_BATCH_TEMPLATE = (
@@ -42,6 +43,13 @@ DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_MD = (
 DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV = (
     DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE.with_suffix(".csv")
 )
+ORIGIN_CONTEXT_FIELDS = (
+    "origin_wave",
+    "first_added_commit_sha",
+    "first_added_commit_short_sha",
+    "first_added_commit_date",
+    "first_added_commit_subject",
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -50,6 +58,14 @@ def _json_text(payload: dict[str, Any]) -> str:
 
 def _resolve(repo_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else repo_root / path
+
+
+def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
+    resolved = _resolve(repo_root, path)
+    if not resolved.exists():
+        return {}
+    payload = json.loads(resolved.read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else {}
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -122,6 +138,30 @@ def _family_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
 
 def _git_rm_args(paths: list[str]) -> list[str]:
     return ["git", "rm", "--", *paths] if paths else []
+
+
+def _origin_rows_by_path(origin_report: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    rows_by_path: dict[str, dict[str, Any]] = {}
+    for row in _as_list(origin_report.get("origin_rows")):
+        if not isinstance(row, dict):
+            continue
+        path = _text(row.get("path"))
+        if path and path not in rows_by_path:
+            rows_by_path[path] = row
+    return rows_by_path
+
+
+def _origin_context(row: dict[str, Any]) -> dict[str, str]:
+    return {field: _text(row.get(field)) for field in ORIGIN_CONTEXT_FIELDS}
+
+
+def _with_origin_context(
+    row: dict[str, Any],
+    origin_row: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if not origin_row:
+        return {**row, **{field: "" for field in ORIGIN_CONTEXT_FIELDS}}
+    return {**row, **_origin_context(origin_row)}
 
 
 def _cleanup_owner_decision(decision: str) -> bool:
@@ -204,6 +244,7 @@ def _plan_row(row: dict[str, Any]) -> dict[str, Any]:
             row.get("recommended_owner_decision_alternate")
         ),
         "current_release_action": _text(row.get("current_release_action")),
+        **_origin_context(row),
         **action,
     }
 
@@ -626,6 +667,7 @@ def _decision_template_row(row: dict[str, Any], *, index: int, batch_id: str) ->
         "families": [str(item) for item in _as_list(row.get("families"))],
         "matched_tokens": [str(item) for item in _as_list(row.get("matched_tokens"))],
         "current_release_action": _text(row.get("current_release_action")),
+        **_origin_context(row),
         "recommended_owner_decision": recommended,
         "recommended_owner_decision_primary": _text(
             row.get("recommended_owner_decision_primary")
@@ -820,6 +862,7 @@ def _release_surface_first_batch_decision_template(
     *,
     rows: list[dict[str, Any]],
     intake: dict[str, Any],
+    origin_report_path: Path,
 ) -> dict[str, Any]:
     release_rows = sorted(
         [row for row in rows if _text(row.get("path_area")) == "release_surface"],
@@ -830,6 +873,9 @@ def _release_surface_first_batch_decision_template(
     decision_rows = [
         _decision_template_row(row, index=index, batch_id="release_surface_first")
         for index, row in enumerate(release_rows)
+    ]
+    origin_context_missing_paths = [
+        row["path"] for row in decision_rows if not row["first_added_commit_sha"]
     ]
     primary_delete_paths = [
         row["path"]
@@ -854,6 +900,11 @@ def _release_surface_first_batch_decision_template(
             str(item) for item in _as_list(intake.get("blockers"))
         ],
         "decision_rows": decision_rows,
+        "origin_context_source_report": origin_report_path.as_posix(),
+        "origin_context_fields": list(ORIGIN_CONTEXT_FIELDS),
+        "origin_context_complete": not origin_context_missing_paths,
+        "origin_context_missing_path_count": len(origin_context_missing_paths),
+        "origin_context_missing_paths": origin_context_missing_paths,
         "canonical_owner_decisions_path": DEFAULT_OWNER_DECISIONS.as_posix(),
         "generated_template_paths": {
             "json": DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE.as_posix(),
@@ -982,6 +1033,7 @@ def _release_surface_first_owner_action_packet(
                 "recommended_owner_decision_alternate": _text(
                     row.get("recommended_owner_decision_alternate")
                 ),
+                **_origin_context(row),
                 "post_decision_required_action": _text(
                     row.get("post_decision_required_action")
                 ),
@@ -989,6 +1041,16 @@ def _release_surface_first_owner_action_packet(
             for row in decision_rows
         ],
         "template_paths": _as_dict(template.get("generated_template_paths")),
+        "origin_context_source_report": _text(
+            template.get("origin_context_source_report")
+        ),
+        "origin_context_complete": bool(template.get("origin_context_complete")),
+        "origin_context_missing_path_count": int(
+            template.get("origin_context_missing_path_count", 0) or 0
+        ),
+        "origin_context_missing_paths": [
+            str(item) for item in _as_list(template.get("origin_context_missing_paths"))
+        ],
         "owner_decision_submission_options": _as_dict(
             template.get("owner_decision_submission_options")
         ),
@@ -1047,8 +1109,11 @@ def build_application_plan(
     audit_path: Path = DEFAULT_AUDIT,
     quarantine_manifest_path: Path = DEFAULT_QUARANTINE_MANIFEST,
     owner_decisions_path: Path = DEFAULT_OWNER_DECISIONS,
+    origin_report_path: Path = DEFAULT_ORIGIN_REPORT,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
+    origin_report = _load_json(repo_root, origin_report_path)
+    origin_rows_by_path = _origin_rows_by_path(origin_report)
     packet = owner_review.build_owner_review_packet(
         repo_root=repo_root,
         audit_path=audit_path,
@@ -1057,6 +1122,10 @@ def build_application_plan(
     )
     review_rows = [
         row for row in _as_list(packet.get("review_rows")) if isinstance(row, dict)
+    ]
+    review_rows = [
+        _with_origin_context(row, origin_rows_by_path.get(_text(row.get("path"))))
+        for row in review_rows
     ]
     rows = [_plan_row(row) for row in review_rows]
     status = _status_from_packet(packet)
@@ -1113,6 +1182,7 @@ def build_application_plan(
         _release_surface_first_batch_decision_template(
             rows=rows,
             intake=release_surface_first_batch_decision_intake,
+            origin_report_path=origin_report_path,
         )
     )
     release_surface_first_owner_action_packet = (
@@ -1155,9 +1225,10 @@ def build_application_plan(
                 audit_path,
                 quarantine_manifest_path,
                 owner_decisions_path,
+                origin_report_path,
             ],
             reused_evidence=False,
-            reuse_policy="structural_scope_owner_decision_application_plan_from_owner_review_packet",
+            reuse_policy="structural_scope_owner_decision_application_plan_from_owner_review_packet_and_origin_report",
             repo_root=repo_root,
         ),
         "status": status,
@@ -1168,6 +1239,14 @@ def build_application_plan(
         "owner_decision_validation_pass": not owner_decision_validation_blockers,
         "owner_decision_validation_blockers": owner_decision_validation_blockers,
         "owner_decisions_path": owner_decisions_path.as_posix(),
+        "origin_context_source_report": origin_report_path.as_posix(),
+        "origin_context_row_count": len(origin_rows_by_path),
+        "origin_context_attached_count": sum(
+            1 for row in rows if _text(row.get("first_added_commit_sha"))
+        ),
+        "origin_context_missing_path_count": sum(
+            1 for row in rows if not _text(row.get("first_added_commit_sha"))
+        ),
         "owner_decision_template_paths": {
             "json": owner_review.DEFAULT_OWNER_DECISION_TEMPLATE.as_posix(),
             "csv": owner_review.DEFAULT_OWNER_DECISION_TEMPLATE_CSV.as_posix(),
@@ -1441,12 +1520,32 @@ def _markdown(payload: dict[str, Any]) -> str:
                 "- `owner_decision_template.csv`: "
                 f"`{packet_template_paths.get('csv')}`"
             )
-        lines.extend(["", "| Row | Path | Primary Decision |", "|---|---|---|"])
+        lines.append(
+            "- `origin_context_source_report`: "
+            f"`{action_packet.get('origin_context_source_report')}`"
+        )
+        lines.append(
+            "- `origin_context_complete`: "
+            f"`{action_packet.get('origin_context_complete')}`"
+        )
+        lines.extend(
+            [
+                "",
+                "| Row | Path | Origin Wave | First Added | Primary Decision |",
+                "|---|---|---|---|---|",
+            ]
+        )
         for row in action_packet.get("decision_request_rows", []):
+            first_added = (
+                f"{row.get('first_added_commit_short_sha', '')} "
+                f"{row.get('first_added_commit_date', '')}"
+            ).strip()
             lines.append(
                 "| "
                 f"`{row['row_id']}` | "
                 f"`{row['path']}` | "
+                f"`{row.get('origin_wave', '')}` | "
+                f"`{first_added}` | "
                 f"`{row['recommended_owner_decision_primary']}` |"
             )
         lines.append("")
@@ -1709,15 +1808,21 @@ def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> s
     lines.extend(["", "## Decision Rows", ""])
     lines.extend(
         [
-            "| Row | Path | Primary Decision | Alternate Decision |",
-            "|---|---|---|---|",
+            "| Row | Path | Origin Wave | First Added | Primary Decision | Alternate Decision |",
+            "|---|---|---|---|---|---|",
         ]
     )
     for row in payload["decision_rows"]:
+        first_added = (
+            f"{row.get('first_added_commit_short_sha', '')} "
+            f"{row.get('first_added_commit_date', '')}"
+        ).strip()
         lines.append(
             "| "
             f"`{row['row_id']}` | "
             f"`{row['path']}` | "
+            f"`{row.get('origin_wave', '')}` | "
+            f"`{first_added}` | "
             f"`{row['recommended_owner_decision_primary']}` | "
             f"`{row['recommended_owner_decision_alternate']}` |"
         )
@@ -1760,6 +1865,7 @@ def write_application_plan(
     audit_path: Path = DEFAULT_AUDIT,
     quarantine_manifest_path: Path = DEFAULT_QUARANTINE_MANIFEST,
     owner_decisions_path: Path = DEFAULT_OWNER_DECISIONS,
+    origin_report_path: Path = DEFAULT_ORIGIN_REPORT,
     out: Path = DEFAULT_OUT,
     out_md: Path = DEFAULT_OUT_MD,
     next_batch_template_out: Path = DEFAULT_NEXT_BATCH_TEMPLATE,
@@ -1780,6 +1886,7 @@ def write_application_plan(
         audit_path=audit_path,
         quarantine_manifest_path=quarantine_manifest_path,
         owner_decisions_path=owner_decisions_path,
+        origin_report_path=origin_report_path,
     )
     resolved_out = _resolve(repo_root, out)
     resolved_out_md = _resolve(repo_root, out_md)
@@ -1854,6 +1961,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT)
     parser.add_argument("--quarantine-manifest", type=Path, default=DEFAULT_QUARANTINE_MANIFEST)
     parser.add_argument("--owner-decisions", type=Path, default=DEFAULT_OWNER_DECISIONS)
+    parser.add_argument("--origin-report", type=Path, default=DEFAULT_ORIGIN_REPORT)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument(
@@ -1916,6 +2024,7 @@ def main(argv: list[str] | None = None) -> int:
         audit_path=args.audit,
         quarantine_manifest_path=args.quarantine_manifest,
         owner_decisions_path=args.owner_decisions,
+        origin_report_path=args.origin_report,
         out=args.out,
         out_md=args.out_md,
         next_batch_template_out=args.next_batch_template_out,

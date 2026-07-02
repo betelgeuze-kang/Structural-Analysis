@@ -19,9 +19,14 @@
       "families": [
         "molecular_docking"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+      "first_added_commit_short_sha": "805535fc",
+      "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
       "matched_tokens": [
         "gpcr"
       ],
+      "origin_wave": "science_release_surface_seed",
       "owner_decision": "",
       "owner_identity": "",
       "owner_role": "",
@@ -46,9 +51,14 @@
       "families": [
         "molecular_science_evidence"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+      "first_added_commit_short_sha": "805535fc",
+      "first_added_commit_subject": "Add locked H-Bond and GPCR evidence surfaces",
       "matched_tokens": [
         "h_bond"
       ],
+      "origin_wave": "science_release_surface_seed",
       "owner_decision": "",
       "owner_identity": "",
       "owner_role": "",
@@ -73,9 +83,14 @@
       "families": [
         "molecular_dynamics"
       ],
+      "first_added_commit_date": "2026-06-30",
+      "first_added_commit_sha": "01e6fe1b298a976bd4dee9c399ed79f0fb4e4818",
+      "first_added_commit_short_sha": "01e6fe1b",
+      "first_added_commit_subject": "Materialize PocketMD Lite product surface",
       "matched_tokens": [
         "pocketmd"
       ],
+      "origin_wave": "pocketmd_release_surface_materialization",
       "owner_decision": "",
       "owner_identity": "",
       "owner_role": "",

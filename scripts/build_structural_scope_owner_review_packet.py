@@ -89,6 +89,11 @@ OWNER_DECISION_COLUMNS = (
     "signed_owner_exception_reference",
     "external_archive_reference",
     "allowed_owner_decisions",
+    "origin_wave",
+    "first_added_commit_sha",
+    "first_added_commit_short_sha",
+    "first_added_commit_date",
+    "first_added_commit_subject",
 )
 OWNER_DECISION_REQUIRED_COLUMNS = (
     "path",
