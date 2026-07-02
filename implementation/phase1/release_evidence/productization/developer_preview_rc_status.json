@@ -480,12 +480,12 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-02T05:31:55.917056+00:00",
+  "generated_at": "2026-07-02T12:09:39.590144+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:b8edb41cdeee6af03bd88d98e06d737629e5d6fe8f1305404aa6f0b8c01619a7",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:8dd07df8d527f18bdc3b8b519dfe93c1ff6cfd96e92074800e7fddacb87a0236",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:a6c5a9be649567ed72c58f37ce93bcc32ca27a95b9e2b2ef61923e90fa8ea634",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:4a0da6d2c4f56d1a042aa462aa374fa643872b1ba589a1dc34a59797454b5b62",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:00e332ed31c72de59392f6177535ecdf98ddaf0ccf12b32e0d6b86452176bc18",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d8cdf2989191bbff716779c472be3600e326f5f86a6bccb9093aca4b012ac778",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:2d3fd50ad43bed838d61a6527750819eb5474283cb3c5143562958a6feca9712",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
@@ -1270,14 +1270,12 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 40,
+    "developer_preview_blocker_count": 18,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
-      "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
       "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
       "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
       "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
@@ -1289,9 +1287,9 @@
       "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
       "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
       "human_ux::observation_file_missing",
-      "independent_product::P0 release and core evidence::p0_release_publication_open",
-      "independent_product::P1 validation and benchmark breadth::p1_benchmark_breadth_not_ready",
-      "independent_product::P1 validation and benchmark breadth::p1_benchmark_execution_blocked"
+      "structural_scope::owner_decision_pending_count=86",
+      "structural_scope::owner_decisions_missing",
+      "structural_scope::release_surface_owner_decision_required_count=3"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -3243,6 +3241,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "fb3778ef26814b0d22c5790bc6c4acaae79b9e8e",
+  "source_commit_sha": "f877e789f4529650a9ccd6a463653e11043a7c62",
   "status": "blocked"
 }
