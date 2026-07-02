@@ -1,6 +1,6 @@
 # Paid Pilot Scope Guard Report
 
-- `summary_line`: `Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9`
+- `summary_line`: `Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9`
 - `contract_pass`: `True`
 
 | Scope Check | Pass |
@@ -25,6 +25,14 @@
 | `residual_audit` | `True` |
 | `reference_comparison` | `True` |
 | `reviewer_package` | `True` |
+
+| Support/Sales Boundary | Pass |
+|---|---|
+| `sales_motion_restricted_reviewer_assist` | `True` |
+| `sales_no_autonomous_or_replacement_claim` | `True` |
+| `support_evidence_bundle_triage_only` | `True` |
+| `support_no_production_sla_until_ga` | `True` |
+| `support_no_license_server_or_tenant_ops` | `True` |
 
 | Commercial v1 Separate-Validation Exclusion | Pass |
 |---|---|

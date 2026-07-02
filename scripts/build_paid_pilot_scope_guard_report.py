@@ -64,6 +64,39 @@ REQUIRED_SCOPE_TERMS = {
     ],
 }
 
+REQUIRED_SUPPORT_SALES_BOUNDARY_TERMS = {
+    "sales_motion_restricted_reviewer_assist": [
+        "restricted reviewer-assisted pilot",
+        "restricted reviewer assisted pilot",
+        "제한된 reviewer-assisted pilot",
+        "제한된 검토 보조 pilot",
+    ],
+    "sales_no_autonomous_or_replacement_claim": [
+        "not an autonomous solver",
+        "not autonomous solver",
+        "구조기술사 대체가 아니다",
+        "기술사 대체가 아니다",
+    ],
+    "support_evidence_bundle_triage_only": [
+        "evidence-bundle triage",
+        "evidence bundle triage",
+        "evidence bundle/reviewer handoff triage",
+        "증거 번들 triage",
+    ],
+    "support_no_production_sla_until_ga": [
+        "no production SLA",
+        "production SLA is not included",
+        "production SLA가 포함되지 않는다",
+        "production SLA는 포함되지 않는다",
+    ],
+    "support_no_license_server_or_tenant_ops": [
+        "no license-server operation",
+        "license-server operation is not included",
+        "license-server/tenant operation",
+        "license-server/tenant 운영은 포함되지 않는다",
+    ],
+}
+
 COMMERCIAL_V1_SUPPORTED_SCOPE_TERMS = {
     "frame_families": [
         "frame structures",
@@ -298,6 +331,14 @@ def build_report(
         }
         for check, phrases in COMMERCIAL_V1_SUPPORTED_SCOPE_TERMS.items()
     ]
+    support_sales_boundary_rows = [
+        {
+            "check": check,
+            "pass": _contains_any(scope_text, phrases),
+            "accepted_phrases": phrases,
+        }
+        for check, phrases in REQUIRED_SUPPORT_SALES_BOUNDARY_TERMS.items()
+    ]
     separate_validation_exclusion_rows = [
         {
             "check": check,
@@ -332,6 +373,9 @@ def build_report(
     support_bundle_section_rows = _support_bundle_section_rows(support_bundle)
     missing_terms = [row["check"] for row in term_rows if not row["pass"]]
     missing_supported_scope = [row["check"] for row in supported_scope_rows if not row["pass"]]
+    missing_support_sales_boundary = [
+        row["check"] for row in support_sales_boundary_rows if not row["pass"]
+    ]
     missing_separate_validation_exclusions = [
         row["check"]
         for row in separate_validation_exclusion_rows
@@ -350,6 +394,7 @@ def build_report(
     blockers = [
         *(f"scope_term_missing:{label}" for label in missing_terms),
         *(f"commercial_v1_supported_scope_missing:{label}" for label in missing_supported_scope),
+        *(f"support_sales_boundary_missing:{label}" for label in missing_support_sales_boundary),
         *(
             f"commercial_v1_separate_validation_exclusion_missing:{label}"
             for label in missing_separate_validation_exclusions
@@ -387,6 +432,9 @@ def build_report(
             f"scope_terms={len(term_rows) - len(missing_terms)}/{len(term_rows)} | "
             f"commercial_v1_supported_scope="
             f"{len(supported_scope_rows) - len(missing_supported_scope)}/{len(supported_scope_rows)} | "
+            f"support_sales_boundary="
+            f"{len(support_sales_boundary_rows) - len(missing_support_sales_boundary)}"
+            f"/{len(support_sales_boundary_rows)} | "
             f"commercial_v1_separate_validation_exclusions="
             f"{len(separate_validation_exclusion_rows) - len(missing_separate_validation_exclusions)}"
             f"/{len(separate_validation_exclusion_rows)} | "
@@ -396,6 +444,7 @@ def build_report(
             "scope_source_present": scope_source.exists(),
             "all_required_scope_terms_present": not missing_terms,
             "commercial_v1_supported_scope_present": not missing_supported_scope,
+            "support_sales_boundary_present": not missing_support_sales_boundary,
             "commercial_v1_separate_validation_exclusions_present": (
                 not missing_separate_validation_exclusions
             ),
@@ -412,6 +461,10 @@ def build_report(
             "commercial_v1_supported_scope_count": len(supported_scope_rows),
             "commercial_v1_supported_scope_pass_count": (
                 len(supported_scope_rows) - len(missing_supported_scope)
+            ),
+            "support_sales_boundary_count": len(support_sales_boundary_rows),
+            "support_sales_boundary_pass_count": (
+                len(support_sales_boundary_rows) - len(missing_support_sales_boundary)
             ),
             "commercial_v1_separate_validation_exclusion_count": (
                 len(separate_validation_exclusion_rows)
@@ -431,11 +484,13 @@ def build_report(
             "owner_action": (
                 "Keep paid-pilot product/contract language constrained to review assist, specified "
                 "structure families/workflows, and attached engine/reviewer evidence package. "
-                "Commercial v1 supported scope and separate-validation exclusions must stay visible."
+                "Commercial v1 supported scope, support/sales boundaries, and "
+                "separate-validation exclusions must stay visible."
             ),
         },
         "scope_term_rows": term_rows,
         "commercial_v1_supported_scope_rows": supported_scope_rows,
+        "support_sales_boundary_rows": support_sales_boundary_rows,
         "commercial_v1_separate_validation_exclusion_rows": separate_validation_exclusion_rows,
         "forbidden_claim_rows": forbidden_claim_rows,
         "artifact_rows": artifact_rows,
@@ -444,8 +499,9 @@ def build_report(
         "claim_boundary": (
             "This guard validates scoped paid-pilot language and evidence-package references. It does not "
             "create legal approval, customer acceptance, or GA/Enterprise readiness. Commercial v1 supported "
-            "scope and separate-validation exclusions describe the productization surface, not external V&V, "
-            "authority approval, or signoff evidence."
+            "scope, support/sales boundaries, and separate-validation exclusions describe the productization "
+            "surface, not external V&V, authority approval, production support SLA, license-server operation, "
+            "or signoff evidence."
         ),
     }
 
@@ -470,6 +526,15 @@ def _markdown(payload: dict[str, Any]) -> str:
         ]
     )
     for row in payload["commercial_v1_supported_scope_rows"]:
+        lines.append(f"| `{row['check']}` | `{row['pass']}` |")
+    lines.extend(
+        [
+            "",
+            "| Support/Sales Boundary | Pass |",
+            "|---|---|",
+        ]
+    )
+    for row in payload["support_sales_boundary_rows"]:
         lines.append(f"| `{row['check']}` | `{row['pass']}` |")
     lines.extend(
         [

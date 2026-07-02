@@ -73,9 +73,10 @@
     "no_prohibited_scope_claims_present": true,
     "required_evidence_package_artifacts_green": true,
     "scope_source_present": true,
-    "support_bundle_required_sections_present": true
+    "support_bundle_required_sections_present": true,
+    "support_sales_boundary_present": true
   },
-  "claim_boundary": "This guard validates scoped paid-pilot language and evidence-package references. It does not create legal approval, customer acceptance, or GA/Enterprise readiness. Commercial v1 supported scope and separate-validation exclusions describe the productization surface, not external V&V, authority approval, or signoff evidence.",
+  "claim_boundary": "This guard validates scoped paid-pilot language and evidence-package references. It does not create legal approval, customer acceptance, or GA/Enterprise readiness. Commercial v1 supported scope, support/sales boundaries, and separate-validation exclusions describe the productization surface, not external V&V, authority approval, production support SLA, license-server operation, or signoff evidence.",
   "commercial_v1_separate_validation_exclusion_rows": [
     {
       "accepted_phrases": [
@@ -308,17 +309,17 @@
       ]
     }
   ],
-  "generated_at": "2026-07-02T15:40:52.707153+00:00",
+  "generated_at": "2026-07-02T16:06:03.566681+00:00",
   "input_checksums": {
-    "README.md": "sha256:f56c2ddeb5b9f430fb5449888040e7f1050f0ce4b65274d6ad25960625ca1d4e",
-    "docs/commercialization-gap-current-state.md": "sha256:92002f2c563ff25f6dfd726645480e76d4d2035fec38fea74d72403d49c8512b",
-    "docs/pm-release-gate-milestones.md": "sha256:170d7a354579946033ad47fc132c00515144bb0c743e9c3395d43c7ccfd04e0b",
+    "README.md": "sha256:5df54f8eca7eab943e18a1c63b5ff444dfe6ffa2c68646f72228cb04e9616071",
+    "docs/commercialization-gap-current-state.md": "sha256:df5c2262dcb46b9b550ceaa5589b9ff095a073569500207479506930628d9917",
+    "docs/pm-release-gate-milestones.md": "sha256:250b48bd6d829bbc297304419845b99ad52f1cb36660d3b06f3632284d7521b1",
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:2d06b055d9ab5605562c585a1a6e8977fe7ff9726b29dc70261f26a9796d215b",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:5767b4546cdfe290af10c4c69e51b6bc14c050219c66d7051537cae7440b04a2",
     "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json": "sha256:e839ab95bd4133a83deb941c99634f03208a760fbb9321db269c494e628d4be8",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:331c562111128e7870de34ef2ef4fee8a940bd81b1b2fa4a83a0228e310ab6b5",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a6355bb38a2eb5c89dea674994e7921cea857bf1eefe8c8eefca1f73fb4456cc",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:bbdc05a2b882aeb747f63ecf7f41110917372a1bf2bff998a3d1cc4dec2eed97",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d64e4b1d7c20e2a3acf89a69a098cee056908d18a637e40719971cd1580a5ced",
     "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json": "sha256:f2848f06c83509c4ae0db3f43877567dd86bafa655018451ca5bf27507fb2136",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:a661fd7afbbe4b04bd083601417190cba8a161e582992bcd76330c7df934e69f",
     "implementation/phase1/support_bundle_manifest.json": "sha256:218a5ee7db7a07b3db806d9010fe9216e54e821afa640a4303f39aa824b911b2"
@@ -373,7 +374,7 @@
       "pass": true
     }
   ],
-  "source_commit_sha": "645217edfaf87afb8e5120723875d0555c0b3b08",
+  "source_commit_sha": "7c1a4ba7189072fef0de1d0468b744fd5095cdee",
   "summary": {
     "claim_boundary_docs": [
       "README.md",
@@ -385,16 +386,18 @@
     "commercial_v1_supported_scope_pass_count": 12,
     "evidence_artifact_count": 9,
     "evidence_artifact_present_count": 9,
-    "owner_action": "Keep paid-pilot product/contract language constrained to review assist, specified structure families/workflows, and attached engine/reviewer evidence package. Commercial v1 supported scope and separate-validation exclusions must stay visible.",
+    "owner_action": "Keep paid-pilot product/contract language constrained to review assist, specified structure families/workflows, and attached engine/reviewer evidence package. Commercial v1 supported scope, support/sales boundaries, and separate-validation exclusions must stay visible.",
     "prohibited_scope_claim_count": 6,
     "prohibited_scope_claim_present_count": 0,
     "required_scope_term_count": 5,
     "required_scope_term_pass_count": 5,
     "scope_source": "docs/pm-release-gate-milestones.md",
     "support_bundle_required_section_count": 3,
-    "support_bundle_required_section_present_count": 3
+    "support_bundle_required_section_present_count": 3,
+    "support_sales_boundary_count": 5,
+    "support_sales_boundary_pass_count": 5
   },
-  "summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
+  "summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
   "support_bundle_section_rows": [
     {
       "label": "pm_owner_evidence_request_packet",
@@ -410,6 +413,58 @@
       "label": "pm_release_reproduction_command_audit",
       "present": true,
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_reproduction_command_audit.json"
+    }
+  ],
+  "support_sales_boundary_rows": [
+    {
+      "accepted_phrases": [
+        "restricted reviewer-assisted pilot",
+        "restricted reviewer assisted pilot",
+        "제한된 reviewer-assisted pilot",
+        "제한된 검토 보조 pilot"
+      ],
+      "check": "sales_motion_restricted_reviewer_assist",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "not an autonomous solver",
+        "not autonomous solver",
+        "구조기술사 대체가 아니다",
+        "기술사 대체가 아니다"
+      ],
+      "check": "sales_no_autonomous_or_replacement_claim",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "evidence-bundle triage",
+        "evidence bundle triage",
+        "evidence bundle/reviewer handoff triage",
+        "증거 번들 triage"
+      ],
+      "check": "support_evidence_bundle_triage_only",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "no production SLA",
+        "production SLA is not included",
+        "production SLA가 포함되지 않는다",
+        "production SLA는 포함되지 않는다"
+      ],
+      "check": "support_no_production_sla_until_ga",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "no license-server operation",
+        "license-server operation is not included",
+        "license-server/tenant operation",
+        "license-server/tenant 운영은 포함되지 않는다"
+      ],
+      "check": "support_no_license_server_or_tenant_ops",
+      "pass": true
     }
   ]
 }

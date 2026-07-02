@@ -174,6 +174,7 @@ CI streak intake는 `github_actions_ci_streak_evidence.json`의 schema, freshnes
 `ga_enterprise_readiness_report.json`은 GA/Enterprise에 필요한 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence를 milestone/release-area gate와 분리해 owner handoff로 고정한다.
 `ga_enterprise_signoff_intake_packet.json`은 GA/Enterprise 외부 signoff 3종이 채워야 할 필드, owner별 packet, evidence path, source artifact, `docs/templates/*.template.json` template path를 고정하며, signoff evidence를 대체하지 않는다. GA readiness는 빈 `contract_pass=true`나 template copy만으로 통과하지 않고 필수 필드, placeholder 부재, 승인 decision을 함께 확인한다.
 `paid_pilot_scope_guard_report.json`은 constrained paid pilot에 필요한 검토 보조, 지정 구조군/workflow, engine/reviewer evidence package, unsupported/missing evidence blocker 문구와 evidence package artifact 존재를 검증한다.
+또한 support/sales boundary를 별도 계약으로 검증한다. Sales motion은 restricted reviewer-assisted pilot로만 설명하며, not an autonomous solver이고 구조기술사 대체가 아니다. Support motion은 evidence-bundle triage와 reviewer handoff까지만 포함하며, no production SLA, no license-server operation, no license-server/tenant operation 상태를 유지한다.
 
 최근 닫힌 release-area blocker:
 
@@ -193,6 +194,8 @@ CI streak intake는 `github_actions_ci_streak_evidence.json`의 schema, freshnes
 - 지정된 구조군과 지정된 workflow
 - engine/reviewer evidence package 포함
 - unsupported 또는 missing evidence 항목은 pass가 아니라 blocker로 표시
+- support/sales boundary: restricted reviewer-assisted pilot이며 not an autonomous solver, 구조기술사 대체가 아니다
+- support boundary: evidence-bundle triage와 reviewer handoff까지만 포함하며 no production SLA, no license-server operation, no license-server/tenant operation 상태다
 
 상용 v1 지원 범위 (commercial v1 supported scope): paid-pilot scope guard는 다음 항목이 scope source에 명시돼야 PASS다.
 
