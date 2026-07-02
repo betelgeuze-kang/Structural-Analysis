@@ -2420,15 +2420,61 @@
             "surface_id": "surface_interaction_benchmark_gate_report"
           }
         ],
+        "excluded_evidence_surface_count": 4,
+        "excluded_evidence_surfaces": [
+          {
+            "excluded_from_release_gate": true,
+            "exclusion_reason": "non_structural_product_surface",
+            "non_structural_product_path": true,
+            "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+            "release_claim_eligible": false,
+            "surface_id": "gpcr_hard_decoy_evidence_surface"
+          },
+          {
+            "excluded_from_release_gate": true,
+            "exclusion_reason": "non_structural_product_surface",
+            "non_structural_product_path": true,
+            "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+            "release_claim_eligible": false,
+            "surface_id": "h_bond_backmap_evidence_surface"
+          },
+          {
+            "excluded_from_release_gate": true,
+            "exclusion_reason": "non_structural_product_surface",
+            "non_structural_product_path": true,
+            "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+            "release_claim_eligible": false,
+            "surface_id": "pocketmd_lite_science_product_surface"
+          },
+          {
+            "excluded_from_release_gate": true,
+            "exclusion_reason": "not_in_structural_evidence_surface_allowlist",
+            "non_structural_product_path": false,
+            "path": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+            "release_claim_eligible": false,
+            "surface_id": "product_capabilities_surface"
+          }
+        ],
         "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "locked_evidence_surface_count": 0,
         "missing_evidence_surface_count": 0,
+        "non_structural_evidence_surface_excluded_count": 3,
         "operator_action_count": 9,
         "operator_actions": [],
         "public_benchmark_ready": true,
         "release_allowed": false,
         "stale_artifact_count": 0,
-        "stale_artifact_refresh_required": false
+        "stale_artifact_refresh_required": false,
+        "structural_evidence_surface_allowlist_ids": [
+          "element_material_breadth_gate_report",
+          "general_fe_contact_benchmark_gate_report",
+          "material_constitutive_gate_report",
+          "solver_breadth_report",
+          "solver_truthfulness_gate_report",
+          "steel_composite_constitutive_gate_report",
+          "structural_contact_gate_report",
+          "surface_interaction_benchmark_gate_report"
+        ]
       },
       "suppressed_duplicate_blocker_count": 2,
       "suppressed_duplicate_blockers": [
@@ -2652,7 +2698,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T00:36:48.786322+00:00",
+  "generated_at": "2026-07-02T00:41:36.881944+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2678,7 +2724,7 @@
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:1f3f663705a05b4d1e6d1312603a8e1c8664fbe62db3e64dc01b0a8bba61aa90",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:638cc7b0807b27b1af8848c20a198c9a20e97ff34f2e74e3d1927d47200f3a45",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:840affca7e1ba00c375277525f0f91ef46430b108f56f365cfd02c4ebfbba6d1",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:74442161282fa31da789bd335158452591b4e32efda29ad2609de9d8446e7f05",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:bef00419e26f444eb82c7cba4606e97d67b8355893cbfb779040059efbe2b4cc",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:835ddc941322369fc1475716358f15a05aebfdb45f3b45165dbeba86a36dcdba",
@@ -2819,15 +2865,61 @@
         "surface_id": "surface_interaction_benchmark_gate_report"
       }
     ],
+    "excluded_evidence_surface_count": 4,
+    "excluded_evidence_surfaces": [
+      {
+        "excluded_from_release_gate": true,
+        "exclusion_reason": "non_structural_product_surface",
+        "non_structural_product_path": true,
+        "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "release_claim_eligible": false,
+        "surface_id": "gpcr_hard_decoy_evidence_surface"
+      },
+      {
+        "excluded_from_release_gate": true,
+        "exclusion_reason": "non_structural_product_surface",
+        "non_structural_product_path": true,
+        "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "release_claim_eligible": false,
+        "surface_id": "h_bond_backmap_evidence_surface"
+      },
+      {
+        "excluded_from_release_gate": true,
+        "exclusion_reason": "non_structural_product_surface",
+        "non_structural_product_path": true,
+        "path": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+        "release_claim_eligible": false,
+        "surface_id": "pocketmd_lite_science_product_surface"
+      },
+      {
+        "excluded_from_release_gate": true,
+        "exclusion_reason": "not_in_structural_evidence_surface_allowlist",
+        "non_structural_product_path": false,
+        "path": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+        "release_claim_eligible": false,
+        "surface_id": "product_capabilities_surface"
+      }
+    ],
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
+    "non_structural_evidence_surface_excluded_count": 3,
     "operator_action_count": 9,
     "operator_actions": [],
     "public_benchmark_ready": true,
     "release_allowed": false,
     "stale_artifact_count": 0,
-    "stale_artifact_refresh_required": false
+    "stale_artifact_refresh_required": false,
+    "structural_evidence_surface_allowlist_ids": [
+      "element_material_breadth_gate_report",
+      "general_fe_contact_benchmark_gate_report",
+      "material_constitutive_gate_report",
+      "solver_breadth_report",
+      "solver_truthfulness_gate_report",
+      "steel_composite_constitutive_gate_report",
+      "structural_contact_gate_report",
+      "surface_interaction_benchmark_gate_report"
+    ]
   },
   "release_ready": false,
   "reuse_policy": "product_readiness_snapshot_aggregates_release_readiness_inputs",
@@ -2934,7 +3026,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "b7d7a51c555988eaf9236d03a481bb0295c05c02",
+  "source_commit_sha": "4737aa3b9d54c98f8a12f397d6f6c3aae3b818a3",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3023,24 +3115,15 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [
-          "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/build_structural_scope_owner_review_packet.py",
-          "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py"
-        ],
-        "generated_at": "2026-07-01T23:53:54.769142+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-02T00:41:36.650533+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "cbf17f86d132f59b49137474fed1cad676828778",
+        "source_commit_matches_head": true,
+        "source_commit_sha": "4737aa3b9d54c98f8a12f397d6f6c3aae3b818a3",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
@@ -3366,12 +3449,14 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py"
+          "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T23:29:01.188394+00:00",
         "input_checksum_present": true,
@@ -3521,6 +3606,7 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
@@ -3530,7 +3616,8 @@
           "tests/test_build_phase6_ux_observation_status.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py"
+          "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T22:45:28.953707+00:00",
         "input_checksum_present": true,
@@ -3674,10 +3761,12 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py"
+          "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T23:56:51.953865+00:00",
         "input_checksum_present": true,
@@ -3695,10 +3784,12 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py"
+          "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T10:19:19.231347+00:00",
         "input_checksum_present": true,
@@ -3722,6 +3813,7 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/report_pm_release_gate.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_rc_status.py",
@@ -3733,6 +3825,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_report_pm_release_gate.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py"
         ],
         "generated_at": "2026-07-01T22:31:56.887011+00:00",
@@ -3759,6 +3852,7 @@
           "scripts/build_structural_scope_owner_review_packet.py",
           "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/build_ux_new_user_observation_report.py",
+          "scripts/report_pm_release_gate.py",
           "scripts/run_g1_full_load_hip_newton_lane.py",
           "scripts/run_phase3_medium_model_scorecard_receipt.py",
           "tests/test_build_ci_streak_intake_packet.py",
@@ -3772,6 +3866,7 @@
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
+          "tests/test_report_pm_release_gate.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_run_phase3_medium_model_scorecard_receipt.py"
         ],
@@ -3983,13 +4078,15 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
           "tests/test_build_phase6_ux_observation_status.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py"
+          "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T23:22:38.923987+00:00",
         "input_checksum_present": true,
@@ -4005,8 +4102,10 @@
         "changed_paths_since_source_commit": [
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py"
+          "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-02T00:30:51.893820+00:00",
         "input_checksum_present": true,
@@ -4021,7 +4120,9 @@
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
           "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py"
+          "scripts/report_pm_release_gate.py",
+          "tests/test_build_structural_scope_owner_decision_application_plan.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-02T00:35:29.340371+00:00",
         "input_checksum_present": true,
@@ -4041,12 +4142,14 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
           "tests/test_build_github_actions_ci_streak_evidence.py",
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py"
+          "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T23:29:01.231219+00:00",
         "input_checksum_present": true,
@@ -4080,7 +4183,9 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
+        "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -4105,7 +4210,9 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
+        " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
       ]
     }
   },
