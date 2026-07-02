@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 
 
@@ -215,6 +216,59 @@ def test_fresh_full_validation_lane_status_blocks_failed_latest_result(
     assert row["fresh_validation_result_latest_tail_reason_code"] == (
         "ERR_ROCM_RUNTIME_UNAVAILABLE"
     )
+
+
+def test_fresh_full_validation_lane_status_suppresses_stale_receipt_mismatch_when_failed_result_is_newer(
+    tmp_path: Path,
+) -> None:
+    docs = (_write_text(tmp_path / "runbook.md", "GPU-capable validation task\n"),)
+    materialized = _write_json(
+        tmp_path / "gpu" / "solver_hip_e2e_contract_report.json",
+        {"contract_pass": False, "reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE"},
+    )
+    receipt_root = tmp_path / "receipts"
+    receipt_path = _write_json(
+        receipt_root / "gpu_hip_solver.fresh_validation_receipt.json",
+        _valid_receipt_payload(
+            artifact_path=materialized,
+            artifact_sha256="sha256:" + "b" * 64,
+        ),
+    )
+    result_path = _write_json(
+        receipt_root / "gpu_hip_solver.fresh_validation_receipt.result.json",
+        _failed_result_payload(),
+    )
+    os.utime(receipt_path, (1_000, 1_000))
+    os.utime(result_path, (1_001, 1_001))
+
+    payload = lane_status.build_status(
+        docs=docs,
+        receipt_root=receipt_root,
+        lanes=(_lane(materialized),),
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["fresh_validation_receipt_superseded_by_failed_result_count"] == 1
+    assert "gpu_hip_solver::fresh_validation_result_failed" in payload["blockers"]
+    assert not any(
+        blocker.startswith("gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed")
+        for blocker in payload["blockers"]
+    )
+    row = payload["rows"][0]
+    assert row["fresh_validation_receipt_superseded_by_failed_result"] is True
+    assert row["fresh_validation_receipt_artifact_integrity_status"] == (
+        "superseded_by_failed_result"
+    )
+    assert row["fresh_validation_receipt_artifact_integrity_blockers"] == []
+    assert any(
+        "sha256_mismatch" in blocker
+        for blocker in row["fresh_validation_receipt_artifact_integrity_raw_blockers"]
+    )
+    grouping = payload["blocker_grouping_metadata"]
+    assert grouping["groups"]["fresh_receipt_artifact_integrity"]["blocker_count"] == 0
+    assert "gpu_hip_solver::fresh_validation_result_failed" in grouping["groups"][
+        "fresh_receipt_execution_result"
+    ]["blockers"]
 
 
 def test_fresh_full_validation_lane_status_resolves_checksum_verified_path_alias(

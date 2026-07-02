@@ -221,6 +221,13 @@ def _sha256_ref(path: Path) -> str | None:
     return f"sha256:{digest.hexdigest()}"
 
 
+def _path_mtime_ns(path: Path) -> int | None:
+    try:
+        return path.stat().st_mtime_ns
+    except OSError:
+        return None
+
+
 def _receipt_artifact_integrity_check(
     receipt_payload: dict[str, Any],
     *,
@@ -328,6 +335,7 @@ def _fresh_validation_result_summary(receipt_root: Path, lane_id: str) -> dict[s
     return {
         "path": str(result_path),
         "present": present,
+        "mtime_ns": _path_mtime_ns(result_path) if present else None,
         "contract_pass": payload.get("contract_pass") if present else None,
         "reason_code": str(payload.get("reason_code", "") or "") if present else "",
         "blockers": [str(item) for item in _as_list(payload.get("blockers"))],
@@ -443,7 +451,10 @@ def _fresh_validation_blocker_grouping_metadata(blockers: list[str]) -> dict[str
         "grouping_policy": (
             "Preserve every lane blocker while separating publication boundary, "
             "fresh receipt presence, receipt metadata/freshness, receipt identity, "
-            "schema validation, and artifact integrity failures."
+            "schema validation, execution-result failures, and artifact integrity "
+            "failures. When a newer failed execution result supersedes an older PASS "
+            "receipt, stale receipt checksum mismatches remain visible as raw "
+            "diagnostics but the failed execution result is the blocking authority."
         ),
         "blocker_count": len(blockers),
         "unassigned_blocker_count": len(unassigned_blockers),
@@ -497,6 +508,7 @@ def _lane_row(
     doc_terms = [str(term) for term in lane.get("doc_terms", [])]
     receipt_path = receipt_root / f"{lane_id}.fresh_validation_receipt.json"
     receipt_payload = _load_json(receipt_path)
+    receipt_mtime_ns = _path_mtime_ns(receipt_path) if receipt_path.exists() else None
     materialized_present = all(path.exists() for path in materialized_paths)
     doc_boundary_present = all(term.lower() in docs_text for term in doc_terms)
     receipt_present = receipt_path.exists()
@@ -510,6 +522,14 @@ def _lane_row(
     result_present = bool(result_summary["present"])
     result_contract_pass = result_summary["contract_pass"]
     result_failed = bool(result_present and result_contract_pass is False)
+    result_mtime_ns = result_summary.get("mtime_ns")
+    result_supersedes_receipt = bool(
+        result_failed
+        and receipt_present
+        and isinstance(result_mtime_ns, int)
+        and isinstance(receipt_mtime_ns, int)
+        and result_mtime_ns >= receipt_mtime_ns
+    )
     result_blockers = list(result_summary["blockers"])
     validation = _validate_receipt(receipt_path, receipt_schema) if receipt_present else {
         "contract_pass": False,
@@ -523,9 +543,22 @@ def _lane_row(
         if receipt_present and receipt_validator_pass
         else {"blockers": [], "path_aliases": []}
     )
-    artifact_integrity_blockers = list(artifact_integrity["blockers"])
+    raw_artifact_integrity_blockers = list(artifact_integrity["blockers"])
+    artifact_integrity_blockers = (
+        [] if result_supersedes_receipt else raw_artifact_integrity_blockers
+    )
     artifact_path_aliases = list(artifact_integrity["path_aliases"])
-    receipt_artifact_integrity_pass = receipt_present and not artifact_integrity_blockers
+    receipt_artifact_integrity_pass = bool(
+        receipt_present and not raw_artifact_integrity_blockers and not result_supersedes_receipt
+    )
+    if not receipt_present:
+        receipt_artifact_integrity_status = "missing_receipt"
+    elif result_supersedes_receipt:
+        receipt_artifact_integrity_status = "superseded_by_failed_result"
+    elif raw_artifact_integrity_blockers:
+        receipt_artifact_integrity_status = "blocked"
+    else:
+        receipt_artifact_integrity_status = "pass"
     lane_pass = bool(
         materialized_present
         and doc_boundary_present
@@ -582,6 +615,7 @@ def _lane_row(
         "doc_terms": doc_terms,
         "validation_lane_boundary_present": doc_boundary_present,
         "fresh_validation_receipt": str(receipt_path),
+        "fresh_validation_receipt_mtime_ns": receipt_mtime_ns,
         "fresh_validation_receipt_present": receipt_present,
         "fresh_validation_receipt_metadata_present": receipt_metadata_present,
         "fresh_validation_receipt_reused_evidence": receipt_reused_evidence,
@@ -591,12 +625,16 @@ def _lane_row(
         "fresh_validation_receipt_runner_matches": receipt_runner_matches,
         "fresh_validation_receipt_contract_pass": receipt_validator_pass,
         "fresh_validation_receipt_artifact_integrity_pass": receipt_artifact_integrity_pass,
+        "fresh_validation_receipt_artifact_integrity_status": receipt_artifact_integrity_status,
         "fresh_validation_receipt_artifact_integrity_blockers": artifact_integrity_blockers,
+        "fresh_validation_receipt_artifact_integrity_raw_blockers": raw_artifact_integrity_blockers,
+        "fresh_validation_receipt_superseded_by_failed_result": result_supersedes_receipt,
         "fresh_validation_receipt_path_alias_count": len(artifact_path_aliases),
         "fresh_validation_receipt_path_aliases": artifact_path_aliases,
         "fresh_validation_receipt_reason_code": validation.get("reason_code"),
         "fresh_validation_receipt_blockers": receipt_validator_blockers,
         "fresh_validation_result": str(result_summary["path"]),
+        "fresh_validation_result_mtime_ns": result_mtime_ns,
         "fresh_validation_result_present": result_present,
         "fresh_validation_result_contract_pass": result_contract_pass,
         "fresh_validation_result_reason_code": str(result_summary["reason_code"]),
@@ -671,6 +709,9 @@ def build_status(
             "fresh_validation_receipt_path_alias_count": sum(
                 int(row["fresh_validation_receipt_path_alias_count"]) for row in rows
             ),
+            "fresh_validation_receipt_superseded_by_failed_result_count": sum(
+                1 for row in rows if row["fresh_validation_receipt_superseded_by_failed_result"]
+            ),
             "fresh_validation_result_present_count": sum(
                 1 for row in rows if row["fresh_validation_result_present"]
             ),
@@ -693,7 +734,9 @@ def build_status(
             "validated by implementation/phase1/validate_fresh_validation_receipt.py. Missing or invalid "
             "receipts must stay blocked and must not be replaced by CPU-required hydrated reports. Legacy "
             "path aliases resolve only tracked release-evidence migrations and pass only when the resolved "
-            "file sha256 matches the receipt expectation."
+            "file sha256 matches the receipt expectation. A newer failed execution-result artifact may "
+            "supersede an older PASS receipt for blocker attribution only; this keeps stale checksum drift "
+            "visible as raw diagnostics while preserving the failed execution result as the active blocker."
         ),
     }
 
