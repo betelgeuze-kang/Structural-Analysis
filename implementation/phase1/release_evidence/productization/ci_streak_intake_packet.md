@@ -62,6 +62,54 @@
 - `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
 - `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
 
+## Streak Requirements
+
+- `required_lanes`: `['pr', 'nightly']`
+- `required_consecutive_pass_count`: `30`
+- `source_schema_version`: `github-actions-ci-streak-evidence.v1`
+- `max_source_evidence_age_hours`: `168`
+- `runner_class`: `self-hosted linux x64`
+
+## Required Fields
+
+| Field | Current | Required | Pass |
+|---|---|---|---:|
+| `github_actions_ci_streak_evidence.schema_version` | `github-actions-ci-streak-evidence.v1` | `github-actions-ci-streak-evidence.v1` | `True` |
+| `github_actions_ci_streak_evidence.generated_at` | `2026-07-01T10:19:19.231347+00:00` | `timezone-aware timestamp no older than 168 hours` | `True` |
+| `github_actions_ci_streak_evidence.threshold` | `30` | `30` | `True` |
+| `lanes.pr.consecutive_pass_count` | `0` | `>= 30` | `False` |
+| `lanes.pr.threshold_pass` | `False` | `true` | `False` |
+| `lanes.pr.pull_request_run_source_present` | `True` | `true` | `True` |
+| `lanes.pr.workflow_registered_active` | `registered=True; state=active` | `registered=true and state=active` | `True` |
+| `lanes.nightly.consecutive_pass_count` | `0` | `>= 30` | `False` |
+| `lanes.nightly.threshold_pass` | `False` | `true` | `False` |
+| `lanes.nightly.workflow_registered_active` | `registered=True; state=active` | `registered=true and state=active` | `True` |
+| `lanes.nightly.schedule_or_dispatch_trigger_present` | `['schedule', 'workflow_dispatch']` | `schedule or workflow_dispatch trigger present` | `True` |
+| `lanes.pr.local_self_hosted_runner_default` | `True` | `true` | `True` |
+| `lanes.nightly.local_self_hosted_runner_default` | `True` | `true` | `True` |
+
+## Derived Checks
+
+| Check | Current | Required | Pass |
+|---|---|---|---:|
+| `source_manifest_threshold_consistency` | `source=30; required=30` | `source threshold equals release threshold` | `True` |
+| `source_evidence_freshness` | `age_hours=33.75` | `freshness_pass=true` | `True` |
+| `pr_trigger_and_source` | `triggers=['pull_request', 'push', 'workflow_dispatch']; pull_request_source=True` | `pull_request trigger and pull_request source runs present` | `True` |
+| `nightly_trigger_source` | `triggers=['schedule', 'workflow_dispatch']` | `schedule or workflow_dispatch trigger present` | `True` |
+| `self_hosted_runner_precondition` | `evaluated=True; online=0; ready=0` | `at least one required self-hosted runner online when evaluated` | `False` |
+| `github_hosted_runner_defaults_absent` | `False` | `false` | `True` |
+| `job_start_blockers_absent` | `6` | `0` | `False` |
+| `release_area_blockers_absent` | `['pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing', 'pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing']` | `[]` | `False` |
+
+## Gate Unblock Plan
+
+- `restore_self_hosted_runner_precondition`
+- `resolve_github_actions_job_start_blockers`
+- `collect_pr_30_consecutive_passes`
+- `collect_nightly_30_consecutive_passes`
+- `refresh_ci_streak_source_evidence`
+- `regenerate_release_gate_evidence`
+
 ## CI Release Credit Policy
 
 - `accepted_source`: `tracked GitHub Actions PR and nightly consecutive-pass evidence`
@@ -76,4 +124,4 @@
 
 | Path | Schema | Fresh | Age Hours | Pass |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `26.966` | `False` |
+| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `33.75` | `False` |

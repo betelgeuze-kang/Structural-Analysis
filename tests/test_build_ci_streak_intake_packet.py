@@ -192,6 +192,38 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
     assert payload["summary"]["release_area_blocker_count"] == 2
     assert payload["summary"]["blocker_id_count"] == 14
     assert payload["ci_release_credit_policy"]["required_consecutive_pass_count"] == 30
+    assert payload["ci_evidence_policy"] == payload["ci_release_credit_policy"]
+    assert payload["streak_requirements"] == {
+        "max_source_evidence_age_hours": 168,
+        "release_area": "basic_ci",
+        "required_consecutive_pass_count": 30,
+        "required_lane_count": 2,
+        "required_lanes": ["pr", "nightly"],
+        "runner_class": "self-hosted linux x64",
+        "source_schema_version": "github-actions-ci-streak-evidence.v1",
+    }
+    assert payload["required_field_count"] == 13
+    assert payload["derived_check_count"] == 8
+    required_fields = {row["field"]: row for row in payload["required_fields"]}
+    assert required_fields["lanes.pr.consecutive_pass_count"][
+        "closure_check_pass"
+    ] is False
+    assert required_fields["lanes.pr.pull_request_run_source_present"][
+        "closure_check_pass"
+    ] is False
+    assert required_fields["lanes.nightly.workflow_registered_active"][
+        "closure_check_pass"
+    ] is False
+    derived_checks = {row["field"]: row for row in payload["derived_checks"]}
+    assert derived_checks["pr_trigger_and_source"]["closure_check_pass"] is False
+    assert derived_checks["job_start_blockers_absent"]["closure_check_pass"] is True
+    assert derived_checks["release_area_blockers_absent"]["closure_check_pass"] is False
+    assert [row["slot_id"] for row in payload["gate_unblock_plan"]] == [
+        "collect_pr_30_consecutive_passes",
+        "collect_nightly_30_consecutive_passes",
+        "refresh_ci_streak_source_evidence",
+        "regenerate_release_gate_evidence",
+    ]
     assert payload["summary"]["source_evidence_pass"] is False
     assert payload["summary"]["source_evidence_freshness_pass"] is True
     assert payload["summary"]["pr_missing_consecutive_pass_count"] == 30
@@ -656,6 +688,11 @@ def test_ci_streak_intake_packet_surfaces_offline_self_hosted_runner(
         "nightly_missing=30 | blockers=9 | runner=blocked"
     )
     assert payload["current_blocker_count"] == 9
+    assert payload["derived_checks"][4]["field"] == "self_hosted_runner_precondition"
+    assert payload["derived_checks"][4]["closure_check_pass"] is False
+    assert payload["gate_unblock_plan"][0]["slot_id"] == (
+        "restore_self_hosted_runner_precondition"
+    )
     assert "Runner Precondition" in markdown
     assert "self-hosted, linux, x64" in payload["runner_precondition"]["owner_action"]
 
@@ -696,6 +733,10 @@ def test_ci_streak_intake_packet_passes_closed_manifest_with_valid_source_eviden
     assert payload["release_area_blocker_ids"] == []
     assert payload["blocker_ids"] == []
     assert payload["blocker_id_count"] == 0
+    assert payload["required_field_pass_count"] == payload["required_field_count"]
+    assert payload["derived_check_pass_count"] == payload["derived_check_count"]
+    assert payload["gate_unblock_plan"] == []
+    assert payload["gate_unblock_plan_count"] == 0
     assert payload["summary"]["lane_pass_count"] == 2
     assert payload["summary"]["source_evidence_pass"] is True
     assert payload["summary"]["pr_source_threshold_pass"] is True
@@ -840,5 +881,9 @@ def test_ci_streak_intake_packet_cli_writes_markdown(tmp_path: Path, capsys) -> 
     assert "Blocker IDs" in markdown
     assert "Evidence Intake Artifacts" in markdown
     assert "CI Release Credit Policy" in markdown
+    assert "Streak Requirements" in markdown
+    assert "Required Fields" in markdown
+    assert "Derived Checks" in markdown
+    assert "Gate Unblock Plan" in markdown
     assert "Workflow Registered" in markdown
     assert "Source Evidence" in markdown

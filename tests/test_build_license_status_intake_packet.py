@@ -102,7 +102,36 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
         "generated PM/license/readiness gate artifacts"
         in payload["approval_evidence_policy"]["rejected_evidence_refs"]
     )
+    assert payload["license_evidence_policy"] == payload["approval_evidence_policy"]
+    assert payload["approval_evidence_policy"]["closure_rule"].startswith(
+        "The PM security release area closes only after"
+    )
     assert payload["summary_line"] == "License status intake: BLOCKED | fields=0/17 | blockers=2"
+    assert payload["required_field_count"] == 10
+    assert payload["required_field_pass_count"] == 0
+    assert payload["derived_check_count"] == 7
+    assert payload["derived_check_pass_count"] == 0
+    assert [row["field"] for row in payload["required_fields"]] == [
+        "status",
+        "tier",
+        "license_id",
+        "issuer_or_approver",
+        "approver_role",
+        "approval_ref",
+        "approved_at_utc",
+        "evidence_ref",
+        "product_scope",
+        "expiry_or_perpetual",
+    ]
+    assert [row["field"] for row in payload["derived_checks"]] == [
+        "approval_timeline",
+        "approval_ref_distinct",
+        "provenance_complete",
+        "evidence_ref_not_self_reference",
+        "evidence_ref_not_template_reference",
+        "evidence_ref_not_template_artifact",
+        "evidence_ref_not_generated_gate_artifact",
+    ]
     assert payload["summary"]["closure_blocker_count"] == 2
     assert payload["summary"]["blocker_id_count"] == 3
     assert payload["summary"]["evidence_intake_artifact_count"] == 6
@@ -216,6 +245,8 @@ def test_license_status_intake_packet_passes_through_closed_report(tmp_path: Pat
     assert payload["blocker_ids"] == []
     assert payload["blocker_id_count"] == 0
     assert payload["summary"]["field_pass_count"] == 17
+    assert payload["required_field_pass_count"] == payload["required_field_count"]
+    assert payload["derived_check_pass_count"] == payload["derived_check_count"]
     assert payload["summary"]["provenance_complete_pass"] is True
     assert payload["current_blockers"] == []
     assert payload["gate_unblock_plan"] == []
@@ -289,5 +320,7 @@ def test_license_status_intake_packet_cli_writes_markdown(tmp_path: Path, capsys
     assert "Blocker IDs" in out_md.read_text(encoding="utf-8")
     assert "Evidence Intake Artifacts" in out_md.read_text(encoding="utf-8")
     assert "Approval Evidence Policy" in out_md.read_text(encoding="utf-8")
+    assert "Required Fields" in out_md.read_text(encoding="utf-8")
+    assert "Derived Checks" in out_md.read_text(encoding="utf-8")
     assert "Validation Commands" in out_md.read_text(encoding="utf-8")
     assert "Gate Unblock Plan" in out_md.read_text(encoding="utf-8")

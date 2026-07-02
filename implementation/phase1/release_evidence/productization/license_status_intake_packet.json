@@ -8,6 +8,7 @@
       "https URL",
       "existing local evidence path"
     ],
+    "closure_rule": "The PM security release area closes only after license_status.json is populated from approved product/legal evidence and license_status_closure_report.json contract_pass=true.",
     "rejected_evidence_refs": [
       "license_status.json self-reference",
       "docs/templates or .template artifacts",
@@ -43,6 +44,80 @@
     "license_evidence_ref_missing",
     "license_product_scope_missing",
     "license_expiry_missing_or_invalid"
+  ],
+  "derived_check_count": 7,
+  "derived_check_pass_count": 0,
+  "derived_checks": [
+    {
+      "accepted_keys": [],
+      "closure_check": "approval_timeline_pass",
+      "closure_check_pass": false,
+      "current_value": "approved_at=; expires_at=",
+      "field": "approval_timeline",
+      "owner_note": "Approval date must be internally consistent with current validity.",
+      "required_value": "approved_at_utc <= now and approved_at_utc <= expiry when not perpetual",
+      "template_value": "derived from closure report"
+    },
+    {
+      "accepted_keys": [],
+      "closure_check": "approval_ref_distinct_pass",
+      "closure_check_pass": false,
+      "current_value": "license_id=; approval_ref=",
+      "field": "approval_ref_distinct",
+      "owner_note": "A license identifier cannot also serve as the approval decision evidence reference.",
+      "required_value": "approval_ref differs from license_id",
+      "template_value": "derived from closure report"
+    },
+    {
+      "accepted_keys": [],
+      "closure_check": "provenance_complete_pass",
+      "closure_check_pass": false,
+      "current_value": "role=; evidence_ref=; evidence_kind=missing",
+      "field": "provenance_complete",
+      "owner_note": "Derived check for complete legal/product approval provenance.",
+      "required_value": "approver role, approval time, evidence ref, and distinct approval ref all pass",
+      "template_value": "derived from closure report"
+    },
+    {
+      "accepted_keys": [],
+      "closure_check": "evidence_ref_not_self_reference_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "evidence_ref_not_self_reference",
+      "owner_note": "The license status record cannot serve as its own approval evidence artifact.",
+      "required_value": "evidence_ref must not point back to license_status.json",
+      "template_value": "derived from closure report"
+    },
+    {
+      "accepted_keys": [],
+      "closure_check": "evidence_ref_not_template_reference_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "evidence_ref_not_template_reference",
+      "owner_note": "Templates are owner input aids, not product/legal approval evidence.",
+      "required_value": "evidence_ref must not point to the license status template",
+      "template_value": "derived from closure report"
+    },
+    {
+      "accepted_keys": [],
+      "closure_check": "evidence_ref_not_template_artifact_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "evidence_ref_not_template_artifact",
+      "owner_note": "Any template-like file is rejected as product/legal approval evidence.",
+      "required_value": "evidence_ref must not point to docs/templates or a .template.* artifact",
+      "template_value": "derived from closure report"
+    },
+    {
+      "accepted_keys": [],
+      "closure_check": "evidence_ref_not_generated_gate_artifact_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "evidence_ref_not_generated_gate_artifact",
+      "owner_note": "Generated gate reports and intake packets verify approval evidence; they cannot be that evidence.",
+      "required_value": "evidence_ref must not point to generated PM/license/readiness gate artifacts",
+      "template_value": "derived from closure report"
+    }
   ],
   "evidence_intake_artifact_count": 6,
   "evidence_intake_artifacts": [
@@ -341,7 +416,24 @@
     }
   ],
   "gate_unblock_plan_count": 6,
-  "generated_at": "2026-07-02T05:31:39.196215+00:00",
+  "generated_at": "2026-07-02T20:05:33.948857+00:00",
+  "license_evidence_policy": {
+    "accepted_evidence_ref_kinds": [
+      "ticket:<id>",
+      "jira:<id>",
+      "legal:<id>",
+      "docusign:<id>",
+      "https URL",
+      "existing local evidence path"
+    ],
+    "closure_rule": "The PM security release area closes only after license_status.json is populated from approved product/legal evidence and license_status_closure_report.json contract_pass=true.",
+    "rejected_evidence_refs": [
+      "license_status.json self-reference",
+      "docs/templates or .template artifacts",
+      "generated PM/license/readiness gate artifacts",
+      "placeholder values such as OWNER_INPUT_REQUIRED or EVIDENCE-REF"
+    ]
+  },
   "license_status_path": "implementation/phase1/release/support_bundle/license_status.json",
   "next_actions": [
     "fill_license_status_record_from_template",
@@ -354,6 +446,147 @@
   "release_area": "security",
   "release_area_blocker_ids": [
     "pm_release::security::license_status_not_configured"
+  ],
+  "required_field_count": 10,
+  "required_field_pass_count": 0,
+  "required_fields": [
+    {
+      "accepted_keys": [
+        "status"
+      ],
+      "closure_check": "status_active_pass",
+      "closure_check_pass": false,
+      "current_value": "not_configured",
+      "field": "status",
+      "owner_note": "Must reflect an approved product/legal decision, not a draft state.",
+      "required_value": "active | approved | valid",
+      "template_value": "active"
+    },
+    {
+      "accepted_keys": [
+        "tier",
+        "edition"
+      ],
+      "closure_check": "tier_allowed_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "tier",
+      "owner_note": "Must stay inside the PM-approved paid-pilot or limited-commercial boundary.",
+      "required_value": "paid-pilot | limited-commercial",
+      "template_value": "limited-commercial"
+    },
+    {
+      "accepted_keys": [
+        "license_id",
+        "id"
+      ],
+      "closure_check": "license_id_present_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "license_id",
+      "owner_note": "Template values such as LICENSE-ID are rejected.",
+      "required_value": "non-placeholder license or approval identifier",
+      "template_value": "LICENSE-ID"
+    },
+    {
+      "accepted_keys": [
+        "issuer",
+        "approved_by",
+        "approver"
+      ],
+      "closure_check": "issuer_or_approver_present_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "issuer_or_approver",
+      "owner_note": "Template values such as product-or-legal-owner are rejected.",
+      "required_value": "product/legal owner or approval authority",
+      "template_value": "product-or-legal-owner"
+    },
+    {
+      "accepted_keys": [
+        "approver_role",
+        "approval_role"
+      ],
+      "closure_check": "approver_role_allowed_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "approver_role",
+      "owner_note": "Role is separate from the human approver identity and must be one of the allowed release roles.",
+      "required_value": "product_owner | legal_counsel | product_and_legal | delegated_product_owner",
+      "template_value": "APPROVER-ROLE"
+    },
+    {
+      "accepted_keys": [
+        "approval_ref",
+        "approval_ticket",
+        "legal_ticket",
+        "decision_ref"
+      ],
+      "closure_check": "approval_reference_present_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "approval_ref",
+      "owner_note": "Template values such as LEGAL-OR-PRODUCT-APPROVAL-ID are rejected.",
+      "required_value": "legal/product approval reference",
+      "template_value": "LEGAL-OR-PRODUCT-APPROVAL-ID"
+    },
+    {
+      "accepted_keys": [
+        "approved_at_utc",
+        "approved_at",
+        "decision_at_utc"
+      ],
+      "closure_check": "approved_at_not_future_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "approved_at_utc",
+      "owner_note": "Approval timestamp must be timezone-aware and no later than the report generation time.",
+      "required_value": "timezone-aware approval timestamp, not future",
+      "template_value": "APPROVED-AT-UTC"
+    },
+    {
+      "accepted_keys": [
+        "evidence_ref",
+        "approval_artifact_ref",
+        "evidence_path"
+      ],
+      "closure_check": "evidence_ref_resolvable_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "evidence_ref",
+      "owner_note": "Approval reference identifies the decision; evidence_ref points to the retrievable artifact.",
+      "required_value": "https URL, supported external ref, or existing local evidence path",
+      "template_value": "EVIDENCE-REF"
+    },
+    {
+      "accepted_keys": [
+        "product_scope",
+        "scope",
+        "features"
+      ],
+      "closure_check": "product_scope_boundary_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "product_scope",
+      "owner_note": "Scope should preserve the PM claim boundary: review assist, specified families/workflows, evidence package.",
+      "required_value": "review-assist, specified-structure-families, specified-workflows, engine-and-reviewer-evidence-package",
+      "template_value": "review-assist, specified-structure-families, specified-workflows, engine-and-reviewer-evidence-package"
+    },
+    {
+      "accepted_keys": [
+        "expires_at_utc",
+        "expires_at",
+        "valid_until",
+        "perpetual"
+      ],
+      "closure_check": "expiry_valid_pass",
+      "closure_check_pass": false,
+      "current_value": "",
+      "field": "expiry_or_perpetual",
+      "owner_note": "Expired or missing validity evidence keeps the release-area security gate blocked.",
+      "required_value": "future expiry timestamp or perpetual=true",
+      "template_value": "2027-06-16T00:00:00+00:00"
+    }
   ],
   "schema_version": "license-status-intake-packet.v1",
   "status": "blocked",

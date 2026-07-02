@@ -28,12 +28,12 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T19:53:59.381190+00:00",
+  "generated_at": "2026-07-02T20:05:33.978814+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:2d06b055d9ab5605562c585a1a6e8977fe7ff9726b29dc70261f26a9796d215b",
-    "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:5767b4546cdfe290af10c4c69e51b6bc14c050219c66d7051537cae7440b04a2",
+    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:500b7803686ab0e8a38937948dc8831ce19bf9ef6461e601121ef434e39ba81a",
+    "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:df2b7aad2968199ea05f42c45b7b4297c0dd2afe4d9afcaedfac318134562113",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:97f01196b818264f1a9b99fddd0aaf953c9238a7a1b7616a55b3699f01ac1f83",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:68d713d4b4d1fcc3b010e4bb2000c591250fb037f09dd90933df1d67c261fa58",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:1d2665791271a5569c66643a80ab60e8ae35c40efede3ee22755a6804df61dbd",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:7b70e5bd5827670d48a6fe3d5dd0b4d13bd98b4e5d04c59ec92db74e593f761e",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:8b3440f0281881df8894ebe24a331837e39484773f878e444592e984ea443b0a",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:ec89a59a2b32465d7cbb22c455c4cfd4663b901397142c19214f0cb792966fdf"
@@ -1609,7 +1609,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "f3e60e5dcb7fe4159340aae8c718ff69769917be",
+  "source_commit_sha": "5b347b7d3c638a2b59c67e89b751ba17fc4e62c5",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,

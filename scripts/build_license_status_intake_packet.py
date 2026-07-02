@@ -347,6 +347,29 @@ def build_packet(
         validation_commands=validation_commands,
         contract_pass=contract_pass,
     )
+    required_fields = rows[: len(FIELD_SPECS)]
+    derived_checks = rows[len(FIELD_SPECS) :]
+    approval_evidence_policy = {
+        "accepted_evidence_ref_kinds": [
+            "ticket:<id>",
+            "jira:<id>",
+            "legal:<id>",
+            "docusign:<id>",
+            "https URL",
+            "existing local evidence path",
+        ],
+        "rejected_evidence_refs": [
+            "license_status.json self-reference",
+            "docs/templates or .template artifacts",
+            "generated PM/license/readiness gate artifacts",
+            "placeholder values such as OWNER_INPUT_REQUIRED or EVIDENCE-REF",
+        ],
+        "closure_rule": (
+            "The PM security release area closes only after license_status.json is "
+            "populated from approved product/legal evidence and "
+            "license_status_closure_report.json contract_pass=true."
+        ),
+    }
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
@@ -362,22 +385,18 @@ def build_packet(
         "closure_report_path": str(closure_report_path),
         "evidence_intake_artifacts": evidence_intake_artifacts,
         "evidence_intake_artifact_count": len(evidence_intake_artifacts),
-        "approval_evidence_policy": {
-            "accepted_evidence_ref_kinds": [
-                "ticket:<id>",
-                "jira:<id>",
-                "legal:<id>",
-                "docusign:<id>",
-                "https URL",
-                "existing local evidence path",
-            ],
-            "rejected_evidence_refs": [
-                "license_status.json self-reference",
-                "docs/templates or .template artifacts",
-                "generated PM/license/readiness gate artifacts",
-                "placeholder values such as OWNER_INPUT_REQUIRED or EVIDENCE-REF",
-            ],
-        },
+        "approval_evidence_policy": approval_evidence_policy,
+        "license_evidence_policy": approval_evidence_policy,
+        "required_fields": required_fields,
+        "required_field_count": len(required_fields),
+        "required_field_pass_count": sum(
+            1 for row in required_fields if row["closure_check_pass"] is True
+        ),
+        "derived_checks": derived_checks,
+        "derived_check_count": len(derived_checks),
+        "derived_check_pass_count": sum(
+            1 for row in derived_checks if row["closure_check_pass"] is True
+        ),
         "summary_line": (
             f"License status intake: {'PASS' if contract_pass else 'BLOCKED'} | "
             f"fields={sum(1 for row in rows if row['closure_check_pass'])}/{len(rows)} | "
@@ -438,6 +457,22 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"| `{cell(row['field'])}` | `{cell(row['current_value'])}` | {cell(row['required_value'])} | "
             f"`{cell(row['closure_check'])}` = `{row['closure_check_pass']}` |"
+        )
+    lines.extend(["", "## Required Fields", ""])
+    lines.append("| Field | Current | Required | Pass |")
+    lines.append("|---|---|---|---:|")
+    for row in payload.get("required_fields", []):
+        lines.append(
+            f"| `{cell(row['field'])}` | `{cell(row['current_value'])}` | "
+            f"{cell(row['required_value'])} | `{row['closure_check_pass']}` |"
+        )
+    lines.extend(["", "## Derived Checks", ""])
+    lines.append("| Check | Current | Required | Pass |")
+    lines.append("|---|---|---|---:|")
+    for row in payload.get("derived_checks", []):
+        lines.append(
+            f"| `{cell(row['field'])}` | `{cell(row['current_value'])}` | "
+            f"{cell(row['required_value'])} | `{row['closure_check_pass']}` |"
         )
     if payload["gate_unblock_plan"]:
         lines.extend(["", "## Gate Unblock Plan", ""])

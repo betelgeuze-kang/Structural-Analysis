@@ -32,6 +32,33 @@
 | `evidence_ref_not_template_artifact` | `` | evidence_ref must not point to docs/templates or a .template.* artifact | `evidence_ref_not_template_artifact_pass` = `False` |
 | `evidence_ref_not_generated_gate_artifact` | `` | evidence_ref must not point to generated PM/license/readiness gate artifacts | `evidence_ref_not_generated_gate_artifact_pass` = `False` |
 
+## Required Fields
+
+| Field | Current | Required | Pass |
+|---|---|---|---:|
+| `status` | `not_configured` | active \| approved \| valid | `False` |
+| `tier` | `` | paid-pilot \| limited-commercial | `False` |
+| `license_id` | `` | non-placeholder license or approval identifier | `False` |
+| `issuer_or_approver` | `` | product/legal owner or approval authority | `False` |
+| `approver_role` | `` | product_owner \| legal_counsel \| product_and_legal \| delegated_product_owner | `False` |
+| `approval_ref` | `` | legal/product approval reference | `False` |
+| `approved_at_utc` | `` | timezone-aware approval timestamp, not future | `False` |
+| `evidence_ref` | `` | https URL, supported external ref, or existing local evidence path | `False` |
+| `product_scope` | `` | review-assist, specified-structure-families, specified-workflows, engine-and-reviewer-evidence-package | `False` |
+| `expiry_or_perpetual` | `` | future expiry timestamp or perpetual=true | `False` |
+
+## Derived Checks
+
+| Check | Current | Required | Pass |
+|---|---|---|---:|
+| `approval_timeline` | `approved_at=; expires_at=` | approved_at_utc <= now and approved_at_utc <= expiry when not perpetual | `False` |
+| `approval_ref_distinct` | `license_id=; approval_ref=` | approval_ref differs from license_id | `False` |
+| `provenance_complete` | `role=; evidence_ref=; evidence_kind=missing` | approver role, approval time, evidence ref, and distinct approval ref all pass | `False` |
+| `evidence_ref_not_self_reference` | `` | evidence_ref must not point back to license_status.json | `False` |
+| `evidence_ref_not_template_reference` | `` | evidence_ref must not point to the license status template | `False` |
+| `evidence_ref_not_template_artifact` | `` | evidence_ref must not point to docs/templates or a .template.* artifact | `False` |
+| `evidence_ref_not_generated_gate_artifact` | `` | evidence_ref must not point to generated PM/license/readiness gate artifacts | `False` |
+
 ## Gate Unblock Plan
 
 - `attach_license_status_record`
