@@ -193,7 +193,7 @@
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
   ],
-  "generated_at": "2026-07-02T15:26:19.689454+00:00",
+  "generated_at": "2026-07-02T15:49:02.755662+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -268,9 +268,9 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
-    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:c01e4721af9c05a95c24b12b2606027b333b95cb09f2ee2d9d1b45fce0403242",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e3cfb4c5a47e7999d85b6260c1ab51926df962e7d45bc872e4c9372eaf8793f1",
-    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:c16a7e154afe8500a7471369656f71ce0597d0a0817c7b18976b95ee51802714",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:053fb2401991a270777fb27c488fa1cb8e7bd04b6fc60c149de9dce3990a2787",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e2a6958f91c458977e7653abe1dedf0a926e23a26892356a0fbfc6d18ba6bc30",
+    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:0c518c7e3678c0a5526bb67dbc1ae348c402cfeb0160a063453cb336b7375d14",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:ca58151d432993bb1851ff196a45a55c3dd80b6fe38b306b863cdf9a2fbdc7c2",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:8b437a017f328f541ca1a99edc6ff3302ea02cefed1dced8c9d2f62f4111645c",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:fff3f1e0393a6dde86c0ea737f7e51fc95fd41c82f8513656378323c964f3376",
@@ -416,7 +416,7 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "ab0aee6bfb8a3aa94b9e04e51e1deed8237bfbe2",
+  "source_commit_sha": "6e350d93d999b7bbfbb58ab7dbfb226411a49b78",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
