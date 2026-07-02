@@ -19,7 +19,7 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 65.4,
-  "generated_at": "2026-07-02T17:55:12.334647+00:00",
+  "generated_at": "2026-07-02T17:58:21.722601+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:98439fb1f17f2c24dac68eaa4c4a7ff60b535762eb4cd5097c32cb9f40a10d6b",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:920c814cfff48dc577ed40fa3af5d1b3f2bc518f2ba0c0f550e1d838395e42f4",
@@ -31,11 +31,11 @@
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:ca58151d432993bb1851ff196a45a55c3dd80b6fe38b306b863cdf9a2fbdc7c2",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:c4a295a313fe8d74f27cc1dd67355339ac64052144a2d85e8e0a4ee3bef21c16",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2fb1dd88fb3e9a7bf4cda00971cb5cdac62fbca1d475eeecf6c2b67e8edcb3a3",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:24f1028f9f47709cee1c7424032ba658c420e5a8f9485cbdf2875790a9856e9e",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:ee3b6cbcd89b522225da0786b66e70c959001e84ffdf5aa2fe997f839abf22be",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:6de2a358fe150685ac720b2812494842769d560d8c3f4add33edfbc508654bc8",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:c5945a2ffa3e8c6bbf8c8ce6fef84571ddf4212a1af68d8b269c7c20b1a3788c",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:01758d261fd7d971cbd939b7aedb706eb2d9308c284dce54f281301cfe084582",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:d999c751b2c8730e270ea7d973b905822b79d1bb6bf9bc517149b1d9bedcd04b",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:ffc2c9fdfb3c4e017821a356f73f5b09c881e2ac8f4d2e6547446a945a1d57ba",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:56d639eac6f8471f1fe9dfcdb3d9f33d9397e1603765631d9b6600009c7fef38",
     "scripts/build_structural_product_development_roadmap.py": "sha256:87e6498551b81cc2c1e37f66eb6c510343353040110873da6b1958aa3a0a5690"
   },
   "passed_evidence_requirement_count": 34,
@@ -499,7 +499,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "9022f7dcd7d1ab3f09d61ab1644f4ab99c89a1bf",
+  "source_commit_sha": "be4d7cb7e24c9916671d3ea5bde47f00eb591444",
   "stage_average_progress_percent": 55.3,
   "stage_count": 8,
   "status": "blocked",
