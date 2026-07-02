@@ -2932,7 +2932,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T10:11:54.860954+00:00",
+  "generated_at": "2026-07-02T10:18:25.492556+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2966,7 +2966,7 @@
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:e0d5c3f8830e73b6e83fa98ddc817850e760efefe9f5cc6090beb9e0ac4a930c",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "scripts/build_product_readiness_snapshot.py": "sha256:7468b2cee6c047df8aecdcee76240ced4b24b9b7f743f9cd528611dff386b862"
+    "scripts/build_product_readiness_snapshot.py": "sha256:ee0dc48f9fb3db3c0998136e9636144d0f863b7a09c12fefe6ff392767b28303"
   },
   "limited_commercial_ready": false,
   "paid_pilot_ready": false,
@@ -3282,7 +3282,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "bf2d395d56c415337981bf22380da27ad91bef43",
+  "source_commit_sha": "c55c708e276ff7be70935d4a814176cc2f7e8ac7",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3373,6 +3373,11 @@
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3396,6 +3401,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T07:10:09.756381+00:00",
@@ -3411,6 +3417,11 @@
         "artifact": "gap_closure_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3438,6 +3449,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:41:08.857134+00:00",
@@ -3453,6 +3465,11 @@
         "artifact": "commercial_gap_ledger_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3480,6 +3497,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:40:47.918908+00:00",
@@ -3495,6 +3513,11 @@
         "artifact": "gap_ledger_evidence_audit",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3522,6 +3545,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:40:54.362978+00:00",
@@ -3537,6 +3561,11 @@
         "artifact": "phase1_core_api_contract",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3564,6 +3593,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:30:50.124412+00:00",
@@ -3579,6 +3609,11 @@
         "artifact": "developer_preview_readiness",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3606,6 +3641,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:31:49.885508+00:00",
@@ -3621,6 +3657,11 @@
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3648,6 +3689,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:31:55.917056+00:00",
@@ -3663,6 +3705,11 @@
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3690,6 +3737,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:32:29.609016+00:00",
@@ -3705,6 +3753,11 @@
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3732,6 +3785,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:30:48.983896+00:00",
@@ -3747,6 +3801,11 @@
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3774,6 +3833,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:31:17.036297+00:00",
@@ -3789,6 +3849,11 @@
         "artifact": "customer_shadow_evidence_status",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3816,6 +3881,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:30:48.928548+00:00",
@@ -3831,6 +3897,11 @@
         "artifact": "workstation_delivery_readiness",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3858,6 +3929,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:30:48.848532+00:00",
@@ -3873,9 +3945,15 @@
         "artifact": "independent_product_readiness",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_product_readiness_snapshot.py",
           "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_organize_phase1_workspace.py"
+          "tests/test_organize_phase1_workspace.py",
+          "tests/test_structural_runtime_bridge_paths.py"
         ],
         "generated_at": "2026-07-02T10:07:14.590474+00:00",
         "input_checksum_present": true,
@@ -3890,6 +3968,11 @@
         "artifact": "github_actions_ci_streak_evidence",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3917,6 +4000,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-01T10:19:19.231347+00:00",
@@ -3932,6 +4016,11 @@
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -3959,6 +4048,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:30:49.009567+00:00",
@@ -3974,6 +4064,11 @@
         "artifact": "license_status_closure_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -4001,6 +4096,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:30:49.000533+00:00",
@@ -4016,6 +4112,11 @@
         "artifact": "paid_pilot_scope_guard_report",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -4043,6 +4144,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:32:28.651460+00:00",
@@ -4058,6 +4160,11 @@
         "artifact": "external_benchmark_submission_readiness",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -4085,6 +4192,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:32:08.912614+00:00",
@@ -4100,6 +4208,11 @@
         "artifact": "external_benchmark_submission_updates",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -4127,6 +4240,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T05:32:09.044946+00:00",
@@ -4142,6 +4256,11 @@
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -4165,6 +4284,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T06:53:34.790427+00:00",
@@ -4180,6 +4300,11 @@
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_pm_release_blocker_action_register.py",
           "scripts/build_product_readiness_snapshot.py",
@@ -4203,6 +4328,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T06:53:34.833308+00:00",
@@ -4218,6 +4344,11 @@
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_cleanup_impact_report.py",
           "scripts/check_repo_hygiene.py",
@@ -4226,7 +4357,8 @@
           "tests/test_build_structural_scope_cleanup_impact_report.py",
           "tests/test_check_repo_hygiene.py",
           "tests/test_organize_phase1_workspace.py",
-          "tests/test_plan_source_boundary_cleanup.py"
+          "tests/test_plan_source_boundary_cleanup.py",
+          "tests/test_structural_runtime_bridge_paths.py"
         ],
         "generated_at": "2026-07-02T09:08:06.612670+00:00",
         "input_checksum_present": true,
@@ -4241,6 +4373,11 @@
         "artifact": "developer_preview_final_gate_owner_packet",
         "changed_paths_since_source_commit": [
           "implementation/phase1/organize_phase1_workspace.py",
+          "implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "implementation/phase1/rust_track_lf_bridge.py",
+          "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+          "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+          "implementation/phase1/structural_runtime_ffi/src/lib.rs",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_runtime_packaging_manifest.py",
           "scripts/build_science_evidence_surface_seeds.py",
@@ -4256,6 +4393,7 @@
           "tests/test_organize_phase1_workspace.py",
           "tests/test_plan_source_boundary_cleanup.py",
           "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_runtime_bridge_paths.py",
           "tests/test_verify_quality_gate.py"
         ],
         "generated_at": "2026-07-02T07:56:41.651717+00:00",
