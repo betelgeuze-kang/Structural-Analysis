@@ -3333,6 +3333,38 @@ def test_snapshot_structural_scope_origin_helper_does_not_stale_leaf_receipts(
     ]
 
 
+def test_snapshot_structural_scope_cleanup_impact_helper_does_not_stale_leaf_receipts(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/build_structural_scope_cleanup_impact_report.py",
+        "print('structural scope cleanup impact helper changed')\n",
+    )
+    _commit_all(tmp_path, "structural scope cleanup impact helper change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"] is True
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
 def test_snapshot_developer_preview_owner_packet_helper_does_not_stale_leaf_receipts(
     tmp_path: Path,
 ) -> None:
