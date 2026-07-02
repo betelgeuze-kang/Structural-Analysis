@@ -29,14 +29,14 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert "verify:frontend-browser-smoke -- --mode minimal" in output
     assert "scripts/report_source_boundary_footprint.py --check" in output
     assert (
-        "scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked"
+        "scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked"
         in output
     )
     assert output.index("scripts/report_source_boundary_footprint.py --check") < output.index(
-        "scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked"
+        "scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked"
     )
     assert output.index(
-        "scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked"
+        "scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked"
     ) < output.index("scripts/check_git_remote_safety.py --show-ok")
     assert "tests/test_project_ops_api_service.py" in output
     assert "-m pytest -q\n" not in output
@@ -51,7 +51,7 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     assert "scripts/check_p1_readiness_status.py --json --fail-blocked" in output
     assert "scripts/check_p1_benchmark_breadth_status.py --json --fail-blocked" in output
     assert (
-        "scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked"
+        "scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked"
         in output
     )
     assert "-m pytest -q" in output

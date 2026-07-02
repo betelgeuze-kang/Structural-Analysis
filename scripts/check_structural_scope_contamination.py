@@ -97,6 +97,25 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _strip_volatile(payload: Any) -> Any:
+    if isinstance(payload, dict):
+        return {
+            key: _strip_volatile(value)
+            for key, value in payload.items()
+            if key not in {"generated_at", "source_commit_sha"}
+        }
+    if isinstance(payload, list):
+        return [_strip_volatile(item) for item in payload]
+    return payload
+
+
+def _load_json_object(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path} must contain a JSON object.")
+    return payload
+
+
 def _git_paths(repo_root: Path, args: list[str]) -> list[str]:
     try:
         output = subprocess.check_output(
@@ -769,6 +788,30 @@ def write_audit(
     return payload
 
 
+def check_audit(
+    *,
+    repo_root: Path = ROOT,
+    out: Path = DEFAULT_OUT,
+    include_untracked: bool = True,
+    quarantine_manifest: Path = DEFAULT_QUARANTINE_MANIFEST,
+) -> tuple[bool, str, dict[str, Any]]:
+    payload = build_audit(
+        repo_root=repo_root,
+        include_untracked=include_untracked,
+        quarantine_manifest=quarantine_manifest,
+    )
+    resolved_out = out if out.is_absolute() else repo_root / out
+    if not resolved_out.exists():
+        return False, f"structural_scope_contamination_audit_missing:{resolved_out}", payload
+    try:
+        existing = _load_json_object(resolved_out)
+    except Exception as exc:
+        return False, f"structural_scope_contamination_audit_invalid_json:{exc}", payload
+    if _strip_volatile(existing) != _strip_volatile(payload):
+        return False, "structural_scope_contamination_audit_mismatch", payload
+    return True, "structural_scope_contamination_audit_consistent", payload
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
@@ -781,6 +824,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Refresh the quarantine manifest from the current matched tracked paths before auditing.",
     )
     parser.add_argument("--json", action="store_true")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Compare the current audit to --out without writing JSON or markdown.",
+    )
     parser.add_argument("--fail-blocked", action="store_true")
     parser.add_argument(
         "--fail-owner-cleanup-pending",
@@ -800,27 +848,43 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.check and args.refresh_quarantine_manifest:
+        raise SystemExit("--check cannot be combined with --refresh-quarantine-manifest")
     if args.refresh_quarantine_manifest:
         write_quarantine_manifest(
             repo_root=args.repo_root,
             out=args.quarantine_manifest,
             include_untracked=not args.tracked_only,
         )
-    payload = write_audit(
-        repo_root=args.repo_root,
-        out=args.out,
-        out_md=args.out_md,
-        include_untracked=not args.tracked_only,
-        quarantine_manifest=args.quarantine_manifest,
-    )
+    if args.check:
+        check_ok, check_message, payload = check_audit(
+            repo_root=args.repo_root,
+            out=args.out,
+            include_untracked=not args.tracked_only,
+            quarantine_manifest=args.quarantine_manifest,
+        )
+    else:
+        payload = write_audit(
+            repo_root=args.repo_root,
+            out=args.out,
+            out_md=args.out_md,
+            include_untracked=not args.tracked_only,
+            quarantine_manifest=args.quarantine_manifest,
+        )
+        check_ok = True
+        check_message = "structural_scope_contamination_audit_written"
     if args.json:
         print(_json_text(payload), end="")
+    elif args.check:
+        print(f"Structural scope contamination audit check: {check_message}")
     else:
         print(
             "Structural scope contamination audit: "
             f"{payload['status']} | "
             f"non_structural_paths={payload['non_structural_path_count']}"
         )
+    if args.check and not check_ok:
+        return 1
     if args.fail_blocked and not payload["contract_pass"]:
         return 1
     if args.fail_owner_cleanup_pending and not payload["owner_cleanup_closure_ready"]:

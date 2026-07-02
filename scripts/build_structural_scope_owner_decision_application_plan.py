@@ -398,7 +398,7 @@ def _cleanup_command_manifest(cleanup_rows: list[dict[str, Any]]) -> dict[str, A
                 "human confirms deletion scope",
             ],
             "post_apply_verification": [
-                "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
                 "python3 scripts/build_structural_scope_owner_review_packet.py",
                 "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-blocked",
                 "python3 scripts/build_product_readiness_snapshot.py --check",
@@ -414,7 +414,7 @@ def _cleanup_command_manifest(cleanup_rows: list[dict[str, Any]]) -> dict[str, A
                 "human confirms extracted copy/history is sufficient",
             ],
             "post_apply_verification": [
-                "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
                 "python3 scripts/build_structural_scope_owner_review_packet.py",
                 "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-blocked",
                 "python3 scripts/build_product_readiness_snapshot.py --check",
@@ -633,7 +633,7 @@ def _cleanup_priority_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]
                     == "extract_to_molecular_or_science_repository"
                 ],
                 "post_apply_verification": [
-                    "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                    "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
                     "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
                     "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
                     "python3 scripts/build_product_readiness_snapshot.py --check",
@@ -787,7 +787,7 @@ def _next_batch_decision_template(
                 if path_area == "release_surface"
                 else []
             ),
-            "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+            "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
             "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
             "python3 scripts/build_product_readiness_snapshot.py --check",
@@ -1005,7 +1005,7 @@ def _release_surface_first_batch_decision_template(
         },
         "post_batch_verification": [
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
-            "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+            "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
             "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
             "python3 scripts/build_product_readiness_snapshot.py --check",
@@ -1234,7 +1234,7 @@ def _release_surface_first_operator_sequence(
             "status": "waiting_on_manual_cleanup",
             "runnable_now": False,
             "validation_commands": [
-                "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
                 "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
                 "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
             ],

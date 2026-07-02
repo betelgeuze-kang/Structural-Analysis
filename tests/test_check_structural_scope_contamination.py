@@ -479,3 +479,76 @@ def test_scope_audit_cli_can_fail_on_owner_cleanup_pending(tmp_path: Path) -> No
         )
         == 1
     )
+
+
+def test_scope_audit_check_does_not_rewrite_outputs(tmp_path: Path) -> None:
+    _git("init", cwd=tmp_path)
+    _tracked(tmp_path / "implementation" / "phase1" / "md3bead_soa.py")
+    _git("add", ".", cwd=tmp_path)
+
+    out = tmp_path / "audit.json"
+    out_md = tmp_path / "audit.md"
+    scope_audit.write_audit(
+        repo_root=tmp_path,
+        out=out,
+        out_md=out_md,
+        include_untracked=False,
+    )
+    original_json = out.read_text(encoding="utf-8")
+    original_markdown = out_md.read_text(encoding="utf-8")
+
+    assert (
+        scope_audit.main(
+            [
+                "--repo-root",
+                tmp_path.as_posix(),
+                "--out",
+                out.as_posix(),
+                "--out-md",
+                out_md.as_posix(),
+                "--tracked-only",
+                "--check",
+            ]
+        )
+        == 0
+    )
+
+    assert out.read_text(encoding="utf-8") == original_json
+    assert out_md.read_text(encoding="utf-8") == original_markdown
+
+
+def test_scope_audit_check_detects_mismatch_without_rewriting(tmp_path: Path) -> None:
+    _git("init", cwd=tmp_path)
+    _tracked(tmp_path / "implementation" / "phase1" / "md3bead_soa.py")
+    _git("add", ".", cwd=tmp_path)
+
+    out = tmp_path / "audit.json"
+    out_md = tmp_path / "audit.md"
+    scope_audit.write_audit(
+        repo_root=tmp_path,
+        out=out,
+        out_md=out_md,
+        include_untracked=False,
+    )
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["contract_pass"] = True
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    tampered_json = out.read_text(encoding="utf-8")
+
+    assert (
+        scope_audit.main(
+            [
+                "--repo-root",
+                tmp_path.as_posix(),
+                "--out",
+                out.as_posix(),
+                "--out-md",
+                out_md.as_posix(),
+                "--tracked-only",
+                "--check",
+            ]
+        )
+        == 1
+    )
+
+    assert out.read_text(encoding="utf-8") == tampered_json

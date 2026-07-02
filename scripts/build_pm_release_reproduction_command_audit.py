@@ -75,6 +75,9 @@ OUTPUT_PATH_FLAGS = frozenset(
 )
 OUTPUT_DIRECTORY_FLAGS = frozenset(("--bundle-dir",))
 EXTERNAL_OWNER_NETWORK_SCRIPTS = frozenset(("build_github_actions_ci_streak_evidence.py",))
+ALLOWLISTED_LOCAL_PYTHON_PATHS = frozenset(
+    ("implementation/phase1/validate_fresh_validation_receipt.py",)
+)
 NPM_AUDIT_LEVELS = frozenset(("info", "low", "moderate", "high", "critical"))
 
 
@@ -138,6 +141,36 @@ def _script_exists(script_arg: str, *, repo_root: Path) -> bool:
     if not script_arg.startswith("scripts/"):
         return False
     return (repo_root / script_arg).exists()
+
+
+def _allowlisted_local_python_script_exists(script_arg: str, *, repo_root: Path) -> bool:
+    if script_arg not in ALLOWLISTED_LOCAL_PYTHON_PATHS:
+        return False
+    return (repo_root / script_arg).exists()
+
+
+def _has_shell_composition(command: str) -> bool:
+    index = 0
+    while index < len(command):
+        if command[index : index + 2] in {"&&", "||", ">>", "$("}:
+            return True
+        char = command[index]
+        if char in {";", "|", "`", "\n", "\r"}:
+            return True
+        if char == "<":
+            placeholder_end = command.find(">", index + 1)
+            next_space = min(
+                [position for position in (command.find(" ", index + 1), command.find("\t", index + 1)) if position != -1],
+                default=-1,
+            )
+            if placeholder_end != -1 and (next_space == -1 or placeholder_end < next_space):
+                index = placeholder_end + 1
+                continue
+            return True
+        if char == ">":
+            return True
+        index += 1
+    return False
 
 
 def _command_output_blockers(argv: list[str], *, repo_root: Path) -> list[str]:
@@ -232,7 +265,7 @@ def _validate_command(
         blockers.append("command_empty")
         row["blockers"] = blockers
         return row
-    if any(marker in command for marker in SHELL_COMPOSITION_MARKERS):
+    if _has_shell_composition(command):
         blockers.append("command_shell_composition")
         row["blockers"] = blockers
         return row
@@ -254,6 +287,11 @@ def _validate_command(
             if script_name in EXTERNAL_OWNER_NETWORK_SCRIPTS
             else "local_static_or_report"
         )
+    elif argv[0] == "python3" and len(argv) >= 2 and _allowlisted_local_python_script_exists(
+        argv[1],
+        repo_root=repo_root,
+    ):
+        row["execution_class"] = "local_static_or_report"
     elif argv[0] == "node" and len(argv) >= 2 and argv[1].startswith("scripts/"):
         if not _script_exists(argv[1], repo_root=repo_root):
             blockers.append("command_script_missing")

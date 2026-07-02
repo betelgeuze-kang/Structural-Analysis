@@ -31,6 +31,10 @@ def _repo(tmp_path: Path) -> Path:
     repo = tmp_path / "repo"
     _write_text(repo / "scripts" / "ok.py", "#!/usr/bin/env python3\n")
     _write_text(repo / "scripts" / "external.py", "#!/usr/bin/env python3\n")
+    _write_text(
+        repo / "implementation" / "phase1" / "validate_fresh_validation_receipt.py",
+        "#!/usr/bin/env python3\n",
+    )
     for script_name in [
         "build_pm_release_blocker_action_register.py",
         "build_pm_release_blocker_closure_board.py",
@@ -114,6 +118,38 @@ def test_rejects_shell_composition(tmp_path: Path) -> None:
 
     assert payload["contract_pass"] is False
     assert "command_shell_composition" in payload["blockers"]
+
+
+def test_accepts_human_placeholder_choices_without_treating_as_shell(tmp_path: Path) -> None:
+    payload = _report_for_commands(
+        tmp_path,
+        [
+            (
+                "python3 scripts/ok.py --participant-ref <anonymized-participant-ref> "
+                "--participant-role <new_user|first_time_user|pilot_user> "
+                "--approval-decision <accepted|approved|pass|signed|approved_for_release>"
+            )
+        ],
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["blockers"] == []
+
+
+def test_accepts_allowlisted_phase1_python_validator(tmp_path: Path) -> None:
+    payload = _report_for_commands(
+        tmp_path,
+        [
+            (
+                "python3 implementation/phase1/validate_fresh_validation_receipt.py "
+                "--receipt implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json "
+                "--fail-blocked"
+            )
+        ],
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["blockers"] == []
 
 
 def test_rejects_missing_script(tmp_path: Path) -> None:

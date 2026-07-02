@@ -360,7 +360,7 @@ def _cleanup_reference_priority_batches(rows: list[dict[str, Any]]) -> list[dict
                 "release_freshness_source_boundary_paths": [],
                 "post_cleanup_verification": [
                     "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
-                    "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                    "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
                     "python3 scripts/build_product_readiness_snapshot.py --check",
                 ],
             },
@@ -443,7 +443,7 @@ def _release_surface_cleanup_impact_rows(
                 "cleanup_ready_after_owner_decision": not blocking_rows,
                 "post_cleanup_verification": [
                     "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
-                    "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+                    "python3 scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked",
                     "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
                     "python3 scripts/build_product_readiness_snapshot.py --check",
                 ],

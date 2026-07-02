@@ -337,7 +337,7 @@ def test_build_register_prioritizes_structural_scope_cleanup_plan(tmp_path: Path
         for command in row["reproduction_commands"]
     )
     assert any(
-        "check_structural_scope_contamination.py --fail-blocked" in command
+        "check_structural_scope_contamination.py --check --fail-blocked" in command
         for command in row["verification_commands"]
     )
     assert any(

@@ -630,7 +630,7 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
             "`structural_scope_owner_decision_application_plan.json.release_surface_owner_decision_required_count == 0`",
             "`structural_scope_owner_decision_application_plan.json.retain_quarantined_exception_count == 0`",
             "`structural_scope_owner_decision_application_plan.json.evidence_closure_pass == true` after manual delete/extract cleanup",
-            "`check_structural_scope_contamination.py --fail-blocked` exits 0 after cleanup and release evidence regeneration",
+            "`check_structural_scope_contamination.py --check --fail-blocked` exits 0 after cleanup and release evidence regeneration",
         ]
     if namespace == "fresh_full_validation":
         lane_id = code.split("::", 1)[0]
@@ -978,7 +978,7 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
             f"--owner-decisions {DEFAULT_STRUCTURAL_SCOPE_RELEASE_SURFACE_FIRST_CANDIDATE} "
             "--fail-release-surface-first-blocked",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
-            "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
+            "python3 scripts/check_structural_scope_contamination.py --check --fail-blocked",
             "python3 scripts/build_product_readiness_snapshot.py --check",
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
         ]

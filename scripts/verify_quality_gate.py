@@ -39,6 +39,7 @@ def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
             _python(),
             "scripts/check_structural_scope_contamination.py",
             "--tracked-only",
+            "--check",
             "--fail-blocked",
         ],
         [_python(), "scripts/check_git_remote_safety.py", "--show-ok"],
