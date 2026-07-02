@@ -2820,7 +2820,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T01:17:46.126220+00:00",
+  "generated_at": "2026-07-02T01:30:26.062500+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2831,7 +2831,7 @@
     "implementation/phase1/release/independent_product_readiness.json": "sha256:43bc1085773b436d5c24210b9f11043f97a4a4ed4fa03f9107c47a370e0b661b",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:7def9431db66fa2089569389d37c7387031c094c40515ded4e998696c8f517e5",
     "implementation/phase1/release_evidence/productization/developer_preview_final_gate_owner_packet.json": "sha256:3cec970c676b847d52bb614833d7a9dc5f6f8b21e127610c7c8733c9b4306633",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:300be1a9be55ce6d66f50d01468e96082a10af860c0e8791a402a93c6204e9a7",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:9983597d1f29bf1a960419f1bcefdbfee959160539bd71506b7ec2aec3571518",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:03f3beb6fd151ba5e3c49b4562b90a7a796bd6bf9e53247612c9f99224090021",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:bebcb3f079217973276f1278af2697785adfd1780d9df32e61d80f0779f748d9",
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:da69de906011d29c0cc29d004f55eac224877a5c3edc545577a4d5163f1ab728",
@@ -2845,12 +2845,12 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:ab24d234600f80df38b7f96516966150aa4cb3bc72f988be6af5944c5b325ef2",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:1f3f663705a05b4d1e6d1312603a8e1c8664fbe62db3e64dc01b0a8bba61aa90",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1a21e26274c1bef22618c1e9065365b677a60272b71950f3e43ee9436235350d",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:b3efd7e57eb7ec05f8d82f048df3a8a8c1bbe0a1f806e82d51cb3f8ad27cc6ab",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:ee72cf3a2f3f317446c529c667773ad45904503d4fba4a9280ae8896faac1954",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:74442161282fa31da789bd335158452591b4e32efda29ad2609de9d8446e7f05",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:9f423ab3ad34581df4638ba47c3c484ebef4756fe3dc5ece48cf73e39c91ca9e",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:835ddc941322369fc1475716358f15a05aebfdb45f3b45165dbeba86a36dcdba",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:e3d4dd88493767108d5feba10291c04fe895ffe10c22c53e12c7b50e060d91a4",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:76f44d8618dfba4d62dc00e039cf6e290d5f6cdb2cb91296d9ec3021c0cea509",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:1e14dfca123e7f72932af68008d243781c33fe0dbfc3542cd74c49493b8e2863",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
@@ -3150,7 +3150,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": true,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "3b8ada621c1f2c44a97fa586bcd067ccee31d957",
+  "source_commit_sha": "defe77e62a2837730daa899434399f012feb68dc",
   "stale_or_inconsistent": false,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3240,12 +3240,12 @@
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T01:17:45.895463+00:00",
+        "generated_at": "2026-07-02T01:30:12.381517+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "3b8ada621c1f2c44a97fa586bcd067ccee31d957",
+        "source_commit_sha": "defe77e62a2837730daa899434399f012feb68dc",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3577,33 +3577,21 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py",
-          "scripts/build_developer_preview_final_gate_owner_packet.py",
-          "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
-          "scripts/build_github_actions_ci_streak_evidence.py",
-          "scripts/build_license_status_intake_packet.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/build_structural_scope_owner_review_packet.py",
-          "scripts/report_pm_release_gate.py",
-          "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_developer_preview_final_gate_owner_packet.py",
-          "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
-          "tests/test_build_github_actions_ci_streak_evidence.py",
-          "tests/test_build_license_status_intake_packet.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py",
-          "tests/test_report_pm_release_gate.py"
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+          "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+          "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+          "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.md",
+          "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
         ],
-        "generated_at": "2026-07-01T23:29:01.188394+00:00",
+        "generated_at": "2026-07-02T01:28:09.720639+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "2f0465f6a8baa77d6023050395b83b02aa13021b",
+        "source_commit_sha": "ac7b5c5fc21e129b50e15348c68bf70d6cb9d300",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
@@ -3750,6 +3738,7 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_final_gate_owner_packet.py",
@@ -3763,6 +3752,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T22:45:28.953707+00:00",
@@ -3914,6 +3904,7 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_final_gate_owner_packet.py",
@@ -3922,6 +3913,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T23:56:51.953865+00:00",
@@ -3943,6 +3935,7 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_final_gate_owner_packet.py",
@@ -3951,6 +3944,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T10:19:19.231347+00:00",
@@ -3965,43 +3959,21 @@
       {
         "artifact": "ux_new_user_observation_report",
         "changed_paths_since_source_commit": [
-          "scripts/build_ci_streak_intake_packet.py",
-          "scripts/build_developer_preview_final_gate_owner_packet.py",
-          "scripts/build_developer_preview_rc_status.py",
-          "scripts/build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
-          "scripts/build_github_actions_ci_streak_evidence.py",
-          "scripts/build_license_status_intake_packet.py",
-          "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "scripts/build_phase6_benchmark_scale_status.py",
-          "scripts/build_phase6_ux_observation_status.py",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/build_structural_scope_owner_decision_application_plan.py",
-          "scripts/build_structural_scope_owner_review_packet.py",
-          "scripts/report_pm_release_gate.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_developer_preview_final_gate_owner_packet.py",
-          "tests/test_build_developer_preview_rc_status.py",
-          "tests/test_build_g1_load_dependent_near_null_geometric_stiffness_comparison.py",
-          "tests/test_build_github_actions_ci_streak_evidence.py",
-          "tests/test_build_license_status_intake_packet.py",
-          "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
-          "tests/test_build_phase6_benchmark_scale_status.py",
-          "tests/test_build_phase6_ux_observation_status.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_build_structural_scope_owner_decision_application_plan.py",
-          "tests/test_build_structural_scope_owner_review_packet.py",
-          "tests/test_report_pm_release_gate.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py"
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+          "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json",
+          "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+          "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.md",
+          "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
         ],
-        "generated_at": "2026-07-01T22:31:56.887011+00:00",
+        "generated_at": "2026-07-02T01:27:55.178446+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
-        "source_commit_sha": "3cdf1cb9cd031d9d4720fa24934a79d676cfddff",
+        "source_commit_sha": "ac7b5c5fc21e129b50e15348c68bf70d6cb9d300",
         "source_state_fresh": true,
-        "source_state_kind": "non_artifact_source_paths_changed"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "license_status_closure_report",
@@ -4035,6 +4007,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ux_new_user_observation_report.py",
           "tests/test_report_pm_release_gate.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
@@ -4256,6 +4229,7 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_final_gate_owner_packet.py",
@@ -4266,6 +4240,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-01T23:22:38.923987+00:00",
@@ -4286,6 +4261,7 @@
           "scripts/build_product_readiness_snapshot.py",
           "scripts/build_structural_scope_owner_decision_application_plan.py",
           "scripts/build_structural_scope_owner_review_packet.py",
+          "scripts/build_ux_new_user_observation_intake_packet.py",
           "scripts/report_pm_release_gate.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_final_gate_owner_packet.py",
@@ -4293,6 +4269,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_build_structural_scope_owner_decision_application_plan.py",
           "tests/test_build_structural_scope_owner_review_packet.py",
+          "tests/test_build_ux_new_user_observation_intake_packet.py",
           "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-07-02T00:30:51.893820+00:00",
@@ -4311,10 +4288,12 @@
           "scripts/build_developer_preview_final_gate_owner_packet.py",
           "scripts/build_license_status_intake_packet.py",
           "scripts/build_product_readiness_snapshot.py",
+          "scripts/build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ci_streak_intake_packet.py",
           "tests/test_build_developer_preview_final_gate_owner_packet.py",
           "tests/test_build_license_status_intake_packet.py",
-          "tests/test_build_product_readiness_snapshot.py"
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_build_ux_new_user_observation_intake_packet.py"
         ],
         "generated_at": "2026-07-02T01:03:27.204373+00:00",
         "input_checksum_present": true,
@@ -4330,8 +4309,10 @@
         "changed_paths_since_source_commit": [
           "scripts/build_ci_streak_intake_packet.py",
           "scripts/build_license_status_intake_packet.py",
+          "scripts/build_ux_new_user_observation_intake_packet.py",
           "tests/test_build_ci_streak_intake_packet.py",
-          "tests/test_build_license_status_intake_packet.py"
+          "tests/test_build_license_status_intake_packet.py",
+          "tests/test_build_ux_new_user_observation_intake_packet.py"
         ],
         "generated_at": "2026-07-02T01:08:43.913396+00:00",
         "input_checksum_present": true,
@@ -4365,9 +4346,8 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
-        "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md",
         "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       ],
       "non_receipt_dirty_paths": [],
@@ -4393,9 +4373,8 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
-        " M implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md",
         " M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       ]
     }
