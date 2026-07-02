@@ -3579,6 +3579,56 @@ def test_snapshot_structural_scope_owner_decision_batch_merge_helper_does_not_st
     ]
 
 
+def test_snapshot_structural_scope_owner_decision_fill_helper_scopes_to_application_plan(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "scripts/fill_structural_scope_release_surface_owner_decisions.py",
+        "print('release surface owner decision fill helper changed')\n",
+    )
+    _commit_all(tmp_path, "structural scope owner decision fill helper change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "non_artifact_source_paths_changed"
+    )
+    assert (
+        metadata_rows["structural_scope_owner_decision_application_plan"][
+            "source_state_fresh"
+        ]
+        is False
+    )
+    assert (
+        metadata_rows["structural_scope_owner_decision_application_plan"][
+            "source_state_kind"
+        ]
+        == "non_receipt_paths_changed"
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
+        not in payload["blockers"]
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:"
+        "structural_scope_owner_decision_application_plan"
+    ) in payload["blockers"]
+
+
 def test_snapshot_structural_scope_origin_helper_does_not_stale_leaf_receipts(
     tmp_path: Path,
 ) -> None:
