@@ -922,6 +922,17 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         ]
     if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
         return [
+            "python3 scripts/fill_ux_new_user_observation_from_human_sample.py "
+            "--out implementation/phase1/release_evidence/productization/ux_new_user_observation.json "
+            "--report-out implementation/phase1/release_evidence/productization/ux_new_user_observation.fill_report.json "
+            "--participant-ref <anonymized-participant-ref> "
+            "--participant-role <new_user|first_time_user|pilot_user> "
+            "--new-to-product true --sample-project-id <sample-project-id> "
+            "--observer <human-observer> --started-at-utc <started-at-utc> "
+            "--completed-at-utc <completed-at-utc> --completion-minutes <minutes> "
+            "--blocker-count 0 --evidence-ref <human-observation-evidence-ref> "
+            "--approval-decision <accepted|approved|pass|signed|approved_for_release> "
+            "--all-required-steps-passed --fail-blocked",
             f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_REPORT}",
             f"python3 scripts/build_ux_new_user_observation_intake_packet.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET}",
             pm_report_command,

@@ -632,6 +632,7 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
         },
         "ux_new_user_observation_report": {
             "scripts/build_ux_new_user_observation_report.py",
+            "scripts/fill_ux_new_user_observation_from_human_sample.py",
             "docs/templates/ux_new_user_observation.template.json",
         },
         "workstation_delivery_readiness": {

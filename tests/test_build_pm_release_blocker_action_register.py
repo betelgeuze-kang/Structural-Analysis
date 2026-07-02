@@ -1072,6 +1072,7 @@ def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None
     assert row["external_input_required"] is True
     assert row["resolution_type"] == "external_human_new_user_observation_required"
     assert row["owner_action"] == "Schedule and attach one observed new-user sample run."
+    assert any("fill_ux_new_user_observation_from_human_sample.py" in command for command in row["reproduction_commands"])
     assert any("build_ux_new_user_observation_report.py" in command for command in row["reproduction_commands"])
     assert any("build_ux_new_user_observation_intake_packet.py" in command for command in row["reproduction_commands"])
     assert any("build_ux_new_user_observation_report.py" in command for command in row["verification_commands"])
