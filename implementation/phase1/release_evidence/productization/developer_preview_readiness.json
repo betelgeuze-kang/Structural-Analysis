@@ -203,7 +203,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-02T23:25:32.819608+00:00",
+  "generated_at": "2026-07-02T23:21:27.870094+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -226,7 +226,7 @@
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "fce472673e68b57573433591cbf7efa50ac21727",
+      "source_commit_sha": "46d3bb2936d6043d9f3bcf6251609def5f0784d1",
       "status": "blocked"
     }
   },
@@ -2225,6 +2225,6 @@
       }
     }
   },
-  "source_commit_sha": "d80ab2d64e421adece7823a0dfd8e8fa5dffeb69",
+  "source_commit_sha": "110c35bba923a4afa200ec848c967189c611d429",
   "status": "blocked"
 }

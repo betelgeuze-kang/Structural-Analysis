@@ -120,7 +120,7 @@
     },
     "technical_silent_import_loss_zero": true
   },
-  "generated_at": "2026-07-02T23:24:31.679746+00:00",
+  "generated_at": "2026-07-02T23:20:42.351073+00:00",
   "import_health_contract_pass_count": 10,
   "import_health_execution_count": 10,
   "input_checksums": {
@@ -128,7 +128,7 @@
     "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:190de20d56258bebee061d081bf7103c9f5f22df9198d61b4808ea4a332a8382",
     "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:e247ff80b0f98644404bea047c21aa64f7a8320433f1b5fb6ef36a62526c6146",
     "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:8e2ff5a3c583014ec323c0e7502197549f0226326a0ef2b30c95d262c099d711",
-    "scripts/build_phase6_silent_import_loss_status.py": "sha256:49395c5c4bca80f5ee11b565df6d4ccc74d1545b3894c6db64b378b7970067e7"
+    "scripts/build_phase6_silent_import_loss_status.py": "sha256:39e5274318dd2e9308a9f4edb1c74fd164a10fa9de38704bec3487a951c6535b"
   },
   "owner_action": "complete product/legal and per-file license review for quantity credit; close or explicitly defer the ifc-bench query/GUI spillover blockers; then refresh the RC final gate.",
   "product_release_credit_blockers": [
@@ -155,7 +155,7 @@
   "silent_import_loss_gate_pass_count": 10,
   "silent_import_loss_zero": true,
   "source_checksum_attached_count": 10,
-  "source_commit_sha": "d80ab2d64e421adece7823a0dfd8e8fa5dffeb69",
+  "source_commit_sha": "15bb455f43b0a0b15ced20980df5239897575832",
   "source_file_acquired_count": 10,
   "source_license_quantity_credit_ready_count": 0,
   "source_license_receipt_contract_pass": false,
