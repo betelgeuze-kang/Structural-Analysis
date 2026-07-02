@@ -3,8 +3,7 @@
   "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
   "claim_boundary": "This is a batch fill-in template and cleanup preview only. It is not an owner decision, does not delete files, and does not close scope cleanup without recorded owner evidence and refreshed audits.",
   "conditional_required_fields": [
-    "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
-    "signed_owner_exception_reference when owner_decision=retain_quarantined_with_signed_owner_exception"
+    "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository"
   ],
   "decision_pending_count": 3,
   "decision_rows": [
