@@ -18,7 +18,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/seed-pr-ci-source-evidence origin/main"
   },
   "contract_pass": true,
-  "generated_at": "2026-07-02T02:54:44.362023+00:00",
+  "generated_at": "2026-07-02T02:57:27.230470+00:00",
   "pending_remote_updates": [],
   "preflight_pass": true,
   "r4_disclosure": {
@@ -33,27 +33,27 @@
   "receipt_commit_boundary": {
     "claim_boundary": "This receipt records GitHub sync state at source_commit_sha. A later commit that only refreshes productization/surface evidence can remain fresh in the PM gate as an evidence-only delta; any source-code or non-evidence delta must regenerate this preflight before claiming GitHub sync release credit.",
     "post_receipt_commit_delta_policy": "productization_or_surface_receipts_only",
-    "source_commit_sha": "fa1925f22c1d3856678386925532b19e3e770111"
+    "source_commit_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112"
   },
   "remote_fetch_attempted": false,
   "remote_fetch_ok": null,
   "remote_mutation_approved": false,
   "remote_sync_needed": false,
   "schema_version": "github-development-sync-preflight.v1",
-  "source_commit_sha": "fa1925f22c1d3856678386925532b19e3e770111",
+  "source_commit_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112",
   "state": {
     "branch": "codex/seed-pr-ci-source-evidence",
     "effective_worktree_status_short": "",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
     "ignored_worktree_status_short": "",
-    "local_head_sha": "fa1925f22c1d3856678386925532b19e3e770111",
+    "local_head_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
-    "remote_feature_sha": "fa1925f22c1d3856678386925532b19e3e770111",
+    "remote_feature_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "fa1925f22c1d3856678386925532b19e3e770111",
+    "remote_main_sha": "0b65811847b12e677bbfa98ba5013a4a04f71112",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
