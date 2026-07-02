@@ -35,6 +35,12 @@ def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
+        [
+            _python(),
+            "scripts/check_structural_scope_contamination.py",
+            "--tracked-only",
+            "--fail-blocked",
+        ],
         [_python(), "scripts/check_git_remote_safety.py", "--show-ok"],
         [_python(), "-m", "ruff", "check", "."],
         [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-core-open"],

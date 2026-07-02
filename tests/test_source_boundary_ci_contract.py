@@ -18,6 +18,9 @@ def test_ci_runs_source_boundary_inventory_as_a_candidate_gate() -> None:
     gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
     assert "scripts/plan_source_boundary_cleanup.py" in gate
     assert "scripts/report_source_boundary_footprint.py" in gate
+    assert "scripts/check_structural_scope_contamination.py" in gate
+    assert "--tracked-only" in gate
+    assert "--fail-blocked" in gate
     assert "--large-file-threshold-mib" in gate
     assert '"10"' in gate
     assert "--allowlist-manifest" in gate
