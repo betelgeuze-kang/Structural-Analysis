@@ -197,6 +197,9 @@ def _write_upstream_handoff_artifacts(repo_root: Path) -> None:
                         "implementation/phase1/release_evidence/productization/"
                         "phase6_windows_platform_replay_receipt.json"
                     ),
+                    "materialization_commands": [
+                        "python3 scripts/fill_phase6_windows_platform_replay_receipt.py --out implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json --fail-blocked"
+                    ],
                     "minimum_evidence": ["Windows replay receipt exists"],
                 },
             ],
@@ -299,6 +302,12 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
     assert packets["linux_windows_reproducibility_confirmed"][
         "owner_unblock_slot_ids"
     ] == ["attach_windows_platform_replay_receipt"]
+    assert any(
+        "fill_phase6_windows_platform_replay_receipt.py" in command
+        for command in packets["linux_windows_reproducibility_confirmed"][
+            "owner_unblock_plan"
+        ][0]["materialization_commands"]
+    )
     assert (
         "implementation/phase1/release_evidence/productization/"
         "phase6_windows_platform_replay_receipt.json"

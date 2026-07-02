@@ -104,6 +104,12 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
     assert gate_plan["attach_windows_platform_replay_receipt"]["required_artifact"].endswith(
         "phase6_windows_platform_replay_receipt.json"
     )
+    assert any(
+        "fill_phase6_windows_platform_replay_receipt.py" in command
+        for command in gate_plan["attach_windows_platform_replay_receipt"][
+            "materialization_commands"
+        ]
+    )
     assert (
         "do_not_copy_linux_receipt_as_windows_receipt"
         in gate_plan["attach_windows_platform_replay_receipt"]["forbidden_shortcuts"]
@@ -164,6 +170,9 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
         "structural_analysis.benchmark.cli" in row["command"]
         for row in windows_handoff["required_replay_commands"]
     )
+    assert "fill_phase6_windows_platform_replay_receipt.py" in windows_handoff[
+        "fill_platform_replay_receipt_command"
+    ]
     assert (
         "python3 scripts/build_phase6_linux_windows_parity_status.py --check"
         in windows_handoff["validation_commands_after_attachment"]

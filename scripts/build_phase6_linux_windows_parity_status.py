@@ -38,6 +38,22 @@ PLATFORM_IDENTITY_FIELDS = (
 )
 
 
+def _windows_fill_command(receipt_path: str) -> str:
+    return (
+        "python3 scripts/fill_phase6_windows_platform_replay_receipt.py "
+        f"--out {receipt_path} "
+        "--os-name <windows-os-name> "
+        "--os-version <windows-os-version> "
+        "--python-version <windows-python-version> "
+        "--node-version <windows-node-version> "
+        "--replay-environment <windows-replay-environment> "
+        "--receipt-origin <windows-replay-evidence-ref> "
+        "--working-tree-clean true "
+        "--all-required-commands-zero "
+        "--fail-blocked"
+    )
+
+
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
@@ -237,6 +253,15 @@ def _missing_platform_receipt_handoff(
                 "required_replay_commands": platform_receipt_template.get(
                     "commands", []
                 ),
+                **(
+                    {
+                        "fill_platform_replay_receipt_command": _windows_fill_command(
+                            receipt_paths[platform]
+                        )
+                    }
+                    if platform == "windows"
+                    else {}
+                ),
                 "required_receipt_fields": sorted(platform_receipt_template),
                 "expected_scorecard": platform_receipt_template.get(
                     "expected_scorecard", {}
@@ -315,6 +340,11 @@ def _gate_unblock_plan(
                     "expected_scorecard and stable_artifact_checksums match the Phase 3 seed replay bundle",
                 ],
                 "required_replay_commands": row.get("required_replay_commands", []),
+                "materialization_commands": [
+                    row["fill_platform_replay_receipt_command"]
+                ]
+                if row.get("fill_platform_replay_receipt_command")
+                else [],
                 "forbidden_shortcuts": row.get("forbidden_shortcuts", []),
                 "validation_commands_after_attachment": row.get(
                     "validation_commands_after_attachment",

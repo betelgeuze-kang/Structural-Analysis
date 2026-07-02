@@ -721,6 +721,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert missing_platform_handoff[0]["receipt_path"].endswith(
         "phase6_windows_platform_replay_receipt.json"
     )
+    assert "fill_phase6_windows_platform_replay_receipt.py" in missing_platform_handoff[
+        0
+    ]["fill_platform_replay_receipt_command"]
     assert (
         "do_not_copy_linux_receipt_as_windows_receipt"
         in missing_platform_handoff[0]["forbidden_shortcuts"]
