@@ -63,6 +63,28 @@
   "contract_pass": true,
   "decision_record": {
     "claim_boundary": "This decision routes the next G1 diagnostic slice only. It does not close G1, prove full-load 1.0 equilibrium, or prove production ROCm/HIP residency.",
+    "evidence_intake_artifacts": [
+      "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json",
+      "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json",
+      "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json",
+      "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json",
+      "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+      "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+      "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
+    ],
+    "g1_closure_blocker_ids": [
+      "g1_closure::full_load_1p0_checkpoint_candidate_missing",
+      "g1_closure::consistent_residual_jacobian_newton_required",
+      "g1_closure::production_rocm_hip_residual_jvp_worker_required",
+      "g1_full_load_lane::auto_select_no_loadable_candidates",
+      "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
+      "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate",
+      "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
+      "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
+      "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready",
+      "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
+      "g1_full_load_lane::hip_consistency_proof_has_blockers"
+    ],
     "global_connectivity_decision_record_present": true,
     "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
     "required_next_receipts": [
@@ -83,6 +105,16 @@
     "no_production_rocm_hip_residency_claim"
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_intake_artifact_count": 7,
+  "evidence_intake_artifacts": [
+    "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json",
+    "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json",
+    "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json",
+    "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
+  ],
   "evidence_signals": {
     "boundary_subsystem_not_full_global_tangent": true,
     "direct_elastic_link_endpoint_count": 0,
@@ -112,7 +144,21 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "generated_at": "2026-07-01T18:21:25.786390+00:00",
+  "g1_closure_blocker_id_count": 11,
+  "g1_closure_blocker_ids": [
+    "g1_closure::full_load_1p0_checkpoint_candidate_missing",
+    "g1_closure::consistent_residual_jacobian_newton_required",
+    "g1_closure::production_rocm_hip_residual_jvp_worker_required",
+    "g1_full_load_lane::auto_select_no_loadable_candidates",
+    "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
+    "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate",
+    "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
+    "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
+    "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready",
+    "g1_full_load_lane::hip_consistency_proof_worker::consistent_residual_jacobian_newton_gate_not_passed",
+    "g1_full_load_lane::hip_consistency_proof_has_blockers"
+  ],
+  "generated_at": "2026-07-02T01:49:00.131324+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -174,11 +220,13 @@
   ],
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
-    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:4c6943b630979b6825f237895ed3b481cb59334a40bb1ad050f47ce21e98f15c",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:c5b29b3a465cdf659489c7cb037ce203a936ff2af621ff298c26a4b367cf9a44",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:358b7610b8fd3d0a7b5aa869b5de3f210be0aa8da69d93b5d8ba0774b49e98ec",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:5d0fe0f8b109dc4e9938a644e3e5715603e0845012c12668f20943a33b8d8ef8",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:ca58151d432993bb1851ff196a45a55c3dd80b6fe38b306b863cdf9a2fbdc7c2",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:8b437a017f328f541ca1a99edc6ff3302ea02cefed1dced8c9d2f62f4111645c",
-    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:dafa9b5f3ff30eb04c14a02bb97d5381242aa199a6aef9273b6318a3490448fb"
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:0c7539798ab5ae1b91154edebdc718c7c7d13a3e067f63de179b3ae728e321a0",
+    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:4290bad8bb8b7af1f4ed1167c5b41c607387e3acbb8eed400ce8b9e90ec3b866"
   },
   "next_actions": [
     "stop_row_only_support_or_elastic_link_correction_loop",
@@ -187,6 +235,29 @@
     "continue_consistent_residual_jacobian_newton_path",
     "build_production_rocm_hip_residual_jvp_worker_when_runtime_available"
   ],
+  "production_lane_evidence_policy": {
+    "accepted_evidence": [
+      "full-load 1.0 checkpoint candidate with direct residual and increment gates",
+      "consistent residual/Jacobian Newton receipt",
+      "production ROCm/HIP residual/JVP residency proof with no CPU fallback",
+      "g1_full_load_hip_newton_lane_report.contract_pass == true"
+    ],
+    "candidate_runner_status": "ready_for_runner_implementation",
+    "closure_rule": "G1 closure requires a full-load 1.0 checkpoint, a passing consistent residual/Jacobian Newton gate, and a production ROCm/HIP residual/JVP worker path with no CPU fallback.",
+    "g1_full_load_lane_status": "blocked",
+    "hip_required_probe_status": "partial",
+    "rejected_substitutes": [
+      "non-promoting F2g/F2h diagnostic readiness",
+      "row-active residual frontier descent below full-load 1.0",
+      "CPU diagnostic direct residual proof counted as production HIP",
+      "HIP compatibility alias without device-resident residual/JVP proof"
+    ],
+    "required_receipts": [
+      "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+      "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
+    ],
+    "schema_version": "g1-production-rocm-hip-evidence-policy.v1"
+  },
   "promotes_g1_closure": false,
   "reason_code": "PASS",
   "recommended_next_actions": [
@@ -248,6 +319,25 @@
     "support_or_elastic_link_row_gap": "deprioritized",
     "weak_restraint_or_geometric_softening": "active_secondary"
   },
+  "row_only_correction_policy": {
+    "accepted_next_lanes": [
+      "consistent_residual_jacobian_newton_rocm_worker",
+      "load_dependent_near_null_geometric_stiffness_comparison",
+      "production_rocm_hip_residual_jvp_worker"
+    ],
+    "decision": "stop_support_or_elastic_link_row_only_loop",
+    "rejected_substitutes": [
+      "more support/link row-only correction without new authoritative rows",
+      "fixed-point residual used as physical direct residual",
+      "CPU diagnostic assembler counted as production ROCm/HIP closure",
+      "frontier residual descent counted as full-load 1.0 equilibrium"
+    ],
+    "required_receipts_before_reconsidering_row_only_loop": [
+      "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json",
+      "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json"
+    ],
+    "schema_version": "g1-row-only-correction-policy.v1"
+  },
   "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
   "signals": {
     "boundary_subsystem_not_full_global_tangent": true,
@@ -278,16 +368,18 @@
     "row_only_correction_loop_stopped_by_global_connectivity": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "0ce1036034a7a6cc9a68991ebf1f9693a7218c6a",
+  "source_commit_sha": "296289d105fcf000ebc68a52f8e9a04b0fac8100",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
     "dominant_node_count": 8,
     "dominant_nodes_element_reachable_to_support_count": 8,
     "element_graph_connects_dominant_modes_to_supports": true,
+    "evidence_intake_artifact_count": 7,
     "f2h_lightweight_0p1_0p2_0p4_ready": true,
     "f2h_max_converged_load_scale": 0.4,
     "f2h_residual_trend_across_increasing_load": "nondecreasing",
+    "g1_closure_blocker_id_count": 11,
     "global_frame_shell_tangent_integration_ready": false,
     "load_dependent_geometric_softening_signal": "active_secondary",
     "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
