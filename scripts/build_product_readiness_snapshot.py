@@ -362,7 +362,10 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         return True
     if path.startswith("implementation/phase1/release_evidence/productization/"):
         return path.endswith((".json", ".md"))
-    if path.startswith("implementation/phase1/release_evidence/surface/") and path.endswith(".json"):
+    if (
+        path.startswith("implementation/phase1/release_evidence/surface/")
+        or path.startswith("implementation/phase1/release_evidence/gpu/")
+    ) and path.endswith(".json"):
         return True
     if path in {
         "implementation/phase1/branch64_microbatch_profile_report.json",

@@ -3703,6 +3703,13 @@ def test_snapshot_allows_zero_copy_probe_reports_as_generated_receipts() -> None
         assert build_product_readiness_snapshot._receipt_commit_allowed_path(path, set())
 
 
+def test_snapshot_allows_gpu_release_evidence_json_as_generated_receipt() -> None:
+    assert build_product_readiness_snapshot._receipt_commit_allowed_path(
+        "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+        set(),
+    )
+
+
 def test_snapshot_developer_preview_owner_packet_helper_does_not_stale_leaf_receipts(
     tmp_path: Path,
 ) -> None:
@@ -4808,6 +4815,57 @@ def test_snapshot_allows_release_surface_json_as_receipt_boundary(
     )
     assert (
         "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json"
+        in metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"]
+    )
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
+def test_snapshot_allows_release_gpu_json_as_receipt_boundary(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_json(
+        tmp_path
+        / "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+        {
+            "schema_version": "solver-hip-e2e-contract-report.v1",
+            "generated_at": "2026-06-21T00:00:01+00:00",
+            "source_commit_sha": source_commit,
+            "input_checksums": {"strict_probe": "sha256:abc123"},
+            "reused_evidence": False,
+            "contract_pass": False,
+            "reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+            "status": "blocked",
+        },
+    )
+    gpu_commit = _commit_all(tmp_path, "solver hip runtime evidence")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["source_commit_sha"] == gpu_commit
+    assert payload["evidence_fresh"] is True
+    assert payload["status"] == "ready"
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "receipt_only_commit"
+    )
+    assert (
+        "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
         in metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"]
     )
     assert not [
