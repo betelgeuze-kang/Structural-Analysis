@@ -1,13 +1,13 @@
 # P0 Closure Status
 
-- Overall P0: `open`
-- Release publication closed: `False`
+- Overall P0: `closed`
+- Release publication closed: `True`
 - Core evidence closed: `True`
-- Next action: `run Publish Release Assets workflow or provide release asset listing`
+- Next action: `promote release manifest and proceed to P1/P2 breadth work`
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
-| P0-1 release publication | `open` | default publication evidence missing |
+| P0-1 release publication | `closed` | implementation/phase1/release_artifacts_manifest.json |
 | P0-2 MIDAS exact roundtrip | `closed` | MIDAS exact roundtrip closure: PASS | exact=33/33 | canonical=0 | lossy=0 | unsupported=0 | manual=0 | pending_review=0 | exact_queue=0/8 | scope_excluded=2 | limits=none |
 | P0-3 KDS load combination | `closed` | Load-combination engine gate: PASS | models=3 | family=KDS-2022-steel-gravity | runtime_combo_range=8-8 | nested=6 max_depth=2 | breadth=rc | rc/wind/seismic=24/0/0 | exact_roundtrip=3/3 | pattern_coverage=3/3 min=1.00 | kds_strength_avg=1.000 min=1.000 | kds_service_avg=1.000 min=1.000 | gaps=none |
 | P0-4 MIDAS-KDS geometry identity | `closed` | MIDAS-KDS exact geometry bridge validator: PASS | breadth=PASS | artifacts=3/3 exact | exact_artifacts=3/3 | exact_artifact_coverage=1 | exact_row_coverage=1 | threshold=3/3 | exact_review_ids=36/36 | exact_rows=3168/3168 | snapshots=36/36 | section_parity=36/36 | load_crosswalk=36/36 | semantic_crosswalk=36/36 | full_member_crosswalk=242/242 PASS | full_section_crosswalk=200/200 PASS | full_load_crosswalk=51/51 PASS | geometry_diff=36/36 |
