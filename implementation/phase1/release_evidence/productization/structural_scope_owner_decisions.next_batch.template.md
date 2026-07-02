@@ -23,6 +23,13 @@
 - `primary_delete_path_count`: `3`
 - `primary_extract_path_count`: `0`
 
+## Owner Decision Submission
+
+- `canonical_owner_decisions_path`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json`
+- `template_csv_path`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv`
+- `validate_canonical_owner_decisions_command`: `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked`
+- `validate_filled_csv_command`: `python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions <filled-next-batch-owner-decisions.csv> --fail-release-surface-first-blocked`
+
 ## Post Batch Verification
 
 - `python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked`

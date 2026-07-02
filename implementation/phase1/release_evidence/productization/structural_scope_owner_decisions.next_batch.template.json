@@ -94,6 +94,18 @@
     "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
     "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md"
   },
+  "owner_decision_submission_options": {
+    "accepted_submission_formats": [
+      "json",
+      "csv"
+    ],
+    "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+    "claim_boundary": "A filled CSV can validate a scoped owner-review batch, but final closure still requires recorded owner evidence, manual cleanup where applicable, and refreshed structural scope receipts.",
+    "filled_csv_placeholder": "<filled-next-batch-owner-decisions.csv>",
+    "template_csv_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
+    "validate_canonical_owner_decisions_command": "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
+    "validate_filled_csv_command": "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions <filled-next-batch-owner-decisions.csv> --fail-release-surface-first-blocked"
+  },
   "path_area": "release_surface",
   "path_specific_restrictions": [
     "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface"

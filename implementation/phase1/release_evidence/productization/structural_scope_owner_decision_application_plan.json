@@ -82,12 +82,12 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T03:13:46.136362+00:00",
+  "generated_at": "2026-07-02T03:17:32.914877+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:56eee33ad18d1566d238a3a8d2af4e729d59b04e958a0cb562515f19472152b8",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:826c36a8adcd4325d2d4389800e65dddf2739a13c4273d69cf50233869f4e7aa",
-    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:bbfea80d51617cb1d231eca95d4129507a784b0f9d3bb1d95315f992b70ea68d",
+    "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:77125d2c53a5119e7aa1725f016243c51162b8b69d3eeea7ce24a63b03a63914",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:4e87ae50c4850edd04dd7be8c2740eff518a81c7630db18ee35e15094e7bc497"
   },
   "next_actions": [
@@ -215,6 +215,18 @@
       "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
       "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.json",
       "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.md"
+    },
+    "owner_decision_submission_options": {
+      "accepted_submission_formats": [
+        "json",
+        "csv"
+      ],
+      "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+      "claim_boundary": "A filled CSV can validate a scoped owner-review batch, but final closure still requires recorded owner evidence, manual cleanup where applicable, and refreshed structural scope receipts.",
+      "filled_csv_placeholder": "<filled-next-batch-owner-decisions.csv>",
+      "template_csv_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.next_batch.template.csv",
+      "validate_canonical_owner_decisions_command": "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
+      "validate_filled_csv_command": "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions <filled-next-batch-owner-decisions.csv> --fail-release-surface-first-blocked"
     },
     "path_area": "release_surface",
     "path_specific_restrictions": [
@@ -3556,6 +3568,18 @@
       "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
       "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
     },
+    "owner_decision_submission_options": {
+      "accepted_submission_formats": [
+        "json",
+        "csv"
+      ],
+      "canonical_owner_decisions_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+      "claim_boundary": "A filled CSV can validate a scoped owner-review batch, but final closure still requires recorded owner evidence, manual cleanup where applicable, and refreshed structural scope receipts.",
+      "filled_csv_placeholder": "<filled-release-surface-first-owner-decisions.csv>",
+      "template_csv_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
+      "validate_canonical_owner_decisions_command": "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
+      "validate_filled_csv_command": "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions <filled-release-surface-first-owner-decisions.csv> --fail-release-surface-first-blocked"
+    },
     "path_area": "release_surface",
     "path_specific_restrictions": [
       "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface"
@@ -3620,7 +3644,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "f6255c16a29e738ba95f5208f92dc00a16330745",
+  "source_commit_sha": "e52363594acb2ae91781b66e910b66eb61c6cb4c",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
