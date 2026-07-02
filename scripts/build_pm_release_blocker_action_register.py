@@ -45,6 +45,21 @@ DEFAULT_UX_NEW_USER_OBSERVATION_REPORT = Path(
 DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
 )
+DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN = Path(
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json"
+)
+DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
+)
+DEFAULT_STRUCTURAL_SCOPE_CONTAMINATION_AUDIT = Path(
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json"
+)
+DEFAULT_STRUCTURAL_SCOPE_QUARANTINE_MANIFEST = Path(
+    "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
+)
+DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISIONS = Path(
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json"
+)
 DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT = Path(
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
 )
@@ -62,6 +77,7 @@ DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
 )
 GITHUB_SYNC_APPROVAL_PHRASE = "feature push + main fast-forward 승인"
+STRUCTURAL_SCOPE_CLEANUP_BLOCKER_ID = "structural_scope_cleanup::owner_review_decisions_pending"
 
 
 def _is_ux_human_new_user_blocker(*, namespace: str, code: str) -> bool:
@@ -164,6 +180,109 @@ def _as_int(value: Any, default: int = 0) -> int:
         return int(default)
 
 
+def _structural_scope_cleanup_open(plan: dict[str, Any]) -> bool:
+    if not plan:
+        return False
+    if bool(plan.get("evidence_closure_pass", False)):
+        return False
+    return bool(
+        _as_int(plan.get("owner_decision_pending_count"), 0)
+        or _as_int(plan.get("release_surface_owner_decision_required_count"), 0)
+        or _as_int(plan.get("post_decision_cleanup_pending_count"), 0)
+        or _as_int(plan.get("retain_quarantined_exception_count"), 0)
+        or _as_list(plan.get("application_blockers"))
+        or _as_list(plan.get("blockers"))
+    )
+
+
+def _structural_scope_source_row(
+    *,
+    plan: dict[str, Any],
+    plan_path: Path,
+) -> dict[str, Any]:
+    owner_decision_recorded = _as_int(plan.get("owner_decision_recorded_count"), 0)
+    owner_decision_pending = _as_int(plan.get("owner_decision_pending_count"), 0)
+    owner_decision_total = _as_int(
+        plan.get("owner_decision_total_count"),
+        owner_decision_recorded + owner_decision_pending,
+    )
+    return {
+        "title": "Structural Scope Cleanup",
+        "summary": {
+            "status": str(plan.get("status", "") or ""),
+            "summary_line": str(plan.get("summary_line", "") or ""),
+            "owner_decision_recorded_count": owner_decision_recorded,
+            "owner_decision_pending_count": owner_decision_pending,
+            "owner_decision_total_count": owner_decision_total,
+            "release_surface_owner_decision_required_count": _as_int(
+                plan.get("release_surface_owner_decision_required_count"), 0
+            ),
+            "release_surface_owner_decision_required_paths": [
+                str(path)
+                for path in _as_list(plan.get("release_surface_owner_decision_required_paths"))
+                if str(path)
+            ],
+            "release_surface_first_batch_ready": bool(
+                plan.get("release_surface_first_batch_ready", False)
+            ),
+            "release_surface_first_batch_blockers": [
+                str(item)
+                for item in _as_list(plan.get("release_surface_first_batch_blockers"))
+                if str(item)
+            ],
+            "release_surface_first_batch_template_paths": _as_dict(
+                plan.get("release_surface_first_batch_template_paths")
+            ),
+            "post_decision_cleanup_pending_count": _as_int(
+                plan.get("post_decision_cleanup_pending_count"), 0
+            ),
+            "retain_quarantined_exception_count": _as_int(
+                plan.get("retain_quarantined_exception_count"), 0
+            ),
+            "pending_owner_decision_family_counts": _as_dict(
+                plan.get("pending_owner_decision_family_counts")
+            ),
+            "pending_owner_decision_path_area_counts": _as_dict(
+                plan.get("pending_owner_decision_path_area_counts")
+            ),
+            "next_owner_review_batch": _as_dict(plan.get("next_owner_review_batch")),
+            "owner_decision_template_paths": _as_dict(
+                plan.get("owner_decision_template_paths")
+            ),
+            "owner_decision_validation_pass": bool(
+                plan.get("owner_decision_validation_pass", False)
+            ),
+            "owner_decision_validation_blockers": [
+                str(item)
+                for item in _as_list(plan.get("owner_decision_validation_blockers"))
+                if str(item)
+            ],
+            "evidence_closure_pass": bool(plan.get("evidence_closure_pass", False)),
+            "application_ready": bool(plan.get("application_ready", False)),
+        },
+        "artifacts": {
+            "structural_scope_owner_decision_application_plan": str(plan_path),
+            "structural_scope_owner_review_packet": str(
+                DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET
+            ),
+            "structural_scope_contamination_audit": str(
+                DEFAULT_STRUCTURAL_SCOPE_CONTAMINATION_AUDIT
+            ),
+            "structural_scope_quarantine_manifest": str(
+                DEFAULT_STRUCTURAL_SCOPE_QUARANTINE_MANIFEST
+            ),
+            "structural_scope_owner_decisions": str(DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISIONS),
+            "product_readiness_snapshot": str(
+                Path("implementation/phase1/release_evidence/productization/product_readiness_snapshot.json")
+            ),
+        },
+        "claim_boundary": str(
+            plan.get("claim_boundary")
+            or "Structural release-surface cleanup requires explicit owner delete/extract decisions before non-structural molecular artifacts can leave quarantine."
+        ),
+    }
+
+
 def _split_blocker(blocker_id: str) -> tuple[str, str]:
     if "::" not in blocker_id:
         return "", blocker_id
@@ -184,6 +303,28 @@ def _indexed_rows(rows: list[Any], key: str) -> dict[str, dict[str, Any]]:
 
 def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
     summary = _as_dict(row.get("summary"))
+    if namespace == "structural_scope_cleanup":
+        pending = _as_int(summary.get("owner_decision_pending_count"), 0)
+        total = _as_int(summary.get("owner_decision_total_count"), pending)
+        release_surface_pending = _as_int(
+            summary.get("release_surface_owner_decision_required_count"), 0
+        )
+        release_paths = [
+            str(path)
+            for path in _as_list(summary.get("release_surface_owner_decision_required_paths"))
+            if str(path)
+        ]
+        first_paths = ", ".join(release_paths[:3])
+        path_clause = f" First release-surface paths: {first_paths}." if first_paths else ""
+        return (
+            "Complete structural scope cleanup before feature expansion: record owner "
+            "`delete_from_structural_repository` or "
+            "`extract_to_molecular_or_science_repository` decisions for the "
+            f"{release_surface_pending} release-surface-first path(s) and the "
+            f"{pending}/{total} pending quarantined PocketMD/GPCR/MD3Bead-family path(s), "
+            "then rerun the structural scope application plan and contamination audit."
+            f"{path_clause}"
+        )
     if namespace == "fresh_full_validation":
         lane_id = code.split("::", 1)[0]
         runner = str(row.get("runner", "") or summary.get("runner", "") or lane_id)
@@ -265,6 +406,8 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
 
 
 def _owner(*, namespace: str, code: str) -> str:
+    if namespace == "structural_scope_cleanup":
+        return "release_scope_owner"
     if namespace == "fresh_full_validation":
         return "validation_lane_owner"
     if namespace == "customer_shadow":
@@ -287,6 +430,8 @@ def _owner(*, namespace: str, code: str) -> str:
 
 
 def _resolution_type(*, namespace: str, code: str) -> str:
+    if namespace == "structural_scope_cleanup":
+        return "owner_review_scope_cleanup_required"
     if namespace == "fresh_full_validation":
         return "fresh_validation_receipt_required"
     if not namespace and code in {
@@ -314,6 +459,15 @@ def _resolution_type(*, namespace: str, code: str) -> str:
 
 def _claim_boundary(*, namespace: str, code: str, row: dict[str, Any]) -> str:
     summary = _as_dict(row.get("summary"))
+    if namespace == "structural_scope_cleanup":
+        direct = str(row.get("claim_boundary", "") or "")
+        if direct:
+            return direct
+        return (
+            "Non-structural molecular artifacts remain outside the building structural-analysis "
+            "release surface until every quarantined path has an owner delete/extract decision, "
+            "manual cleanup is applied, and the post-decision scope audit is green."
+        )
     if namespace == "fresh_full_validation":
         return (
             "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, "
@@ -350,6 +504,14 @@ def _claim_boundary(*, namespace: str, code: str, row: dict[str, Any]) -> str:
 
 def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> list[str]:
     summary = _as_dict(row.get("summary"))
+    if namespace == "structural_scope_cleanup":
+        return [
+            "`structural_scope_owner_decision_application_plan.json.owner_decision_pending_count == 0`",
+            "`structural_scope_owner_decision_application_plan.json.release_surface_owner_decision_required_count == 0`",
+            "`structural_scope_owner_decision_application_plan.json.retain_quarantined_exception_count == 0`",
+            "`structural_scope_owner_decision_application_plan.json.evidence_closure_pass == true` after manual delete/extract cleanup",
+            "`check_structural_scope_contamination.py --fail-blocked` exits 0 after cleanup and release evidence regeneration",
+        ]
     if namespace == "fresh_full_validation":
         lane_id = code.split("::", 1)[0]
         return [
@@ -450,6 +612,14 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         "python3 scripts/report_pm_release_gate.py "
         f"--out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}"
     )
+    if namespace == "structural_scope_cleanup":
+        return [
+            f"python3 scripts/check_structural_scope_contamination.py --out {DEFAULT_STRUCTURAL_SCOPE_CONTAMINATION_AUDIT} --out-md {DEFAULT_STRUCTURAL_SCOPE_CONTAMINATION_AUDIT.with_suffix('.md')}",
+            f"python3 scripts/build_structural_scope_owner_review_packet.py --out {DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET} --out-md {DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET.with_suffix('.md')} --write-decision-template",
+            f"python3 scripts/build_structural_scope_owner_decision_application_plan.py --out {DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN} --out-md {DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN.with_suffix('.md')}",
+            "python3 scripts/build_product_readiness_snapshot.py",
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+        ]
     if namespace == "fresh_full_validation":
         return [
             f"python3 scripts/build_fresh_full_validation_lane_status.py --out {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS} --out-md {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS.with_suffix('.md')}",
@@ -522,6 +692,13 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
 
 
 def _verification_commands(*, namespace: str, code: str) -> list[str]:
+    if namespace == "structural_scope_cleanup":
+        return [
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+            "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
+            "python3 scripts/build_product_readiness_snapshot.py --check",
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
+        ]
     if namespace == "fresh_full_validation":
         return [
             f"python3 scripts/build_fresh_full_validation_lane_status.py --out {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS} --out-md {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS.with_suffix('.md')} --fail-blocked",
@@ -583,7 +760,8 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
 
 def _owner_input_required(*, namespace: str, code: str) -> bool:
     return bool(
-        (namespace == "basic_ci" and "consecutive_pass" in code)
+        namespace == "structural_scope_cleanup"
+        or (namespace == "basic_ci" and "consecutive_pass" in code)
         or (namespace == "security" and "license" in code)
         or _is_ux_human_new_user_blocker(namespace=namespace, code=code)
         or namespace == "github_sync"
@@ -612,6 +790,22 @@ def _evidence_artifacts(row: dict[str, Any]) -> dict[str, str]:
 
 def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[str, str]) -> dict[str, str]:
     augmented = dict(artifacts)
+    if namespace == "structural_scope_cleanup":
+        augmented["structural_scope_owner_decision_application_plan"] = str(
+            DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN
+        )
+        augmented["structural_scope_owner_review_packet"] = str(
+            DEFAULT_STRUCTURAL_SCOPE_OWNER_REVIEW_PACKET
+        )
+        augmented["structural_scope_contamination_audit"] = str(
+            DEFAULT_STRUCTURAL_SCOPE_CONTAMINATION_AUDIT
+        )
+        augmented["structural_scope_quarantine_manifest"] = str(
+            DEFAULT_STRUCTURAL_SCOPE_QUARANTINE_MANIFEST
+        )
+        augmented["structural_scope_owner_decisions"] = str(
+            DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISIONS
+        )
     if namespace == "fresh_full_validation":
         augmented["fresh_full_validation_lane_status"] = str(DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS)
     if not namespace and code in {
@@ -639,6 +833,8 @@ def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[st
 
 
 def _expected_intake_artifact(*, namespace: str, code: str) -> str:
+    if namespace == "structural_scope_cleanup":
+        return "structural_scope_owner_decision_application_plan"
     if namespace == "basic_ci" and "consecutive_pass" in code:
         return "ci_streak_intake_packet"
     if namespace == "security" and "license" in code:
@@ -703,6 +899,64 @@ def _source_intake_packet(
 
 def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[str, Any]:
     summary = _as_dict(row.get("summary"))
+    if namespace == "structural_scope_cleanup":
+        owner_pending = _as_int(summary.get("owner_decision_pending_count"), 0)
+        owner_total = _as_int(summary.get("owner_decision_total_count"), owner_pending)
+        release_surface_pending = _as_int(
+            summary.get("release_surface_owner_decision_required_count"), 0
+        )
+        cleanup_pending = _as_int(summary.get("post_decision_cleanup_pending_count"), 0)
+        retain_exceptions = _as_int(summary.get("retain_quarantined_exception_count"), 0)
+        if release_surface_pending:
+            state = "release_surface_owner_decisions_pending"
+        elif owner_pending:
+            state = "owner_decisions_pending"
+        elif retain_exceptions:
+            state = "retain_quarantined_exception_review_required"
+        elif cleanup_pending:
+            state = "manual_cleanup_application_pending"
+        elif bool(summary.get("evidence_closure_pass", False)):
+            state = "ready_for_pm_regeneration"
+        else:
+            state = "structural_scope_cleanup_blocked"
+        return {
+            "state": state,
+            "status": str(summary.get("status", "") or ""),
+            "owner_decision_recorded_count": _as_int(
+                summary.get("owner_decision_recorded_count"), 0
+            ),
+            "owner_decision_pending_count": owner_pending,
+            "owner_decision_total_count": owner_total,
+            "release_surface_owner_decision_required_count": release_surface_pending,
+            "release_surface_owner_decision_required_paths": _as_list(
+                summary.get("release_surface_owner_decision_required_paths")
+            ),
+            "release_surface_first_batch_ready": bool(
+                summary.get("release_surface_first_batch_ready", False)
+            ),
+            "release_surface_first_batch_blockers": _as_list(
+                summary.get("release_surface_first_batch_blockers")
+            ),
+            "release_surface_first_batch_template_paths": _as_dict(
+                summary.get("release_surface_first_batch_template_paths")
+            ),
+            "post_decision_cleanup_pending_count": cleanup_pending,
+            "retain_quarantined_exception_count": retain_exceptions,
+            "owner_decision_validation_pass": bool(
+                summary.get("owner_decision_validation_pass", False)
+            ),
+            "owner_decision_validation_blockers": _as_list(
+                summary.get("owner_decision_validation_blockers")
+            ),
+            "pending_owner_decision_family_counts": _as_dict(
+                summary.get("pending_owner_decision_family_counts")
+            ),
+            "pending_owner_decision_path_area_counts": _as_dict(
+                summary.get("pending_owner_decision_path_area_counts")
+            ),
+            "next_owner_review_batch": _as_dict(summary.get("next_owner_review_batch")),
+            "source_policy": "owner_delete_or_extract_decisions_required_before_release_surface_cleanup",
+        }
     if namespace == "fresh_full_validation":
         lane_id = code.split("::", 1)[0]
         present = bool(row.get("fresh_validation_receipt_present", False))
@@ -952,8 +1206,23 @@ def _handoff_payload(
     }
 
 
-def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
+def build_register(
+    pm_report: Path = DEFAULT_PM_REPORT,
+    structural_scope_plan: Path | None = None,
+) -> dict[str, Any]:
     report = _load_json(pm_report)
+    structural_scope_plan_payload = (
+        _load_json(structural_scope_plan) if structural_scope_plan is not None else {}
+    )
+    structural_scope_source_row = _structural_scope_source_row(
+        plan=structural_scope_plan_payload,
+        plan_path=structural_scope_plan,
+    ) if structural_scope_plan is not None and structural_scope_plan_payload else {}
+    structural_scope_blockers = (
+        [STRUCTURAL_SCOPE_CLEANUP_BLOCKER_ID]
+        if _structural_scope_cleanup_open(structural_scope_plan_payload)
+        else []
+    )
     release_decision = _as_dict(report.get("release_decision"))
     release_decision_operator_actions = [
         row for row in _as_list(release_decision.get("operator_actions")) if isinstance(row, dict)
@@ -987,12 +1256,17 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             *[str(row) for row in _as_list(report.get("release_area_blockers"))],
         ]
     ga_enterprise_blockers = [str(row) for row in _as_list(release_tiers.get("ga_enterprise_blockers"))]
-    all_blockers = list(dict.fromkeys([*full_blockers, *ga_enterprise_blockers]))
+    all_blockers = list(
+        dict.fromkeys([*structural_scope_blockers, *full_blockers, *ga_enterprise_blockers])
+    )
 
     rows: list[dict[str, Any]] = []
     for blocker_id in all_blockers:
         namespace, code = _split_blocker(blocker_id)
-        if namespace in release_area_rows:
+        if namespace == "structural_scope_cleanup":
+            scope = "release_surface_scope"
+            source_row = structural_scope_source_row
+        elif namespace in release_area_rows:
             scope = "release_area"
             source_row = release_area_rows[namespace]
         elif namespace in milestone_rows:
@@ -1121,6 +1395,7 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
                 DEFAULT_CI_STREAK_INTAKE_PACKET,
                 DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
                 DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET,
+                *([structural_scope_plan] if structural_scope_plan is not None else []),
             ]
         ),
         "pm_release_gate_report": str(pm_report),
@@ -1135,6 +1410,7 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "release_area_total_count": release_area_total_count,
             "milestone_blocker_count": len(milestone_blockers),
             "ga_enterprise_blocker_count": len(ga_enterprise_blockers),
+            "structural_scope_cleanup_blocker_count": len(structural_scope_blockers),
             "release_decision_operator_action_count": len(release_decision_operator_actions),
             "owner_input_required_count": sum(1 for row in rows if row["owner_input_required"]),
             "full_release_gate_ready": bool(report.get("full_release_gate_ready", False)),
@@ -1211,6 +1487,16 @@ def _markdown(payload: dict[str, Any]) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pm-report", type=Path, default=DEFAULT_PM_REPORT)
+    parser.add_argument(
+        "--structural-scope-plan",
+        type=Path,
+        default=DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN,
+        help=(
+            "Optional structural scope owner-decision application plan. When present "
+            "and not closed, the register surfaces it as the first release-surface "
+            "scope cleanup action."
+        ),
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -1220,7 +1506,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    payload = build_register(pm_report=args.pm_report)
+    payload = build_register(
+        pm_report=args.pm_report,
+        structural_scope_plan=args.structural_scope_plan,
+    )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.out_md is not None:

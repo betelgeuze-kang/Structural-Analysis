@@ -210,6 +210,108 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert security_row["evidence_status"]["state"] == "not_configured"
 
 
+def test_build_register_prioritizes_structural_scope_cleanup_plan(tmp_path: Path) -> None:
+    report = _pm_report(tmp_path / "pm_release_gate_report.json", blockers=[])
+    plan = _write_json(
+        tmp_path / "structural_scope_owner_decision_application_plan.json",
+        {
+            "status": "pending_owner_decisions",
+            "summary_line": "Structural scope owner decision application plan: PENDING_OWNER_DECISIONS",
+            "evidence_closure_pass": False,
+            "application_ready": False,
+            "owner_decision_validation_pass": False,
+            "owner_decision_validation_blockers": [
+                "owner_decisions_missing",
+                "owner_decision_pending_count=86",
+            ],
+            "owner_decision_recorded_count": 0,
+            "owner_decision_pending_count": 86,
+            "owner_decision_total_count": 86,
+            "release_surface_owner_decision_required_count": 3,
+            "release_surface_owner_decision_required_paths": [
+                "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+                "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+                "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+            ],
+            "release_surface_first_batch_ready": False,
+            "release_surface_first_batch_blockers": [
+                "pending_release_surface_owner_decision_count=3"
+            ],
+            "release_surface_first_batch_template_paths": {
+                "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
+                "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
+                "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md",
+            },
+            "post_decision_cleanup_pending_count": 0,
+            "retain_quarantined_exception_count": 0,
+            "pending_owner_decision_family_counts": {
+                "molecular_docking": 48,
+                "molecular_dynamics": 25,
+                "molecular_science_evidence": 13,
+            },
+            "pending_owner_decision_path_area_counts": {
+                "release_surface": 3,
+                "script": 19,
+            },
+            "next_owner_review_batch": {
+                "batch_id": "release_surface_first",
+                "path_count": 3,
+            },
+            "owner_decision_template_paths": {
+                "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
+            },
+            "application_blockers": [
+                "owner_decision_pending_count=86",
+                "release_surface_owner_decision_required_count=3",
+            ],
+            "blockers": ["owner_decision_pending_count=86"],
+            "claim_boundary": (
+                "This application plan is non-mutating and keeps non-structural "
+                "artifacts outside the building structural-analysis release surface."
+            ),
+        },
+    )
+
+    payload = build_register_module.build_register(
+        pm_report=report,
+        structural_scope_plan=plan,
+    )
+    row = payload["rows"][0]
+
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["open_blocker_count"] == 1
+    assert payload["summary"]["structural_scope_cleanup_blocker_count"] == 1
+    assert row["blocker_id"] == "structural_scope_cleanup::owner_review_decisions_pending"
+    assert row["scope"] == "release_surface_scope"
+    assert row["owner"] == "release_scope_owner"
+    assert row["owner_input_required"] is True
+    assert row["handoff_state"] == "external_owner_input_ready"
+    assert row["resolution_type"] == "owner_review_scope_cleanup_required"
+    assert "3 release-surface-first path(s)" in row["owner_action"]
+    assert "86/86 pending quarantined" in row["owner_action"]
+    assert row["source_intake_artifact"] == "structural_scope_owner_decision_application_plan"
+    assert row["source_intake_path"] == plan.as_posix()
+    assert row["evidence_status"]["state"] == "release_surface_owner_decisions_pending"
+    assert row["evidence_status"]["owner_decision_pending_count"] == 86
+    assert row["evidence_status"]["release_surface_owner_decision_required_count"] == 3
+    assert row["evidence_status"]["release_surface_first_batch_ready"] is False
+    assert row["evidence_status"]["next_owner_review_batch"]["batch_id"] == "release_surface_first"
+    assert any(
+        "owner_decision_pending_count == 0" in item
+        for item in row["acceptance_criteria"]
+    )
+    assert any(
+        "build_structural_scope_owner_decision_application_plan.py" in command
+        for command in row["reproduction_commands"]
+    )
+    assert any(
+        "check_structural_scope_contamination.py --fail-blocked" in command
+        for command in row["verification_commands"]
+    )
+    assert "structural_scope_owner_review_packet" in row["evidence_artifacts"]
+    assert payload["next_actions"] == [row["next_action"]]
+
+
 def test_build_register_passes_when_pm_report_has_no_blockers(tmp_path: Path) -> None:
     report = _pm_report(tmp_path / "pm_release_gate_report.json", blockers=[])
     payload = build_register_module.build_register(pm_report=report)
@@ -824,6 +926,8 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
         [
             "--pm-report",
             str(report),
+            "--structural-scope-plan",
+            str(tmp_path / "missing_structural_scope_plan.json"),
             "--out",
             str(out),
             "--out-md",
