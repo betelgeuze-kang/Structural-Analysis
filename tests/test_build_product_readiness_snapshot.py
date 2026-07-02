@@ -3404,6 +3404,13 @@ def test_snapshot_allows_branch64_microbatch_profile_as_generated_receipt() -> N
     )
 
 
+def test_snapshot_allows_scaleout_io_profile_as_generated_receipt() -> None:
+    assert build_product_readiness_snapshot._receipt_commit_allowed_path(
+        "implementation/phase1/scaleout_io_profile_report.json",
+        set(),
+    )
+
+
 def test_snapshot_allows_zero_copy_probe_reports_as_generated_receipts() -> None:
     for path in [
         "implementation/phase1/zero_copy_real_probe_report.forbidden.json",
