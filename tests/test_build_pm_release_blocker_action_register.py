@@ -234,9 +234,18 @@ def test_build_register_prioritizes_structural_scope_cleanup_plan(tmp_path: Path
                 "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
             ],
             "release_surface_first_batch_ready": False,
+            "release_surface_first_batch_application_ready": False,
             "release_surface_first_batch_blockers": [
                 "pending_release_surface_owner_decision_count=3"
             ],
+            "release_surface_first_batch_application_blockers": [
+                "pending_release_surface_owner_decision_count=3",
+                "release_surface_cleanup_decision_count_below_expected=0/3",
+            ],
+            "release_surface_first_batch_cleanup_application_preflight": {
+                "status": "no_cleanup_required",
+                "ready": False,
+            },
             "release_surface_first_batch_template_paths": {
                 "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
                 "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
@@ -295,7 +304,16 @@ def test_build_register_prioritizes_structural_scope_cleanup_plan(tmp_path: Path
     assert row["evidence_status"]["owner_decision_pending_count"] == 86
     assert row["evidence_status"]["release_surface_owner_decision_required_count"] == 3
     assert row["evidence_status"]["release_surface_first_batch_ready"] is False
+    assert row["evidence_status"]["release_surface_first_batch_application_ready"] is False
+    assert row["evidence_status"]["release_surface_first_batch_application_blockers"] == [
+        "pending_release_surface_owner_decision_count=3",
+        "release_surface_cleanup_decision_count_below_expected=0/3",
+    ]
     assert row["evidence_status"]["next_owner_review_batch"]["batch_id"] == "release_surface_first"
+    assert any(
+        "release_surface_first_batch_application_ready == true" in item
+        for item in row["acceptance_criteria"]
+    )
     assert any(
         "owner_decision_pending_count == 0" in item
         for item in row["acceptance_criteria"]
@@ -306,6 +324,10 @@ def test_build_register_prioritizes_structural_scope_cleanup_plan(tmp_path: Path
     )
     assert any(
         "check_structural_scope_contamination.py --fail-blocked" in command
+        for command in row["verification_commands"]
+    )
+    assert any(
+        "--fail-release-surface-first-blocked" in command
         for command in row["verification_commands"]
     )
     assert "structural_scope_owner_review_packet" in row["evidence_artifacts"]

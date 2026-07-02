@@ -225,11 +225,24 @@ def _structural_scope_source_row(
             "release_surface_first_batch_ready": bool(
                 plan.get("release_surface_first_batch_ready", False)
             ),
+            "release_surface_first_batch_application_ready": bool(
+                plan.get("release_surface_first_batch_application_ready", False)
+            ),
             "release_surface_first_batch_blockers": [
                 str(item)
                 for item in _as_list(plan.get("release_surface_first_batch_blockers"))
                 if str(item)
             ],
+            "release_surface_first_batch_application_blockers": [
+                str(item)
+                for item in _as_list(
+                    plan.get("release_surface_first_batch_application_blockers")
+                )
+                if str(item)
+            ],
+            "release_surface_first_batch_cleanup_application_preflight": _as_dict(
+                plan.get("release_surface_first_batch_cleanup_application_preflight")
+            ),
             "release_surface_first_batch_template_paths": _as_dict(
                 plan.get("release_surface_first_batch_template_paths")
             ),
@@ -506,6 +519,7 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
     summary = _as_dict(row.get("summary"))
     if namespace == "structural_scope_cleanup":
         return [
+            "`structural_scope_owner_decision_application_plan.json.release_surface_first_batch_application_ready == true` before applying the first release-surface cleanup batch",
             "`structural_scope_owner_decision_application_plan.json.owner_decision_pending_count == 0`",
             "`structural_scope_owner_decision_application_plan.json.release_surface_owner_decision_required_count == 0`",
             "`structural_scope_owner_decision_application_plan.json.retain_quarantined_exception_count == 0`",
@@ -694,6 +708,7 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
 def _verification_commands(*, namespace: str, code: str) -> list[str]:
     if namespace == "structural_scope_cleanup":
         return [
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
             "python3 scripts/check_structural_scope_contamination.py --fail-blocked",
             "python3 scripts/build_product_readiness_snapshot.py --check",
@@ -934,8 +949,17 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "release_surface_first_batch_ready": bool(
                 summary.get("release_surface_first_batch_ready", False)
             ),
+            "release_surface_first_batch_application_ready": bool(
+                summary.get("release_surface_first_batch_application_ready", False)
+            ),
             "release_surface_first_batch_blockers": _as_list(
                 summary.get("release_surface_first_batch_blockers")
+            ),
+            "release_surface_first_batch_application_blockers": _as_list(
+                summary.get("release_surface_first_batch_application_blockers")
+            ),
+            "release_surface_first_batch_cleanup_application_preflight": _as_dict(
+                summary.get("release_surface_first_batch_cleanup_application_preflight")
             ),
             "release_surface_first_batch_template_paths": _as_dict(
                 summary.get("release_surface_first_batch_template_paths")
