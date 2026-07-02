@@ -927,7 +927,12 @@ def _case_readiness_ledger(
         if isinstance(receipt, dict)
     ]
     receipts_by_case = {str(row.get("case_id") or ""): row for row in receipts}
-    source_verified = bool(source_license_receipt.get("source_url_verified") is True)
+    source_verified_by_case = {
+        str(candidate.get("case_id") or "")
+        for candidate in _safe_list(source_license_receipt.get("source_url_candidates"))
+        if isinstance(candidate, dict)
+        and candidate.get("local_matches_upstream_raw_sha256") is True
+    }
     license_approved = bool(
         source_license_receipt.get("redistribution_allowed") is True
         and source_license_receipt.get("commercial_use_allowed") is True
@@ -939,6 +944,7 @@ def _case_readiness_ledger(
     for row in sorted(canonical_rows, key=lambda item: str(item.get("case_id") or "")):
         case_id = str(row.get("case_id") or "")
         receipt = receipts_by_case.get(case_id, {})
+        authoritative_source_pass = case_id in source_verified_by_case
         scorecard_execution_pass = bool(
             receipt.get("scorecard_execution_pass") is True
         )
@@ -948,7 +954,7 @@ def _case_readiness_ledger(
         reference_outputs_pass = bool(receipt.get("reference_output_sha256"))
         normalization_pass = bool(receipt.get("normalization_receipt_contract_pass") is True)
         blockers = []
-        if source_verified is not True:
+        if authoritative_source_pass is not True:
             blockers.append("source_url_verification_pending")
         if license_approved is not True:
             blockers.append("license_review_pending")
@@ -967,7 +973,8 @@ def _case_readiness_ledger(
                 "source_path": row.get("path"),
                 "source_sha256": row.get("sha256"),
                 "parser_contract_pass": row.get("parser_contract_ready") is True,
-                "authoritative_source_pass": source_verified,
+                "authoritative_source_pass": authoritative_source_pass,
+                "authoritative_source_case_ids": sorted(source_verified_by_case),
                 "license_approval_pass": license_approved,
                 "reference_outputs_pass": reference_outputs_pass,
                 "normalization_pass": normalization_pass,
@@ -1010,6 +1017,27 @@ def _case_readiness_ledger(
             "receipts, scorecard executions, or PASS/REVIEW decisions."
         ),
     }
+
+
+def _selected_medium_candidate_rows(canonical_report: dict[str, Any]) -> list[dict[str, Any]]:
+    rows = [
+        row
+        for row in _safe_list(canonical_report.get("rows"))
+        if isinstance(row, dict) and row.get("parser_contract_ready") is True
+    ]
+    return [
+        {
+            "case_id": row.get("case_id"),
+            "family_id": row.get("family_id"),
+            "path": row.get("path"),
+            "format": row.get("format"),
+            "origin": row.get("origin"),
+            "size_bytes": row.get("size_bytes"),
+            "sha256": row.get("sha256"),
+            "parser_contract_ready": bool(row.get("parser_contract_ready")),
+        }
+        for row in rows[:5]
+    ]
 
 
 def _case_blocker_next_inputs(blockers: list[str]) -> list[str]:
@@ -1209,11 +1237,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
     )
     topology_metrics = _safe_dict(topology_report.get("metrics"))
     topology_source = _safe_dict(topology_report.get("source_provenance"))
-    canonical_rows = [
-        row
-        for row in _safe_list(canonical_report.get("rows"))
-        if isinstance(row, dict) and row.get("case_id") in {"SCBF16B", "SCBF16B_shell_beam_mix"}
-    ]
+    canonical_rows = _selected_medium_candidate_rows(canonical_report)
     source_license_receipt = _try_load_json(repo_root / SOURCE_LICENSE_RECEIPT)
     receipt_inventory = _medium_scorecard_receipt_inventory(repo_root)
     required_medium_model_count = 5

@@ -80,7 +80,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["current_medium_model_scorecard_count"] == 0
     assert payload["pass_or_approved_review_count"] == 0
     assert payload["scorecard_receipt_inventory"]["receipt_file_count"] == 0
-    assert payload["local_candidate_artifact_count"] == 2
+    assert payload["local_candidate_artifact_count"] == 3
     assert payload["local_topology_contract_pass"] is True
     assert payload["source_url_verified"] is True
     assert payload["license_review_status"] == "identified_gpl_3_0_product_legal_review_required"
@@ -88,8 +88,8 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
     assert payload["summary"] == {
         "required_medium_model_count": 5,
-        "local_candidate_case_count": 2,
-        "missing_candidate_case_count": 3,
+        "local_candidate_case_count": 3,
+        "missing_candidate_case_count": 2,
         "current_medium_model_scorecard_count": 0,
         "normalization_receipt_count": 0,
         "pass_or_approved_review_count": 0,
@@ -108,8 +108,8 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
             "receipts, scorecard execution, and PASS/REVIEW decisions pass."
         ),
         "current_scorecard_credit_count": 0,
-        "local_candidate_case_count": 2,
-        "missing_candidate_case_count": 3,
+        "local_candidate_case_count": 3,
+        "missing_candidate_case_count": 2,
         "required_candidate_case_count": 5,
     }
     assert "source_url_verification_pending" not in payload["blockers"]
@@ -175,44 +175,56 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     case_ledger = payload["case_readiness_ledger"]
     assert case_ledger["schema_version"] == "phase3-medium-model-case-readiness-ledger.v1"
     assert case_ledger["required_case_count"] == 5
-    assert case_ledger["local_candidate_case_count"] == 2
-    assert case_ledger["missing_candidate_case_count"] == 3
+    assert case_ledger["local_candidate_case_count"] == 3
+    assert case_ledger["missing_candidate_case_count"] == 2
     assert case_ledger["case_ready_count"] == 0
     assert case_ledger["selection_gate"] == {
-        "blockers": ["medium_structural_models_current_below_required:2/5"],
+        "blockers": ["medium_structural_models_current_below_required:3/5"],
         "contract_pass": False,
-        "current_candidate_case_count": 2,
+        "current_candidate_case_count": 3,
         "required_candidate_case_count": 5,
     }
     case_rows = {row["case_id"]: row for row in case_ledger["case_rows"]}
-    assert set(case_rows) == {"SCBF16B", "SCBF16B_shell_beam_mix"}
+    assert set(case_rows) == {
+        "SCBF16B",
+        "SCBF16B_shell_beam_mix",
+        "luxinzheng_megatall_model1",
+    }
     assert case_rows["SCBF16B"]["parser_contract_pass"] is True
     assert case_rows["SCBF16B"]["authoritative_source_pass"] is True
+    assert case_rows["SCBF16B_shell_beam_mix"]["authoritative_source_pass"] is False
+    assert case_rows["luxinzheng_megatall_model1"]["authoritative_source_pass"] is False
+    assert "source_url_verification_pending" in (
+        case_rows["luxinzheng_megatall_model1"]["blockers"]
+    )
     assert "reference_outputs_missing" in case_rows["SCBF16B"]["blockers"]
     queue = payload["medium_model_case_execution_queue"]
     assert queue["schema_version"] == "phase3-medium-model-case-execution-queue.v1"
     assert queue["required_case_count"] == 5
-    assert queue["selected_case_count"] == 2
-    assert queue["missing_case_count"] == 3
+    assert queue["selected_case_count"] == 3
+    assert queue["missing_case_count"] == 2
     assert queue["case_ready_count"] == 0
     assert len(queue["queue_rows"]) == 5
     assert queue["next_case_slot"]["slot"] == 1
     assert queue["next_case_slot"]["case_id"] == "SCBF16B"
-    selected_slots = queue["queue_rows"][:2]
-    missing_slots = queue["queue_rows"][2:]
+    selected_slots = queue["queue_rows"][:3]
+    missing_slots = queue["queue_rows"][3:]
     assert [row["slot_status"] for row in selected_slots] == [
+        "selected_blocked",
         "selected_blocked",
         "selected_blocked",
     ]
     assert [row["slot_status"] for row in missing_slots] == [
         "operator_selection_required",
         "operator_selection_required",
-        "operator_selection_required",
     ]
     assert "PASS or APPROVED_REVIEW decision with non-generated evidence_ref" in (
         selected_slots[0]["next_required_inputs"]
     )
-    assert missing_slots[0]["case_id"] == "OPERATOR_ATTACHED_MEDIUM_CASE_3"
+    assert "verified authoritative source URL/checksum" in (
+        selected_slots[2]["next_required_inputs"]
+    )
+    assert missing_slots[0]["case_id"] == "OPERATOR_ATTACHED_MEDIUM_CASE_4"
     assert "run_phase3_medium_model_scorecard_receipt.py" in (
         missing_slots[0]["runner_command_template"]
     )
