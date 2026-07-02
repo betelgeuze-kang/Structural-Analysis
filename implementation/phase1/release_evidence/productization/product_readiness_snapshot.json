@@ -2936,7 +2936,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-02T06:19:55.313133+00:00",
+  "generated_at": "2026-07-02T06:25:22.639892+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:976331bc1361c3c654bc50d0e0a4f4e04204f8befd72a8832c37b1eb20c8c2a9",
@@ -2961,11 +2961,11 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:42c4c82309e6400940005f311f04c8fedf07c926300a93dc02ad52eebd99b9c1",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:d8cdf2989191bbff716779c472be3600e326f5f86a6bccb9093aca4b012ac778",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8651a6c6efb1397091b774732546e33c3fe1b47e0a20f1a36ea060b898370100",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:7368ee00711c28c4ad4993631e24484c930003d21bf2973d0627e6c6dd2d1c73",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:bc9b89f0dafc7e6176e57c657671d1e248aba040bf0acbaf424e59463f64028c",
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:4e6fb3e7460da1e00a642d4aff97c624f8aadb2274e2f950f1cf9f40ad916a53",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:b98a84257eb5111c42349be34faceac634abc9d40cc1cd9e1973b0108a0c596f",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:30add94689ce86fe0ba847d0b759c68e66fbe62cef081b9e6d3341fc708dbe81",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:d158fed65ba1d02c7635a0d0bdbeb20bcbd745259fafb6fd38e0ec7f8fc19721",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:690aaeab789858c7f60cc8f984be3db9761fe28b1c0afa3cb9b9429e1acb04d4",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:9e311c787fadd7f2c3463a1ef52e8e14ce43e9e84628271af8ec3fbe289ed5f1",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:3ea9c4b54e36a220375087aedb9fa7fa8b1314b29290c117239c2e960e83bb14",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:e0d5c3f8830e73b6e83fa98ddc817850e760efefe9f5cc6090beb9e0ac4a930c",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -3287,7 +3287,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "35f1bc749cf668771470b3bd57962fcce213c649",
+  "source_commit_sha": "e29be8304e68a249e7c5f01e60ec525d6b8228e1",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3776,36 +3776,36 @@
       {
         "artifact": "structural_scope_contamination_audit",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T06:19:23.955838+00:00",
+        "generated_at": "2026-07-02T06:24:51.066266+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "35f1bc749cf668771470b3bd57962fcce213c649",
+        "source_commit_sha": "e29be8304e68a249e7c5f01e60ec525d6b8228e1",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T06:19:23.997225+00:00",
+        "generated_at": "2026-07-02T06:24:51.106508+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "35f1bc749cf668771470b3bd57962fcce213c649",
+        "source_commit_sha": "e29be8304e68a249e7c5f01e60ec525d6b8228e1",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
       {
         "artifact": "structural_scope_owner_decision_application_plan",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-07-02T06:19:55.086137+00:00",
+        "generated_at": "2026-07-02T06:25:22.402952+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "35f1bc749cf668771470b3bd57962fcce213c649",
+        "source_commit_sha": "e29be8304e68a249e7c5f01e60ec525d6b8228e1",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -3854,14 +3854,13 @@
       "dirty": false,
       "dirty_paths": [
         "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
         "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
         "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
         "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
+        "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -3887,14 +3886,13 @@
       },
       "status_rows": [
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
+        " M implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
         " M implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
         " M implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
         " M implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
         " M implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-        " M implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        "?? implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        "?? implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md"
+        " M implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json"
       ]
     }
   },
