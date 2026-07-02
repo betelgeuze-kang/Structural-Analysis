@@ -31,6 +31,16 @@
 
 - `production_rocm_hip_residual_jvp_worker_path_not_ready`
 
+## Worker Path Repair Plan
+
+- `next_action_id`: `repair_production_rocm_hip_residual_jvp_worker_path`
+- `blocker_count`: `9`
+- `runtime_device_interface`: `3`
+- `hip_required_direct_probe`: `1`
+- `production_hip_residual_jacobian_path`: `1`
+- `matrix_free_global_krylov`: `3`
+- `current_tangent_residual_row_replay`: `1`
+
 ## Closure Blockers
 
 - `checkpoint_load_scale_below_required_full_load`
