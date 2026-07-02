@@ -8,7 +8,6 @@ import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "build_science_evidence_surface_seeds.py"
-PM_REPORT_PATH = REPO_ROOT / "scripts" / "report_pm_release_gate.py"
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
@@ -19,54 +18,22 @@ assert spec.loader is not None
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
-pm_spec = importlib.util.spec_from_file_location("report_pm_release_gate", PM_REPORT_PATH)
-assert pm_spec is not None
-pm_report = importlib.util.module_from_spec(pm_spec)
-assert pm_spec.loader is not None
-sys.modules[pm_spec.name] = pm_report
-pm_spec.loader.exec_module(pm_report)
 
-
-def test_science_evidence_surface_seeds_are_locked_not_passing() -> None:
+def test_science_evidence_surface_seeds_are_retired_for_structural_scope() -> None:
     surfaces = module.build_science_evidence_surface_seeds(repo_root=REPO_ROOT)
+    guard = module.build_surface_seed_guard(repo_root=REPO_ROOT)
 
-    h_bond = surfaces["h_bond_backmap"]
-    gpcr = surfaces["gpcr_hard_decoy"]
-    assert h_bond["surface_id"] == "h_bond_backmap_evidence_surface"
-    assert h_bond["contract_pass"] is False
-    assert h_bond["claim_locked"] is True
-    assert "h_bond_backmap_authoritative_receipts_required" in h_bond["blockers"]
-    assert h_bond["first_blocked_target"] == "operator_attached_h_bond_backmap_cases"
-    assert h_bond["root_cause_tags"] == [
-        "operator_receipts_required",
-        "operator_handoff_required",
-    ]
-    assert h_bond["operator_evidence_gap_count"] == 3
-    assert h_bond["first_operator_evidence_gap"]["slot_id"] == (
-        "operator_attached_h_bond_backmap_cases"
+    assert surfaces == {}
+    assert guard["schema_version"] == (
+        "structural-release-non-structural-surface-seed-guard.v1"
     )
-    assert h_bond["first_operator_evidence_gap"]["blocked_h_bond_criteria"] == [
-        "authoritative_h_bond_backmap_cases_attached",
-        "source_receipts_attached",
-    ]
-    assert gpcr["surface_id"] == "gpcr_hard_decoy_evidence_surface"
-    assert gpcr["contract_pass"] is False
-    assert gpcr["reason_code"] == "ERR_BROAD_GPCR_CLAIM_LOCKED"
-    assert gpcr["first_blocked_target"] == "DRD2"
-    assert gpcr["root_cause_tags"] == ["operator_values_required"]
-    assert gpcr["exit_criteria"] == {
-        "ranking_pr_auc_ci_low_min": 0.45,
-        "top20_hit_rate_min": 0.20,
-        "decoys_above_positive_count_max": 0,
-        "positive_out_anchored_by_top_decoys_allowed": False,
-    }
-    assert gpcr["materializer"]["schema_version"] == "gpcr-hard-decoy-suite-report.v1"
-    assert "materialize_gpcr_hard_decoy_suite_report.py" in gpcr["materializer"][
-        "materialization_command"
-    ]
+    assert guard["status"] == "retired_from_structural_release_surface"
+    assert guard["contract_pass"] is True
+    assert guard["surface_written_count"] == 0
+    assert guard["structural_release_surface_mutated"] is False
 
 
-def test_science_evidence_surface_seed_cli_writes_pm_visible_surfaces(
+def test_science_evidence_surface_seed_cli_writes_no_release_surface_files(
     tmp_path: Path,
 ) -> None:
     surface_dir = tmp_path / "surface"
@@ -83,59 +50,29 @@ def test_science_evidence_surface_seed_cli_writes_pm_visible_surfaces(
         == 0
     )
 
-    h_bond_path = surface_dir / "h_bond_backmap_evidence_surface.json"
-    gpcr_path = surface_dir / "gpcr_hard_decoy_evidence_surface.json"
-    assert h_bond_path.exists()
-    assert gpcr_path.exists()
-    h_bond_payload = json.loads(h_bond_path.read_text(encoding="utf-8"))
-    gpcr_payload = json.loads(gpcr_path.read_text(encoding="utf-8"))
-    assert h_bond_payload["source_commit_sha"]
-    assert gpcr_payload["input_checksums"][
-        "scripts/build_science_evidence_surface_seeds.py"
-    ].startswith("sha256:")
-    assert gpcr_payload["input_checksums"][
-        "scripts/materialize_gpcr_hard_decoy_suite_report.py"
-    ].startswith("sha256:")
-
-    rows = pm_report._evidence_surface_rows(surface_dir)
-    rows_by_id = {row["surface_id"]: row for row in rows}
-    assert rows_by_id["h_bond_backmap_evidence_surface"]["locked"] is True
-    assert rows_by_id["gpcr_hard_decoy_evidence_surface"]["locked"] is True
-    assert rows_by_id["h_bond_backmap_evidence_surface"]["contract_pass"] is False
-    assert rows_by_id["h_bond_backmap_evidence_surface"]["first_blocked_target"] == (
-        "operator_attached_h_bond_backmap_cases"
-    )
-    assert rows_by_id["h_bond_backmap_evidence_surface"]["root_cause_tags"] == [
-        "operator_receipts_required",
-        "operator_handoff_required",
-    ]
-    assert rows_by_id["gpcr_hard_decoy_evidence_surface"]["contract_pass"] is False
+    assert not surface_dir.exists()
 
 
-def test_science_evidence_surface_seed_cli_can_write_only_h_bond(
+def test_science_evidence_surface_seed_cli_json_reports_guard(
     tmp_path: Path,
+    capsys,
 ) -> None:
-    surface_dir = tmp_path / "surface"
-
     assert (
         module.main(
             [
                 "--surface-dir",
-                str(surface_dir),
+                str(tmp_path / "surface"),
                 "--repo-root",
                 str(REPO_ROOT),
                 "--family",
-                "h_bond_backmap",
+                "legacy-non-structural",
+                "--json",
             ]
         )
         == 0
     )
 
-    h_bond_path = surface_dir / "h_bond_backmap_evidence_surface.json"
-    gpcr_path = surface_dir / "gpcr_hard_decoy_evidence_surface.json"
-    assert h_bond_path.exists()
-    assert not gpcr_path.exists()
-    h_bond_payload = json.loads(h_bond_path.read_text(encoding="utf-8"))
-    assert h_bond_payload["first_blocked_target"] == (
-        "operator_attached_h_bond_backmap_cases"
-    )
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["surfaces"] == {}
+    assert payload["guard"]["requested_family"] == "legacy-non-structural"
+    assert payload["guard"]["surface_written_count"] == 0
