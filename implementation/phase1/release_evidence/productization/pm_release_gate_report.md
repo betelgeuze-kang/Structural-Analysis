@@ -23,7 +23,7 @@
 - `evidence_surface_count`: `8`
 - `missing_evidence_surface_count`: `0`
 - `locked_evidence_surface_count`: `0`
-- `public_benchmark_ready`: `True`
+- `public_benchmark_ready`: `False`
 - `next_locally_closable_gaps`: `G1`
 
 | Milestone | Status | Blockers |

@@ -480,13 +480,13 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-02T03:34:55.059107+00:00",
+  "generated_at": "2026-07-02T04:44:30.989548+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:03f3beb6fd151ba5e3c49b4562b90a7a796bd6bf9e53247612c9f99224090021",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:08bbc775d60400b396f2d6c4662f0cea7e7d9a67f14edbfc7fae4cd120af4e5e",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:a6c5a9be649567ed72c58f37ce93bcc32ca27a95b9e2b2ef61923e90fa8ea634",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:5a04bf91a7c81be8ed0c549959e61fa3d352da465819b4488ad291ac4d380ed5",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:9830bc89cad1b5d958cbdb54f2c507c1bca7525c0a40f700447eb03900ff0889",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:3d558b9c72c49242f32bf34d8fdfb5f74291eff81eef66af361157f616857208",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:2d3fd50ad43bed838d61a6527750819eb5474283cb3c5143562958a6feca9712",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -1270,13 +1270,28 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 5,
+    "developer_preview_blocker_count": 42,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
-      "human_ux::observation_file_missing"
+      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
+      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
+      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
+      "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
+      "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+      "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
+      "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
+      "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
+      "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed",
+      "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
+      "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
+      "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
+      "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+      "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -3228,6 +3243,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "e149ae7bf61d3e03e697fb5c1dac1f3377994e86",
+  "source_commit_sha": "5f5276bc17e8f7f2a93215183d04ea46b14581c3",
   "status": "blocked"
 }

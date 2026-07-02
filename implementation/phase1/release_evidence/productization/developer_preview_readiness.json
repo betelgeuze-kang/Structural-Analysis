@@ -4,19 +4,82 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 5,
+  "blocker_count": 42,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
     "g1::material_newton_breadth_not_closed",
     "g1::production_rocm_hip_residency_not_closed",
-    "human_ux::observation_file_missing"
+    "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
+    "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
+    "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+    "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
+    "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
+    "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+    "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
+    "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
+    "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
+    "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed",
+    "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
+    "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
+    "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
+    "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+    "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
+    "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
+    "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
+    "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+    "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json",
+    "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed",
+    "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+    "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+    "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
+    "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json",
+    "human_ux::observation_file_missing",
+    "independent_product::P0 release and core evidence::p0_release_publication_open",
+    "independent_product::P1 validation and benchmark breadth::p1_benchmark_breadth_not_ready",
+    "independent_product::P1 validation and benchmark breadth::p1_benchmark_execution_blocked",
+    "independent_product::P1 validation and benchmark breadth::p1_execution_blocked",
+    "independent_product::P1 validation and benchmark breadth::p1_inputs_not_ready",
+    "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
+    "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+    "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+    "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+    "structural_scope::owner_decision_pending_count=86",
+    "structural_scope::owner_decisions_missing",
+    "structural_scope::release_surface_owner_decision_required_count=3"
   ],
   "categories": {
     "benchmark": {
-      "blocked": false,
-      "blocker_count": 0,
-      "blockers": []
+      "blocked": true,
+      "blocker_count": 25,
+      "blockers": [
+        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
+        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
+        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
+        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
+        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
+        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
+        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
+        "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed",
+        "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json",
+        "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed",
+        "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+        "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+        "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
+        "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json"
+      ]
     },
     "future commercial": {
       "blocked": true,
@@ -67,9 +130,21 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 1,
+      "blocker_count": 13,
       "blockers": [
-        "human_ux::observation_file_missing"
+        "human_ux::observation_file_missing",
+        "independent_product::P0 release and core evidence::p0_release_publication_open",
+        "independent_product::P1 validation and benchmark breadth::p1_benchmark_breadth_not_ready",
+        "independent_product::P1 validation and benchmark breadth::p1_benchmark_execution_blocked",
+        "independent_product::P1 validation and benchmark breadth::p1_execution_blocked",
+        "independent_product::P1 validation and benchmark breadth::p1_inputs_not_ready",
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
+        "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+        "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
+        "structural_scope::owner_decision_pending_count=86",
+        "structural_scope::owner_decisions_missing",
+        "structural_scope::release_surface_owner_decision_required_count=3"
       ]
     }
   },
@@ -192,7 +267,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-07-01T19:57:59.491161+00:00",
+  "generated_at": "2026-07-02T04:44:30.927404+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -203,42 +278,68 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
+      "input_checksum": "sha256:3d558b9c72c49242f32bf34d8fdfb5f74291eff81eef66af361157f616857208",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "80b366c14845438e14300189ed300cd246daa8ad",
+      "source_commit_sha": "5f5276bc17e8f7f2a93215183d04ea46b14581c3",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:22b97109b755a786911f99bf5527ca8728eb50c3a885cb71c29f99f01a04f981",
+      "input_checksum": "sha256:c39edea9e7cfc5098fc571b897b2f76812412cb25c9f4bcf9d2c891486a5391d",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "f16a1ce521e84563fb713a6e2f4f23fce713fe8d",
-      "status": "blocked"
+      "source_commit_sha": "5f5276bc17e8f7f2a93215183d04ea46b14581c3",
+      "status": "stale_or_inconsistent"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4075fd832ffad15c808534a1b89ac3a3abfdd5780d3976b23a4dfd3eceb56dc8",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:22b97109b755a786911f99bf5527ca8728eb50c3a885cb71c29f99f01a04f981"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:3d558b9c72c49242f32bf34d8fdfb5f74291eff81eef66af361157f616857208",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:c39edea9e7cfc5098fc571b897b2f76812412cb25c9f4bcf9d2c891486a5391d"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
-  "product_snapshot_status": "blocked",
+  "product_snapshot_status": "stale_or_inconsistent",
   "reason_code": "ERR_DEVELOPER_PREVIEW_BLOCKED",
   "reuse_policy": "derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence",
   "reused_evidence": false,
   "root_blocker_evidence": {
     "fresh_full_validation": {
       "blocker_grouping_metadata": {
-        "blocker_count": 0,
+        "blocker_count": 25,
         "grouping_policy": "Preserve every lane blocker while separating publication boundary, fresh receipt presence, receipt metadata/freshness, receipt identity, schema validation, and artifact integrity failures.",
         "groups": {
           "fresh_receipt_artifact_integrity": {
-            "blocker_count": 0,
-            "blockers": [],
+            "blocker_count": 25,
+            "blockers": [
+              "performance_profile::fresh_validation_receipt_artifact_integrity_failed",
+              "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
+              "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+              "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
+              "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
+              "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
+              "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+              "performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json",
+              "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed",
+              "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+              "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+              "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
+              "surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json",
+              "midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed",
+              "midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
+              "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
+              "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
+              "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
+              "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+              "external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
+              "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
+              "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+              "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
+              "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
+              "design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz"
+            ],
             "description": "Receipt artifact checksum or path integrity failures.",
             "scope": "fresh_validation_receipt_required"
           },
@@ -277,8 +378,8 @@
         "unassigned_blocker_count": 0,
         "unassigned_blockers": []
       },
-      "contract_pass": true,
-      "fresh_validation_receipt_pass_count": 8,
+      "contract_pass": false,
+      "fresh_validation_receipt_pass_count": 3,
       "fresh_validation_receipt_present_count": 8,
       "lane_boundary_metadata": {
         "gpu_hip_policy": "GPU/HIP validation remains a performance-track lane after CPU reference parity. Missing GPU/HIP fresh receipts must stay visible and must not be used to replace CPU full-load/full-mesh/material-Newton closure evidence.",
@@ -291,16 +392,28 @@
             "scope": "benchmark_validation_refresh"
           },
           "design_optimization_refresh": {
-            "blockers": [],
+            "blockers": [
+              "fresh_validation_receipt_artifact_integrity_failed",
+              "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz"
+            ],
             "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
-            "pass": true,
+            "pass": false,
             "runner": "design_optimization_validation",
             "scope": "fresh_full_validation_refresh"
           },
           "external_benchmark_refresh": {
-            "blockers": [],
+            "blockers": [
+              "fresh_validation_receipt_artifact_integrity_failed",
+              "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
+              "fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json"
+            ],
             "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json",
-            "pass": true,
+            "pass": false,
             "runner": "benchmark_productization_validation",
             "scope": "benchmark_validation_refresh"
           },
@@ -312,16 +425,28 @@
             "scope": "performance_track_after_cpu_reference_parity"
           },
           "midas_exact_refresh": {
-            "blockers": [],
+            "blockers": [
+              "fresh_validation_receipt_artifact_integrity_failed",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json"
+            ],
             "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json",
-            "pass": true,
+            "pass": false,
             "runner": "midas_validation",
             "scope": "fresh_full_validation_refresh"
           },
           "performance_profile": {
-            "blockers": [],
+            "blockers": [
+              "fresh_validation_receipt_artifact_integrity_failed",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json"
+            ],
             "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json",
-            "pass": true,
+            "pass": false,
             "runner": "performance_validation",
             "scope": "performance_or_heavy_profile_refresh"
           },
@@ -333,9 +458,15 @@
             "scope": "performance_or_heavy_profile_refresh"
           },
           "surface_material_contact": {
-            "blockers": [],
+            "blockers": [
+              "fresh_validation_receipt_artifact_integrity_failed",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
+              "fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json"
+            ],
             "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json",
-            "pass": true,
+            "pass": false,
             "runner": "heavy_surface_material_contact_validation",
             "scope": "fresh_full_validation_refresh"
           }
@@ -343,11 +474,11 @@
         "schema_version": "fresh-full-validation-lane-boundaries.v1"
       },
       "lane_count": 8,
-      "ready": true,
+      "ready": false,
       "row_contract_pass_count": 8,
       "row_count": 8,
       "row_fresh_receipt_count": 8,
-      "row_pass_count": 8
+      "row_pass_count": 3
     },
     "g1": {
       "blocker_grouping_metadata": {
@@ -404,8 +535,9 @@
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 22,
+        "suppressed_detail_blocker_count": 23,
         "unmatched_detail_blockers": [
+          "g1_full_load_lane::auto_select_no_loadable_candidates",
           "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate"
         ]
       },
@@ -439,6 +571,7 @@
       },
       "contract_pass": true,
       "detail_blocker_represented_by": {
+        "g1_full_load_lane::auto_select_no_loadable_candidates": "g1::*",
         "g1_full_load_lane::checkpoint_load_scale_below_required_full_load": "g1::*",
         "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate": "g1::*",
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven": "g1::*",
@@ -1723,14 +1856,16 @@
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
       "full_load_hip_newton_lane_full_load_input_pass": false,
-      "full_load_hip_newton_lane_observed_load_scale": 0.656,
+      "full_load_hip_newton_lane_observed_load_scale": -1.0,
+      "full_load_hip_newton_lane_observed_load_scale_source": "missing",
       "full_load_hip_newton_lane_ready": false,
       "full_load_hip_newton_lane_required_load_scale": 1.0,
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 22,
+      "suppressed_detail_blocker_count": 23,
       "suppressed_detail_blockers": [
+        "g1_full_load_lane::auto_select_no_loadable_candidates",
         "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
         "g1_full_load_lane::checkpoint_resolution_no_full_load_candidate",
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
@@ -1830,9 +1965,19 @@
         ]
       },
       "fresh validation": {
-        "blocked": false,
-        "blocker_count": 0,
-        "blockers": []
+        "blocked": true,
+        "blocker_count": 9,
+        "blockers": [
+          "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed",
+          "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[0].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+          "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
+          "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed",
+          "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[1].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
+          "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:receipt_artifacts[2].path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md",
+          "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed",
+          "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed",
+          "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed"
+        ]
       },
       "human UX": {
         "blocked": true,
@@ -1861,14 +2006,46 @@
         ]
       },
       "release freshness/sync": {
-        "blocked": false,
-        "blocker_count": 0,
-        "blockers": []
+        "blocked": true,
+        "blocker_count": 27,
+        "blockers": [
+          "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
+          "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+          "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+          "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
+          "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
+          "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/contact_readiness_report.json",
+          "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+          "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/gpu_bottleneck_audit_report.json",
+          "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_large_report.json",
+          "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/moving_load_integrator_xlarge_report.json",
+          "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+          "fresh_full_validation::performance_profile::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/vti_contact_window_variant_sweep_report.json",
+          "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/foundation_soil_link_gate_report.json",
+          "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/ssi_boundary_gate_report.json",
+          "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_gate_report.json",
+          "fresh_full_validation::surface_material_contact::fresh_validation_receipt_artifact_integrity_failed:input_checksums.path_missing:implementation/phase1/structural_contact_validation_report.json",
+          "independent_product::P0 release and core evidence::p0_release_publication_open",
+          "independent_product::P1 validation and benchmark breadth::p1_benchmark_breadth_not_ready",
+          "independent_product::P1 validation and benchmark breadth::p1_benchmark_execution_blocked",
+          "independent_product::P1 validation and benchmark breadth::p1_execution_blocked",
+          "independent_product::P1 validation and benchmark breadth::p1_inputs_not_ready",
+          "stale_or_inconsistent:source_commit_mismatch:developer_preview_final_gate_owner_packet",
+          "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
+          "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
+          "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
+          "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+          "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report"
+        ]
       },
       "structural scope": {
-        "blocked": false,
-        "blocker_count": 0,
-        "blockers": []
+        "blocked": true,
+        "blocker_count": 3,
+        "blockers": [
+          "structural_scope::owner_decision_pending_count=86",
+          "structural_scope::owner_decisions_missing",
+          "structural_scope::release_surface_owner_decision_required_count=3"
+        ]
       }
     }
   },
@@ -2064,6 +2241,6 @@
       }
     }
   },
-  "source_commit_sha": "f16a1ce521e84563fb713a6e2f4f23fce713fe8d",
+  "source_commit_sha": "5f5276bc17e8f7f2a93215183d04ea46b14581c3",
   "status": "blocked"
 }
