@@ -2,10 +2,59 @@
 
 - `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/24 | blockers=12`
 - `contract_pass`: `False`
+- `release_area`: `ux`
+- `blocker_ids`: `27`
 - `gate_unblock_plan_count`: `5`
 - `observation_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
 - `template_path`: `docs/templates/ux_new_user_observation.template.json`
 - `owner_action`: Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
+
+## Blocker IDs
+
+- `pm_release::ux::human_new_user_observation_missing_or_failed`
+- `pm_release::ux::human_new_user_30min_sample_evidence_missing`
+- `developer_preview_rc::new_user_core_workflow_observation_passed`
+- `human_ux::observation_file_missing`
+- `human_ux::contract_signal_not_pass`
+- `human_ux::required_fields_missing`
+- `human_ux::participant_not_new_user`
+- `human_ux::new_to_product_not_confirmed`
+- `human_ux::completion_minutes_missing`
+- `human_ux::workflow_steps_missing`
+- `human_ux::required_workflow_steps_missing`
+- `human_ux::required_workflow_step_not_passed`
+- `human_ux::blocking_usability_issue_present`
+- `human_ux::evidence_ref_missing`
+- `human_ux::approval_decision_not_accepted`
+- `ux_new_user_observation::observation_file_missing`
+- `ux_new_user_observation::contract_signal_not_pass`
+- `ux_new_user_observation::required_fields_missing`
+- `ux_new_user_observation::participant_not_new_user`
+- `ux_new_user_observation::new_to_product_not_confirmed`
+- `ux_new_user_observation::completion_minutes_missing`
+- `ux_new_user_observation::workflow_steps_missing`
+- `ux_new_user_observation::required_workflow_steps_missing`
+- `ux_new_user_observation::required_workflow_step_not_passed`
+- `ux_new_user_observation::blocking_usability_issue_present`
+- `ux_new_user_observation::evidence_ref_missing`
+- `ux_new_user_observation::approval_decision_not_accepted`
+
+## Evidence Intake Artifacts
+
+- `docs/templates/ux_new_user_observation.template.json`
+- `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
+- `implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
+- `implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json`
+- `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
+- `implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
+
+## Human Observation Evidence Policy
+
+- `closure_rule`: The UX PM release area and Developer Preview UX final gate close only after ux_new_user_observation_report.json and phase6_ux_observation_status.json both pass from a real human 30-minute new-user sample.
+- `accepted_evidence`: human-observed 30-minute new-user workflow record with anonymized participant_ref; observer-owned note, ticket, recording reference, or signed evidence bundle; timezone-aware started_at_utc/completed_at_utc plus matching completion_minutes <= 30; all five required workflow steps observed with passing outcomes; approval_decision explicitly accepted for release evidence
+- `rejected_substitutes`: automated browser smoke or task-based UX rehearsal without human observation; generated UX/PM/DP/readiness gate reports used as evidence_ref; docs/templates or *.template.* files; the observation JSON self-referencing itself as separate evidence; operator/expert rehearsal that is not a new-user observation
 
 | Field | Current | Template | Required | Report Check |
 |---|---|---|---|---|
@@ -46,5 +95,8 @@
 
 - `python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json`
 - `python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json`
+- `python3 scripts/build_phase6_ux_observation_status.py --out implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json`
+- `python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
 - `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
 - `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+- `python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
