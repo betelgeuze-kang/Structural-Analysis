@@ -2995,6 +2995,11 @@ def build_snapshot(
                         "release_surface_first_batch_blockers"
                     )
                 ),
+                "release_surface_first_batch_template_paths": _as_dict(
+                    structural_scope_cleanup_plan.get(
+                        "release_surface_first_batch_template_paths"
+                    )
+                ),
                 "next_batch_template_paths": _as_dict(
                     _as_dict(
                         structural_scope_cleanup_plan.get(

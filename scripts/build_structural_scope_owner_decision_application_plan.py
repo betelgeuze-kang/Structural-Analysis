@@ -32,6 +32,16 @@ DEFAULT_NEXT_BATCH_TEMPLATE = (
 )
 DEFAULT_NEXT_BATCH_TEMPLATE_MD = DEFAULT_NEXT_BATCH_TEMPLATE.with_suffix(".md")
 DEFAULT_NEXT_BATCH_TEMPLATE_CSV = DEFAULT_NEXT_BATCH_TEMPLATE.with_suffix(".csv")
+DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE = (
+    PRODUCTIZATION
+    / "structural_scope_owner_decisions.release_surface_first.template.json"
+)
+DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_MD = (
+    DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE.with_suffix(".md")
+)
+DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV = (
+    DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE.with_suffix(".csv")
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -44,6 +54,10 @@ def _resolve(repo_root: Path, path: Path) -> Path:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
 
 
 def _text(value: Any) -> str:
@@ -721,6 +735,95 @@ def _next_batch_decision_template(
     }
 
 
+def _release_surface_first_batch_decision_template(
+    *,
+    rows: list[dict[str, Any]],
+    intake: dict[str, Any],
+) -> dict[str, Any]:
+    release_rows = sorted(
+        [row for row in rows if _text(row.get("path_area")) == "release_surface"],
+        key=lambda item: _text(item.get("path")),
+    )
+    if not release_rows:
+        return {}
+    decision_rows = [
+        _decision_template_row(row, index=index, batch_id="release_surface_first")
+        for index, row in enumerate(release_rows)
+    ]
+    primary_delete_paths = [
+        row["path"]
+        for row in decision_rows
+        if row["recommended_owner_decision_primary"]
+        == "delete_from_structural_repository"
+    ]
+    primary_extract_paths = [
+        row["path"]
+        for row in decision_rows
+        if row["recommended_owner_decision_primary"]
+        == "extract_to_molecular_or_science_repository"
+    ]
+    return {
+        "schema_version": owner_review.DECISION_SCHEMA_VERSION,
+        "batch_id": "release_surface_first",
+        "path_area": "release_surface",
+        "expected_path_count": len(release_rows),
+        "decision_pending_count": int(intake.get("pending_decision_count", 0) or 0),
+        "current_intake_status": _text(intake.get("status")),
+        "current_intake_blockers": [
+            str(item) for item in _as_list(intake.get("blockers"))
+        ],
+        "decision_rows": decision_rows,
+        "canonical_owner_decisions_path": DEFAULT_OWNER_DECISIONS.as_posix(),
+        "generated_template_paths": {
+            "json": DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE.as_posix(),
+            "csv": DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV.as_posix(),
+            "markdown": DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_MD.as_posix(),
+        },
+        "required_owner_fill_fields": [
+            "owner_decision",
+            "owner_identity",
+            "owner_role",
+            "decision_timestamp_utc",
+            "evidence_reference",
+        ],
+        "conditional_required_fields": [
+            "external_archive_reference when owner_decision=extract_to_molecular_or_science_repository",
+        ],
+        "path_specific_restrictions": [
+            "retain_quarantined_with_signed_owner_exception is not allowed when path_area=release_surface",
+        ],
+        "primary_cleanup_preview": {
+            "safe_to_auto_apply": False,
+            "owner_decision_required": True,
+            "primary_delete_path_count": len(primary_delete_paths),
+            "primary_delete_paths": primary_delete_paths,
+            "primary_delete_git_rm_args": _git_rm_args(primary_delete_paths),
+            "primary_extract_path_count": len(primary_extract_paths),
+            "primary_extract_paths": primary_extract_paths,
+            "primary_extract_post_archive_git_rm_args": _git_rm_args(
+                primary_extract_paths
+            ),
+            "preconditions": [
+                "owner fills all release_surface_first rows in structural_scope_owner_decisions.json or CSV",
+                "owner_decision_validation_pass=true for these release surface rows",
+                "human confirms release-surface cleanup scope before any git rm",
+            ],
+        },
+        "post_batch_verification": [
+            "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
+            "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
+            "python3 scripts/build_product_readiness_snapshot.py --check",
+        ],
+        "claim_boundary": (
+            "This is a fixed release_surface_first fill-in template and cleanup "
+            "preview only. It is not an owner decision, does not delete files, "
+            "and cannot close scope cleanup without recorded owner evidence and "
+            "a refreshed post-decision structural scope audit."
+        ),
+    }
+
+
 def _status_from_packet(packet: dict[str, Any]) -> str:
     if not packet.get("contract_pass"):
         return "blocked_scope_cleanup"
@@ -818,6 +921,12 @@ def build_application_plan(
     next_owner_review_batch_decision_template = _next_batch_decision_template(
         pending_owner_decision_rows=pending_owner_decision_rows,
         next_batch=next_owner_review_batch,
+    )
+    release_surface_first_batch_decision_template = (
+        _release_surface_first_batch_decision_template(
+            rows=rows,
+            intake=release_surface_first_batch_decision_intake,
+        )
     )
     application_blockers = _deduped(
         [
@@ -937,6 +1046,14 @@ def build_application_plan(
                 release_surface_first_batch_decision_intake.get("blockers")
             )
         ],
+        "release_surface_first_batch_decision_template": (
+            release_surface_first_batch_decision_template
+        ),
+        "release_surface_first_batch_template_paths": _as_dict(
+            release_surface_first_batch_decision_template.get(
+                "generated_template_paths"
+            )
+        ),
         "cleanup_required_count": len(cleanup_rows),
         "cleanup_application_preflight": cleanup_application_preflight,
         "cleanup_application_preflight_ready": bool(
@@ -1059,6 +1176,13 @@ def _markdown(payload: dict[str, Any]) -> str:
             lines.extend(f"- `{item}`" for item in intake["blockers"])
         else:
             lines.append("- blockers: none")
+        template_paths = payload.get("release_surface_first_batch_template_paths")
+        template_paths = template_paths if isinstance(template_paths, dict) else {}
+        if template_paths:
+            lines.append(
+                "- `release_surface_first_batch_template.csv`: "
+                f"`{template_paths.get('csv')}`"
+            )
         lines.append("")
     next_batch_template = payload.get("next_owner_review_batch_decision_template")
     next_batch_template = (
@@ -1224,6 +1348,73 @@ def _next_batch_template_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _release_surface_first_batch_template_markdown(payload: dict[str, Any]) -> str:
+    if not payload:
+        return ""
+    lines = [
+        "# Structural Scope Release Surface First Batch Owner Decision Template",
+        "",
+        f"- `batch_id`: `{payload['batch_id']}`",
+        f"- `path_area`: `{payload['path_area']}`",
+        f"- `expected_path_count`: `{payload['expected_path_count']}`",
+        f"- `decision_pending_count`: `{payload['decision_pending_count']}`",
+        f"- `current_intake_status`: `{payload['current_intake_status']}`",
+        (
+            "- `external_archive_reference`: required when `owner_decision` is "
+            "`extract_to_molecular_or_science_repository`"
+        ),
+        "",
+        "## Path-Specific Restrictions",
+        "",
+    ]
+    restrictions = [
+        str(item) for item in _as_list(payload.get("path_specific_restrictions"))
+    ]
+    if restrictions:
+        lines.extend(f"- `{item}`" for item in restrictions)
+    else:
+        lines.append("- none")
+    blockers = [str(item) for item in _as_list(payload.get("current_intake_blockers"))]
+    lines.extend(["", "## Current Intake Blockers", ""])
+    if blockers:
+        lines.extend(f"- `{item}`" for item in blockers)
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Decision Rows", ""])
+    lines.extend(
+        [
+            "| Row | Path | Primary Decision | Alternate Decision |",
+            "|---|---|---|---|",
+        ]
+    )
+    for row in payload["decision_rows"]:
+        lines.append(
+            "| "
+            f"`{row['row_id']}` | "
+            f"`{row['path']}` | "
+            f"`{row['recommended_owner_decision_primary']}` | "
+            f"`{row['recommended_owner_decision_alternate']}` |"
+        )
+    preview = payload.get("primary_cleanup_preview")
+    preview = preview if isinstance(preview, dict) else {}
+    lines.extend(
+        [
+            "",
+            "## Primary Cleanup Preview",
+            "",
+            f"- `safe_to_auto_apply`: `{preview.get('safe_to_auto_apply')}`",
+            f"- `primary_delete_path_count`: `{preview.get('primary_delete_path_count', 0)}`",
+            f"- `primary_extract_path_count`: `{preview.get('primary_extract_path_count', 0)}`",
+            "",
+            "## Claim Boundary",
+            "",
+            str(payload["claim_boundary"]),
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def write_application_plan(
     *,
     repo_root: Path = ROOT,
@@ -1235,6 +1426,15 @@ def write_application_plan(
     next_batch_template_out: Path = DEFAULT_NEXT_BATCH_TEMPLATE,
     next_batch_template_out_md: Path = DEFAULT_NEXT_BATCH_TEMPLATE_MD,
     next_batch_template_out_csv: Path = DEFAULT_NEXT_BATCH_TEMPLATE_CSV,
+    release_surface_first_batch_template_out: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE
+    ),
+    release_surface_first_batch_template_out_md: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_MD
+    ),
+    release_surface_first_batch_template_out_csv: Path = (
+        DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV
+    ),
 ) -> dict[str, Any]:
     payload = build_application_plan(
         repo_root=repo_root,
@@ -1268,6 +1468,44 @@ def write_application_plan(
             _csv_text(next_batch_template["decision_rows"]),
             encoding="utf-8",
         )
+    release_surface_first_template = payload.get(
+        "release_surface_first_batch_decision_template"
+    )
+    release_surface_first_template = (
+        release_surface_first_template
+        if isinstance(release_surface_first_template, dict)
+        else {}
+    )
+    if release_surface_first_template:
+        resolved_release_surface = _resolve(
+            repo_root,
+            release_surface_first_batch_template_out,
+        )
+        resolved_release_surface_md = _resolve(
+            repo_root,
+            release_surface_first_batch_template_out_md,
+        )
+        resolved_release_surface_csv = _resolve(
+            repo_root,
+            release_surface_first_batch_template_out_csv,
+        )
+        resolved_release_surface.parent.mkdir(parents=True, exist_ok=True)
+        resolved_release_surface.write_text(
+            _json_text(release_surface_first_template),
+            encoding="utf-8",
+        )
+        resolved_release_surface_md.parent.mkdir(parents=True, exist_ok=True)
+        resolved_release_surface_md.write_text(
+            _release_surface_first_batch_template_markdown(
+                release_surface_first_template
+            ),
+            encoding="utf-8",
+        )
+        resolved_release_surface_csv.parent.mkdir(parents=True, exist_ok=True)
+        resolved_release_surface_csv.write_text(
+            _csv_text(release_surface_first_template["decision_rows"]),
+            encoding="utf-8",
+        )
     return payload
 
 
@@ -1293,6 +1531,21 @@ def build_parser() -> argparse.ArgumentParser:
         "--next-batch-template-out-csv",
         type=Path,
         default=DEFAULT_NEXT_BATCH_TEMPLATE_CSV,
+    )
+    parser.add_argument(
+        "--release-surface-first-batch-template-out",
+        type=Path,
+        default=DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE,
+    )
+    parser.add_argument(
+        "--release-surface-first-batch-template-out-md",
+        type=Path,
+        default=DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_MD,
+    )
+    parser.add_argument(
+        "--release-surface-first-batch-template-out-csv",
+        type=Path,
+        default=DEFAULT_RELEASE_SURFACE_FIRST_BATCH_TEMPLATE_CSV,
     )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -1320,6 +1573,15 @@ def main(argv: list[str] | None = None) -> int:
         next_batch_template_out=args.next_batch_template_out,
         next_batch_template_out_md=args.next_batch_template_out_md,
         next_batch_template_out_csv=args.next_batch_template_out_csv,
+        release_surface_first_batch_template_out=(
+            args.release_surface_first_batch_template_out
+        ),
+        release_surface_first_batch_template_out_md=(
+            args.release_surface_first_batch_template_out_md
+        ),
+        release_surface_first_batch_template_out_csv=(
+            args.release_surface_first_batch_template_out_csv
+        ),
     )
     if args.json:
         print(_json_text(payload), end="")

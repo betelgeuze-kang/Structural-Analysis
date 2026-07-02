@@ -195,6 +195,8 @@ def test_application_plan_waits_for_owner_decisions(tmp_path: Path) -> None:
     ] == 0
     assert payload["release_surface_first_batch_ready"] is False
     assert payload["release_surface_first_batch_blockers"] == []
+    assert payload["release_surface_first_batch_decision_template"] == {}
+    assert payload["release_surface_first_batch_template_paths"] == {}
     assert payload["owner_decision_template_paths"] == {
         "json": (
             "implementation/phase1/release_evidence/productization/"
@@ -284,6 +286,37 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
     )
     assert payload["release_surface_first_batch_ready"] is False
     assert payload["release_surface_first_batch_blockers"] == intake["blockers"]
+    release_template = payload["release_surface_first_batch_decision_template"]
+    assert release_template["batch_id"] == "release_surface_first"
+    assert release_template["path_area"] == "release_surface"
+    assert release_template["expected_path_count"] == 1
+    assert release_template["decision_pending_count"] == 1
+    assert release_template["current_intake_status"] == "pending_owner_decisions"
+    assert release_template["current_intake_blockers"] == intake["blockers"]
+    assert release_template["generated_template_paths"] == {
+        "json": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.release_surface_first.template.json"
+        ),
+        "csv": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.release_surface_first.template.csv"
+        ),
+        "markdown": (
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions.release_surface_first.template.md"
+        ),
+    }
+    assert release_template["decision_rows"][0]["row_id"] == (
+        "release_surface_first-001"
+    )
+    assert release_template["decision_rows"][0]["path"] == release_surface_path
+    assert release_template["decision_rows"][0]["allowed_owner_decisions"] == list(
+        application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+    )
+    assert payload["release_surface_first_batch_template_paths"] == (
+        release_template["generated_template_paths"]
+    )
     assert payload["next_owner_review_batch"]["batch_id"] == "release_surface_first"
     assert payload["next_owner_review_batch"]["priority"] == 1
     assert payload["next_owner_review_batch"]["paths"] == [release_surface_path]
@@ -677,6 +710,13 @@ def test_application_plan_surfaces_partial_release_surface_cleanup_batch(
     assert intake["blockers"] == []
     assert payload["release_surface_first_batch_ready"] is True
     assert payload["release_surface_first_batch_blockers"] == []
+    release_template = payload["release_surface_first_batch_decision_template"]
+    assert release_template["expected_path_count"] == 1
+    assert release_template["decision_pending_count"] == 0
+    assert release_template["current_intake_status"] == (
+        "ready_for_manual_cleanup_application"
+    )
+    assert release_template["decision_rows"][0]["path"] == release_surface_path
     assert payload["cleanup_application_preflight"]["status"] == (
         "ready_for_manual_cleanup_application"
     )
@@ -902,6 +942,71 @@ def test_application_plan_writes_json_and_markdown(tmp_path: Path) -> None:
         next_template_md.read_text(encoding="utf-8")
     )
     assert "owner_decision" in next_template_csv.read_text(encoding="utf-8")
+
+
+def test_application_plan_writes_release_surface_first_template(
+    tmp_path: Path,
+) -> None:
+    audit = _audit_payload()
+    manifest = _manifest_payload()
+    release_surface_path = (
+        "implementation/phase1/release_evidence/surface/"
+        "pocketmd_lite_science_product_surface.json"
+    )
+    audit["quarantined_non_structural_rows"].append(
+        {
+            "path": release_surface_path,
+            "git_state": "tracked",
+            "path_area": "release_surface",
+            "families": ["molecular_dynamics"],
+            "matched_tokens": ["pocketmd"],
+            "quarantine_status": "quarantined",
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    manifest["paths"].append(
+        {
+            "path": release_surface_path,
+            "excluded_from_structural_release_surface": True,
+        }
+    )
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    _write_json(audit_path, audit)
+    _write_json(manifest_path, manifest)
+    out = tmp_path / "plan.json"
+    out_md = tmp_path / "plan.md"
+    release_template = tmp_path / "release_surface_first.template.json"
+    release_template_md = tmp_path / "release_surface_first.template.md"
+    release_template_csv = tmp_path / "release_surface_first.template.csv"
+
+    application_plan.write_application_plan(
+        repo_root=tmp_path,
+        audit_path=audit_path,
+        quarantine_manifest_path=manifest_path,
+        owner_decisions_path=tmp_path / "missing_decisions.json",
+        out=out,
+        out_md=out_md,
+        release_surface_first_batch_template_out=release_template,
+        release_surface_first_batch_template_out_md=release_template_md,
+        release_surface_first_batch_template_out_csv=release_template_csv,
+    )
+
+    template_payload = json.loads(release_template.read_text(encoding="utf-8"))
+    assert template_payload["batch_id"] == "release_surface_first"
+    assert template_payload["expected_path_count"] == 1
+    assert template_payload["decision_pending_count"] == 1
+    assert template_payload["decision_rows"][0]["path"] == release_surface_path
+    assert "Release Surface First Batch" in release_template_md.read_text(
+        encoding="utf-8"
+    )
+    csv_rows = list(
+        csv.DictReader(release_template_csv.read_text(encoding="utf-8").splitlines())
+    )
+    assert csv_rows[0]["path"] == release_surface_path
+    assert csv_rows[0]["allowed_owner_decisions"] == ";".join(
+        application_plan.owner_review.RELEASE_SURFACE_ALLOWED_OWNER_DECISIONS
+    )
 
 
 def test_application_plan_fail_invalid_owner_decisions_exit_code(
