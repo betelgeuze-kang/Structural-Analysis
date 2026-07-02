@@ -98,6 +98,17 @@ def test_product_capabilities_surface_exposes_structural_solver_row() -> None:
     )
 
 
+def test_product_capabilities_surface_builder_has_no_non_structural_defaults() -> None:
+    module_names = set(vars(module))
+    blocked_names = {
+        name
+        for name in module_names
+        if any(token in name.lower() for token in ("gpcr", "pocketmd", "md3bead"))
+    }
+
+    assert blocked_names == set()
+
+
 def test_product_capabilities_surface_cli_writes_pm_visible_ready_surface(
     tmp_path: Path,
 ) -> None:
