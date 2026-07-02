@@ -63,14 +63,14 @@
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "fresh_full_validation_ready": false,
-  "generated_at": "2026-07-02T16:09:29.025143+00:00",
+  "generated_at": "2026-07-02T16:56:48.680035+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
     "docs/commercialization-gap-current-state.md": "sha256:df5c2262dcb46b9b550ceaa5589b9ff095a073569500207479506930628d9917",
     "docs/release-publication-runbook.md": "sha256:e531952925d22c141e57757c58b428c23330cef11dee71017c162d312fe8ddfb",
     "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
     "implementation/phase1/release_evidence/full_validation": "dir-sha256:3234ed21a385b14164b3a9658afa7c9a5aaeb468f94115d51eec7f3c2c2b8027",
-    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:3aa4be56506c35f7ea1b614661980aa8c2b273b749b8404647e4fbe63d07a55d",
+    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:51fcb241f9223f1055fb222f08cedf7e004abb7b3227116defd73232505d3089",
     "implementation/phase1/release_evidence/midas": "dir-sha256:4d5b1f694f85ba3f2eadf2b2fd2ad2fe6ee5972d8d29ad277157d15d5e29ef78",
     "implementation/phase1/release_evidence/performance": "dir-sha256:94739503041244e08d67c361e30801ca464d68841eb70e61186168271df0b002",
     "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_smoke_report.json": "sha256:1bf89382ea13a179c00b67ca756a95ad4009456f43627bebe97b4c6750c6266c",
@@ -407,7 +407,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "28d391369ab9648d0fdc4693fddfffc429e5947f",
+  "source_commit_sha": "c36be6d03138235d212151b73e0063ec7fd3254a",
   "status": "blocked",
   "summary": {
     "blocker_count": 6,

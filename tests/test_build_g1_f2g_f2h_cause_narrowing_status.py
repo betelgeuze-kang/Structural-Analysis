@@ -28,6 +28,7 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
     g1 = tmp_path / "g1.json"
     global_connectivity = tmp_path / "g1_global_connectivity.json"
     load_dependent_comparison = tmp_path / "g1_load_dependent_comparison.json"
+    solver_hip = tmp_path / "solver_hip_e2e_contract_report.json"
     script = tmp_path / "scripts/build_g1_f2g_f2h_cause_narrowing_status.py"
     _write_json(
         f2g,
@@ -104,6 +105,28 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
             },
         },
     )
+    _write_json(
+        solver_hip,
+        {
+            "status": "blocked",
+            "contract_pass": False,
+            "reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+            "rocm_environment": {
+                "contract_pass": False,
+                "runtime_device_interface_present": False,
+                "blockers": ["dev_kfd_missing", "dev_dri_missing"],
+            },
+            "checks": {
+                "rocm_runtime_environment_pass": False,
+                "strict_probe_pass": True,
+            },
+            "summary": {
+                "gpu_solver_count": 0,
+                "production_kernel_solver_count": 0,
+                "hip_kernel_invocation_count_total": 0,
+            },
+        },
+    )
     script.parent.mkdir(parents=True, exist_ok=True)
     script.write_text("# fixture\n", encoding="utf-8")
 
@@ -114,6 +137,7 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         g1_full_load_path=g1,
         global_connectivity_path=global_connectivity,
         load_dependent_comparison_path=load_dependent_comparison,
+        solver_hip_e2e_path=solver_hip,
     )
 
     assert payload["status"] == "ready"
@@ -124,7 +148,7 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         "consistent_residual_jacobian_newton_rocm_worker"
     )
     assert payload["summary"]["g1_closure_blocker_id_count"] == 5
-    assert payload["summary"]["evidence_intake_artifact_count"] == 8
+    assert payload["summary"]["evidence_intake_artifact_count"] == 9
     assert payload["g1_closure_blocker_id_count"] == 5
     assert "g1_closure::full_load_1p0_checkpoint_candidate_missing" in payload[
         "g1_closure_blocker_ids"
@@ -136,6 +160,7 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         "g1_closure_blocker_ids"
     ]
     assert str(f2g) in payload["evidence_intake_artifacts"]
+    assert str(solver_hip) in payload["evidence_intake_artifacts"]
     assert (
         "implementation/phase1/release_evidence/productization/"
         "g1_consistent_newton_full_load_checkpoint_candidate_runner.json"
@@ -156,6 +181,19 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         "G1 closure requires a full-load 1.0 checkpoint"
     )
     assert payload["production_lane_evidence_policy"]["g1_full_load_lane_status"] == "missing"
+    assert payload["production_lane_evidence_policy"]["solver_hip_e2e_contract"] == {
+        "path": str(solver_hip),
+        "status": "blocked",
+        "contract_pass": False,
+        "reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+        "runtime_environment_pass": False,
+        "runtime_device_interface_present": False,
+        "runtime_blockers": ["dev_kfd_missing", "dev_dri_missing"],
+        "strict_probe_pass": True,
+        "gpu_solver_count": 0,
+        "production_kernel_solver_count": 0,
+        "hip_kernel_invocation_count_total": 0,
+    }
     assert "CPU diagnostic direct residual proof counted as production HIP" in payload[
         "production_lane_evidence_policy"
     ]["rejected_substitutes"]
@@ -194,6 +232,16 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
         payload["evidence_signals"]["load_dependent_geometric_softening_signal"]
         == "active_secondary"
     )
+    assert payload["evidence_signals"]["solver_hip_e2e_reason_code"] == (
+        "ERR_ROCM_RUNTIME_UNAVAILABLE"
+    )
+    assert payload["evidence_signals"]["solver_hip_runtime_blockers"] == [
+        "dev_kfd_missing",
+        "dev_dri_missing",
+    ]
+    assert payload["evidence_signals"]["solver_hip_strict_probe_pass"] is True
+    assert payload["summary"]["solver_hip_runtime_blocker_count"] == 2
+    assert payload["summary"]["solver_hip_gpu_solver_count"] == 0
     assert payload["decision_record"]["stop_row_only_support_or_elastic_link_correction_loop"] is True
     assert payload["decision_record"]["primary_next_lane"] == (
         "consistent_residual_jacobian_newton_rocm_worker"
@@ -226,6 +274,13 @@ def test_cause_narrowing_deprioritizes_row_only_support_fix(tmp_path: Path) -> N
     assert payload["recommended_next_actions"][2]["status"] == (
         "blocked_missing_load_dependent_near_null_packets"
     )
+    assert payload["recommended_next_actions"][3]["status"] == (
+        "blocked_runtime_device_interface"
+    )
+    assert payload["recommended_next_actions"][3]["current_runtime_blockers"] == [
+        "dev_kfd_missing",
+        "dev_dri_missing",
+    ]
 
 
 def test_cause_narrowing_blocks_when_f2h_is_not_ready(tmp_path: Path) -> None:

@@ -32,6 +32,9 @@ DEFAULT_CANDIDATE_RUNNER = (
 DEFAULT_HIP_REQUIRED_PROBE = (
     PRODUCTIZATION / "mgt_residual_jacobian_consistency_hip_required_probe.json"
 )
+DEFAULT_SOLVER_HIP_E2E = (
+    Path("implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json")
+)
 DEFAULT_OUT = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
 SCHEMA_VERSION = "g1-f2g-f2h-cause-narrowing-status.v1"
 REUSE_POLICY = "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice"
@@ -98,6 +101,21 @@ def _deduped(items: list[str]) -> list[str]:
     return out
 
 
+def _runtime_blockers_from_solver_hip(solver_hip_e2e: dict[str, Any]) -> list[str]:
+    rocm_environment = _as_dict(solver_hip_e2e.get("rocm_environment"))
+    blockers = [
+        str(item)
+        for item in _as_list(rocm_environment.get("blockers"))
+        if str(item)
+    ]
+    if blockers:
+        return _deduped(blockers)
+    checks = _as_dict(solver_hip_e2e.get("checks"))
+    if checks and checks.get("rocm_runtime_environment_pass") is not True:
+        return ["rocm_runtime_environment_not_passed"]
+    return []
+
+
 def _finding_ids(f2g_audit: dict[str, Any]) -> set[str]:
     return {
         str(row.get("finding_id") or "")
@@ -141,6 +159,7 @@ def build_status(
     g1_full_load_path: Path = DEFAULT_G1_FULL_LOAD,
     global_connectivity_path: Path = DEFAULT_GLOBAL_CONNECTIVITY,
     load_dependent_comparison_path: Path = DEFAULT_LOAD_DEPENDENT_COMPARISON,
+    solver_hip_e2e_path: Path = DEFAULT_SOLVER_HIP_E2E,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     f2g_audit = _load_json(repo_root, f2g_audit_path)
@@ -150,6 +169,7 @@ def build_status(
     load_dependent_comparison = _load_json(repo_root, load_dependent_comparison_path)
     candidate_runner = _load_json(repo_root, DEFAULT_CANDIDATE_RUNNER)
     hip_required_probe = _load_json(repo_root, DEFAULT_HIP_REQUIRED_PROBE)
+    solver_hip_e2e = _load_json(repo_root, solver_hip_e2e_path)
 
     blockers: list[str] = []
     if not f2g_audit:
@@ -215,6 +235,36 @@ def build_status(
     load_dependent_geometric_signal = str(
         load_dependent_summary.get("geometric_softening_signal") or "not_audited"
     )
+    solver_hip_rocm_environment = _as_dict(solver_hip_e2e.get("rocm_environment"))
+    solver_hip_checks = _as_dict(solver_hip_e2e.get("checks"))
+    solver_hip_summary = _as_dict(solver_hip_e2e.get("summary"))
+    solver_hip_runtime_blockers = _runtime_blockers_from_solver_hip(solver_hip_e2e)
+    solver_hip_e2e_status = str(
+        solver_hip_e2e.get("status")
+        or (
+            "ready"
+            if solver_hip_e2e.get("contract_pass") is True
+            else "blocked"
+            if solver_hip_e2e
+            else "missing"
+        )
+    )
+    solver_hip_e2e_reason_code = str(solver_hip_e2e.get("reason_code") or "")
+    solver_hip_runtime_environment_pass = bool(
+        solver_hip_rocm_environment.get("contract_pass") is True
+        or solver_hip_checks.get("rocm_runtime_environment_pass") is True
+    )
+    solver_hip_runtime_interface_present = (
+        solver_hip_rocm_environment.get("runtime_device_interface_present") is True
+    )
+    solver_hip_strict_probe_pass = solver_hip_checks.get("strict_probe_pass") is True
+    solver_hip_gpu_solver_count = _as_int(solver_hip_summary.get("gpu_solver_count"))
+    solver_hip_production_kernel_count = _as_int(
+        solver_hip_summary.get("production_kernel_solver_count")
+    )
+    solver_hip_kernel_invocations = _as_int(
+        solver_hip_summary.get("hip_kernel_invocation_count_total")
+    )
 
     evidence_signals = {
         "dominant_near_null_rows": dominant_rows,
@@ -249,6 +299,15 @@ def build_status(
             load_dependent_near_null_ready
         ),
         "load_dependent_geometric_softening_signal": load_dependent_geometric_signal,
+        "solver_hip_e2e_status": solver_hip_e2e_status,
+        "solver_hip_e2e_reason_code": solver_hip_e2e_reason_code,
+        "solver_hip_runtime_environment_pass": solver_hip_runtime_environment_pass,
+        "solver_hip_runtime_device_interface_present": solver_hip_runtime_interface_present,
+        "solver_hip_runtime_blockers": solver_hip_runtime_blockers,
+        "solver_hip_strict_probe_pass": solver_hip_strict_probe_pass,
+        "solver_hip_gpu_solver_count": solver_hip_gpu_solver_count,
+        "solver_hip_production_kernel_solver_count": solver_hip_production_kernel_count,
+        "solver_hip_kernel_invocation_count_total": solver_hip_kernel_invocations,
     }
     primary_next_lane = (
         global_primary_next_lane
@@ -272,6 +331,7 @@ def build_status(
             str(load_dependent_comparison_path),
             str(DEFAULT_CANDIDATE_RUNNER),
             str(DEFAULT_HIP_REQUIRED_PROBE),
+            str(solver_hip_e2e_path),
             str(g1_full_load_path),
             *required_next_receipts,
         ]
@@ -368,6 +428,11 @@ def build_status(
             "classification": "required_for_production_residency",
             "evidence": [
                 *[str(item) for item in _as_list(g1_full_load.get("blockers")) if "hip" in str(item).lower() or "rocm" in str(item).lower()],
+                *[f"solver_hip_e2e_runtime::{item}" for item in solver_hip_runtime_blockers],
+                f"solver_hip_e2e_reason_code={solver_hip_e2e_reason_code or 'missing'}",
+                f"solver_hip_e2e_gpu_solvers={solver_hip_gpu_solver_count}",
+                f"solver_hip_e2e_production_kernels={solver_hip_production_kernel_count}",
+                f"solver_hip_e2e_hip_kernel_invocations={solver_hip_kernel_invocations}",
                 "production HIP/JVP lane is not proven by the non-promoting F2g/F2h receipts",
             ],
             "next_action": "build/execute production ROCm HIP residual/JVP worker when runtime devices are available",
@@ -426,6 +491,13 @@ def build_status(
             load_dependent_near_null_ready
         ),
         "load_dependent_geometric_softening_signal": load_dependent_geometric_signal,
+        "solver_hip_e2e_status": solver_hip_e2e_status,
+        "solver_hip_e2e_reason_code": solver_hip_e2e_reason_code,
+        "solver_hip_runtime_blocker_count": len(solver_hip_runtime_blockers),
+        "solver_hip_runtime_device_interface_present": solver_hip_runtime_interface_present,
+        "solver_hip_gpu_solver_count": solver_hip_gpu_solver_count,
+        "solver_hip_production_kernel_solver_count": solver_hip_production_kernel_count,
+        "solver_hip_kernel_invocation_count_total": solver_hip_kernel_invocations,
         "primary_next_lane": primary_next_lane,
         "required_next_receipt_count": len(required_next_receipts),
         "evidence_intake_artifact_count": len(evidence_intake_artifacts),
@@ -466,6 +538,19 @@ def build_status(
         "candidate_runner_status": str(candidate_runner.get("status", "missing")),
         "hip_required_probe_status": str(hip_required_probe.get("status", "missing")),
         "g1_full_load_lane_status": str(g1_full_load.get("status", "missing")),
+        "solver_hip_e2e_contract": {
+            "path": str(solver_hip_e2e_path),
+            "status": solver_hip_e2e_status,
+            "contract_pass": solver_hip_e2e.get("contract_pass") is True,
+            "reason_code": solver_hip_e2e_reason_code,
+            "runtime_environment_pass": solver_hip_runtime_environment_pass,
+            "runtime_device_interface_present": solver_hip_runtime_interface_present,
+            "runtime_blockers": solver_hip_runtime_blockers,
+            "strict_probe_pass": solver_hip_strict_probe_pass,
+            "gpu_solver_count": solver_hip_gpu_solver_count,
+            "production_kernel_solver_count": solver_hip_production_kernel_count,
+            "hip_kernel_invocation_count_total": solver_hip_kernel_invocations,
+        },
         "accepted_evidence": [
             "full-load 1.0 checkpoint candidate with direct residual and increment gates",
             "consistent residual/Jacobian Newton receipt",
@@ -546,14 +631,20 @@ def build_status(
         {
             "action_id": "build_production_rocm_hip_residual_jvp_worker",
             "priority": 4,
-            "status": "required_for_production_residency",
+            "status": (
+                "blocked_runtime_device_interface"
+                if solver_hip_runtime_blockers
+                else "required_for_production_residency"
+            ),
             "rationale": (
                 "The current receipts are non-promoting diagnostics; production ROCm/HIP "
                 "residual/JVP residency still needs a dedicated worker proof."
             ),
+            "current_runtime_blockers": solver_hip_runtime_blockers,
             "acceptance_evidence": [
                 "production ROCm/HIP residual worker receipt with no CPU fallback",
                 "JVP/residual residency proof and parity against CPU reference",
+                "solver_hip_e2e_contract_report.json.contract_pass == true",
             ],
         },
     ]
@@ -569,6 +660,7 @@ def build_status(
                 load_dependent_comparison_path,
                 DEFAULT_CANDIDATE_RUNNER,
                 DEFAULT_HIP_REQUIRED_PROBE,
+                solver_hip_e2e_path,
             ],
             reused_evidence=True,
             reuse_policy=REUSE_POLICY,
@@ -626,6 +718,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=DEFAULT_LOAD_DEPENDENT_COMPARISON,
     )
+    parser.add_argument("--solver-hip-e2e-json", type=Path, default=DEFAULT_SOLVER_HIP_E2E)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     return parser.parse_args(argv)
 
@@ -639,6 +732,7 @@ def main(argv: list[str] | None = None) -> int:
         g1_full_load_path=args.g1_full_load_json,
         global_connectivity_path=args.global_connectivity_json,
         load_dependent_comparison_path=args.load_dependent_comparison_json,
+        solver_hip_e2e_path=args.solver_hip_e2e_json,
     )
     output = args.out if args.out.is_absolute() else args.repo_root / args.out
     output.parent.mkdir(parents=True, exist_ok=True)

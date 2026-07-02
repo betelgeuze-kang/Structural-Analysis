@@ -66,6 +66,12 @@
         "hip_consistency_proof_has_blockers",
         "hip_consistency_proof_runtime::dev_kfd_missing",
         "hip_consistency_proof_runtime::dev_dri_missing",
+        "solver_hip_e2e_runtime::dev_kfd_missing",
+        "solver_hip_e2e_runtime::dev_dri_missing",
+        "solver_hip_e2e_reason_code=ERR_ROCM_RUNTIME_UNAVAILABLE",
+        "solver_hip_e2e_gpu_solvers=0",
+        "solver_hip_e2e_production_kernels=0",
+        "solver_hip_e2e_hip_kernel_invocations=0",
         "production HIP/JVP lane is not proven by the non-promoting F2g/F2h receipts"
       ],
       "hypothesis": "production_rocm_hip_residual_jvp_lane_gap",
@@ -83,6 +89,7 @@
       "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json",
       "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
       "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+      "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
       "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
     ],
     "g1_closure_blocker_ids": [
@@ -129,7 +136,7 @@
     "no_production_rocm_hip_residency_claim"
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "evidence_intake_artifact_count": 7,
+  "evidence_intake_artifact_count": 8,
   "evidence_intake_artifacts": [
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json",
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json",
@@ -137,6 +144,7 @@
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json",
     "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
   ],
   "evidence_signals": {
@@ -166,6 +174,18 @@
     "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
     "load_dependent_near_null_packet_comparison_ready": false,
     "row_only_correction_loop_stopped_by_global_connectivity": true,
+    "solver_hip_e2e_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+    "solver_hip_e2e_status": "blocked",
+    "solver_hip_gpu_solver_count": 0,
+    "solver_hip_kernel_invocation_count_total": 0,
+    "solver_hip_production_kernel_solver_count": 0,
+    "solver_hip_runtime_blockers": [
+      "dev_kfd_missing",
+      "dev_dri_missing"
+    ],
+    "solver_hip_runtime_device_interface_present": false,
+    "solver_hip_runtime_environment_pass": false,
+    "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
   "g1_closure_blocker_id_count": 22,
@@ -193,7 +213,7 @@
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
   ],
-  "generated_at": "2026-07-02T15:49:02.755662+00:00",
+  "generated_at": "2026-07-02T16:56:47.617129+00:00",
   "hypothesis_rank": [
     {
       "classification": "deprioritized",
@@ -260,6 +280,12 @@
         "hip_consistency_proof_has_blockers",
         "hip_consistency_proof_runtime::dev_kfd_missing",
         "hip_consistency_proof_runtime::dev_dri_missing",
+        "solver_hip_e2e_runtime::dev_kfd_missing",
+        "solver_hip_e2e_runtime::dev_dri_missing",
+        "solver_hip_e2e_reason_code=ERR_ROCM_RUNTIME_UNAVAILABLE",
+        "solver_hip_e2e_gpu_solvers=0",
+        "solver_hip_e2e_production_kernels=0",
+        "solver_hip_e2e_hip_kernel_invocations=0",
         "production HIP/JVP lane is not proven by the non-promoting F2g/F2h receipts"
       ],
       "hypothesis": "production_rocm_hip_residual_jvp_lane_gap",
@@ -267,14 +293,15 @@
     }
   ],
   "input_checksums": {
+    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:51fcb241f9223f1055fb222f08cedf7e004abb7b3227116defd73232505d3089",
     "implementation/phase1/release_evidence/productization/f2h_lightweight_continuation_status.local.json": "sha256:e18438d69a6f45a18cc8cd0afd15c2b30dd81228ec70b58b8e38204a942a62df",
-    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:053fb2401991a270777fb27c488fa1cb8e7bd04b6fc60c149de9dce3990a2787",
+    "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:be791286de28f181e85cd8e9d2542c6e3033d369793aebed8c466af830610be5",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:e2a6958f91c458977e7653abe1dedf0a926e23a26892356a0fbfc6d18ba6bc30",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:0c518c7e3678c0a5526bb67dbc1ae348c402cfeb0160a063453cb336b7375d14",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:ca58151d432993bb1851ff196a45a55c3dd80b6fe38b306b863cdf9a2fbdc7c2",
     "implementation/phase1/release_evidence/productization/g1_support_elastic_link_reconciliation_audit.local.json": "sha256:8b437a017f328f541ca1a99edc6ff3302ea02cefed1dced8c9d2f62f4111645c",
     "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:fff3f1e0393a6dde86c0ea737f7e51fc95fd41c82f8513656378323c964f3376",
-    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:4290bad8bb8b7af1f4ed1167c5b41c607387e3acbb8eed400ce8b9e90ec3b866"
+    "scripts/build_g1_f2g_f2h_cause_narrowing_status.py": "sha256:d29d0d37a3f84ab027144a3998b9a3a451e2e350e1e8be4fc26397b7315b34b9"
   },
   "next_actions": [
     "stop_row_only_support_or_elastic_link_correction_loop",
@@ -304,7 +331,23 @@
       "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
       "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json"
     ],
-    "schema_version": "g1-production-rocm-hip-evidence-policy.v1"
+    "schema_version": "g1-production-rocm-hip-evidence-policy.v1",
+    "solver_hip_e2e_contract": {
+      "contract_pass": false,
+      "gpu_solver_count": 0,
+      "hip_kernel_invocation_count_total": 0,
+      "path": "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+      "production_kernel_solver_count": 0,
+      "reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+      "runtime_blockers": [
+        "dev_kfd_missing",
+        "dev_dri_missing"
+      ],
+      "runtime_device_interface_present": false,
+      "runtime_environment_pass": false,
+      "status": "blocked",
+      "strict_probe_pass": true
+    }
   },
   "promotes_g1_closure": false,
   "reason_code": "PASS",
@@ -348,12 +391,17 @@
     {
       "acceptance_evidence": [
         "production ROCm/HIP residual worker receipt with no CPU fallback",
-        "JVP/residual residency proof and parity against CPU reference"
+        "JVP/residual residency proof and parity against CPU reference",
+        "solver_hip_e2e_contract_report.json.contract_pass == true"
       ],
       "action_id": "build_production_rocm_hip_residual_jvp_worker",
+      "current_runtime_blockers": [
+        "dev_kfd_missing",
+        "dev_dri_missing"
+      ],
       "priority": 4,
       "rationale": "The current receipts are non-promoting diagnostics; production ROCm/HIP residual/JVP residency still needs a dedicated worker proof.",
-      "status": "required_for_production_residency"
+      "status": "blocked_runtime_device_interface"
     }
   ],
   "reuse_policy": "non_promoting_f2g_f2h_diagnostic_receipts_aggregated_for_next_g1_slice",
@@ -414,16 +462,28 @@
     "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
     "load_dependent_near_null_packet_comparison_ready": false,
     "row_only_correction_loop_stopped_by_global_connectivity": true,
+    "solver_hip_e2e_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+    "solver_hip_e2e_status": "blocked",
+    "solver_hip_gpu_solver_count": 0,
+    "solver_hip_kernel_invocation_count_total": 0,
+    "solver_hip_production_kernel_solver_count": 0,
+    "solver_hip_runtime_blockers": [
+      "dev_kfd_missing",
+      "dev_dri_missing"
+    ],
+    "solver_hip_runtime_device_interface_present": false,
+    "solver_hip_runtime_environment_pass": false,
+    "solver_hip_strict_probe_pass": true,
     "support_or_link_row_gap_disfavored": true
   },
-  "source_commit_sha": "6e350d93d999b7bbfbb58ab7dbfb226411a49b78",
+  "source_commit_sha": "c36be6d03138235d212151b73e0063ec7fd3254a",
   "status": "ready",
   "summary": {
     "dominant_near_null_rows": 64,
     "dominant_node_count": 8,
     "dominant_nodes_element_reachable_to_support_count": 8,
     "element_graph_connects_dominant_modes_to_supports": true,
-    "evidence_intake_artifact_count": 7,
+    "evidence_intake_artifact_count": 8,
     "f2h_lightweight_0p1_0p2_0p4_ready": true,
     "f2h_max_converged_load_scale": 0.4,
     "f2h_residual_trend_across_increasing_load": "nondecreasing",
@@ -435,6 +495,13 @@
     "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
     "promotes_g1_closure": false,
     "required_next_receipt_count": 2,
+    "solver_hip_e2e_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+    "solver_hip_e2e_status": "blocked",
+    "solver_hip_gpu_solver_count": 0,
+    "solver_hip_kernel_invocation_count_total": 0,
+    "solver_hip_production_kernel_solver_count": 0,
+    "solver_hip_runtime_blocker_count": 2,
+    "solver_hip_runtime_device_interface_present": false,
     "support_or_link_row_gap_disfavored": true
   },
   "summary_line": "G1 F2g/F2h cause narrowing: READY | support_or_link_row_gap_disfavored=True | f2h_0p4_ready=True | next=consistent_residual_jacobian_newton_rocm_worker"
