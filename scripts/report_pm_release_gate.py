@@ -428,6 +428,30 @@ def _evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _excluded_evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for path in _evidence_surface_json_paths(evidence_surface_dir):
+        surface_id = path.stem
+        if surface_id in STRUCTURAL_EVIDENCE_SURFACE_IDS:
+            continue
+        non_structural_product_path = _non_structural_product_path(str(path))
+        rows.append(
+            {
+                "surface_id": surface_id,
+                "path": str(path),
+                "excluded_from_release_gate": True,
+                "exclusion_reason": (
+                    "non_structural_product_surface"
+                    if non_structural_product_path
+                    else "not_in_structural_evidence_surface_allowlist"
+                ),
+                "non_structural_product_path": non_structural_product_path,
+                "release_claim_eligible": False,
+            }
+        )
+    return rows
+
+
 def _operator_action_count(pm_blocker_register: dict[str, Any]) -> int:
     rows = _rows(pm_blocker_register)
     if rows:
@@ -827,6 +851,7 @@ def _release_decision(
         else (full_release_blockers[0] if full_release_blockers else "")
     )
     evidence_surfaces = _evidence_surface_rows(evidence_surface_dir)
+    excluded_evidence_surfaces = _excluded_evidence_surface_rows(evidence_surface_dir)
     missing_surface_count = sum(1 for row in evidence_surfaces if row["missing"])
     if not evidence_surface_dir.exists() or not evidence_surface_dir.is_dir():
         missing_surface_count += 1
@@ -867,6 +892,16 @@ def _release_decision(
         "stale_artifact_count": stale_count,
         "stale_artifact_refresh_required": bool(stale_count),
         "evidence_surface_count": len(evidence_surfaces),
+        "excluded_evidence_surface_count": len(excluded_evidence_surfaces),
+        "excluded_evidence_surfaces": excluded_evidence_surfaces,
+        "non_structural_evidence_surface_excluded_count": sum(
+            1
+            for row in excluded_evidence_surfaces
+            if row["non_structural_product_path"]
+        ),
+        "structural_evidence_surface_allowlist_ids": sorted(
+            STRUCTURAL_EVIDENCE_SURFACE_IDS
+        ),
         "missing_evidence_surface_count": missing_surface_count,
         "locked_evidence_surface_count": locked_surface_count,
         "public_benchmark_ready": _public_benchmark_ready(

@@ -1211,12 +1211,28 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert decision["stale_artifact_count"] == 0
     assert decision["stale_artifact_refresh_required"] is False
     assert decision["evidence_surface_count"] == 1
+    assert decision["excluded_evidence_surface_count"] == 1
+    assert decision["non_structural_evidence_surface_excluded_count"] == 1
     assert decision["missing_evidence_surface_count"] == 0
     assert decision["locked_evidence_surface_count"] == 0
     assert decision["public_benchmark_ready"] is True
     assert decision["operator_actions"] == []
     surface_paths = {row["surface_id"]: row for row in decision["evidence_surfaces"]}
     assert surface_paths["structural_contact_gate_report"]["contract_pass"] is True
+    excluded_surface_paths = {
+        row["surface_id"]: row for row in decision["excluded_evidence_surfaces"]
+    }
+    assert excluded_surface_paths["gpcr_hard_decoy_surface"] == {
+        "surface_id": "gpcr_hard_decoy_surface",
+        "path": str(base_kwargs["evidence_surface_dir"] / "gpcr_hard_decoy_surface.json"),
+        "excluded_from_release_gate": True,
+        "exclusion_reason": "non_structural_product_surface",
+        "non_structural_product_path": True,
+        "release_claim_eligible": False,
+    }
+    assert "structural_contact_gate_report" in decision[
+        "structural_evidence_surface_allowlist_ids"
+    ]
     assert payload["implementation_orchestration"]["cursor_opencode_worker_preflight_pass"] is True
     assert (
         payload["implementation_orchestration"]["summary"]["opencode_configured_model"]
