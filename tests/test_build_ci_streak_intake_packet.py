@@ -175,6 +175,23 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
         "nightly_missing=30 | blockers=12 | runner=not_evaluated"
     )
     assert payload["current_blocker_count"] == 12
+    assert payload["release_area"] == "basic_ci"
+    assert payload["release_area_blocker_ids"] == [
+        "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+    ]
+    assert "ci_streak::pr:pr_ci_30_consecutive_pass_evidence_missing" in payload[
+        "blocker_ids"
+    ]
+    assert "ci_streak::nightly:github_actions_query_error" in payload[
+        "blocker_ids"
+    ]
+    assert payload["blocker_id_count"] == 14
+    assert payload["evidence_intake_artifact_count"] == 5
+    assert str(manifest) in payload["evidence_intake_artifacts"]
+    assert payload["summary"]["release_area_blocker_count"] == 2
+    assert payload["summary"]["blocker_id_count"] == 14
+    assert payload["ci_release_credit_policy"]["required_consecutive_pass_count"] == 30
     assert payload["summary"]["source_evidence_pass"] is False
     assert payload["summary"]["source_evidence_freshness_pass"] is True
     assert payload["summary"]["pr_missing_consecutive_pass_count"] == 30
@@ -676,6 +693,9 @@ def test_ci_streak_intake_packet_passes_closed_manifest_with_valid_source_eviden
     )
     assert payload["current_blocker_count"] == 0
     assert payload["current_blockers"] == []
+    assert payload["release_area_blocker_ids"] == []
+    assert payload["blocker_ids"] == []
+    assert payload["blocker_id_count"] == 0
     assert payload["summary"]["lane_pass_count"] == 2
     assert payload["summary"]["source_evidence_pass"] is True
     assert payload["summary"]["pr_source_threshold_pass"] is True
@@ -817,5 +837,8 @@ def test_ci_streak_intake_packet_cli_writes_markdown(tmp_path: Path, capsys) -> 
     markdown = out_md.read_text(encoding="utf-8")
     assert "summary_line" in markdown
     assert "Validation Commands" in markdown
+    assert "Blocker IDs" in markdown
+    assert "Evidence Intake Artifacts" in markdown
+    assert "CI Release Credit Policy" in markdown
     assert "Workflow Registered" in markdown
     assert "Source Evidence" in markdown

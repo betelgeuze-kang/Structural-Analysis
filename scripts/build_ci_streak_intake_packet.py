@@ -21,6 +21,8 @@ DEFAULT_SELF_HOSTED_RUNNER_STATUS = Path(
 )
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json")
 DEFAULT_OUT_MD = Path("implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md")
+DEFAULT_PM_RELEASE_GATE_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
+DEFAULT_PRODUCT_READINESS_SNAPSHOT = Path("implementation/phase1/release_evidence/productization/product_readiness_snapshot.json")
 DEFAULT_MAX_SOURCE_EVIDENCE_AGE_HOURS = 24 * 7
 
 
@@ -69,6 +71,17 @@ def _dedupe(values: list[str]) -> list[str]:
             seen.add(value)
             deduped.append(value)
     return deduped
+
+
+def _release_area_blocker_ids(lane_rows: list[dict[str, Any]]) -> list[str]:
+    ids: list[str] = []
+    for row in lane_rows:
+        lane = str(row.get("lane", ""))
+        if lane == "pr" and row.get("threshold_pass") is not True:
+            ids.append("pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing")
+        if lane == "nightly" and row.get("threshold_pass") is not True:
+            ids.append("pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing")
+    return _dedupe(ids)
 
 
 def _manifest_lane(manifest: dict[str, Any], lane: str) -> dict[str, Any]:
@@ -491,11 +504,51 @@ def build_packet(
         row["missing_consecutive_pass_count"] for row in lane_rows if row["lane"] == "nightly"
     )
     runner_status = str(runner_precondition["status"])
+    release_area_blocker_ids = _release_area_blocker_ids(lane_rows)
+    blocker_ids = _dedupe(
+        [
+            *release_area_blocker_ids,
+            *[f"ci_streak::{blocker}" for blocker in blockers],
+        ]
+    )
+    evidence_intake_artifacts = _dedupe(
+        [
+            str(manifest_path),
+            str(github_actions_evidence_path),
+            *(
+                [str(runner_status_path)]
+                if runner_status_path is not None
+                else []
+            ),
+            str(DEFAULT_OUT),
+            str(DEFAULT_PM_RELEASE_GATE_REPORT),
+            str(DEFAULT_PRODUCT_READINESS_SNAPSHOT),
+        ]
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
         "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
+        "release_area": "basic_ci",
+        "release_area_blocker_ids": release_area_blocker_ids,
+        "blocker_ids": blocker_ids,
+        "blocker_id_count": len(blocker_ids),
+        "evidence_intake_artifacts": evidence_intake_artifacts,
+        "evidence_intake_artifact_count": len(evidence_intake_artifacts),
+        "ci_release_credit_policy": {
+            "required_lanes": ["pr", "nightly"],
+            "required_consecutive_pass_count": threshold,
+            "accepted_source": (
+                "tracked GitHub Actions PR and nightly consecutive-pass evidence"
+            ),
+            "rejected_substitutes": [
+                "local PR or nightly gate artifacts counted as release streak credit",
+                "manifest-only consecutive-pass claims without source evidence",
+                "queued/job-start-blocked workflow runs",
+                "github-hosted runner defaults when self-hosted labels are required",
+            ],
+        },
         "reason_code": (
             "PASS"
             if contract_pass
@@ -535,6 +588,9 @@ def build_packet(
             "workflow_queue_backlog_lane_count": len(
                 {row["lane"] for row in workflow_backlog_queue if row["lane"]}
             ),
+            "release_area_blocker_count": len(release_area_blocker_ids),
+            "blocker_id_count": len(blocker_ids),
+            "evidence_intake_artifact_count": len(evidence_intake_artifacts),
             "source_evidence_generated_at": source_evidence["generated_at"],
             "source_evidence_age_hours": source_evidence["age_hours"],
             "source_evidence_freshness_pass": source_evidence["freshness_pass"],
@@ -612,7 +668,10 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `status`: `{payload['status']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `reason_code`: `{payload['reason_code']}`",
+        f"- `release_area`: `{payload['release_area']}`",
         f"- `current_blocker_count`: `{payload['current_blocker_count']}`",
+        f"- `blocker_id_count`: `{payload['blocker_id_count']}`",
+        f"- `evidence_intake_artifact_count`: `{payload['evidence_intake_artifact_count']}`",
         f"- `ci_consecutive_pass_manifest`: `{payload['ci_consecutive_pass_manifest']}`",
         f"- `github_actions_ci_streak_evidence`: `{payload['github_actions_ci_streak_evidence']}`",
         "",
@@ -677,6 +736,25 @@ def _markdown(payload: dict[str, Any]) -> str:
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:
         lines.append(f"- `{command}`")
+    lines.extend(["", "## Blocker IDs", ""])
+    if payload["blocker_ids"]:
+        lines.extend(f"- `{item}`" for item in payload["blocker_ids"])
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Evidence Intake Artifacts", ""])
+    for artifact in payload["evidence_intake_artifacts"]:
+        lines.append(f"- `{artifact}`")
+    policy = payload.get("ci_release_credit_policy")
+    policy = policy if isinstance(policy, dict) else {}
+    lines.extend(["", "## CI Release Credit Policy", ""])
+    lines.append(f"- `accepted_source`: `{policy.get('accepted_source', '')}`")
+    lines.append(
+        "- `required_consecutive_pass_count`: "
+        f"`{policy.get('required_consecutive_pass_count', '')}`"
+    )
+    lines.append("- rejected substitutes:")
+    for item in policy.get("rejected_substitutes", []):
+        lines.append(f"  - {item}")
     lines.extend(
         [
             "",
