@@ -82,9 +82,9 @@
   "evidence_closure_pass": false,
   "extract_decision_count": 0,
   "extract_path_count": 0,
-  "generated_at": "2026-07-02T02:05:40.738391+00:00",
+  "generated_at": "2026-07-02T02:34:40.994684+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:bfb10fddbcf50595d8c7a7a7f0d87def836f904c203aa9a159e6a0b177603142",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:c3f5677cf0ed1ab0f1b7770f74f1d4200d90689da72594fc6d74271d8bf546db",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json": "missing",
     "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json": "sha256:80edad0f3f3c4f87f64c95e388bdbcfe945c7ac8fa77b3f001833b4eeb2e4e11",
     "scripts/build_structural_scope_owner_decision_application_plan.py": "sha256:723ac9629db97aaf072c71fe7f6f357a29b224a4e705782f91a6395bfdb9573b",
@@ -3593,7 +3593,7 @@
   "reuse_policy": "structural_scope_owner_decision_application_plan_from_owner_review_packet",
   "reused_evidence": false,
   "schema_version": "structural-scope-owner-decision-application-plan.v1",
-  "source_commit_sha": "887fcb960bd2f4d5b094ed7c2dbc80984bb7b95f",
+  "source_commit_sha": "86c5129c36f668b3f9ee9439e3d16c727b0ef65b",
   "status": "pending_owner_decisions",
   "suggested_sequence": [
     "fill structural_scope_owner_decisions.json or a CSV owner-decisions file from the generated owner decision templates",
