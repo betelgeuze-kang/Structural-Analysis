@@ -402,10 +402,14 @@ def test_application_plan_prioritizes_pending_release_surface_owner_review(
                 "owner fills matching decision rows in "
                 "structural_scope_owner_decisions.json or CSV"
             ),
-            "owner_decision_validation_pass=true for these rows",
+            "release_surface_first_batch_application_ready=true for this batch",
             "human confirms the batch cleanup scope",
         ],
     }
+    assert batch_template["post_batch_verification"][0] == (
+        "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+        "--fail-release-surface-first-blocked"
+    )
     csv_rows = list(
         csv.DictReader(
             application_plan._csv_text(batch_template["decision_rows"]).splitlines()
@@ -1022,6 +1026,18 @@ def test_application_plan_writes_release_surface_first_template(
     assert template_payload["expected_path_count"] == 1
     assert template_payload["decision_pending_count"] == 1
     assert template_payload["decision_rows"][0]["path"] == release_surface_path
+    assert template_payload["primary_cleanup_preview"]["preconditions"] == [
+        (
+            "owner fills all release_surface_first rows in "
+            "structural_scope_owner_decisions.json or CSV"
+        ),
+        "release_surface_first_batch_application_ready=true",
+        "human confirms release-surface cleanup scope before any git rm",
+    ]
+    assert template_payload["post_batch_verification"][0] == (
+        "python3 scripts/build_structural_scope_owner_decision_application_plan.py "
+        "--fail-release-surface-first-blocked"
+    )
     next_markdown = next_template_md.read_text(encoding="utf-8")
     release_markdown = release_template_md.read_text(encoding="utf-8")
     assert "Release Surface First Batch" in release_markdown

@@ -718,11 +718,23 @@ def _next_batch_decision_template(
             ),
             "preconditions": [
                 "owner fills matching decision rows in structural_scope_owner_decisions.json or CSV",
-                "owner_decision_validation_pass=true for these rows",
+                (
+                    "release_surface_first_batch_application_ready=true for this "
+                    "batch"
+                    if path_area == "release_surface"
+                    else "owner_decision_validation_pass=true for these rows"
+                ),
                 "human confirms the batch cleanup scope",
             ],
         },
         "post_batch_verification": [
+            *(
+                [
+                    "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked"
+                ]
+                if path_area == "release_surface"
+                else []
+            ),
             "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
             "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
@@ -817,11 +829,12 @@ def _release_surface_first_batch_decision_template(
             ),
             "preconditions": [
                 "owner fills all release_surface_first rows in structural_scope_owner_decisions.json or CSV",
-                "owner_decision_validation_pass=true for these release surface rows",
+                "release_surface_first_batch_application_ready=true",
                 "human confirms release-surface cleanup scope before any git rm",
             ],
         },
         "post_batch_verification": [
+            "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
             "python3 scripts/check_structural_scope_contamination.py --tracked-only --fail-blocked",
             "python3 scripts/build_structural_scope_owner_review_packet.py --write-decision-template",
             "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
